@@ -20,7 +20,8 @@ warn() { echo -e "${YELLOW}⚠${NC} $*"; }
 info() { echo -e "  $*"; }
 
 # Collect all machine JSON files
-mapfile -t MACHINE_FILES < <(find "$MACHINES_ROOT" -name "*.json" | sort)
+MACHINE_FILES=()
+while IFS= read -r _f; do MACHINE_FILES+=("$_f"); done < <(find "$MACHINES_ROOT" -name "*.json" | sort)
 
 if [ "${#MACHINE_FILES[@]}" -eq 0 ]; then
     warn "No machine JSON files found in $MACHINES_ROOT"
