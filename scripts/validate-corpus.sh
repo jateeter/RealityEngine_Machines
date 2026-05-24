@@ -20,7 +20,8 @@ ok()   { echo -e "${GREEN}✓${NC} $*"; }
 fail() { echo -e "${RED}✗${NC} $*"; }
 warn() { echo -e "${YELLOW}⚠${NC} $*"; }
 
-mapfile -t FILES < <(find "$MACHINES_ROOT" -name "*.json" | sort)
+FILES=()
+while IFS= read -r _f; do FILES+=("$_f"); done < <(find "$MACHINES_ROOT" -name "*.json" | sort)
 
 if [ "${#FILES[@]}" -eq 0 ]; then
     warn "No machine JSON files found in $MACHINES_ROOT"
