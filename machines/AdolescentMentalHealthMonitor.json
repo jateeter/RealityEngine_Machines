@@ -1,0 +1,546 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Adolescent Mental Health Monitor",
+    "description": "Integration machine that reads combined output signals from the Home Food Security Monitor [1995:1999] and the Home Environment Safety Monitor [1999:2003] to detect adolescent mental health risk driven by co-occurring social adversities. Food insecurity and housing instability are the two most predictive household stressors for adolescent depression, anxiety, and behavioral health crises. Monitors mood indicators, school engagement, risk behavior, and family conflict as 8D integrated input. Output at [2027:2031] is available to downstream care coordination systems.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Home Health — Adolescent / Behavioral Health",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [2027:2031]: [1,0,0,0]=CRISIS_RISK, [0,1,0,0]=BEHAVIORAL_CONCERN, [0,0,1,0]=ELEVATED_STRESS, [0,0,0,1]=MENTAL_HEALTH_OK",
+      "tags": [
+        "adolescent",
+        "adolescent-mental-health-monitor",
+        "behavioral-health",
+        "ces-sequences",
+        "ces-sequences-3",
+        "food-insecurity",
+        "health-personal",
+        "home-health",
+        "home-health-adolescent-behavioral-health",
+        "housing-instability",
+        "input-sequences",
+        "input-sequences-1",
+        "kleene-plus",
+        "life-balance-adolescent-family-and-school",
+        "low-income",
+        "mental-health",
+        "startup-loadable"
+      ],
+      "sequenceCount": 3,
+      "populationFocus": "Adolescents ages 12–18 in food-insecure and housing-unstable households; low-income youth without behavioral health access",
+      "sensorNormalization": {
+        "food_security_signal_norm": "0.0=[1,0,0,0] FOOD_CRISIS from upstream (bit 342), 0.5=[0,0,1,0] ASSISTANCE_NEEDED (bit 344), 1.0=[0,0,0,1] FOOD_SECURE (bit 345)",
+        "housing_safety_signal_norm": "0.0=[1,0,0,0] UNSAFE_HOUSING from upstream (bit 346), 0.5=[0,0,1,0] HEALTH_HAZARD_RISK (bit 348), 1.0=[0,0,0,1] ENVIRONMENT_SAFE (bit 349)",
+        "mood_engagement_norm": "0.0=persistent low mood; school absence; social withdrawal; expressed hopelessness, 0.5=variable mood; inconsistent engagement; some withdrawal, 1.0=age-appropriate mood and engagement",
+        "risk_behavior_norm": "0.0=active risk behaviors (self-harm, substance use, truancy, violence), 0.5=risk factors present (peer conflict, some substance experimentation, declining grades), 1.0=no identified risk behaviors"
+      },
+      "upstreamMachines": [
+        "HomeFoodSecurityMonitor (output [1995:1999])",
+        "HomeEnvironmentSafetyMonitor (output [1999:2003])"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "adolescent",
+          "behavioral-health",
+          "health-personal",
+          "home-health"
+        ],
+        "family": "adolescent-mental-health-monitor",
+        "machineCode": "adolescent-mental-health-monitor",
+        "capabilityTags": [],
+        "workflowTags": [
+          "life-balance-adolescent-family-and-school",
+          "food-insecurity",
+          "home-health-adolescent-behavioral-health",
+          "housing-instability",
+          "kleene-plus",
+          "low-income",
+          "mental-health"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "adolescent",
+          "adolescent-mental-health-monitor",
+          "behavioral-health",
+          "ces-sequences",
+          "ces-sequences-3",
+          "food-insecurity",
+          "health-personal",
+          "home-health",
+          "home-health-adolescent-behavioral-health",
+          "housing-instability",
+          "input-sequences",
+          "input-sequences-1",
+          "kleene-plus",
+          "life-balance-adolescent-family-and-school",
+          "low-income",
+          "mental-health",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/adolescentmentalhealthmonitor",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "patient-safety-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"health-personal\".  Review and tune the routing as the team owning AdolescentMentalHealthMonitor matures."
+      },
+      "triggerConfig": {
+        "processId": "ADOLESCENTMENTALHEALTHMONITOR",
+        "processName": "Adolescent Mental Health Monitor",
+        "rules": [
+          {
+            "sequenceId": "adolescent-mh-crisis",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "CRISIS_RISK: dual adversity household driving acute adolescent mental health crisis risk at [2027:2031]"
+          },
+          {
+            "sequenceId": "adolescent-mh-behavioral-concern",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "BEHAVIORAL_CONCERN: adolescent behavioral changes driven by household adversity at [2027:2031]"
+          },
+          {
+            "sequenceId": "adolescent-mh-ok",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "MENTAL_HEALTH_OK: adolescent mental health supported by stable food and housing environment at [2027:2031]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1995,
+        "length": 8
+      },
+      "output": {
+        "offset": 2027,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "adolescent-mh-crisis",
+        "name": "Dual Adversity Crisis: STABLE+ → STRESSED → AT_RISK → CRISIS_RISK",
+        "metadata": {
+          "description": "Detects adolescent mental health crisis driven by co-occurring food insecurity and housing instability — the dual adversity pathway most strongly linked to adolescent suicidality, substance use disorders, and school dropout in low-income populations. Requires STABLE+ baseline before crisis escalation arms. The 8D input vector reads four dimensions from each upstream machine, detecting simultaneous deterioration in both food security and housing safety.",
+          "path": "STABLE+ → STRESSED → AT_RISK → output[1,0,0,0]",
+          "output": "[1,0,0,0] (CRISIS_RISK)"
+        },
+        "vectors": [
+          {
+            "id": "amh-stable",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "STABLE",
+              "description": "STABLE+ — food secure (FOOD_SECURE bit high in [1995:1999]) and environment safe (ENVIRONMENT_SAFE bit high in [1999:2003]); adolescent mood and behavior within normal range. isInitial A*A = A+.",
+              "upstream_state": "HomeFoodSecurity=FOOD_SECURE, HomeEnvironmentSafety=ENVIRONMENT_SAFE"
+            },
+            "nextVectorIds": [
+              "amh-stable",
+              "amh-stressed"
+            ]
+          },
+          {
+            "id": "amh-stressed",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "STRESSED",
+              "description": "STRESSED — one adversity domain active: food insecurity OR housing instability. FOOD_INSECURE or UNSAFE_HOUSING signal detected. Adolescent mood variability and school engagement declining.",
+              "upstream_state": "One domain in crisis/insecurity state; behavioral changes reported by caregiver"
+            },
+            "nextVectorIds": [
+              "amh-at-risk"
+            ]
+          },
+          {
+            "id": "amh-at-risk",
+            "elements": [
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "AT_RISK",
+              "description": "AT_RISK — dual adversity: FOOD_CRISIS and UNSAFE_HOUSING simultaneously active. Both upstream machines in crisis state. Adolescent showing behavioral regression, school withdrawal, or risk behaviors. Fires CRISIS_RISK.",
+              "upstream_state": "HomeFoodSecurity=FOOD_CRISIS, HomeEnvironmentSafety=UNSAFE_HOUSING"
+            },
+            "outputVectors": [
+              {
+                "id": "amh-crisis-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "CRISIS_RISK: dual adversity household driving acute adolescent mental health crisis risk at [2027:2031]",
+                  "action": "School counselor notification; behavioral health crisis referral; family stabilization services; ACE screening; mandated reporter assessment"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "adolescent-mh-behavioral-concern",
+        "name": "Behavioral Concern: ELEVATED+ → BEHAVIORAL_CONCERN signal",
+        "metadata": {
+          "description": "Fires BEHAVIORAL_CONCERN when single-domain adversity (food insecurity OR unsafe housing but not both in crisis) is sustained alongside adolescent behavioral changes — the most common presentation requiring school-based mental health services in low-income districts.",
+          "pattern": "ELEVATED+",
+          "output": "[0,1,0,0] (BEHAVIORAL_CONCERN)"
+        },
+        "vectors": [
+          {
+            "id": "amh-elevated",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "ELEVATED",
+              "description": "ELEVATED+ — food insecure (FOOD_INSECURE bit) AND health hazard risk (HEALTH_HAZARD_RISK bit from housing). Two adversity indicators present; adolescent behavioral changes emerging. isInitial A*A = A+: fires BEHAVIORAL_CONCERN each cycle.",
+              "upstream_state": "HomeFoodSecurity=FOOD_INSECURE, HomeEnvironmentSafety=HEALTH_HAZARD_RISK"
+            },
+            "outputVectors": [
+              {
+                "id": "amh-behavioral-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "BEHAVIORAL_CONCERN: adolescent behavioral changes driven by household adversity at [2027:2031]",
+                  "action": "School counselor check-in; home visitor assessment; caregiver mental health screening; behavioral health referral"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "adolescent-mh-ok",
+        "name": "Mental Health OK: THRIVING+ → MENTAL_HEALTH_OK signal",
+        "metadata": {
+          "description": "Fires MENTAL_HEALTH_OK when both upstream social determinant machines report stable/safe states and adolescent behavioral indicators are within normal range. Confirms that food and housing stability are supporting healthy adolescent development.",
+          "pattern": "THRIVING+",
+          "output": "[0,0,0,1] (MENTAL_HEALTH_OK)"
+        },
+        "vectors": [
+          {
+            "id": "amh-thriving",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.68,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "THRIVING",
+              "description": "THRIVING+ — FOOD_SECURE (bit 345 high) and ENVIRONMENT_SAFE (bit 349 high) from upstream machines. Adolescent mood, engagement, and behavior all within healthy range. Fires MENTAL_HEALTH_OK each cycle.",
+              "upstream_state": "HomeFoodSecurity=FOOD_SECURE, HomeEnvironmentSafety=ENVIRONMENT_SAFE"
+            },
+            "outputVectors": [
+              {
+                "id": "amh-ok-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "MENTAL_HEALTH_OK: adolescent mental health supported by stable food and housing environment at [2027:2031]",
+                  "action": "No intervention required; continue monitoring"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Eviction and Food Assistance Lapse — Teen Mental Health Crisis",
+        "pattern": "6-step: STABLE→STABLE→STRESSED (food insecure)→STRESSED (unsafe housing)→AT_RISK (dual crisis)→STABLE (after family stabilization)",
+        "description": "Family faces simultaneous eviction notice and SNAP benefit lapse in November; teenager begins school refusal and self-harm ideation; dual crisis triggers behavioral health intervention; family stabilization restores safe baseline.",
+        "vectors": [
+          [
+            0.08,
+            0.09,
+            0.08,
+            0.63,
+            0.08,
+            0.09,
+            0.09,
+            0.66
+          ],
+          [
+            0.07,
+            0.08,
+            0.09,
+            0.62,
+            0.08,
+            0.08,
+            0.08,
+            0.65
+          ],
+          [
+            0.08,
+            0.63,
+            0.08,
+            0.08,
+            0.63,
+            0.09,
+            0.09,
+            0.09
+          ],
+          [
+            0.08,
+            0.08,
+            0.08,
+            0.08,
+            0.63,
+            0.08,
+            0.09,
+            0.08
+          ],
+          [
+            0.63,
+            0.08,
+            0.08,
+            0.08,
+            0.08,
+            0.63,
+            0.08,
+            0.08
+          ],
+          [
+            0.08,
+            0.08,
+            0.08,
+            0.64,
+            0.08,
+            0.08,
+            0.08,
+            0.67
+          ]
+        ],
+        "metadata": {
+          "scenario": "eviction-snap-lapse-teen-crisis",
+          "expectedOutputs": {
+            "steps_1_2": "MENTAL_HEALTH_OK fires [0,0,0,1]",
+            "steps_3_4": "no output (STRESSED intermediate)",
+            "step_5": "CRISIS_RISK fires [1,0,0,0]",
+            "step_6": "MENTAL_HEALTH_OK fires [0,0,0,1] (after family stabilization)"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

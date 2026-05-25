@@ -1,0 +1,502 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Health Services Behavioral Health Integration Learning Loop",
+    "description": "Health Services domain machine for behavioral health integration that turns evaluation findings into adaptation and quality improvement. It operationalizes the PH system transformation evaluation-plan workflow by watching evaluability, logic-model outputs, evaluation questions, selected measures, and AI-dispatchable intervention status. Output at [1883:1887] can trigger downstream agents or peer machines in the Behavioral Health Integration pathway.",
+    "metadata": {
+      "category": "health-services",
+      "domain": "Health Services - Behavioral Health Integration",
+      "author": "Reality Engine",
+      "sourceGuide": "Practical Guide for Building an Eval Plan for PH System Transformation, PHAB, February 2026",
+      "guideConcepts": [
+        "assess evaluability",
+        "select a topic and define the ideal state",
+        "build a logic model",
+        "combine topic-specific logic models",
+        "identify evaluation questions",
+        "select measures and draft an evaluation plan matrix"
+      ],
+      "transformationFocus": "Behavioral Health Integration",
+      "focusDescription": "screening, crisis routing, integrated supports, and stabilization",
+      "function": "Learning Loop",
+      "aiTrigger": "behavioral-health-integration-learning-loop-risk-or-optimization-signal",
+      "dispatchableAgent": "benefits_navigation_agent",
+      "agentActions": [
+        "Dispatch benefits_navigation_agent to resolve behavioral health integration delivery risk and update the evaluation plan matrix.",
+        "Trigger optimization agent workflow for behavioral health integration using current logic-model outputs and measures.",
+        "Record sustained progress toward the ideal state for behavioral health integration and keep monitoring."
+      ],
+      "outputSpace": "4D binary at [1883:1887]: [1,0,0,0]=URGENT_AGENT_DISPATCH, [0,1,0,0]=OPTIMIZE_DELIVERY, [0,0,1,0]=HUMAN_REVIEW, [0,0,0,1]=IDEAL_STATE_STABLE",
+      "tags": [
+        "ai-trigger",
+        "behavioral-health-integration",
+        "behavioral-health-integration-learning-loop-risk-or-optimization-signal",
+        "benefits-navigation-agent",
+        "ces-sequences",
+        "ces-sequences-3",
+        "community-health-care-delivery",
+        "dispatchable-agent",
+        "evaluation-plan",
+        "health-services",
+        "health-services-behavioral-health-integration",
+        "health-services-behavioral-health-integration-learning-loop",
+        "health-services-generated",
+        "hsph149",
+        "input-sequences",
+        "input-sequences-4",
+        "learning-loop",
+        "logic-model",
+        "public-health-system-transformation",
+        "startup-loadable"
+      ],
+      "sequenceCount": 3,
+      "populationFocus": "Community health service recipients, public health agencies, care partners, and cross-sector service networks",
+      "sensorNormalization": {
+        "evaluability_readiness_norm": "0.0=no usable data, support, or capacity; 0.5=partial evaluability; 1.0=clear scope, data, resources, and interest-holder support",
+        "service_delivery_pressure_norm": "0.0=acute unmet demand or failed handoffs; 0.5=manageable pressure; 1.0=stable delivery capacity",
+        "equity_signal_norm": "0.0=large disparity or excluded population; 0.5=known gap under mitigation; 1.0=equitable reach and experience",
+        "measure_confidence_norm": "0.0=missing/low-quality measures; 0.5=partial indicator confidence; 1.0=timely, actionable, trusted measures"
+      },
+      "inputSemantics": [
+        "evaluability readiness",
+        "service delivery pressure",
+        "equity signal",
+        "measure confidence"
+      ],
+      "downstreamPattern": "Output region [1883:1887] feeds peer health-services machines and AI dispatch orchestration.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "health-services",
+        "domainTags": [
+          "behavioral-health-integration",
+          "health-services"
+        ],
+        "family": "health-services-generated",
+        "machineCode": "hsph149",
+        "capabilityTags": [
+          "ai-triggers",
+          "behavioral-health-integration-learning-loop-risk-or-optimization-signal",
+          "dispatchable-agents",
+          "health-services-behavioral-health-integration-learning-loop",
+          "learning-loop"
+        ],
+        "workflowTags": [
+          "ai-trigger",
+          "benefits-navigation-agent",
+          "community-health-care-delivery",
+          "dispatchable-agent",
+          "evaluation-plan",
+          "health-services-behavioral-health-integration",
+          "health-services-generated",
+          "logic-model",
+          "public-health-system-transformation"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "health-services"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-4",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ai-trigger",
+          "ai-triggers",
+          "behavioral-health-integration",
+          "behavioral-health-integration-learning-loop-risk-or-optimization-signal",
+          "benefits-navigation-agent",
+          "ces-sequences",
+          "ces-sequences-3",
+          "community-health-care-delivery",
+          "dispatchable-agent",
+          "dispatchable-agents",
+          "evaluation-plan",
+          "health-services",
+          "health-services-behavioral-health-integration",
+          "health-services-behavioral-health-integration-learning-loop",
+          "health-services-generated",
+          "hsph149",
+          "input-sequences",
+          "input-sequences-4",
+          "learning-loop",
+          "logic-model",
+          "public-health-system-transformation",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "public-health-on-call",
+        "runbook": "https://runbooks.example.org/health-services/hsph149_behavioral-health-integration-learning-loop",
+        "escalationPolicy": "pagerduty:public-health",
+        "contact": {
+          "primary": "public-health-on-call-primary@example.org",
+          "secondary": "public-health-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"health-services\".  Review and tune the routing as the team owning HSPH149_behavioral-health-integration-learning-loop matures."
+      },
+      "triggerConfig": {
+        "processId": "HSPH149_BEHAVIORAL_HEALTH_INTEGRATION_LEARNING_LOOP",
+        "processName": "Health Services Behavioral Health Integration Learning Loop",
+        "rules": [
+          {
+            "sequenceId": "hsph-149-urgent-dispatch",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Urgent AI dispatch required."
+          },
+          {
+            "sequenceId": "hsph-149-optimize-delivery",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Optimization agent workflow should run."
+          },
+          {
+            "sequenceId": "hsph-149-stable-ideal-state",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Ideal-state progress is stable."
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 3835,
+        "length": 4
+      },
+      "output": {
+        "offset": 1883,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "hsph-149-urgent-dispatch",
+        "name": "Behavioral Health Integration Learning Loop: READY -> GAP -> CRITICAL -> URGENT_AGENT_DISPATCH",
+        "metadata": {
+          "description": "Escalates when an initially evaluable transformation area develops delivery pressure, equity risk, and weak measure confidence.",
+          "path": "READY -> GAP -> CRITICAL",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "hsph-149-ready",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "READY",
+              "description": "Evaluable, resourced, equitable, and measurable baseline."
+            },
+            "nextVectorIds": [
+              "hsph-149-gap"
+            ]
+          },
+          {
+            "id": "hsph-149-gap",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "GAP",
+              "description": "Delivery pressure and weak measurement appear while evaluability and equity signals remain visible."
+            },
+            "nextVectorIds": [
+              "hsph-149-critical"
+            ]
+          },
+          {
+            "id": "hsph-149-critical",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "CRITICAL",
+              "description": "Transformation signal requires urgent AI dispatch and accountable follow-up."
+            },
+            "outputVectors": [
+              {
+                "id": "hsph-149-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Urgent AI dispatch required.",
+                  "action": "Dispatch benefits_navigation_agent to resolve behavioral health integration delivery risk and update the evaluation plan matrix."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hsph-149-optimize-delivery",
+        "name": "Behavioral Health Integration Learning Loop: OPTIMIZATION_OPPORTUNITY -> OPTIMIZE_DELIVERY",
+        "metadata": {
+          "description": "Fires when measures show a feasible optimization opportunity without acute crisis.",
+          "pattern": "OPTIMIZATION_OPPORTUNITY",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "hsph-149-optimize",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "OPTIMIZATION_OPPORTUNITY",
+              "description": "Service delivery is functioning but AI optimization can improve outcomes, equity, or efficiency."
+            },
+            "outputVectors": [
+              {
+                "id": "hsph-149-optimize-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Optimization agent workflow should run.",
+                  "action": "Trigger optimization agent workflow for behavioral health integration using current logic-model outputs and measures."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hsph-149-stable-ideal-state",
+        "name": "Behavioral Health Integration Learning Loop: IDEAL_STATE_SIGNAL -> IDEAL_STATE_STABLE",
+        "metadata": {
+          "description": "Fires when the focus area shows sustained, measured progress toward the ideal state.",
+          "pattern": "IDEAL_STATE_SIGNAL",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "hsph-149-stable",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "IDEAL_STATE_SIGNAL",
+              "description": "Delivery is stable, measures are trusted, and the transformation area is on track."
+            },
+            "outputVectors": [
+              {
+                "id": "hsph-149-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "Ideal-state progress is stable.",
+                  "action": "Record sustained progress toward the ideal state for behavioral health integration and keep monitoring."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Escalation to urgent agent dispatch",
+        "description": "Evaluability starts strong, then delivery and measurement gaps emerge, then the focus area reaches crisis.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-agent-dispatch"
+        }
+      },
+      {
+        "name": "Optimization opportunity",
+        "description": "AI optimization can improve delivery before crisis conditions appear.",
+        "vectors": [
+          [
+            0,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "optimize-delivery"
+        }
+      },
+      {
+        "name": "Stable ideal-state progress",
+        "description": "The focus area is progressing toward the transformed ideal state.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "ideal-state-stable"
+        }
+      },
+      {
+        "name": "Ready baseline without output",
+        "description": "A single ready signal arms the escalation path but does not dispatch an agent.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "ready-baseline"
+        }
+      }
+    ]
+  }
+}

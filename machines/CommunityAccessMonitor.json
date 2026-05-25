@@ -1,0 +1,532 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Community Access Monitor",
+    "description": "Integration machine that reads combined output signals from the Referral Network Monitor [976:980] and the Community Outreach Monitor [980:984] to detect community access failures — conditions where the outreach and referral systems that connect people to community services have broken down. When outreach fails to reach eligible populations AND the referral network cannot route connected clients to services, community services become inaccessible regardless of how many programs exist on paper. Output at [996:1000] is available to downstream care coordination systems.",
+    "metadata": {
+      "category": "community-services",
+      "domain": "Community Services — Community Access / Network Health",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [996:1000]: [1,0,0,0]=ACCESS_FAILURE, [0,1,0,0]=ACCESS_BARRIERS, [0,0,1,0]=ACCESS_LIMITED, [0,0,0,1]=ACCESS_ADEQUATE",
+      "tags": [
+        "ces-sequences",
+        "ces-sequences-3",
+        "community-access",
+        "community-access-monitor",
+        "community-outreach",
+        "community-services",
+        "community-services-community-access-network-health",
+        "community-services-generated",
+        "input-sequences",
+        "input-sequences-1",
+        "kleene-plus",
+        "network-health",
+        "referral-network",
+        "service-delivery",
+        "startup-loadable"
+      ],
+      "sequenceCount": 3,
+      "populationFocus": "Community members needing access to services who depend on outreach to be reached and referral networks to be connected; geographic and demographic service deserts",
+      "sensorNormalization": {
+        "referral_signal_norm": "0.0=[1,0,0,0] REFERRAL_BREAKDOWN from ReferralNetwork (bit 454), 0.5=[0,0,1,0] REFERRAL_DELAYS (bit 456), 1.0=[0,0,0,1] REFERRAL_FUNCTIONAL (bit 457)",
+        "outreach_signal_norm": "0.0=[1,0,0,0] OUTREACH_FAILURE from CommunityOutreach (bit 458), 0.5=[0,0,1,0] ENGAGEMENT_BUILDING (bit 460), 1.0=[0,0,0,1] OUTREACH_EFFECTIVE (bit 461)",
+        "geographic_coverage_norm": "0.0=large geographic areas with no service presence or outreach coverage, 0.5=partial coverage; some areas reachable; remote or rural areas unserved, 1.0=full geographic coverage; no service deserts in target area",
+        "service_awareness_norm": "0.0=target population largely unaware services exist; no effective public communication, 0.5=moderate awareness; some segments informed; hard-to-reach populations unaware, 1.0=high awareness; trusted messengers active; service uptake matching eligibility estimates"
+      },
+      "upstreamMachines": [
+        "ReferralNetworkMonitor (output [976:980])",
+        "CommunityOutreachMonitor (output [980:984])"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "community-access",
+          "community-services",
+          "network-health"
+        ],
+        "family": "community-access-monitor",
+        "machineCode": "community-access-monitor",
+        "capabilityTags": [
+          "referral-network"
+        ],
+        "workflowTags": [
+          "community-access-monitor",
+          "community-outreach",
+          "community-services-community-access-network-health",
+          "community-services-generated",
+          "kleene-plus",
+          "service-delivery"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "community-access",
+          "community-access-monitor",
+          "community-outreach",
+          "community-services",
+          "community-services-community-access-network-health",
+          "community-services-generated",
+          "input-sequences",
+          "input-sequences-1",
+          "kleene-plus",
+          "network-health",
+          "referral-network",
+          "service-delivery",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/communityaccessmonitor",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning CommunityAccessMonitor matures."
+      },
+      "triggerConfig": {
+        "processId": "COMMUNITYACCESSMONITOR",
+        "processName": "Community Access Monitor",
+        "rules": [
+          {
+            "sequenceId": "access-failure-escalation",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "ACCESS_FAILURE: community cannot reach services; outreach and referral systems simultaneously failed at [996:1000]"
+          },
+          {
+            "sequenceId": "access-barriers-signal",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "ACCESS_BARRIERS: significant barriers preventing reliable community access to services at [996:1000]"
+          },
+          {
+            "sequenceId": "access-adequate-ok",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "ACCESS_ADEQUATE: community successfully connected to services through functional outreach and referral systems at [996:1000]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 976,
+        "length": 8
+      },
+      "output": {
+        "offset": 996,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "access-failure-escalation",
+        "name": "Access Collapse: ADEQUATE+ → LIMITED → BARRIERS → ACCESS_FAILURE",
+        "metadata": {
+          "description": "Detects community access system collapse from an adequate baseline through increasing restrictions to full failure. When both outreach and referral break simultaneously — a common disaster-response or systemic-crisis scenario — community members cannot be reached and, once identified, cannot be connected to services. The double failure is worse than either alone because there is no fallback routing. Requires ADEQUATE+ baseline before failure escalation arms.",
+          "path": "ADEQUATE+ → LIMITED → BARRIERS → output[1,0,0,0]",
+          "output": "[1,0,0,0] (ACCESS_FAILURE)"
+        },
+        "vectors": [
+          {
+            "id": "ca-adequate",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "ADEQUATE",
+              "description": "ADEQUATE+ — REFERRAL_FUNCTIONAL (bit 457) and OUTREACH_EFFECTIVE (bit 461) both high. Outreach reaching community; referral network routing successfully. isInitial A*A = A+.",
+              "upstream_state": "ReferralNetwork=REFERRAL_FUNCTIONAL, CommunityOutreach=OUTREACH_EFFECTIVE"
+            },
+            "nextVectorIds": [
+              "ca-adequate",
+              "ca-limited"
+            ]
+          },
+          {
+            "id": "ca-limited",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "LIMITED",
+              "description": "LIMITED — REFERRAL_DELAYS (bit 456) and ENGAGEMENT_BUILDING (bit 460). Both systems degraded but not failed; access restricted. Clients being reached but wait times long; or outreach building but not yet effective.",
+              "upstream_state": "ReferralNetwork=REFERRAL_DELAYS, CommunityOutreach=ENGAGEMENT_BUILDING"
+            },
+            "nextVectorIds": [
+              "ca-barriers"
+            ]
+          },
+          {
+            "id": "ca-barriers",
+            "elements": [
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "BARRIERS",
+              "description": "BARRIERS — REFERRAL_BREAKDOWN (bit 454) and OUTREACH_FAILURE (bit 458). Both upstream systems in crisis. Community cannot be reached AND those reached cannot be connected to services. Fires ACCESS_FAILURE.",
+              "upstream_state": "ReferralNetwork=REFERRAL_BREAKDOWN, CommunityOutreach=OUTREACH_FAILURE"
+            },
+            "outputVectors": [
+              {
+                "id": "ca-failure-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "ACCESS_FAILURE: community cannot reach services; outreach and referral systems simultaneously failed at [996:1000]",
+                  "action": "Emergency community convening; direct service delivery bypass of referral system; mobile services deployment; mutual aid network activation; funder emergency notification"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "access-barriers-signal",
+        "name": "Access Barriers: CONSTRAINED+ → ACCESS_BARRIERS signal",
+        "metadata": {
+          "description": "Fires ACCESS_BARRIERS when one system is in breakdown and the other is degraded — the more common partial-failure state where community members can sometimes reach services through workarounds but not reliably.",
+          "pattern": "CONSTRAINED+",
+          "output": "[0,1,0,0] (ACCESS_BARRIERS)"
+        },
+        "vectors": [
+          {
+            "id": "ca-constrained",
+            "elements": [
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "CONSTRAINED",
+              "description": "CONSTRAINED+ — REFERRAL_BREAKDOWN (bit 454) but ENGAGEMENT_BUILDING (bit 460). Referrals not working but outreach is building community engagement; people are being reached but cannot be routed to services. isInitial A*A = A+: fires ACCESS_BARRIERS each cycle.",
+              "scenario": "Strong street outreach connecting with homeless individuals; all housing referral partners at capacity with closed waitlists; outreach workers have no place to send people they connect with"
+            },
+            "outputVectors": [
+              {
+                "id": "ca-barriers-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "ACCESS_BARRIERS: significant barriers preventing reliable community access to services at [996:1000]",
+                  "action": "Resource gap advocacy with funders; alternative service pathway identification; interim direct service bridge; cross-sector coordination meeting"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "access-adequate-ok",
+        "name": "Access Adequate: CONNECTED+ → ACCESS_ADEQUATE signal",
+        "metadata": {
+          "description": "Fires ACCESS_ADEQUATE when both outreach and referral systems are confirmed functional — community members are being reached AND successfully connected to the services they need. The goal state for a healthy community services ecosystem.",
+          "pattern": "CONNECTED+",
+          "output": "[0,0,0,1] (ACCESS_ADEQUATE)"
+        },
+        "vectors": [
+          {
+            "id": "ca-connected",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "CONNECTED",
+              "description": "CONNECTED+ — REFERRAL_FUNCTIONAL (bit 457) and OUTREACH_EFFECTIVE (bit 461) both high. Community successfully reached and connected to services. Fires ACCESS_ADEQUATE each cycle.",
+              "scenario": "Community health worker program with high trust and established referral partnerships; 80%+ follow-through on referrals; peer ambassador network active"
+            },
+            "outputVectors": [
+              {
+                "id": "ca-adequate-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "ACCESS_ADEQUATE: community successfully connected to services through functional outreach and referral systems at [996:1000]",
+                  "action": "No access intervention required; continue monitoring and document effective practices"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Winter Storm Disrupts Both Outreach and Referral Network",
+        "pattern": "5-step: ADEQUATE→ADEQUATE→LIMITED (outreach suspended, referrals delayed)→ACCESS_FAILURE (partner closures)→ADEQUATE (restored after storm)",
+        "description": "Severe winter storm suspends street outreach for two weeks; partner agencies close; community access collapses; emergency mutual aid activates; systems restored after storm.",
+        "vectors": [
+          [
+            0.09,
+            0.09,
+            0.09,
+            0.63,
+            0.09,
+            0.09,
+            0.09,
+            0.63
+          ],
+          [
+            0.08,
+            0.08,
+            0.08,
+            0.62,
+            0.08,
+            0.08,
+            0.08,
+            0.62
+          ],
+          [
+            0.09,
+            0.09,
+            0.63,
+            0.09,
+            0.09,
+            0.09,
+            0.63,
+            0.09
+          ],
+          [
+            0.63,
+            0.09,
+            0.09,
+            0.09,
+            0.63,
+            0.09,
+            0.09,
+            0.09
+          ],
+          [
+            0.09,
+            0.09,
+            0.09,
+            0.66,
+            0.09,
+            0.09,
+            0.09,
+            0.66
+          ]
+        ],
+        "metadata": {
+          "scenario": "winter-storm-access-collapse",
+          "expectedOutputs": {
+            "steps_1_2": "ACCESS_ADEQUATE fires [0,0,0,1]",
+            "step_3": "no output (LIMITED intermediate)",
+            "step_4": "ACCESS_FAILURE fires [1,0,0,0]",
+            "step_5": "ACCESS_ADEQUATE fires [0,0,0,1] (after storm restoration)"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

@@ -1,0 +1,511 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Community Services Health And Human Services Intake Crisis Benefit Intake",
+    "description": "Community-services machine for crisis benefit intake in the health and human services intake workstream. It monitors utility shutoff, food insecurity, eviction risk, and immediate relief eligibility and emits AI-triggered actions for health and human services, law enforcement/public safety coordination, homelessness response, and city operations.",
+    "metadata": {
+      "category": "community-services",
+      "domain": "Community Services - Health And Human Services Intake",
+      "author": "Reality Engine",
+      "workstream": "Health And Human Services Intake",
+      "operationalFocus": "Crisis Benefit Intake",
+      "focusDescription": "utility shutoff, food insecurity, eviction risk, and immediate relief eligibility",
+      "upstreamMachine": "Community Services Health And Human Services Intake Immigrant Refugee Navigation",
+      "upstreamDomain": "community-services",
+      "upstreamOutputRegion": "[1032:1036]",
+      "upstreamPurpose": null,
+      "downstreamMachines": [
+        "Community Services Health And Human Services Intake Human Services Intake Executive"
+      ],
+      "crossDomainInterconnect": false,
+      "crossDomainOutputTarget": null,
+      "crossDomainOutputPurpose": null,
+      "dispatchableAgent": "community_command_agent",
+      "aiTrigger": "community-services-health-and-human-services-intake-crisis-benefit-intake",
+      "predictiveFlowTrigger": "community-services-predictive-health-and-human-services-intake-crisis-benefit-intake",
+      "agentActions": [
+        "Dispatch community_command_agent for urgent community-services intervention on crisis benefit intake.",
+        "Coordinate health, housing, public safety, transportation, or city service partners for crisis benefit intake.",
+        "Create field work order or mobile team task for crisis benefit intake.",
+        "Maintain monitored service path for crisis benefit intake."
+      ],
+      "inputSpace": "4D binary at [1032:1036]",
+      "outputSpace": "4D binary at [1036:1040]: [1,0,0,0]=URGENT_RESPONSE, [0,1,0,0]=COORDINATE_SERVICES, [0,0,1,0]=FIELD_WORK_ORDER, [0,0,0,1]=STABLE_SERVICE_PATH",
+      "inputSemantics": [
+        "resident need severity",
+        "eligibility and documentation readiness",
+        "field capacity or operational readiness",
+        "safety, mobility, and health risk"
+      ],
+      "tags": [
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-4",
+        "city-services",
+        "community-command-agent",
+        "community-services",
+        "community-services-generated",
+        "community-services-health-and-human-services-intake",
+        "community-services-health-and-human-services-intake-crisis-benefit-intake",
+        "community-services-predictive-health-and-human-services-intake-crisis-benefit-intake",
+        "crisis-benefit-intake",
+        "cross-domain",
+        "csx009",
+        "dispatchable-agent",
+        "health-and-human-services",
+        "health-and-human-services-intake",
+        "homelessness",
+        "input-sequences",
+        "input-sequences-5",
+        "law-enforcement",
+        "machine-interconnect",
+        "public-safety",
+        "startup-loadable"
+      ],
+      "sequenceCount": 5,
+      "reuseGuideline": "Map 311, case-management, CAD/RMS, shelter HMIS, benefit enrollment, outreach, public health, and transit-access signals into the 4D input lane. Route outputs to case workers, mobile crisis, public safety, housing navigators, field crews, transportation dispatch, or health-service agents.",
+      "downstreamPattern": "Output region [1036:1040] feeds Community Services Health And Human Services Intake Human Services Intake Executive.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "community-services",
+          "health-and-human-services-intake"
+        ],
+        "family": "community-services-generated",
+        "machineCode": "csx009",
+        "capabilityTags": [
+          "ai-triggers",
+          "community-services-predictive-health-and-human-services-intake-crisis-benefit-intake",
+          "dispatchable-agents"
+        ],
+        "workflowTags": [
+          "ai-trigger",
+          "city-services",
+          "community-command-agent",
+          "community-services-generated",
+          "community-services-health-and-human-services-intake",
+          "crisis-benefit-intake",
+          "cross-domain",
+          "dispatchable-agent",
+          "health-and-human-services",
+          "homelessness",
+          "law-enforcement",
+          "public-safety"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ai-trigger",
+          "ai-triggers",
+          "ces-sequences",
+          "ces-sequences-4",
+          "city-services",
+          "community-command-agent",
+          "community-services",
+          "community-services-generated",
+          "community-services-health-and-human-services-intake",
+          "community-services-health-and-human-services-intake-crisis-benefit-intake",
+          "community-services-predictive-health-and-human-services-intake-crisis-benefit-intake",
+          "crisis-benefit-intake",
+          "cross-domain",
+          "csx009",
+          "dispatchable-agent",
+          "dispatchable-agents",
+          "health-and-human-services",
+          "health-and-human-services-intake",
+          "homelessness",
+          "input-sequences",
+          "input-sequences-5",
+          "law-enforcement",
+          "machine-interconnect",
+          "public-safety",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/csx009_health-and-human-services-intake-crisis-benefit-intake",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning CSX009_health-and-human-services-intake-crisis-benefit-intake matures."
+      },
+      "triggerConfig": {
+        "processId": "CSX009_HEALTH_AND_HUMAN_SERVICES_INTAKE_CRISIS_BENEFIT_INTAKE",
+        "processName": "Community Services Health And Human Services Intake Crisis Benefit Intake",
+        "rules": [
+          {
+            "sequenceId": "csx-009-urgent-response",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Crisis Benefit Intake: WATCH -> URGENT_RESPONSE"
+          },
+          {
+            "sequenceId": "csx-009-coordinate-services",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Crisis Benefit Intake: COORDINATION_NEEDED -> COORDINATE_SERVICES"
+          },
+          {
+            "sequenceId": "csx-009-field-work-order",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Crisis Benefit Intake: FIELD_TASK_NEEDED -> FIELD_WORK_ORDER"
+          },
+          {
+            "sequenceId": "csx-009-stable-service-path",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Crisis Benefit Intake: STABLE_PATH -> STABLE_SERVICE_PATH"
+          }
+        ]
+      },
+      "severity": "life-safety"
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1032,
+        "length": 4
+      },
+      "output": {
+        "offset": 1036,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "csx-009-urgent-response",
+        "name": "Crisis Benefit Intake: WATCH -> URGENT_RESPONSE",
+        "metadata": {
+          "description": "Escalates resident or field risk into urgent response.",
+          "output": "[1,0,0,0]",
+          "severity": "life-safety"
+        },
+        "vectors": [
+          {
+            "id": "csx-009-watch",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "nextVectorIds": [
+              "csx-009-urgent"
+            ]
+          },
+          {
+            "id": "csx-009-urgent",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": false,
+            "outputVectors": [
+              {
+                "id": "csx-009-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch community_command_agent for urgent community-services intervention on crisis benefit intake."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-009-coordinate-services",
+        "name": "Crisis Benefit Intake: COORDINATION_NEEDED -> COORDINATE_SERVICES",
+        "metadata": {
+          "description": "Triggers cross-agency coordination.",
+          "output": "[0,1,0,0]",
+          "severity": "life-safety"
+        },
+        "vectors": [
+          {
+            "id": "csx-009-coordinate",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-009-coordinate-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Coordinate health, housing, public safety, transportation, or city service partners for crisis benefit intake."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-009-field-work-order",
+        "name": "Crisis Benefit Intake: FIELD_TASK_NEEDED -> FIELD_WORK_ORDER",
+        "metadata": {
+          "description": "Creates a field crew, outreach, or mobile response task.",
+          "output": "[0,0,1,0]",
+          "severity": "life-safety"
+        },
+        "vectors": [
+          {
+            "id": "csx-009-field-task",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-009-field-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Create field work order or mobile team task for crisis benefit intake."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-009-stable-service-path",
+        "name": "Crisis Benefit Intake: STABLE_PATH -> STABLE_SERVICE_PATH",
+        "metadata": {
+          "description": "Confirms resident service path is stable and monitored.",
+          "output": "[0,0,0,1]",
+          "severity": "life-safety"
+        },
+        "vectors": [
+          {
+            "id": "csx-009-stable",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-009-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Maintain monitored service path for crisis benefit intake."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Urgent response sequence",
+        "description": "Two-step community risk escalation ending in urgent response.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-response",
+          "sequenceLength": 2
+        }
+      },
+      {
+        "name": "Coordinate services",
+        "description": "Coordinates health, public safety, housing, transit, or city service partners.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "coordinate-services"
+        }
+      },
+      {
+        "name": "Field work order",
+        "description": "Creates a field response or outreach task.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "field-work-order"
+        }
+      },
+      {
+        "name": "Stable service path",
+        "description": "Confirms the resident or city service path is stable.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "stable-service-path"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Initial observation arms the urgent path without firing.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

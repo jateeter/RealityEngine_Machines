@@ -1,0 +1,545 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Home Social Isolation Monitor",
+    "description": "Integration machine that reads combined output signals from the Home Medication Cost Barrier Monitor [2011:2015] and the Home Transportation Barrier Monitor [2015:2019] to detect social isolation driven by access barriers. For low- and medium-income adults managing chronic conditions at home, the combination of medication cost barriers and transportation failures systematically restricts social participation, community connection, and human contact — accelerating depression, cognitive decline, and self-neglect. Output at [2035:2039] is available to downstream care coordination systems.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Home Health — Social Isolation / Access Barriers",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [2035:2039]: [1,0,0,0]=SEVERE_ISOLATION, [0,1,0,0]=SOCIAL_WITHDRAWAL, [0,0,1,0]=ISOLATION_RISK, [0,0,0,1]=SOCIALLY_CONNECTED",
+      "tags": [
+        "access-barriers",
+        "ces-sequences",
+        "ces-sequences-3",
+        "elder-care",
+        "health-personal",
+        "home-health",
+        "home-health-social-isolation-access-barriers",
+        "home-social-isolation-monitor",
+        "input-sequences",
+        "input-sequences-1",
+        "kleene-plus",
+        "low-income",
+        "medication",
+        "social-isolation",
+        "startup-loadable",
+        "transportation"
+      ],
+      "sequenceCount": 3,
+      "populationFocus": "Home-bound adults managing chronic illness; elderly patients without transportation; low-income adults in medication or transport deserts",
+      "sensorNormalization": {
+        "medication_barrier_signal_norm": "0.0=[1,0,0,0] ADHERENCE_CRISIS from MedCostBarrier (bit 358), 0.5=[0,1,0,0] COST_BARRIER_ACTIVE (bit 359), 1.0=[0,0,0,1] MEDICATION_MANAGED (bit 361)",
+        "transport_barrier_signal_norm": "0.0=[1,0,0,0] CRITICAL_ACCESS_FAILURE from Transportation (bit 362), 0.5=[0,0,1,0] TRANSIT_DEPENDENT_RISK (bit 364), 1.0=[0,0,0,1] TRANSPORTATION_ADEQUATE (bit 365)",
+        "social_contact_norm": "0.0=zero social contact; not leaving home; no calls; no visitors in >2 weeks, 0.5=minimal contact (one or two interactions per week; phone only), 1.0=regular social contact; community participation",
+        "self_care_norm": "0.0=self-neglect evident (nutrition, hygiene, medication all failing), 0.5=managing core self-care with effort; some slippage, 1.0=adequate self-care maintained independently"
+      },
+      "upstreamMachines": [
+        "HomeMedicationCostBarrierMonitor (output [2011:2015])",
+        "HomeTransportationBarrierMonitor (output [2015:2019])"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "access-barriers",
+          "health-personal",
+          "home-health",
+          "social-isolation"
+        ],
+        "family": "home-social-isolation-monitor",
+        "machineCode": "home-social-isolation-monitor",
+        "capabilityTags": [],
+        "workflowTags": [
+          "elder-care",
+          "home-health-social-isolation-access-barriers",
+          "home-social-isolation-monitor",
+          "kleene-plus",
+          "low-income",
+          "medication",
+          "transportation"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "access-barriers",
+          "ces-sequences",
+          "ces-sequences-3",
+          "elder-care",
+          "health-personal",
+          "home-health",
+          "home-health-social-isolation-access-barriers",
+          "home-social-isolation-monitor",
+          "input-sequences",
+          "input-sequences-1",
+          "kleene-plus",
+          "low-income",
+          "medication",
+          "social-isolation",
+          "startup-loadable",
+          "transportation"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/homesocialisolationmonitor",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "patient-safety-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"health-personal\".  Review and tune the routing as the team owning HomeSocialIsolationMonitor matures."
+      },
+      "triggerConfig": {
+        "processId": "HOMESOCIALISOLATIONMONITOR",
+        "processName": "Home Social Isolation Monitor",
+        "rules": [
+          {
+            "sequenceId": "social-isolation-severe",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "SEVERE_ISOLATION: patient housebound with dual access barrier crisis; self-neglect risk at [2035:2039]"
+          },
+          {
+            "sequenceId": "social-isolation-risk",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "ISOLATION_RISK: converging access barriers approaching isolation threshold at [2035:2039]"
+          },
+          {
+            "sequenceId": "social-connected-ok",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "SOCIALLY_CONNECTED: access barriers resolved; social participation maintained at [2035:2039]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 2011,
+        "length": 8
+      },
+      "output": {
+        "offset": 2035,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "social-isolation-severe",
+        "name": "Isolation Cascade: CONNECTED+ → WITHDRAWING → ISOLATED → SEVERE_ISOLATION",
+        "metadata": {
+          "description": "Tracks progressive social isolation driven by compounding access barriers. When medication adherence crisis and transportation failure co-occur, the patient stops leaving the home, stops engaging community programs, and enters a self-reinforcing isolation spiral. Requires CONNECTED+ baseline before crisis arm activates.",
+          "path": "CONNECTED+ → WITHDRAWING → ISOLATED → output[1,0,0,0]",
+          "output": "[1,0,0,0] (SEVERE_ISOLATION)"
+        },
+        "vectors": [
+          {
+            "id": "si-connected",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "CONNECTED",
+              "description": "CONNECTED+ — MEDICATION_MANAGED (bit 361) and TRANSPORTATION_ADEQUATE (bit 365) both high. Medications managed; transport available; patient engaged in community. isInitial A*A = A+.",
+              "upstream_state": "MedCostBarrier=MEDICATION_MANAGED, TransportBarrier=TRANSPORTATION_ADEQUATE"
+            },
+            "nextVectorIds": [
+              "si-connected",
+              "si-withdrawing"
+            ]
+          },
+          {
+            "id": "si-withdrawing",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "WITHDRAWING",
+              "description": "WITHDRAWING — COST_BARRIER_ACTIVE (bit 359) and TRANSIT_DEPENDENT_RISK (bit 364). One moderate barrier in each domain. Patient reducing community trips to conserve resources; social contact decreasing.",
+              "upstream_state": "MedCostBarrier=COST_BARRIER_ACTIVE, TransportBarrier=TRANSIT_DEPENDENT_RISK"
+            },
+            "nextVectorIds": [
+              "si-isolated"
+            ]
+          },
+          {
+            "id": "si-isolated",
+            "elements": [
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "ISOLATED",
+              "description": "ISOLATED — dual crisis: ADHERENCE_CRISIS (bit 358) and CRITICAL_ACCESS_FAILURE (bit 362). Both upstream machines in full crisis state. Patient housebound; self-care declining. Fires SEVERE_ISOLATION.",
+              "upstream_state": "MedCostBarrier=ADHERENCE_CRISIS, TransportBarrier=CRITICAL_ACCESS_FAILURE"
+            },
+            "outputVectors": [
+              {
+                "id": "si-severe-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "SEVERE_ISOLATION: patient housebound with dual access barrier crisis; self-neglect risk at [2035:2039]",
+                  "action": "Emergency home visit; welfare check; emergency medication delivery; NEMT enrollment; adult protective services consideration"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "social-isolation-risk",
+        "name": "Isolation Risk: BARRIER_RISK+ → ISOLATION_RISK signal",
+        "metadata": {
+          "description": "Fires ISOLATION_RISK when one domain is in crisis state and the other is in a risk state — the early warning signal for patients who will become severely isolated if the second barrier is not addressed. Most responsive to outreach intervention before the full isolation cascade locks in.",
+          "pattern": "BARRIER_RISK+",
+          "output": "[0,0,1,0] (ISOLATION_RISK)"
+        },
+        "vectors": [
+          {
+            "id": "si-barrier-risk",
+            "elements": [
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "BARRIER_RISK",
+              "description": "BARRIER_RISK+ — ADHERENCE_CRISIS (bit 358) and TRANSIT_DEPENDENT_RISK (bit 364). Medication fully failing; transport fragile. Patient at threshold of full social isolation. isInitial A*A = A+: fires ISOLATION_RISK each cycle.",
+              "scenario": "Rural elder: medications unaffordable, riding borrowed car to pharmacy — one breakdown away from complete isolation"
+            },
+            "outputVectors": [
+              {
+                "id": "si-risk-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "ISOLATION_RISK: converging access barriers approaching isolation threshold at [2035:2039]",
+                  "action": "Proactive home visitor contact; multi-barrier resolution plan; phone/telehealth setup; community resource navigator"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "social-connected-ok",
+        "name": "Socially Connected: STABLE+ → SOCIALLY_CONNECTED signal",
+        "metadata": {
+          "description": "Fires SOCIALLY_CONNECTED when both access barrier machines report adequate states — confirming that medication and transportation needs are met and the patient has resources to maintain social participation.",
+          "pattern": "STABLE+",
+          "output": "[0,0,0,1] (SOCIALLY_CONNECTED)"
+        },
+        "vectors": [
+          {
+            "id": "si-stable",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "STABLE",
+              "description": "STABLE+ — MEDICATION_MANAGED (bit 361) and TRANSPORTATION_ADEQUATE (bit 365) both high. No access barriers; patient maintaining community connection. Fires SOCIALLY_CONNECTED each cycle.",
+              "scenario": "Patient on Medicaid with generic coverage; NEMT enrolled; attends senior center twice weekly"
+            },
+            "outputVectors": [
+              {
+                "id": "si-connected-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "SOCIALLY_CONNECTED: access barriers resolved; social participation maintained at [2035:2039]",
+                  "action": "No isolation intervention required; continue monitoring"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Post-Retirement Income Drop — Dual Barrier Isolation",
+        "pattern": "6-step: CONNECTED→CONNECTED→WITHDRAWING→ISOLATION_RISK→SEVERE_ISOLATION→CONNECTED (after outreach)",
+        "description": "Widowed elder retires; pension cuts trigger medication rationing; simultaneously stops driving; county transit route cut; full isolation; outreach worker intervention restores connection.",
+        "vectors": [
+          [
+            0.08,
+            0.09,
+            0.09,
+            0.63,
+            0.09,
+            0.09,
+            0.09,
+            0.63
+          ],
+          [
+            0.09,
+            0.09,
+            0.08,
+            0.62,
+            0.09,
+            0.08,
+            0.09,
+            0.62
+          ],
+          [
+            0.09,
+            0.63,
+            0.09,
+            0.09,
+            0.09,
+            0.09,
+            0.63,
+            0.09
+          ],
+          [
+            0.63,
+            0.09,
+            0.09,
+            0.09,
+            0.09,
+            0.09,
+            0.63,
+            0.09
+          ],
+          [
+            0.63,
+            0.09,
+            0.09,
+            0.09,
+            0.63,
+            0.09,
+            0.09,
+            0.09
+          ],
+          [
+            0.09,
+            0.09,
+            0.09,
+            0.66,
+            0.09,
+            0.09,
+            0.09,
+            0.66
+          ]
+        ],
+        "metadata": {
+          "scenario": "retirement-income-drop-isolation",
+          "expectedOutputs": {
+            "steps_1_2": "SOCIALLY_CONNECTED fires [0,0,0,1]",
+            "step_3": "no output (WITHDRAWING intermediate)",
+            "step_4": "ISOLATION_RISK fires [0,0,1,0]",
+            "step_5": "SEVERE_ISOLATION fires [1,0,0,0]",
+            "step_6": "SOCIALLY_CONNECTED fires [0,0,0,1] (after outreach worker intervention)"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

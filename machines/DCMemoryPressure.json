@@ -1,0 +1,493 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "DC Memory Pressure Detector",
+    "description": "Monitors memory utilization and swap usage to detect memory pressure escalating to thrashing and cascading failure. Implements the regular expression NORMAL+ → PRESSURE+ → THRASHING → CASCADING+ → FAILURE → [alarm]. A concurrent HEALTHY+ sequence fires the reset signal when memory is within safe parameters.",
+    "metadata": {
+      "category": "data-center",
+      "domain": "Data Center — Memory / Pressure",
+      "author": "Reality Engine",
+      "created": "2026-02-27T00:00:00Z",
+      "eventSpace": "4D continuous sensor vector at [1344:1348]: [mem_usage_norm, mem_page_fault_rate_norm, mem_cache_miss_norm, swap_usage_norm]",
+      "outputSpace": "2D binary at [1367:1369]: [1,0]=MEMORY_ALARM, [0,1]=MEMORY_HEALTHY",
+      "tags": [
+        "anomaly-detection",
+        "cascading-failure",
+        "ces-sequences",
+        "ces-sequences-2",
+        "data-center",
+        "data-center-memory-pressure",
+        "dc-memory-pressure-detector",
+        "dcmemory-pressure",
+        "input-sequences",
+        "input-sequences-1",
+        "memory",
+        "monitoring",
+        "pressure",
+        "startup-loadable",
+        "thrashing"
+      ],
+      "sequenceCount": 2,
+      "downstreamMachine": "DCMemoryAlertFF (reads [1367:1369])",
+      "regularExpression": {
+        "escalation": "NORMAL+ → PRESSURE+ → THRASHING → CASCADING+ → FAILURE → output[1,0]",
+        "recovery": "HEALTHY+ → output[0,1]",
+        "combined": "Models memory-induced system degradation: elevated usage (PRESSURE+) leads to page thrashing (THRASHING), which cascades into swap exhaustion (CASCADING+), ultimately causing system failure (FAILURE). Each stage requires sustained observation before advancing, preventing false alarms.",
+        "isInitialNote": "NORMAL and HEALTHY are isInitial vectors implementing A*A = A+. At least one NORMAL reading is required to arm PRESSURE; at least one HEALTHY reading is required to produce the reset output. NORMAL* or HEALTHY* would be incorrect — they would imply successors can be armed or output produced without any matching sensor observation."
+      },
+      "sensorNormalization": {
+        "mem_usage_norm": "0.0 = 0% memory used, 1.0 = 100% memory used",
+        "mem_page_fault_rate_norm": "wildcard (don't care — value=0.5, tolerance=0.5)",
+        "mem_cache_miss_norm": "wildcard (don't care — value=0.5, tolerance=0.5)",
+        "swap_usage_norm": "0.0 = no swap used, 1.0 = swap exhausted"
+      },
+      "singleTransitionAssumption": {
+        "required": false,
+        "scope": "continuous sensor space — STA not applicable as defined for binary vectors",
+        "compliant": true,
+        "notes": "Continuous-space STA analog: gradual memory utilization progression through bands. Memory thrashing typically develops gradually as physical memory fills and the OS begins paging. An abrupt jump from NORMAL to FAILURE (without observed PRESSURE+ or THRASHING transitions) would not trigger the alarm, correctly filtering out measurement artifacts or OOM-killer actions that restore memory suddenly. NORMAL is isInitial (A*A = A+): at least one NORMAL reading is required to arm PRESSURE."
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "data-center",
+        "domainTags": [
+          "data-center",
+          "memory",
+          "pressure"
+        ],
+        "family": "dc-memory-pressure-detector",
+        "machineCode": "dcmemory-pressure",
+        "capabilityTags": [
+          "monitoring"
+        ],
+        "workflowTags": [
+          "anomaly-detection",
+          "cascading-failure",
+          "data-center",
+          "dc-memory-pressure-detector",
+          "dcmemory-pressure",
+          "thrashing"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "anomaly-detection",
+          "cascading-failure",
+          "ces-sequences",
+          "ces-sequences-2",
+          "data-center",
+          "data-center-memory-pressure",
+          "dc-memory-pressure-detector",
+          "dcmemory-pressure",
+          "input-sequences",
+          "input-sequences-1",
+          "memory",
+          "monitoring",
+          "pressure",
+          "startup-loadable",
+          "thrashing"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "datacenter-noc",
+        "runbook": "https://runbooks.example.org/data-center/dcmemorypressure",
+        "escalationPolicy": "pagerduty:datacenter-noc",
+        "contact": {
+          "primary": "datacenter-noc-primary@example.org",
+          "secondary": "datacenter-noc-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 300,
+          "error": 120
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"data-center\".  Review and tune the routing as the team owning DCMemoryPressure matures."
+      },
+      "triggerConfig": {
+        "processId": "DCMEMORYPRESSURE",
+        "processName": "DC Memory Pressure Detector",
+        "rules": [
+          {
+            "sequenceId": "dc-memory-escalation",
+            "outputMatches": [
+              1,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "MEMORY FAILURE: Alarm signal [1,0] to DCMemoryAlertFF at [1367:1369]"
+          },
+          {
+            "sequenceId": "dc-memory-healthy",
+            "outputMatches": [
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "MEMORY HEALTHY: Reset signal [0,1] to DCMemoryAlertFF at [1367:1369]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1344,
+        "length": 4
+      },
+      "output": {
+        "offset": 1367,
+        "length": 2
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "dc-memory-escalation",
+        "name": "Memory Escalation: NORMAL+ → PRESSURE+ → THRASHING → CASCADING+ → FAILURE",
+        "metadata": {
+          "description": "5-stage memory pressure escalation culminating in cascading failure. All isInitial states implement A*A = A+ semantics.",
+          "path": "NORMAL+ → PRESSURE+ → THRASHING → CASCADING+ → FAILURE",
+          "output": "[1,0] (MEMORY ALARM)"
+        },
+        "vectors": [
+          {
+            "id": "dc-mem-esc-normal",
+            "elements": [
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.05,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "NORMAL",
+              "description": "NORMAL+ (= NORMAL*NORMAL, A*A) — one or more healthy memory readings required before PRESSURE is armed. isInitial provides the self-loop (A*); the mandatory match (A) activates PRESSURE via nextVectorIds.",
+              "role": "kleene-plus-initial",
+              "mem_usage_range": "0.15–0.55 (15%–55% memory used)",
+              "swap_usage_range": "0.00–0.10 (minimal swap usage)",
+              "kleeneOperator": "+"
+            },
+            "nextVectorIds": [
+              "dc-mem-esc-normal",
+              "dc-mem-esc-pressure"
+            ]
+          },
+          {
+            "id": "dc-mem-esc-pressure",
+            "elements": [
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.25,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "PRESSURE",
+              "description": "PRESSURE+ — elevated memory usage with swap beginning; one or more sustained readings",
+              "role": "kleene-plus",
+              "mem_usage_range": "0.53–0.77 (53%–77% memory used)",
+              "swap_usage_range": "0.10–0.40 (swap activity increasing)",
+              "kleeneOperator": "+"
+            },
+            "nextVectorIds": [
+              "dc-mem-esc-pressure",
+              "dc-mem-esc-thrashing"
+            ]
+          },
+          {
+            "id": "dc-mem-esc-thrashing",
+            "elements": [
+              {
+                "value": 0.8,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "THRASHING",
+              "description": "THRASHING — OS actively swapping; mandatory single observation before cascading",
+              "role": "required-transition",
+              "mem_usage_range": "0.72–0.88 (72%–88% memory used)",
+              "swap_usage_range": "0.43–0.67 (heavy swap usage)",
+              "semantics": "Non-initial transitional (no self-loop): exactly one THRASHING reading confirms active paging before declaring cascading failure."
+            },
+            "nextVectorIds": [
+              "dc-mem-esc-cascading"
+            ]
+          },
+          {
+            "id": "dc-mem-esc-cascading",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.8,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "CASCADING",
+              "description": "CASCADING+ — near-exhaustion of physical and swap memory; one or more cascading readings",
+              "role": "kleene-plus",
+              "mem_usage_range": "0.84–0.96 (84%–96% memory used)",
+              "swap_usage_range": "0.70–0.90 (swap nearly exhausted)",
+              "kleeneOperator": "+"
+            },
+            "nextVectorIds": [
+              "dc-mem-esc-cascading",
+              "dc-mem-esc-failure"
+            ]
+          },
+          {
+            "id": "dc-mem-esc-failure",
+            "elements": [
+              {
+                "value": 0.97,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.97,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "FAILURE",
+              "description": "FAILURE — total memory exhaustion; both physical and swap exhausted; fires alarm",
+              "role": "terminal",
+              "mem_usage_range": "0.93–1.00 (>93% memory used)",
+              "swap_usage_range": "0.93–1.00 (swap exhausted)"
+            },
+            "outputVectors": [
+              {
+                "id": "dc-mem-esc-alarm-output",
+                "vector": [
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "MEMORY FAILURE: Alarm signal [1,0] to DCMemoryAlertFF at [1367:1369]",
+                  "severity": "EMERGENCY",
+                  "action": "DCMemoryAlertFF will SET; initiate process termination, workload shedding"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dc-memory-healthy",
+        "name": "Memory Healthy Recovery: HEALTHY+ → output[0,1]",
+        "metadata": {
+          "description": "Fires reset signal [0,1] on every cycle that memory utilization is within safe parameters (A*A = A+: one or more matching cycles). Enables DCMemoryAlertFF to RESET when memory health is restored.",
+          "pattern": "HEALTHY+",
+          "output": "[0,1] (MEMORY HEALTHY)"
+        },
+        "vectors": [
+          {
+            "id": "dc-mem-healthy-event",
+            "elements": [
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.05,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "HEALTHY",
+              "description": "Memory healthy — fires [0,1] reset signal on every matching cycle (A*A = A+: at least one matching cycle required to produce output)",
+              "role": "continuous-reset-plus",
+              "mem_usage_range": "0.15–0.55 (same as NORMAL)",
+              "swap_usage_range": "0.00–0.10 (same as NORMAL)"
+            },
+            "outputVectors": [
+              {
+                "id": "dc-mem-healthy-output",
+                "vector": [
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "MEMORY HEALTHY: Reset signal [0,1] to DCMemoryAlertFF at [1367:1369]",
+                  "severity": "INFO",
+                  "action": "DCMemoryAlertFF will RESET; memory utilization normal"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Memory Exhaustion Escalation",
+        "pattern": "12-step: NORMAL→NORMAL→PRESSURE→PRESSURE→PRESSURE→THRASHING→CASCADING→CASCADING→FAILURE→FAILURE→PRESSURE→NORMAL",
+        "description": "Complete memory pressure event modeling gradual exhaustion and recovery",
+        "vectors": [
+          [
+            0.35,
+            0.5,
+            0.5,
+            0.04
+          ],
+          [
+            0.38,
+            0.5,
+            0.5,
+            0.05
+          ],
+          [
+            0.58,
+            0.5,
+            0.5,
+            0.18
+          ],
+          [
+            0.65,
+            0.5,
+            0.5,
+            0.25
+          ],
+          [
+            0.72,
+            0.5,
+            0.5,
+            0.35
+          ],
+          [
+            0.8,
+            0.5,
+            0.5,
+            0.55
+          ],
+          [
+            0.87,
+            0.5,
+            0.5,
+            0.75
+          ],
+          [
+            0.91,
+            0.5,
+            0.5,
+            0.82
+          ],
+          [
+            0.96,
+            0.5,
+            0.5,
+            0.96
+          ],
+          [
+            0.97,
+            0.5,
+            0.5,
+            0.97
+          ],
+          [
+            0.65,
+            0.5,
+            0.5,
+            0.28
+          ],
+          [
+            0.35,
+            0.5,
+            0.5,
+            0.04
+          ]
+        ],
+        "metadata": {
+          "scenario": "memory-exhaustion-recovery",
+          "stageTrace": "NORMAL,NORMAL,PRESSURE,PRESSURE,PRESSURE,THRASHING,CASCADING,CASCADING,FAILURE,FAILURE,PRESSURE,NORMAL",
+          "expectedOutputs": {
+            "steps_1_2": "HEALTHY fires [0,1]",
+            "steps_3_10": "no output (intermediate escalation stages)",
+            "steps_9_10": "FAILURE fires [1,0]",
+            "step_11": "no output (PRESSURE: memory recovering)",
+            "step_12": "HEALTHY fires [0,1] (memory restored)"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

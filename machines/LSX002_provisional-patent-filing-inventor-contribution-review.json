@@ -1,0 +1,545 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Legal Services Provisional Patent Filing Inventor Contribution Review",
+    "description": "Legal services workflow machine for inventor contribution review in the provisional patent filing workstream. It monitors map each inventor to claimed technical contribution and resolve contributor ambiguity. This is an operational workflow example for individual and corporate legal services, not legal advice.",
+    "metadata": {
+      "category": "legal-services",
+      "domain": "Legal Services - Provisional Patent Filing",
+      "author": "Reality Engine",
+      "workstream": "Provisional Patent Filing",
+      "operationalFocus": "Inventor Contribution Review",
+      "focusDescription": "map each inventor to claimed technical contribution and resolve contributor ambiguity",
+      "sourceGuidance": [
+        "USPTO provisional patent applications: complete written description, inventor naming, filing fee/cover sheet, 12-month nonprovisional benefit window",
+        "USPTO Patent Center: electronic filing and application management for patent submissions",
+        "USPTO trademark process and Trademark Center: mark/goods-services review, account identity verification, filing and docket tracking",
+        "U.S. Copyright Office eCO registration: application, fee, deposit copy/copies, work-type/form selection",
+        "U.S. Copyright Office preregistration: limited-use preregistration for eligible unpublished works likely to face prerelease infringement"
+      ],
+      "legalDisclaimer": "Workflow automation example only; attorney review is required for legal advice, filing decisions, and jurisdiction-specific analysis.",
+      "dispatchableAgent": "trademark_workflow_agent",
+      "aiTrigger": "legal-services-provisional-patent-filing-inventor-contribution-review",
+      "agentActions": [
+        "Route inventor contribution review to attorney review for deadline, ownership, or rights-risk triage.",
+        "Dispatch trademark_workflow_agent to optimize the next workstep for inventor contribution review.",
+        "Create or update docket/checklist tasks for inventor contribution review.",
+        "Mark inventor contribution review ready for the next controlled workflow step."
+      ],
+      "inputSpace": "4D binary at [2051:2055]",
+      "outputSpace": "4D binary at [2059:2063]: [1,0,0,0]=ATTORNEY_REVIEW, [0,1,0,0]=OPTIMIZE_WORKSTEP, [0,0,1,0]=DOCKET_ACTION, [0,0,0,1]=READY_FOR_NEXT_STEP",
+      "inputSemantics": [
+        "facts complete",
+        "rights/ownership clear",
+        "deadline or filing pressure",
+        "commercialization readiness"
+      ],
+      "tags": [
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-4",
+        "copyright",
+        "dispatchable-agent",
+        "input-sequences",
+        "input-sequences-5",
+        "intellectual-property",
+        "inventor-contribution-review",
+        "legal-services",
+        "legal-services-generated",
+        "legal-services-provisional-patent-filing",
+        "legal-services-provisional-patent-filing-inventor-contribution-review",
+        "lsx002",
+        "machine-interconnect",
+        "productization",
+        "provisional-patent",
+        "provisional-patent-filing",
+        "startup-loadable",
+        "trademark",
+        "trademark-workflow-agent"
+      ],
+      "sequenceCount": 4,
+      "reuseGuideline": "Map legal intake, docket, evidence, filing-portal, and AI review signals into the 4D input lane. Route outputs to attorney review, workstep optimization, docket updates, or product launch gates.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "legal-services",
+        "domainTags": [
+          "legal-services",
+          "provisional-patent-filing"
+        ],
+        "family": "legal-services-generated",
+        "machineCode": "lsx002",
+        "capabilityTags": [
+          "trademark-workflow-agent"
+        ],
+        "workflowTags": [
+          "ai-trigger",
+          "copyright",
+          "dispatchable-agent",
+          "intellectual-property",
+          "inventor-contribution-review",
+          "legal-services-generated",
+          "legal-services-provisional-patent-filing",
+          "productization",
+          "provisional-patent",
+          "trademark"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ai-trigger",
+          "ces-sequences",
+          "ces-sequences-4",
+          "copyright",
+          "dispatchable-agent",
+          "input-sequences",
+          "input-sequences-5",
+          "intellectual-property",
+          "inventor-contribution-review",
+          "legal-services",
+          "legal-services-generated",
+          "legal-services-provisional-patent-filing",
+          "legal-services-provisional-patent-filing-inventor-contribution-review",
+          "lsx002",
+          "machine-interconnect",
+          "productization",
+          "provisional-patent",
+          "provisional-patent-filing",
+          "startup-loadable",
+          "trademark",
+          "trademark-workflow-agent"
+        ]
+      },
+      "upstreamMachines": [
+        "Legal Services Provisional Patent Filing Invention Intake"
+      ],
+      "upstreamMachine": "Legal Services Provisional Patent Filing Invention Intake",
+      "downstreamMachines": [
+        "Legal Services Provisional Patent Filing Ownership And Assignment Readiness"
+      ],
+      "workflowConnectionPolicy": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "legal-services-workflow-interconnect-update",
+        "primaryConnectionMode": "perceptual-output-overlap",
+        "commonActionMode": "metadata-dispatch-route when a machine participates in more than one common workflow action",
+        "commonActions": [
+          "ai-agent-assist",
+          "attorney-review",
+          "commercialization-and-enforcement",
+          "conflict-and-engagement-control",
+          "docket-integrity",
+          "evidence-preservation",
+          "filing-portal-readiness",
+          "matter-intake",
+          "portfolio-summary-and-learning"
+        ]
+      },
+      "workflowConnections": [
+        {
+          "type": "perceptual-output-overlap",
+          "action": "primary-controlled-workflow-step",
+          "targetMachine": "Legal Services Provisional Patent Filing Ownership And Assignment Readiness",
+          "targetInputSpace": "[2059:2063]",
+          "description": "Machine output vector is written into the target machine input lane to advance the legal workflow."
+        }
+      ],
+      "perceptualInterconnect": true,
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "legal-operations",
+        "runbook": "https://runbooks.example.org/legal-services/lsx002_provisional-patent-filing-inventor-contribution-review",
+        "escalationPolicy": "pagerduty:legal-ops",
+        "contact": {
+          "primary": "legal-operations-primary@example.org",
+          "secondary": "legal-operations-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"legal-services\".  Review and tune the routing as the team owning LSX002_provisional-patent-filing-inventor-contribution-review matures."
+      },
+      "triggerConfig": {
+        "processId": "LSX002_PROVISIONAL_PATENT_FILING_INVENTOR_CONTRIBUTION_REVIEW",
+        "processName": "Legal Services Provisional Patent Filing Inventor Contribution Review",
+        "rules": [
+          {
+            "sequenceId": "lsx-002-attorney-review",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Inventor Contribution Review: INCOMPLETE_OR_RISK -> ATTORNEY_REVIEW"
+          },
+          {
+            "sequenceId": "lsx-002-optimize",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Inventor Contribution Review: OPTIMIZATION_WINDOW -> OPTIMIZE_WORKSTEP"
+          },
+          {
+            "sequenceId": "lsx-002-docket",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Inventor Contribution Review: DOCKET_PRESSURE -> DOCKET_ACTION"
+          },
+          {
+            "sequenceId": "lsx-002-ready",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Inventor Contribution Review: READY -> READY_FOR_NEXT_STEP"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 2051,
+        "length": 4
+      },
+      "output": {
+        "offset": 2059,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "lsx-002-attorney-review",
+        "name": "Inventor Contribution Review: INCOMPLETE_OR_RISK -> ATTORNEY_REVIEW",
+        "metadata": {
+          "description": "Escalates when facts, rights, or deadline pressure require attorney review.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "lsx-002-risk-watch",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "nextVectorIds": [
+              "lsx-002-review-needed"
+            ]
+          },
+          {
+            "id": "lsx-002-review-needed",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "outputVectors": [
+              {
+                "id": "lsx-002-review-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route inventor contribution review to attorney review for deadline, ownership, or rights-risk triage."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "lsx-002-optimize",
+        "name": "Inventor Contribution Review: OPTIMIZATION_WINDOW -> OPTIMIZE_WORKSTEP",
+        "metadata": {
+          "description": "Fires when the matter can proceed more efficiently through AI-assisted workflow optimization.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "lsx-002-optimization",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "lsx-002-optimize-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch trademark_workflow_agent to optimize the next workstep for inventor contribution review."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "lsx-002-docket",
+        "name": "Inventor Contribution Review: DOCKET_PRESSURE -> DOCKET_ACTION",
+        "metadata": {
+          "description": "Creates a docket update or checklist task for the next controlled step.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "lsx-002-docket-needed",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "lsx-002-docket-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Create or update docket/checklist tasks for inventor contribution review."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "lsx-002-ready",
+        "name": "Inventor Contribution Review: READY -> READY_FOR_NEXT_STEP",
+        "metadata": {
+          "description": "Signals that facts, rights posture, timing, and commercialization readiness are aligned.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "lsx-002-ready-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "lsx-002-ready-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Mark inventor contribution review ready for the next controlled workflow step."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Attorney review escalation",
+        "description": "Risk or missing rights facts require attorney review.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "attorney-review"
+        }
+      },
+      {
+        "name": "Optimize workstep",
+        "description": "Matter is suitable for AI-assisted workflow optimization.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "optimize-workstep"
+        }
+      },
+      {
+        "name": "Docket action",
+        "description": "Deadline or filing pressure requires docket/checklist action.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "docket-action"
+        }
+      },
+      {
+        "name": "Ready for next step",
+        "description": "Matter is ready to advance to the next controlled step.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "ready-for-next-step"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Initial risk-watch state arms escalation without completing the sequence.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

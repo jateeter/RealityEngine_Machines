@@ -1,0 +1,326 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Logical Infrastructure Alternating Toggle",
+    "description": "Reusable digital-logic infrastructure machine for ASIC-style connective tissue. It implements the temporal regular expression `(01)+`. Detects repeated low/high toggling. Reads a 4D control/status lane at [4011:4015] and emits a 2D match lane at [4015:4017].",
+    "metadata": {
+      "category": "digital-logic",
+      "domain": "Digital Logic - Infrastructure",
+      "author": "Reality Engine",
+      "regularExpression": "(01)+",
+      "asicPattern": "Alternating Toggle",
+      "reuseRole": "general-purpose logical connective tissue",
+      "inputSpace": "4D binary at [4011:4015]",
+      "outputSpace": "2D binary at [4015:4017]: [1,0]=MATCH, [0,1]=CLEAR_OR_AVAILABLE",
+      "inputSemantics": [
+        "primary",
+        "secondary",
+        "tertiary",
+        "qualifier"
+      ],
+      "tags": [
+        "alternating-toggle",
+        "asic-pattern",
+        "ces-sequences",
+        "ces-sequences-1",
+        "digital-logic",
+        "digital-logic-generated",
+        "digital-logic-infrastructure",
+        "dlx010",
+        "infrastructure",
+        "input-sequences",
+        "input-sequences-2",
+        "logical-infrastructure",
+        "logical-infrastructure-alternating-toggle",
+        "regular-expression",
+        "startup-loadable"
+      ],
+      "sequenceCount": 1,
+      "reuseGuideline": "Use this machine by mapping upstream source or machine output bits into its 4D input lane. Map its 2D output lane into downstream machine input when a reusable temporal guard, latch trigger, handshake detector, CDC detector, bus phase detector, or safety qualifier is needed.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "digital-logic",
+        "domainTags": [
+          "digital-logic",
+          "infrastructure"
+        ],
+        "family": "digital-logic-generated",
+        "machineCode": "dlx010",
+        "capabilityTags": [],
+        "workflowTags": [
+          "alternating-toggle",
+          "asic-pattern",
+          "digital-logic-generated",
+          "digital-logic-infrastructure",
+          "logical-infrastructure",
+          "regular-expression"
+        ],
+        "integrationTags": [
+          "digital-logic"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-1",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "alternating-toggle",
+          "asic-pattern",
+          "ces-sequences",
+          "ces-sequences-1",
+          "digital-logic",
+          "digital-logic-generated",
+          "digital-logic-infrastructure",
+          "dlx010",
+          "infrastructure",
+          "input-sequences",
+          "input-sequences-2",
+          "logical-infrastructure",
+          "logical-infrastructure-alternating-toggle",
+          "regular-expression",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "reliability-engineering",
+        "runbook": "https://runbooks.example.org/digital-logic/dlx010_alternating-toggle",
+        "escalationPolicy": "slack:#reliability-test",
+        "contact": {
+          "primary": "reliability-engineering-primary@example.org",
+          "secondary": "reliability-engineering-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"digital-logic\".  Review and tune the routing as the team owning DLX010_alternating-toggle matures."
+      },
+      "triggerConfig": {
+        "processId": "DLX010_ALTERNATING_TOGGLE",
+        "processName": "Logical Infrastructure Alternating Toggle",
+        "rules": [
+          {
+            "sequenceId": "dlx-010-match",
+            "outputMatches": [
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Alternating Toggle matched regular expression (01)+."
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4011,
+        "length": 4
+      },
+      "output": {
+        "offset": 4015,
+        "length": 2
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "dlx-010-match",
+        "name": "Alternating Toggle: (01)+ -> MATCH",
+        "metadata": {
+          "description": "Detects repeated low/high toggling.",
+          "regularExpression": "(01)+",
+          "output": "[1,0]"
+        },
+        "vectors": [
+          {
+            "id": "dlx-010-step-1",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "STEP_1",
+              "description": "Alternating Toggle regex step 1: [0, 0, 0, 0]"
+            },
+            "nextVectorIds": [
+              "dlx-010-step-2"
+            ]
+          },
+          {
+            "id": "dlx-010-step-2",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "STEP_2",
+              "description": "Alternating Toggle regex step 2: [1, 0, 0, 0]"
+            },
+            "nextVectorIds": [
+              "dlx-010-step-3"
+            ]
+          },
+          {
+            "id": "dlx-010-step-3",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "STEP_3",
+              "description": "Alternating Toggle regex step 3: [0, 0, 0, 0]"
+            },
+            "nextVectorIds": [
+              "dlx-010-step-4"
+            ]
+          },
+          {
+            "id": "dlx-010-step-4",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "STEP_4",
+              "description": "Alternating Toggle regex step 4: [1, 0, 0, 0]"
+            },
+            "outputVectors": [
+              {
+                "id": "dlx-010-match-output",
+                "vector": [
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Alternating Toggle matched regular expression (01)+.",
+                  "state": "MATCH"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Alternating Toggle match path",
+        "description": "Validates regular expression (01)+.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0]",
+          "scenario": "alternating-toggle"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Single baseline sample does not complete the expression.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

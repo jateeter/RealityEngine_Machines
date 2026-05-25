@@ -1,0 +1,641 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Transportation Fleet Cleaning And Sanitation Exterior Wash Scheduling",
+    "description": "Public transportation fleet machine for exterior wash scheduling in the cleaning and sanitation workstream. It monitors weather, road grime, visibility, camera obstruction, and wash-bay availability for a 100-bus 24/7 operation and emits AI-triggered outputs for rider experience, operations, maintenance, cleaning, security, and predictive fleet-flow management.",
+    "metadata": {
+      "category": "transportation",
+      "domain": "Transportation Fleet - Cleaning And Sanitation",
+      "author": "Reality Engine",
+      "fleetSize": 100,
+      "operationalFocus": "Exterior Wash Scheduling",
+      "workstream": "Cleaning And Sanitation",
+      "focusDescription": "weather, road grime, visibility, camera obstruction, and wash-bay availability",
+      "upstreamMachine": "Transportation Fleet Cleaning And Sanitation High Touch Surface Sanitation",
+      "upstreamOutputRegion": "[3387:3391]",
+      "downstreamMachines": [
+        "Transportation Fleet Cleaning And Sanitation Lost Item Handling"
+      ],
+      "dispatchableAgent": "transit_security_agent",
+      "aiTrigger": "transportation-fleet-cleaning-and-sanitation-exterior-wash-scheduling",
+      "predictiveFlowTrigger": "predictive-flow-cleaning-and-sanitation-exterior-wash-scheduling",
+      "agentActions": [
+        "Dispatch transit_security_agent for critical 100-bus fleet intervention on exterior wash scheduling.",
+        "Trigger predictive flow management for exterior wash scheduling using rider, vehicle, and route context.",
+        "Create maintenance, cleaning, security, or service task for exterior wash scheduling.",
+        "Keep 24/7 monitoring active for exterior wash scheduling."
+      ],
+      "criticalEventSequenceLength": 5,
+      "criticalEventSequenceLengthBasis": "Every TFX machine has one critical inputSequence containing exactly 5 vectors; the generated family average is 5.0.",
+      "inputSpace": "4D binary at [3387:3391]",
+      "outputSpace": "4D binary at [3391:3395]: [1,0,0,0]=CRITICAL_EVENT, [0,1,0,0]=PREDICTIVE_FLOW_ADJUST, [0,0,1,0]=OPS_TASK, [0,0,0,1]=SERVICE_NOMINAL",
+      "inputSemantics": [
+        "service reliability",
+        "rider impact",
+        "asset readiness",
+        "safety/security risk"
+      ],
+      "tags": [
+        "100-bus-fleet",
+        "24x7-operations",
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-4",
+        "cleaning",
+        "cleaning-and-sanitation",
+        "dispatchable-agent",
+        "exterior-wash-scheduling",
+        "input-sequences",
+        "input-sequences-5",
+        "machine-interconnect",
+        "maintenance",
+        "predictive-flow",
+        "predictive-flow-cleaning-and-sanitation-exterior-wash-scheduling",
+        "public-transit",
+        "rider-experience",
+        "security",
+        "startup-loadable",
+        "tfx036",
+        "transit-security-agent",
+        "transportation",
+        "transportation-fleet",
+        "transportation-fleet-cleaning-and-sanitation",
+        "transportation-fleet-cleaning-and-sanitation-exterior-wash-scheduling",
+        "transportation-generated",
+        "vehicle-monitoring"
+      ],
+      "sequenceCount": 4,
+      "reuseGuideline": "Map AVL, APC, CAD/AVL, fare, work-order, cleaning, security, rider feedback, and depot signals into the 4D input lane. Route outputs to dispatch, service control, maintenance, cleaning, security, customer communications, or executive fleet optimization agents.",
+      "downstreamPattern": "Output region [3391:3395] feeds Transportation Fleet Cleaning And Sanitation Lost Item Handling for predictive fleet-flow management.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "transportation",
+        "domainTags": [
+          "cleaning-and-sanitation",
+          "transportation",
+          "transportation-fleet"
+        ],
+        "family": "transportation-generated",
+        "machineCode": "tfx036",
+        "capabilityTags": [
+          "maintenance",
+          "predictive-flow",
+          "predictive-flow-cleaning-and-sanitation-exterior-wash-scheduling",
+          "vehicle-monitoring"
+        ],
+        "workflowTags": [
+          "100-bus-fleet",
+          "24x7-operations",
+          "ai-trigger",
+          "cleaning",
+          "dispatchable-agent",
+          "exterior-wash-scheduling",
+          "public-transit",
+          "rider-experience",
+          "security",
+          "transit-security-agent",
+          "transportation-fleet-cleaning-and-sanitation",
+          "transportation-generated"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "100-bus-fleet",
+          "24x7-operations",
+          "ai-trigger",
+          "ces-sequences",
+          "ces-sequences-4",
+          "cleaning",
+          "cleaning-and-sanitation",
+          "dispatchable-agent",
+          "exterior-wash-scheduling",
+          "input-sequences",
+          "input-sequences-5",
+          "machine-interconnect",
+          "maintenance",
+          "predictive-flow",
+          "predictive-flow-cleaning-and-sanitation-exterior-wash-scheduling",
+          "public-transit",
+          "rider-experience",
+          "security",
+          "startup-loadable",
+          "tfx036",
+          "transit-security-agent",
+          "transportation",
+          "transportation-fleet",
+          "transportation-fleet-cleaning-and-sanitation",
+          "transportation-fleet-cleaning-and-sanitation-exterior-wash-scheduling",
+          "transportation-generated",
+          "vehicle-monitoring"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "transit-operations",
+        "runbook": "https://runbooks.example.org/transportation/tfx036_cleaning-and-sanitation-exterior-wash-scheduling",
+        "escalationPolicy": "pagerduty:transit-ops",
+        "contact": {
+          "primary": "transit-operations-primary@example.org",
+          "secondary": "transit-operations-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 300,
+          "error": 120
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"transportation\".  Review and tune the routing as the team owning TFX036_cleaning-and-sanitation-exterior-wash-scheduling matures."
+      },
+      "triggerConfig": {
+        "processId": "TFX036_CLEANING_AND_SANITATION_EXTERIOR_WASH_SCHEDULING",
+        "processName": "Transportation Fleet Cleaning And Sanitation Exterior Wash Scheduling",
+        "rules": [
+          {
+            "sequenceId": "tfx-036-critical-event",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Exterior Wash Scheduling: OBSERVE -> WATCH -> DEGRADED -> ESCALATING -> CRITICAL_EVENT"
+          },
+          {
+            "sequenceId": "tfx-036-predictive-flow",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Exterior Wash Scheduling: FLOW_RISK -> PREDICTIVE_FLOW_ADJUST"
+          },
+          {
+            "sequenceId": "tfx-036-ops-task",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Exterior Wash Scheduling: TASK_NEEDED -> OPS_TASK"
+          },
+          {
+            "sequenceId": "tfx-036-nominal",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Exterior Wash Scheduling: NOMINAL -> SERVICE_NOMINAL"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 3387,
+        "length": 4
+      },
+      "output": {
+        "offset": 3391,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "tfx-036-critical-event",
+        "name": "Exterior Wash Scheduling: OBSERVE -> WATCH -> DEGRADED -> ESCALATING -> CRITICAL_EVENT",
+        "metadata": {
+          "description": "Five-step critical event sequence for 24/7 transportation operations.",
+          "sequenceLength": 5,
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "tfx-036-observe",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "stage": "observe"
+            },
+            "nextVectorIds": [
+              "tfx-036-watch"
+            ]
+          },
+          {
+            "id": "tfx-036-watch",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "stage": "watch"
+            },
+            "nextVectorIds": [
+              "tfx-036-degraded"
+            ]
+          },
+          {
+            "id": "tfx-036-degraded",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "stage": "degraded"
+            },
+            "nextVectorIds": [
+              "tfx-036-escalating"
+            ]
+          },
+          {
+            "id": "tfx-036-escalating",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "stage": "escalating"
+            },
+            "nextVectorIds": [
+              "tfx-036-critical"
+            ]
+          },
+          {
+            "id": "tfx-036-critical",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "stage": "critical"
+            },
+            "outputVectors": [
+              {
+                "id": "tfx-036-critical-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch transit_security_agent for critical 100-bus fleet intervention on exterior wash scheduling."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tfx-036-predictive-flow",
+        "name": "Exterior Wash Scheduling: FLOW_RISK -> PREDICTIVE_FLOW_ADJUST",
+        "metadata": {
+          "description": "Triggers predictive flow management before rider impact becomes critical.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "tfx-036-flow-risk",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "tfx-036-flow-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Trigger predictive flow management for exterior wash scheduling using rider, vehicle, and route context."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tfx-036-ops-task",
+        "name": "Exterior Wash Scheduling: TASK_NEEDED -> OPS_TASK",
+        "metadata": {
+          "description": "Creates maintenance, cleaning, security, or operations tasking.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "tfx-036-task-needed",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "tfx-036-task-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Create maintenance, cleaning, security, or service task for exterior wash scheduling."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tfx-036-nominal",
+        "name": "Exterior Wash Scheduling: NOMINAL -> SERVICE_NOMINAL",
+        "metadata": {
+          "description": "Confirms service is in an acceptable 24/7 operating band.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "tfx-036-nominal-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "tfx-036-nominal-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Keep 24/7 monitoring active for exterior wash scheduling."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Critical event sequence",
+        "description": "Five-step degradation path ending in a critical event output.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0
+          ],
+          [
+            1,
+            1,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "critical-event",
+          "sequenceLength": 5
+        }
+      },
+      {
+        "name": "Predictive flow adjustment",
+        "description": "Predicts service-flow pressure before a critical event.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "predictive-flow-adjust"
+        }
+      },
+      {
+        "name": "Operations task",
+        "description": "Creates maintenance, cleaning, security, or operational tasking.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "ops-task"
+        }
+      },
+      {
+        "name": "Nominal service",
+        "description": "Confirms stable transportation service.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "service-nominal"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Initial critical-event observation arms the sequence without firing.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

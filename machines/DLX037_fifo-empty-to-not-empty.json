@@ -1,0 +1,256 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Logical Infrastructure Fifo Empty To Not Empty",
+    "description": "Reusable digital-logic infrastructure machine for ASIC-style connective tissue. It implements the temporal regular expression `EMPTY WRITE`. Detects FIFO leaving empty state. Reads a 4D control/status lane at [1699:1703] and emits a 2D match lane at [1703:1705].",
+    "metadata": {
+      "category": "digital-logic",
+      "domain": "Digital Logic - Infrastructure",
+      "author": "Reality Engine",
+      "regularExpression": "EMPTY WRITE",
+      "asicPattern": "Fifo Empty To Not Empty",
+      "reuseRole": "general-purpose logical connective tissue",
+      "inputSpace": "4D binary at [1699:1703]",
+      "outputSpace": "2D binary at [1703:1705]: [1,0]=MATCH, [0,1]=CLEAR_OR_AVAILABLE",
+      "inputSemantics": [
+        "primary",
+        "secondary",
+        "tertiary",
+        "qualifier"
+      ],
+      "tags": [
+        "asic-pattern",
+        "ces-sequences",
+        "ces-sequences-1",
+        "digital-logic",
+        "digital-logic-generated",
+        "digital-logic-infrastructure",
+        "dlx037",
+        "fifo-empty-to-not-empty",
+        "infrastructure",
+        "input-sequences",
+        "input-sequences-2",
+        "logical-infrastructure",
+        "logical-infrastructure-fifo-empty-to-not-empty",
+        "regular-expression",
+        "startup-loadable"
+      ],
+      "sequenceCount": 1,
+      "reuseGuideline": "Use this machine by mapping upstream source or machine output bits into its 4D input lane. Map its 2D output lane into downstream machine input when a reusable temporal guard, latch trigger, handshake detector, CDC detector, bus phase detector, or safety qualifier is needed.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "digital-logic",
+        "domainTags": [
+          "digital-logic",
+          "infrastructure"
+        ],
+        "family": "digital-logic-generated",
+        "machineCode": "dlx037",
+        "capabilityTags": [],
+        "workflowTags": [
+          "asic-pattern",
+          "digital-logic-generated",
+          "digital-logic-infrastructure",
+          "fifo-empty-to-not-empty",
+          "logical-infrastructure",
+          "regular-expression"
+        ],
+        "integrationTags": [
+          "digital-logic"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-1",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "asic-pattern",
+          "ces-sequences",
+          "ces-sequences-1",
+          "digital-logic",
+          "digital-logic-generated",
+          "digital-logic-infrastructure",
+          "dlx037",
+          "fifo-empty-to-not-empty",
+          "infrastructure",
+          "input-sequences",
+          "input-sequences-2",
+          "logical-infrastructure",
+          "logical-infrastructure-fifo-empty-to-not-empty",
+          "regular-expression",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "reliability-engineering",
+        "runbook": "https://runbooks.example.org/digital-logic/dlx037_fifo-empty-to-not-empty",
+        "escalationPolicy": "slack:#reliability-test",
+        "contact": {
+          "primary": "reliability-engineering-primary@example.org",
+          "secondary": "reliability-engineering-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"digital-logic\".  Review and tune the routing as the team owning DLX037_fifo-empty-to-not-empty matures."
+      },
+      "triggerConfig": {
+        "processId": "DLX037_FIFO_EMPTY_TO_NOT_EMPTY",
+        "processName": "Logical Infrastructure Fifo Empty To Not Empty",
+        "rules": [
+          {
+            "sequenceId": "dlx-037-match",
+            "outputMatches": [
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Fifo Empty To Not Empty matched regular expression EMPTY WRITE."
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1699,
+        "length": 4
+      },
+      "output": {
+        "offset": 1703,
+        "length": 2
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "dlx-037-match",
+        "name": "Fifo Empty To Not Empty: EMPTY WRITE -> MATCH",
+        "metadata": {
+          "description": "Detects FIFO leaving empty state.",
+          "regularExpression": "EMPTY WRITE",
+          "output": "[1,0]"
+        },
+        "vectors": [
+          {
+            "id": "dlx-037-step-1",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "STEP_1",
+              "description": "Fifo Empty To Not Empty regex step 1: [1, 0, 0, 0]"
+            },
+            "nextVectorIds": [
+              "dlx-037-step-2"
+            ]
+          },
+          {
+            "id": "dlx-037-step-2",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "STEP_2",
+              "description": "Fifo Empty To Not Empty regex step 2: [0, 1, 0, 0]"
+            },
+            "outputVectors": [
+              {
+                "id": "dlx-037-match-output",
+                "vector": [
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Fifo Empty To Not Empty matched regular expression EMPTY WRITE.",
+                  "state": "MATCH"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Fifo Empty To Not Empty match path",
+        "description": "Validates regular expression EMPTY WRITE.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0]",
+          "scenario": "fifo-empty-to-not-empty"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Single baseline sample does not complete the expression.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

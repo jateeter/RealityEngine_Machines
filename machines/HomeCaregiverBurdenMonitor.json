@@ -1,0 +1,548 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Home Caregiver Burden Monitor",
+    "description": "Integration machine that reads combined output signals from the Pediatric Nutrition Monitor [2003:2007] and the Child Development Monitor [2007:2011] to assess caregiver burden driven by child health challenges. Child nutritional problems and developmental delays are the primary pediatric-driven stressors for at-home caregivers in low-income settings. Caregiver burnout reduces care quality across all household members and is a leading predictor of preventable pediatric ED visits. Output at [2031:2035] is available to downstream care coordination systems.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Home Health — Caregiver Support / Burden Assessment",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [2031:2035]: [1,0,0,0]=CAREGIVER_BURNOUT, [0,1,0,0]=HIGH_BURDEN, [0,0,1,0]=MODERATE_BURDEN, [0,0,0,1]=CAREGIVER_COPING",
+      "tags": [
+        "burden-assessment",
+        "caregiver-burden",
+        "caregiver-burnout",
+        "caregiver-support",
+        "ces-sequences",
+        "ces-sequences-3",
+        "child-health",
+        "health-personal",
+        "home-caregiver-burden-monitor",
+        "home-health",
+        "home-health-caregiver-support-burden-assessment",
+        "input-sequences",
+        "input-sequences-1",
+        "kleene-plus",
+        "low-income",
+        "pediatric",
+        "startup-loadable"
+      ],
+      "sequenceCount": 3,
+      "populationFocus": "Primary caregivers of children with health or developmental challenges; single parents; low-income households with limited respite support",
+      "sensorNormalization": {
+        "nutrition_alert_signal_norm": "0.0=[1,0,0,0] GROWTH_ALERT from PedNutrition (bit 350), 0.5=[0,0,1,0] MICRONUTRIENT_CONCERN (bit 352), 1.0=[0,0,0,1] NUTRITION_OK (bit 353)",
+        "development_alert_signal_norm": "0.0=[1,0,0,0] REFERRAL_NEEDED from ChildDev (bit 354), 0.5=[0,1,0,0] SOCIAL_DEVELOPMENTAL_CONCERN (bit 355), 1.0=[0,0,0,1] DEVELOPMENT_OK (bit 357)",
+        "caregiver_stress_norm": "0.0=caregiver expressing burnout, inability to cope; household management failing, 0.5=managing under stress; help sought but not adequate, 1.0=caregiver managing adequately with support",
+        "respite_access_norm": "0.0=zero respite support (no family, no programs, no childcare), 0.5=limited respite (one source available but insufficient), 1.0=adequate respite network; regular relief available"
+      },
+      "upstreamMachines": [
+        "PediatricNutritionMonitor (output [2003:2007])",
+        "ChildDevelopmentMonitor (output [2007:2011])"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "burden-assessment",
+          "caregiver-support",
+          "health-personal",
+          "home-health"
+        ],
+        "family": "home-caregiver-burden-monitor",
+        "machineCode": "home-caregiver-burden-monitor",
+        "capabilityTags": [],
+        "workflowTags": [
+          "caregiver-burden",
+          "caregiver-burnout",
+          "child-health",
+          "home-caregiver-burden-monitor",
+          "home-health-caregiver-support-burden-assessment",
+          "kleene-plus",
+          "low-income",
+          "pediatric"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "burden-assessment",
+          "caregiver-burden",
+          "caregiver-burnout",
+          "caregiver-support",
+          "ces-sequences",
+          "ces-sequences-3",
+          "child-health",
+          "health-personal",
+          "home-caregiver-burden-monitor",
+          "home-health",
+          "home-health-caregiver-support-burden-assessment",
+          "input-sequences",
+          "input-sequences-1",
+          "kleene-plus",
+          "low-income",
+          "pediatric",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/homecaregiverburdenmonitor",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "patient-safety-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"health-personal\".  Review and tune the routing as the team owning HomeCaregiverBurdenMonitor matures."
+      },
+      "triggerConfig": {
+        "processId": "HOMECAREGIVERBURDENMONITOR",
+        "processName": "Home Caregiver Burden Monitor",
+        "rules": [
+          {
+            "sequenceId": "caregiver-burnout-escalation",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "CAREGIVER_BURNOUT: dual child health crises causing caregiver decompensation at [2031:2035]"
+          },
+          {
+            "sequenceId": "caregiver-high-burden",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "HIGH_BURDEN: significant caregiver stress from multiple active child health concerns at [2031:2035]"
+          },
+          {
+            "sequenceId": "caregiver-coping-ok",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "CAREGIVER_COPING: child health and development supported; caregiver managing adequately at [2031:2035]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 2003,
+        "length": 8
+      },
+      "output": {
+        "offset": 2031,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "caregiver-burnout-escalation",
+        "name": "Burnout Cascade: COPING+ → STRAINED → HIGH_BURDEN_STATE → CAREGIVER_BURNOUT",
+        "metadata": {
+          "description": "Tracks caregiver burden escalation driven by simultaneous pediatric health and developmental challenges. When both upstream machines signal concern simultaneously, caregiver coping is overwhelmed — especially in single-parent, low-income households with no respite network. The COPING+ baseline requires at least one confirmed adequate period before burnout escalation can arm.",
+          "path": "COPING+ → STRAINED → HIGH_BURDEN_STATE → output[1,0,0,0]",
+          "output": "[1,0,0,0] (CAREGIVER_BURNOUT)"
+        },
+        "vectors": [
+          {
+            "id": "cb-coping",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "COPING",
+              "description": "COPING+ — NUTRITION_OK bit high (353) and DEVELOPMENT_OK bit high (357) from upstream. Child health and development adequate; caregiver managing. isInitial A*A = A+.",
+              "upstream_state": "PediatricNutrition=NUTRITION_OK, ChildDevelopment=DEVELOPMENT_OK"
+            },
+            "nextVectorIds": [
+              "cb-coping",
+              "cb-strained"
+            ]
+          },
+          {
+            "id": "cb-strained",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "STRAINED",
+              "description": "STRAINED — one child health concern active: MICRONUTRIENT_CONCERN (bit 352) OR SOCIAL_DEVELOPMENTAL_CONCERN (bit 355). Caregiver stress elevated; help-seeking beginning.",
+              "upstream_state": "One concern signal from either upstream machine; caregiver reporting fatigue"
+            },
+            "nextVectorIds": [
+              "cb-high-burden"
+            ]
+          },
+          {
+            "id": "cb-high-burden",
+            "elements": [
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "HIGH_BURDEN_STATE",
+              "description": "HIGH_BURDEN_STATE — dual crisis: GROWTH_ALERT (bit 350) AND REFERRAL_NEEDED (bit 354). Both pediatric domains in alert state. Caregiver overwhelmed. Fires CAREGIVER_BURNOUT.",
+              "upstream_state": "PediatricNutrition=GROWTH_ALERT, ChildDevelopment=REFERRAL_NEEDED"
+            },
+            "outputVectors": [
+              {
+                "id": "cb-burnout-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "CAREGIVER_BURNOUT: dual child health crises causing caregiver decompensation at [2031:2035]",
+                  "action": "Caregiver respite referral; home visitor crisis support; behavioral health intake for caregiver; family services engagement"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "caregiver-high-burden",
+        "name": "High Burden: BURDEN+ → HIGH_BURDEN signal",
+        "metadata": {
+          "description": "Fires HIGH_BURDEN when one upstream machine is in an alert state and the other is in concern state — the most common high-stress caregiver presentation, where one major child health issue compounds a second moderate concern. Common in WIC-enrolled families with a child in early intervention.",
+          "pattern": "BURDEN+",
+          "output": "[0,1,0,0] (HIGH_BURDEN)"
+        },
+        "vectors": [
+          {
+            "id": "cb-burden",
+            "elements": [
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "BURDEN",
+              "description": "BURDEN+ — GROWTH_ALERT (bit 350) AND SOCIAL_DEVELOPMENTAL_CONCERN (bit 355): one alert + one concern from different machines. isInitial A*A = A+: fires HIGH_BURDEN each cycle.",
+              "scenario": "Child with failure-to-thrive AND social withdrawal; caregiver managing dual referral systems without support"
+            },
+            "outputVectors": [
+              {
+                "id": "cb-high-burden-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "HIGH_BURDEN: significant caregiver stress from multiple active child health concerns at [2031:2035]",
+                  "action": "Care coordinator contact; respite options screening; caregiver coping assessment; CHW home visit"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "caregiver-coping-ok",
+        "name": "Caregiver Coping: MANAGING+ → CAREGIVER_COPING signal",
+        "metadata": {
+          "description": "Fires CAREGIVER_COPING when both upstream child health machines report adequate states. Confirms that caregiver support systems and child health status are balanced — often reflecting successful WIC, Head Start, and home visiting program engagement.",
+          "pattern": "MANAGING+",
+          "output": "[0,0,0,1] (CAREGIVER_COPING)"
+        },
+        "vectors": [
+          {
+            "id": "cb-managing",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "MANAGING",
+              "description": "MANAGING+ — NUTRITION_OK (bit 353) and DEVELOPMENT_OK (bit 357) both high. Child thriving on all monitored dimensions; caregiver burden within normal range. Fires CAREGIVER_COPING each cycle.",
+              "scenario": "Child enrolled in WIC and Head Start; caregiver receiving home visiting support; family stable"
+            },
+            "outputVectors": [
+              {
+                "id": "cb-coping-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "CAREGIVER_COPING: child health and development supported; caregiver managing adequately at [2031:2035]",
+                  "action": "No additional intervention needed; continue monitoring schedule"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "WIC Lapse and Developmental Regression",
+        "pattern": "6-step: COPING→COPING→STRAINED (one concern)→HIGH_BURDEN (one alert)→BURNOUT (dual crisis)→COPING (after stabilization)",
+        "description": "WIC benefits lapse causes growth alert; simultaneous housing move triggers developmental regression and social withdrawal referral; caregiver decompensates; coordinated intervention resolves both.",
+        "vectors": [
+          [
+            0.08,
+            0.09,
+            0.09,
+            0.63,
+            0.09,
+            0.09,
+            0.08,
+            0.63
+          ],
+          [
+            0.09,
+            0.09,
+            0.08,
+            0.62,
+            0.08,
+            0.09,
+            0.09,
+            0.62
+          ],
+          [
+            0.09,
+            0.09,
+            0.63,
+            0.09,
+            0.09,
+            0.63,
+            0.09,
+            0.09
+          ],
+          [
+            0.63,
+            0.09,
+            0.09,
+            0.09,
+            0.09,
+            0.63,
+            0.09,
+            0.09
+          ],
+          [
+            0.63,
+            0.09,
+            0.09,
+            0.09,
+            0.63,
+            0.09,
+            0.09,
+            0.09
+          ],
+          [
+            0.09,
+            0.09,
+            0.09,
+            0.64,
+            0.09,
+            0.09,
+            0.09,
+            0.64
+          ]
+        ],
+        "metadata": {
+          "scenario": "wic-lapse-developmental-regression-burnout",
+          "expectedOutputs": {
+            "steps_1_2": "CAREGIVER_COPING fires [0,0,0,1]",
+            "step_3": "no output (STRAINED intermediate)",
+            "step_4": "HIGH_BURDEN fires [0,1,0,0]",
+            "step_5": "CAREGIVER_BURNOUT fires [1,0,0,0]",
+            "step_6": "CAREGIVER_COPING fires [0,0,0,1] (after coordinated intervention)"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

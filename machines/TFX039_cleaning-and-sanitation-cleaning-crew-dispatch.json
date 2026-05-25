@@ -1,0 +1,640 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Transportation Fleet Cleaning And Sanitation Cleaning Crew Dispatch",
+    "description": "Public transportation fleet machine for cleaning crew dispatch in the cleaning and sanitation workstream. It monitors crew availability, depot queue, vehicle priority, and turnaround time for a 100-bus 24/7 operation and emits AI-triggered outputs for rider experience, operations, maintenance, cleaning, security, and predictive fleet-flow management.",
+    "metadata": {
+      "category": "transportation",
+      "domain": "Transportation Fleet - Cleaning And Sanitation",
+      "author": "Reality Engine",
+      "fleetSize": 100,
+      "operationalFocus": "Cleaning Crew Dispatch",
+      "workstream": "Cleaning And Sanitation",
+      "focusDescription": "crew availability, depot queue, vehicle priority, and turnaround time",
+      "upstreamMachine": "Transportation Fleet Cleaning And Sanitation Depot Waste Removal",
+      "upstreamOutputRegion": "[3399:3403]",
+      "downstreamMachines": [
+        "Transportation Fleet Cleaning And Sanitation Clean Bus Release Gate"
+      ],
+      "dispatchableAgent": "transit_workforce_agent",
+      "aiTrigger": "transportation-fleet-cleaning-and-sanitation-cleaning-crew-dispatch",
+      "predictiveFlowTrigger": "predictive-flow-cleaning-and-sanitation-cleaning-crew-dispatch",
+      "agentActions": [
+        "Dispatch transit_workforce_agent for critical 100-bus fleet intervention on cleaning crew dispatch.",
+        "Trigger predictive flow management for cleaning crew dispatch using rider, vehicle, and route context.",
+        "Create maintenance, cleaning, security, or service task for cleaning crew dispatch.",
+        "Keep 24/7 monitoring active for cleaning crew dispatch."
+      ],
+      "criticalEventSequenceLength": 5,
+      "criticalEventSequenceLengthBasis": "Every TFX machine has one critical inputSequence containing exactly 5 vectors; the generated family average is 5.0.",
+      "inputSpace": "4D binary at [3399:3403]",
+      "outputSpace": "4D binary at [3403:3407]: [1,0,0,0]=CRITICAL_EVENT, [0,1,0,0]=PREDICTIVE_FLOW_ADJUST, [0,0,1,0]=OPS_TASK, [0,0,0,1]=SERVICE_NOMINAL",
+      "inputSemantics": [
+        "service reliability",
+        "rider impact",
+        "asset readiness",
+        "safety/security risk"
+      ],
+      "tags": [
+        "100-bus-fleet",
+        "24x7-operations",
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-4",
+        "cleaning",
+        "cleaning-and-sanitation",
+        "cleaning-crew-dispatch",
+        "dispatchable-agent",
+        "input-sequences",
+        "input-sequences-5",
+        "machine-interconnect",
+        "maintenance",
+        "predictive-flow",
+        "predictive-flow-cleaning-and-sanitation-cleaning-crew-dispatch",
+        "public-transit",
+        "rider-experience",
+        "security",
+        "startup-loadable",
+        "tfx039",
+        "transit-workforce-agent",
+        "transportation",
+        "transportation-fleet",
+        "transportation-fleet-cleaning-and-sanitation",
+        "transportation-fleet-cleaning-and-sanitation-cleaning-crew-dispatch",
+        "transportation-generated",
+        "vehicle-monitoring"
+      ],
+      "sequenceCount": 4,
+      "reuseGuideline": "Map AVL, APC, CAD/AVL, fare, work-order, cleaning, security, rider feedback, and depot signals into the 4D input lane. Route outputs to dispatch, service control, maintenance, cleaning, security, customer communications, or executive fleet optimization agents.",
+      "downstreamPattern": "Output region [3403:3407] feeds Transportation Fleet Cleaning And Sanitation Clean Bus Release Gate for predictive fleet-flow management.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "transportation",
+        "domainTags": [
+          "cleaning-and-sanitation",
+          "transportation",
+          "transportation-fleet"
+        ],
+        "family": "transportation-generated",
+        "machineCode": "tfx039",
+        "capabilityTags": [
+          "maintenance",
+          "predictive-flow",
+          "predictive-flow-cleaning-and-sanitation-cleaning-crew-dispatch",
+          "vehicle-monitoring"
+        ],
+        "workflowTags": [
+          "100-bus-fleet",
+          "24x7-operations",
+          "ai-trigger",
+          "cleaning",
+          "dispatchable-agent",
+          "public-transit",
+          "rider-experience",
+          "security",
+          "transit-workforce-agent",
+          "transportation-fleet-cleaning-and-sanitation",
+          "transportation-generated"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "100-bus-fleet",
+          "24x7-operations",
+          "ai-trigger",
+          "ces-sequences",
+          "ces-sequences-4",
+          "cleaning",
+          "cleaning-and-sanitation",
+          "cleaning-crew-dispatch",
+          "dispatchable-agent",
+          "input-sequences",
+          "input-sequences-5",
+          "machine-interconnect",
+          "maintenance",
+          "predictive-flow",
+          "predictive-flow-cleaning-and-sanitation-cleaning-crew-dispatch",
+          "public-transit",
+          "rider-experience",
+          "security",
+          "startup-loadable",
+          "tfx039",
+          "transit-workforce-agent",
+          "transportation",
+          "transportation-fleet",
+          "transportation-fleet-cleaning-and-sanitation",
+          "transportation-fleet-cleaning-and-sanitation-cleaning-crew-dispatch",
+          "transportation-generated",
+          "vehicle-monitoring"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "transit-operations",
+        "runbook": "https://runbooks.example.org/transportation/tfx039_cleaning-and-sanitation-cleaning-crew-dispatch",
+        "escalationPolicy": "pagerduty:transit-ops",
+        "contact": {
+          "primary": "transit-operations-primary@example.org",
+          "secondary": "transit-operations-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 300,
+          "error": 120
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"transportation\".  Review and tune the routing as the team owning TFX039_cleaning-and-sanitation-cleaning-crew-dispatch matures."
+      },
+      "triggerConfig": {
+        "processId": "TFX039_CLEANING_AND_SANITATION_CLEANING_CREW_DISPATCH",
+        "processName": "Transportation Fleet Cleaning And Sanitation Cleaning Crew Dispatch",
+        "rules": [
+          {
+            "sequenceId": "tfx-039-critical-event",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Cleaning Crew Dispatch: OBSERVE -> WATCH -> DEGRADED -> ESCALATING -> CRITICAL_EVENT"
+          },
+          {
+            "sequenceId": "tfx-039-predictive-flow",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Cleaning Crew Dispatch: FLOW_RISK -> PREDICTIVE_FLOW_ADJUST"
+          },
+          {
+            "sequenceId": "tfx-039-ops-task",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Cleaning Crew Dispatch: TASK_NEEDED -> OPS_TASK"
+          },
+          {
+            "sequenceId": "tfx-039-nominal",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Cleaning Crew Dispatch: NOMINAL -> SERVICE_NOMINAL"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 3399,
+        "length": 4
+      },
+      "output": {
+        "offset": 3403,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "tfx-039-critical-event",
+        "name": "Cleaning Crew Dispatch: OBSERVE -> WATCH -> DEGRADED -> ESCALATING -> CRITICAL_EVENT",
+        "metadata": {
+          "description": "Five-step critical event sequence for 24/7 transportation operations.",
+          "sequenceLength": 5,
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "tfx-039-observe",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "stage": "observe"
+            },
+            "nextVectorIds": [
+              "tfx-039-watch"
+            ]
+          },
+          {
+            "id": "tfx-039-watch",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "stage": "watch"
+            },
+            "nextVectorIds": [
+              "tfx-039-degraded"
+            ]
+          },
+          {
+            "id": "tfx-039-degraded",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "stage": "degraded"
+            },
+            "nextVectorIds": [
+              "tfx-039-escalating"
+            ]
+          },
+          {
+            "id": "tfx-039-escalating",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "stage": "escalating"
+            },
+            "nextVectorIds": [
+              "tfx-039-critical"
+            ]
+          },
+          {
+            "id": "tfx-039-critical",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "stage": "critical"
+            },
+            "outputVectors": [
+              {
+                "id": "tfx-039-critical-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch transit_workforce_agent for critical 100-bus fleet intervention on cleaning crew dispatch."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tfx-039-predictive-flow",
+        "name": "Cleaning Crew Dispatch: FLOW_RISK -> PREDICTIVE_FLOW_ADJUST",
+        "metadata": {
+          "description": "Triggers predictive flow management before rider impact becomes critical.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "tfx-039-flow-risk",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "tfx-039-flow-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Trigger predictive flow management for cleaning crew dispatch using rider, vehicle, and route context."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tfx-039-ops-task",
+        "name": "Cleaning Crew Dispatch: TASK_NEEDED -> OPS_TASK",
+        "metadata": {
+          "description": "Creates maintenance, cleaning, security, or operations tasking.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "tfx-039-task-needed",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "tfx-039-task-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Create maintenance, cleaning, security, or service task for cleaning crew dispatch."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tfx-039-nominal",
+        "name": "Cleaning Crew Dispatch: NOMINAL -> SERVICE_NOMINAL",
+        "metadata": {
+          "description": "Confirms service is in an acceptable 24/7 operating band.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "tfx-039-nominal-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "tfx-039-nominal-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Keep 24/7 monitoring active for cleaning crew dispatch."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Critical event sequence",
+        "description": "Five-step degradation path ending in a critical event output.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0
+          ],
+          [
+            1,
+            1,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "critical-event",
+          "sequenceLength": 5
+        }
+      },
+      {
+        "name": "Predictive flow adjustment",
+        "description": "Predicts service-flow pressure before a critical event.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "predictive-flow-adjust"
+        }
+      },
+      {
+        "name": "Operations task",
+        "description": "Creates maintenance, cleaning, security, or operational tasking.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "ops-task"
+        }
+      },
+      {
+        "name": "Nominal service",
+        "description": "Confirms stable transportation service.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "service-nominal"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Initial critical-event observation arms the sequence without firing.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

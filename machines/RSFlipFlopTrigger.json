@@ -1,0 +1,282 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "RS Flipflop Trigger",
+    "description": "RS flip-flop whose output transitions fire an upstream GraphQL trigger into the local AI stack. SET drives the machine output to [1,0] (AMBER), RESET drives it to [0,1] (GREEN). The trigger configuration in metadata.triggerConfig is consumed by the dispatcher template at examples/triggers/graphql_trigger_template.py.",
+    "metadata": {
+      "category": "digital-logic",
+      "author": "Reality Engine",
+      "created": "2026-04-21T00:00:00Z",
+      "eventSpace": "2D binary vectors: [S, R] inputs (00, 01, 10, 11)",
+      "outputSpace": "2D binary: {[1,0]=SET/AMBER, [0,1]=RESET/GREEN}",
+      "tags": [
+        "ces-sequences",
+        "ces-sequences-2",
+        "digital-logic",
+        "flip-flop",
+        "input-sequences",
+        "input-sequences-3",
+        "localai-bridge",
+        "rs-flipflop-trigger",
+        "rsflip-flop-trigger",
+        "startup-loadable",
+        "trigger"
+      ],
+      "sequenceCount": 2,
+      "triggerConfig": {
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "examples/triggers/graphql_trigger_template.py",
+        "processId": "RS-FLIPFLOP-TRIGGER",
+        "processName": "RS Flipflop Trigger",
+        "rules": [
+          {
+            "sequenceId": "rs-set-sequence",
+            "outputMatches": [
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Machine latched SET — signal AMBER to local AI"
+          },
+          {
+            "sequenceId": "rs-reset-sequence",
+            "outputMatches": [
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "ok",
+            "description": "Machine reset — clear upstream AMBER/RED"
+          }
+        ]
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "digital-logic",
+        "domainTags": [
+          "digital-logic"
+        ],
+        "family": "rs-flipflop-trigger",
+        "machineCode": "rsflip-flop-trigger",
+        "capabilityTags": [],
+        "workflowTags": [
+          "flip-flop",
+          "localai-bridge",
+          "rs-flipflop-trigger",
+          "rsflip-flop-trigger",
+          "trigger"
+        ],
+        "integrationTags": [
+          "digital-logic"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "input-sequences",
+          "input-sequences-3",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "digital-logic",
+          "flip-flop",
+          "input-sequences",
+          "input-sequences-3",
+          "localai-bridge",
+          "rs-flipflop-trigger",
+          "rsflip-flop-trigger",
+          "startup-loadable",
+          "trigger"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "reliability-engineering",
+        "runbook": "https://runbooks.example.org/digital-logic/rsflipfloptrigger",
+        "escalationPolicy": "slack:#reliability-test",
+        "contact": {
+          "primary": "reliability-engineering-primary@example.org",
+          "secondary": "reliability-engineering-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"digital-logic\".  Review and tune the routing as the team owning RSFlipFlopTrigger matures."
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 3917,
+        "length": 2
+      },
+      "output": {
+        "offset": 3919,
+        "length": 2
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "rs-set-sequence",
+        "name": "SET → trigger AMBER",
+        "metadata": {
+          "description": "SET input (S=1, R=0) drives output HIGH and fires the upstream AMBER trigger",
+          "path": "10→[1,0]",
+          "output": "[1,0]",
+          "triggerOn": "output",
+          "ragStatusCode": "AMBER"
+        },
+        "vectors": [
+          {
+            "id": "rs-trigger-set",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "10",
+              "description": "SET state — trigger condition",
+              "state": "SET"
+            },
+            "outputVectors": [
+              {
+                "id": "rs-trigger-output-set",
+                "vector": [
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "SET asserted — upstream AMBER",
+                  "state": "SET",
+                  "logicValue": "HIGH",
+                  "ragStatusCode": "AMBER"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "rs-reset-sequence",
+        "name": "RESET → trigger GREEN",
+        "metadata": {
+          "description": "RESET input (S=0, R=1) drives output LOW and fires the upstream GREEN trigger",
+          "path": "01→[0,1]",
+          "output": "[0,1]",
+          "triggerOn": "output",
+          "ragStatusCode": "GREEN"
+        },
+        "vectors": [
+          {
+            "id": "rs-trigger-reset",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "01",
+              "description": "RESET state — trigger clear",
+              "state": "RESET"
+            },
+            "outputVectors": [
+              {
+                "id": "rs-trigger-output-reset",
+                "vector": [
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "RESET asserted — upstream GREEN",
+                  "state": "RESET",
+                  "logicValue": "LOW",
+                  "ragStatusCode": "GREEN"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "SET — fires AMBER trigger",
+        "pattern": "00→10",
+        "description": "Hold → SET. Expected upstream effect: updateProcessState(id=RS-FLIPFLOP-TRIGGER, ragStatusCode=AMBER)",
+        "vectors": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ]
+        ]
+      },
+      {
+        "name": "RESET — fires GREEN trigger",
+        "pattern": "00→01",
+        "description": "Hold → RESET. Expected upstream effect: updateProcessState(id=RS-FLIPFLOP-TRIGGER, ragStatusCode=GREEN)",
+        "vectors": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      },
+      {
+        "name": "SET then RESET round-trip",
+        "pattern": "00→10→00→01→00",
+        "description": "Validates both triggers fire in sequence: AMBER on SET, GREEN on RESET",
+        "vectors": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

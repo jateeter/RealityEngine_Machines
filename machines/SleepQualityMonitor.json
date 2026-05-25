@@ -1,0 +1,309 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Sleep Quality Monitor",
+    "description": "Classifies nightly sleep into RESTFUL, DISTURBED, or POOR based on bed-sensor-derived signals (duration, fragmentation). Triggers the local AI when sleep degrades so it can surface trends, adjust reminders, or notify caregivers.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "wellness",
+      "author": "Reality Engine",
+      "created": "2026-04-21T00:00:00Z",
+      "workflow": "in-home-sleep-quality",
+      "eventSpace": "2D binary: [adequate_duration, fragmented]",
+      "outputSpace": "2D binary: {[0,0]=RESTFUL, [0,1]=DISTURBED, [1,1]=POOR}",
+      "tags": [
+        "anomaly-detection",
+        "ces-sequences",
+        "ces-sequences-3",
+        "elder-care",
+        "health-personal",
+        "in-home-monitoring",
+        "input-sequences",
+        "input-sequences-2",
+        "sleep",
+        "sleep-quality-monitor",
+        "startup-loadable",
+        "trigger",
+        "wellness"
+      ],
+      "sequenceCount": 3,
+      "triggerConfig": {
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "examples/triggers/graphql_trigger_template.py",
+        "processId": "SLEEP-QUALITY",
+        "processName": "Sleep Quality Monitor",
+        "rules": [
+          {
+            "sequenceId": "sleep-restful",
+            "outputMatches": [
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "ok",
+            "description": "Restful night — no intervention"
+          },
+          {
+            "sequenceId": "sleep-disturbed",
+            "outputMatches": [
+              0,
+              1
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Fragmented sleep — surface the trend in the AI's daily summary"
+          },
+          {
+            "sequenceId": "sleep-poor",
+            "outputMatches": [
+              1,
+              1
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Short + fragmented sleep — recommend clinical follow-up"
+          }
+        ]
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "wellness"
+        ],
+        "family": "sleep-quality-monitor",
+        "machineCode": "sleep-quality-monitor",
+        "capabilityTags": [
+          "in-home-monitoring"
+        ],
+        "workflowTags": [
+          "anomaly-detection",
+          "elder-care",
+          "sleep",
+          "trigger"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "anomaly-detection",
+          "ces-sequences",
+          "ces-sequences-3",
+          "elder-care",
+          "health-personal",
+          "in-home-monitoring",
+          "input-sequences",
+          "input-sequences-2",
+          "sleep",
+          "sleep-quality-monitor",
+          "startup-loadable",
+          "trigger",
+          "wellness"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/sleepqualitymonitor",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "patient-safety-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"health-personal\".  Review and tune the routing as the team owning SleepQualityMonitor matures."
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1943,
+        "length": 2
+      },
+      "output": {
+        "offset": 1945,
+        "length": 2
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "sleep-restful",
+        "name": "Restful sleep → GREEN",
+        "metadata": {
+          "description": "Adequate duration, minimal fragmentation"
+        },
+        "vectors": [
+          {
+            "id": "sleep-ev-restful",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "restful",
+              "state": "RESTFUL"
+            },
+            "outputVectors": [
+              {
+                "id": "sleep-out-restful",
+                "vector": [
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "ragStatusCode": "GREEN",
+                  "state": "RESTFUL"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sleep-disturbed",
+        "name": "Disturbed sleep → AMBER",
+        "metadata": {
+          "description": "Adequate duration but fragmented"
+        },
+        "vectors": [
+          {
+            "id": "sleep-ev-disturbed",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "disturbed",
+              "state": "DISTURBED"
+            },
+            "outputVectors": [
+              {
+                "id": "sleep-out-disturbed",
+                "vector": [
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "ragStatusCode": "AMBER",
+                  "state": "DISTURBED"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sleep-poor",
+        "name": "Poor sleep → RED",
+        "metadata": {
+          "description": "Insufficient duration AND fragmented"
+        },
+        "vectors": [
+          {
+            "id": "sleep-ev-poor",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "poor",
+              "state": "POOR"
+            },
+            "outputVectors": [
+              {
+                "id": "sleep-out-poor",
+                "vector": [
+                  1,
+                  1
+                ],
+                "metadata": {
+                  "ragStatusCode": "RED",
+                  "state": "POOR"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Restful night",
+        "pattern": "[1,0]",
+        "description": "Adequate duration, low fragmentation — GREEN trigger",
+        "vectors": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "name": "Disturbed then poor",
+        "pattern": "[1,1] → [0,1]",
+        "description": "Fragmented adequate sleep (AMBER), then insufficient + fragmented (RED)",
+        "vectors": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

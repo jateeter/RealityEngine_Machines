@@ -1,0 +1,707 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Data Center PDU Load Balance Monitor",
+    "description": "Data-center operations machine for pdu load balance monitor. It monitors phase balance, breaker margin, outlet telemetry, and rack load drift and emits operational outputs for 24/7 incident response, maintenance planning, upgrade readiness, and steady-state assurance.",
+    "metadata": {
+      "category": "data-center",
+      "domain": "Data Center - 24x7 Operations",
+      "author": "Reality Engine",
+      "operationalFocus": "PDU Load Balance Monitor",
+      "focusDescription": "phase balance, breaker margin, outlet telemetry, and rack load drift",
+      "upstreamMachine": "Data Center Power Utility Feed Monitor",
+      "upstreamOutputRegion": "[4061:4065]",
+      "downstreamMachines": [
+        "Data Center Rack Thermal Envelope Monitor"
+      ],
+      "projectionHorizon": "24h",
+      "projectionWindows": [
+        "0-6h",
+        "6-12h",
+        "12-18h",
+        "18-24h"
+      ],
+      "prescriptiveMaintenanceRole": "Consumes Data Center Power Utility Feed Monitor output to convert upstream operational posture into prescriptive action for pdu load balance monitor.",
+      "dispatchableAgent": "dc_network_agent",
+      "aiTrigger": "data-center-pdu-load-balance-monitor-ops-maintenance-upgrade",
+      "agentActions": [
+        "Dispatch dc_network_agent for immediate stabilization of pdu load balance monitor.",
+        "Schedule maintenance for pdu load balance monitor with rollback and staffing checks.",
+        "Plan upgrade or lifecycle change for pdu load balance monitor using risk-gated rollout.",
+        "Keep 24/7 monitoring active for pdu load balance monitor.",
+        "Project pdu load balance monitor forward over the next 24 hours and prescribe maintenance or upgrade work before the risk window opens."
+      ],
+      "inputSpace": "4D binary at [4061:4065]",
+      "outputSpace": "4D binary at [4077:4081]: [1,0,0,0]=URGENT_INTERVENTION, [0,1,0,0]=SCHEDULE_MAINTENANCE, [0,0,1,0]=PLAN_UPGRADE, [0,0,0,1]=OPERATING_NOMINAL",
+      "inputSemantics": [
+        "availability margin",
+        "maintenance readiness",
+        "upgrade/lifecycle pressure",
+        "operational confidence"
+      ],
+      "tags": [
+        "24x7-operations",
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-5",
+        "data-center",
+        "data-center-24x7-operations",
+        "data-center-generated",
+        "data-center-pdu-load-balance-monitor",
+        "data-center-pdu-load-balance-monitor-ops-maintenance-upgrade",
+        "dc-network-agent",
+        "dcx004",
+        "dispatchable-agent",
+        "incident-response",
+        "input-sequences",
+        "input-sequences-6",
+        "machine-interconnect",
+        "maintenance",
+        "pdu-load-balance-monitor",
+        "startup-loadable",
+        "upgrade-cycle"
+      ],
+      "sequenceCount": 5,
+      "reuseGuideline": "Use as a 24/7 operational guardrail. Map telemetry, CMDB, change, or AI-dispatch signals into the 4D input lane; map outputs to incident, maintenance, upgrade, or executive-summary machines.",
+      "downstreamPattern": "Output region [4077:4081] feeds Data Center Rack Thermal Envelope Monitor for prescriptive 24/7 operations.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "data-center",
+        "domainTags": [
+          "24x7-operations",
+          "data-center"
+        ],
+        "family": "data-center-generated",
+        "machineCode": "dcx004",
+        "capabilityTags": [
+          "data-center-pdu-load-balance-monitor-ops-maintenance-upgrade",
+          "maintenance"
+        ],
+        "workflowTags": [
+          "ai-trigger",
+          "data-center-24x7-operations",
+          "data-center-generated",
+          "data-center",
+          "dc-network-agent",
+          "dispatchable-agent",
+          "incident-response",
+          "pdu-load-balance-monitor",
+          "upgrade-cycle"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-5",
+          "input-sequences",
+          "input-sequences-6",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "24x7-operations",
+          "ai-trigger",
+          "ces-sequences",
+          "ces-sequences-5",
+          "data-center",
+          "data-center-24x7-operations",
+          "data-center-generated",
+          "data-center-pdu-load-balance-monitor",
+          "data-center-pdu-load-balance-monitor-ops-maintenance-upgrade",
+          "dc-network-agent",
+          "dcx004",
+          "dispatchable-agent",
+          "incident-response",
+          "input-sequences",
+          "input-sequences-6",
+          "machine-interconnect",
+          "maintenance",
+          "pdu-load-balance-monitor",
+          "startup-loadable",
+          "upgrade-cycle"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "datacenter-noc",
+        "runbook": "https://runbooks.example.org/data-center/dcx004_pdu-load-balance-monitor",
+        "escalationPolicy": "pagerduty:datacenter-noc",
+        "contact": {
+          "primary": "datacenter-noc-primary@example.org",
+          "secondary": "datacenter-noc-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 300,
+          "error": 120
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"data-center\".  Review and tune the routing as the team owning DCX004_pdu-load-balance-monitor matures."
+      },
+      "triggerConfig": {
+        "processId": "DCX004_PDU_LOAD_BALANCE_MONITOR",
+        "processName": "Data Center PDU Load Balance Monitor",
+        "rules": [
+          {
+            "sequenceId": "dcx-004-urgent",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "PDU Load Balance Monitor: DEGRADED -> CRITICAL -> URGENT_INTERVENTION"
+          },
+          {
+            "sequenceId": "dcx-004-maintenance",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "PDU Load Balance Monitor: SERVICE_DUE -> SCHEDULE_MAINTENANCE"
+          },
+          {
+            "sequenceId": "dcx-004-upgrade",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "PDU Load Balance Monitor: LIFECYCLE_PRESSURE -> PLAN_UPGRADE"
+          },
+          {
+            "sequenceId": "dcx-004-nominal",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "PDU Load Balance Monitor: HEALTHY -> OPERATING_NOMINAL"
+          },
+          {
+            "sequenceId": "dcx-004-24h-projection",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "PDU Load Balance Monitor: 0-6H -> 6-12H -> 12-18H -> 18-24H -> PRESCRIPTIVE_ACTION"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4061,
+        "length": 4
+      },
+      "output": {
+        "offset": 4077,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "dcx-004-urgent",
+        "name": "PDU Load Balance Monitor: DEGRADED -> CRITICAL -> URGENT_INTERVENTION",
+        "metadata": {
+          "description": "Escalates when availability and operational confidence collapse.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-004-degraded",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "nextVectorIds": [
+              "dcx-004-critical"
+            ]
+          },
+          {
+            "id": "dcx-004-critical",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "outputVectors": [
+              {
+                "id": "dcx-004-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch dc_network_agent for immediate stabilization of pdu load balance monitor."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-004-maintenance",
+        "name": "PDU Load Balance Monitor: SERVICE_DUE -> SCHEDULE_MAINTENANCE",
+        "metadata": {
+          "description": "Schedules maintenance before service quality degrades.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-004-service-due",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "dcx-004-maintenance-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Schedule maintenance for pdu load balance monitor with rollback and staffing checks."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-004-upgrade",
+        "name": "PDU Load Balance Monitor: LIFECYCLE_PRESSURE -> PLAN_UPGRADE",
+        "metadata": {
+          "description": "Plans an upgrade, refresh, or lifecycle action under controlled change management.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-004-upgrade-needed",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "dcx-004-upgrade-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Plan upgrade or lifecycle change for pdu load balance monitor using risk-gated rollout."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-004-nominal",
+        "name": "PDU Load Balance Monitor: HEALTHY -> OPERATING_NOMINAL",
+        "metadata": {
+          "description": "Confirms stable 24/7 operational posture.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-004-healthy",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "dcx-004-nominal-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Keep 24/7 monitoring active for pdu load balance monitor."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-004-24h-projection",
+        "name": "PDU Load Balance Monitor: 0-6H -> 6-12H -> 12-18H -> 18-24H -> PRESCRIPTIVE_ACTION",
+        "metadata": {
+          "description": "Projects operational posture across a 24/7 horizon and prescribes work before the forecasted risk window opens.",
+          "projectionHorizon": "24h",
+          "projectionWindows": [
+            "0-6h",
+            "6-12h",
+            "12-18h",
+            "18-24h"
+          ],
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-004-projection-0-6h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "window": "0-6h",
+              "description": "Current posture is stable but lifecycle pressure is visible."
+            },
+            "nextVectorIds": [
+              "dcx-004-projection-6-12h"
+            ]
+          },
+          {
+            "id": "dcx-004-projection-6-12h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "window": "6-12h",
+              "description": "Operational confidence begins to degrade."
+            },
+            "nextVectorIds": [
+              "dcx-004-projection-12-18h"
+            ]
+          },
+          {
+            "id": "dcx-004-projection-12-18h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "window": "12-18h",
+              "description": "Maintenance readiness is no longer sufficient for the forecasted load."
+            },
+            "nextVectorIds": [
+              "dcx-004-projection-18-24h"
+            ]
+          },
+          {
+            "id": "dcx-004-projection-18-24h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "window": "18-24h",
+              "description": "Forecast crosses the prescriptive maintenance threshold."
+            },
+            "outputVectors": [
+              {
+                "id": "dcx-004-projection-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Project pdu load balance monitor forward over the next 24 hours and prescribe maintenance or upgrade work before the risk window opens.",
+                  "projectionHorizon": "24h"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Urgent intervention",
+        "description": "Availability and confidence collapse after degraded operation.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-intervention"
+        }
+      },
+      {
+        "name": "Maintenance due",
+        "description": "Maintenance should be scheduled before degradation.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "schedule-maintenance"
+        }
+      },
+      {
+        "name": "Upgrade planning",
+        "description": "Lifecycle pressure requires upgrade planning.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "plan-upgrade"
+        }
+      },
+      {
+        "name": "Nominal operations",
+        "description": "The machine reports stable 24/7 operation.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "operating-nominal"
+        }
+      },
+      {
+        "name": "24-hour prescriptive projection",
+        "description": "Projects operations across four 6-hour windows and prescribes maintenance before the 24-hour risk window opens.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            1
+          ],
+          [
+            0,
+            1,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "24h-prescriptive-projection"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "A single degraded baseline arms the urgent path without firing.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

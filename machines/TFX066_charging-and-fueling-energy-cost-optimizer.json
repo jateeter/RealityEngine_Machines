@@ -1,0 +1,641 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Transportation Fleet Charging And Fueling Energy Cost Optimizer",
+    "description": "Public transportation fleet machine for energy cost optimizer in the charging and fueling workstream. It monitors tariff window, demand charge, route priority, and charger scheduling for a 100-bus 24/7 operation and emits AI-triggered outputs for rider experience, operations, maintenance, cleaning, security, and predictive fleet-flow management.",
+    "metadata": {
+      "category": "transportation",
+      "domain": "Transportation Fleet - Charging And Fueling",
+      "author": "Reality Engine",
+      "fleetSize": 100,
+      "operationalFocus": "Energy Cost Optimizer",
+      "workstream": "Charging And Fueling",
+      "focusDescription": "tariff window, demand charge, route priority, and charger scheduling",
+      "upstreamMachine": "Transportation Fleet Charging And Fueling Fueling Queue Optimizer",
+      "upstreamOutputRegion": "[3487:3491]",
+      "downstreamMachines": [
+        "Transportation Fleet Charging And Fueling Charger Maintenance Planner"
+      ],
+      "dispatchableAgent": "transit_security_agent",
+      "aiTrigger": "transportation-fleet-charging-and-fueling-energy-cost-optimizer",
+      "predictiveFlowTrigger": "predictive-flow-charging-and-fueling-energy-cost-optimizer",
+      "agentActions": [
+        "Dispatch transit_security_agent for critical 100-bus fleet intervention on energy cost optimizer.",
+        "Trigger predictive flow management for energy cost optimizer using rider, vehicle, and route context.",
+        "Create maintenance, cleaning, security, or service task for energy cost optimizer.",
+        "Keep 24/7 monitoring active for energy cost optimizer."
+      ],
+      "criticalEventSequenceLength": 5,
+      "criticalEventSequenceLengthBasis": "Every TFX machine has one critical inputSequence containing exactly 5 vectors; the generated family average is 5.0.",
+      "inputSpace": "4D binary at [3487:3491]",
+      "outputSpace": "4D binary at [3491:3495]: [1,0,0,0]=CRITICAL_EVENT, [0,1,0,0]=PREDICTIVE_FLOW_ADJUST, [0,0,1,0]=OPS_TASK, [0,0,0,1]=SERVICE_NOMINAL",
+      "inputSemantics": [
+        "service reliability",
+        "rider impact",
+        "asset readiness",
+        "safety/security risk"
+      ],
+      "tags": [
+        "100-bus-fleet",
+        "24x7-operations",
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-4",
+        "charging-and-fueling",
+        "cleaning",
+        "dispatchable-agent",
+        "energy-cost-optimizer",
+        "input-sequences",
+        "input-sequences-5",
+        "machine-interconnect",
+        "maintenance",
+        "predictive-flow",
+        "predictive-flow-charging-and-fueling-energy-cost-optimizer",
+        "public-transit",
+        "rider-experience",
+        "security",
+        "startup-loadable",
+        "tfx066",
+        "transit-security-agent",
+        "transportation",
+        "transportation-fleet",
+        "transportation-fleet-charging-and-fueling",
+        "transportation-fleet-charging-and-fueling-energy-cost-optimizer",
+        "transportation-generated",
+        "vehicle-monitoring"
+      ],
+      "sequenceCount": 4,
+      "reuseGuideline": "Map AVL, APC, CAD/AVL, fare, work-order, cleaning, security, rider feedback, and depot signals into the 4D input lane. Route outputs to dispatch, service control, maintenance, cleaning, security, customer communications, or executive fleet optimization agents.",
+      "downstreamPattern": "Output region [3491:3495] feeds Transportation Fleet Charging And Fueling Charger Maintenance Planner for predictive fleet-flow management.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "transportation",
+        "domainTags": [
+          "charging-and-fueling",
+          "transportation",
+          "transportation-fleet"
+        ],
+        "family": "transportation-generated",
+        "machineCode": "tfx066",
+        "capabilityTags": [
+          "maintenance",
+          "predictive-flow",
+          "predictive-flow-charging-and-fueling-energy-cost-optimizer",
+          "vehicle-monitoring"
+        ],
+        "workflowTags": [
+          "100-bus-fleet",
+          "24x7-operations",
+          "ai-trigger",
+          "cleaning",
+          "dispatchable-agent",
+          "energy-cost-optimizer",
+          "public-transit",
+          "rider-experience",
+          "security",
+          "transit-security-agent",
+          "transportation-fleet-charging-and-fueling",
+          "transportation-generated"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "100-bus-fleet",
+          "24x7-operations",
+          "ai-trigger",
+          "ces-sequences",
+          "ces-sequences-4",
+          "charging-and-fueling",
+          "cleaning",
+          "dispatchable-agent",
+          "energy-cost-optimizer",
+          "input-sequences",
+          "input-sequences-5",
+          "machine-interconnect",
+          "maintenance",
+          "predictive-flow",
+          "predictive-flow-charging-and-fueling-energy-cost-optimizer",
+          "public-transit",
+          "rider-experience",
+          "security",
+          "startup-loadable",
+          "tfx066",
+          "transit-security-agent",
+          "transportation",
+          "transportation-fleet",
+          "transportation-fleet-charging-and-fueling",
+          "transportation-fleet-charging-and-fueling-energy-cost-optimizer",
+          "transportation-generated",
+          "vehicle-monitoring"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "transit-operations",
+        "runbook": "https://runbooks.example.org/transportation/tfx066_charging-and-fueling-energy-cost-optimizer",
+        "escalationPolicy": "pagerduty:transit-ops",
+        "contact": {
+          "primary": "transit-operations-primary@example.org",
+          "secondary": "transit-operations-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 300,
+          "error": 120
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"transportation\".  Review and tune the routing as the team owning TFX066_charging-and-fueling-energy-cost-optimizer matures."
+      },
+      "triggerConfig": {
+        "processId": "TFX066_CHARGING_AND_FUELING_ENERGY_COST_OPTIMIZER",
+        "processName": "Transportation Fleet Charging And Fueling Energy Cost Optimizer",
+        "rules": [
+          {
+            "sequenceId": "tfx-066-critical-event",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Energy Cost Optimizer: OBSERVE -> WATCH -> DEGRADED -> ESCALATING -> CRITICAL_EVENT"
+          },
+          {
+            "sequenceId": "tfx-066-predictive-flow",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Energy Cost Optimizer: FLOW_RISK -> PREDICTIVE_FLOW_ADJUST"
+          },
+          {
+            "sequenceId": "tfx-066-ops-task",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Energy Cost Optimizer: TASK_NEEDED -> OPS_TASK"
+          },
+          {
+            "sequenceId": "tfx-066-nominal",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Energy Cost Optimizer: NOMINAL -> SERVICE_NOMINAL"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 3487,
+        "length": 4
+      },
+      "output": {
+        "offset": 3491,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "tfx-066-critical-event",
+        "name": "Energy Cost Optimizer: OBSERVE -> WATCH -> DEGRADED -> ESCALATING -> CRITICAL_EVENT",
+        "metadata": {
+          "description": "Five-step critical event sequence for 24/7 transportation operations.",
+          "sequenceLength": 5,
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "tfx-066-observe",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "stage": "observe"
+            },
+            "nextVectorIds": [
+              "tfx-066-watch"
+            ]
+          },
+          {
+            "id": "tfx-066-watch",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "stage": "watch"
+            },
+            "nextVectorIds": [
+              "tfx-066-degraded"
+            ]
+          },
+          {
+            "id": "tfx-066-degraded",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "stage": "degraded"
+            },
+            "nextVectorIds": [
+              "tfx-066-escalating"
+            ]
+          },
+          {
+            "id": "tfx-066-escalating",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "stage": "escalating"
+            },
+            "nextVectorIds": [
+              "tfx-066-critical"
+            ]
+          },
+          {
+            "id": "tfx-066-critical",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "stage": "critical"
+            },
+            "outputVectors": [
+              {
+                "id": "tfx-066-critical-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch transit_security_agent for critical 100-bus fleet intervention on energy cost optimizer."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tfx-066-predictive-flow",
+        "name": "Energy Cost Optimizer: FLOW_RISK -> PREDICTIVE_FLOW_ADJUST",
+        "metadata": {
+          "description": "Triggers predictive flow management before rider impact becomes critical.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "tfx-066-flow-risk",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "tfx-066-flow-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Trigger predictive flow management for energy cost optimizer using rider, vehicle, and route context."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tfx-066-ops-task",
+        "name": "Energy Cost Optimizer: TASK_NEEDED -> OPS_TASK",
+        "metadata": {
+          "description": "Creates maintenance, cleaning, security, or operations tasking.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "tfx-066-task-needed",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "tfx-066-task-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Create maintenance, cleaning, security, or service task for energy cost optimizer."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tfx-066-nominal",
+        "name": "Energy Cost Optimizer: NOMINAL -> SERVICE_NOMINAL",
+        "metadata": {
+          "description": "Confirms service is in an acceptable 24/7 operating band.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "tfx-066-nominal-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "tfx-066-nominal-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Keep 24/7 monitoring active for energy cost optimizer."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Critical event sequence",
+        "description": "Five-step degradation path ending in a critical event output.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0
+          ],
+          [
+            1,
+            1,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "critical-event",
+          "sequenceLength": 5
+        }
+      },
+      {
+        "name": "Predictive flow adjustment",
+        "description": "Predicts service-flow pressure before a critical event.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "predictive-flow-adjust"
+        }
+      },
+      {
+        "name": "Operations task",
+        "description": "Creates maintenance, cleaning, security, or operational tasking.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "ops-task"
+        }
+      },
+      {
+        "name": "Nominal service",
+        "description": "Confirms stable transportation service.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "service-nominal"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Initial critical-event observation arms the sequence without firing.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

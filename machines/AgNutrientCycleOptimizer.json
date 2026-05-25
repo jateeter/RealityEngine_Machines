@@ -1,0 +1,600 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Ag Nutrient Cycle Optimizer",
+    "description": "Correlates nutrient solution quality signals with active photoperiod state to optimize nutrient uptake timing. Reads binary outputs from AgNutrientSolutionMonitor [28:32] and AgPhotoPeriodLightingController [32:36]. During active photosynthesis, elevated nutrient demand is expected; mismatches between solution quality and light state indicate suboptimal scheduling. Output feeds AgHarvestReadinessAssessor and AgYieldOptimizationAI at [3959:3963].",
+    "metadata": {
+      "category": "agriculture",
+      "domain": "Agriculture — Nutrient Management / Crop Optimization",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [3959:3963]: [1,0,0,0]=NUTRIENT_LOCKOUT, [0,1,0,0]=UPTAKE_MISMATCH, [0,0,1,0]=NIGHT_REST, [0,0,0,1]=NUTRIENT_OK",
+      "tags": [
+        "ag-nutrient-cycle-optimizer",
+        "agriculture",
+        "agriculture-nutrient-management-crop-optimization",
+        "ces-sequences",
+        "ces-sequences-3",
+        "crop-optimization",
+        "indoor-growing",
+        "input-sequences",
+        "input-sequences-1",
+        "kleene-plus",
+        "machine-interconnect",
+        "nutrient-management",
+        "nutrient-uptake",
+        "nutrition",
+        "photoperiod",
+        "startup-loadable"
+      ],
+      "sequenceCount": 3,
+      "inputSignalMap": {
+        "elem_0": "PH_ALERT from AgNutrientSolutionMonitor [268]",
+        "elem_1": "EC_ALERT from AgNutrientSolutionMonitor [269]",
+        "elem_2": "DEFICIENCY_ALERT from AgNutrientSolutionMonitor [270]",
+        "elem_3": "SOLUTION_OK from AgNutrientSolutionMonitor [271]",
+        "elem_4": "LIGHTS_ON from AgPhotoPeriodLightingController [272]",
+        "elem_5": "LIGHTS_OFF from AgPhotoPeriodLightingController [273]",
+        "elem_6": "DLI_ALERT from AgPhotoPeriodLightingController [274]",
+        "elem_7": "PHOTO_OK from AgPhotoPeriodLightingController [275]"
+      },
+      "upstreamMachines": [
+        "AgNutrientSolutionMonitor (output at [28:32])",
+        "AgPhotoPeriodLightingController (output at [32:36])"
+      ],
+      "downstreamMachines": [
+        "AgHarvestReadinessAssessor (reads [3959:3963])",
+        "AgYieldOptimizationAI (reads [3959:3963])"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "agriculture",
+        "domainTags": [
+          "agriculture",
+          "crop-optimization",
+          "nutrient-management"
+        ],
+        "family": "ag-nutrient-cycle-optimizer",
+        "machineCode": "ag-nutrient-cycle-optimizer",
+        "capabilityTags": [
+          "agriculture-nutrient-management-crop-optimization",
+          "crop-optimization"
+        ],
+        "workflowTags": [
+          "indoor-growing",
+          "kleene-plus",
+          "nutrient-uptake",
+          "nutrition",
+          "photoperiod"
+        ],
+        "integrationTags": [
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ag-nutrient-cycle-optimizer",
+          "agriculture",
+          "agriculture-nutrient-management-crop-optimization",
+          "ces-sequences",
+          "ces-sequences-3",
+          "crop-optimization",
+          "indoor-growing",
+          "input-sequences",
+          "input-sequences-1",
+          "kleene-plus",
+          "machine-interconnect",
+          "nutrient-management",
+          "nutrient-uptake",
+          "nutrition",
+          "photoperiod",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "agriculture-operations",
+        "runbook": "https://runbooks.example.org/agriculture/agnutrientcycleoptimizer",
+        "escalationPolicy": "pagerduty:ag-ops",
+        "contact": {
+          "primary": "agriculture-operations-primary@example.org",
+          "secondary": "agriculture-operations-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 3600,
+          "error": 900
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"agriculture\".  Review and tune the routing as the team owning AgNutrientCycleOptimizer matures."
+      },
+      "triggerConfig": {
+        "processId": "AGNUTRIENTCYCLEOPTIMIZER",
+        "processName": "Ag Nutrient Cycle Optimizer",
+        "rules": [
+          {
+            "sequenceId": "ag-nutrient-optimal-uptake",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "NUTRIENT_OK: optimal nutrient uptake conditions active at [3959:3963]"
+          },
+          {
+            "sequenceId": "ag-nutrient-lockout",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "NUTRIENT_LOCKOUT: pH-induced nutrient unavailability during active photosynthesis at [3959:3963]"
+          },
+          {
+            "sequenceId": "ag-nutrient-night-rest",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "NIGHT_REST: dark period with optimal solution ready at [3959:3963]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 28,
+        "length": 8
+      },
+      "output": {
+        "offset": 3959,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ag-nutrient-optimal-uptake",
+        "name": "Active Uptake: LIGHT_SOLUTION_OK+ → PEAK_UPTAKE → NUTRIENT_OK",
+        "metadata": {
+          "description": "Fires NUTRIENT_OK when lights are actively on (photosynthesis driving nutrient demand) AND solution quality is optimal. This is the peak nutrient uptake window in the plant's daily cycle.",
+          "path": "LIGHT_SOLUTION_OK+ → PEAK_UPTAKE → output[0,0,0,1]",
+          "output": "[0,0,0,1] (NUTRIENT_OK)"
+        },
+        "vectors": [
+          {
+            "id": "ag-nco-light-solution-ok",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "LIGHT_SOLUTION_OK",
+              "description": "LIGHT_SOLUTION_OK+ — SOLUTION_OK=1, LIGHTS_ON=1, PHOTO_OK=1: active photosynthesis with quality nutrient solution. isInitial A*A = A+.",
+              "condition": "SOLUTION_OK=1, LIGHTS_ON=1, PHOTO_OK=1, no alerts"
+            },
+            "nextVectorIds": [
+              "ag-nco-light-solution-ok",
+              "ag-nco-peak-uptake"
+            ]
+          },
+          {
+            "id": "ag-nco-peak-uptake",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "PEAK_UPTAKE",
+              "description": "PEAK_UPTAKE — sustained light+solution quality; peak root nutrient absorption. Fires NUTRIENT_OK.",
+              "condition": "Confirmed sustained optimal uptake window"
+            },
+            "outputVectors": [
+              {
+                "id": "ag-nco-nutrient-ok-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "NUTRIENT_OK: optimal nutrient uptake conditions active at [3959:3963]",
+                  "action": "Harvest assessor and AI optimizer register healthy nutrient state"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ag-nutrient-lockout",
+        "name": "Nutrient Lockout: SOLUTION_WATCH+ → ALERT_WITH_LIGHT → LOCKOUT → NUTRIENT_LOCKOUT",
+        "metadata": {
+          "description": "Detects pH or EC alert during an active light period — the most damaging scenario, as plants are actively trying to absorb nutrients but solution quality prevents it. pH-induced lockout during peak photosynthesis can cause rapid visible deficiency symptoms.",
+          "path": "SOLUTION_WATCH+ → ALERT_WITH_LIGHT → LOCKOUT → output[1,0,0,0]",
+          "output": "[1,0,0,0] (NUTRIENT_LOCKOUT)"
+        },
+        "vectors": [
+          {
+            "id": "ag-nco-solution-watch",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "SOLUTION_WATCH",
+              "description": "SOLUTION_WATCH+ — PH_ALERT=1 while LIGHTS_ON and PHOTO_OK: solution problem during active photoperiod. isInitial A*A = A+.",
+              "condition": "PH_ALERT=1, LIGHTS_ON=1, PHOTO_OK=1"
+            },
+            "nextVectorIds": [
+              "ag-nco-solution-watch",
+              "ag-nco-alert-with-light"
+            ]
+          },
+          {
+            "id": "ag-nco-alert-with-light",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "ALERT_WITH_LIGHT",
+              "description": "ALERT_WITH_LIGHT — PH_ALERT persisting; PHOTO_OK lost (plants responding to nutrient stress; photosynthesis dropping).",
+              "condition": "PH_ALERT=1, LIGHTS_ON=1, PHOTO_OK=0"
+            },
+            "nextVectorIds": [
+              "ag-nco-lockout"
+            ]
+          },
+          {
+            "id": "ag-nco-lockout",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "LOCKOUT",
+              "description": "LOCKOUT — PH_ALERT + DEFICIENCY_ALERT together during light period: pH lockout has caused measurable deficiency. Fires NUTRIENT_LOCKOUT.",
+              "condition": "PH_ALERT=1, DEFICIENCY_ALERT=1, LIGHTS_ON=1"
+            },
+            "outputVectors": [
+              {
+                "id": "ag-nco-lockout-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "NUTRIENT_LOCKOUT: pH-induced nutrient unavailability during active photosynthesis at [3959:3963]",
+                  "action": "Emergency pH adjustment; reduce lighting duration; AI optimizer enters corrective mode"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ag-nutrient-night-rest",
+        "name": "Night Nutrient Rest: DARK_SOLUTION_OK+ → NIGHT_REST signal",
+        "metadata": {
+          "description": "Fires NIGHT_REST when lights are off and solution quality is maintained. During dark periods, nutrient uptake slows but root zone should still have clean solution available for early-morning uptake surge.",
+          "pattern": "DARK_SOLUTION_OK+",
+          "output": "[0,0,1,0] (NIGHT_REST)"
+        },
+        "vectors": [
+          {
+            "id": "ag-nco-dark-solution-ok",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "DARK_SOLUTION_OK",
+              "description": "DARK_SOLUTION_OK+ — LIGHTS_OFF=1, SOLUTION_OK=1: dark period with clean solution ready for next light cycle. isInitial A*A = A+.",
+              "condition": "LIGHTS_OFF=1, SOLUTION_OK=1, no alerts"
+            },
+            "outputVectors": [
+              {
+                "id": "ag-nco-night-rest-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "NIGHT_REST: dark period with optimal solution ready at [3959:3963]",
+                  "action": "Expected quiescent state; AI optimizer logs rest cycle"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Day-Night Nutrient Cycle",
+        "pattern": "6-step: DARK_OK→LIGHTS_ON(ok)→PEAK→PEAK→DLI_MET→DARK_OK",
+        "description": "Full 24-hour nutrient-photoperiod cycle: night rest, morning ramp, peak uptake, lights-off, next night.",
+        "vectors": [
+          [
+            0.1,
+            0.1,
+            0.1,
+            0.9,
+            0.1,
+            0.9,
+            0.1,
+            0.1
+          ],
+          [
+            0.1,
+            0.1,
+            0.1,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.9
+          ],
+          [
+            0.1,
+            0.1,
+            0.1,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.9
+          ],
+          [
+            0.1,
+            0.1,
+            0.1,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.9
+          ],
+          [
+            0.1,
+            0.1,
+            0.1,
+            0.9,
+            0.1,
+            0.9,
+            0.1,
+            0.1
+          ],
+          [
+            0.1,
+            0.1,
+            0.1,
+            0.9,
+            0.1,
+            0.9,
+            0.1,
+            0.1
+          ]
+        ],
+        "metadata": {
+          "scenario": "day-night-nutrient-cycle",
+          "expectedOutputs": {
+            "step_1": "NIGHT_REST fires [0,0,1,0]",
+            "steps_2_3": "NUTRIENT_OK fires [0,0,0,1] (peak uptake confirmed)",
+            "step_4": "NUTRIENT_OK fires [0,0,0,1]",
+            "steps_5_6": "NIGHT_REST fires [0,0,1,0]"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

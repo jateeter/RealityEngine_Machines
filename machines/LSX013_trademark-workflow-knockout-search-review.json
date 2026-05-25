@@ -1,0 +1,561 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Legal Services Trademark Workflow Knockout Search Review",
+    "description": "Legal services workflow machine for knockout search review in the trademark workflow workstream. It monitors review exact and near-match search results across USPTO, web, app stores, and domains. This is an operational workflow example for individual and corporate legal services, not legal advice.",
+    "metadata": {
+      "category": "legal-services",
+      "domain": "Legal Services - Trademark Workflow",
+      "author": "Reality Engine",
+      "workstream": "Trademark Workflow",
+      "operationalFocus": "Knockout Search Review",
+      "focusDescription": "review exact and near-match search results across USPTO, web, app stores, and domains",
+      "sourceGuidance": [
+        "USPTO provisional patent applications: complete written description, inventor naming, filing fee/cover sheet, 12-month nonprovisional benefit window",
+        "USPTO Patent Center: electronic filing and application management for patent submissions",
+        "USPTO trademark process and Trademark Center: mark/goods-services review, account identity verification, filing and docket tracking",
+        "U.S. Copyright Office eCO registration: application, fee, deposit copy/copies, work-type/form selection",
+        "U.S. Copyright Office preregistration: limited-use preregistration for eligible unpublished works likely to face prerelease infringement"
+      ],
+      "legalDisclaimer": "Workflow automation example only; attorney review is required for legal advice, filing decisions, and jurisdiction-specific analysis.",
+      "dispatchableAgent": "copyright_workflow_agent",
+      "aiTrigger": "legal-services-trademark-workflow-knockout-search-review",
+      "agentActions": [
+        "Route knockout search review to attorney review for deadline, ownership, or rights-risk triage.",
+        "Dispatch copyright_workflow_agent to optimize the next workstep for knockout search review.",
+        "Create or update docket/checklist tasks for knockout search review.",
+        "Mark knockout search review ready for the next controlled workflow step."
+      ],
+      "inputSpace": "4D binary at [2139:2143]",
+      "outputSpace": "4D binary at [2147:2151]: [1,0,0,0]=ATTORNEY_REVIEW, [0,1,0,0]=OPTIMIZE_WORKSTEP, [0,0,1,0]=DOCKET_ACTION, [0,0,0,1]=READY_FOR_NEXT_STEP",
+      "inputSemantics": [
+        "facts complete",
+        "rights/ownership clear",
+        "deadline or filing pressure",
+        "commercialization readiness"
+      ],
+      "tags": [
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-4",
+        "copyright",
+        "copyright-workflow-agent",
+        "dispatchable-agent",
+        "input-sequences",
+        "input-sequences-5",
+        "intellectual-property",
+        "knockout-search-review",
+        "legal-services",
+        "legal-services-generated",
+        "legal-services-trademark-workflow",
+        "legal-services-trademark-workflow-knockout-search-review",
+        "lsx013",
+        "machine-interconnect",
+        "productization",
+        "provisional-patent",
+        "startup-loadable",
+        "trademark",
+        "trademark-workflow"
+      ],
+      "sequenceCount": 4,
+      "reuseGuideline": "Map legal intake, docket, evidence, filing-portal, and AI review signals into the 4D input lane. Route outputs to attorney review, workstep optimization, docket updates, or product launch gates.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "legal-services",
+        "domainTags": [
+          "legal-services",
+          "trademark-workflow"
+        ],
+        "family": "legal-services-generated",
+        "machineCode": "lsx013",
+        "capabilityTags": [
+          "copyright-workflow-agent",
+          "legal-services-trademark-workflow",
+          "legal-services-trademark-workflow-knockout-search-review",
+          "trademark-workflow"
+        ],
+        "workflowTags": [
+          "ai-trigger",
+          "copyright",
+          "dispatchable-agent",
+          "intellectual-property",
+          "knockout-search-review",
+          "legal-services-generated",
+          "productization",
+          "provisional-patent",
+          "trademark"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ai-trigger",
+          "ces-sequences",
+          "ces-sequences-4",
+          "copyright",
+          "copyright-workflow-agent",
+          "dispatchable-agent",
+          "input-sequences",
+          "input-sequences-5",
+          "intellectual-property",
+          "knockout-search-review",
+          "legal-services",
+          "legal-services-generated",
+          "legal-services-trademark-workflow",
+          "legal-services-trademark-workflow-knockout-search-review",
+          "lsx013",
+          "machine-interconnect",
+          "productization",
+          "provisional-patent",
+          "startup-loadable",
+          "trademark",
+          "trademark-workflow"
+        ]
+      },
+      "upstreamMachines": [
+        "Legal Services Trademark Workflow Distinctiveness Screening"
+      ],
+      "upstreamMachine": "Legal Services Trademark Workflow Distinctiveness Screening",
+      "downstreamMachines": [
+        "Legal Services Trademark Workflow Goods Services Classification"
+      ],
+      "workflowConnectionPolicy": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "legal-services-workflow-interconnect-update",
+        "primaryConnectionMode": "perceptual-output-overlap",
+        "commonActionMode": "metadata-dispatch-route when a machine participates in more than one common workflow action",
+        "commonActions": [
+          "ai-agent-assist",
+          "attorney-review",
+          "commercialization-and-enforcement",
+          "conflict-and-engagement-control",
+          "docket-integrity",
+          "evidence-preservation",
+          "filing-portal-readiness",
+          "matter-intake",
+          "portfolio-summary-and-learning"
+        ]
+      },
+      "workflowConnections": [
+        {
+          "type": "perceptual-output-overlap",
+          "action": "primary-controlled-workflow-step",
+          "targetMachine": "Legal Services Trademark Workflow Goods Services Classification",
+          "targetInputSpace": "[2147:2151]",
+          "description": "Machine output vector is written into the target machine input lane to advance the legal workflow."
+        },
+        {
+          "type": "metadata-dispatch-route",
+          "action": "attorney-review",
+          "targetMachine": "Legal Services AI Assisted Legal Operations Risk Memo Synthesizer",
+          "targetInputSpace": "[2467:2471]",
+          "description": "Common legal workflow action documents a dispatch/coordination route while preserving the primary vector lane."
+        },
+        {
+          "type": "metadata-dispatch-route",
+          "action": "ai-agent-assist",
+          "targetMachine": "Legal Services AI Assisted Legal Operations Prior Art Search Agent Dispatcher",
+          "targetInputSpace": "[2451:2455]",
+          "description": "Common legal workflow action documents a dispatch/coordination route while preserving the primary vector lane."
+        }
+      ],
+      "perceptualInterconnect": true,
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "legal-operations",
+        "runbook": "https://runbooks.example.org/legal-services/lsx013_trademark-workflow-knockout-search-review",
+        "escalationPolicy": "pagerduty:legal-ops",
+        "contact": {
+          "primary": "legal-operations-primary@example.org",
+          "secondary": "legal-operations-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"legal-services\".  Review and tune the routing as the team owning LSX013_trademark-workflow-knockout-search-review matures."
+      },
+      "triggerConfig": {
+        "processId": "LSX013_TRADEMARK_WORKFLOW_KNOCKOUT_SEARCH_REVIEW",
+        "processName": "Legal Services Trademark Workflow Knockout Search Review",
+        "rules": [
+          {
+            "sequenceId": "lsx-013-attorney-review",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Knockout Search Review: INCOMPLETE_OR_RISK -> ATTORNEY_REVIEW"
+          },
+          {
+            "sequenceId": "lsx-013-optimize",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Knockout Search Review: OPTIMIZATION_WINDOW -> OPTIMIZE_WORKSTEP"
+          },
+          {
+            "sequenceId": "lsx-013-docket",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Knockout Search Review: DOCKET_PRESSURE -> DOCKET_ACTION"
+          },
+          {
+            "sequenceId": "lsx-013-ready",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Knockout Search Review: READY -> READY_FOR_NEXT_STEP"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 2139,
+        "length": 4
+      },
+      "output": {
+        "offset": 2147,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "lsx-013-attorney-review",
+        "name": "Knockout Search Review: INCOMPLETE_OR_RISK -> ATTORNEY_REVIEW",
+        "metadata": {
+          "description": "Escalates when facts, rights, or deadline pressure require attorney review.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "lsx-013-risk-watch",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "nextVectorIds": [
+              "lsx-013-review-needed"
+            ]
+          },
+          {
+            "id": "lsx-013-review-needed",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "outputVectors": [
+              {
+                "id": "lsx-013-review-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route knockout search review to attorney review for deadline, ownership, or rights-risk triage."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "lsx-013-optimize",
+        "name": "Knockout Search Review: OPTIMIZATION_WINDOW -> OPTIMIZE_WORKSTEP",
+        "metadata": {
+          "description": "Fires when the matter can proceed more efficiently through AI-assisted workflow optimization.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "lsx-013-optimization",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "lsx-013-optimize-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch copyright_workflow_agent to optimize the next workstep for knockout search review."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "lsx-013-docket",
+        "name": "Knockout Search Review: DOCKET_PRESSURE -> DOCKET_ACTION",
+        "metadata": {
+          "description": "Creates a docket update or checklist task for the next controlled step.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "lsx-013-docket-needed",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "lsx-013-docket-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Create or update docket/checklist tasks for knockout search review."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "lsx-013-ready",
+        "name": "Knockout Search Review: READY -> READY_FOR_NEXT_STEP",
+        "metadata": {
+          "description": "Signals that facts, rights posture, timing, and commercialization readiness are aligned.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "lsx-013-ready-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "lsx-013-ready-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Mark knockout search review ready for the next controlled workflow step."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Attorney review escalation",
+        "description": "Risk or missing rights facts require attorney review.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "attorney-review"
+        }
+      },
+      {
+        "name": "Optimize workstep",
+        "description": "Matter is suitable for AI-assisted workflow optimization.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "optimize-workstep"
+        }
+      },
+      {
+        "name": "Docket action",
+        "description": "Deadline or filing pressure requires docket/checklist action.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "docket-action"
+        }
+      },
+      {
+        "name": "Ready for next step",
+        "description": "Matter is ready to advance to the next controlled step.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "ready-for-next-step"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Initial risk-watch state arms escalation without completing the sequence.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

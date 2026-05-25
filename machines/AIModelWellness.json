@@ -1,0 +1,684 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "ai-model-wellness",
+    "name": "AI Model Wellness Monitor",
+    "description": "Monitors AI model serving health — tracks inference error rate, latency SLO compliance, model accuracy drift, and memory leak indicators to detect model degradation before user impact.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "gte",
+    "perceptualMapping": {
+      "input": {
+        "offset": 272,
+        "length": 4
+      },
+      "output": {
+        "offset": 304,
+        "length": 6
+      },
+      "bitsPerElement": 8
+    },
+    "metadata": {
+      "category": "ai-services",
+      "domain": "AI Infrastructure — Model Serving Health",
+      "tags": [
+        "ai-infrastructure",
+        "ai-infrastructure-model-serving-health",
+        "ai-model-wellness-monitor",
+        "ai-services",
+        "ai-trigger",
+        "aimodel-wellness",
+        "ces-sequences",
+        "ces-sequences-2",
+        "drift",
+        "inference",
+        "input-sequences",
+        "input-sequences-3",
+        "model-serving",
+        "model-serving-health",
+        "slo",
+        "startup-loadable"
+      ],
+      "inputDimensions": [
+        {
+          "index": 0,
+          "name": "inference_error_rate",
+          "description": "0=no errors, 1=complete failure (all requests erroring)"
+        },
+        {
+          "index": 1,
+          "name": "latency_slo_ratio",
+          "description": "0=at or below SLO, 1=severely exceeding SLO (e.g., 10x target latency)"
+        },
+        {
+          "index": 2,
+          "name": "accuracy_drift_score",
+          "description": "0=no concept drift, 1=severe model staleness/distribution shift"
+        },
+        {
+          "index": 3,
+          "name": "memory_leak_score",
+          "description": "0=stable memory, 1=rapid memory growth (leak indicator)"
+        }
+      ],
+      "outputDimensions": [
+        {
+          "index": 0,
+          "name": "STATUS_HEALTHY"
+        },
+        {
+          "index": 1,
+          "name": "STATUS_DEGRADED"
+        },
+        {
+          "index": 2,
+          "name": "STATUS_CRITICAL"
+        },
+        {
+          "index": 3,
+          "name": "STATUS_FAILED"
+        },
+        {
+          "index": 4,
+          "name": "ACT_REFRESH_MODEL_WEIGHTS"
+        },
+        {
+          "index": 5,
+          "name": "ACT_FAILOVER_TO_BACKUP"
+        }
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "ai-services",
+        "domainTags": [
+          "ai-infrastructure",
+          "ai-services",
+          "model-serving-health"
+        ],
+        "family": "ai-model-wellness-monitor",
+        "machineCode": "aimodel-wellness",
+        "capabilityTags": [],
+        "workflowTags": [
+          "ai-infrastructure-model-serving-health",
+          "ai-model-wellness-monitor",
+          "ai-trigger",
+          "aimodel-wellness",
+          "drift",
+          "inference",
+          "model-serving",
+          "slo"
+        ],
+        "integrationTags": [
+          "ai-services"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "input-sequences",
+          "input-sequences-3",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ai-infrastructure",
+          "ai-infrastructure-model-serving-health",
+          "ai-model-wellness-monitor",
+          "ai-services",
+          "ai-trigger",
+          "aimodel-wellness",
+          "ces-sequences",
+          "ces-sequences-2",
+          "drift",
+          "inference",
+          "input-sequences",
+          "input-sequences-3",
+          "model-serving",
+          "model-serving-health",
+          "slo",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "ml-platform-on-call",
+        "runbook": "https://runbooks.example.org/ai-services/aimodelwellness",
+        "escalationPolicy": "pagerduty:ml-platform",
+        "contact": {
+          "primary": "ml-platform-on-call-primary@example.org",
+          "secondary": "ml-platform-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 300
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"ai-services\".  Review and tune the routing as the team owning AIModelWellness matures."
+      },
+      "triggerConfig": {
+        "processId": "AIMODELWELLNESS",
+        "processName": "AI Model Wellness Monitor",
+        "rules": [
+          {
+            "sequenceId": "aimw-model-degradation",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Model wellness HEALTHY — error rate nominal, SLOs met, no drift detected"
+          },
+          {
+            "sequenceId": "aimw-model-degradation",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Model wellness DEGRADED — error rate rising, SLO p99 latency exceeding target"
+          },
+          {
+            "sequenceId": "aimw-model-degradation",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Model wellness CRITICAL — significant SLO violations, accuracy drift confirmed"
+          },
+          {
+            "sequenceId": "aimw-model-degradation",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Action: Trigger model weight refresh and hot-reload from latest checkpoint"
+          },
+          {
+            "sequenceId": "aimw-model-degradation",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Model wellness FAILED — serving effectively down, user impact severe"
+          },
+          {
+            "sequenceId": "aimw-model-degradation",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Action: Emergency model reload from last known-good checkpoint"
+          },
+          {
+            "sequenceId": "aimw-model-degradation",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Action: Failover to backup model replica, page on-call ML engineer"
+          },
+          {
+            "sequenceId": "aimw-latency-breach",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Latency SLO BREACH — p99 inference latency exceeding SLO despite normal error rate"
+          },
+          {
+            "sequenceId": "aimw-latency-breach",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Action: Refresh model instance to clear potential memory fragmentation or KV cache bloat"
+          }
+        ]
+      }
+    },
+    "sequences": [
+      {
+        "id": "aimw-model-degradation",
+        "name": "Model Wellness Degradation",
+        "description": "4-step degradation: HEALTHY → DEGRADED → CRITICAL → FAILED as model serving metrics progressively deteriorate",
+        "vectors": [
+          {
+            "id": "aimw-healthy",
+            "isInitial": true,
+            "nextVectorIds": [
+              "aimw-degraded"
+            ],
+            "elements": [
+              {
+                "value": 0.05,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.12,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.08,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aimw-out-healthy",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Model wellness HEALTHY — error rate nominal, SLOs met, no drift detected",
+                  "severity": "INFO"
+                }
+              }
+            ]
+          },
+          {
+            "id": "aimw-degraded",
+            "isInitial": false,
+            "nextVectorIds": [
+              "aimw-critical"
+            ],
+            "elements": [
+              {
+                "value": 0.58,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aimw-out-degraded",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Model wellness DEGRADED — error rate rising, SLO p99 latency exceeding target",
+                  "severity": "WARNING"
+                }
+              }
+            ]
+          },
+          {
+            "id": "aimw-critical",
+            "isInitial": false,
+            "nextVectorIds": [
+              "aimw-failed"
+            ],
+            "elements": [
+              {
+                "value": 0.78,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.8,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.75,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.72,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aimw-out-critical",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Model wellness CRITICAL — significant SLO violations, accuracy drift confirmed",
+                  "severity": "CRITICAL"
+                }
+              },
+              {
+                "id": "aimw-act-refresh",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Action: Trigger model weight refresh and hot-reload from latest checkpoint",
+                  "severity": "ACTION"
+                }
+              }
+            ]
+          },
+          {
+            "id": "aimw-failed",
+            "isInitial": false,
+            "nextVectorIds": [],
+            "elements": [
+              {
+                "value": 0.92,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.94,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.88,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aimw-out-failed",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Model wellness FAILED — serving effectively down, user impact severe",
+                  "severity": "EMERGENCY"
+                }
+              },
+              {
+                "id": "aimw-act-refresh-crit",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Action: Emergency model reload from last known-good checkpoint",
+                  "severity": "ACTION"
+                }
+              },
+              {
+                "id": "aimw-act-failover",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "Action: Failover to backup model replica, page on-call ML engineer",
+                  "severity": "ACTION"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "aimw-latency-breach",
+        "name": "Latency SLO Breach Alert",
+        "description": "2-step detection: NOMINAL_LATENCY → SLO_BREACH — fires when latency spikes HIGH while error rate and drift remain LOW",
+        "vectors": [
+          {
+            "id": "aimw-lat-nominal",
+            "isInitial": true,
+            "nextVectorIds": [
+              "aimw-lat-breach"
+            ],
+            "elements": [
+              {
+                "value": 0.08,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.15,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.12,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": []
+          },
+          {
+            "id": "aimw-lat-breach",
+            "isInitial": false,
+            "nextVectorIds": [],
+            "elements": [
+              {
+                "value": 0.08,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.82,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.12,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aimw-out-lat-warn",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Latency SLO BREACH — p99 inference latency exceeding SLO despite normal error rate",
+                  "severity": "WARNING"
+                }
+              },
+              {
+                "id": "aimw-act-refresh-lat",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Action: Refresh model instance to clear potential memory fragmentation or KV cache bloat",
+                  "severity": "ACTION"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "id": "aimw-seq-1",
+        "name": "Healthy Model Operation",
+        "description": "All serving metrics well within acceptable ranges — model operating nominally",
+        "vectors": [
+          [
+            0.04,
+            0.1,
+            0.08,
+            0.06
+          ],
+          [
+            0.05,
+            0.12,
+            0.1,
+            0.08
+          ],
+          [
+            0.06,
+            0.14,
+            0.11,
+            0.07
+          ]
+        ]
+      },
+      {
+        "id": "aimw-seq-2",
+        "name": "Model Degradation to Failure",
+        "description": "Progressive model health decline from healthy baseline through degraded and critical to complete failure",
+        "metadata": {
+          "expectedOutputs": 4,
+          "scenario": "Model drift after training data distribution shift causing cascading serving failures"
+        },
+        "vectors": [
+          [
+            0.05,
+            0.12,
+            0.1,
+            0.08
+          ],
+          [
+            0.58,
+            0.62,
+            0.55,
+            0.6
+          ],
+          [
+            0.78,
+            0.8,
+            0.75,
+            0.72
+          ],
+          [
+            0.92,
+            0.94,
+            0.9,
+            0.88
+          ]
+        ]
+      },
+      {
+        "id": "aimw-seq-3",
+        "name": "Latency SLO Breach",
+        "description": "Latency spikes while error rate and accuracy remain acceptable — isolated infrastructure issue",
+        "metadata": {
+          "expectedOutputs": 1,
+          "scenario": "KV cache exhaustion in transformer model causing inference latency spike"
+        },
+        "vectors": [
+          [
+            0.06,
+            0.14,
+            0.1,
+            0.09
+          ],
+          [
+            0.08,
+            0.84,
+            0.12,
+            0.1
+          ]
+        ]
+      }
+    ]
+  }
+}

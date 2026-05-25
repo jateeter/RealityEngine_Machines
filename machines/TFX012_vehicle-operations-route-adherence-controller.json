@@ -1,0 +1,641 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Transportation Fleet Vehicle Operations Route Adherence Controller",
+    "description": "Public transportation fleet machine for route adherence controller in the vehicle operations workstream. It monitors schedule deviation, detour state, dwell variance, and control-center action for a 100-bus 24/7 operation and emits AI-triggered outputs for rider experience, operations, maintenance, cleaning, security, and predictive fleet-flow management.",
+    "metadata": {
+      "category": "transportation",
+      "domain": "Transportation Fleet - Vehicle Operations",
+      "author": "Reality Engine",
+      "fleetSize": 100,
+      "operationalFocus": "Route Adherence Controller",
+      "workstream": "Vehicle Operations",
+      "focusDescription": "schedule deviation, detour state, dwell variance, and control-center action",
+      "upstreamMachine": "Transportation Fleet Vehicle Operations Bus Telematics Health",
+      "upstreamOutputRegion": "[3283:3287]",
+      "downstreamMachines": [
+        "Transportation Fleet Vehicle Operations Headway Balancer"
+      ],
+      "dispatchableAgent": "transit_planning_agent",
+      "aiTrigger": "transportation-fleet-vehicle-operations-route-adherence-controller",
+      "predictiveFlowTrigger": "predictive-flow-vehicle-operations-route-adherence-controller",
+      "agentActions": [
+        "Dispatch transit_planning_agent for critical 100-bus fleet intervention on route adherence controller.",
+        "Trigger predictive flow management for route adherence controller using rider, vehicle, and route context.",
+        "Create maintenance, cleaning, security, or service task for route adherence controller.",
+        "Keep 24/7 monitoring active for route adherence controller."
+      ],
+      "criticalEventSequenceLength": 5,
+      "criticalEventSequenceLengthBasis": "Every TFX machine has one critical inputSequence containing exactly 5 vectors; the generated family average is 5.0.",
+      "inputSpace": "4D binary at [3283:3287]",
+      "outputSpace": "4D binary at [3287:3291]: [1,0,0,0]=CRITICAL_EVENT, [0,1,0,0]=PREDICTIVE_FLOW_ADJUST, [0,0,1,0]=OPS_TASK, [0,0,0,1]=SERVICE_NOMINAL",
+      "inputSemantics": [
+        "service reliability",
+        "rider impact",
+        "asset readiness",
+        "safety/security risk"
+      ],
+      "tags": [
+        "100-bus-fleet",
+        "24x7-operations",
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-4",
+        "cleaning",
+        "dispatchable-agent",
+        "input-sequences",
+        "input-sequences-5",
+        "machine-interconnect",
+        "maintenance",
+        "predictive-flow",
+        "predictive-flow-vehicle-operations-route-adherence-controller",
+        "public-transit",
+        "rider-experience",
+        "route-adherence-controller",
+        "security",
+        "startup-loadable",
+        "tfx012",
+        "transit-planning-agent",
+        "transportation",
+        "transportation-fleet",
+        "transportation-fleet-vehicle-operations",
+        "transportation-fleet-vehicle-operations-route-adherence-controller",
+        "transportation-generated",
+        "vehicle-monitoring",
+        "vehicle-operations"
+      ],
+      "sequenceCount": 4,
+      "reuseGuideline": "Map AVL, APC, CAD/AVL, fare, work-order, cleaning, security, rider feedback, and depot signals into the 4D input lane. Route outputs to dispatch, service control, maintenance, cleaning, security, customer communications, or executive fleet optimization agents.",
+      "downstreamPattern": "Output region [3287:3291] feeds Transportation Fleet Vehicle Operations Headway Balancer for predictive fleet-flow management.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "transportation",
+        "domainTags": [
+          "transportation",
+          "transportation-fleet",
+          "vehicle-operations"
+        ],
+        "family": "transportation-generated",
+        "machineCode": "tfx012",
+        "capabilityTags": [
+          "maintenance",
+          "predictive-flow",
+          "predictive-flow-vehicle-operations-route-adherence-controller",
+          "vehicle-monitoring"
+        ],
+        "workflowTags": [
+          "100-bus-fleet",
+          "24x7-operations",
+          "ai-trigger",
+          "cleaning",
+          "dispatchable-agent",
+          "public-transit",
+          "rider-experience",
+          "route-adherence-controller",
+          "security",
+          "transit-planning-agent",
+          "transportation-fleet-vehicle-operations",
+          "transportation-generated"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "100-bus-fleet",
+          "24x7-operations",
+          "ai-trigger",
+          "ces-sequences",
+          "ces-sequences-4",
+          "cleaning",
+          "dispatchable-agent",
+          "input-sequences",
+          "input-sequences-5",
+          "machine-interconnect",
+          "maintenance",
+          "predictive-flow",
+          "predictive-flow-vehicle-operations-route-adherence-controller",
+          "public-transit",
+          "rider-experience",
+          "route-adherence-controller",
+          "security",
+          "startup-loadable",
+          "tfx012",
+          "transit-planning-agent",
+          "transportation",
+          "transportation-fleet",
+          "transportation-fleet-vehicle-operations",
+          "transportation-fleet-vehicle-operations-route-adherence-controller",
+          "transportation-generated",
+          "vehicle-monitoring",
+          "vehicle-operations"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "transit-operations",
+        "runbook": "https://runbooks.example.org/transportation/tfx012_vehicle-operations-route-adherence-controller",
+        "escalationPolicy": "pagerduty:transit-ops",
+        "contact": {
+          "primary": "transit-operations-primary@example.org",
+          "secondary": "transit-operations-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 300,
+          "error": 120
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"transportation\".  Review and tune the routing as the team owning TFX012_vehicle-operations-route-adherence-controller matures."
+      },
+      "triggerConfig": {
+        "processId": "TFX012_VEHICLE_OPERATIONS_ROUTE_ADHERENCE_CONTROLLER",
+        "processName": "Transportation Fleet Vehicle Operations Route Adherence Controller",
+        "rules": [
+          {
+            "sequenceId": "tfx-012-critical-event",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Route Adherence Controller: OBSERVE -> WATCH -> DEGRADED -> ESCALATING -> CRITICAL_EVENT"
+          },
+          {
+            "sequenceId": "tfx-012-predictive-flow",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Route Adherence Controller: FLOW_RISK -> PREDICTIVE_FLOW_ADJUST"
+          },
+          {
+            "sequenceId": "tfx-012-ops-task",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Route Adherence Controller: TASK_NEEDED -> OPS_TASK"
+          },
+          {
+            "sequenceId": "tfx-012-nominal",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Route Adherence Controller: NOMINAL -> SERVICE_NOMINAL"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 3283,
+        "length": 4
+      },
+      "output": {
+        "offset": 3287,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "tfx-012-critical-event",
+        "name": "Route Adherence Controller: OBSERVE -> WATCH -> DEGRADED -> ESCALATING -> CRITICAL_EVENT",
+        "metadata": {
+          "description": "Five-step critical event sequence for 24/7 transportation operations.",
+          "sequenceLength": 5,
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "tfx-012-observe",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "stage": "observe"
+            },
+            "nextVectorIds": [
+              "tfx-012-watch"
+            ]
+          },
+          {
+            "id": "tfx-012-watch",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "stage": "watch"
+            },
+            "nextVectorIds": [
+              "tfx-012-degraded"
+            ]
+          },
+          {
+            "id": "tfx-012-degraded",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "stage": "degraded"
+            },
+            "nextVectorIds": [
+              "tfx-012-escalating"
+            ]
+          },
+          {
+            "id": "tfx-012-escalating",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "stage": "escalating"
+            },
+            "nextVectorIds": [
+              "tfx-012-critical"
+            ]
+          },
+          {
+            "id": "tfx-012-critical",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "stage": "critical"
+            },
+            "outputVectors": [
+              {
+                "id": "tfx-012-critical-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch transit_planning_agent for critical 100-bus fleet intervention on route adherence controller."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tfx-012-predictive-flow",
+        "name": "Route Adherence Controller: FLOW_RISK -> PREDICTIVE_FLOW_ADJUST",
+        "metadata": {
+          "description": "Triggers predictive flow management before rider impact becomes critical.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "tfx-012-flow-risk",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "tfx-012-flow-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Trigger predictive flow management for route adherence controller using rider, vehicle, and route context."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tfx-012-ops-task",
+        "name": "Route Adherence Controller: TASK_NEEDED -> OPS_TASK",
+        "metadata": {
+          "description": "Creates maintenance, cleaning, security, or operations tasking.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "tfx-012-task-needed",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "tfx-012-task-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Create maintenance, cleaning, security, or service task for route adherence controller."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tfx-012-nominal",
+        "name": "Route Adherence Controller: NOMINAL -> SERVICE_NOMINAL",
+        "metadata": {
+          "description": "Confirms service is in an acceptable 24/7 operating band.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "tfx-012-nominal-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "tfx-012-nominal-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Keep 24/7 monitoring active for route adherence controller."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Critical event sequence",
+        "description": "Five-step degradation path ending in a critical event output.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0
+          ],
+          [
+            1,
+            1,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "critical-event",
+          "sequenceLength": 5
+        }
+      },
+      {
+        "name": "Predictive flow adjustment",
+        "description": "Predicts service-flow pressure before a critical event.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "predictive-flow-adjust"
+        }
+      },
+      {
+        "name": "Operations task",
+        "description": "Creates maintenance, cleaning, security, or operational tasking.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "ops-task"
+        }
+      },
+      {
+        "name": "Nominal service",
+        "description": "Confirms stable transportation service.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "service-nominal"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Initial critical-event observation arms the sequence without firing.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

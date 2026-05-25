@@ -1,0 +1,291 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Logical Infrastructure Ready Before Valid",
+    "description": "Reusable digital-logic infrastructure machine for ASIC-style connective tissue. It implements the temporal regular expression `READY+ VALID`. Detects ready asserted before valid arrives. Reads a 4D control/status lane at [4041:4045] and emits a 2D match lane at [4045:4047].",
+    "metadata": {
+      "category": "digital-logic",
+      "domain": "Digital Logic - Infrastructure",
+      "author": "Reality Engine",
+      "regularExpression": "READY+ VALID",
+      "asicPattern": "Ready Before Valid",
+      "reuseRole": "general-purpose logical connective tissue",
+      "inputSpace": "4D binary at [4041:4045]",
+      "outputSpace": "2D binary at [4045:4047]: [1,0]=MATCH, [0,1]=CLEAR_OR_AVAILABLE",
+      "inputSemantics": [
+        "primary",
+        "secondary",
+        "tertiary",
+        "qualifier"
+      ],
+      "tags": [
+        "asic-pattern",
+        "ces-sequences",
+        "ces-sequences-1",
+        "digital-logic",
+        "digital-logic-generated",
+        "digital-logic-infrastructure",
+        "dlx016",
+        "infrastructure",
+        "input-sequences",
+        "input-sequences-2",
+        "logical-infrastructure",
+        "logical-infrastructure-ready-before-valid",
+        "ready-before-valid",
+        "regular-expression",
+        "startup-loadable"
+      ],
+      "sequenceCount": 1,
+      "reuseGuideline": "Use this machine by mapping upstream source or machine output bits into its 4D input lane. Map its 2D output lane into downstream machine input when a reusable temporal guard, latch trigger, handshake detector, CDC detector, bus phase detector, or safety qualifier is needed.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "digital-logic",
+        "domainTags": [
+          "digital-logic",
+          "infrastructure"
+        ],
+        "family": "digital-logic-generated",
+        "machineCode": "dlx016",
+        "capabilityTags": [],
+        "workflowTags": [
+          "asic-pattern",
+          "digital-logic-generated",
+          "digital-logic-infrastructure",
+          "logical-infrastructure",
+          "ready-before-valid",
+          "regular-expression"
+        ],
+        "integrationTags": [
+          "digital-logic"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-1",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "asic-pattern",
+          "ces-sequences",
+          "ces-sequences-1",
+          "digital-logic",
+          "digital-logic-generated",
+          "digital-logic-infrastructure",
+          "dlx016",
+          "infrastructure",
+          "input-sequences",
+          "input-sequences-2",
+          "logical-infrastructure",
+          "logical-infrastructure-ready-before-valid",
+          "ready-before-valid",
+          "regular-expression",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "reliability-engineering",
+        "runbook": "https://runbooks.example.org/digital-logic/dlx016_ready-before-valid",
+        "escalationPolicy": "slack:#reliability-test",
+        "contact": {
+          "primary": "reliability-engineering-primary@example.org",
+          "secondary": "reliability-engineering-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"digital-logic\".  Review and tune the routing as the team owning DLX016_ready-before-valid matures."
+      },
+      "triggerConfig": {
+        "processId": "DLX016_READY_BEFORE_VALID",
+        "processName": "Logical Infrastructure Ready Before Valid",
+        "rules": [
+          {
+            "sequenceId": "dlx-016-match",
+            "outputMatches": [
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Ready Before Valid matched regular expression READY+ VALID."
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4041,
+        "length": 4
+      },
+      "output": {
+        "offset": 4045,
+        "length": 2
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "dlx-016-match",
+        "name": "Ready Before Valid: READY+ VALID -> MATCH",
+        "metadata": {
+          "description": "Detects ready asserted before valid arrives.",
+          "regularExpression": "READY+ VALID",
+          "output": "[1,0]"
+        },
+        "vectors": [
+          {
+            "id": "dlx-016-step-1",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "STEP_1",
+              "description": "Ready Before Valid regex step 1: [0, 1, 0, 0]"
+            },
+            "nextVectorIds": [
+              "dlx-016-step-2"
+            ]
+          },
+          {
+            "id": "dlx-016-step-2",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "STEP_2",
+              "description": "Ready Before Valid regex step 2: [0, 1, 0, 0]"
+            },
+            "nextVectorIds": [
+              "dlx-016-step-3"
+            ]
+          },
+          {
+            "id": "dlx-016-step-3",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "STEP_3",
+              "description": "Ready Before Valid regex step 3: [1, 1, 0, 0]"
+            },
+            "outputVectors": [
+              {
+                "id": "dlx-016-match-output",
+                "vector": [
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Ready Before Valid matched regular expression READY+ VALID.",
+                  "state": "MATCH"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Ready Before Valid match path",
+        "description": "Validates regular expression READY+ VALID.",
+        "vectors": [
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            1,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0]",
+          "scenario": "ready-before-valid"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Single baseline sample does not complete the expression.",
+        "vectors": [
+          [
+            0,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

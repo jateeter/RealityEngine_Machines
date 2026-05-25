@@ -1,0 +1,506 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Community Services Courts Diversion And Victim Services Protection Order Support",
+    "description": "Community-services machine for protection order support in the courts diversion and victim services workstream. It monitors order status, service completion, safety planning, and violation risk and emits AI-triggered actions for health and human services, law enforcement/public safety coordination, homelessness response, and city operations.",
+    "metadata": {
+      "category": "community-services",
+      "domain": "Community Services - Courts Diversion And Victim Services",
+      "author": "Reality Engine",
+      "workstream": "Courts Diversion And Victim Services",
+      "operationalFocus": "Protection Order Support",
+      "focusDescription": "order status, service completion, safety planning, and violation risk",
+      "upstreamMachine": "Community Services Courts Diversion And Victim Services Victim Advocate Assignment",
+      "upstreamDomain": "community-services",
+      "upstreamOutputRegion": "[1176:1180]",
+      "upstreamPurpose": null,
+      "downstreamMachines": [
+        "Community Services Courts Diversion And Victim Services Reentry Services Coordinator"
+      ],
+      "crossDomainInterconnect": false,
+      "crossDomainOutputTarget": null,
+      "crossDomainOutputPurpose": null,
+      "dispatchableAgent": "community_intake_agent",
+      "aiTrigger": "community-services-courts-diversion-and-victim-services-protection-order-support",
+      "predictiveFlowTrigger": "community-services-predictive-courts-diversion-and-victim-services-protection-order-support",
+      "agentActions": [
+        "Dispatch community_intake_agent for urgent community-services intervention on protection order support.",
+        "Coordinate health, housing, public safety, transportation, or city service partners for protection order support.",
+        "Create field work order or mobile team task for protection order support.",
+        "Maintain monitored service path for protection order support."
+      ],
+      "inputSpace": "4D binary at [1176:1180]",
+      "outputSpace": "4D binary at [1180:1184]: [1,0,0,0]=URGENT_RESPONSE, [0,1,0,0]=COORDINATE_SERVICES, [0,0,1,0]=FIELD_WORK_ORDER, [0,0,0,1]=STABLE_SERVICE_PATH",
+      "inputSemantics": [
+        "resident need severity",
+        "eligibility and documentation readiness",
+        "field capacity or operational readiness",
+        "safety, mobility, and health risk"
+      ],
+      "tags": [
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-4",
+        "city-services",
+        "community-intake-agent",
+        "community-services",
+        "community-services-courts-diversion-and-victim-services",
+        "community-services-courts-diversion-and-victim-services-protection-order-support",
+        "community-services-generated",
+        "community-services-predictive-courts-diversion-and-victim-services-protection-order-support",
+        "courts-diversion-and-victim-services",
+        "cross-domain",
+        "csx046",
+        "dispatchable-agent",
+        "health-and-human-services",
+        "homelessness",
+        "input-sequences",
+        "input-sequences-5",
+        "law-enforcement",
+        "machine-interconnect",
+        "protection-order-support",
+        "public-safety",
+        "startup-loadable"
+      ],
+      "sequenceCount": 5,
+      "reuseGuideline": "Map 311, case-management, CAD/RMS, shelter HMIS, benefit enrollment, outreach, public health, and transit-access signals into the 4D input lane. Route outputs to case workers, mobile crisis, public safety, housing navigators, field crews, transportation dispatch, or health-service agents.",
+      "downstreamPattern": "Output region [1180:1184] feeds Community Services Courts Diversion And Victim Services Reentry Services Coordinator.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "community-services",
+          "courts-diversion-and-victim-services"
+        ],
+        "family": "community-services-generated",
+        "machineCode": "csx046",
+        "capabilityTags": [
+          "ai-triggers",
+          "community-services-predictive-courts-diversion-and-victim-services-protection-order-support",
+          "dispatchable-agents"
+        ],
+        "workflowTags": [
+          "ai-trigger",
+          "city-services",
+          "community-intake-agent",
+          "community-services-courts-diversion-and-victim-services",
+          "community-services-generated",
+          "cross-domain",
+          "dispatchable-agent",
+          "health-and-human-services",
+          "homelessness",
+          "law-enforcement",
+          "protection-order-support",
+          "public-safety"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ai-trigger",
+          "ai-triggers",
+          "ces-sequences",
+          "ces-sequences-4",
+          "city-services",
+          "community-intake-agent",
+          "community-services",
+          "community-services-courts-diversion-and-victim-services",
+          "community-services-courts-diversion-and-victim-services-protection-order-support",
+          "community-services-generated",
+          "community-services-predictive-courts-diversion-and-victim-services-protection-order-support",
+          "courts-diversion-and-victim-services",
+          "cross-domain",
+          "csx046",
+          "dispatchable-agent",
+          "dispatchable-agents",
+          "health-and-human-services",
+          "homelessness",
+          "input-sequences",
+          "input-sequences-5",
+          "law-enforcement",
+          "machine-interconnect",
+          "protection-order-support",
+          "public-safety",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/csx046_courts-diversion-and-victim-services-protection-order-support",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning CSX046_courts-diversion-and-victim-services-protection-order-support matures."
+      },
+      "triggerConfig": {
+        "processId": "CSX046_COURTS_DIVERSION_AND_VICTIM_SERVICES_PROTECTION_ORDER_SUPPORT",
+        "processName": "Community Services Courts Diversion And Victim Services Protection Order Support",
+        "rules": [
+          {
+            "sequenceId": "csx-046-urgent-response",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Protection Order Support: WATCH -> URGENT_RESPONSE"
+          },
+          {
+            "sequenceId": "csx-046-coordinate-services",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Protection Order Support: COORDINATION_NEEDED -> COORDINATE_SERVICES"
+          },
+          {
+            "sequenceId": "csx-046-field-work-order",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Protection Order Support: FIELD_TASK_NEEDED -> FIELD_WORK_ORDER"
+          },
+          {
+            "sequenceId": "csx-046-stable-service-path",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Protection Order Support: STABLE_PATH -> STABLE_SERVICE_PATH"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1176,
+        "length": 4
+      },
+      "output": {
+        "offset": 1180,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "csx-046-urgent-response",
+        "name": "Protection Order Support: WATCH -> URGENT_RESPONSE",
+        "metadata": {
+          "description": "Escalates resident or field risk into urgent response.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-046-watch",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "nextVectorIds": [
+              "csx-046-urgent"
+            ]
+          },
+          {
+            "id": "csx-046-urgent",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": false,
+            "outputVectors": [
+              {
+                "id": "csx-046-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch community_intake_agent for urgent community-services intervention on protection order support."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-046-coordinate-services",
+        "name": "Protection Order Support: COORDINATION_NEEDED -> COORDINATE_SERVICES",
+        "metadata": {
+          "description": "Triggers cross-agency coordination.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-046-coordinate",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-046-coordinate-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Coordinate health, housing, public safety, transportation, or city service partners for protection order support."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-046-field-work-order",
+        "name": "Protection Order Support: FIELD_TASK_NEEDED -> FIELD_WORK_ORDER",
+        "metadata": {
+          "description": "Creates a field crew, outreach, or mobile response task.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-046-field-task",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-046-field-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Create field work order or mobile team task for protection order support."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-046-stable-service-path",
+        "name": "Protection Order Support: STABLE_PATH -> STABLE_SERVICE_PATH",
+        "metadata": {
+          "description": "Confirms resident service path is stable and monitored.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "csx-046-stable",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-046-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Maintain monitored service path for protection order support."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Urgent response sequence",
+        "description": "Two-step community risk escalation ending in urgent response.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-response",
+          "sequenceLength": 2
+        }
+      },
+      {
+        "name": "Coordinate services",
+        "description": "Coordinates health, public safety, housing, transit, or city service partners.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "coordinate-services"
+        }
+      },
+      {
+        "name": "Field work order",
+        "description": "Creates a field response or outreach task.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "field-work-order"
+        }
+      },
+      {
+        "name": "Stable service path",
+        "description": "Confirms the resident or city service path is stable.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "stable-service-path"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Initial observation arms the urgent path without firing.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

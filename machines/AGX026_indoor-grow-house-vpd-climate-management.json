@@ -1,0 +1,574 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Agriculture Indoor Grow House VPD Climate Management",
+    "description": "Agriculture domain machine for indoor grow house operations focused on vpd climate management. It monitors temperature, relative humidity, VPD, and transpiration stability and emits AI-dispatchable outputs at [188:192] for automation, maintenance, and optimization workflows.",
+    "metadata": {
+      "category": "agriculture",
+      "domain": "Agriculture - Indoor Grow House",
+      "author": "Reality Engine",
+      "operationalFocus": "VPD Climate Management",
+      "focusDescription": "temperature, relative humidity, VPD, and transpiration stability",
+      "upstreamMachine": null,
+      "upstreamOutputRegion": null,
+      "predictiveManagementRole": "Primary source machine for vpd climate management predictive management signals.",
+      "aiTrigger": "indoor-grow-house-vpd-climate-management-risk-maintenance-or-optimization",
+      "dispatchableAgent": "growhouse_climate_agent",
+      "agentActions": [
+        "Dispatch growhouse_climate_agent to stabilize vpd climate management and record corrective action.",
+        "Run AI optimization for vpd climate management using the latest operating window and production targets.",
+        "Create preventive-maintenance work for vpd climate management and verify completion telemetry.",
+        "Continue automated monitoring for vpd climate management while preserving current setpoints."
+      ],
+      "outputSpace": "4D binary at [188:192]: [1,0,0,0]=URGENT_STABILIZE, [0,1,0,0]=OPTIMIZE_OPERATION, [0,0,1,0]=PREVENTIVE_MAINTENANCE, [0,0,0,1]=OPERATING_WINDOW_OK",
+      "tags": [
+        "agriculture",
+        "agriculture-generated",
+        "agriculture-indoor-grow-house",
+        "agriculture-indoor-grow-house-vpd-climate-management",
+        "agx026",
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-4",
+        "dispatchable-agent",
+        "growhouse-climate-agent",
+        "indoor-grow-house",
+        "indoor-grow-house-vpd-climate-management-risk-maintenance-or-optimization",
+        "input-sequences",
+        "input-sequences-5",
+        "machine-interconnect",
+        "maintenance",
+        "operational-management",
+        "startup-loadable",
+        "vpd-climate-management"
+      ],
+      "sequenceCount": 4,
+      "sensorNormalization": {
+        "process_stability_norm": "0.0=unstable or outside safe operating band; 0.5=watch band; 1.0=stable in target band",
+        "resource_efficiency_norm": "0.0=wasteful or constrained; 0.5=acceptable; 1.0=efficient and available",
+        "biosecurity_or_ipm_norm": "0.0=active biological threat; 0.5=mitigated watch state; 1.0=controlled and documented",
+        "maintenance_readiness_norm": "0.0=overdue or faulted; 0.5=service due soon; 1.0=maintained and verified"
+      },
+      "inputSemantics": [
+        "process stability",
+        "resource efficiency",
+        "biosecurity or IPM status",
+        "maintenance readiness"
+      ],
+      "downstreamMachines": [
+        "Agriculture Indoor Grow House Airflow Circulation"
+      ],
+      "downstreamPattern": "Output region [188:192] feeds Agriculture Indoor Grow House Airflow Circulation for predictive agriculture management.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "agriculture",
+        "domainTags": [
+          "agriculture",
+          "indoor-grow-house"
+        ],
+        "family": "agriculture-generated",
+        "machineCode": "agx026",
+        "capabilityTags": [
+          "ai-triggers",
+          "dispatchable-agents",
+          "indoor-grow-house-vpd-climate-management-risk-maintenance-or-optimization",
+          "maintenance"
+        ],
+        "workflowTags": [
+          "agriculture-generated",
+          "agriculture-indoor-grow-house",
+          "ai-trigger",
+          "dispatchable-agent",
+          "growhouse-climate-agent",
+          "operational-management",
+          "vpd-climate-management"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "agriculture",
+          "agriculture-generated",
+          "agriculture-indoor-grow-house",
+          "agriculture-indoor-grow-house-vpd-climate-management",
+          "agx026",
+          "ai-trigger",
+          "ai-triggers",
+          "ces-sequences",
+          "ces-sequences-4",
+          "dispatchable-agent",
+          "dispatchable-agents",
+          "growhouse-climate-agent",
+          "indoor-grow-house",
+          "indoor-grow-house-vpd-climate-management-risk-maintenance-or-optimization",
+          "input-sequences",
+          "input-sequences-5",
+          "machine-interconnect",
+          "maintenance",
+          "operational-management",
+          "startup-loadable",
+          "vpd-climate-management"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "agriculture-operations",
+        "runbook": "https://runbooks.example.org/agriculture/agx026_indoor-grow-house-vpd-climate-management",
+        "escalationPolicy": "pagerduty:ag-ops",
+        "contact": {
+          "primary": "agriculture-operations-primary@example.org",
+          "secondary": "agriculture-operations-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 3600,
+          "error": 900
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"agriculture\".  Review and tune the routing as the team owning AGX026_indoor-grow-house-vpd-climate-management matures."
+      },
+      "triggerConfig": {
+        "processId": "AGX026_INDOOR_GROW_HOUSE_VPD_CLIMATE_MANAGEMENT",
+        "processName": "Agriculture Indoor Grow House VPD Climate Management",
+        "rules": [
+          {
+            "sequenceId": "agx-026-urgent-stabilize",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Urgent stabilization required."
+          },
+          {
+            "sequenceId": "agx-026-optimize-operation",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Optimization workflow should run."
+          },
+          {
+            "sequenceId": "agx-026-preventive-maintenance",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Preventive maintenance required."
+          },
+          {
+            "sequenceId": "agx-026-operating-window-ok",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Operating window is stable."
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 184,
+        "length": 4
+      },
+      "output": {
+        "offset": 188,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "agx-026-urgent-stabilize",
+        "name": "VPD Climate Management: NORMAL -> WATCH -> CRITICAL -> URGENT_STABILIZE",
+        "metadata": {
+          "description": "Escalates from stable operation to a critical process or welfare risk.",
+          "path": "NORMAL -> WATCH -> CRITICAL",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "agx-026-normal",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "NORMAL",
+              "description": "Operating window is stable and maintenance is current."
+            },
+            "nextVectorIds": [
+              "agx-026-watch"
+            ]
+          },
+          {
+            "id": "agx-026-watch",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "WATCH",
+              "description": "Efficiency and maintenance signals are weakening."
+            },
+            "nextVectorIds": [
+              "agx-026-critical"
+            ]
+          },
+          {
+            "id": "agx-026-critical",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "CRITICAL",
+              "description": "Operation requires immediate stabilization and AI dispatch."
+            },
+            "outputVectors": [
+              {
+                "id": "agx-026-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Urgent stabilization required.",
+                  "action": "Dispatch growhouse_climate_agent to stabilize vpd climate management and record corrective action."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agx-026-optimize-operation",
+        "name": "VPD Climate Management: OPTIMIZATION_WINDOW -> OPTIMIZE_OPERATION",
+        "metadata": {
+          "description": "Fires when the process is safe but AI can improve yield, welfare, resource use, or labor timing.",
+          "pattern": "OPTIMIZATION_WINDOW",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "agx-026-optimize",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "OPTIMIZATION_WINDOW",
+              "description": "Optimization can improve the operating plan before risk accumulates."
+            },
+            "outputVectors": [
+              {
+                "id": "agx-026-optimize-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Optimization workflow should run.",
+                  "action": "Run AI optimization for vpd climate management using the latest operating window and production targets."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agx-026-preventive-maintenance",
+        "name": "VPD Climate Management: SERVICE_DUE -> PREVENTIVE_MAINTENANCE",
+        "metadata": {
+          "description": "Fires when service should be scheduled before a fault or production loss.",
+          "pattern": "SERVICE_DUE",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "agx-026-service-due",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "SERVICE_DUE",
+              "description": "Maintenance work should be created while the operation remains controllable."
+            },
+            "outputVectors": [
+              {
+                "id": "agx-026-maintenance-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Preventive maintenance required.",
+                  "action": "Create preventive-maintenance work for vpd climate management and verify completion telemetry."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agx-026-operating-window-ok",
+        "name": "VPD Climate Management: STABLE -> OPERATING_WINDOW_OK",
+        "metadata": {
+          "description": "Fires when the operation is stable and should continue under current automation settings.",
+          "pattern": "STABLE",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "agx-026-stable",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "STABLE",
+              "description": "Current setpoints are acceptable and no intervention is required."
+            },
+            "outputVectors": [
+              {
+                "id": "agx-026-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "Operating window is stable.",
+                  "action": "Continue automated monitoring for vpd climate management while preserving current setpoints."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Escalation to urgent stabilization",
+        "description": "A stable operation degrades through watch conditions and then reaches a critical state.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-stabilize"
+        }
+      },
+      {
+        "name": "Optimization opportunity",
+        "description": "AI can improve production, welfare, efficiency, or labor timing before critical risk appears.",
+        "vectors": [
+          [
+            0,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "optimize-operation"
+        }
+      },
+      {
+        "name": "Preventive maintenance required",
+        "description": "Maintenance should be scheduled before a preventable failure occurs.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "preventive-maintenance"
+        }
+      },
+      {
+        "name": "Stable operating window",
+        "description": "The process is inside the target operating band and should continue monitoring.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "operating-window-ok"
+        }
+      },
+      {
+        "name": "Normal baseline without output",
+        "description": "A single normal signal arms the escalation path without dispatching an agent.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "normal-baseline"
+        }
+      }
+    ]
+  }
+}

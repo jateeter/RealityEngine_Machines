@@ -1,0 +1,536 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Home Chronic Disease Monitor",
+    "description": "Monitors primary biomarker control, symptom burden, self-management capacity, and lifestyle adherence for adults managing one or more chronic conditions (diabetes, hypertension, COPD, heart failure) at home in low- and medium-income settings. Poor chronic disease control in home care populations is driven by compounding social stressors rather than clinical non-compliance. Output at [2019:2023] feeds the Home Mental Health Access Monitor, reflecting the bidirectional chronic disease — depression comorbidity pathway.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Home Health — Chronic Disease Management",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [2019:2023]: [1,0,0,0]=DISEASE_EXACERBATION, [0,1,0,0]=POOR_CONTROL, [0,0,1,0]=BORDERLINE_CONTROL, [0,0,0,1]=DISEASE_CONTROLLED",
+      "tags": [
+        "ces-sequences",
+        "ces-sequences-4",
+        "chronic-disease",
+        "chronic-disease-management",
+        "copd",
+        "diabetes",
+        "health-personal",
+        "home-chronic-disease-monitor",
+        "home-health",
+        "home-health-chronic-disease-management",
+        "hypertension",
+        "input-sequences",
+        "input-sequences-1",
+        "kleene-plus",
+        "low-income",
+        "self-management",
+        "startup-loadable"
+      ],
+      "sequenceCount": 4,
+      "populationFocus": "Adults with one or more chronic conditions; patients in home-based care programs; low-income adults with limited specialist access",
+      "sensorNormalization": {
+        "biomarker_control_norm": "0.0=critical out-of-range (A1c>10, BP>180/120, O2 sat<88%), 0.5=borderline control (A1c 7.5–9, BP 140–160/90–100), 1.0=target range maintained (A1c<7, BP<130/80)",
+        "symptom_burden_norm": "0.0=severe daily symptoms limiting function (daily dyspnea, chest pain, severe hypoglycemic episodes), 0.5=moderate but manageable with effort, 1.0=asymptomatic or minimal symptoms",
+        "self_management_norm": "0.0=unable to self-monitor or self-treat (no glucometer, no BP cuff, no inhaler technique), 0.5=partial self-management (monitoring inconsistently; some technique errors), 1.0=confident and consistent self-management",
+        "lifestyle_adherence_norm": "0.0=no dietary modification or physical activity; smoking active; high-risk behaviors, 0.5=partial lifestyle change with barriers (diet improved but exercise impossible due to pain/environment), 1.0=fully adherent to prescribed lifestyle plan"
+      },
+      "downstreamMachine": "HomeMentalHealthAccessMonitor (reads [2019:2027])",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "chronic-disease-management",
+          "health-personal",
+          "home-health"
+        ],
+        "family": "home-chronic-disease-monitor",
+        "machineCode": "home-chronic-disease-monitor",
+        "capabilityTags": [],
+        "workflowTags": [
+          "chronic-disease",
+          "copd",
+          "diabetes",
+          "home-chronic-disease-monitor",
+          "home-health-chronic-disease-management",
+          "hypertension",
+          "kleene-plus",
+          "low-income",
+          "self-management"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "chronic-disease",
+          "chronic-disease-management",
+          "copd",
+          "diabetes",
+          "health-personal",
+          "home-chronic-disease-monitor",
+          "home-health",
+          "home-health-chronic-disease-management",
+          "hypertension",
+          "input-sequences",
+          "input-sequences-1",
+          "kleene-plus",
+          "low-income",
+          "self-management",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/homechronicdiseasemonitor",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "patient-safety-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"health-personal\".  Review and tune the routing as the team owning HomeChronicDiseaseMonitor matures."
+      },
+      "triggerConfig": {
+        "processId": "HOMECHRONICDISEASEMONITOR",
+        "processName": "Home Chronic Disease Monitor",
+        "rules": [
+          {
+            "sequenceId": "chronic-disease-exacerbation",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "DISEASE_EXACERBATION: acute disease exacerbation requiring urgent clinical intervention at [2019:2023]"
+          },
+          {
+            "sequenceId": "chronic-disease-poor-control",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "POOR_CONTROL: chronic disease consistently out of target range; complication risk elevated at [2019:2023]"
+          },
+          {
+            "sequenceId": "chronic-disease-borderline",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "BORDERLINE_CONTROL: chronic disease near but outside target range; preventive intensification warranted at [2019:2023]"
+          },
+          {
+            "sequenceId": "chronic-disease-controlled-ok",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "DISEASE_CONTROLLED: chronic disease biomarkers in target range; complication risk managed at [2019:2023]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1987,
+        "length": 4
+      },
+      "output": {
+        "offset": 2019,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "chronic-disease-exacerbation",
+        "name": "Disease Exacerbation: CONTROLLED+ → SLIPPING → POORLY_CONTROLLED → EXACERBATION → DISEASE_EXACERBATION",
+        "metadata": {
+          "description": "Tracks progressive chronic disease control loss leading to acute exacerbation. In home care settings, exacerbation events (diabetic ketoacidosis, hypertensive crisis, COPD exacerbation) are largely preventable with early monitoring. Social stressors — food insecurity, housing instability, caregiver burnout — are the predominant drivers of control loss in this population.",
+          "path": "CONTROLLED+ → SLIPPING → POORLY_CONTROLLED → EXACERBATION → output[1,0,0,0]",
+          "output": "[1,0,0,0] (DISEASE_EXACERBATION)"
+        },
+        "vectors": [
+          {
+            "id": "cd-controlled",
+            "elements": [
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.58,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "CONTROLLED",
+              "description": "CONTROLLED+ — primary biomarkers in or near target range; symptoms manageable; self-monitoring occurring; lifestyle partially adherent. isInitial A*A = A+.",
+              "biomarker_control": "0.55–0.72 (near-target range; acceptable control)"
+            },
+            "nextVectorIds": [
+              "cd-controlled",
+              "cd-slipping"
+            ]
+          },
+          {
+            "id": "cd-slipping",
+            "elements": [
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.42,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "SLIPPING",
+              "description": "SLIPPING — biomarkers trending toward out-of-range; symptom burden increasing; self-management inconsistency.",
+              "biomarker_control": "0.30–0.48 (borderline to poor control; trend worsening)"
+            },
+            "nextVectorIds": [
+              "cd-poorly-controlled"
+            ]
+          },
+          {
+            "id": "cd-poorly-controlled",
+            "elements": [
+              {
+                "value": 0.22,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.25,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.2,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.22,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "POORLY_CONTROLLED",
+              "description": "POORLY_CONTROLLED — biomarkers significantly out of range; daily symptoms; self-management breaking down.",
+              "biomarker_control": "0.15–0.28 (poor control; exacerbation risk elevated)"
+            },
+            "nextVectorIds": [
+              "cd-exacerbation"
+            ]
+          },
+          {
+            "id": "cd-exacerbation",
+            "elements": [
+              {
+                "value": 0.08,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.08,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "EXACERBATION",
+              "description": "EXACERBATION — critical biomarker values; severe symptoms; self-management collapsed. Fires DISEASE_EXACERBATION requiring urgent intervention.",
+              "biomarker_control": "0.0–0.12 (critical values; acute event risk)"
+            },
+            "outputVectors": [
+              {
+                "id": "cd-exacerbation-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "DISEASE_EXACERBATION: acute disease exacerbation requiring urgent clinical intervention at [2019:2023]",
+                  "action": "Urgent nurse visit; physician notification; ER transport if critical; medication review; social barrier assessment"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chronic-disease-poor-control",
+        "name": "Poor Control: STRUGGLING+ → POOR_CONTROL signal",
+        "metadata": {
+          "description": "Fires POOR_CONTROL when chronic disease biomarkers are consistently out of target range without acute exacerbation — the sustained inadequate control state that drives long-term complications (retinopathy, nephropathy, peripheral vascular disease) in low-income diabetic and hypertensive populations.",
+          "pattern": "STRUGGLING+",
+          "output": "[0,1,0,0] (POOR_CONTROL)"
+        },
+        "vectors": [
+          {
+            "id": "cd-struggling",
+            "elements": [
+              {
+                "value": 0.22,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.28,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.25,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "STRUGGLING",
+              "description": "STRUGGLING+ — biomarkers consistently poor but not acute; symptom burden moderate; self-management attempted but inadequate. isInitial A*A = A+: fires POOR_CONTROL each matching cycle.",
+              "scenario": "Diabetic patient with A1c consistently 9.5–10.5; no acute event but organ damage accumulating"
+            },
+            "outputVectors": [
+              {
+                "id": "cd-poor-control-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "POOR_CONTROL: chronic disease consistently out of target range; complication risk elevated at [2019:2023]",
+                  "action": "Intensified home monitoring; medication review; nutrition counseling; CHW support for social barriers"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chronic-disease-borderline",
+        "name": "Borderline Control: BORDERLINE+ → BORDERLINE_CONTROL signal",
+        "metadata": {
+          "description": "Fires BORDERLINE_CONTROL when disease metrics are in the near-miss zone — adequate enough to avoid acute events but insufficient for complication prevention. Common in working-poor patients managing diet and lifestyle without full access to chronic disease support programs.",
+          "pattern": "BORDERLINE+",
+          "output": "[0,0,1,0] (BORDERLINE_CONTROL)"
+        },
+        "vectors": [
+          {
+            "id": "cd-borderline",
+            "elements": [
+              {
+                "value": 0.42,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.48,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.42,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "BORDERLINE",
+              "description": "BORDERLINE+ — biomarkers near but outside target; symptom burden low; self-management inconsistent but attempting. isInitial A*A = A+: fires BORDERLINE_CONTROL each matching cycle.",
+              "scenario": "Hypertensive patient running 140s/90s; not at target but managing; diet compliance partial"
+            },
+            "outputVectors": [
+              {
+                "id": "cd-borderline-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "BORDERLINE_CONTROL: chronic disease near but outside target range; preventive intensification warranted at [2019:2023]",
+                  "action": "Medication titration review; DSMES referral; dietary counseling; home visit frequency increase"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chronic-disease-controlled-ok",
+        "name": "Disease Controlled: WELL_CONTROLLED+ → DISEASE_CONTROLLED signal",
+        "metadata": {
+          "description": "Fires DISEASE_CONTROLLED when biomarkers are in target range and self-management is functioning. In low-income home care, this outcome reflects successful care coordination and social barrier resolution — not just clinical compliance.",
+          "pattern": "WELL_CONTROLLED+",
+          "output": "[0,0,0,1] (DISEASE_CONTROLLED)"
+        },
+        "vectors": [
+          {
+            "id": "cd-well-controlled",
+            "elements": [
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.63,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.58,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "WELL_CONTROLLED",
+              "description": "WELL_CONTROLLED+ — biomarkers at or near target; symptoms controlled; self-management consistent; lifestyle partially adherent. Fires DISEASE_CONTROLLED each matching cycle.",
+              "scenario": "Diabetic patient on Medicaid with CHW support; A1c <7.5; consistent self-monitoring"
+            },
+            "outputVectors": [
+              {
+                "id": "cd-controlled-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "DISEASE_CONTROLLED: chronic disease biomarkers in target range; complication risk managed at [2019:2023]",
+                  "action": "Mental health access monitor registers chronic disease stable"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Diabetic Control Loss During Job Loss",
+        "pattern": "6-step: CONTROLLED→CONTROLLED→SLIPPING→POORLY_CONTROLLED→EXACERBATION (DKA)→CONTROLLED (after stabilization)",
+        "description": "Patient loses job and health insurance; stops affording insulin; blood sugar spirals to DKA; ER visit; Medicaid emergency enrollment; returns to home management.",
+        "vectors": [
+          [
+            0.63,
+            0.61,
+            0.59,
+            0.56
+          ],
+          [
+            0.61,
+            0.59,
+            0.57,
+            0.54
+          ],
+          [
+            0.37,
+            0.41,
+            0.34,
+            0.37
+          ],
+          [
+            0.21,
+            0.24,
+            0.19,
+            0.21
+          ],
+          [
+            0.07,
+            0.09,
+            0.07,
+            0.09
+          ],
+          [
+            0.64,
+            0.62,
+            0.6,
+            0.57
+          ]
+        ],
+        "metadata": {
+          "scenario": "job-loss-insulin-dka",
+          "expectedOutputs": {
+            "steps_1_2": "DISEASE_CONTROLLED fires [0,0,0,1]",
+            "step_3": "no output (SLIPPING intermediate)",
+            "step_4": "POOR_CONTROL fires [0,1,0,0]",
+            "step_5": "DISEASE_EXACERBATION fires [1,0,0,0]",
+            "step_6": "DISEASE_CONTROLLED fires [0,0,0,1] (after Medicaid enrollment)"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

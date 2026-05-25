@@ -1,0 +1,506 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Community Services Health And Human Services Intake Resident Intake Triage",
+    "description": "Community-services machine for resident intake triage in the health and human services intake workstream. It monitors walk-in, call-center, and digital intake severity with consent and identity readiness and emits AI-triggered actions for health and human services, law enforcement/public safety coordination, homelessness response, and city operations.",
+    "metadata": {
+      "category": "community-services",
+      "domain": "Community Services - Health And Human Services Intake",
+      "author": "Reality Engine",
+      "workstream": "Health And Human Services Intake",
+      "operationalFocus": "Resident Intake Triage",
+      "focusDescription": "walk-in, call-center, and digital intake severity with consent and identity readiness",
+      "upstreamMachine": null,
+      "upstreamDomain": null,
+      "upstreamOutputRegion": null,
+      "upstreamPurpose": null,
+      "downstreamMachines": [
+        "Community Services Health And Human Services Intake Case Routing Coordinator"
+      ],
+      "crossDomainInterconnect": false,
+      "crossDomainOutputTarget": null,
+      "crossDomainOutputPurpose": null,
+      "dispatchableAgent": "community_intake_agent",
+      "aiTrigger": "community-services-health-and-human-services-intake-resident-intake-triage",
+      "predictiveFlowTrigger": "community-services-predictive-health-and-human-services-intake-resident-intake-triage",
+      "agentActions": [
+        "Dispatch community_intake_agent for urgent community-services intervention on resident intake triage.",
+        "Coordinate health, housing, public safety, transportation, or city service partners for resident intake triage.",
+        "Create field work order or mobile team task for resident intake triage.",
+        "Maintain monitored service path for resident intake triage."
+      ],
+      "inputSpace": "4D binary at [1000:1004]",
+      "outputSpace": "4D binary at [1004:1008]: [1,0,0,0]=URGENT_RESPONSE, [0,1,0,0]=COORDINATE_SERVICES, [0,0,1,0]=FIELD_WORK_ORDER, [0,0,0,1]=STABLE_SERVICE_PATH",
+      "inputSemantics": [
+        "resident need severity",
+        "eligibility and documentation readiness",
+        "field capacity or operational readiness",
+        "safety, mobility, and health risk"
+      ],
+      "tags": [
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-4",
+        "city-services",
+        "community-intake-agent",
+        "community-services",
+        "community-services-generated",
+        "community-services-health-and-human-services-intake",
+        "community-services-health-and-human-services-intake-resident-intake-triage",
+        "community-services-predictive-health-and-human-services-intake-resident-intake-triage",
+        "cross-domain",
+        "csx001",
+        "dispatchable-agent",
+        "health-and-human-services",
+        "health-and-human-services-intake",
+        "homelessness",
+        "input-sequences",
+        "input-sequences-5",
+        "law-enforcement",
+        "machine-interconnect",
+        "public-safety",
+        "resident-intake-triage",
+        "startup-loadable"
+      ],
+      "sequenceCount": 5,
+      "reuseGuideline": "Map 311, case-management, CAD/RMS, shelter HMIS, benefit enrollment, outreach, public health, and transit-access signals into the 4D input lane. Route outputs to case workers, mobile crisis, public safety, housing navigators, field crews, transportation dispatch, or health-service agents.",
+      "downstreamPattern": "Output region [1004:1008] feeds Community Services Health And Human Services Intake Case Routing Coordinator.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "community-services",
+          "health-and-human-services-intake"
+        ],
+        "family": "community-services-generated",
+        "machineCode": "csx001",
+        "capabilityTags": [
+          "ai-triggers",
+          "community-services-predictive-health-and-human-services-intake-resident-intake-triage",
+          "dispatchable-agents"
+        ],
+        "workflowTags": [
+          "ai-trigger",
+          "city-services",
+          "community-intake-agent",
+          "community-services-generated",
+          "community-services-health-and-human-services-intake",
+          "cross-domain",
+          "dispatchable-agent",
+          "health-and-human-services",
+          "homelessness",
+          "law-enforcement",
+          "public-safety",
+          "resident-intake-triage"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ai-trigger",
+          "ai-triggers",
+          "ces-sequences",
+          "ces-sequences-4",
+          "city-services",
+          "community-intake-agent",
+          "community-services",
+          "community-services-generated",
+          "community-services-health-and-human-services-intake",
+          "community-services-health-and-human-services-intake-resident-intake-triage",
+          "community-services-predictive-health-and-human-services-intake-resident-intake-triage",
+          "cross-domain",
+          "csx001",
+          "dispatchable-agent",
+          "dispatchable-agents",
+          "health-and-human-services",
+          "health-and-human-services-intake",
+          "homelessness",
+          "input-sequences",
+          "input-sequences-5",
+          "law-enforcement",
+          "machine-interconnect",
+          "public-safety",
+          "resident-intake-triage",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/csx001_health-and-human-services-intake-resident-intake-triage",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning CSX001_health-and-human-services-intake-resident-intake-triage matures."
+      },
+      "triggerConfig": {
+        "processId": "CSX001_HEALTH_AND_HUMAN_SERVICES_INTAKE_RESIDENT_INTAKE_TRIAGE",
+        "processName": "Community Services Health And Human Services Intake Resident Intake Triage",
+        "rules": [
+          {
+            "sequenceId": "csx-001-urgent-response",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Resident Intake Triage: WATCH -> URGENT_RESPONSE"
+          },
+          {
+            "sequenceId": "csx-001-coordinate-services",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Resident Intake Triage: COORDINATION_NEEDED -> COORDINATE_SERVICES"
+          },
+          {
+            "sequenceId": "csx-001-field-work-order",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Resident Intake Triage: FIELD_TASK_NEEDED -> FIELD_WORK_ORDER"
+          },
+          {
+            "sequenceId": "csx-001-stable-service-path",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Resident Intake Triage: STABLE_PATH -> STABLE_SERVICE_PATH"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1000,
+        "length": 4
+      },
+      "output": {
+        "offset": 1004,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "csx-001-urgent-response",
+        "name": "Resident Intake Triage: WATCH -> URGENT_RESPONSE",
+        "metadata": {
+          "description": "Escalates resident or field risk into urgent response.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-001-watch",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "nextVectorIds": [
+              "csx-001-urgent"
+            ]
+          },
+          {
+            "id": "csx-001-urgent",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": false,
+            "outputVectors": [
+              {
+                "id": "csx-001-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch community_intake_agent for urgent community-services intervention on resident intake triage."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-001-coordinate-services",
+        "name": "Resident Intake Triage: COORDINATION_NEEDED -> COORDINATE_SERVICES",
+        "metadata": {
+          "description": "Triggers cross-agency coordination.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-001-coordinate",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-001-coordinate-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Coordinate health, housing, public safety, transportation, or city service partners for resident intake triage."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-001-field-work-order",
+        "name": "Resident Intake Triage: FIELD_TASK_NEEDED -> FIELD_WORK_ORDER",
+        "metadata": {
+          "description": "Creates a field crew, outreach, or mobile response task.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-001-field-task",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-001-field-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Create field work order or mobile team task for resident intake triage."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-001-stable-service-path",
+        "name": "Resident Intake Triage: STABLE_PATH -> STABLE_SERVICE_PATH",
+        "metadata": {
+          "description": "Confirms resident service path is stable and monitored.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "csx-001-stable",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-001-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Maintain monitored service path for resident intake triage."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Urgent response sequence",
+        "description": "Two-step community risk escalation ending in urgent response.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-response",
+          "sequenceLength": 2
+        }
+      },
+      {
+        "name": "Coordinate services",
+        "description": "Coordinates health, public safety, housing, transit, or city service partners.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "coordinate-services"
+        }
+      },
+      {
+        "name": "Field work order",
+        "description": "Creates a field response or outreach task.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "field-work-order"
+        }
+      },
+      {
+        "name": "Stable service path",
+        "description": "Confirms the resident or city service path is stable.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "stable-service-path"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Initial observation arms the urgent path without firing.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

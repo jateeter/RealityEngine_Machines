@@ -1,0 +1,291 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Logical Infrastructure Reset Sync Two Stage",
+    "description": "Reusable digital-logic infrastructure machine for ASIC-style connective tissue. It implements the temporal regular expression `RST 10 11`. Detects two-stage reset synchronizer release. Reads a 4D control/status lane at [1597:1601] and emits a 2D match lane at [1601:1603].",
+    "metadata": {
+      "category": "digital-logic",
+      "domain": "Digital Logic - Infrastructure",
+      "author": "Reality Engine",
+      "regularExpression": "RST 10 11",
+      "asicPattern": "Reset Sync Two Stage",
+      "reuseRole": "general-purpose logical connective tissue",
+      "inputSpace": "4D binary at [1597:1601]",
+      "outputSpace": "2D binary at [1601:1603]: [1,0]=MATCH, [0,1]=CLEAR_OR_AVAILABLE",
+      "inputSemantics": [
+        "primary",
+        "secondary",
+        "tertiary",
+        "qualifier"
+      ],
+      "tags": [
+        "asic-pattern",
+        "ces-sequences",
+        "ces-sequences-1",
+        "digital-logic",
+        "digital-logic-generated",
+        "digital-logic-infrastructure",
+        "dlx020",
+        "infrastructure",
+        "input-sequences",
+        "input-sequences-2",
+        "logical-infrastructure",
+        "logical-infrastructure-reset-sync-two-stage",
+        "regular-expression",
+        "reset-sync-two-stage",
+        "startup-loadable"
+      ],
+      "sequenceCount": 1,
+      "reuseGuideline": "Use this machine by mapping upstream source or machine output bits into its 4D input lane. Map its 2D output lane into downstream machine input when a reusable temporal guard, latch trigger, handshake detector, CDC detector, bus phase detector, or safety qualifier is needed.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "digital-logic",
+        "domainTags": [
+          "digital-logic",
+          "infrastructure"
+        ],
+        "family": "digital-logic-generated",
+        "machineCode": "dlx020",
+        "capabilityTags": [],
+        "workflowTags": [
+          "asic-pattern",
+          "digital-logic-generated",
+          "digital-logic-infrastructure",
+          "logical-infrastructure",
+          "regular-expression",
+          "reset-sync-two-stage"
+        ],
+        "integrationTags": [
+          "digital-logic"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-1",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "asic-pattern",
+          "ces-sequences",
+          "ces-sequences-1",
+          "digital-logic",
+          "digital-logic-generated",
+          "digital-logic-infrastructure",
+          "dlx020",
+          "infrastructure",
+          "input-sequences",
+          "input-sequences-2",
+          "logical-infrastructure",
+          "logical-infrastructure-reset-sync-two-stage",
+          "regular-expression",
+          "reset-sync-two-stage",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "reliability-engineering",
+        "runbook": "https://runbooks.example.org/digital-logic/dlx020_reset-sync-two-stage",
+        "escalationPolicy": "slack:#reliability-test",
+        "contact": {
+          "primary": "reliability-engineering-primary@example.org",
+          "secondary": "reliability-engineering-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"digital-logic\".  Review and tune the routing as the team owning DLX020_reset-sync-two-stage matures."
+      },
+      "triggerConfig": {
+        "processId": "DLX020_RESET_SYNC_TWO_STAGE",
+        "processName": "Logical Infrastructure Reset Sync Two Stage",
+        "rules": [
+          {
+            "sequenceId": "dlx-020-match",
+            "outputMatches": [
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Reset Sync Two Stage matched regular expression RST 10 11."
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1597,
+        "length": 4
+      },
+      "output": {
+        "offset": 1601,
+        "length": 2
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "dlx-020-match",
+        "name": "Reset Sync Two Stage: RST 10 11 -> MATCH",
+        "metadata": {
+          "description": "Detects two-stage reset synchronizer release.",
+          "regularExpression": "RST 10 11",
+          "output": "[1,0]"
+        },
+        "vectors": [
+          {
+            "id": "dlx-020-step-1",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "STEP_1",
+              "description": "Reset Sync Two Stage regex step 1: [1, 0, 0, 0]"
+            },
+            "nextVectorIds": [
+              "dlx-020-step-2"
+            ]
+          },
+          {
+            "id": "dlx-020-step-2",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "STEP_2",
+              "description": "Reset Sync Two Stage regex step 2: [0, 1, 0, 0]"
+            },
+            "nextVectorIds": [
+              "dlx-020-step-3"
+            ]
+          },
+          {
+            "id": "dlx-020-step-3",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "STEP_3",
+              "description": "Reset Sync Two Stage regex step 3: [0, 1, 1, 0]"
+            },
+            "outputVectors": [
+              {
+                "id": "dlx-020-match-output",
+                "vector": [
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Reset Sync Two Stage matched regular expression RST 10 11.",
+                  "state": "MATCH"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Reset Sync Two Stage match path",
+        "description": "Validates regular expression RST 10 11.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0]",
+          "scenario": "reset-sync-two-stage"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Single baseline sample does not complete the expression.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

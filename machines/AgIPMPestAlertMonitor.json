@@ -1,0 +1,600 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Ag IPM Pest Alert Monitor",
+    "description": "Integrated Pest Management monitor that correlates lighting and atmospheric conditions to assess pest and disease pressure. High humidity during dark periods creates botrytis risk; poor air circulation during active light cycles creates spider mite and aphid habitat. Reads outputs from AgPhotoPeriodLightingController [32:36] and AgAtmosphericController [36:40]. Output feeds AgYieldOptimizationAI at [3963:3967].",
+    "metadata": {
+      "category": "agriculture",
+      "domain": "Agriculture — IPM / Pest Management",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [3963:3967]: [1,0,0,0]=FUNGAL_ALERT, [0,1,0,0]=INSECT_ALERT, [0,0,1,0]=IPM_WARNING, [0,0,0,1]=IPM_OK",
+      "tags": [
+        "ag-ipm-pest-alert-monitor",
+        "ag-ipmpest-alert-monitor",
+        "agriculture",
+        "agriculture-generated",
+        "agriculture-ipm-pest-management",
+        "botrytis",
+        "ces-sequences",
+        "ces-sequences-3",
+        "fungal",
+        "indoor-growing",
+        "input-sequences",
+        "input-sequences-1",
+        "ipm",
+        "kleene-plus",
+        "pest",
+        "pest-management",
+        "startup-loadable",
+        "thermal-comfort"
+      ],
+      "sequenceCount": 3,
+      "inputSignalMap": {
+        "elem_0": "LIGHTS_ON from AgPhotoPeriodLightingController [272]",
+        "elem_1": "LIGHTS_OFF from AgPhotoPeriodLightingController [273]",
+        "elem_2": "DLI_ALERT from AgPhotoPeriodLightingController [274]",
+        "elem_3": "PHOTO_OK from AgPhotoPeriodLightingController [275]",
+        "elem_4": "CO2_INJECT from AgAtmosphericController [276]",
+        "elem_5": "VENT_OPEN from AgAtmosphericController [277]",
+        "elem_6": "HUMIDITY_ALERT from AgAtmosphericController [278]",
+        "elem_7": "ATMOS_OK from AgAtmosphericController [279]"
+      },
+      "upstreamMachines": [
+        "AgPhotoPeriodLightingController (output at [32:36])",
+        "AgAtmosphericController (output at [36:40])"
+      ],
+      "downstreamMachine": "AgYieldOptimizationAI (reads [3963:3967])",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "agriculture",
+        "domainTags": [
+          "agriculture",
+          "ipm",
+          "pest-management"
+        ],
+        "family": "ag-ipm-pest-alert-monitor",
+        "machineCode": "ag-ipmpest-alert-monitor",
+        "capabilityTags": [],
+        "workflowTags": [
+          "agriculture-generated",
+          "agriculture-ipm-pest-management",
+          "botrytis",
+          "fungal",
+          "indoor-growing",
+          "kleene-plus",
+          "pest",
+          "thermal-comfort"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ag-ipm-pest-alert-monitor",
+          "ag-ipmpest-alert-monitor",
+          "agriculture",
+          "agriculture-generated",
+          "agriculture-ipm-pest-management",
+          "botrytis",
+          "ces-sequences",
+          "ces-sequences-3",
+          "fungal",
+          "indoor-growing",
+          "input-sequences",
+          "input-sequences-1",
+          "ipm",
+          "kleene-plus",
+          "pest",
+          "pest-management",
+          "startup-loadable",
+          "thermal-comfort"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "agriculture-operations",
+        "runbook": "https://runbooks.example.org/agriculture/agipmpestalertmonitor",
+        "escalationPolicy": "pagerduty:ag-ops",
+        "contact": {
+          "primary": "agriculture-operations-primary@example.org",
+          "secondary": "agriculture-operations-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 3600,
+          "error": 900
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"agriculture\".  Review and tune the routing as the team owning AgIPMPestAlertMonitor matures."
+      },
+      "triggerConfig": {
+        "processId": "AGIPMPESTALERTMONITOR",
+        "processName": "Ag IPM Pest Alert Monitor",
+        "rules": [
+          {
+            "sequenceId": "ag-ipm-fungal-escalation",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "FUNGAL_ALERT: botrytis/mildew risk critical at [3963:3967]"
+          },
+          {
+            "sequenceId": "ag-ipm-insect-pressure",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "INSECT_ALERT: stagnant-air insect habitat conditions detected at [3963:3967]"
+          },
+          {
+            "sequenceId": "ag-ipm-clear",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "IPM_OK: low pest pressure; optimal environmental controls active at [3963:3967]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 32,
+        "length": 8
+      },
+      "output": {
+        "offset": 3963,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ag-ipm-fungal-escalation",
+        "name": "Fungal Disease Risk: DARK_HUMID_WATCH+ → DARK_HUMID → CONDENSATION_DARK → FUNGAL_ALERT",
+        "metadata": {
+          "description": "Detects the highest-risk botrytis/powdery mildew scenario: humidity alert during dark period with ventilation not responding. Dark + humid + stagnant air creates ideal spore germination conditions. Requires sustained occurrence before firing to exclude brief humidity transients.",
+          "path": "DARK_HUMID_WATCH+ → DARK_HUMID → CONDENSATION_DARK → output[1,0,0,0]",
+          "output": "[1,0,0,0] (FUNGAL_ALERT)"
+        },
+        "vectors": [
+          {
+            "id": "ag-ipm-dark-humid-watch",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "DARK_HUMID_WATCH",
+              "description": "DARK_HUMID_WATCH+ — LIGHTS_OFF=1, HUMIDITY_ALERT=1: elevated humidity during dark period. isInitial A*A = A+: at least one cycle of dark+humidity confirmed before escalating.",
+              "condition": "LIGHTS_OFF=1, HUMIDITY_ALERT=1, ATMOS_OK=0"
+            },
+            "nextVectorIds": [
+              "ag-ipm-dark-humid-watch",
+              "ag-ipm-dark-humid"
+            ]
+          },
+          {
+            "id": "ag-ipm-dark-humid",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "DARK_HUMID",
+              "description": "DARK_HUMID — LIGHTS_OFF + VENT_OPEN response triggered but HUMIDITY_ALERT persists: ventilation insufficient to resolve humidity.",
+              "condition": "LIGHTS_OFF=1, VENT_OPEN=1, HUMIDITY_ALERT=1"
+            },
+            "nextVectorIds": [
+              "ag-ipm-condensation-dark"
+            ]
+          },
+          {
+            "id": "ag-ipm-condensation-dark",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "CONDENSATION_DARK",
+              "description": "CONDENSATION_DARK — sustained dark+humidity+vent-open with no resolution: condensation forming on plant surfaces. Fires FUNGAL_ALERT.",
+              "condition": "LIGHTS_OFF=1, VENT_OPEN=1, HUMIDITY_ALERT=1 (sustained)"
+            },
+            "outputVectors": [
+              {
+                "id": "ag-ipm-fungal-alert-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "FUNGAL_ALERT: botrytis/mildew risk critical at [3963:3967]",
+                  "action": "Inspect canopy; apply preventive fungicide; increase airflow; AI optimizer extends dark-period VPD monitoring"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ag-ipm-insect-pressure",
+        "name": "Insect Pressure: LIGHT_STAGNANT+ → CO2_PEAK_LIGHT → INSECT_ALERT",
+        "metadata": {
+          "description": "Detects insect-favorable conditions: active light period with CO2 injection demand (indicating stagnant zones where CO2 depletes) and no active ventilation. Stagnant warm air during peak photoperiod is prime habitat for spider mites, aphids, and fungus gnats.",
+          "path": "LIGHT_STAGNANT+ → CO2_PEAK_LIGHT → output[0,1,0,0]",
+          "output": "[0,1,0,0] (INSECT_ALERT)"
+        },
+        "vectors": [
+          {
+            "id": "ag-ipm-light-stagnant",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "LIGHT_STAGNANT",
+              "description": "LIGHT_STAGNANT+ — LIGHTS_ON=1, PHOTO_OK=1, CO2_INJECT=1 (CO2 depleted in stagnant zones), ATMOS_OK=0. isInitial A*A = A+.",
+              "condition": "LIGHTS_ON=1, PHOTO_OK=1, CO2_INJECT=1 (poor air mixing)"
+            },
+            "nextVectorIds": [
+              "ag-ipm-light-stagnant",
+              "ag-ipm-co2-peak-light"
+            ]
+          },
+          {
+            "id": "ag-ipm-co2-peak-light",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "CO2_PEAK_LIGHT",
+              "description": "CO2_PEAK_LIGHT — LIGHTS_ON + CO2_INJECT, PHOTO_OK lost: hot stagnant microclimate zones forming around canopy. Fires INSECT_ALERT.",
+              "condition": "LIGHTS_ON=1, CO2_INJECT=1, PHOTO_OK=0 (canopy stress)"
+            },
+            "outputVectors": [
+              {
+                "id": "ag-ipm-insect-alert-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "INSECT_ALERT: stagnant-air insect habitat conditions detected at [3963:3967]",
+                  "action": "Inspect undersides of leaves; deploy sticky traps; increase circulation fan speed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ag-ipm-clear",
+        "name": "IPM Clear: CLEAR+ → IPM_OK",
+        "metadata": {
+          "description": "Fires IPM_OK when atmospheric conditions are clean and photoperiod is healthy: no humidity alert, ventilation adequate, lights optimal. Represents low pest-pressure baseline.",
+          "pattern": "CLEAR+",
+          "output": "[0,0,0,1] (IPM_OK)"
+        },
+        "vectors": [
+          {
+            "id": "ag-ipm-clear",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "CLEAR",
+              "description": "CLEAR+ — LIGHTS_ON=1, PHOTO_OK=1, ATMOS_OK=1: active photoperiod with clean atmosphere and no humidity alert. Fires IPM_OK each matching cycle.",
+              "condition": "LIGHTS_ON=1, PHOTO_OK=1, ATMOS_OK=1, no alerts"
+            },
+            "outputVectors": [
+              {
+                "id": "ag-ipm-ok-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "IPM_OK: low pest pressure; optimal environmental controls active at [3963:3967]",
+                  "action": "AI optimizer registers clean IPM baseline; no interventions required"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Night Humidity Spike Leading to Fungal Alert",
+        "pattern": "6-step: CLEAR(day)→DARK_OK→DARK_HUMID_WATCH→DARK_HUMID→CONDENSATION→CLEAR(next day)",
+        "description": "Photoperiod transition to dark period; humidity rises beyond ventilation capacity; FUNGAL_ALERT fires before canopy inspection.",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ],
+          [
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ],
+          [
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.9,
+            0.1
+          ],
+          [
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.9,
+            0.9,
+            0.1
+          ],
+          [
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.9,
+            0.9,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ]
+        ],
+        "metadata": {
+          "scenario": "night-humidity-fungal-alert",
+          "expectedOutputs": {
+            "step_1": "IPM_OK fires [0,0,0,1]",
+            "step_2": "no output (dark but atmospheric ok)",
+            "step_3": "DARK_HUMID_WATCH self-loop; no output",
+            "steps_4_5": "FUNGAL_ALERT fires [1,0,0,0]",
+            "step_6": "IPM_OK fires [0,0,0,1] (recovered)"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

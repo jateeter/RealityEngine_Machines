@@ -1,0 +1,432 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Community Outreach Monitor",
+    "description": "Monitors outreach engagement rates, unreached population coverage, outreach frequency, and community trust indicators for community service outreach programs. In community services, outreach is the first mile — without it, eligible populations remain unaware of or disconnected from available services. Outreach effectiveness is especially critical for immigrant communities, people experiencing homelessness, and individuals with prior negative government contact who distrust institutional services. Output at [980:984] feeds the Community Access Monitor.",
+    "metadata": {
+      "category": "community-services",
+      "domain": "Community Services — Community Outreach / Engagement",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [980:984]: [1,0,0,0]=OUTREACH_FAILURE, [0,1,0,0]=LOW_ENGAGEMENT, [0,0,1,0]=ENGAGEMENT_BUILDING, [0,0,0,1]=OUTREACH_EFFECTIVE",
+      "tags": [
+        "ces-sequences",
+        "ces-sequences-3",
+        "community-outreach",
+        "community-outreach-monitor",
+        "community-services",
+        "community-services-community-outreach-engagement",
+        "community-services-generated",
+        "engagement",
+        "input-sequences",
+        "input-sequences-1",
+        "kleene-plus",
+        "startup-loadable",
+        "trust",
+        "unreached-populations"
+      ],
+      "sequenceCount": 3,
+      "populationFocus": "Outreach-dependent service populations: immigrant communities, homeless individuals, returning citizens, domestic violence survivors, isolated elders; organizations running street outreach, community health worker programs, and peer outreach",
+      "sensorNormalization": {
+        "engagement_rate_norm": "0.0=<10% of outreach contacts result in service connection (contacts made but clients not engaging), 0.5=30–50% engagement rate (moderate connection; trust barriers present), 1.0=>75% engagement rate (high trust; effective outreach messaging and worker relationships)",
+        "unreached_population_norm": "0.0=target population almost entirely unreached (>80% of estimated eligible have not had contact), 0.5=partial coverage (30–60% reached; hard-to-reach subgroups untouched), 1.0=>80% of estimated target population has been contacted at least once",
+        "outreach_frequency_norm": "0.0=no active outreach occurring (program paused, staff unavailable, funding lapsed), 0.5=intermittent outreach (monthly or less; insufficient for trust-building), 1.0=regular intensive outreach (weekly or more; consistent presence in target locations)",
+        "trust_score_norm": "0.0=community actively avoiding outreach workers; prior incident damaging trust; fear of contact with services, 0.5=neutral trust; some community members engaging; others avoidant, 1.0=high trust; community initiating contact; peer referrals active"
+      },
+      "downstreamMachine": "CommunityAccessMonitor (reads [976:984])",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "community-outreach",
+          "community-services",
+          "engagement"
+        ],
+        "family": "community-outreach-monitor",
+        "machineCode": "community-outreach-monitor",
+        "capabilityTags": [],
+        "workflowTags": [
+          "community-outreach-monitor",
+          "community-services-community-outreach-engagement",
+          "community-services-generated",
+          "kleene-plus",
+          "trust",
+          "unreached-populations"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "community-outreach",
+          "community-outreach-monitor",
+          "community-services",
+          "community-services-community-outreach-engagement",
+          "community-services-generated",
+          "engagement",
+          "input-sequences",
+          "input-sequences-1",
+          "kleene-plus",
+          "startup-loadable",
+          "trust",
+          "unreached-populations"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/communityoutreachmonitor",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning CommunityOutreachMonitor matures."
+      },
+      "triggerConfig": {
+        "processId": "COMMUNITYOUTREACHMONITOR",
+        "processName": "Community Outreach Monitor",
+        "rules": [
+          {
+            "sequenceId": "outreach-failure-escalation",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "OUTREACH_FAILURE: community outreach program not achieving meaningful service connections at [980:984]"
+          },
+          {
+            "sequenceId": "outreach-building",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "ENGAGEMENT_BUILDING: outreach on positive trajectory but not yet at effective levels at [980:984]"
+          },
+          {
+            "sequenceId": "outreach-effective-ok",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "OUTREACH_EFFECTIVE: outreach program successfully connecting target population to community services at [980:984]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 948,
+        "length": 4
+      },
+      "output": {
+        "offset": 980,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "outreach-failure-escalation",
+        "name": "Outreach Collapse: EFFECTIVE+ → DECLINING → INEFFECTIVE → OUTREACH_FAILURE",
+        "metadata": {
+          "description": "Tracks outreach program effectiveness collapse from a functional baseline through declining engagement to full failure. Outreach failure can be triggered by staff turnover (the specific workers who built community trust leave), by a critical incident (ICE raid following an outreach event; police involvement at a street outreach location), or by messaging that community members perceive as threatening rather than helpful. Requires EFFECTIVE+ baseline before failure escalation arms.",
+          "path": "EFFECTIVE+ → DECLINING → INEFFECTIVE → output[1,0,0,0]",
+          "output": "[1,0,0,0] (OUTREACH_FAILURE)"
+        },
+        "vectors": [
+          {
+            "id": "co-effective",
+            "elements": [
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "EFFECTIVE",
+              "description": "EFFECTIVE+ — engagement rate above 75%; meaningful population coverage; regular outreach schedule; strong community trust. isInitial A*A = A+.",
+              "engagement_rate": "0.58–0.75 (most contacts converting to service connections)"
+            },
+            "nextVectorIds": [
+              "co-effective",
+              "co-declining"
+            ]
+          },
+          {
+            "id": "co-declining",
+            "elements": [
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.32,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "DECLINING",
+              "description": "DECLINING — engagement rate dropping; population coverage shrinking; outreach frequency reducing; trust indicators neutral or declining.",
+              "engagement_rate": "0.28–0.45 (engagement declining; community avoidance observed)"
+            },
+            "nextVectorIds": [
+              "co-ineffective"
+            ]
+          },
+          {
+            "id": "co-ineffective",
+            "elements": [
+              {
+                "value": 0.12,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.15,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.15,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "INEFFECTIVE",
+              "description": "INEFFECTIVE — outreach making no meaningful connections; community avoiding workers; large unreached population; trust broken. Fires OUTREACH_FAILURE.",
+              "engagement_rate": "0.0–0.18 (contacts made but no service connections; program not reaching intended population)"
+            },
+            "outputVectors": [
+              {
+                "id": "co-failure-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "OUTREACH_FAILURE: community outreach program not achieving meaningful service connections at [980:984]",
+                  "action": "Community trust repair engagement; peer outreach worker recruitment; community needs assessment; messaging and approach overhaul; community advisory group convening"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "outreach-building",
+        "name": "Engagement Building: EMERGING+ → ENGAGEMENT_BUILDING signal",
+        "metadata": {
+          "description": "Fires ENGAGEMENT_BUILDING when outreach is showing positive trajectory — contact rates improving, some trust established, service connections beginning — but not yet at effective levels. The early-stage outreach state for new programs or programs recovering from trust damage.",
+          "pattern": "EMERGING+",
+          "output": "[0,0,1,0] (ENGAGEMENT_BUILDING)"
+        },
+        "vectors": [
+          {
+            "id": "co-emerging",
+            "elements": [
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.3,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.42,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "EMERGING",
+              "description": "EMERGING+ — moderate engagement rate; outreach frequency regular; trust building; population coverage expanding. isInitial A*A = A+: fires ENGAGEMENT_BUILDING each cycle.",
+              "scenario": "New street outreach program at 6 months; building relationships with unsheltered population; 35% engagement rate; growing peer referrals"
+            },
+            "outputVectors": [
+              {
+                "id": "co-building-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "ENGAGEMENT_BUILDING: outreach on positive trajectory but not yet at effective levels at [980:984]",
+                  "action": "Peer outreach ambassador program expansion; maintain consistent presence; track trust indicators; avoid disruptive program changes during relationship-building phase"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "outreach-effective-ok",
+        "name": "Outreach Effective: THRIVING+ → OUTREACH_EFFECTIVE signal",
+        "metadata": {
+          "description": "Fires OUTREACH_EFFECTIVE when engagement rates are high, population coverage is broad, outreach is occurring at frequency sufficient for trust maintenance, and community trust is strong enough that peer referrals are active. The program is genuinely connecting the target population to services.",
+          "pattern": "THRIVING+",
+          "output": "[0,0,0,1] (OUTREACH_EFFECTIVE)"
+        },
+        "vectors": [
+          {
+            "id": "co-thriving",
+            "elements": [
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.58,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.68,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "THRIVING",
+              "description": "THRIVING+ — high engagement rate; broad population coverage; frequent outreach schedule; strong community trust; peer referrals active. Fires OUTREACH_EFFECTIVE each cycle.",
+              "scenario": "Established community health worker program; 80% engagement rate; community members initiating contact; peer ambassadors referring neighbors"
+            },
+            "outputVectors": [
+              {
+                "id": "co-effective-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "OUTREACH_EFFECTIVE: outreach program successfully connecting target population to community services at [980:984]",
+                  "action": "Community access monitor registers outreach functional; continue and document effective practices"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Trust Collapse After ICE Raid at Outreach Site",
+        "pattern": "6-step: EFFECTIVE→EFFECTIVE→DECLINING (raid reported)→INEFFECTIVE (community avoiding)→BUILDING (peer outreach)→EFFECTIVE (trust rebuilt)",
+        "description": "Immigration enforcement action near a community outreach location triggers community avoidance; immigrant outreach program loses engagement; pivot to peer-led outreach rebuilds trust over months.",
+        "vectors": [
+          [
+            0.61,
+            0.56,
+            0.66,
+            0.63
+          ],
+          [
+            0.59,
+            0.54,
+            0.64,
+            0.61
+          ],
+          [
+            0.34,
+            0.37,
+            0.37,
+            0.31
+          ],
+          [
+            0.11,
+            0.14,
+            0.14,
+            0.09
+          ],
+          [
+            0.37,
+            0.29,
+            0.54,
+            0.41
+          ],
+          [
+            0.63,
+            0.59,
+            0.69,
+            0.66
+          ]
+        ],
+        "metadata": {
+          "scenario": "trust-collapse-after-ice-raid",
+          "expectedOutputs": {
+            "steps_1_2": "OUTREACH_EFFECTIVE fires [0,0,0,1]",
+            "step_3": "no output (DECLINING intermediate)",
+            "step_4": "OUTREACH_FAILURE fires [1,0,0,0]",
+            "step_5": "ENGAGEMENT_BUILDING fires [0,0,1,0]",
+            "step_6": "OUTREACH_EFFECTIVE fires [0,0,0,1] (after trust rebuilt)"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

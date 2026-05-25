@@ -1,0 +1,496 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Pediatric Nutrition Monitor",
+    "description": "Tracks child nutrition adequacy, growth trajectory, and micronutrient status for children ages 0–12 in low- and medium-income home settings. Monitors growth percentile trends, caloric adequacy, iron/vitamin D/B12 micronutrient balance, and dietary diversity — the four dimensions most predictive of developmental outcomes in under-resourced households. Output at [2003:2007] feeds the Home Caregiver Burden Monitor, as child nutritional problems are a primary driver of caregiver stress and care coordination demand.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Home Health — Pediatric / Child Nutrition",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [2003:2007]: [1,0,0,0]=GROWTH_ALERT, [0,1,0,0]=NUTRITION_DEFICIT, [0,0,1,0]=MICRONUTRIENT_CONCERN, [0,0,0,1]=NUTRITION_OK",
+      "tags": [
+        "ces-sequences",
+        "ces-sequences-3",
+        "child-nutrition",
+        "failure-to-thrive",
+        "growth-monitoring",
+        "health-personal",
+        "home-health",
+        "home-health-pediatric-child-nutrition",
+        "input-sequences",
+        "input-sequences-1",
+        "kleene-plus",
+        "low-income",
+        "pediatric",
+        "pediatric-nutrition-monitor",
+        "startup-loadable"
+      ],
+      "sequenceCount": 3,
+      "populationFocus": "Children ages 0–12; WIC-eligible families; households with limited grocery access or food insecurity",
+      "sensorNormalization": {
+        "growth_percentile_norm": "0.0=<5th percentile (failure to thrive / significant underweight), 0.5=25th–75th percentile (healthy range), 1.0=>95th percentile (overweight risk in low-income context)",
+        "caloric_adequacy_norm": "0.0=severe caloric deficit (<50% daily requirement), 0.5=adequate (90–110% daily requirement), 1.0=consistent surplus",
+        "micronutrient_score_norm": "0.0=multiple confirmed deficiencies (Fe, Vit D, B12 all low), 0.5=borderline adequate, 1.0=well-supplemented across all tracked nutrients",
+        "dietary_diversity_norm": "0.0=single food group only (calorie-dense, low-nutrient), 0.5=moderate variety (3+ food groups), 1.0=high diversity (5+ food groups consistently)"
+      },
+      "downstreamMachine": "HomeCaregiverBurdenMonitor (reads [2003:2007])",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "child-nutrition",
+          "health-personal",
+          "home-health",
+          "pediatric"
+        ],
+        "family": "pediatric-nutrition-monitor",
+        "machineCode": "pediatric-nutrition-monitor",
+        "capabilityTags": [
+          "growth-monitoring"
+        ],
+        "workflowTags": [
+          "failure-to-thrive",
+          "home-health-pediatric-child-nutrition",
+          "kleene-plus",
+          "low-income",
+          "pediatric-nutrition-monitor"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "child-nutrition",
+          "failure-to-thrive",
+          "growth-monitoring",
+          "health-personal",
+          "home-health",
+          "home-health-pediatric-child-nutrition",
+          "input-sequences",
+          "input-sequences-1",
+          "kleene-plus",
+          "low-income",
+          "pediatric",
+          "pediatric-nutrition-monitor",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/pediatricnutritionmonitor",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "patient-safety-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"health-personal\".  Review and tune the routing as the team owning PediatricNutritionMonitor matures."
+      },
+      "triggerConfig": {
+        "processId": "PEDIATRICNUTRITIONMONITOR",
+        "processName": "Pediatric Nutrition Monitor",
+        "rules": [
+          {
+            "sequenceId": "ped-nut-growth-faltering",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "GROWTH_ALERT: failure-to-thrive pattern; pediatric nutrition consult required at [2003:2007]"
+          },
+          {
+            "sequenceId": "ped-nut-micronutrient",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "MICRONUTRIENT_CONCERN: iron-deficiency anemia or vitamin D/B12 deficiency risk at [2003:2007]"
+          },
+          {
+            "sequenceId": "ped-nut-ok",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "NUTRITION_OK: pediatric nutrition adequate for developmental support at [2003:2007]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1971,
+        "length": 4
+      },
+      "output": {
+        "offset": 2003,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ped-nut-growth-faltering",
+        "name": "Growth Faltering: NORMAL+ → DECLINING → GROWTH_CONCERN → GROWTH_ALERT",
+        "metadata": {
+          "description": "Detects growth trajectory deviation — the most clinically significant pediatric nutrition signal. Two or more consecutive weight/height measurements crossing downward across percentile lines without illness explanation indicate nutritional inadequacy. The NORMAL+ initial state ensures baseline growth data before faltering can be flagged.",
+          "path": "NORMAL+ → DECLINING → GROWTH_CONCERN → output[1,0,0,0]",
+          "output": "[1,0,0,0] (GROWTH_ALERT)"
+        },
+        "vectors": [
+          {
+            "id": "pn-normal",
+            "elements": [
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.58,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.52,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "NORMAL",
+              "description": "NORMAL+ — growth percentile in healthy range; adequate calories; acceptable micronutrient and dietary diversity scores. isInitial A*A = A+.",
+              "growth_percentile": "0.48–0.65 (25th–75th percentile)"
+            },
+            "nextVectorIds": [
+              "pn-normal",
+              "pn-declining"
+            ]
+          },
+          {
+            "id": "pn-declining",
+            "elements": [
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.32,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.3,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "DECLINING",
+              "description": "DECLINING — growth percentile crossing downward; caloric adequacy dropping; dietary diversity narrowing.",
+              "growth_percentile": "0.25–0.45 (10th–25th percentile; crossing lines)"
+            },
+            "nextVectorIds": [
+              "pn-growth-concern"
+            ]
+          },
+          {
+            "id": "pn-growth-concern",
+            "elements": [
+              {
+                "value": 0.15,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.2,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.18,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.12,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "GROWTH_CONCERN",
+              "description": "GROWTH_CONCERN — below 10th percentile with documented caloric deficit and poor dietary diversity. Fires GROWTH_ALERT requiring pediatric nutritionist or WIC referral.",
+              "growth_percentile": "0.05–0.20 (<10th percentile with deficit)"
+            },
+            "outputVectors": [
+              {
+                "id": "pn-growth-alert-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "GROWTH_ALERT: failure-to-thrive pattern; pediatric nutrition consult required at [2003:2007]",
+                  "action": "WIC referral; pediatrician growth review; food prescription program screening"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ped-nut-micronutrient",
+        "name": "Micronutrient Deficiency: SUFFICIENT+ → BORDERLINE → DEFICIENT → MICRONUTRIENT_CONCERN",
+        "metadata": {
+          "description": "Tracks micronutrient status decline — iron-deficiency anemia, vitamin D deficiency, and B12 deficiency are highly prevalent in low-income pediatric populations and cause measurable cognitive and developmental impacts. This pattern fires before overt clinical symptoms appear.",
+          "path": "SUFFICIENT+ → BORDERLINE → DEFICIENT → output[0,0,1,0]",
+          "output": "[0,0,1,0] (MICRONUTRIENT_CONCERN)"
+        },
+        "vectors": [
+          {
+            "id": "pn-sufficient",
+            "elements": [
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.58,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "SUFFICIENT",
+              "description": "SUFFICIENT+ — micronutrient score adequate; dietary diversity providing key vitamins and minerals. isInitial A*A = A+.",
+              "micronutrient_score": "0.52–0.68 (borderline-to-adequate across Fe, Vit D, B12)"
+            },
+            "nextVectorIds": [
+              "pn-sufficient",
+              "pn-borderline"
+            ]
+          },
+          {
+            "id": "pn-borderline",
+            "elements": [
+              {
+                "value": 0.52,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.45,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.42,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "BORDERLINE",
+              "description": "BORDERLINE — micronutrient score below adequate; caloric intake maintained but quality declining; dietary diversity narrowing.",
+              "micronutrient_score": "0.30–0.48 (one or more nutrients low-borderline)"
+            },
+            "nextVectorIds": [
+              "pn-deficient"
+            ]
+          },
+          {
+            "id": "pn-deficient",
+            "elements": [
+              {
+                "value": 0.45,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.15,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.2,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "DEFICIENT",
+              "description": "DEFICIENT — multiple micronutrient deficiencies; low dietary diversity; caloric diet dominated by low-nutrient foods. Fires MICRONUTRIENT_CONCERN.",
+              "micronutrient_score": "0.0–0.22 (multiple confirmed deficiencies)"
+            },
+            "outputVectors": [
+              {
+                "id": "pn-micronutrient-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "MICRONUTRIENT_CONCERN: iron-deficiency anemia or vitamin D/B12 deficiency risk at [2003:2007]",
+                  "action": "Lab screening referral; WIC food package review; supplement prescription; dietitian consult"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ped-nut-ok",
+        "name": "Nutrition OK: THRIVING+ → NUTRITION_OK signal",
+        "metadata": {
+          "description": "Fires NUTRITION_OK when all four nutrition dimensions are above adequate thresholds. In low-income settings this represents successful outcome of WIC participation, food bank access, or community nutrition programs.",
+          "pattern": "THRIVING+",
+          "output": "[0,0,0,1] (NUTRITION_OK)"
+        },
+        "vectors": [
+          {
+            "id": "pn-thriving",
+            "elements": [
+              {
+                "value": 0.58,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.58,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "THRIVING",
+              "description": "THRIVING+ — growth on-track, adequate calories, sufficient micronutrients, reasonable dietary diversity. Fires NUTRITION_OK each matching cycle.",
+              "scenario": "Child on WIC program with consistent food access; growth tracking appropriately"
+            },
+            "outputVectors": [
+              {
+                "id": "pn-ok-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "NUTRITION_OK: pediatric nutrition adequate for developmental support at [2003:2007]",
+                  "action": "Caregiver burden monitor registers healthy child nutrition state"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Growth Faltering During Food Assistance Gap",
+        "pattern": "6-step: NORMAL→NORMAL→DECLINING→DECLINING→GROWTH_CONCERN (alert)→THRIVING (after WIC restart)",
+        "description": "Child's WIC benefits lapse between recertification periods; 6-week nutrition gap causes measurable growth decline; alert prompts WIC outreach; recovery.",
+        "vectors": [
+          [
+            0.56,
+            0.59,
+            0.53,
+            0.56
+          ],
+          [
+            0.54,
+            0.57,
+            0.51,
+            0.54
+          ],
+          [
+            0.34,
+            0.37,
+            0.31,
+            0.29
+          ],
+          [
+            0.31,
+            0.35,
+            0.29,
+            0.26
+          ],
+          [
+            0.14,
+            0.19,
+            0.17,
+            0.11
+          ],
+          [
+            0.59,
+            0.63,
+            0.61,
+            0.59
+          ]
+        ],
+        "metadata": {
+          "scenario": "wic-lapse-growth-impact",
+          "expectedOutputs": {
+            "steps_1_2": "NUTRITION_OK fires [0,0,0,1]",
+            "steps_3_4": "no output (DECLINING intermediate)",
+            "step_5": "GROWTH_ALERT fires [1,0,0,0]",
+            "step_6": "NUTRITION_OK fires [0,0,0,1] (WIC reinstated)"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

@@ -1,0 +1,506 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Community Services Shelter Housing And Supportive Services Shelter Bed Availability",
+    "description": "Community-services machine for shelter bed availability in the shelter housing and supportive services workstream. It monitors bed inventory, demographic fit, accessibility needs, and intake cutoff and emits AI-triggered actions for health and human services, law enforcement/public safety coordination, homelessness response, and city operations.",
+    "metadata": {
+      "category": "community-services",
+      "domain": "Community Services - Shelter Housing And Supportive Services",
+      "author": "Reality Engine",
+      "workstream": "Shelter Housing And Supportive Services",
+      "operationalFocus": "Shelter Bed Availability",
+      "focusDescription": "bed inventory, demographic fit, accessibility needs, and intake cutoff",
+      "upstreamMachine": "Community Services Homelessness Outreach Homeless Outreach Executive",
+      "upstreamDomain": "community-services",
+      "upstreamOutputRegion": "[1232:1236]",
+      "upstreamPurpose": null,
+      "downstreamMachines": [
+        "Community Services Shelter Housing And Supportive Services Coordinated Entry Queue"
+      ],
+      "crossDomainInterconnect": false,
+      "crossDomainOutputTarget": null,
+      "crossDomainOutputPurpose": null,
+      "dispatchableAgent": "housing_services_agent",
+      "aiTrigger": "community-services-shelter-housing-and-supportive-services-shelter-bed-availability",
+      "predictiveFlowTrigger": "community-services-predictive-shelter-housing-and-supportive-services-shelter-bed-availability",
+      "agentActions": [
+        "Dispatch housing_services_agent for urgent community-services intervention on shelter bed availability.",
+        "Coordinate health, housing, public safety, transportation, or city service partners for shelter bed availability.",
+        "Create field work order or mobile team task for shelter bed availability.",
+        "Maintain monitored service path for shelter bed availability."
+      ],
+      "inputSpace": "4D binary at [1232:1236]",
+      "outputSpace": "4D binary at [1236:1240]: [1,0,0,0]=URGENT_RESPONSE, [0,1,0,0]=COORDINATE_SERVICES, [0,0,1,0]=FIELD_WORK_ORDER, [0,0,0,1]=STABLE_SERVICE_PATH",
+      "inputSemantics": [
+        "resident need severity",
+        "eligibility and documentation readiness",
+        "field capacity or operational readiness",
+        "safety, mobility, and health risk"
+      ],
+      "tags": [
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-4",
+        "city-services",
+        "community-services",
+        "community-services-generated",
+        "community-services-predictive-shelter-housing-and-supportive-services-shelter-bed-availability",
+        "community-services-shelter-housing-and-supportive-services",
+        "community-services-shelter-housing-and-supportive-services-shelter-bed-availability",
+        "cross-domain",
+        "csx061",
+        "dispatchable-agent",
+        "health-and-human-services",
+        "homelessness",
+        "housing-services-agent",
+        "input-sequences",
+        "input-sequences-5",
+        "law-enforcement",
+        "machine-interconnect",
+        "public-safety",
+        "shelter-bed-availability",
+        "shelter-housing-and-supportive-services",
+        "startup-loadable"
+      ],
+      "sequenceCount": 5,
+      "reuseGuideline": "Map 311, case-management, CAD/RMS, shelter HMIS, benefit enrollment, outreach, public health, and transit-access signals into the 4D input lane. Route outputs to case workers, mobile crisis, public safety, housing navigators, field crews, transportation dispatch, or health-service agents.",
+      "downstreamPattern": "Output region [1236:1240] feeds Community Services Shelter Housing And Supportive Services Coordinated Entry Queue.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "community-services",
+          "shelter-housing-and-supportive-services"
+        ],
+        "family": "community-services-generated",
+        "machineCode": "csx061",
+        "capabilityTags": [
+          "ai-triggers",
+          "community-services-predictive-shelter-housing-and-supportive-services-shelter-bed-availability",
+          "dispatchable-agents"
+        ],
+        "workflowTags": [
+          "ai-trigger",
+          "city-services",
+          "community-services-generated",
+          "community-services-shelter-housing-and-supportive-services",
+          "cross-domain",
+          "dispatchable-agent",
+          "health-and-human-services",
+          "homelessness",
+          "housing-services-agent",
+          "law-enforcement",
+          "public-safety",
+          "shelter-bed-availability"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ai-trigger",
+          "ai-triggers",
+          "ces-sequences",
+          "ces-sequences-4",
+          "city-services",
+          "community-services",
+          "community-services-generated",
+          "community-services-predictive-shelter-housing-and-supportive-services-shelter-bed-availability",
+          "community-services-shelter-housing-and-supportive-services",
+          "community-services-shelter-housing-and-supportive-services-shelter-bed-availability",
+          "cross-domain",
+          "csx061",
+          "dispatchable-agent",
+          "dispatchable-agents",
+          "health-and-human-services",
+          "homelessness",
+          "housing-services-agent",
+          "input-sequences",
+          "input-sequences-5",
+          "law-enforcement",
+          "machine-interconnect",
+          "public-safety",
+          "shelter-bed-availability",
+          "shelter-housing-and-supportive-services",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/csx061_shelter-housing-and-supportive-services-shelter-bed-availability",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning CSX061_shelter-housing-and-supportive-services-shelter-bed-availability matures."
+      },
+      "triggerConfig": {
+        "processId": "CSX061_SHELTER_HOUSING_AND_SUPPORTIVE_SERVICES_SHELTER_BED_AVAILABILITY",
+        "processName": "Community Services Shelter Housing And Supportive Services Shelter Bed Availability",
+        "rules": [
+          {
+            "sequenceId": "csx-061-urgent-response",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Shelter Bed Availability: WATCH -> URGENT_RESPONSE"
+          },
+          {
+            "sequenceId": "csx-061-coordinate-services",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Shelter Bed Availability: COORDINATION_NEEDED -> COORDINATE_SERVICES"
+          },
+          {
+            "sequenceId": "csx-061-field-work-order",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Shelter Bed Availability: FIELD_TASK_NEEDED -> FIELD_WORK_ORDER"
+          },
+          {
+            "sequenceId": "csx-061-stable-service-path",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Shelter Bed Availability: STABLE_PATH -> STABLE_SERVICE_PATH"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1232,
+        "length": 4
+      },
+      "output": {
+        "offset": 1236,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "csx-061-urgent-response",
+        "name": "Shelter Bed Availability: WATCH -> URGENT_RESPONSE",
+        "metadata": {
+          "description": "Escalates resident or field risk into urgent response.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-061-watch",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "nextVectorIds": [
+              "csx-061-urgent"
+            ]
+          },
+          {
+            "id": "csx-061-urgent",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": false,
+            "outputVectors": [
+              {
+                "id": "csx-061-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch housing_services_agent for urgent community-services intervention on shelter bed availability."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-061-coordinate-services",
+        "name": "Shelter Bed Availability: COORDINATION_NEEDED -> COORDINATE_SERVICES",
+        "metadata": {
+          "description": "Triggers cross-agency coordination.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-061-coordinate",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-061-coordinate-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Coordinate health, housing, public safety, transportation, or city service partners for shelter bed availability."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-061-field-work-order",
+        "name": "Shelter Bed Availability: FIELD_TASK_NEEDED -> FIELD_WORK_ORDER",
+        "metadata": {
+          "description": "Creates a field crew, outreach, or mobile response task.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-061-field-task",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-061-field-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Create field work order or mobile team task for shelter bed availability."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-061-stable-service-path",
+        "name": "Shelter Bed Availability: STABLE_PATH -> STABLE_SERVICE_PATH",
+        "metadata": {
+          "description": "Confirms resident service path is stable and monitored.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "csx-061-stable",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-061-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Maintain monitored service path for shelter bed availability."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Urgent response sequence",
+        "description": "Two-step community risk escalation ending in urgent response.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-response",
+          "sequenceLength": 2
+        }
+      },
+      {
+        "name": "Coordinate services",
+        "description": "Coordinates health, public safety, housing, transit, or city service partners.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "coordinate-services"
+        }
+      },
+      {
+        "name": "Field work order",
+        "description": "Creates a field response or outreach task.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "field-work-order"
+        }
+      },
+      {
+        "name": "Stable service path",
+        "description": "Confirms the resident or city service path is stable.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "stable-service-path"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Initial observation arms the urgent path without firing.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

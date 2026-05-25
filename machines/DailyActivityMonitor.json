@@ -1,0 +1,299 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Daily Activity Monitor",
+    "description": "Compares today's in-home movement against the patient's 7-day baseline. Flags sedentary days as AMBER and prolonged inactivity (multiple consecutive sedentary days) as RED so the local AI can escalate wellness outreach.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "wellness",
+      "author": "Reality Engine",
+      "created": "2026-04-21T00:00:00Z",
+      "workflow": "in-home-activity-baseline",
+      "eventSpace": "2D binary: [below_baseline_today, sedentary_streak_active]",
+      "outputSpace": "2D binary: {[0,0]=ACTIVE, [1,0]=SEDENTARY, [1,1]=PROLONGED_INACTIVITY}",
+      "tags": [
+        "anomaly-detection",
+        "ces-sequences",
+        "ces-sequences-3",
+        "daily-activity-monitor",
+        "elder-care",
+        "health-personal",
+        "in-home-monitoring",
+        "input-sequences",
+        "input-sequences-2",
+        "startup-loadable",
+        "trigger",
+        "wellness"
+      ],
+      "sequenceCount": 3,
+      "triggerConfig": {
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "examples/triggers/graphql_trigger_template.py",
+        "processId": "ACTIVITY-MONITOR",
+        "processName": "Daily Activity Monitor",
+        "rules": [
+          {
+            "sequenceId": "activity-active",
+            "outputMatches": [
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "ok",
+            "description": "Movement on par with baseline"
+          },
+          {
+            "sequenceId": "activity-sedentary",
+            "outputMatches": [
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Below baseline today — suggest a short activity nudge"
+          },
+          {
+            "sequenceId": "activity-prolonged",
+            "outputMatches": [
+              1,
+              1
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Multi-day inactivity streak — escalate to caregiver / clinician"
+          }
+        ]
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "wellness"
+        ],
+        "family": "daily-activity-monitor",
+        "machineCode": "daily-activity-monitor",
+        "capabilityTags": [
+          "in-home-monitoring"
+        ],
+        "workflowTags": [
+          "anomaly-detection",
+          "daily-activity-monitor",
+          "elder-care",
+          "trigger"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "anomaly-detection",
+          "ces-sequences",
+          "ces-sequences-3",
+          "daily-activity-monitor",
+          "elder-care",
+          "health-personal",
+          "in-home-monitoring",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable",
+          "trigger",
+          "wellness"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/dailyactivitymonitor",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "patient-safety-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"health-personal\".  Review and tune the routing as the team owning DailyActivityMonitor matures."
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1951,
+        "length": 2
+      },
+      "output": {
+        "offset": 1953,
+        "length": 2
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "activity-active",
+        "name": "Active day → GREEN",
+        "metadata": {
+          "description": "Today's movement matches or exceeds 7-day baseline"
+        },
+        "vectors": [
+          {
+            "id": "activity-ev-active",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "active",
+              "state": "ACTIVE"
+            },
+            "outputVectors": [
+              {
+                "id": "activity-out-active",
+                "vector": [
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "ragStatusCode": "GREEN",
+                  "state": "ACTIVE"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "activity-sedentary",
+        "name": "Sedentary day → AMBER",
+        "metadata": {
+          "description": "Single-day dip below baseline"
+        },
+        "vectors": [
+          {
+            "id": "activity-ev-sedentary",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "sedentary",
+              "state": "SEDENTARY"
+            },
+            "outputVectors": [
+              {
+                "id": "activity-out-sedentary",
+                "vector": [
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "ragStatusCode": "AMBER",
+                  "state": "SEDENTARY"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "activity-prolonged",
+        "name": "Prolonged inactivity → RED",
+        "metadata": {
+          "description": "Consecutive sedentary days exceeded streak threshold"
+        },
+        "vectors": [
+          {
+            "id": "activity-ev-prolonged",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "prolonged",
+              "state": "PROLONGED_INACTIVITY"
+            },
+            "outputVectors": [
+              {
+                "id": "activity-out-prolonged",
+                "vector": [
+                  1,
+                  1
+                ],
+                "metadata": {
+                  "ragStatusCode": "RED",
+                  "state": "PROLONGED_INACTIVITY"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Active day",
+        "pattern": "[0,0]",
+        "description": "On-baseline day — GREEN trigger",
+        "vectors": [
+          [
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "name": "Sedentary → prolonged streak",
+        "pattern": "[1,0] → [1,1]",
+        "description": "One sedentary day (AMBER) followed by streak escalation (RED)",
+        "vectors": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

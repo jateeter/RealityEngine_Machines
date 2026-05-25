@@ -1,0 +1,507 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Community Services Health And Human Services Intake Case Routing Coordinator",
+    "description": "Community-services machine for case routing coordinator in the health and human services intake workstream. It monitors resident needs, program fit, staff capacity, and response SLA and emits AI-triggered actions for health and human services, law enforcement/public safety coordination, homelessness response, and city operations.",
+    "metadata": {
+      "category": "community-services",
+      "domain": "Community Services - Health And Human Services Intake",
+      "author": "Reality Engine",
+      "workstream": "Health And Human Services Intake",
+      "operationalFocus": "Case Routing Coordinator",
+      "focusDescription": "resident needs, program fit, staff capacity, and response SLA",
+      "upstreamMachine": "Community Services Health And Human Services Intake Resident Intake Triage",
+      "upstreamDomain": "community-services",
+      "upstreamOutputRegion": "[1004:1008]",
+      "upstreamPurpose": null,
+      "downstreamMachines": [
+        "Community Services Health And Human Services Intake Multilingual Access Monitor"
+      ],
+      "crossDomainInterconnect": false,
+      "crossDomainOutputTarget": null,
+      "crossDomainOutputPurpose": null,
+      "dispatchableAgent": "benefits_navigation_agent",
+      "aiTrigger": "community-services-health-and-human-services-intake-case-routing-coordinator",
+      "predictiveFlowTrigger": "community-services-predictive-health-and-human-services-intake-case-routing-coordinator",
+      "agentActions": [
+        "Dispatch benefits_navigation_agent for urgent community-services intervention on case routing coordinator.",
+        "Coordinate health, housing, public safety, transportation, or city service partners for case routing coordinator.",
+        "Create field work order or mobile team task for case routing coordinator.",
+        "Maintain monitored service path for case routing coordinator."
+      ],
+      "inputSpace": "4D binary at [1004:1008]",
+      "outputSpace": "4D binary at [1008:1012]: [1,0,0,0]=URGENT_RESPONSE, [0,1,0,0]=COORDINATE_SERVICES, [0,0,1,0]=FIELD_WORK_ORDER, [0,0,0,1]=STABLE_SERVICE_PATH",
+      "inputSemantics": [
+        "resident need severity",
+        "eligibility and documentation readiness",
+        "field capacity or operational readiness",
+        "safety, mobility, and health risk"
+      ],
+      "tags": [
+        "ai-trigger",
+        "benefits-navigation-agent",
+        "case-routing-coordinator",
+        "ces-sequences",
+        "ces-sequences-4",
+        "city-services",
+        "community-services",
+        "community-services-generated",
+        "community-services-health-and-human-services-intake",
+        "community-services-health-and-human-services-intake-case-routing-coordinator",
+        "community-services-predictive-health-and-human-services-intake-case-routing-coordinator",
+        "cross-domain",
+        "csx002",
+        "dispatchable-agent",
+        "health-and-human-services",
+        "health-and-human-services-intake",
+        "homelessness",
+        "input-sequences",
+        "input-sequences-5",
+        "law-enforcement",
+        "machine-interconnect",
+        "public-safety",
+        "startup-loadable"
+      ],
+      "sequenceCount": 5,
+      "reuseGuideline": "Map 311, case-management, CAD/RMS, shelter HMIS, benefit enrollment, outreach, public health, and transit-access signals into the 4D input lane. Route outputs to case workers, mobile crisis, public safety, housing navigators, field crews, transportation dispatch, or health-service agents.",
+      "downstreamPattern": "Output region [1008:1012] feeds Community Services Health And Human Services Intake Multilingual Access Monitor.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "community-services",
+          "health-and-human-services-intake"
+        ],
+        "family": "community-services-generated",
+        "machineCode": "csx002",
+        "capabilityTags": [
+          "ai-triggers",
+          "case-routing-coordinator",
+          "community-services-health-and-human-services-intake-case-routing-coordinator",
+          "community-services-predictive-health-and-human-services-intake-case-routing-coordinator",
+          "dispatchable-agents"
+        ],
+        "workflowTags": [
+          "ai-trigger",
+          "benefits-navigation-agent",
+          "city-services",
+          "community-services-generated",
+          "community-services-health-and-human-services-intake",
+          "cross-domain",
+          "dispatchable-agent",
+          "health-and-human-services",
+          "homelessness",
+          "law-enforcement",
+          "public-safety"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ai-trigger",
+          "ai-triggers",
+          "benefits-navigation-agent",
+          "case-routing-coordinator",
+          "ces-sequences",
+          "ces-sequences-4",
+          "city-services",
+          "community-services",
+          "community-services-generated",
+          "community-services-health-and-human-services-intake",
+          "community-services-health-and-human-services-intake-case-routing-coordinator",
+          "community-services-predictive-health-and-human-services-intake-case-routing-coordinator",
+          "cross-domain",
+          "csx002",
+          "dispatchable-agent",
+          "dispatchable-agents",
+          "health-and-human-services",
+          "health-and-human-services-intake",
+          "homelessness",
+          "input-sequences",
+          "input-sequences-5",
+          "law-enforcement",
+          "machine-interconnect",
+          "public-safety",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/csx002_health-and-human-services-intake-case-routing-coordinator",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning CSX002_health-and-human-services-intake-case-routing-coordinator matures."
+      },
+      "triggerConfig": {
+        "processId": "CSX002_HEALTH_AND_HUMAN_SERVICES_INTAKE_CASE_ROUTING_COORDINATOR",
+        "processName": "Community Services Health And Human Services Intake Case Routing Coordinator",
+        "rules": [
+          {
+            "sequenceId": "csx-002-urgent-response",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Case Routing Coordinator: WATCH -> URGENT_RESPONSE"
+          },
+          {
+            "sequenceId": "csx-002-coordinate-services",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Case Routing Coordinator: COORDINATION_NEEDED -> COORDINATE_SERVICES"
+          },
+          {
+            "sequenceId": "csx-002-field-work-order",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Case Routing Coordinator: FIELD_TASK_NEEDED -> FIELD_WORK_ORDER"
+          },
+          {
+            "sequenceId": "csx-002-stable-service-path",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Case Routing Coordinator: STABLE_PATH -> STABLE_SERVICE_PATH"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1004,
+        "length": 4
+      },
+      "output": {
+        "offset": 1008,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "csx-002-urgent-response",
+        "name": "Case Routing Coordinator: WATCH -> URGENT_RESPONSE",
+        "metadata": {
+          "description": "Escalates resident or field risk into urgent response.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-002-watch",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "nextVectorIds": [
+              "csx-002-urgent"
+            ]
+          },
+          {
+            "id": "csx-002-urgent",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": false,
+            "outputVectors": [
+              {
+                "id": "csx-002-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch benefits_navigation_agent for urgent community-services intervention on case routing coordinator."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-002-coordinate-services",
+        "name": "Case Routing Coordinator: COORDINATION_NEEDED -> COORDINATE_SERVICES",
+        "metadata": {
+          "description": "Triggers cross-agency coordination.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-002-coordinate",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-002-coordinate-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Coordinate health, housing, public safety, transportation, or city service partners for case routing coordinator."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-002-field-work-order",
+        "name": "Case Routing Coordinator: FIELD_TASK_NEEDED -> FIELD_WORK_ORDER",
+        "metadata": {
+          "description": "Creates a field crew, outreach, or mobile response task.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-002-field-task",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-002-field-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Create field work order or mobile team task for case routing coordinator."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-002-stable-service-path",
+        "name": "Case Routing Coordinator: STABLE_PATH -> STABLE_SERVICE_PATH",
+        "metadata": {
+          "description": "Confirms resident service path is stable and monitored.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "csx-002-stable",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-002-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Maintain monitored service path for case routing coordinator."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Urgent response sequence",
+        "description": "Two-step community risk escalation ending in urgent response.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-response",
+          "sequenceLength": 2
+        }
+      },
+      {
+        "name": "Coordinate services",
+        "description": "Coordinates health, public safety, housing, transit, or city service partners.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "coordinate-services"
+        }
+      },
+      {
+        "name": "Field work order",
+        "description": "Creates a field response or outreach task.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "field-work-order"
+        }
+      },
+      {
+        "name": "Stable service path",
+        "description": "Confirms the resident or city service path is stable.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "stable-service-path"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Initial observation arms the urgent path without firing.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,568 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Agriculture Yuma DO Probe Reliability Tracker",
+    "description": "Yuma MQTT-driven DO-probe reliability machine. Reads the four DO sensor cells at offsets [84:88) populated by the live LATERAL/DOSuite/DEV0000017/SensorReadings/v1 MQTT stream (DO level + DO temp + their watch bands) and produces a 4-cell probe-reliability signal at offsets [260:264): URGENT_MAINT, FORECAST_MAINT, CALIBRATE, NORMAL. Complements AGX005 (operational DO control) by surfacing probe-health concerns such as drift or sensor failure.",
+    "metadata": {
+      "category": "agriculture",
+      "domain": "Agriculture - Aquaculture",
+      "author": "Reality Engine",
+      "operationalFocus": "Yuma DO Probe Reliability",
+      "focusDescription": "Live MQTT sensor stream from LATERAL/DOSuite/DEV0000017/SensorReadings/v1",
+      "mqttIntegration": {
+        "configFile": "RealityEngine_CPP/config/mqtt-mappings.yuma-agriculture.json",
+        "topicFilter": "LATERAL/DOSuite/DEV0000017/SensorReadings/v1",
+        "inputRegion": {
+          "offset": 84,
+          "length": 4
+        },
+        "drivenBy": "AGX005",
+        "sensorBands": [
+          "DO level in nominal band",
+          "DO temp in nominal band",
+          "low-DO watch band",
+          "high-DO-temp watch band"
+        ],
+        "rationale": "Same MQTT region as AGX005 but a maintenance lens \u2014 distinct outputs."
+      },
+      "upstreamMachine": "Agriculture Aquaculture Dissolved Oxygen Control",
+      "upstreamOutputRegion": null,
+      "predictiveManagementRole": "Maintenance-focused machine driven by live yuma.lateraledge.cloud MQTT data via AGX005 sensor region.",
+      "aiTrigger": "agriculture-yuma-do-probe-reliability-tracker-maintenance",
+      "dispatchableAgent": "aquaculture_do_probe_reliability_agent",
+      "agentActions": [
+        "Dispatch aquaculture_do_probe_reliability_agent for urgent maintenance and record corrective action.",
+        "Schedule preventive maintenance via aquaculture_do_probe_reliability_agent and verify completion telemetry.",
+        "Run sensor-calibration workflow via aquaculture_do_probe_reliability_agent for the yuma do probe reliability stream.",
+        "Continue automated monitoring for yuma do probe reliability while preserving current setpoints."
+      ],
+      "outputSpace": "4D binary at [260:264]: [1,0,0,0]=URGENT_MAINT, [0,1,0,0]=FORECAST_MAINT, [0,0,1,0]=CALIBRATE, [0,0,0,1]=NORMAL",
+      "tags": [
+        "agriculture",
+        "agriculture-generated",
+        "agriculture-mqtt",
+        "agriculture-yuma",
+        "agriculture-yuma-agx005",
+        "agx052",
+        "ai-trigger",
+        "ai-triggers",
+        "aquaculture_do_probe_reliability_agent",
+        "ces-sequences",
+        "ces-sequences-4",
+        "dispatchable-agent",
+        "dispatchable-agents",
+        "input-sequences",
+        "input-sequences-5",
+        "machine-interconnect",
+        "maintenance",
+        "operational-management",
+        "predictive-maintenance",
+        "startup-loadable",
+        "yuma-mqtt-driven"
+      ],
+      "sequenceCount": 4,
+      "sensorNormalization": {
+        "process_stability_norm": "0.0=outside MQTT band; 0.5=watch; 1.0=in MQTT-defined nominal band",
+        "resource_efficiency_norm": "0.0=wasteful; 0.5=acceptable; 1.0=efficient",
+        "biosecurity_or_ipm_norm": "0.0=biohazard; 0.5=mitigated; 1.0=controlled",
+        "maintenance_readiness_norm": "0.0=overdue; 0.5=service due; 1.0=verified"
+      },
+      "inputSemantics": [
+        "DO level in nominal band",
+        "DO temp in nominal band",
+        "low-DO watch band",
+        "high-DO-temp watch band"
+      ],
+      "downstreamMachines": [
+        "Agriculture Yuma Facility AI Synthesis Bridge"
+      ],
+      "downstreamPattern": "Output region [260:264] feeds the Agriculture Yuma Facility AI Synthesis Bridge (AGX055) which projects all four Yuma maintenance machines into the AgYieldOptimizationAI input window at [3959:3971].",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/generate_yuma_mqtt_maintenance_machines.py",
+        "primaryDomain": "agriculture",
+        "domainTags": [
+          "agriculture",
+          "agriculture-yuma"
+        ],
+        "family": "agriculture-yuma-mqtt",
+        "machineCode": "agx052",
+        "capabilityTags": [
+          "ai-triggers",
+          "dispatchable-agents",
+          "maintenance",
+          "predictive-maintenance",
+          "yuma-mqtt-driven"
+        ],
+        "workflowTags": [
+          "agriculture-yuma",
+          "ai-trigger",
+          "dispatchable-agent",
+          "operational-management"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect",
+          "mqtt-bridge"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "agriculture-operations",
+        "runbook": "https://runbooks.example.org/agriculture/agx052_yuma-do-probe-reliability-tracker",
+        "escalationPolicy": "pagerduty:ag-ops",
+        "contact": {
+          "primary": "agriculture-operations-primary@example.org",
+          "secondary": "agriculture-operations-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 3600,
+          "error": 900
+        },
+        "notes": "Yuma MQTT-driven AGX052 \u2014 auto-generated from scripts/generate_yuma_mqtt_maintenance_machines.py.  MQTT topic: LATERAL/DOSuite/DEV0000017/SensorReadings/v1."
+      },
+      "triggerConfig": {
+        "processId": "AGX052_YUMA_DO_PROBE_RELIABILITY_TRACKER",
+        "processName": "Agriculture Yuma DO Probe Reliability Tracker",
+        "rules": [
+          {
+            "sequenceId": "agx-052-urgent-maint",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Urgent maintenance dispatch required."
+          },
+          {
+            "sequenceId": "agx-052-forecast-maint",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "info",
+            "description": "Preventive maintenance should be scheduled."
+          },
+          {
+            "sequenceId": "agx-052-calibrate",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "info",
+            "description": "Sensor calibration required."
+          },
+          {
+            "sequenceId": "agx-052-normal",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Equipment in normal operating window."
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 84,
+        "length": 4
+      },
+      "output": {
+        "offset": 260,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "agx-052-urgent-maint",
+        "name": "Yuma DO Probe Reliability: NORMAL -> WATCH -> CRITICAL -> URGENT_MAINT",
+        "metadata": {
+          "description": "Two-step escalation from stable readings into a fault state.",
+          "path": "NORMAL -> WATCH -> CRITICAL",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "agx-052-normal",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "NORMAL",
+              "description": "All four sensor cells in nominal range."
+            },
+            "nextVectorIds": [
+              "agx-052-watch"
+            ]
+          },
+          {
+            "id": "agx-052-watch",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "WATCH",
+              "description": "Two sensor cells leaving the nominal band."
+            },
+            "nextVectorIds": [
+              "agx-052-critical"
+            ]
+          },
+          {
+            "id": "agx-052-critical",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "CRITICAL",
+              "description": "All four sensor cells outside nominal \u2014 fault state."
+            },
+            "outputVectors": [
+              {
+                "id": "agx-052-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Dispatch maintenance immediately \u2014 sensor data shows a fault condition.",
+                  "action": "Dispatch aquaculture_do_probe_reliability_agent for urgent maintenance and record corrective action."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agx-052-forecast-maint",
+        "name": "Yuma DO Probe Reliability: FORECAST_MAINT input pattern -> FORECAST_MAINT",
+        "metadata": {
+          "description": "Schedule maintenance in the upcoming service window.",
+          "pattern": "FORECAST_MAINT",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "agx-052-forecast-maint-event",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "FORECAST_MAINT",
+              "description": "Schedule maintenance in the upcoming service window."
+            },
+            "outputVectors": [
+              {
+                "id": "agx-052-forecast-maint-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Schedule maintenance in the upcoming service window.",
+                  "action": "Schedule preventive maintenance via aquaculture_do_probe_reliability_agent and verify completion telemetry."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agx-052-calibrate",
+        "name": "Yuma DO Probe Reliability: CALIBRATE input pattern -> CALIBRATE",
+        "metadata": {
+          "description": "Sensor drift suspected \u2014 run calibration.",
+          "pattern": "CALIBRATE",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "agx-052-calibrate-event",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "CALIBRATE",
+              "description": "Sensor drift suspected \u2014 run calibration."
+            },
+            "outputVectors": [
+              {
+                "id": "agx-052-calibrate-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Sensor drift suspected \u2014 run calibration.",
+                  "action": "Run sensor-calibration workflow via aquaculture_do_probe_reliability_agent for the yuma do probe reliability stream."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agx-052-normal",
+        "name": "Yuma DO Probe Reliability: NORMAL input pattern -> NORMAL",
+        "metadata": {
+          "description": "Equipment is healthy \u2014 continue automated monitoring.",
+          "pattern": "NORMAL",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "agx-052-normal-event",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "NORMAL",
+              "description": "Equipment is healthy \u2014 continue automated monitoring."
+            },
+            "outputVectors": [
+              {
+                "id": "agx-052-normal-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "Equipment is healthy \u2014 continue automated monitoring.",
+                  "action": "Continue automated monitoring for yuma do probe reliability while preserving current setpoints."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Escalation to urgent maintenance",
+        "description": "A stable sensor stream degrades through watch conditions and then reaches a fault state.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-maint"
+        }
+      },
+      {
+        "name": "Maintenance forecast",
+        "description": "Inner sensor cells degrade \u2014 the forecast model flags scheduled service.",
+        "vectors": [
+          [
+            0,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "forecast-maint"
+        }
+      },
+      {
+        "name": "Sensor calibration required",
+        "description": "Inner cells flap while outer cells stay healthy \u2014 a drift pattern that calls for calibration.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "calibrate"
+        }
+      },
+      {
+        "name": "Normal operating window",
+        "description": "Three of four sensor cells healthy \u2014 equipment in good working order.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "normal"
+        }
+      },
+      {
+        "name": "Baseline normal",
+        "description": "A single all-1 sensor reading arms the escalation path without dispatching maintenance.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline"
+        }
+      }
+    ]
+  }
+}

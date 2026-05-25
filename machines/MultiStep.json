@@ -1,0 +1,421 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Multi-Step State Machine",
+    "description": "Demonstrates 3-step critical event sequences with state transitions and binary outputs",
+    "metadata": {
+      "category": "digital-logic",
+      "author": "Reality Engine",
+      "created": "2026-02-02T00:00:00Z",
+      "eventSpace": "3D binary vectors: 000-111",
+      "outputSpace": "2D binary vectors: {00, 01, 10, 11}",
+      "tags": [
+        "ces-sequences",
+        "ces-sequences-2",
+        "digital-logic",
+        "input-sequences",
+        "input-sequences-3",
+        "multi-step",
+        "multi-step-state-machine",
+        "startup-loadable",
+        "state-machine",
+        "three-step"
+      ],
+      "sequenceCount": 2,
+      "description": "Two independent sequences with distinct outputs",
+      "singleTransitionAssumption": {
+        "required": true,
+        "scope": "intra-sequence",
+        "compliant": true,
+        "notes": "STA is required within each sequence: intermediate transitional vectors (ms-seq1-001, ms-seq2-101) are only activated by their predecessors and will deactivate on any non-matching input. A multi-bit jump (e.g. [0,0,0]→[0,1,1], HD=2) would skip the intermediate step and silently abort the sequence. The defined intra-sequence paths all use HD=1. The 'Both Sequences Interleaved' input sequence contains a HD=3 inter-sequence jump ([0,1,1]→[1,0,0]) which is safe because Seq2's initial vector (ms-seq2-100) is always active and requires no predecessor.",
+        "maxHammingDistanceInDefinedSequences": 3,
+        "maxHammingDistanceIntraSequence": 1,
+        "violations": [
+          {
+            "sequence": "Both Sequences Interleaved",
+            "transition": "[0,1,1] → [1,0,0]",
+            "hammingDistance": 3,
+            "intent": "Inter-sequence jump: Seq1 final → Seq2 initial. Safe because initial vectors are always active.",
+            "behavior": "Correct — ms-seq2-100 matches immediately"
+          }
+        ]
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "digital-logic",
+        "domainTags": [
+          "digital-logic"
+        ],
+        "family": "multi-step-state-machine",
+        "machineCode": "multi-step",
+        "capabilityTags": [],
+        "workflowTags": [
+          "multi-step",
+          "multi-step-state-machine",
+          "state-machine",
+          "three-step"
+        ],
+        "integrationTags": [
+          "digital-logic"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "input-sequences",
+          "input-sequences-3",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "digital-logic",
+          "input-sequences",
+          "input-sequences-3",
+          "multi-step",
+          "multi-step-state-machine",
+          "startup-loadable",
+          "state-machine",
+          "three-step"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "reliability-engineering",
+        "runbook": "https://runbooks.example.org/digital-logic/multistep",
+        "escalationPolicy": "slack:#reliability-test",
+        "contact": {
+          "primary": "reliability-engineering-primary@example.org",
+          "secondary": "reliability-engineering-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"digital-logic\".  Review and tune the routing as the team owning MultiStep matures."
+      },
+      "triggerConfig": {
+        "processId": "MULTISTEP",
+        "processName": "Multi-Step State Machine",
+        "rules": [
+          {
+            "sequenceId": "multi-step-seq1",
+            "outputMatches": [
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Sequence 1 complete: output [0,1]"
+          },
+          {
+            "sequenceId": "multi-step-seq2",
+            "outputMatches": [
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Sequence 2 complete: output [1,0]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 3907,
+        "length": 3
+      },
+      "output": {
+        "offset": 3910,
+        "length": 2
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "multi-step-seq1",
+        "name": "Sequence 1: 000→001→011→[01]",
+        "metadata": {
+          "description": "3-step sequence producing [0,1] output",
+          "path": "000→001→011",
+          "output": "[0,1]"
+        },
+        "vectors": [
+          {
+            "id": "ms-seq1-000",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "000",
+              "description": "Initial state"
+            },
+            "nextVectorIds": [
+              "ms-seq1-001"
+            ]
+          },
+          {
+            "id": "ms-seq1-001",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "001",
+              "description": "First transition"
+            },
+            "nextVectorIds": [
+              "ms-seq1-011"
+            ]
+          },
+          {
+            "id": "ms-seq1-011",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "011",
+              "description": "Terminal state"
+            },
+            "outputVectors": [
+              {
+                "id": "ms-seq1-output",
+                "vector": [
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "Sequence 1 complete: output [0,1]",
+                  "pattern": "01"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "multi-step-seq2",
+        "name": "Sequence 2: 100→101→111→[10]",
+        "metadata": {
+          "description": "3-step sequence producing [1,0] output",
+          "path": "100→101→111",
+          "output": "[1,0]"
+        },
+        "vectors": [
+          {
+            "id": "ms-seq2-100",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "100",
+              "description": "Initial state"
+            },
+            "nextVectorIds": [
+              "ms-seq2-101"
+            ]
+          },
+          {
+            "id": "ms-seq2-101",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "101",
+              "description": "First transition"
+            },
+            "nextVectorIds": [
+              "ms-seq2-111"
+            ]
+          },
+          {
+            "id": "ms-seq2-111",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "111",
+              "description": "Terminal state"
+            },
+            "outputVectors": [
+              {
+                "id": "ms-seq2-output",
+                "vector": [
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Sequence 2 complete: output [1,0]",
+                  "pattern": "10"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Sequence 1 Complete Path",
+        "pattern": "000→001→011",
+        "description": "3-step sequence producing [0,1] output",
+        "vectors": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      {
+        "name": "Sequence 2 Complete Path",
+        "pattern": "100→101→111",
+        "description": "3-step sequence producing [1,0] output",
+        "vectors": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            1
+          ],
+          [
+            1,
+            1,
+            1
+          ]
+        ]
+      },
+      {
+        "name": "Both Sequences Interleaved",
+        "pattern": "000→001→011...100→101→111",
+        "description": "Execute both sequences with outputs",
+        "vectors": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            1,
+            1
+          ],
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            1
+          ],
+          [
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputs": 2,
+          "expectedOutputSequence": "[0,1], [1,0]"
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

@@ -1,0 +1,506 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Community Services Courts Diversion And Victim Services Citation Court Reminder",
+    "description": "Community-services machine for citation court reminder in the courts diversion and victim services workstream. It monitors court date, contactability, transport barrier, and failure-to-appear risk and emits AI-triggered actions for health and human services, law enforcement/public safety coordination, homelessness response, and city operations.",
+    "metadata": {
+      "category": "community-services",
+      "domain": "Community Services - Courts Diversion And Victim Services",
+      "author": "Reality Engine",
+      "workstream": "Courts Diversion And Victim Services",
+      "operationalFocus": "Citation Court Reminder",
+      "focusDescription": "court date, contactability, transport barrier, and failure-to-appear risk",
+      "upstreamMachine": "Community Services Courts Diversion And Victim Services Pre Arrest Diversion Router",
+      "upstreamDomain": "community-services",
+      "upstreamOutputRegion": "[1160:1164]",
+      "upstreamPurpose": null,
+      "downstreamMachines": [
+        "Community Services Courts Diversion And Victim Services Community Service Placement"
+      ],
+      "crossDomainInterconnect": false,
+      "crossDomainOutputTarget": null,
+      "crossDomainOutputPurpose": null,
+      "dispatchableAgent": "homeless_outreach_agent",
+      "aiTrigger": "community-services-courts-diversion-and-victim-services-citation-court-reminder",
+      "predictiveFlowTrigger": "community-services-predictive-courts-diversion-and-victim-services-citation-court-reminder",
+      "agentActions": [
+        "Dispatch homeless_outreach_agent for urgent community-services intervention on citation court reminder.",
+        "Coordinate health, housing, public safety, transportation, or city service partners for citation court reminder.",
+        "Create field work order or mobile team task for citation court reminder.",
+        "Maintain monitored service path for citation court reminder."
+      ],
+      "inputSpace": "4D binary at [1160:1164]",
+      "outputSpace": "4D binary at [1164:1168]: [1,0,0,0]=URGENT_RESPONSE, [0,1,0,0]=COORDINATE_SERVICES, [0,0,1,0]=FIELD_WORK_ORDER, [0,0,0,1]=STABLE_SERVICE_PATH",
+      "inputSemantics": [
+        "resident need severity",
+        "eligibility and documentation readiness",
+        "field capacity or operational readiness",
+        "safety, mobility, and health risk"
+      ],
+      "tags": [
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-4",
+        "citation-court-reminder",
+        "city-services",
+        "community-services",
+        "community-services-courts-diversion-and-victim-services",
+        "community-services-courts-diversion-and-victim-services-citation-court-reminder",
+        "community-services-generated",
+        "community-services-predictive-courts-diversion-and-victim-services-citation-court-reminder",
+        "courts-diversion-and-victim-services",
+        "cross-domain",
+        "csx042",
+        "dispatchable-agent",
+        "health-and-human-services",
+        "homeless-outreach-agent",
+        "homelessness",
+        "input-sequences",
+        "input-sequences-5",
+        "law-enforcement",
+        "machine-interconnect",
+        "public-safety",
+        "startup-loadable"
+      ],
+      "sequenceCount": 5,
+      "reuseGuideline": "Map 311, case-management, CAD/RMS, shelter HMIS, benefit enrollment, outreach, public health, and transit-access signals into the 4D input lane. Route outputs to case workers, mobile crisis, public safety, housing navigators, field crews, transportation dispatch, or health-service agents.",
+      "downstreamPattern": "Output region [1164:1168] feeds Community Services Courts Diversion And Victim Services Community Service Placement.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "community-services",
+          "courts-diversion-and-victim-services"
+        ],
+        "family": "community-services-generated",
+        "machineCode": "csx042",
+        "capabilityTags": [
+          "ai-triggers",
+          "community-services-predictive-courts-diversion-and-victim-services-citation-court-reminder",
+          "dispatchable-agents"
+        ],
+        "workflowTags": [
+          "ai-trigger",
+          "citation-court-reminder",
+          "city-services",
+          "community-services-courts-diversion-and-victim-services",
+          "community-services-generated",
+          "cross-domain",
+          "dispatchable-agent",
+          "health-and-human-services",
+          "homeless-outreach-agent",
+          "homelessness",
+          "law-enforcement",
+          "public-safety"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ai-trigger",
+          "ai-triggers",
+          "ces-sequences",
+          "ces-sequences-4",
+          "citation-court-reminder",
+          "city-services",
+          "community-services",
+          "community-services-courts-diversion-and-victim-services",
+          "community-services-courts-diversion-and-victim-services-citation-court-reminder",
+          "community-services-generated",
+          "community-services-predictive-courts-diversion-and-victim-services-citation-court-reminder",
+          "courts-diversion-and-victim-services",
+          "cross-domain",
+          "csx042",
+          "dispatchable-agent",
+          "dispatchable-agents",
+          "health-and-human-services",
+          "homeless-outreach-agent",
+          "homelessness",
+          "input-sequences",
+          "input-sequences-5",
+          "law-enforcement",
+          "machine-interconnect",
+          "public-safety",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/csx042_courts-diversion-and-victim-services-citation-court-reminder",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning CSX042_courts-diversion-and-victim-services-citation-court-reminder matures."
+      },
+      "triggerConfig": {
+        "processId": "CSX042_COURTS_DIVERSION_AND_VICTIM_SERVICES_CITATION_COURT_REMINDER",
+        "processName": "Community Services Courts Diversion And Victim Services Citation Court Reminder",
+        "rules": [
+          {
+            "sequenceId": "csx-042-urgent-response",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Citation Court Reminder: WATCH -> URGENT_RESPONSE"
+          },
+          {
+            "sequenceId": "csx-042-coordinate-services",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Citation Court Reminder: COORDINATION_NEEDED -> COORDINATE_SERVICES"
+          },
+          {
+            "sequenceId": "csx-042-field-work-order",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Citation Court Reminder: FIELD_TASK_NEEDED -> FIELD_WORK_ORDER"
+          },
+          {
+            "sequenceId": "csx-042-stable-service-path",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Citation Court Reminder: STABLE_PATH -> STABLE_SERVICE_PATH"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1160,
+        "length": 4
+      },
+      "output": {
+        "offset": 1164,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "csx-042-urgent-response",
+        "name": "Citation Court Reminder: WATCH -> URGENT_RESPONSE",
+        "metadata": {
+          "description": "Escalates resident or field risk into urgent response.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-042-watch",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "nextVectorIds": [
+              "csx-042-urgent"
+            ]
+          },
+          {
+            "id": "csx-042-urgent",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": false,
+            "outputVectors": [
+              {
+                "id": "csx-042-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch homeless_outreach_agent for urgent community-services intervention on citation court reminder."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-042-coordinate-services",
+        "name": "Citation Court Reminder: COORDINATION_NEEDED -> COORDINATE_SERVICES",
+        "metadata": {
+          "description": "Triggers cross-agency coordination.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-042-coordinate",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-042-coordinate-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Coordinate health, housing, public safety, transportation, or city service partners for citation court reminder."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-042-field-work-order",
+        "name": "Citation Court Reminder: FIELD_TASK_NEEDED -> FIELD_WORK_ORDER",
+        "metadata": {
+          "description": "Creates a field crew, outreach, or mobile response task.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-042-field-task",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-042-field-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Create field work order or mobile team task for citation court reminder."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-042-stable-service-path",
+        "name": "Citation Court Reminder: STABLE_PATH -> STABLE_SERVICE_PATH",
+        "metadata": {
+          "description": "Confirms resident service path is stable and monitored.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "csx-042-stable",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-042-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Maintain monitored service path for citation court reminder."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Urgent response sequence",
+        "description": "Two-step community risk escalation ending in urgent response.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-response",
+          "sequenceLength": 2
+        }
+      },
+      {
+        "name": "Coordinate services",
+        "description": "Coordinates health, public safety, housing, transit, or city service partners.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "coordinate-services"
+        }
+      },
+      {
+        "name": "Field work order",
+        "description": "Creates a field response or outreach task.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "field-work-order"
+        }
+      },
+      {
+        "name": "Stable service path",
+        "description": "Confirms the resident or city service path is stable.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "stable-service-path"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Initial observation arms the urgent path without firing.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

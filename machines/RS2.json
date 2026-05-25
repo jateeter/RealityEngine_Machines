@@ -1,0 +1,357 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "RS2",
+    "description": "Two-step RS flip-flop with hold state and 2-event sequences",
+    "metadata": {
+      "category": "digital-logic",
+      "author": "Reality Engine",
+      "created": "2026-02-02T00:00:00Z",
+      "eventSpace": "2D binary vectors: [S, R] inputs (00, 01, 10, 11)",
+      "outputSpace": "2D binary: {[1,0]=SET/HIGH, [0,1]=RESET/LOW, [0,0]=SPECIAL}",
+      "tags": [
+        "ces-sequences",
+        "ces-sequences-2",
+        "digital-logic",
+        "flip-flop",
+        "input-sequences",
+        "input-sequences-3",
+        "rs2",
+        "startup-loadable",
+        "stateful",
+        "two-step"
+      ],
+      "sequenceCount": 2,
+      "description": "Two 2-step sequences: SET (00→10) and RESET (00→01)",
+      "singleTransitionAssumption": {
+        "required": true,
+        "scope": "full sequence",
+        "compliant": true,
+        "notes": "STA is required. SET and RESET are 2-step sequences: the HOLD state [0,0] must precede [1,0] or [0,1] for output to be produced. A direct [0,0]→[1,1] jump (HD=2) silently fails: [1,1] matches neither rs2-set-10 nor rs2-reset-01 and both deactivate. A direct [1,0]→[0,1] jump (HD=2) may inadvertently trigger RESET if rs2-reset-01 happens to be pre-seeded from a prior [0,0] step (since both successors are activated simultaneously after every [0,0] input). The [1,1] state (S=R=1 simultaneously) invalidates all active successors; recovery requires a subsequent [0,0] to re-seed them. All defined input sequences use HD≤1 transitions.",
+        "maxHammingDistanceInDefinedSequences": 1,
+        "forbiddenState": {
+          "input": "[1,1]",
+          "reachableViaSingleTransition": true,
+          "behavior": "Deactivates both rs2-set-10 and rs2-reset-01 (no-match). No output. Requires [0,0] to recover.",
+          "explicitlyTestedIn": "Complete Test Sequence step [1,0]→[1,1]→[0,1]: produces no output on final [0,1]"
+        },
+        "violations": [
+          {
+            "transition": "[0,0] → [1,1]",
+            "hammingDistance": 2,
+            "behavior": "No output — both successors deactivate on [1,1] mismatch"
+          },
+          {
+            "transition": "[1,0] → [0,1]",
+            "hammingDistance": 2,
+            "behavior": "May inadvertently RESET if rs2-reset-01 was pre-seeded by a prior [0,0] step; otherwise no output"
+          }
+        ]
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "digital-logic",
+        "domainTags": [
+          "digital-logic"
+        ],
+        "family": "rs2",
+        "machineCode": "rs2",
+        "capabilityTags": [],
+        "workflowTags": [
+          "flip-flop",
+          "rs2",
+          "stateful",
+          "two-step"
+        ],
+        "integrationTags": [
+          "digital-logic"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "input-sequences",
+          "input-sequences-3",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "digital-logic",
+          "flip-flop",
+          "input-sequences",
+          "input-sequences-3",
+          "rs2",
+          "startup-loadable",
+          "stateful",
+          "two-step"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "reliability-engineering",
+        "runbook": "https://runbooks.example.org/digital-logic/rs2",
+        "escalationPolicy": "slack:#reliability-test",
+        "contact": {
+          "primary": "reliability-engineering-primary@example.org",
+          "secondary": "reliability-engineering-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"digital-logic\".  Review and tune the routing as the team owning RS2 matures."
+      },
+      "triggerConfig": {
+        "processId": "RS2",
+        "processName": "RS2",
+        "rules": [
+          {
+            "sequenceId": "rs2-set-sequence",
+            "outputMatches": [
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "RS2 SET to HIGH (1,0)"
+          },
+          {
+            "sequenceId": "rs2-reset-sequence",
+            "outputMatches": [
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "RS2 RESET to LOW (0,1)"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 3910,
+        "length": 2
+      },
+      "output": {
+        "offset": 3915,
+        "length": 2
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "rs2-set-sequence",
+        "name": "SET Sequence: (0,0)→(1,0)→[1,0]",
+        "metadata": {
+          "description": "From hold state, set input produces HIGH output",
+          "path": "(0,0)→(1,0)",
+          "output": "[1,0]"
+        },
+        "vectors": [
+          {
+            "id": "rs2-set-00",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "00",
+              "description": "Hold/Initial state (S=0, R=0)",
+              "state": "HOLD",
+              "sequenceType": "SET"
+            },
+            "nextVectorIds": [
+              "rs2-set-10"
+            ]
+          },
+          {
+            "id": "rs2-set-10",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "10",
+              "description": "Set input (S=1, R=0)",
+              "state": "SET"
+            },
+            "outputVectors": [
+              {
+                "id": "rs2-output-set",
+                "vector": [
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "RS2 SET to HIGH (1,0)",
+                  "state": "SET"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "rs2-reset-sequence",
+        "name": "RESET Sequence: (0,0)→(0,1)→[0,1]",
+        "metadata": {
+          "description": "From hold state, reset input produces LOW output",
+          "path": "(0,0)→(0,1)",
+          "output": "[0,1]"
+        },
+        "vectors": [
+          {
+            "id": "rs2-reset-00",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "00",
+              "description": "Hold/Initial state (S=0, R=0)",
+              "state": "HOLD",
+              "sequenceType": "RESET"
+            },
+            "nextVectorIds": [
+              "rs2-reset-01"
+            ]
+          },
+          {
+            "id": "rs2-reset-01",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "01",
+              "description": "Reset input (S=0, R=1)",
+              "state": "RESET"
+            },
+            "outputVectors": [
+              {
+                "id": "rs2-output-reset",
+                "vector": [
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "RS2 RESET to LOW (0,1)",
+                  "state": "RESET"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "SET Operation",
+        "pattern": "(0,0)→(1,0)",
+        "description": "Transition from hold to set state",
+        "vectors": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ]
+        ]
+      },
+      {
+        "name": "RESET Operation",
+        "pattern": "(0,0)→(0,1)",
+        "description": "Transition from hold to reset state",
+        "vectors": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      },
+      {
+        "name": "Complete Test Sequence",
+        "pattern": "(0,0)→(1,0)→(0,0)→(0,1)→(0,0)→(1,0)→(1,1)→(0,1)",
+        "description": "Full test sequence with SET, RESET, and invalid states",
+        "vectors": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputs": 3,
+          "expectedOutputSequence": "[1,0], [0,1], [1,0]"
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

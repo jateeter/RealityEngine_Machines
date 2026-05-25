@@ -1,0 +1,427 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Service Delivery Compliance Monitor",
+    "description": "Monitors delivery timeliness, service quality metrics, regulatory adherence, and documentation completeness for community service programs subject to federal, state, or contract compliance requirements. Community services organizations that receive public funding operate under strict delivery timelines — SNAP must be issued within 30 days of application, housing assistance waitlist notifications have required timeframes, and case documentation must be current for billing and audit purposes. Output at [972:976] feeds the Service Delivery Integrity Monitor.",
+    "metadata": {
+      "category": "community-services",
+      "domain": "Community Services — Service Delivery / Compliance",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [972:976]: [1,0,0,0]=COMPLIANCE_VIOLATION, [0,1,0,0]=COMPLIANCE_AT_RISK, [0,0,1,0]=MONITORING_REQUIRED, [0,0,0,1]=COMPLIANT",
+      "tags": [
+        "ces-sequences",
+        "ces-sequences-3",
+        "community-services",
+        "community-services-service-delivery-compliance",
+        "compliance",
+        "documentation",
+        "input-sequences",
+        "input-sequences-1",
+        "kleene-plus",
+        "quality-assurance",
+        "regulatory",
+        "service-delivery",
+        "service-delivery-compliance-monitor",
+        "startup-loadable"
+      ],
+      "sequenceCount": 3,
+      "populationFocus": "Publicly funded community service programs; agencies with federal grant compliance requirements; organizations subject to state licensing and performance contracts",
+      "sensorNormalization": {
+        "delivery_timeliness_norm": "0.0=regulatory timeline violated (>30-day SNAP determination, missed housing notification, overdue benefit issuance), 0.5=timeliness borderline (meeting minimum but not target), 1.0=timeliness targets met or exceeded across all service types",
+        "service_quality_norm": "0.0=multiple service quality failures (grievances unresolved, required contacts missed, service plans not updated), 0.5=quality borderline (most metrics met; one or two failures open), 1.0=all quality indicators meeting or exceeding contract standards",
+        "regulatory_adherence_norm": "0.0=active regulatory violation (corrective action plan open, audit finding unresolved, licensing condition triggered), 0.5=no active violation but risk factors present (past finding; new regulation not yet implemented), 1.0=all regulatory requirements current; no open findings",
+        "documentation_completeness_norm": "0.0=case files critically deficient (missing required assessments, unsigned plans, billing documentation absent), 0.5=partial documentation (non-critical items outstanding; no billing impact), 1.0=all documentation current and complete; audit-ready"
+      },
+      "downstreamMachine": "ServiceDeliveryIntegrityMonitor (reads [968:976])",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "community-services",
+          "compliance",
+          "service-delivery"
+        ],
+        "family": "service-delivery-compliance-monitor",
+        "machineCode": "service-delivery-compliance-monitor",
+        "capabilityTags": [
+          "community-services-service-delivery-compliance",
+          "compliance",
+          "service-delivery-compliance-monitor"
+        ],
+        "workflowTags": [
+          "documentation",
+          "kleene-plus",
+          "quality-assurance",
+          "regulatory"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "community-services",
+          "community-services-service-delivery-compliance",
+          "compliance",
+          "documentation",
+          "input-sequences",
+          "input-sequences-1",
+          "kleene-plus",
+          "quality-assurance",
+          "regulatory",
+          "service-delivery",
+          "service-delivery-compliance-monitor",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/servicedeliverycompliancemonitor",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning ServiceDeliveryComplianceMonitor matures."
+      },
+      "triggerConfig": {
+        "processId": "SERVICEDELIVERYCOMPLIANCEMONITOR",
+        "processName": "Service Delivery Compliance Monitor",
+        "rules": [
+          {
+            "sequenceId": "compliance-violation-escalation",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "COMPLIANCE_VIOLATION: regulatory compliance failure requiring formal corrective action at [972:976]"
+          },
+          {
+            "sequenceId": "compliance-monitoring-required",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "MONITORING_REQUIRED: compliance trajectory requires internal monitoring and corrective action before regulatory threshold is crossed at [972:976]"
+          },
+          {
+            "sequenceId": "compliance-ok",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "COMPLIANT: all service delivery metrics meeting regulatory and contract requirements at [972:976]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 940,
+        "length": 4
+      },
+      "output": {
+        "offset": 972,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "compliance-violation-escalation",
+        "name": "Compliance Failure: COMPLIANT+ → AT_RISK → MONITORING → COMPLIANCE_VIOLATION",
+        "metadata": {
+          "description": "Tracks compliance status deterioration from a confirmed compliant baseline through risk indicators to formal violation. In community services, violations often stem from capacity failures (case workers too overloaded to complete documentation) or from systemic process breakdowns revealed during funder monitoring visits. Requires COMPLIANT+ baseline before violation escalation can arm.",
+          "path": "COMPLIANT+ → AT_RISK → MONITORING → output[1,0,0,0]",
+          "output": "[1,0,0,0] (COMPLIANCE_VIOLATION)"
+        },
+        "vectors": [
+          {
+            "id": "dc-compliant",
+            "elements": [
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.68,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "COMPLIANT",
+              "description": "COMPLIANT+ — timeliness targets met; quality indicators green; no regulatory findings; documentation current. isInitial A*A = A+.",
+              "timeliness_status": "0.60–0.78 (meeting or exceeding contract timelines)"
+            },
+            "nextVectorIds": [
+              "dc-compliant",
+              "dc-at-risk"
+            ]
+          },
+          {
+            "id": "dc-at-risk",
+            "elements": [
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.42,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.4,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "AT_RISK",
+              "description": "AT_RISK — timeliness slipping; one or two quality failures; regulatory risk factor present; documentation lag.",
+              "timeliness_status": "0.30–0.45 (approaching deadline thresholds; corrective action recommended)"
+            },
+            "nextVectorIds": [
+              "dc-monitoring"
+            ]
+          },
+          {
+            "id": "dc-monitoring",
+            "elements": [
+              {
+                "value": 0.15,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.18,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.2,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.15,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "MONITORING",
+              "description": "MONITORING — regulatory timeline violations occurring; quality failures unresolved; funder monitoring plan initiated; documentation critically deficient. Fires COMPLIANCE_VIOLATION.",
+              "timeliness_status": "0.0–0.20 (regulatory thresholds crossed; formal corrective action required)"
+            },
+            "outputVectors": [
+              {
+                "id": "dc-violation-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "COMPLIANCE_VIOLATION: regulatory compliance failure requiring formal corrective action at [972:976]",
+                  "action": "Corrective action plan submission; funder notification; compliance officer engagement; process audit; case file remediation"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "compliance-monitoring-required",
+        "name": "Monitoring Required: BORDERLINE+ → MONITORING_REQUIRED signal",
+        "metadata": {
+          "description": "Fires MONITORING_REQUIRED when compliance metrics are not yet violating thresholds but trajectory and risk factors indicate corrective action is needed before the next funder review. The proactive compliance management signal — catches deterioration before formal violation.",
+          "pattern": "BORDERLINE+",
+          "output": "[0,0,1,0] (MONITORING_REQUIRED)"
+        },
+        "vectors": [
+          {
+            "id": "dc-borderline",
+            "elements": [
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.42,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "BORDERLINE",
+              "description": "BORDERLINE+ — timeliness slipping but not yet violating; quality borderline; no current regulatory finding but new requirement pending implementation; documentation partially lagging. isInitial A*A = A+: fires MONITORING_REQUIRED each cycle.",
+              "scenario": "SNAP office processing 28-day average (30-day limit); new documentation requirement effective next month; quality score 85% (contract requires 90%)"
+            },
+            "outputVectors": [
+              {
+                "id": "dc-monitoring-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "MONITORING_REQUIRED: compliance trajectory requires internal monitoring and corrective action before regulatory threshold is crossed at [972:976]",
+                  "action": "Internal compliance review; supervisor audit; process improvement plan; staff training on documentation requirements"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "compliance-ok",
+        "name": "Compliant: IN_COMPLIANCE+ → COMPLIANT signal",
+        "metadata": {
+          "description": "Fires COMPLIANT when all delivery, quality, regulatory, and documentation metrics are meeting or exceeding requirements. Service delivery integrity monitor uses this alongside worker capacity adequate state to confirm sustainable compliant operations.",
+          "pattern": "IN_COMPLIANCE+",
+          "output": "[0,0,0,1] (COMPLIANT)"
+        },
+        "vectors": [
+          {
+            "id": "dc-in-compliance",
+            "elements": [
+              {
+                "value": 0.68,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.7,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.68,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "IN_COMPLIANCE",
+              "description": "IN_COMPLIANCE+ — all timeliness, quality, regulatory, and documentation metrics at or above requirement. Fires COMPLIANT each cycle.",
+              "scenario": "Agency passing annual federal SNAP review; all case files current; timeliness at 98%; no open corrective actions"
+            },
+            "outputVectors": [
+              {
+                "id": "dc-compliant-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "COMPLIANT: all service delivery metrics meeting regulatory and contract requirements at [972:976]",
+                  "action": "Service delivery integrity monitor registers compliance confirmed"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Funder Monitoring Visit Reveals Documentation Gap",
+        "pattern": "5-step: COMPLIANT→COMPLIANT→BORDERLINE (documentation audit)→AT_RISK (quality failures identified)→COMPLIANT (after remediation)",
+        "description": "Annual state monitoring visit reveals 15% of case files missing required 90-day assessments; quality score drops below contract minimum; corrective action implemented; compliance restored.",
+        "vectors": [
+          [
+            0.66,
+            0.63,
+            0.69,
+            0.66
+          ],
+          [
+            0.64,
+            0.61,
+            0.67,
+            0.64
+          ],
+          [
+            0.37,
+            0.41,
+            0.54,
+            0.37
+          ],
+          [
+            0.37,
+            0.37,
+            0.41,
+            0.39
+          ],
+          [
+            0.69,
+            0.66,
+            0.71,
+            0.69
+          ]
+        ],
+        "metadata": {
+          "scenario": "monitoring-visit-documentation-gap",
+          "expectedOutputs": {
+            "steps_1_2": "COMPLIANT fires [0,0,0,1]",
+            "step_3": "MONITORING_REQUIRED fires [0,0,1,0]",
+            "step_4": "no output (AT_RISK intermediate)",
+            "step_5": "COMPLIANT fires [0,0,0,1] (after remediation)"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

@@ -1,0 +1,705 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Data Center Carbon Aware Workload Scheduler",
+    "description": "Data-center operations machine for carbon aware workload scheduler. It monitors grid carbon signal, workload flexibility, SLA class, and power headroom and emits operational outputs for 24/7 incident response, maintenance planning, upgrade readiness, and steady-state assurance.",
+    "metadata": {
+      "category": "data-center",
+      "domain": "Data Center - 24x7 Operations",
+      "author": "Reality Engine",
+      "operationalFocus": "Carbon Aware Workload Scheduler",
+      "focusDescription": "grid carbon signal, workload flexibility, SLA class, and power headroom",
+      "upstreamMachine": "Data Center Energy Efficiency Optimizer",
+      "upstreamOutputRegion": "[1525:1529]",
+      "downstreamMachines": [],
+      "projectionHorizon": "24h",
+      "projectionWindows": [
+        "0-6h",
+        "6-12h",
+        "12-18h",
+        "18-24h"
+      ],
+      "prescriptiveMaintenanceRole": "Consumes Data Center Energy Efficiency Optimizer output to convert upstream operational posture into prescriptive action for carbon aware workload scheduler.",
+      "dispatchableAgent": "dc_facilities_agent",
+      "aiTrigger": "data-center-carbon-aware-workload-scheduler-ops-maintenance-upgrade",
+      "agentActions": [
+        "Dispatch dc_facilities_agent for immediate stabilization of carbon aware workload scheduler.",
+        "Schedule maintenance for carbon aware workload scheduler with rollback and staffing checks.",
+        "Plan upgrade or lifecycle change for carbon aware workload scheduler using risk-gated rollout.",
+        "Keep 24/7 monitoring active for carbon aware workload scheduler.",
+        "Project carbon aware workload scheduler forward over the next 24 hours and prescribe maintenance or upgrade work before the risk window opens."
+      ],
+      "inputSpace": "4D binary at [1525:1529]",
+      "outputSpace": "4D binary at [1529:1533]: [1,0,0,0]=URGENT_INTERVENTION, [0,1,0,0]=SCHEDULE_MAINTENANCE, [0,0,1,0]=PLAN_UPGRADE, [0,0,0,1]=OPERATING_NOMINAL",
+      "inputSemantics": [
+        "availability margin",
+        "maintenance readiness",
+        "upgrade/lifecycle pressure",
+        "operational confidence"
+      ],
+      "tags": [
+        "24x7-operations",
+        "ai-trigger",
+        "carbon-aware-workload-scheduler",
+        "ces-sequences",
+        "ces-sequences-5",
+        "data-center",
+        "data-center-24x7-operations",
+        "data-center-carbon-aware-workload-scheduler",
+        "data-center-carbon-aware-workload-scheduler-ops-maintenance-upgrade",
+        "data-center-generated",
+        "dc-facilities-agent",
+        "dcx041",
+        "dispatchable-agent",
+        "incident-response",
+        "input-sequences",
+        "input-sequences-6",
+        "machine-interconnect",
+        "maintenance",
+        "startup-loadable",
+        "upgrade-cycle"
+      ],
+      "sequenceCount": 5,
+      "reuseGuideline": "Use as a 24/7 operational guardrail. Map telemetry, CMDB, change, or AI-dispatch signals into the 4D input lane; map outputs to incident, maintenance, upgrade, or executive-summary machines.",
+      "downstreamPattern": "Output region [1529:1533] is available to incident, maintenance, upgrade, and executive-summary automation.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "data-center",
+        "domainTags": [
+          "24x7-operations",
+          "data-center"
+        ],
+        "family": "data-center-generated",
+        "machineCode": "dcx041",
+        "capabilityTags": [
+          "data-center-carbon-aware-workload-scheduler-ops-maintenance-upgrade",
+          "maintenance"
+        ],
+        "workflowTags": [
+          "ai-trigger",
+          "carbon-aware-workload-scheduler",
+          "data-center-24x7-operations",
+          "data-center",
+          "data-center-generated",
+          "dc-facilities-agent",
+          "dispatchable-agent",
+          "incident-response",
+          "upgrade-cycle"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-5",
+          "input-sequences",
+          "input-sequences-6",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "24x7-operations",
+          "ai-trigger",
+          "carbon-aware-workload-scheduler",
+          "ces-sequences",
+          "ces-sequences-5",
+          "data-center",
+          "data-center-24x7-operations",
+          "data-center-carbon-aware-workload-scheduler",
+          "data-center-carbon-aware-workload-scheduler-ops-maintenance-upgrade",
+          "data-center-generated",
+          "dc-facilities-agent",
+          "dcx041",
+          "dispatchable-agent",
+          "incident-response",
+          "input-sequences",
+          "input-sequences-6",
+          "machine-interconnect",
+          "maintenance",
+          "startup-loadable",
+          "upgrade-cycle"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "datacenter-noc",
+        "runbook": "https://runbooks.example.org/data-center/dcx041_carbon-aware-workload-scheduler",
+        "escalationPolicy": "pagerduty:datacenter-noc",
+        "contact": {
+          "primary": "datacenter-noc-primary@example.org",
+          "secondary": "datacenter-noc-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 300,
+          "error": 120
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"data-center\".  Review and tune the routing as the team owning DCX041_carbon-aware-workload-scheduler matures."
+      },
+      "triggerConfig": {
+        "processId": "DCX041_CARBON_AWARE_WORKLOAD_SCHEDULER",
+        "processName": "Data Center Carbon Aware Workload Scheduler",
+        "rules": [
+          {
+            "sequenceId": "dcx-041-urgent",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Carbon Aware Workload Scheduler: DEGRADED -> CRITICAL -> URGENT_INTERVENTION"
+          },
+          {
+            "sequenceId": "dcx-041-maintenance",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Carbon Aware Workload Scheduler: SERVICE_DUE -> SCHEDULE_MAINTENANCE"
+          },
+          {
+            "sequenceId": "dcx-041-upgrade",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Carbon Aware Workload Scheduler: LIFECYCLE_PRESSURE -> PLAN_UPGRADE"
+          },
+          {
+            "sequenceId": "dcx-041-nominal",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Carbon Aware Workload Scheduler: HEALTHY -> OPERATING_NOMINAL"
+          },
+          {
+            "sequenceId": "dcx-041-24h-projection",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Carbon Aware Workload Scheduler: 0-6H -> 6-12H -> 12-18H -> 18-24H -> PRESCRIPTIVE_ACTION"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1525,
+        "length": 4
+      },
+      "output": {
+        "offset": 1529,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "dcx-041-urgent",
+        "name": "Carbon Aware Workload Scheduler: DEGRADED -> CRITICAL -> URGENT_INTERVENTION",
+        "metadata": {
+          "description": "Escalates when availability and operational confidence collapse.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-041-degraded",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "nextVectorIds": [
+              "dcx-041-critical"
+            ]
+          },
+          {
+            "id": "dcx-041-critical",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "outputVectors": [
+              {
+                "id": "dcx-041-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch dc_facilities_agent for immediate stabilization of carbon aware workload scheduler."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-041-maintenance",
+        "name": "Carbon Aware Workload Scheduler: SERVICE_DUE -> SCHEDULE_MAINTENANCE",
+        "metadata": {
+          "description": "Schedules maintenance before service quality degrades.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-041-service-due",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "dcx-041-maintenance-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Schedule maintenance for carbon aware workload scheduler with rollback and staffing checks."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-041-upgrade",
+        "name": "Carbon Aware Workload Scheduler: LIFECYCLE_PRESSURE -> PLAN_UPGRADE",
+        "metadata": {
+          "description": "Plans an upgrade, refresh, or lifecycle action under controlled change management.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-041-upgrade-needed",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "dcx-041-upgrade-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Plan upgrade or lifecycle change for carbon aware workload scheduler using risk-gated rollout."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-041-nominal",
+        "name": "Carbon Aware Workload Scheduler: HEALTHY -> OPERATING_NOMINAL",
+        "metadata": {
+          "description": "Confirms stable 24/7 operational posture.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-041-healthy",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "dcx-041-nominal-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Keep 24/7 monitoring active for carbon aware workload scheduler."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-041-24h-projection",
+        "name": "Carbon Aware Workload Scheduler: 0-6H -> 6-12H -> 12-18H -> 18-24H -> PRESCRIPTIVE_ACTION",
+        "metadata": {
+          "description": "Projects operational posture across a 24/7 horizon and prescribes work before the forecasted risk window opens.",
+          "projectionHorizon": "24h",
+          "projectionWindows": [
+            "0-6h",
+            "6-12h",
+            "12-18h",
+            "18-24h"
+          ],
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-041-projection-0-6h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "window": "0-6h",
+              "description": "Current posture is stable but lifecycle pressure is visible."
+            },
+            "nextVectorIds": [
+              "dcx-041-projection-6-12h"
+            ]
+          },
+          {
+            "id": "dcx-041-projection-6-12h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "window": "6-12h",
+              "description": "Operational confidence begins to degrade."
+            },
+            "nextVectorIds": [
+              "dcx-041-projection-12-18h"
+            ]
+          },
+          {
+            "id": "dcx-041-projection-12-18h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "window": "12-18h",
+              "description": "Maintenance readiness is no longer sufficient for the forecasted load."
+            },
+            "nextVectorIds": [
+              "dcx-041-projection-18-24h"
+            ]
+          },
+          {
+            "id": "dcx-041-projection-18-24h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "window": "18-24h",
+              "description": "Forecast crosses the prescriptive maintenance threshold."
+            },
+            "outputVectors": [
+              {
+                "id": "dcx-041-projection-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Project carbon aware workload scheduler forward over the next 24 hours and prescribe maintenance or upgrade work before the risk window opens.",
+                  "projectionHorizon": "24h"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Urgent intervention",
+        "description": "Availability and confidence collapse after degraded operation.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-intervention"
+        }
+      },
+      {
+        "name": "Maintenance due",
+        "description": "Maintenance should be scheduled before degradation.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "schedule-maintenance"
+        }
+      },
+      {
+        "name": "Upgrade planning",
+        "description": "Lifecycle pressure requires upgrade planning.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "plan-upgrade"
+        }
+      },
+      {
+        "name": "Nominal operations",
+        "description": "The machine reports stable 24/7 operation.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "operating-nominal"
+        }
+      },
+      {
+        "name": "24-hour prescriptive projection",
+        "description": "Projects operations across four 6-hour windows and prescribes maintenance before the 24-hour risk window opens.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            1
+          ],
+          [
+            0,
+            1,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "24h-prescriptive-projection"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "A single degraded baseline arms the urgent path without firing.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

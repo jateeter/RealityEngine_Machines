@@ -1,0 +1,574 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Agriculture Indoor Grow House Crop Steering",
+    "description": "Agriculture domain machine for indoor grow house operations focused on crop steering. It monitors generative/vegetative balance, dryback, EC stacking, and climate cue alignment and emits AI-dispatchable outputs at [252:256] for automation, maintenance, and optimization workflows.",
+    "metadata": {
+      "category": "agriculture",
+      "domain": "Agriculture - Indoor Grow House",
+      "author": "Reality Engine",
+      "operationalFocus": "Crop Steering",
+      "focusDescription": "generative/vegetative balance, dryback, EC stacking, and climate cue alignment",
+      "upstreamMachine": "Agriculture Indoor Grow House Lighting Schedule Integrity",
+      "upstreamOutputRegion": "[196:200]",
+      "predictiveManagementRole": "Consumes Agriculture Indoor Grow House Lighting Schedule Integrity output to make crop steering predictive rather than purely reactive.",
+      "aiTrigger": "indoor-grow-house-crop-steering-risk-maintenance-or-optimization",
+      "dispatchableAgent": "growhouse_climate_agent",
+      "agentActions": [
+        "Dispatch growhouse_climate_agent to stabilize crop steering and record corrective action.",
+        "Run AI optimization for crop steering using the latest operating window and production targets.",
+        "Create preventive-maintenance work for crop steering and verify completion telemetry.",
+        "Continue automated monitoring for crop steering while preserving current setpoints."
+      ],
+      "outputSpace": "4D binary at [252:256]: [1,0,0,0]=URGENT_STABILIZE, [0,1,0,0]=OPTIMIZE_OPERATION, [0,0,1,0]=PREVENTIVE_MAINTENANCE, [0,0,0,1]=OPERATING_WINDOW_OK",
+      "tags": [
+        "agriculture",
+        "agriculture-generated",
+        "agriculture-indoor-grow-house",
+        "agriculture-indoor-grow-house-crop-steering",
+        "agx036",
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-4",
+        "crop-steering",
+        "dispatchable-agent",
+        "growhouse-climate-agent",
+        "indoor-grow-house",
+        "indoor-grow-house-crop-steering-risk-maintenance-or-optimization",
+        "input-sequences",
+        "input-sequences-5",
+        "machine-interconnect",
+        "maintenance",
+        "operational-management",
+        "startup-loadable"
+      ],
+      "sequenceCount": 4,
+      "sensorNormalization": {
+        "process_stability_norm": "0.0=unstable or outside safe operating band; 0.5=watch band; 1.0=stable in target band",
+        "resource_efficiency_norm": "0.0=wasteful or constrained; 0.5=acceptable; 1.0=efficient and available",
+        "biosecurity_or_ipm_norm": "0.0=active biological threat; 0.5=mitigated watch state; 1.0=controlled and documented",
+        "maintenance_readiness_norm": "0.0=overdue or faulted; 0.5=service due soon; 1.0=maintained and verified"
+      },
+      "inputSemantics": [
+        "process stability",
+        "resource efficiency",
+        "biosecurity or IPM status",
+        "maintenance readiness"
+      ],
+      "downstreamMachines": [
+        "Agriculture Indoor Grow House Canopy Height Control"
+      ],
+      "downstreamPattern": "Output region [252:256] feeds Agriculture Indoor Grow House Canopy Height Control for predictive agriculture management.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "agriculture",
+        "domainTags": [
+          "agriculture",
+          "indoor-grow-house"
+        ],
+        "family": "agriculture-generated",
+        "machineCode": "agx036",
+        "capabilityTags": [
+          "ai-triggers",
+          "dispatchable-agents",
+          "indoor-grow-house-crop-steering-risk-maintenance-or-optimization",
+          "maintenance"
+        ],
+        "workflowTags": [
+          "agriculture-generated",
+          "agriculture-indoor-grow-house",
+          "ai-trigger",
+          "crop-steering",
+          "dispatchable-agent",
+          "growhouse-climate-agent",
+          "operational-management"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "agriculture",
+          "agriculture-generated",
+          "agriculture-indoor-grow-house",
+          "agriculture-indoor-grow-house-crop-steering",
+          "agx036",
+          "ai-trigger",
+          "ai-triggers",
+          "ces-sequences",
+          "ces-sequences-4",
+          "crop-steering",
+          "dispatchable-agent",
+          "dispatchable-agents",
+          "growhouse-climate-agent",
+          "indoor-grow-house",
+          "indoor-grow-house-crop-steering-risk-maintenance-or-optimization",
+          "input-sequences",
+          "input-sequences-5",
+          "machine-interconnect",
+          "maintenance",
+          "operational-management",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "agriculture-operations",
+        "runbook": "https://runbooks.example.org/agriculture/agx036_indoor-grow-house-crop-steering",
+        "escalationPolicy": "pagerduty:ag-ops",
+        "contact": {
+          "primary": "agriculture-operations-primary@example.org",
+          "secondary": "agriculture-operations-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 3600,
+          "error": 900
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"agriculture\".  Review and tune the routing as the team owning AGX036_indoor-grow-house-crop-steering matures."
+      },
+      "triggerConfig": {
+        "processId": "AGX036_INDOOR_GROW_HOUSE_CROP_STEERING",
+        "processName": "Agriculture Indoor Grow House Crop Steering",
+        "rules": [
+          {
+            "sequenceId": "agx-036-urgent-stabilize",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Urgent stabilization required."
+          },
+          {
+            "sequenceId": "agx-036-optimize-operation",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Optimization workflow should run."
+          },
+          {
+            "sequenceId": "agx-036-preventive-maintenance",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Preventive maintenance required."
+          },
+          {
+            "sequenceId": "agx-036-operating-window-ok",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Operating window is stable."
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 196,
+        "length": 4
+      },
+      "output": {
+        "offset": 252,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "agx-036-urgent-stabilize",
+        "name": "Crop Steering: NORMAL -> WATCH -> CRITICAL -> URGENT_STABILIZE",
+        "metadata": {
+          "description": "Escalates from stable operation to a critical process or welfare risk.",
+          "path": "NORMAL -> WATCH -> CRITICAL",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "agx-036-normal",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "NORMAL",
+              "description": "Operating window is stable and maintenance is current."
+            },
+            "nextVectorIds": [
+              "agx-036-watch"
+            ]
+          },
+          {
+            "id": "agx-036-watch",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "WATCH",
+              "description": "Efficiency and maintenance signals are weakening."
+            },
+            "nextVectorIds": [
+              "agx-036-critical"
+            ]
+          },
+          {
+            "id": "agx-036-critical",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "CRITICAL",
+              "description": "Operation requires immediate stabilization and AI dispatch."
+            },
+            "outputVectors": [
+              {
+                "id": "agx-036-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Urgent stabilization required.",
+                  "action": "Dispatch growhouse_climate_agent to stabilize crop steering and record corrective action."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agx-036-optimize-operation",
+        "name": "Crop Steering: OPTIMIZATION_WINDOW -> OPTIMIZE_OPERATION",
+        "metadata": {
+          "description": "Fires when the process is safe but AI can improve yield, welfare, resource use, or labor timing.",
+          "pattern": "OPTIMIZATION_WINDOW",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "agx-036-optimize",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "OPTIMIZATION_WINDOW",
+              "description": "Optimization can improve the operating plan before risk accumulates."
+            },
+            "outputVectors": [
+              {
+                "id": "agx-036-optimize-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Optimization workflow should run.",
+                  "action": "Run AI optimization for crop steering using the latest operating window and production targets."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agx-036-preventive-maintenance",
+        "name": "Crop Steering: SERVICE_DUE -> PREVENTIVE_MAINTENANCE",
+        "metadata": {
+          "description": "Fires when service should be scheduled before a fault or production loss.",
+          "pattern": "SERVICE_DUE",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "agx-036-service-due",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "SERVICE_DUE",
+              "description": "Maintenance work should be created while the operation remains controllable."
+            },
+            "outputVectors": [
+              {
+                "id": "agx-036-maintenance-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Preventive maintenance required.",
+                  "action": "Create preventive-maintenance work for crop steering and verify completion telemetry."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agx-036-operating-window-ok",
+        "name": "Crop Steering: STABLE -> OPERATING_WINDOW_OK",
+        "metadata": {
+          "description": "Fires when the operation is stable and should continue under current automation settings.",
+          "pattern": "STABLE",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "agx-036-stable",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "STABLE",
+              "description": "Current setpoints are acceptable and no intervention is required."
+            },
+            "outputVectors": [
+              {
+                "id": "agx-036-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "Operating window is stable.",
+                  "action": "Continue automated monitoring for crop steering while preserving current setpoints."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Escalation to urgent stabilization",
+        "description": "A stable operation degrades through watch conditions and then reaches a critical state.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-stabilize"
+        }
+      },
+      {
+        "name": "Optimization opportunity",
+        "description": "AI can improve production, welfare, efficiency, or labor timing before critical risk appears.",
+        "vectors": [
+          [
+            0,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "optimize-operation"
+        }
+      },
+      {
+        "name": "Preventive maintenance required",
+        "description": "Maintenance should be scheduled before a preventable failure occurs.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "preventive-maintenance"
+        }
+      },
+      {
+        "name": "Stable operating window",
+        "description": "The process is inside the target operating band and should continue monitoring.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "operating-window-ok"
+        }
+      },
+      {
+        "name": "Normal baseline without output",
+        "description": "A single normal signal arms the escalation path without dispatching an agent.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "normal-baseline"
+        }
+      }
+    ]
+  }
+}

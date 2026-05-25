@@ -1,0 +1,427 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Referral Network Monitor",
+    "description": "Monitors referral acceptance rates, wait time performance, warm handoff completion, and follow-through rates across community service referral partnerships. Referral networks are the connective tissue of community services — they route clients to specialized resources (food banks, legal aid, mental health, substance use treatment, housing) that the referring agency cannot provide directly. Network degradation (partner agencies at capacity, wait lists expanding, warm handoff failures) silently starves clients of services they were told they would receive. Output at [976:980] feeds the Community Access Monitor.",
+    "metadata": {
+      "category": "community-services",
+      "domain": "Community Services — Referral Network / Inter-Agency",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [976:980]: [1,0,0,0]=REFERRAL_BREAKDOWN, [0,1,0,0]=NETWORK_STRAINED, [0,0,1,0]=REFERRAL_DELAYS, [0,0,0,1]=REFERRAL_FUNCTIONAL",
+      "tags": [
+        "ces-sequences",
+        "ces-sequences-3",
+        "community-access",
+        "community-services",
+        "community-services-referral-network-inter-agency",
+        "input-sequences",
+        "input-sequences-1",
+        "inter-agency",
+        "kleene-plus",
+        "referral-network",
+        "referral-network-monitor",
+        "service-delivery",
+        "startup-loadable",
+        "warm-handoff"
+      ],
+      "sequenceCount": 3,
+      "populationFocus": "Community service agencies with referral partnerships; clients referred to partner organizations for specialized services; organizations participating in coordinated entry systems",
+      "sensorNormalization": {
+        "referral_acceptance_norm": "0.0=partners not accepting referrals (<20% acceptance rate); all partner agencies at capacity, 0.5=partial acceptance (40–60% of referrals accepted within target timeframe), 1.0=>85% of referrals accepted within target timeframe",
+        "wait_time_norm": "0.0=wait time for referred service >90 days or indefinite (waitlist closed), 0.5=wait time 30–60 days (acceptable for non-urgent; problematic for urgent need), 1.0=wait time <2 weeks for standard services; same-day or next-day for crisis",
+        "warm_handoff_completion_norm": "0.0=warm handoffs not occurring; clients being given phone numbers and left to navigate alone, 0.5=partial warm handoff (email introduction sent; no direct contact confirmation), 1.0=warm handoff confirmed — direct worker-to-worker contact; client acknowledged by receiving agency",
+        "follow_through_norm": "0.0=<30% of referred clients confirmed to have connected with referred service, 0.5=40–65% of referred clients confirmed connected, 1.0=>80% of referred clients confirmed connected within target timeframe"
+      },
+      "downstreamMachine": "CommunityAccessMonitor (reads [976:984])",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "community-services",
+          "inter-agency",
+          "referral-network"
+        ],
+        "family": "referral-network-monitor",
+        "machineCode": "referral-network-monitor",
+        "capabilityTags": [
+          "community-services-referral-network-inter-agency",
+          "referral-network",
+          "referral-network-monitor"
+        ],
+        "workflowTags": [
+          "community-access",
+          "kleene-plus",
+          "service-delivery",
+          "warm-handoff"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "community-access",
+          "community-services",
+          "community-services-referral-network-inter-agency",
+          "input-sequences",
+          "input-sequences-1",
+          "inter-agency",
+          "kleene-plus",
+          "referral-network",
+          "referral-network-monitor",
+          "service-delivery",
+          "startup-loadable",
+          "warm-handoff"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/referralnetworkmonitor",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning ReferralNetworkMonitor matures."
+      },
+      "triggerConfig": {
+        "processId": "REFERRALNETWORKMONITOR",
+        "processName": "Referral Network Monitor",
+        "rules": [
+          {
+            "sequenceId": "referral-breakdown-escalation",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "REFERRAL_BREAKDOWN: community referral network non-functional; clients not connecting with referred services at [976:980]"
+          },
+          {
+            "sequenceId": "referral-delays",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "REFERRAL_DELAYS: referral network functional but wait times preventing timely service access at [976:980]"
+          },
+          {
+            "sequenceId": "referral-ok",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "REFERRAL_FUNCTIONAL: referral network supporting effective client routing at [976:980]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 944,
+        "length": 4
+      },
+      "output": {
+        "offset": 976,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "referral-breakdown-escalation",
+        "name": "Network Collapse: FUNCTIONAL+ → STRAINED → FAILING → REFERRAL_BREAKDOWN",
+        "metadata": {
+          "description": "Tracks referral network collapse from a functional baseline through strain to breakdown. Breakdown conditions arise when multiple partner agencies simultaneously close waitlists, when a major partner loses funding and closes, or when a systemic crisis (natural disaster, pandemic, housing market collapse) floods all community service partners simultaneously. Requires FUNCTIONAL+ baseline before breakdown escalation arms.",
+          "path": "FUNCTIONAL+ → STRAINED → FAILING → output[1,0,0,0]",
+          "output": "[1,0,0,0] (REFERRAL_BREAKDOWN)"
+        },
+        "vectors": [
+          {
+            "id": "rn-functional",
+            "elements": [
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "FUNCTIONAL",
+              "description": "FUNCTIONAL+ — partner acceptance above 85%; wait times reasonable; warm handoffs completing; follow-through tracked above 80%. isInitial A*A = A+.",
+              "acceptance_rate": "0.58–0.75 (most referrals accepted within target timeframe)"
+            },
+            "nextVectorIds": [
+              "rn-functional",
+              "rn-strained"
+            ]
+          },
+          {
+            "id": "rn-strained",
+            "elements": [
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "STRAINED",
+              "description": "STRAINED — acceptance rates declining; wait times extending; warm handoffs becoming inconsistent; follow-through dropping.",
+              "acceptance_rate": "0.28–0.45 (partner agencies near capacity; selective referral acceptance)"
+            },
+            "nextVectorIds": [
+              "rn-failing"
+            ]
+          },
+          {
+            "id": "rn-failing",
+            "elements": [
+              {
+                "value": 0.12,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.15,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.12,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "FAILING",
+              "description": "FAILING — partner agencies not accepting referrals; wait times months or indefinite; warm handoffs failing; follow-through untracked. Fires REFERRAL_BREAKDOWN.",
+              "acceptance_rate": "0.0–0.18 (network effectively non-functional; clients not connecting with services)"
+            },
+            "outputVectors": [
+              {
+                "id": "rn-breakdown-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "REFERRAL_BREAKDOWN: community referral network non-functional; clients not connecting with referred services at [976:980]",
+                  "action": "Emergency partner network meeting; alternative resource identification; direct service expansion; funder notification; coordinated entry system escalation"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "referral-delays",
+        "name": "Referral Delays: DELAYED+ → REFERRAL_DELAYS signal",
+        "metadata": {
+          "description": "Fires REFERRAL_DELAYS when the network is accepting referrals but wait times are too long to be clinically or practically meaningful — the state where referrals are technically functional but not actually helping clients get services within the window of their need.",
+          "pattern": "DELAYED+",
+          "output": "[0,0,1,0] (REFERRAL_DELAYS)"
+        },
+        "vectors": [
+          {
+            "id": "rn-delayed",
+            "elements": [
+              {
+                "value": 0.52,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.28,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.42,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "DELAYED",
+              "description": "DELAYED+ — referrals accepted but wait times 60–90 days; warm handoffs occurring; follow-through moderate. Network technically operational but not meeting urgent needs. isInitial A*A = A+: fires REFERRAL_DELAYS each cycle.",
+              "scenario": "Mental health referrals accepted; 75-day wait for first appointment; urgent cases not being seen within clinical window"
+            },
+            "outputVectors": [
+              {
+                "id": "rn-delays-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "REFERRAL_DELAYS: referral network functional but wait times preventing timely service access at [976:980]",
+                  "action": "Expedited referral pathways negotiation; crisis slot advocacy with partners; interim bridge service identification; peer support engagement while waiting"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "referral-ok",
+        "name": "Referral Functional: OPERATING+ → REFERRAL_FUNCTIONAL signal",
+        "metadata": {
+          "description": "Fires REFERRAL_FUNCTIONAL when partner acceptance is high, wait times are within acceptable windows, warm handoffs are completing with confirmed client contact, and follow-through is being tracked above 80%. Network health supports effective client routing.",
+          "pattern": "OPERATING+",
+          "output": "[0,0,0,1] (REFERRAL_FUNCTIONAL)"
+        },
+        "vectors": [
+          {
+            "id": "rn-operating",
+            "elements": [
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.68,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.63,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "OPERATING",
+              "description": "OPERATING+ — high partner acceptance; short wait times; warm handoffs confirmed; follow-through tracked above 80%. Fires REFERRAL_FUNCTIONAL each cycle.",
+              "scenario": "Coordinated entry network operating well; case managers completing direct handoffs; 85% of referred clients confirmed connected within 2 weeks"
+            },
+            "outputVectors": [
+              {
+                "id": "rn-functional-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "REFERRAL_FUNCTIONAL: referral network supporting effective client routing at [976:980]",
+                  "action": "Community access monitor registers referral network healthy"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Major Partner Agency Closure",
+        "pattern": "5-step: FUNCTIONAL→FUNCTIONAL→STRAINED (closure announced)→BREAKDOWN (closure effective)→FUNCTIONAL (alternative partners onboarded)",
+        "description": "The largest food bank in the referral network closes due to funding loss; referral acceptance for food assistance drops to near zero; emergency network expansion restores functionality.",
+        "vectors": [
+          [
+            0.63,
+            0.66,
+            0.61,
+            0.63
+          ],
+          [
+            0.61,
+            0.64,
+            0.59,
+            0.61
+          ],
+          [
+            0.34,
+            0.37,
+            0.37,
+            0.34
+          ],
+          [
+            0.11,
+            0.14,
+            0.11,
+            0.09
+          ],
+          [
+            0.66,
+            0.69,
+            0.64,
+            0.66
+          ]
+        ],
+        "metadata": {
+          "scenario": "major-partner-closure-network-breakdown",
+          "expectedOutputs": {
+            "steps_1_2": "REFERRAL_FUNCTIONAL fires [0,0,0,1]",
+            "step_3": "no output (STRAINED intermediate)",
+            "step_4": "REFERRAL_BREAKDOWN fires [1,0,0,0]",
+            "step_5": "REFERRAL_FUNCTIONAL fires [0,0,0,1] (after alternative partners onboarded)"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

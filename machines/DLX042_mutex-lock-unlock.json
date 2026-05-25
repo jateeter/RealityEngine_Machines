@@ -1,0 +1,291 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Logical Infrastructure Mutex Lock Unlock",
+    "description": "Reusable digital-logic infrastructure machine for ASIC-style connective tissue. It implements the temporal regular expression `LOCK+ UNLOCK`. Detects mutual exclusion lock interval followed by unlock. Reads a 4D control/status lane at [4071:4075] and emits a 2D match lane at [4075:4077].",
+    "metadata": {
+      "category": "digital-logic",
+      "domain": "Digital Logic - Infrastructure",
+      "author": "Reality Engine",
+      "regularExpression": "LOCK+ UNLOCK",
+      "asicPattern": "Mutex Lock Unlock",
+      "reuseRole": "general-purpose logical connective tissue",
+      "inputSpace": "4D binary at [4071:4075]",
+      "outputSpace": "2D binary at [4075:4077]: [1,0]=MATCH, [0,1]=CLEAR_OR_AVAILABLE",
+      "inputSemantics": [
+        "primary",
+        "secondary",
+        "tertiary",
+        "qualifier"
+      ],
+      "tags": [
+        "asic-pattern",
+        "ces-sequences",
+        "ces-sequences-1",
+        "digital-logic",
+        "digital-logic-generated",
+        "digital-logic-infrastructure",
+        "dlx042",
+        "infrastructure",
+        "input-sequences",
+        "input-sequences-2",
+        "logical-infrastructure",
+        "logical-infrastructure-mutex-lock-unlock",
+        "mutex-lock-unlock",
+        "regular-expression",
+        "startup-loadable"
+      ],
+      "sequenceCount": 1,
+      "reuseGuideline": "Use this machine by mapping upstream source or machine output bits into its 4D input lane. Map its 2D output lane into downstream machine input when a reusable temporal guard, latch trigger, handshake detector, CDC detector, bus phase detector, or safety qualifier is needed.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "digital-logic",
+        "domainTags": [
+          "digital-logic",
+          "infrastructure"
+        ],
+        "family": "digital-logic-generated",
+        "machineCode": "dlx042",
+        "capabilityTags": [],
+        "workflowTags": [
+          "asic-pattern",
+          "digital-logic-generated",
+          "digital-logic-infrastructure",
+          "logical-infrastructure",
+          "mutex-lock-unlock",
+          "regular-expression"
+        ],
+        "integrationTags": [
+          "digital-logic"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-1",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "asic-pattern",
+          "ces-sequences",
+          "ces-sequences-1",
+          "digital-logic",
+          "digital-logic-generated",
+          "digital-logic-infrastructure",
+          "dlx042",
+          "infrastructure",
+          "input-sequences",
+          "input-sequences-2",
+          "logical-infrastructure",
+          "logical-infrastructure-mutex-lock-unlock",
+          "mutex-lock-unlock",
+          "regular-expression",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "reliability-engineering",
+        "runbook": "https://runbooks.example.org/digital-logic/dlx042_mutex-lock-unlock",
+        "escalationPolicy": "slack:#reliability-test",
+        "contact": {
+          "primary": "reliability-engineering-primary@example.org",
+          "secondary": "reliability-engineering-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"digital-logic\".  Review and tune the routing as the team owning DLX042_mutex-lock-unlock matures."
+      },
+      "triggerConfig": {
+        "processId": "DLX042_MUTEX_LOCK_UNLOCK",
+        "processName": "Logical Infrastructure Mutex Lock Unlock",
+        "rules": [
+          {
+            "sequenceId": "dlx-042-match",
+            "outputMatches": [
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Mutex Lock Unlock matched regular expression LOCK+ UNLOCK."
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4071,
+        "length": 4
+      },
+      "output": {
+        "offset": 4075,
+        "length": 2
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "dlx-042-match",
+        "name": "Mutex Lock Unlock: LOCK+ UNLOCK -> MATCH",
+        "metadata": {
+          "description": "Detects mutual exclusion lock interval followed by unlock.",
+          "regularExpression": "LOCK+ UNLOCK",
+          "output": "[1,0]"
+        },
+        "vectors": [
+          {
+            "id": "dlx-042-step-1",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "STEP_1",
+              "description": "Mutex Lock Unlock regex step 1: [1, 0, 0, 0]"
+            },
+            "nextVectorIds": [
+              "dlx-042-step-2"
+            ]
+          },
+          {
+            "id": "dlx-042-step-2",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "STEP_2",
+              "description": "Mutex Lock Unlock regex step 2: [1, 0, 0, 0]"
+            },
+            "nextVectorIds": [
+              "dlx-042-step-3"
+            ]
+          },
+          {
+            "id": "dlx-042-step-3",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "STEP_3",
+              "description": "Mutex Lock Unlock regex step 3: [0, 1, 0, 0]"
+            },
+            "outputVectors": [
+              {
+                "id": "dlx-042-match-output",
+                "vector": [
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Mutex Lock Unlock matched regular expression LOCK+ UNLOCK.",
+                  "state": "MATCH"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Mutex Lock Unlock match path",
+        "description": "Validates regular expression LOCK+ UNLOCK.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0]",
+          "scenario": "mutex-lock-unlock"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Single baseline sample does not complete the expression.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

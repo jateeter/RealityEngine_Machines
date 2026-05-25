@@ -1,0 +1,533 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Workflow Completion Monitor",
+    "description": "Integration machine that reads combined output signals from the Document Signing Workflow Monitor [960:964] and the Qualification Verification Monitor [964:968] to detect workflow completion failures — cases where signing and qualification are both required before services can be delivered but one or both remain incomplete. In community services, unclosed workflow loops (unsigned forms + unverified qualifications) create audit risk, delay benefit issuance, and prevent inter-agency coordination. Output at [988:992] is available to downstream care coordination systems.",
+    "metadata": {
+      "category": "community-services",
+      "domain": "Community Services — Workflow Completion / Qualification",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [988:992]: [1,0,0,0]=WORKFLOW_BLOCKED, [0,1,0,0]=WORKFLOW_STALLED, [0,0,1,0]=WORKFLOW_PARTIAL, [0,0,0,1]=WORKFLOW_COMPLETE",
+      "tags": [
+        "ces-sequences",
+        "ces-sequences-3",
+        "community-services",
+        "community-services-workflow-completion-qualification",
+        "document-signing",
+        "input-sequences",
+        "input-sequences-1",
+        "intake",
+        "kleene-plus",
+        "qualification",
+        "qualification-workflow",
+        "startup-loadable",
+        "workflow",
+        "workflow-completion",
+        "workflow-completion-monitor"
+      ],
+      "sequenceCount": 3,
+      "populationFocus": "Community service enrollees requiring both qualification verification and signed agreements before service delivery can begin; organizations with multi-step onboarding workflows",
+      "sensorNormalization": {
+        "signing_signal_norm": "0.0=[1,0,0,0] SIGNING_BLOCKED from DocSigning (bit 438), 0.5=[0,0,1,0] PARTIAL_SIGNING (bit 440), 1.0=[0,0,0,1] SIGNING_COMPLETE (bit 441)",
+        "qualification_signal_norm": "0.0=[1,0,0,0] QUALIFICATION_FAILED from QualVerification (bit 442), 0.5=[0,1,0,0] REVERIFICATION_REQUIRED (bit 443), 1.0=[0,0,0,1] FULLY_QUALIFIED (bit 445)",
+        "workflow_age_norm": "0.0=workflow open >45 days without completion (stale; client likely disengaged), 0.5=workflow open 15–45 days (active but aging), 1.0=workflow open <15 days (fresh; on-track for timely completion)",
+        "completion_likelihood_norm": "0.0=client unreachable; documents not returned; no recent activity, 0.5=partial progress; some items completed; client intermittently responsive, 1.0=active engagement; all steps progressing; completion imminent"
+      },
+      "upstreamMachines": [
+        "DocumentSigningWorkflowMonitor (output [960:964])",
+        "QualificationVerificationMonitor (output [964:968])"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "community-services",
+          "qualification",
+          "workflow-completion"
+        ],
+        "family": "workflow-completion-monitor",
+        "machineCode": "workflow-completion-monitor",
+        "capabilityTags": [
+          "community-services-workflow-completion-qualification",
+          "qualification-workflow",
+          "workflow",
+          "workflow-completion",
+          "workflow-completion-monitor"
+        ],
+        "workflowTags": [
+          "document-signing",
+          "intake",
+          "kleene-plus"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "community-services",
+          "community-services-workflow-completion-qualification",
+          "document-signing",
+          "input-sequences",
+          "input-sequences-1",
+          "intake",
+          "kleene-plus",
+          "qualification",
+          "qualification-workflow",
+          "startup-loadable",
+          "workflow",
+          "workflow-completion",
+          "workflow-completion-monitor"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/workflowcompletionmonitor",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning WorkflowCompletionMonitor matures."
+      },
+      "triggerConfig": {
+        "processId": "WORKFLOWCOMPLETIONMONITOR",
+        "processName": "Workflow Completion Monitor",
+        "rules": [
+          {
+            "sequenceId": "workflow-blocked-escalation",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "WORKFLOW_BLOCKED: both signing and qualification workflows in failure; service delivery fully blocked at [988:992]"
+          },
+          {
+            "sequenceId": "workflow-partial-open",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "WORKFLOW_PARTIAL: primary workflow complete; supplementary item outstanding at [988:992]"
+          },
+          {
+            "sequenceId": "workflow-complete-ok",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "WORKFLOW_COMPLETE: all signing and qualification requirements met; unrestricted service delivery authorized at [988:992]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 960,
+        "length": 8
+      },
+      "output": {
+        "offset": 988,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "workflow-blocked-escalation",
+        "name": "Dual Block: COMPLETE+ → PARTIAL → STALLED → WORKFLOW_BLOCKED",
+        "metadata": {
+          "description": "Detects workflows where both signing and qualification have failed simultaneously — the highest-severity workflow state, where service delivery is fully blocked. Requires COMPLETE+ baseline confirming that a completed workflow state was previously achieved before the block escalation can arm.",
+          "path": "COMPLETE+ → PARTIAL → STALLED → output[1,0,0,0]",
+          "output": "[1,0,0,0] (WORKFLOW_BLOCKED)"
+        },
+        "vectors": [
+          {
+            "id": "wc-complete",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "COMPLETE",
+              "description": "COMPLETE+ — SIGNING_COMPLETE (bit 441) and FULLY_QUALIFIED (bit 445) both high. All workflow requirements met; unrestricted service delivery authorized. isInitial A*A = A+.",
+              "upstream_state": "DocSigning=SIGNING_COMPLETE, QualVerification=FULLY_QUALIFIED"
+            },
+            "nextVectorIds": [
+              "wc-complete",
+              "wc-partial"
+            ]
+          },
+          {
+            "id": "wc-partial",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "PARTIAL",
+              "description": "PARTIAL — PARTIAL_SIGNING (bit 440) and REVERIFICATION_REQUIRED (bit 443). Both workflows have outstanding items; services partially restricted.",
+              "upstream_state": "DocSigning=PARTIAL_SIGNING, QualVerification=REVERIFICATION_REQUIRED"
+            },
+            "nextVectorIds": [
+              "wc-stalled"
+            ]
+          },
+          {
+            "id": "wc-stalled",
+            "elements": [
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "STALLED",
+              "description": "STALLED — SIGNING_BLOCKED (bit 438) and QUALIFICATION_FAILED (bit 442). Both upstream workflows in failure state. Full service delivery block. Fires WORKFLOW_BLOCKED.",
+              "upstream_state": "DocSigning=SIGNING_BLOCKED, QualVerification=QUALIFICATION_FAILED"
+            },
+            "outputVectors": [
+              {
+                "id": "wc-blocked-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "WORKFLOW_BLOCKED: both signing and qualification workflows in failure; service delivery fully blocked at [988:992]",
+                  "action": "Case manager escalation; dual-track resolution plan; supervisor review; legal/compliance consultation if qualification failure involves adverse action"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "workflow-partial-open",
+        "name": "Partial Completion: PARTIAL_OPEN+ → WORKFLOW_PARTIAL signal",
+        "metadata": {
+          "description": "Fires WORKFLOW_PARTIAL when one workflow is complete and the other is partially completed — the common transitional state where primary services can begin while supplementary authorizations are still in progress.",
+          "pattern": "PARTIAL_OPEN+",
+          "output": "[0,0,1,0] (WORKFLOW_PARTIAL)"
+        },
+        "vectors": [
+          {
+            "id": "wc-partial-open",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "PARTIAL_OPEN",
+              "description": "PARTIAL_OPEN+ — SIGNING_COMPLETE (bit 441) but REVERIFICATION_REQUIRED (bit 443). Documents signed; qualification needs renewal. Primary services active; full authorization pending reverification. isInitial A*A = A+: fires WORKFLOW_PARTIAL each cycle.",
+              "scenario": "Medicaid managed care enrollment: all consent forms signed; annual reverification of income due; services continue during reverification window"
+            },
+            "outputVectors": [
+              {
+                "id": "wc-partial-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "WORKFLOW_PARTIAL: primary workflow complete; supplementary item outstanding at [988:992]",
+                  "action": "Continue primary services; schedule reverification appointment; track outstanding item; set completion deadline"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "workflow-complete-ok",
+        "name": "Workflow Complete: BOTH_COMPLETE+ → WORKFLOW_COMPLETE signal",
+        "metadata": {
+          "description": "Fires WORKFLOW_COMPLETE when both signing and qualification workflows are confirmed complete. Full inter-agency coordination authorized; audit trail complete; no service delivery restrictions.",
+          "pattern": "BOTH_COMPLETE+",
+          "output": "[0,0,0,1] (WORKFLOW_COMPLETE)"
+        },
+        "vectors": [
+          {
+            "id": "wc-both-complete",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "BOTH_COMPLETE",
+              "description": "BOTH_COMPLETE+ — SIGNING_COMPLETE (bit 441) and FULLY_QUALIFIED (bit 445). All workflow requirements satisfied. Fires WORKFLOW_COMPLETE each cycle.",
+              "upstream_state": "DocSigning=SIGNING_COMPLETE, QualVerification=FULLY_QUALIFIED"
+            },
+            "outputVectors": [
+              {
+                "id": "wc-complete-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "WORKFLOW_COMPLETE: all signing and qualification requirements met; unrestricted service delivery authorized at [988:992]",
+                  "action": "Full inter-agency data sharing authorized; complete case coordination enabled; audit trail confirmed"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Redetermination Creates Simultaneous Signing and Qualification Gap",
+        "pattern": "5-step: COMPLETE→COMPLETE→PARTIAL (reverification due)→STALLED (forms expired + qualification failed)→COMPLETE (after in-person resolution)",
+        "description": "Annual redetermination triggers simultaneous signing expiry and income verification failure; both workflows stall; case manager conducts in-person session resolving both; workflow complete.",
+        "vectors": [
+          [
+            0.09,
+            0.09,
+            0.09,
+            0.63,
+            0.09,
+            0.09,
+            0.09,
+            0.63
+          ],
+          [
+            0.08,
+            0.08,
+            0.08,
+            0.62,
+            0.08,
+            0.08,
+            0.08,
+            0.62
+          ],
+          [
+            0.09,
+            0.09,
+            0.09,
+            0.63,
+            0.09,
+            0.63,
+            0.09,
+            0.09
+          ],
+          [
+            0.63,
+            0.09,
+            0.09,
+            0.09,
+            0.63,
+            0.09,
+            0.09,
+            0.09
+          ],
+          [
+            0.09,
+            0.09,
+            0.09,
+            0.66,
+            0.09,
+            0.09,
+            0.09,
+            0.66
+          ]
+        ],
+        "metadata": {
+          "scenario": "redetermination-dual-workflow-stall",
+          "expectedOutputs": {
+            "steps_1_2": "WORKFLOW_COMPLETE fires [0,0,0,1]",
+            "step_3": "WORKFLOW_PARTIAL fires [0,0,1,0]",
+            "step_4": "WORKFLOW_BLOCKED fires [1,0,0,0]",
+            "step_5": "WORKFLOW_COMPLETE fires [0,0,0,1] (after in-person resolution)"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

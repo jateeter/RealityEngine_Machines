@@ -1,0 +1,738 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Ag Plant Growth Cycle Monitor",
+    "description": "Aggregates temperature and irrigation state signals to assess overall plant growth conditions. Reads binary output signals from AgZoneTemperatureController [20:24] and AgIrrigationFlowController [24:28]. Detects temperature stress, water stress, and dual-stress combinations that suppress vegetative growth rate. Output feeds AgHarvestReadinessAssessor at [3955:3959].",
+    "metadata": {
+      "category": "agriculture",
+      "domain": "Agriculture — Plant Growth / Crop Monitoring",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [3955:3959]: [1,0,0,0]=TEMP_STRESS, [0,1,0,0]=WATER_STRESS, [0,0,1,0]=DUAL_STRESS, [0,0,0,1]=GROWTH_OK",
+      "tags": [
+        "ag-plant-growth-cycle-monitor",
+        "agriculture",
+        "agriculture-plant-growth-crop-monitoring",
+        "ces-sequences",
+        "ces-sequences-3",
+        "crop-monitoring",
+        "grow-cycle",
+        "indoor-growing",
+        "input-sequences",
+        "input-sequences-1",
+        "kleene-plus",
+        "plant-growth",
+        "startup-loadable",
+        "stress-detection"
+      ],
+      "sequenceCount": 3,
+      "inputSignalMap": {
+        "elem_0": "HEATING_ON from AgZoneTemperatureController [260]",
+        "elem_1": "COOLING_ON from AgZoneTemperatureController [261]",
+        "elem_2": "VPD_ALERT from AgZoneTemperatureController [262]",
+        "elem_3": "TEMP_OK from AgZoneTemperatureController [263]",
+        "elem_4": "IRRIGATE_ON from AgIrrigationFlowController [264]",
+        "elem_5": "DRAIN_ALERT from AgIrrigationFlowController [265]",
+        "elem_6": "EC_ALERT from AgIrrigationFlowController [266]",
+        "elem_7": "FLOW_OK from AgIrrigationFlowController [267]"
+      },
+      "upstreamMachines": [
+        "AgZoneTemperatureController (output at [20:24])",
+        "AgIrrigationFlowController (output at [24:28])"
+      ],
+      "downstreamMachine": "AgHarvestReadinessAssessor (reads [3955:3959])",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "agriculture",
+        "domainTags": [
+          "agriculture",
+          "crop-monitoring",
+          "plant-growth"
+        ],
+        "family": "ag-plant-growth-cycle-monitor",
+        "machineCode": "ag-plant-growth-cycle-monitor",
+        "capabilityTags": [
+          "agriculture-plant-growth-crop-monitoring",
+          "crop-monitoring"
+        ],
+        "workflowTags": [
+          "grow-cycle",
+          "indoor-growing",
+          "kleene-plus",
+          "stress-detection"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ag-plant-growth-cycle-monitor",
+          "agriculture",
+          "agriculture-plant-growth-crop-monitoring",
+          "ces-sequences",
+          "ces-sequences-3",
+          "crop-monitoring",
+          "grow-cycle",
+          "indoor-growing",
+          "input-sequences",
+          "input-sequences-1",
+          "kleene-plus",
+          "plant-growth",
+          "startup-loadable",
+          "stress-detection"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "agriculture-operations",
+        "runbook": "https://runbooks.example.org/agriculture/agplantgrowthcyclemonitor",
+        "escalationPolicy": "pagerduty:ag-ops",
+        "contact": {
+          "primary": "agriculture-operations-primary@example.org",
+          "secondary": "agriculture-operations-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 3600,
+          "error": 900
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"agriculture\".  Review and tune the routing as the team owning AgPlantGrowthCycleMonitor matures."
+      },
+      "triggerConfig": {
+        "processId": "AGPLANTGROWTHCYCLEMONITOR",
+        "processName": "Ag Plant Growth Cycle Monitor",
+        "rules": [
+          {
+            "sequenceId": "ag-growth-optimal",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "GROWTH_OK: plant growth conditions optimal at [3955:3959]"
+          },
+          {
+            "sequenceId": "ag-growth-temp-stress",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "TEMP_STRESS: temperature-induced growth suppression detected at [3955:3959]"
+          },
+          {
+            "sequenceId": "ag-growth-water-stress",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "WATER_STRESS: water-deficit growth suppression detected at [3955:3959]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 20,
+        "length": 8
+      },
+      "output": {
+        "offset": 3955,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ag-growth-optimal",
+        "name": "Optimal Growth: BASELINE+ → GROWING → VIGOROUS → GROWTH_OK",
+        "metadata": {
+          "description": "Tracks sustained optimal conditions (TEMP_OK + FLOW_OK, no active alerts) through vegetative stages. The BASELINE+ initial state requires confirmed healthy conditions before declaring vigorous growth. Models the A*A = A+ pattern for reliable growth state confirmation.",
+          "path": "BASELINE+ → GROWING → VIGOROUS → output[0,0,0,1]",
+          "output": "[0,0,0,1] (GROWTH_OK)"
+        },
+        "vectors": [
+          {
+            "id": "ag-gc-baseline",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "BASELINE",
+              "description": "BASELINE+ — TEMP_OK=HIGH, FLOW_OK=HIGH, all stress alerts=LOW. Represents healthy baseline conditions. isInitial A*A = A+: at least one confirmed baseline before GROWING arms.",
+              "condition": "TEMP_OK=1, FLOW_OK=1, no alerts active"
+            },
+            "nextVectorIds": [
+              "ag-gc-baseline",
+              "ag-gc-growing"
+            ]
+          },
+          {
+            "id": "ag-gc-growing",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "GROWING",
+              "description": "GROWING — sustained healthy conditions; vegetative growth active.",
+              "condition": "TEMP_OK=1, FLOW_OK=1, no alerts"
+            },
+            "nextVectorIds": [
+              "ag-gc-vigorous"
+            ]
+          },
+          {
+            "id": "ag-gc-vigorous",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "VIGOROUS",
+              "description": "VIGOROUS — confirmed sustained growth cycle. Fires GROWTH_OK.",
+              "condition": "Three or more consecutive healthy cycles confirmed"
+            },
+            "outputVectors": [
+              {
+                "id": "ag-gc-growth-ok-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "GROWTH_OK: plant growth conditions optimal at [3955:3959]",
+                  "action": "Harvest readiness assessor registers healthy vegetative state"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ag-growth-temp-stress",
+        "name": "Temperature Stress: TEMP_WATCH+ → TEMP_ALERT → GROWTH_STALL → TEMP_STRESS",
+        "metadata": {
+          "description": "Detects temperature-induced growth suppression when heating or cooling systems activate but TEMP_OK has dropped. Single or sustained activation of HVAC without recovery triggers growth stall assessment.",
+          "path": "TEMP_WATCH+ → TEMP_ALERT → GROWTH_STALL → output[1,0,0,0]",
+          "output": "[1,0,0,0] (TEMP_STRESS)"
+        },
+        "vectors": [
+          {
+            "id": "ag-gc-temp-watch",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "TEMP_WATCH",
+              "description": "TEMP_WATCH+ — COOLING_ON active; TEMP_OK gone but irrigation still healthy. Monitors for sustained temperature stress. isInitial A*A = A+.",
+              "condition": "COOLING_ON=1, TEMP_OK=0, FLOW_OK=1"
+            },
+            "nextVectorIds": [
+              "ag-gc-temp-watch",
+              "ag-gc-temp-alert"
+            ]
+          },
+          {
+            "id": "ag-gc-temp-alert",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "TEMP_ALERT",
+              "description": "TEMP_ALERT — COOLING_ON and irrigation demand active simultaneously; heat stress affecting transpiration.",
+              "condition": "COOLING_ON=1, IRRIGATE_ON=1 (stress-driven demand)"
+            },
+            "nextVectorIds": [
+              "ag-gc-growth-stall"
+            ]
+          },
+          {
+            "id": "ag-gc-growth-stall",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "GROWTH_STALL",
+              "description": "GROWTH_STALL — heating demand alongside irrigation deficit; growth suppression confirmed. Fires TEMP_STRESS.",
+              "condition": "HEATING_ON=1, IRRIGATE_ON=1, no OK signals"
+            },
+            "outputVectors": [
+              {
+                "id": "ag-gc-temp-stress-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "TEMP_STRESS: temperature-induced growth suppression detected at [3955:3959]",
+                  "action": "Harvest timeline extended; AI optimizer informed of stress condition"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ag-growth-water-stress",
+        "name": "Water Stress: WATER_WATCH+ → IRRIGATION_ACTIVE → DROUGHT_STRESS → WATER_STRESS",
+        "metadata": {
+          "description": "Detects water-deficit-driven growth suppression. Active irrigation demand combined with loss of FLOW_OK signals persistent water stress beyond normal dry-down cycles.",
+          "path": "WATER_WATCH+ → IRRIGATION_ACTIVE → DROUGHT_STRESS → output[0,1,0,0]",
+          "output": "[0,1,0,0] (WATER_STRESS)"
+        },
+        "vectors": [
+          {
+            "id": "ag-gc-water-watch",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "WATER_WATCH",
+              "description": "WATER_WATCH+ — TEMP_OK=1 but IRRIGATE_ON active; substrate entering deficit. isInitial A*A = A+.",
+              "condition": "TEMP_OK=1, IRRIGATE_ON=1, FLOW_OK=0"
+            },
+            "nextVectorIds": [
+              "ag-gc-water-watch",
+              "ag-gc-irrigation-active"
+            ]
+          },
+          {
+            "id": "ag-gc-irrigation-active",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "IRRIGATION_ACTIVE",
+              "description": "IRRIGATION_ACTIVE — sustained irrigation demand; no OK signals active; potential pump failure or channel blockage.",
+              "condition": "IRRIGATE_ON=1, no TEMP_OK or FLOW_OK"
+            },
+            "nextVectorIds": [
+              "ag-gc-drought-stress"
+            ]
+          },
+          {
+            "id": "ag-gc-drought-stress",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "DROUGHT_STRESS",
+              "description": "DROUGHT_STRESS — IRRIGATE_ON with EC_ALERT (concentrated nutrients in drying substrate). Fires WATER_STRESS.",
+              "condition": "IRRIGATE_ON=1, EC_ALERT=1 (salt accumulation in dry substrate)"
+            },
+            "outputVectors": [
+              {
+                "id": "ag-gc-water-stress-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "WATER_STRESS: water-deficit growth suppression detected at [3955:3959]",
+                  "action": "Harvest timeline extended; AI optimizer adjusts irrigation strategy"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Healthy Growth then Temp Stress Recovery",
+        "pattern": "7-step: BASELINE→BASELINE→GROWING→VIGOROUS (ok)→TEMP_WATCH→TEMP_ALERT→GROWTH_STALL",
+        "description": "Three cycles of healthy growth followed by afternoon heat event triggering temperature stress cascade.",
+        "vectors": [
+          [
+            0.1,
+            0.1,
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ],
+          [
+            0.1,
+            0.1,
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ],
+          [
+            0.1,
+            0.1,
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ],
+          [
+            0.1,
+            0.1,
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ],
+          [
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ],
+          [
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.1
+          ]
+        ],
+        "metadata": {
+          "scenario": "growth-then-temp-stress",
+          "expectedOutputs": {
+            "steps_1_4": "GROWTH_OK fires [0,0,0,1] at step 4 (VIGOROUS terminal)",
+            "steps_5_6": "no output (TEMP_WATCH / TEMP_ALERT intermediate)",
+            "step_7": "TEMP_STRESS fires [1,0,0,0]"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

@@ -1,0 +1,707 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Data Center Cluster Capacity Forecast",
+    "description": "Data-center operations machine for cluster capacity forecast. It monitors CPU, memory, accelerator, storage, and reservation growth trend and emits operational outputs for 24/7 incident response, maintenance planning, upgrade readiness, and steady-state assurance.",
+    "metadata": {
+      "category": "data-center",
+      "domain": "Data Center - 24x7 Operations",
+      "author": "Reality Engine",
+      "operationalFocus": "Cluster Capacity Forecast",
+      "focusDescription": "CPU, memory, accelerator, storage, and reservation growth trend",
+      "upstreamMachine": "Data Center Server Fleet Health Monitor",
+      "upstreamOutputRegion": "[1417:1421]",
+      "downstreamMachines": [
+        "Data Center Virtualization HA Readiness"
+      ],
+      "projectionHorizon": "24h",
+      "projectionWindows": [
+        "0-6h",
+        "6-12h",
+        "12-18h",
+        "18-24h"
+      ],
+      "prescriptiveMaintenanceRole": "Consumes Data Center Server Fleet Health Monitor output to convert upstream operational posture into prescriptive action for cluster capacity forecast.",
+      "dispatchableAgent": "dc_change_manager_agent",
+      "aiTrigger": "data-center-cluster-capacity-forecast-ops-maintenance-upgrade",
+      "agentActions": [
+        "Dispatch dc_change_manager_agent for immediate stabilization of cluster capacity forecast.",
+        "Schedule maintenance for cluster capacity forecast with rollback and staffing checks.",
+        "Plan upgrade or lifecycle change for cluster capacity forecast using risk-gated rollout.",
+        "Keep 24/7 monitoring active for cluster capacity forecast.",
+        "Project cluster capacity forecast forward over the next 24 hours and prescribe maintenance or upgrade work before the risk window opens."
+      ],
+      "inputSpace": "4D binary at [1417:1421]",
+      "outputSpace": "4D binary at [1429:1433]: [1,0,0,0]=URGENT_INTERVENTION, [0,1,0,0]=SCHEDULE_MAINTENANCE, [0,0,1,0]=PLAN_UPGRADE, [0,0,0,1]=OPERATING_NOMINAL",
+      "inputSemantics": [
+        "availability margin",
+        "maintenance readiness",
+        "upgrade/lifecycle pressure",
+        "operational confidence"
+      ],
+      "tags": [
+        "24x7-operations",
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-5",
+        "cluster-capacity-forecast",
+        "data-center",
+        "data-center-24x7-operations",
+        "data-center-cluster-capacity-forecast",
+        "data-center-cluster-capacity-forecast-ops-maintenance-upgrade",
+        "data-center-generated",
+        "dc-change-manager-agent",
+        "dcx019",
+        "dispatchable-agent",
+        "incident-response",
+        "input-sequences",
+        "input-sequences-6",
+        "machine-interconnect",
+        "maintenance",
+        "startup-loadable",
+        "upgrade-cycle"
+      ],
+      "sequenceCount": 5,
+      "reuseGuideline": "Use as a 24/7 operational guardrail. Map telemetry, CMDB, change, or AI-dispatch signals into the 4D input lane; map outputs to incident, maintenance, upgrade, or executive-summary machines.",
+      "downstreamPattern": "Output region [1429:1433] feeds Data Center Virtualization HA Readiness for prescriptive 24/7 operations.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "data-center",
+        "domainTags": [
+          "24x7-operations",
+          "data-center"
+        ],
+        "family": "data-center-generated",
+        "machineCode": "dcx019",
+        "capabilityTags": [
+          "cluster-capacity-forecast",
+          "data-center-cluster-capacity-forecast",
+          "data-center-cluster-capacity-forecast-ops-maintenance-upgrade",
+          "maintenance"
+        ],
+        "workflowTags": [
+          "ai-trigger",
+          "data-center-24x7-operations",
+          "data-center-generated",
+          "dc-change-manager-agent",
+          "dispatchable-agent",
+          "incident-response",
+          "upgrade-cycle"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-5",
+          "input-sequences",
+          "input-sequences-6",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "24x7-operations",
+          "ai-trigger",
+          "ces-sequences",
+          "ces-sequences-5",
+          "cluster-capacity-forecast",
+          "data-center",
+          "data-center-24x7-operations",
+          "data-center-cluster-capacity-forecast",
+          "data-center-cluster-capacity-forecast-ops-maintenance-upgrade",
+          "data-center-generated",
+          "dc-change-manager-agent",
+          "dcx019",
+          "dispatchable-agent",
+          "incident-response",
+          "input-sequences",
+          "input-sequences-6",
+          "machine-interconnect",
+          "maintenance",
+          "startup-loadable",
+          "upgrade-cycle"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "datacenter-noc",
+        "runbook": "https://runbooks.example.org/data-center/dcx019_cluster-capacity-forecast",
+        "escalationPolicy": "pagerduty:datacenter-noc",
+        "contact": {
+          "primary": "datacenter-noc-primary@example.org",
+          "secondary": "datacenter-noc-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 300,
+          "error": 120
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"data-center\".  Review and tune the routing as the team owning DCX019_cluster-capacity-forecast matures."
+      },
+      "triggerConfig": {
+        "processId": "DCX019_CLUSTER_CAPACITY_FORECAST",
+        "processName": "Data Center Cluster Capacity Forecast",
+        "rules": [
+          {
+            "sequenceId": "dcx-019-urgent",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Cluster Capacity Forecast: DEGRADED -> CRITICAL -> URGENT_INTERVENTION"
+          },
+          {
+            "sequenceId": "dcx-019-maintenance",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Cluster Capacity Forecast: SERVICE_DUE -> SCHEDULE_MAINTENANCE"
+          },
+          {
+            "sequenceId": "dcx-019-upgrade",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Cluster Capacity Forecast: LIFECYCLE_PRESSURE -> PLAN_UPGRADE"
+          },
+          {
+            "sequenceId": "dcx-019-nominal",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Cluster Capacity Forecast: HEALTHY -> OPERATING_NOMINAL"
+          },
+          {
+            "sequenceId": "dcx-019-24h-projection",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Cluster Capacity Forecast: 0-6H -> 6-12H -> 12-18H -> 18-24H -> PRESCRIPTIVE_ACTION"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1417,
+        "length": 4
+      },
+      "output": {
+        "offset": 1429,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "dcx-019-urgent",
+        "name": "Cluster Capacity Forecast: DEGRADED -> CRITICAL -> URGENT_INTERVENTION",
+        "metadata": {
+          "description": "Escalates when availability and operational confidence collapse.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-019-degraded",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "nextVectorIds": [
+              "dcx-019-critical"
+            ]
+          },
+          {
+            "id": "dcx-019-critical",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "outputVectors": [
+              {
+                "id": "dcx-019-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch dc_change_manager_agent for immediate stabilization of cluster capacity forecast."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-019-maintenance",
+        "name": "Cluster Capacity Forecast: SERVICE_DUE -> SCHEDULE_MAINTENANCE",
+        "metadata": {
+          "description": "Schedules maintenance before service quality degrades.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-019-service-due",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "dcx-019-maintenance-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Schedule maintenance for cluster capacity forecast with rollback and staffing checks."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-019-upgrade",
+        "name": "Cluster Capacity Forecast: LIFECYCLE_PRESSURE -> PLAN_UPGRADE",
+        "metadata": {
+          "description": "Plans an upgrade, refresh, or lifecycle action under controlled change management.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-019-upgrade-needed",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "dcx-019-upgrade-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Plan upgrade or lifecycle change for cluster capacity forecast using risk-gated rollout."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-019-nominal",
+        "name": "Cluster Capacity Forecast: HEALTHY -> OPERATING_NOMINAL",
+        "metadata": {
+          "description": "Confirms stable 24/7 operational posture.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-019-healthy",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "dcx-019-nominal-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Keep 24/7 monitoring active for cluster capacity forecast."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-019-24h-projection",
+        "name": "Cluster Capacity Forecast: 0-6H -> 6-12H -> 12-18H -> 18-24H -> PRESCRIPTIVE_ACTION",
+        "metadata": {
+          "description": "Projects operational posture across a 24/7 horizon and prescribes work before the forecasted risk window opens.",
+          "projectionHorizon": "24h",
+          "projectionWindows": [
+            "0-6h",
+            "6-12h",
+            "12-18h",
+            "18-24h"
+          ],
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-019-projection-0-6h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "window": "0-6h",
+              "description": "Current posture is stable but lifecycle pressure is visible."
+            },
+            "nextVectorIds": [
+              "dcx-019-projection-6-12h"
+            ]
+          },
+          {
+            "id": "dcx-019-projection-6-12h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "window": "6-12h",
+              "description": "Operational confidence begins to degrade."
+            },
+            "nextVectorIds": [
+              "dcx-019-projection-12-18h"
+            ]
+          },
+          {
+            "id": "dcx-019-projection-12-18h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "window": "12-18h",
+              "description": "Maintenance readiness is no longer sufficient for the forecasted load."
+            },
+            "nextVectorIds": [
+              "dcx-019-projection-18-24h"
+            ]
+          },
+          {
+            "id": "dcx-019-projection-18-24h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "window": "18-24h",
+              "description": "Forecast crosses the prescriptive maintenance threshold."
+            },
+            "outputVectors": [
+              {
+                "id": "dcx-019-projection-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Project cluster capacity forecast forward over the next 24 hours and prescribe maintenance or upgrade work before the risk window opens.",
+                  "projectionHorizon": "24h"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Urgent intervention",
+        "description": "Availability and confidence collapse after degraded operation.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-intervention"
+        }
+      },
+      {
+        "name": "Maintenance due",
+        "description": "Maintenance should be scheduled before degradation.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "schedule-maintenance"
+        }
+      },
+      {
+        "name": "Upgrade planning",
+        "description": "Lifecycle pressure requires upgrade planning.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "plan-upgrade"
+        }
+      },
+      {
+        "name": "Nominal operations",
+        "description": "The machine reports stable 24/7 operation.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "operating-nominal"
+        }
+      },
+      {
+        "name": "24-hour prescriptive projection",
+        "description": "Projects operations across four 6-hour windows and prescribes maintenance before the 24-hour risk window opens.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            1
+          ],
+          [
+            0,
+            1,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "24h-prescriptive-projection"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "A single degraded baseline arms the urgent path without firing.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

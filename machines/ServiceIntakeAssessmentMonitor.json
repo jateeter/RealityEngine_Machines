@@ -1,0 +1,425 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Service Intake Assessment Monitor",
+    "description": "Monitors intake and needs assessment workflow for community service recipients — tracking need severity, functional status, safety risk, and support network adequacy. Determines intake priority and routing for case assignment. In community services, intake triage determines whether a person receives immediate crisis response, intensive case management, or standard program enrollment. Output at [956:960] feeds the Enrollment Coordination Monitor.",
+    "metadata": {
+      "category": "community-services",
+      "domain": "Community Services — Intake / Needs Assessment",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [956:960]: [1,0,0,0]=PRIORITY_INTAKE, [0,1,0,0]=COMPLEX_INTAKE, [0,0,1,0]=STANDARD_INTAKE, [0,0,0,1]=INTAKE_COMPLETE",
+      "tags": [
+        "case-management",
+        "ces-sequences",
+        "ces-sequences-3",
+        "community-services",
+        "community-services-intake-needs-assessment",
+        "input-sequences",
+        "input-sequences-1",
+        "intake",
+        "kleene-plus",
+        "needs-assessment",
+        "service-delivery",
+        "service-intake-assessment-monitor",
+        "startup-loadable",
+        "triage"
+      ],
+      "sequenceCount": 3,
+      "populationFocus": "New community service applicants; crisis walk-ins; referrals from partner agencies; individuals experiencing housing, food, or safety crises",
+      "sensorNormalization": {
+        "need_severity_norm": "0.0=acute multi-domain crisis (shelter, food, safety all failing simultaneously), 0.5=significant need in one domain; manageable with standard services, 1.0=moderate need with adequate existing support; standard enrollment appropriate",
+        "functional_status_norm": "0.0=unable to complete intake independently; cognitive, physical, or psychiatric barriers to participation, 0.5=needs assistance with parts of intake; low literacy or language barrier, 1.0=fully capable of completing intake process independently",
+        "safety_risk_norm": "0.0=imminent safety risk (DV, child abuse, elder abuse, suicidality reported), 0.5=elevated risk factors present but not acute (past DV, unstable housing, substance use), 1.0=no safety concerns identified during screening",
+        "support_network_norm": "0.0=completely isolated; no family, friends, or existing services engaged, 0.5=limited support (one informal contact; partial service engagement), 1.0=strong support network; family engaged; existing services active"
+      },
+      "downstreamMachine": "EnrollmentCoordinationMonitor (reads [952:960])",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "community-services",
+          "intake",
+          "needs-assessment"
+        ],
+        "family": "service-intake-assessment-monitor",
+        "machineCode": "service-intake-assessment-monitor",
+        "capabilityTags": [],
+        "workflowTags": [
+          "case-management",
+          "community-services-intake-needs-assessment",
+          "kleene-plus",
+          "service-delivery",
+          "service-intake-assessment-monitor",
+          "triage"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "case-management",
+          "ces-sequences",
+          "ces-sequences-3",
+          "community-services",
+          "community-services-intake-needs-assessment",
+          "input-sequences",
+          "input-sequences-1",
+          "intake",
+          "kleene-plus",
+          "needs-assessment",
+          "service-delivery",
+          "service-intake-assessment-monitor",
+          "startup-loadable",
+          "triage"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/serviceintakeassessmentmonitor",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning ServiceIntakeAssessmentMonitor matures."
+      },
+      "triggerConfig": {
+        "processId": "SERVICEINTAKEASSESSMENTMONITOR",
+        "processName": "Service Intake Assessment Monitor",
+        "rules": [
+          {
+            "sequenceId": "intake-priority-escalation",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "PRIORITY_INTAKE: acute crisis requiring immediate case worker assignment at [956:960]"
+          },
+          {
+            "sequenceId": "intake-complex-routing",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "COMPLEX_INTAKE: multi-domain needs requiring intensive case management assignment at [956:960]"
+          },
+          {
+            "sequenceId": "intake-complete",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "INTAKE_COMPLETE: needs assessment finished; ready for program enrollment at [956:960]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 924,
+        "length": 4
+      },
+      "output": {
+        "offset": 956,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "intake-priority-escalation",
+        "name": "Crisis Intake: STANDARD+ → COMPLEX → PRIORITY → PRIORITY_INTAKE",
+        "metadata": {
+          "description": "Tracks intake complexity escalation from a standard baseline. In community services, initial assessment sometimes reveals acute safety risks or multi-domain crises that require immediate priority routing. The STANDARD+ baseline ensures at least one standard intake before crisis escalation can trigger — preventing initial crisis walk-ins from being misrouted through this sequence.",
+          "path": "STANDARD+ → COMPLEX → PRIORITY → output[1,0,0,0]",
+          "output": "[1,0,0,0] (PRIORITY_INTAKE)"
+        },
+        "vectors": [
+          {
+            "id": "ia-standard",
+            "elements": [
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "STANDARD",
+              "description": "STANDARD+ — moderate need; functional for intake; no acute safety concerns; some support present. isInitial A*A = A+.",
+              "need_severity": "0.50–0.65 (single-domain need; manageable)"
+            },
+            "nextVectorIds": [
+              "ia-standard",
+              "ia-complex"
+            ]
+          },
+          {
+            "id": "ia-complex",
+            "elements": [
+              {
+                "value": 0.32,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.4,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.3,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "COMPLEX",
+              "description": "COMPLEX — multiple need domains; functional barriers requiring intake support; risk factors present.",
+              "need_severity": "0.25–0.45 (two or more need domains; requires complex case management)"
+            },
+            "nextVectorIds": [
+              "ia-priority"
+            ]
+          },
+          {
+            "id": "ia-priority",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.15,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "PRIORITY",
+              "description": "PRIORITY — acute multi-domain crisis; significant functional barriers; active safety risk. Fires PRIORITY_INTAKE for immediate crisis response routing.",
+              "need_severity": "0.0–0.18 (acute crisis across multiple domains)"
+            },
+            "outputVectors": [
+              {
+                "id": "ia-priority-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "PRIORITY_INTAKE: acute crisis requiring immediate case worker assignment at [956:960]",
+                  "action": "Immediate caseworker assignment; safety plan activation; partner agency crisis notification; same-day service initiation"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "intake-complex-routing",
+        "name": "Complex Intake: COMPLEX_STABLE+ → COMPLEX_INTAKE signal",
+        "metadata": {
+          "description": "Fires COMPLEX_INTAKE for applicants with multi-domain needs or functional barriers who require intensive case management routing rather than standard program enrollment. These cases need a dedicated case manager, not just a benefits referral.",
+          "pattern": "COMPLEX_STABLE+",
+          "output": "[0,1,0,0] (COMPLEX_INTAKE)"
+        },
+        "vectors": [
+          {
+            "id": "ia-complex-stable",
+            "elements": [
+              {
+                "value": 0.3,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.28,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "COMPLEX_STABLE",
+              "description": "COMPLEX_STABLE+ — significant need severity; functional barriers requiring intake support; no acute safety risk; limited support. isInitial A*A = A+: fires COMPLEX_INTAKE each cycle.",
+              "scenario": "Elderly applicant with cognitive decline; needs housing, meals, and health aide; cannot complete intake independently but not in acute danger"
+            },
+            "outputVectors": [
+              {
+                "id": "ia-complex-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "COMPLEX_INTAKE: multi-domain needs requiring intensive case management assignment at [956:960]",
+                  "action": "Complex case manager assignment; multi-agency coordination plan; functional capacity assessment; care plan development"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "intake-complete",
+        "name": "Intake Complete: RESOLVED+ → INTAKE_COMPLETE signal",
+        "metadata": {
+          "description": "Fires INTAKE_COMPLETE when needs have been assessed, functional barriers addressed, safety screening is clear, and support network is confirmed — ready for program enrollment and case assignment. Downstream enrollment coordination monitor reads this alongside eligibility confirmation.",
+          "pattern": "RESOLVED+",
+          "output": "[0,0,0,1] (INTAKE_COMPLETE)"
+        },
+        "vectors": [
+          {
+            "id": "ia-resolved",
+            "elements": [
+              {
+                "value": 0.58,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.58,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "RESOLVED",
+              "description": "RESOLVED+ — needs assessed; functional barriers cleared; safety screening clear; support network identified. Fires INTAKE_COMPLETE each cycle.",
+              "scenario": "Applicant completed intake with navigator support; safety screened clear; connected to case manager; ready for enrollment"
+            },
+            "outputVectors": [
+              {
+                "id": "ia-complete-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "INTAKE_COMPLETE: needs assessment finished; ready for program enrollment at [956:960]",
+                  "action": "Enrollment coordination monitor receives INTAKE_COMPLETE; case assignment queue populated"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Domestic Violence Survivor — Priority Intake",
+        "pattern": "5-step: STANDARD→STANDARD→COMPLEX (DV disclosed)→PRIORITY (imminent risk identified)→RESOLVED (after safety plan)",
+        "description": "New housing assistance applicant discloses DV during intake; safety risk elevated; priority crisis services engaged; safety plan stabilizes situation; intake completed.",
+        "vectors": [
+          [
+            0.56,
+            0.61,
+            0.63,
+            0.56
+          ],
+          [
+            0.54,
+            0.59,
+            0.61,
+            0.54
+          ],
+          [
+            0.31,
+            0.34,
+            0.39,
+            0.29
+          ],
+          [
+            0.09,
+            0.14,
+            0.09,
+            0.09
+          ],
+          [
+            0.59,
+            0.63,
+            0.66,
+            0.59
+          ]
+        ],
+        "metadata": {
+          "scenario": "dv-survivor-priority-intake",
+          "expectedOutputs": {
+            "steps_1_2": "INTAKE_COMPLETE fires [0,0,0,1]",
+            "step_3": "no output (COMPLEX intermediate)",
+            "step_4": "PRIORITY_INTAKE fires [1,0,0,0]",
+            "step_5": "INTAKE_COMPLETE fires [0,0,0,1] (after safety plan)"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

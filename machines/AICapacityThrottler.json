@@ -1,0 +1,634 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "ai-capacity-throttler",
+    "name": "AI Capacity Throttler",
+    "description": "Monitor AI compute capacity — GPU utilization, job queue depth, memory pressure, thermal headroom. Prevent cascade overloads by triggering throttling before saturation.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "gte",
+    "perceptualMapping": {
+      "input": {
+        "offset": 264,
+        "length": 4
+      },
+      "output": {
+        "offset": 292,
+        "length": 6
+      },
+      "bitsPerElement": 8
+    },
+    "metadata": {
+      "category": "ai-services",
+      "domain": "AI Infrastructure — AI Workload Capacity Throttling",
+      "tags": [
+        "ai-capacity-throttler",
+        "ai-infrastructure",
+        "ai-infrastructure-ai-workload-capacity-throttling",
+        "ai-services",
+        "ai-workload",
+        "ai-workload-capacity-throttling",
+        "aicapacity-throttler",
+        "capacity",
+        "ces-sequences",
+        "ces-sequences-2",
+        "data-center",
+        "gpu",
+        "input-sequences",
+        "input-sequences-3",
+        "startup-loadable",
+        "throttling"
+      ],
+      "rationale": "Manages AI-workload-driven GPU/memory saturation — a data-center infrastructure concern, not an AI-pipeline concern.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "ai-services",
+        "domainTags": [
+          "ai-infrastructure",
+          "ai-services",
+          "ai-workload-capacity-throttling"
+        ],
+        "family": "ai-capacity-throttler",
+        "machineCode": "aicapacity-throttler",
+        "capabilityTags": [
+          "ai-capacity-throttler",
+          "ai-infrastructure-ai-workload-capacity-throttling",
+          "ai-workload-capacity-throttling",
+          "aicapacity-throttler",
+          "capacity"
+        ],
+        "workflowTags": [
+          "ai-workload",
+          "data-center",
+          "gpu",
+          "throttling"
+        ],
+        "integrationTags": [
+          "ai-services"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "input-sequences",
+          "input-sequences-3",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ai-capacity-throttler",
+          "ai-infrastructure",
+          "ai-infrastructure-ai-workload-capacity-throttling",
+          "ai-services",
+          "ai-workload",
+          "ai-workload-capacity-throttling",
+          "aicapacity-throttler",
+          "capacity",
+          "ces-sequences",
+          "ces-sequences-2",
+          "data-center",
+          "gpu",
+          "input-sequences",
+          "input-sequences-3",
+          "startup-loadable",
+          "throttling"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "ml-platform-on-call",
+        "runbook": "https://runbooks.example.org/ai-services/aicapacitythrottler",
+        "escalationPolicy": "pagerduty:ml-platform",
+        "contact": {
+          "primary": "ml-platform-on-call-primary@example.org",
+          "secondary": "ml-platform-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 300
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"ai-services\".  Review and tune the routing as the team owning AICapacityThrottler matures."
+      },
+      "triggerConfig": {
+        "processId": "AICAPACITYTHROTTLER",
+        "processName": "AI Capacity Throttler",
+        "rules": [
+          {
+            "sequenceId": "aict-capacity-escalation",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Compute capacity AVAILABLE — accepting new inference and training jobs"
+          },
+          {
+            "sequenceId": "aict-capacity-escalation",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Compute capacity BUSY — high utilization, monitor queue depth"
+          },
+          {
+            "sequenceId": "aict-capacity-escalation",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Compute capacity SATURATED — queue growing, inference latency increasing"
+          },
+          {
+            "sequenceId": "aict-capacity-escalation",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Action: Rate-limit new inference requests to prevent queue overflow"
+          },
+          {
+            "sequenceId": "aict-capacity-escalation",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Compute capacity OVERLOADED — OOM risk, SLO violations imminent"
+          },
+          {
+            "sequenceId": "aict-capacity-escalation",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Action: Hard throttle all inference, reject new requests"
+          },
+          {
+            "sequenceId": "aict-capacity-escalation",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Action: Immediately preempt and shed low-priority batch training jobs"
+          },
+          {
+            "sequenceId": "aict-memory-pressure",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Memory pressure CRITICAL — GPU memory nearing exhaustion despite moderate compute load"
+          },
+          {
+            "sequenceId": "aict-memory-pressure",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Action: Shed batch jobs to reclaim GPU memory before OOM kills active inference"
+          }
+        ]
+      }
+    },
+    "sequences": [
+      {
+        "id": "aict-capacity-escalation",
+        "name": "Compute Capacity Escalation",
+        "vectors": [
+          {
+            "id": "aict-available",
+            "isInitial": true,
+            "nextVectorIds": [
+              "aict-busy"
+            ],
+            "elements": [
+              {
+                "value": 0.2,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.15,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.25,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.18,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aict-out-available",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Compute capacity AVAILABLE — accepting new inference and training jobs",
+                  "severity": "INFO"
+                }
+              }
+            ]
+          },
+          {
+            "id": "aict-busy",
+            "isInitial": false,
+            "nextVectorIds": [
+              "aict-saturated"
+            ],
+            "elements": [
+              {
+                "value": 0.72,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aict-out-busy",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Compute capacity BUSY — high utilization, monitor queue depth",
+                  "severity": "WARNING"
+                }
+              }
+            ]
+          },
+          {
+            "id": "aict-saturated",
+            "isInitial": false,
+            "nextVectorIds": [
+              "aict-overloaded"
+            ],
+            "elements": [
+              {
+                "value": 0.88,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.82,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.78,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.75,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aict-out-saturated",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Compute capacity SATURATED — queue growing, inference latency increasing",
+                  "severity": "CRITICAL"
+                }
+              },
+              {
+                "id": "aict-act-throttle",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Action: Rate-limit new inference requests to prevent queue overflow",
+                  "severity": "ACTION"
+                }
+              }
+            ]
+          },
+          {
+            "id": "aict-overloaded",
+            "isInitial": false,
+            "nextVectorIds": [],
+            "elements": [
+              {
+                "value": 0.96,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.94,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.92,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aict-out-overloaded",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Compute capacity OVERLOADED — OOM risk, SLO violations imminent",
+                  "severity": "EMERGENCY"
+                }
+              },
+              {
+                "id": "aict-act-throttle-crit",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Action: Hard throttle all inference, reject new requests",
+                  "severity": "ACTION"
+                }
+              },
+              {
+                "id": "aict-act-shed",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "Action: Immediately preempt and shed low-priority batch training jobs",
+                  "severity": "ACTION"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "aict-memory-pressure",
+        "name": "Memory Pressure Rapid Alert",
+        "vectors": [
+          {
+            "id": "aict-mem-normal",
+            "isInitial": true,
+            "nextVectorIds": [
+              "aict-mem-critical"
+            ],
+            "elements": [
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.3,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.2,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.28,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": []
+          },
+          {
+            "id": "aict-mem-critical",
+            "isInitial": false,
+            "nextVectorIds": [],
+            "elements": [
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.3,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.88,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.28,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aict-out-mem-warn",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Memory pressure CRITICAL — GPU memory nearing exhaustion despite moderate compute load",
+                  "severity": "CRITICAL"
+                }
+              },
+              {
+                "id": "aict-act-shed-mem",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "Action: Shed batch jobs to reclaim GPU memory before OOM kills active inference",
+                  "severity": "ACTION"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "id": "aict-seq-available",
+        "name": "Available Capacity",
+        "vectors": [
+          [
+            0.18,
+            0.12,
+            0.22,
+            0.15
+          ],
+          [
+            0.2,
+            0.15,
+            0.25,
+            0.18
+          ],
+          [
+            0.22,
+            0.18,
+            0.2,
+            0.16
+          ]
+        ]
+      },
+      {
+        "id": "aict-seq-escalation",
+        "name": "Capacity Escalation to Overload",
+        "metadata": {
+          "expectedOutputs": 4,
+          "scenario": "Viral model inference request spike during product launch"
+        },
+        "vectors": [
+          [
+            0.2,
+            0.15,
+            0.25,
+            0.18
+          ],
+          [
+            0.72,
+            0.65,
+            0.6,
+            0.55
+          ],
+          [
+            0.88,
+            0.82,
+            0.78,
+            0.75
+          ],
+          [
+            0.96,
+            0.94,
+            0.92,
+            0.9
+          ]
+        ]
+      },
+      {
+        "id": "aict-seq-memory",
+        "name": "Memory Pressure Spike",
+        "metadata": {
+          "expectedOutputs": 1,
+          "scenario": "Memory leak in model serving process causing GPU OOM risk"
+        },
+        "vectors": [
+          [
+            0.32,
+            0.28,
+            0.22,
+            0.25
+          ],
+          [
+            0.35,
+            0.3,
+            0.9,
+            0.28
+          ]
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,377 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "DC Critical Synthesizer",
+    "description": "Monitors the combined flip-flop states of CoolingControlFF and NetworkThrottleFF. When both thermal and network alarms are simultaneously active, fires a combined critical alert. Implements multi-dimensional failure correlation.",
+    "metadata": {
+      "category": "data-center",
+      "domain": "Data Center — Critical Alert / Synthesizer",
+      "author": "Reality Engine",
+      "created": "2026-02-27T00:00:00Z",
+      "eventSpace": "4D binary FF-state vector at [1371:1375]: [CoolingQ, CoolingQ̄, NetworkQ, NetworkQ̄]",
+      "outputSpace": "2D binary at [1369:1371]: [1,0]=MULTI_ALARM, [0,1]=ALL_CLEAR",
+      "tags": [
+        "ces-sequences",
+        "ces-sequences-2",
+        "correlation",
+        "critical-alert",
+        "data-center",
+        "data-center-critical-alert-synthesizer",
+        "dc-critical-synthesizer",
+        "dccritical-synthesizer",
+        "input-sequences",
+        "input-sequences-3",
+        "multi-alarm",
+        "startup-loadable",
+        "synthesizer"
+      ],
+      "sequenceCount": 2,
+      "role": "Detects simultaneous thermal AND network failure conditions; drives DCCriticalAlertFF",
+      "upstreamMachines": [
+        "DCCoolingControlFF (writes [1371:1373])",
+        "DCNetworkThrottleFF (writes [1373:1375])"
+      ],
+      "downstreamMachine": "DCCriticalAlertFF (reads [1369:1371])",
+      "correlationLogic": "THERMAL_AND_NETWORK: both CoolingControlFF=SET and NetworkThrottleFF=SET",
+      "singleTransitionAssumption": {
+        "required": false,
+        "scope": "not applicable — all event vectors are isInitial (combinatorial pattern matching)",
+        "compliant": true,
+        "notes": "Both MULTI_ALARM and ALL_CLEAR events are isInitial. The synthesizer responds combinatorially to the current combined FF state on every cycle. Both patterns are always active and respond to exactly their target 4-bit patterns. The 4-element vectors use equals comparators to precisely distinguish SET ([1,0]) from RESET ([0,1]) state for each flip-flop."
+      },
+      "correlationMatrix": {
+        "pattern_1010": "Thermal ALARM + Network ALARM → CRITICAL multi-system failure",
+        "pattern_0101": "Thermal CLEAR + Network CLEAR → ALL systems nominal",
+        "pattern_1001": "Thermal ALARM + Network CLEAR → single-system failure, not critical",
+        "pattern_0110": "Thermal CLEAR + Network ALARM → single-system failure, not critical"
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "data-center",
+        "domainTags": [
+          "critical-alert",
+          "data-center",
+          "synthesizer"
+        ],
+        "family": "dc-critical-synthesizer",
+        "machineCode": "dccritical-synthesizer",
+        "capabilityTags": [],
+        "workflowTags": [
+          "correlation",
+          "data-center",
+          "dc-critical-synthesizer",
+          "dccritical-synthesizer",
+          "multi-alarm"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "input-sequences",
+          "input-sequences-3",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "correlation",
+          "critical-alert",
+          "data-center",
+          "data-center-critical-alert-synthesizer",
+          "dc-critical-synthesizer",
+          "dccritical-synthesizer",
+          "input-sequences",
+          "input-sequences-3",
+          "multi-alarm",
+          "startup-loadable",
+          "synthesizer"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "datacenter-noc",
+        "runbook": "https://runbooks.example.org/data-center/dccriticalsynthesizer",
+        "escalationPolicy": "pagerduty:datacenter-noc",
+        "contact": {
+          "primary": "datacenter-noc-primary@example.org",
+          "secondary": "datacenter-noc-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 300,
+          "error": 120
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"data-center\".  Review and tune the routing as the team owning DCCriticalSynthesizer matures."
+      },
+      "triggerConfig": {
+        "processId": "DCCRITICALSYNTHESIZER",
+        "processName": "DC Critical Synthesizer",
+        "rules": [
+          {
+            "sequenceId": "dc-synth-multi-alarm-sequence",
+            "outputMatches": [
+              1,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "MULTI-SYSTEM CRITICAL: Thermal + Network failure correlation detected"
+          },
+          {
+            "sequenceId": "dc-synth-all-clear-sequence",
+            "outputMatches": [
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "ALL SYSTEMS CLEAR: Both thermal and network conditions nominal"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1371,
+        "length": 4
+      },
+      "output": {
+        "offset": 1369,
+        "length": 2
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "dc-synth-multi-alarm-sequence",
+        "name": "MULTI_ALARM: [1,0,1,0] → [1,0]",
+        "metadata": {
+          "description": "Detects simultaneous thermal AND network alarm: both FFs in SET state",
+          "pattern": "CoolingFF=SET AND NetworkFF=SET",
+          "inputPattern": "[CoolingQ=1, CoolingQ̄=0, NetworkQ=1, NetworkQ̄=0]",
+          "output": "[1,0]",
+          "semantics": "Combined multi-system failure requiring immediate escalation"
+        },
+        "vectors": [
+          {
+            "id": "dc-synth-multi-alarm-event",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "MULTI_ALARM",
+              "description": "Both CoolingControlFF [Q=1] and NetworkThrottleFF [Q=1] are active simultaneously",
+              "coolingState": "SET (Q=1)",
+              "networkState": "SET (Q=1)",
+              "severity": "CRITICAL"
+            },
+            "outputVectors": [
+              {
+                "id": "dc-synth-multi-alarm-output",
+                "vector": [
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "MULTI-SYSTEM CRITICAL: Thermal + Network failure correlation detected",
+                  "severity": "CRITICAL",
+                  "action": "Activate DCCriticalAlertFF; notify operators; consider workload migration"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dc-synth-all-clear-sequence",
+        "name": "ALL_CLEAR: [0,1,0,1] → [0,1]",
+        "metadata": {
+          "description": "Confirms all monitored FFs are in RESET (clear) state",
+          "pattern": "CoolingFF=RESET AND NetworkFF=RESET",
+          "inputPattern": "[CoolingQ=0, CoolingQ̄=1, NetworkQ=0, NetworkQ̄=1]",
+          "output": "[0,1]",
+          "semantics": "All monitored subsystems nominal; clear any active critical alert"
+        },
+        "vectors": [
+          {
+            "id": "dc-synth-all-clear-event",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "ALL_CLEAR",
+              "description": "Both CoolingControlFF [Q=0] and NetworkThrottleFF [Q=0] are clear",
+              "coolingState": "RESET (Q=0)",
+              "networkState": "RESET (Q=0)",
+              "severity": "INFO"
+            },
+            "outputVectors": [
+              {
+                "id": "dc-synth-all-clear-output",
+                "vector": [
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "ALL SYSTEMS CLEAR: Both thermal and network conditions nominal",
+                  "severity": "INFO",
+                  "action": "Clear DCCriticalAlertFF; resume normal operations"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Sequential Alarm Activation",
+        "pattern": "[0,1,0,1] → [1,0,0,1] → [1,0,1,0]",
+        "description": "All clear → thermal alarm only → thermal + network alarm (critical)",
+        "vectors": [
+          [
+            0,
+            1,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "step1": "All clear: fires ALL_CLEAR [0,1]",
+          "step2": "Only thermal alarm (CoolingFF=SET, NetworkFF=RESET): no output from either sequence",
+          "step3": "Both alarms active: fires MULTI_ALARM [1,0]"
+        }
+      },
+      {
+        "name": "Multi-Alarm Recovery",
+        "pattern": "[1,0,1,0] → [1,0,0,1] → [0,1,0,1]",
+        "description": "Both alarms → thermal only → all clear",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "step1": "Both alarms: fires MULTI_ALARM [1,0]",
+          "step2": "Network clears, thermal remains: no output",
+          "step3": "All clear: fires ALL_CLEAR [0,1]"
+        }
+      },
+      {
+        "name": "Full Cascading Failure Scenario",
+        "pattern": "6-step escalation and recovery",
+        "description": "Demonstrates complete cascading failure correlation lifecycle",
+        "vectors": [
+          [
+            0,
+            1,
+            0,
+            1
+          ],
+          [
+            0,
+            1,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            1,
+            0
+          ],
+          [
+            1,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "step1": "Nominal: ALL_CLEAR fires [0,1]",
+          "step2": "Nominal: ALL_CLEAR fires [0,1]",
+          "step3": "Thermal alarm only: no output",
+          "step4": "Both alarms: MULTI_ALARM fires [1,0]",
+          "step5": "Both alarms continue: MULTI_ALARM fires [1,0]",
+          "step6": "Recovery complete: ALL_CLEAR fires [0,1]",
+          "expectedOutputSequence": "[0,1], [0,1], (none), [1,0], [1,0], [0,1]"
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

@@ -1,0 +1,430 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Case Worker Capacity Monitor",
+    "description": "Monitors active caseload ratios, response time performance, worker availability, and case complexity distribution for community service case workers and teams. Case worker capacity is the primary throughput constraint in community services — when workers are overloaded, intake delays, missed follow-ups, and compliance failures cascade downstream. Output at [968:972] feeds the Service Delivery Integrity Monitor.",
+    "metadata": {
+      "category": "community-services",
+      "domain": "Community Services — Case Management / Worker Capacity",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [968:972]: [1,0,0,0]=CAPACITY_CRISIS, [0,1,0,0]=OVERLOADED, [0,0,1,0]=CAPACITY_STRAINED, [0,0,0,1]=CAPACITY_ADEQUATE",
+      "tags": [
+        "capacity",
+        "case-management",
+        "case-worker-capacity-monitor",
+        "caseload",
+        "caseworker",
+        "ces-sequences",
+        "ces-sequences-3",
+        "community-services",
+        "community-services-case-management-worker-capacity",
+        "input-sequences",
+        "input-sequences-1",
+        "kleene-plus",
+        "service-delivery",
+        "startup-loadable",
+        "worker-capacity"
+      ],
+      "sequenceCount": 3,
+      "populationFocus": "Community services organizations with case management functions; public agency benefit offices; non-profit care coordinators; social services departments",
+      "sensorNormalization": {
+        "caseload_ratio_norm": "0.0=>150% of recommended caseload per worker (e.g. 75+ cases where 50 is standard), 0.5=100–120% of recommended caseload (manageable but over), 1.0=<90% of recommended caseload (adequate capacity)",
+        "response_time_norm": "0.0=average initial contact response >10 business days (regulatory threshold exceeded), 0.5=response within 3–5 business days (borderline), 1.0=response within 1–2 business days (meeting or exceeding standard)",
+        "worker_availability_norm": "0.0=>25% of case worker positions vacant or on leave; no coverage plan, 0.5=10–25% positions vacant; coverage partial, 1.0=<10% positions vacant; full coverage maintained",
+        "complexity_index_norm": "0.0=majority of caseload is high-complexity (trauma, substance use, serious mental illness, homelessness), 0.5=mixed complexity; high-complexity cases at or above 40% of caseload, 1.0=balanced complexity distribution; high-complexity cases below 30%"
+      },
+      "downstreamMachine": "ServiceDeliveryIntegrityMonitor (reads [968:976])",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "case-management",
+          "community-services",
+          "worker-capacity"
+        ],
+        "family": "case-worker-capacity-monitor",
+        "machineCode": "case-worker-capacity-monitor",
+        "capabilityTags": [
+          "capacity",
+          "case-worker-capacity-monitor",
+          "community-services-case-management-worker-capacity",
+          "worker-capacity"
+        ],
+        "workflowTags": [
+          "caseload",
+          "caseworker",
+          "kleene-plus",
+          "service-delivery"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "capacity",
+          "case-management",
+          "case-worker-capacity-monitor",
+          "caseload",
+          "caseworker",
+          "ces-sequences",
+          "ces-sequences-3",
+          "community-services",
+          "community-services-case-management-worker-capacity",
+          "input-sequences",
+          "input-sequences-1",
+          "kleene-plus",
+          "service-delivery",
+          "startup-loadable",
+          "worker-capacity"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/caseworkercapacitymonitor",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning CaseWorkerCapacityMonitor matures."
+      },
+      "triggerConfig": {
+        "processId": "CASEWORKERCAPACITYMONITOR",
+        "processName": "Case Worker Capacity Monitor",
+        "rules": [
+          {
+            "sequenceId": "capacity-crisis-escalation",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "CAPACITY_CRISIS: case worker capacity failure threatening service delivery and regulatory compliance at [968:972]"
+          },
+          {
+            "sequenceId": "capacity-overloaded",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "OVERLOADED: sustained case worker overload degrading service quality at [968:972]"
+          },
+          {
+            "sequenceId": "capacity-adequate-ok",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "CAPACITY_ADEQUATE: case worker capacity supports quality service delivery at [968:972]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 936,
+        "length": 4
+      },
+      "output": {
+        "offset": 968,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "capacity-crisis-escalation",
+        "name": "Capacity Collapse: ADEQUATE+ → STRAINED → OVERLOADED_STATE → CAPACITY_CRISIS",
+        "metadata": {
+          "description": "Tracks case worker capacity collapse from an adequate baseline through strain and overload to full crisis. Crisis conditions arise from staff attrition, funding cuts that prevent backfill, or sudden intake surges (disaster events, policy changes creating new eligible populations). Requires ADEQUATE+ baseline before crisis escalation arms.",
+          "path": "ADEQUATE+ → STRAINED → OVERLOADED_STATE → output[1,0,0,0]",
+          "output": "[1,0,0,0] (CAPACITY_CRISIS)"
+        },
+        "vectors": [
+          {
+            "id": "cw-adequate",
+            "elements": [
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.58,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "ADEQUATE",
+              "description": "ADEQUATE+ — caseload within recommended range; response times meeting standards; staffing adequate; complexity manageable. isInitial A*A = A+.",
+              "caseload_ratio": "0.58–0.75 (caseload 80–95% of recommended maximum)"
+            },
+            "nextVectorIds": [
+              "cw-adequate",
+              "cw-strained"
+            ]
+          },
+          {
+            "id": "cw-strained",
+            "elements": [
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "STRAINED",
+              "description": "STRAINED — caseload above recommended; response times slipping; partial vacancies; complexity concentration rising.",
+              "caseload_ratio": "0.28–0.45 (caseload 110–130% of recommended maximum)"
+            },
+            "nextVectorIds": [
+              "cw-overloaded"
+            ]
+          },
+          {
+            "id": "cw-overloaded",
+            "elements": [
+              {
+                "value": 0.12,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.15,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.15,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.12,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "OVERLOADED_STATE",
+              "description": "OVERLOADED_STATE — caseload severely over standard; response times violating regulatory thresholds; significant vacancies; high-complexity cases dominating. Fires CAPACITY_CRISIS.",
+              "caseload_ratio": "0.0–0.18 (caseload >150% of recommended; compliance risk)"
+            },
+            "outputVectors": [
+              {
+                "id": "cw-crisis-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "CAPACITY_CRISIS: case worker capacity failure threatening service delivery and regulatory compliance at [968:972]",
+                  "action": "Emergency staffing plan; case redistribution; intake hold for non-critical cases; supervisor escalation; regulatory notification if thresholds exceeded"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "capacity-overloaded",
+        "name": "Overloaded: SUSTAINED_OVERLOAD+ → OVERLOADED signal",
+        "metadata": {
+          "description": "Fires OVERLOADED when caseload consistently exceeds recommended levels without reaching full crisis — the chronic overload state that characterizes many under-resourced community services organizations. Sustained overload without crisis-level vacancy enables service delivery to continue but at degraded quality and compliance risk.",
+          "pattern": "SUSTAINED_OVERLOAD+",
+          "output": "[0,1,0,0] (OVERLOADED)"
+        },
+        "vectors": [
+          {
+            "id": "cw-sustained-overload",
+            "elements": [
+              {
+                "value": 0.28,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.32,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.52,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.3,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "SUSTAINED_OVERLOAD",
+              "description": "SUSTAINED_OVERLOAD+ — caseload 120–140% of recommended; response times borderline; staffing near-full but case complexity high. isInitial A*A = A+: fires OVERLOADED each cycle.",
+              "scenario": "Team of 8 workers carrying caseloads averaging 65 cases each (standard: 50); no vacancies but all at capacity ceiling"
+            },
+            "outputVectors": [
+              {
+                "id": "cw-overloaded-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "OVERLOADED: sustained case worker overload degrading service quality at [968:972]",
+                  "action": "Hiring request escalation; case complexity review; caseload rebalancing; supervisor check-in schedule increase; burnout monitoring"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "capacity-adequate-ok",
+        "name": "Capacity Adequate: STAFFED+ → CAPACITY_ADEQUATE signal",
+        "metadata": {
+          "description": "Fires CAPACITY_ADEQUATE when caseloads are within recommended limits, response times are meeting standards, staffing is near-full, and case complexity is balanced. Downstream service delivery integrity monitor uses this as its baseline stable-delivery indicator.",
+          "pattern": "STAFFED+",
+          "output": "[0,0,0,1] (CAPACITY_ADEQUATE)"
+        },
+        "vectors": [
+          {
+            "id": "cw-staffed",
+            "elements": [
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.68,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "STAFFED",
+              "description": "STAFFED+ — caseloads within recommended range; response times meeting 2-business-day standard; <10% vacancy; complexity balanced. Fires CAPACITY_ADEQUATE each cycle.",
+              "scenario": "Fully staffed team; grant funding covering backfill; new hire in orientation; caseloads averaging 45 per worker"
+            },
+            "outputVectors": [
+              {
+                "id": "cw-adequate-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "CAPACITY_ADEQUATE: case worker capacity supports quality service delivery at [968:972]",
+                  "action": "Service delivery integrity monitor registers staffing adequate"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Staff Attrition Cascade",
+        "pattern": "5-step: ADEQUATE→ADEQUATE→STRAINED (two departures)→OVERLOADED (third departure, no backfill)→ADEQUATE (after hiring)",
+        "description": "Three experienced case workers leave within two months; backfill delayed by hiring freeze; capacity crisis triggers emergency contract worker hire; restored to adequate.",
+        "vectors": [
+          [
+            0.63,
+            0.66,
+            0.61,
+            0.59
+          ],
+          [
+            0.61,
+            0.64,
+            0.59,
+            0.57
+          ],
+          [
+            0.34,
+            0.37,
+            0.37,
+            0.34
+          ],
+          [
+            0.27,
+            0.32,
+            0.52,
+            0.29
+          ],
+          [
+            0.66,
+            0.69,
+            0.63,
+            0.61
+          ]
+        ],
+        "metadata": {
+          "scenario": "staff-attrition-capacity-cascade",
+          "expectedOutputs": {
+            "steps_1_2": "CAPACITY_ADEQUATE fires [0,0,0,1]",
+            "step_3": "no output (STRAINED intermediate)",
+            "step_4": "OVERLOADED fires [0,1,0,0]",
+            "step_5": "CAPACITY_ADEQUATE fires [0,0,0,1] (after contract hire)"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

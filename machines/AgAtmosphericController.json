@@ -1,0 +1,564 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Ag Atmospheric Controller",
+    "description": "Monitors CO2 concentration, relative humidity, and vapor pressure deficit (VPD) within indoor growing zones. Three concurrent patterns detect CO2 depletion during photosynthesis peaks, high-humidity fungal risk, and optimal atmospheric conditions. Upstream: atmospheric sensors at [16:20]. Downstream: AgIPMPestAlertMonitor reads output at [36:40].",
+    "metadata": {
+      "category": "agriculture",
+      "domain": "Agriculture — Atmospheric CO2 / Humidity Control",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [36:40]: [1,0,0,0]=CO2_INJECT, [0,1,0,0]=VENT_OPEN, [0,0,1,0]=HUMIDITY_ALERT, [0,0,0,1]=ATMOS_OK",
+      "tags": [
+        "ag-atmospheric-controller",
+        "agriculture",
+        "agriculture-atmospheric-co2-humidity-control",
+        "atmospheric-co2",
+        "ces-sequences",
+        "ces-sequences-3",
+        "co2-enrichment",
+        "humidity-control",
+        "indoor-growing",
+        "input-sequences",
+        "input-sequences-1",
+        "kleene-plus",
+        "startup-loadable",
+        "thermal-comfort",
+        "vpd"
+      ],
+      "sequenceCount": 3,
+      "sensorNormalization": {
+        "co2_ppm_norm": "0.0=0 ppm, 0.5=800 ppm (enriched optimal), 1.0=2000 ppm",
+        "rh_norm": "0.0=0% RH, 0.5=65% RH (vegetative optimal), 1.0=100% RH",
+        "vpd_norm": "0.0=0.0 kPa (zero VPD, no transpiration), 0.5=1.0 kPa (optimal), 1.0=2.5 kPa (excessive)",
+        "air_exchange_norm": "0.0=stagnant, 0.5=nominal ACH, 1.0=maximum ventilation"
+      },
+      "downstreamMachine": "AgIPMPestAlertMonitor (reads [36:40])",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "agriculture",
+        "domainTags": [
+          "agriculture",
+          "atmospheric-co2",
+          "humidity-control"
+        ],
+        "family": "ag-atmospheric-controller",
+        "machineCode": "ag-atmospheric-controller",
+        "capabilityTags": [],
+        "workflowTags": [
+          "co2-enrichment",
+          "indoor-growing",
+          "kleene-plus",
+          "thermal-comfort",
+          "vpd"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ag-atmospheric-controller",
+          "agriculture",
+          "agriculture-atmospheric-co2-humidity-control",
+          "atmospheric-co2",
+          "ces-sequences",
+          "ces-sequences-3",
+          "co2-enrichment",
+          "humidity-control",
+          "indoor-growing",
+          "input-sequences",
+          "input-sequences-1",
+          "kleene-plus",
+          "startup-loadable",
+          "thermal-comfort",
+          "vpd"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "agriculture-operations",
+        "runbook": "https://runbooks.example.org/agriculture/agatmosphericcontroller",
+        "escalationPolicy": "pagerduty:ag-ops",
+        "contact": {
+          "primary": "agriculture-operations-primary@example.org",
+          "secondary": "agriculture-operations-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 3600,
+          "error": 900
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"agriculture\".  Review and tune the routing as the team owning AgAtmosphericController matures."
+      },
+      "triggerConfig": {
+        "processId": "AGATMOSPHERICCONTROLLER",
+        "processName": "Ag Atmospheric Controller",
+        "rules": [
+          {
+            "sequenceId": "ag-atmos-co2-depletion",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "CO2_INJECT: open CO2 valve; restore enriched atmosphere at [36:40]"
+          },
+          {
+            "sequenceId": "ag-atmos-humidity-escalation",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "HUMIDITY_ALERT: open ventilation; activate dehumidifier at [36:40]"
+          },
+          {
+            "sequenceId": "ag-atmos-optimal",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "ATMOS_OK: atmospheric conditions optimal for plant growth at [36:40]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 16,
+        "length": 4
+      },
+      "output": {
+        "offset": 36,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ag-atmos-co2-depletion",
+        "name": "CO2 Depletion: ENRICHED+ → DECLINING → LOW → DEPLETED → CO2_INJECT",
+        "metadata": {
+          "description": "Tracks CO2 depletion as photosynthesis consumes enriched atmosphere during peak light periods. The ENRICHED+ initial state ensures CO2 injection is only triggered after confirmed enriched conditions — preventing false triggers during dark periods.",
+          "path": "ENRICHED+ → DECLINING → LOW → DEPLETED → output[1,0,0,0]",
+          "output": "[1,0,0,0] (CO2_INJECT)"
+        },
+        "vectors": [
+          {
+            "id": "ag-atm-co2-enriched",
+            "elements": [
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.45,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "ENRICHED",
+              "description": "ENRICHED+ — CO2 above ambient (>500 ppm); system has been actively enriched. isInitial A*A = A+: confirms enriched baseline before tracking depletion.",
+              "co2_range": "0.55–0.72 (600–900 ppm enriched)"
+            },
+            "nextVectorIds": [
+              "ag-atm-co2-enriched",
+              "ag-atm-co2-declining"
+            ]
+          },
+          {
+            "id": "ag-atm-co2-declining",
+            "elements": [
+              {
+                "value": 0.42,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.45,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "DECLINING",
+              "description": "DECLINING — CO2 falling below enriched threshold as photosynthesis consumes it.",
+              "co2_range": "0.35–0.52 (400–600 ppm, approaching ambient)"
+            },
+            "nextVectorIds": [
+              "ag-atm-co2-low"
+            ]
+          },
+          {
+            "id": "ag-atm-co2-low",
+            "elements": [
+              {
+                "value": 0.25,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.45,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "LOW",
+              "description": "LOW CO2 — below ambient 400 ppm; photosynthesis rate limited; plant stress.",
+              "co2_range": "0.15–0.35 (200–400 ppm)"
+            },
+            "nextVectorIds": [
+              "ag-atm-co2-depleted"
+            ]
+          },
+          {
+            "id": "ag-atm-co2-depleted",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.45,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "DEPLETED",
+              "description": "DEPLETED — CO2 critically low (<200 ppm); photosynthesis halted. Fires CO2_INJECT.",
+              "co2_range": "0.0–0.15 (<200 ppm)"
+            },
+            "outputVectors": [
+              {
+                "id": "ag-atm-co2-inject-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "CO2_INJECT: open CO2 valve; restore enriched atmosphere at [36:40]",
+                  "action": "Open CO2 regulator; enrichment cycle begins; IPM monitor registers CO2 stress"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ag-atmos-humidity-escalation",
+        "name": "Humidity Escalation: DRY_WATCH+ → HUMID → HIGH → CONDENSATION_RISK → HUMIDITY_ALERT",
+        "metadata": {
+          "description": "Detects rising relative humidity toward fungal disease risk. High humidity combined with low VPD reduces transpiration and creates conditions for botrytis and powdery mildew. Triggers ventilation before condensation forms.",
+          "path": "DRY_WATCH+ → HUMID → HIGH → CONDENSATION_RISK → output[0,0,1,0]",
+          "output": "[0,0,1,0] (HUMIDITY_ALERT)"
+        },
+        "vectors": [
+          {
+            "id": "ag-atm-dry-watch",
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.45,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.52,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "DRY_WATCH",
+              "description": "DRY_WATCH+ — humidity at optimal VPD range; base monitoring state. isInitial A*A = A+.",
+              "rh_range": "0.40–0.52 (55–65% RH, vegetative optimal)",
+              "vpd_range": "0.50–0.55 (1.0–1.1 kPa, good transpiration)"
+            },
+            "nextVectorIds": [
+              "ag-atm-dry-watch",
+              "ag-atm-humid"
+            ]
+          },
+          {
+            "id": "ag-atm-humid",
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.68,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "HUMID",
+              "description": "HUMID — RH rising above 75%; VPD dropping; transpiration reducing.",
+              "rh_range": "0.62–0.75 (75–85% RH)",
+              "vpd_range": "0.28–0.42 (0.6–0.9 kPa)"
+            },
+            "nextVectorIds": [
+              "ag-atm-high-humidity"
+            ]
+          },
+          {
+            "id": "ag-atm-high-humidity",
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.82,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.2,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "HIGH_HUMIDITY",
+              "description": "HIGH_HUMIDITY — RH >85%; VPD very low; fungal risk elevated.",
+              "rh_range": "0.78–0.90 (85–92% RH)"
+            },
+            "nextVectorIds": [
+              "ag-atm-condensation-risk"
+            ]
+          },
+          {
+            "id": "ag-atm-condensation-risk",
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.93,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.08,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "CONDENSATION_RISK",
+              "description": "CONDENSATION_RISK — RH >92%; condensation forming on surfaces; botrytis/mildew risk critical. Fires HUMIDITY_ALERT.",
+              "rh_range": "0.90–1.00 (>92% RH)",
+              "vpd_range": "0.0–0.12 (<0.3 kPa)"
+            },
+            "outputVectors": [
+              {
+                "id": "ag-atm-humidity-alert-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "HUMIDITY_ALERT: open ventilation; activate dehumidifier at [36:40]",
+                  "action": "Increase air exchange; IPM monitor registers elevated fungal pressure"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ag-atmos-optimal",
+        "name": "Optimal Atmosphere: OPTIMAL+ → ATMOS_OK",
+        "metadata": {
+          "description": "Fires ATMOS_OK when CO2, humidity, and VPD are all within optimal ranges for photosynthesis and transpiration.",
+          "pattern": "OPTIMAL+",
+          "output": "[0,0,0,1] (ATMOS_OK)"
+        },
+        "vectors": [
+          {
+            "id": "ag-atm-optimal",
+            "elements": [
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.45,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.52,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.45,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "OPTIMAL",
+              "description": "OPTIMAL+ — CO2 enriched, humidity moderate, VPD optimal, airflow adequate. Fires ATMOS_OK each matching cycle.",
+              "co2_range": "0.55–0.70 (600–900 ppm)",
+              "rh_range": "0.38–0.52 (55–68% RH)",
+              "vpd_range": "0.48–0.58 (0.9–1.2 kPa)"
+            },
+            "outputVectors": [
+              {
+                "id": "ag-atm-ok-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "ATMOS_OK: atmospheric conditions optimal for plant growth at [36:40]",
+                  "action": "IPM and plant monitors register clean atmospheric baseline"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Peak Photosynthesis CO2 Draw-Down",
+        "pattern": "7-step: ENRICHED → ENRICHED → DECLINING → LOW → DEPLETED → (CO2 injected) → OPTIMAL",
+        "description": "CO2 draw-down during afternoon peak photosynthesis; injection system restores enriched level.",
+        "vectors": [
+          [
+            0.64,
+            0.46,
+            0.52,
+            0.44
+          ],
+          [
+            0.63,
+            0.47,
+            0.51,
+            0.45
+          ],
+          [
+            0.41,
+            0.46,
+            0.51,
+            0.45
+          ],
+          [
+            0.24,
+            0.45,
+            0.52,
+            0.45
+          ],
+          [
+            0.09,
+            0.46,
+            0.52,
+            0.45
+          ],
+          [
+            0.62,
+            0.45,
+            0.52,
+            0.45
+          ],
+          [
+            0.61,
+            0.44,
+            0.53,
+            0.44
+          ]
+        ],
+        "metadata": {
+          "scenario": "co2-drawdown-recovery",
+          "expectedOutputs": {
+            "steps_1_2": "ATMOS_OK fires [0,0,0,1]",
+            "step_3": "no output (DECLINING intermediate)",
+            "step_4": "no output (LOW intermediate)",
+            "step_5": "CO2_INJECT fires [1,0,0,0]",
+            "steps_6_7": "ATMOS_OK fires [0,0,0,1]"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

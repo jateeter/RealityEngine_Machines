@@ -1,0 +1,838 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Data Center Monitoring",
+    "description": "Complex critical event sequences demonstrating multi-dimensional dependencies, variable thresholds, and correlated failure patterns",
+    "metadata": {
+      "category": "data-center",
+      "domain": "Data Center — Multi-Sensor Monitoring",
+      "author": "Reality Engine",
+      "created": "2026-02-02T00:00:00Z",
+      "eventSpace": "8D continuous vectors: [CPU_TEMP, CPU_LOAD, NETWORK_BWTH, POWER_WATTS, STORAGE_USED, MEMORY_USED, DISK_IO, SECURITY_SCORE]",
+      "outputSpace": "12D one-hot encoded action vectors",
+      "tags": [
+        "anomaly-detection",
+        "ces-sequences",
+        "ces-sequences-1",
+        "data-center",
+        "data-center-monitoring",
+        "data-center-multi-sensor-monitoring",
+        "input-sequences",
+        "input-sequences-1",
+        "monitoring",
+        "multi-dimensional",
+        "multi-sensor-monitoring",
+        "startup-loadable"
+      ],
+      "sequenceCount": 5,
+      "description": "Advanced monitoring with thermal-load correlation, network surge detection, power efficiency analysis, storage deduplication, and cascading memory failures",
+      "features": [
+        "Non-binary continuous input vectors (sensor readings)",
+        "Variable threshold matching (tight thresholds for critical metrics)",
+        "Multi-dimensional dependencies (temp correlates with load)",
+        "Complex pattern detection (power efficiency = power/load ratio)",
+        "Correlated failure sequences (memory thrashing causes disk I/O surge)",
+        "Multiple outputs per critical event (emergency triggers multiple actions)"
+      ],
+      "singleTransitionAssumption": {
+        "required": "N/A — continuous space",
+        "scope": "continuous 8D sensor space; Hamming distance is not defined",
+        "compliant": true,
+        "notes": "STA (Hamming distance ≤ 1) is a binary concept and does not apply directly to continuous-valued vectors. The analogous assumption in continuous space is 'gradual monotonic progression' — each sensor reading advances by a bounded amount per step. The defined 'Gradual Degradation Scenario' (12-step input sequence) satisfies this: all sensor values increase monotonically and smoothly. The THRESHOLD comparator (tolerance ±0.50) provides natural tolerance for small sensor jumps. Large abrupt jumps in sensor values could skip intermediate sequence states (e.g., jumping from Normal directly to Emergency values would miss the Warm, Hot, and Critical states, failing to trigger intermediate alerts). This machine assumes gradual environmental change, consistent with real-world data center sensor physics.",
+        "continuousSpaceAnalog": "Gradual monotonic progression — each step advances metrics by a bounded increment",
+        "thresholdTolerance": 0.5,
+        "definedSequenceProgression": "Monotonically increasing from 0.25-0.48 range (Normal) to 0.96-0.99 range (Emergency) across 12 steps"
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "data-center",
+        "domainTags": [
+          "data-center",
+          "multi-sensor-monitoring"
+        ],
+        "family": "data-center-monitoring",
+        "machineCode": "data-center-monitoring",
+        "capabilityTags": [
+          "data-center-monitoring",
+          "data-center-multi-sensor-monitoring",
+          "monitoring",
+          "multi-sensor-monitoring"
+        ],
+        "workflowTags": [
+          "anomaly-detection",
+          "multi-dimensional"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-1",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "anomaly-detection",
+          "ces-sequences",
+          "ces-sequences-1",
+          "data-center",
+          "data-center-monitoring",
+          "data-center-multi-sensor-monitoring",
+          "input-sequences",
+          "input-sequences-1",
+          "monitoring",
+          "multi-dimensional",
+          "multi-sensor-monitoring",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "datacenter-noc",
+        "runbook": "https://runbooks.example.org/data-center/datacentermonitoring",
+        "escalationPolicy": "pagerduty:datacenter-noc",
+        "contact": {
+          "primary": "datacenter-noc-primary@example.org",
+          "secondary": "datacenter-noc-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 300,
+          "error": 120
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"data-center\".  Review and tune the routing as the team owning DataCenterMonitoring matures."
+      },
+      "triggerConfig": {
+        "processId": "DATACENTERMONITORING",
+        "processName": "Data Center Monitoring",
+        "rules": [
+          {
+            "sequenceId": "dc-thermal-overload",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Thermal status: Normal"
+          },
+          {
+            "sequenceId": "dc-thermal-overload",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Thermal warning: Temperature rising with load"
+          },
+          {
+            "sequenceId": "dc-thermal-overload",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Thermal warning: High temperature under load"
+          },
+          {
+            "sequenceId": "dc-thermal-overload",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Thermal CRITICAL: Temperature approaching thermal limit"
+          },
+          {
+            "sequenceId": "dc-thermal-overload",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Action: Throttle CPU to reduce heat"
+          },
+          {
+            "sequenceId": "dc-thermal-overload",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THERMAL EMERGENCY: Immediate action required"
+          },
+          {
+            "sequenceId": "dc-thermal-overload",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Action: Activate emergency cooling systems"
+          },
+          {
+            "sequenceId": "dc-thermal-overload",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Action: Force CPU throttling"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1345,
+        "length": 8
+      },
+      "output": {
+        "offset": 1353,
+        "length": 12
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "dc-thermal-overload",
+        "name": "Thermal Overload - Load Correlated",
+        "metadata": {
+          "description": "Temperature monitoring with CPU load correlation",
+          "path": "Normal→Warm→Hot→Critical→Emergency",
+          "output": "[EMERGENCY, COOLING_ACTIVATE, THROTTLE_CPU]"
+        },
+        "vectors": [
+          {
+            "id": "dc-thermal-normal",
+            "elements": [
+              {
+                "value": 0.25,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.3,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "Normal Temp",
+              "description": "CPU temperature normal (20-40°C)",
+              "tempRange": "20-40°C",
+              "loadRange": "0-55%"
+            },
+            "nextVectorIds": [
+              "dc-thermal-warm"
+            ],
+            "outputVectors": [
+              {
+                "id": "dc-thermal-normal-out",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Thermal status: Normal",
+                  "severity": "INFO"
+                }
+              }
+            ]
+          },
+          {
+            "id": "dc-thermal-warm",
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Warm",
+              "description": "Temperature elevated with increased load",
+              "tempRange": "40-60°C",
+              "loadRange": "50-70%"
+            },
+            "nextVectorIds": [
+              "dc-thermal-hot"
+            ],
+            "outputVectors": [
+              {
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Thermal warning: Temperature rising with load",
+                  "severity": "WARNING"
+                }
+              }
+            ]
+          },
+          {
+            "id": "dc-thermal-hot",
+            "elements": [
+              {
+                "value": 0.69,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.78,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Hot",
+              "description": "High temperature with heavy load",
+              "tempRange": "60-75°C",
+              "loadRange": "70-85%"
+            },
+            "nextVectorIds": [
+              "dc-thermal-critical"
+            ],
+            "outputVectors": [
+              {
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Thermal warning: High temperature under load",
+                  "severity": "WARNING"
+                }
+              }
+            ]
+          },
+          {
+            "id": "dc-thermal-critical",
+            "elements": [
+              {
+                "value": 0.81,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.88,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Critical",
+              "description": "Critical temperature - throttling recommended",
+              "tempRange": "75-85°C",
+              "loadRange": "85-95%"
+            },
+            "nextVectorIds": [
+              "dc-thermal-emergency"
+            ],
+            "outputVectors": [
+              {
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Thermal CRITICAL: Temperature approaching thermal limit",
+                  "severity": "CRITICAL"
+                }
+              },
+              {
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Action: Throttle CPU to reduce heat",
+                  "severity": "ACTION"
+                }
+              }
+            ]
+          },
+          {
+            "id": "dc-thermal-emergency",
+            "elements": [
+              {
+                "value": 0.91,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.94,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Thermal Emergency",
+              "description": "EMERGENCY: Thermal shutdown imminent",
+              "tempRange": ">85°C",
+              "loadRange": ">90%",
+              "risk": "Hardware damage possible"
+            },
+            "outputVectors": [
+              {
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "THERMAL EMERGENCY: Immediate action required",
+                  "severity": "EMERGENCY"
+                }
+              },
+              {
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Action: Activate emergency cooling systems",
+                  "severity": "ACTION"
+                }
+              },
+              {
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Action: Force CPU throttling",
+                  "severity": "ACTION"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Gradual Degradation Scenario",
+        "pattern": "12-step escalation from normal to total failure",
+        "description": "Complete test scenario showing gradual system degradation with multiple correlated failures",
+        "vectors": [
+          [
+            0.25,
+            0.3,
+            0.28,
+            0.38,
+            0.35,
+            0.45,
+            0.38,
+            0.05
+          ],
+          [
+            0.32,
+            0.38,
+            0.32,
+            0.42,
+            0.38,
+            0.48,
+            0.42,
+            0.08
+          ],
+          [
+            0.48,
+            0.58,
+            0.45,
+            0.55,
+            0.45,
+            0.52,
+            0.48,
+            0.12
+          ],
+          [
+            0.52,
+            0.65,
+            0.52,
+            0.62,
+            0.52,
+            0.58,
+            0.52,
+            0.15
+          ],
+          [
+            0.68,
+            0.75,
+            0.62,
+            0.72,
+            0.58,
+            0.65,
+            0.68,
+            0.18
+          ],
+          [
+            0.72,
+            0.82,
+            0.68,
+            0.78,
+            0.68,
+            0.75,
+            0.72,
+            0.22
+          ],
+          [
+            0.78,
+            0.88,
+            0.75,
+            0.85,
+            0.75,
+            0.82,
+            0.78,
+            0.28
+          ],
+          [
+            0.82,
+            0.9,
+            0.82,
+            0.88,
+            0.82,
+            0.88,
+            0.82,
+            0.32
+          ],
+          [
+            0.88,
+            0.94,
+            0.88,
+            0.92,
+            0.88,
+            0.92,
+            0.88,
+            0.38
+          ],
+          [
+            0.91,
+            0.96,
+            0.92,
+            0.95,
+            0.92,
+            0.95,
+            0.92,
+            0.42
+          ],
+          [
+            0.94,
+            0.98,
+            0.95,
+            0.97,
+            0.95,
+            0.96,
+            0.95,
+            0.45
+          ],
+          [
+            0.96,
+            0.99,
+            0.97,
+            0.98,
+            0.97,
+            0.98,
+            0.97,
+            0.48
+          ]
+        ],
+        "metadata": {
+          "scenario": "gradual-degradation",
+          "duration": "55 minutes",
+          "totalSteps": 12
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

@@ -1,0 +1,633 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "ai-wellness-coach",
+    "name": "AI Wellness Coach",
+    "description": "Bridge machine that consumes PatientWellness emissions (wellness-level classification for assisted-living residents) and produces AI-driven coaching recommendations. Integrates the Health Services domain (PatientWellness input) with the AI domain (inference-driven recommendation): reads the 4-level wellness metric (OPTIMAL / GOOD / ALERT / CRITICAL) and emits coaching actions — maintain baseline, targeted enrichment, clinical escalation, or urgent multidisciplinary huddle — along with ancillary triggers for family notification, activity scheduling, care-plan revision, and on-call paging.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "gte",
+    "perceptualMapping": {
+      "input": {
+        "offset": 3931,
+        "length": 8
+      },
+      "output": {
+        "offset": 3941,
+        "length": 8
+      },
+      "bitsPerElement": 8
+    },
+    "metadata": {
+      "category": "ai-services",
+      "author": "Reality Engine",
+      "created": "2026-04-20T00:00:00Z",
+      "domain": "AI — Wellness Coaching / Health-AI Bridge",
+      "tags": [
+        "ai",
+        "ai-services",
+        "ai-wellness-coach",
+        "ai-wellness-coaching-health-ai-bridge",
+        "aiwellness-coach",
+        "bridge",
+        "ces-sequences",
+        "ces-sequences-4",
+        "clinical",
+        "coaching",
+        "elder-care",
+        "health-ai-bridge",
+        "input-sequences",
+        "input-sequences-4",
+        "multi-domain",
+        "patient",
+        "startup-loadable",
+        "wellness",
+        "wellness-coaching"
+      ],
+      "crossDomain": {
+        "reads": "healthservices (PatientWellness output region 210..218)",
+        "writes": "healthservices actions (care-team alerts, family outreach) via AI inference (region 220..228)",
+        "rationale": "Demonstrates integration between Health Services and AI domains. Classified as AI (inference producer) while operating on and feeding back into health-domain signals."
+      },
+      "inputDimensions": [
+        {
+          "index": 0,
+          "name": "wellness_OPTIMAL",
+          "description": "1 when PatientWellness emitted OPTIMAL (Level 4)"
+        },
+        {
+          "index": 1,
+          "name": "wellness_GOOD",
+          "description": "1 when PatientWellness emitted GOOD (Level 3)"
+        },
+        {
+          "index": 2,
+          "name": "wellness_ALERT",
+          "description": "1 when PatientWellness emitted ALERT (Level 2)"
+        },
+        {
+          "index": 3,
+          "name": "wellness_CRITICAL",
+          "description": "1 when PatientWellness emitted CRITICAL (Level 1)"
+        },
+        {
+          "index": 4,
+          "name": "reserved_a",
+          "description": "Reserved PatientWellness output slot"
+        },
+        {
+          "index": 5,
+          "name": "reserved_b",
+          "description": "Reserved PatientWellness output slot"
+        },
+        {
+          "index": 6,
+          "name": "reserved_c",
+          "description": "Reserved PatientWellness output slot"
+        },
+        {
+          "index": 7,
+          "name": "reserved_d",
+          "description": "Reserved PatientWellness output slot"
+        }
+      ],
+      "outputDimensions": [
+        {
+          "index": 0,
+          "name": "COACH_MAINTAIN_BASELINE",
+          "description": "Optimal path — continue current plan, reinforce protective factors"
+        },
+        {
+          "index": 1,
+          "name": "COACH_TARGETED_ENRICHMENT",
+          "description": "Good path — prescribe a specific enrichment program (stress, social, or nutrition)"
+        },
+        {
+          "index": 2,
+          "name": "COACH_CLINICAL_ESCALATE",
+          "description": "Alert path — refer to clinician for care plan review"
+        },
+        {
+          "index": 3,
+          "name": "COACH_URGENT_HUDDLE",
+          "description": "Critical path — trigger multidisciplinary care conference within 24h"
+        },
+        {
+          "index": 4,
+          "name": "NOTIFY_FAMILY",
+          "description": "Page designated family contact with wellness status update"
+        },
+        {
+          "index": 5,
+          "name": "ACT_SCHEDULE_ACTIVITY",
+          "description": "Schedule an AI-recommended enrichment activity on the resident calendar"
+        },
+        {
+          "index": 6,
+          "name": "ACT_REVISE_CARE_PLAN",
+          "description": "Open a care-plan revision task in the clinical workflow"
+        },
+        {
+          "index": 7,
+          "name": "ACT_PAGE_ONCALL_CLINICIAN",
+          "description": "Page the on-call attending physician for immediate consultation"
+        }
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "ai-services",
+        "domainTags": [
+          "ai",
+          "ai-services",
+          "health-ai-bridge",
+          "wellness-coaching"
+        ],
+        "family": "ai-wellness-coach",
+        "machineCode": "aiwellness-coach",
+        "capabilityTags": [],
+        "workflowTags": [
+          "ai-wellness-coach",
+          "ai-wellness-coaching-health-ai-bridge",
+          "aiwellness-coach",
+          "bridge",
+          "clinical",
+          "coaching",
+          "elder-care",
+          "multi-domain",
+          "patient",
+          "wellness"
+        ],
+        "integrationTags": [
+          "ai-services"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-4",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ai",
+          "ai-services",
+          "ai-wellness-coach",
+          "ai-wellness-coaching-health-ai-bridge",
+          "aiwellness-coach",
+          "bridge",
+          "ces-sequences",
+          "ces-sequences-4",
+          "clinical",
+          "coaching",
+          "elder-care",
+          "health-ai-bridge",
+          "input-sequences",
+          "input-sequences-4",
+          "multi-domain",
+          "patient",
+          "startup-loadable",
+          "wellness",
+          "wellness-coaching"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "ml-platform-on-call",
+        "runbook": "https://runbooks.example.org/ai-services/aiwellnesscoach",
+        "escalationPolicy": "pagerduty:ml-platform",
+        "contact": {
+          "primary": "ml-platform-on-call-primary@example.org",
+          "secondary": "ml-platform-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 300
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"ai-services\".  Review and tune the routing as the team owning AIWellnessCoach matures."
+      },
+      "triggerConfig": {
+        "processId": "AIWELLNESSCOACH",
+        "processName": "AI Wellness Coach",
+        "rules": [
+          {
+            "sequenceId": "aiwc-optimal-maintain",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Maintain baseline care plan; AI schedules a protective-factor enrichment activity (e.g., peer mentoring, reminiscence group) to reinforce wellness."
+          },
+          {
+            "sequenceId": "aiwc-good-enrichment",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0,
+              1,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "AI-selected enrichment program (stress-reduction, social, or nutritional) plus optional family update. Activity added to the resident calendar."
+          },
+          {
+            "sequenceId": "aiwc-alert-escalate",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0,
+              1,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Clinical escalation: refer to care team for review, open care-plan revision task, notify family of status change."
+          },
+          {
+            "sequenceId": "aiwc-critical-huddle",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1,
+              1,
+              0,
+              1,
+              1
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Urgent multidisciplinary huddle within 24h. On-call clinician paged, family notified, care plan revision initiated."
+          }
+        ]
+      }
+    },
+    "sequences": [
+      {
+        "id": "aiwc-optimal-maintain",
+        "name": "Optimal Wellness — Maintain & Reinforce",
+        "description": "Resident is thriving (PatientWellness emitted OPTIMAL). AI coach reinforces current plan and schedules a protective enrichment activity.",
+        "vectors": [
+          {
+            "id": "aiwc-optimal",
+            "isInitial": true,
+            "nextVectorIds": [],
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aiwc-out-maintain",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Maintain baseline care plan; AI schedules a protective-factor enrichment activity (e.g., peer mentoring, reminiscence group) to reinforce wellness.",
+                  "severity": "INFO",
+                  "decision": "MAINTAIN_BASELINE"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "aiwc-good-enrichment",
+        "name": "Good Wellness — Targeted Enrichment Program",
+        "description": "PatientWellness emitted GOOD — five of six dimensions in norm with a single gap. AI coach prescribes a targeted enrichment program and offers a non-urgent family update.",
+        "vectors": [
+          {
+            "id": "aiwc-good",
+            "isInitial": true,
+            "nextVectorIds": [],
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aiwc-out-enrichment",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0,
+                  1,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "AI-selected enrichment program (stress-reduction, social, or nutritional) plus optional family update. Activity added to the resident calendar.",
+                  "severity": "LOW",
+                  "decision": "TARGETED_ENRICHMENT"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "aiwc-alert-escalate",
+        "name": "Alert Wellness — Clinical Escalation with Family Outreach",
+        "description": "PatientWellness emitted ALERT — multiple deficits with active decline trend. AI coach escalates to the clinical team, opens a care-plan revision task, and notifies family.",
+        "vectors": [
+          {
+            "id": "aiwc-alert",
+            "isInitial": true,
+            "nextVectorIds": [],
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aiwc-out-escalate",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0,
+                  1,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Clinical escalation: refer to care team for review, open care-plan revision task, notify family of status change.",
+                  "severity": "MEDIUM",
+                  "decision": "CLINICAL_ESCALATE"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "aiwc-critical-huddle",
+        "name": "Critical Wellness — Urgent Multidisciplinary Huddle",
+        "description": "PatientWellness emitted CRITICAL — mental acuity failure with established decline trend. AI coach pages on-call clinician, triggers urgent multidisciplinary huddle, revises care plan, and immediately notifies family.",
+        "vectors": [
+          {
+            "id": "aiwc-critical",
+            "isInitial": true,
+            "nextVectorIds": [],
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aiwc-out-huddle",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1,
+                  1,
+                  0,
+                  1,
+                  1
+                ],
+                "metadata": {
+                  "description": "Urgent multidisciplinary huddle within 24h. On-call clinician paged, family notified, care plan revision initiated.",
+                  "severity": "HIGH",
+                  "decision": "URGENT_HUDDLE"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "id": "aiwc-seq-optimal",
+        "name": "Optimal resident — maintain plan",
+        "description": "PatientWellness OPTIMAL emission (Level 4). Expect COACH_MAINTAIN_BASELINE + ACT_SCHEDULE_ACTIVITY.",
+        "metadata": {
+          "expectedOutputs": 1,
+          "scenario": "Thriving resident, bi-weekly check-in — AI recommends protective-factor enrichment"
+        },
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ]
+        ]
+      },
+      {
+        "id": "aiwc-seq-good",
+        "name": "Good wellness — bereavement recovery",
+        "description": "PatientWellness GOOD emission (Level 3) during bereavement recovery. Expect COACH_TARGETED_ENRICHMENT + NOTIFY_FAMILY + ACT_SCHEDULE_ACTIVITY.",
+        "metadata": {
+          "expectedOutputs": 1,
+          "scenario": "Post-bereavement stress gap — AI selects a stress-reduction program"
+        },
+        "vectors": [
+          [
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ]
+        ]
+      },
+      {
+        "id": "aiwc-seq-alert",
+        "name": "Alert wellness — new diagnosis burden",
+        "description": "PatientWellness ALERT emission (Level 2) following a new type-2 diabetes diagnosis. Expect COACH_CLINICAL_ESCALATE + NOTIFY_FAMILY + ACT_REVISE_CARE_PLAN.",
+        "metadata": {
+          "expectedOutputs": 1,
+          "scenario": "Multiple wellness deficits with declining trajectory — AI triggers clinical review"
+        },
+        "vectors": [
+          [
+            0.1,
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ]
+        ]
+      },
+      {
+        "id": "aiwc-seq-critical",
+        "name": "Critical wellness — cognitive decline threshold crossed",
+        "description": "PatientWellness CRITICAL emission (Level 1) — mental acuity below cohort norm with established decline. Expect COACH_URGENT_HUDDLE + NOTIFY_FAMILY + ACT_REVISE_CARE_PLAN + ACT_PAGE_ONCALL_CLINICIAN.",
+        "metadata": {
+          "expectedOutputs": 1,
+          "scenario": "Cognitive decline crossed clinical threshold — AI fires the highest-severity coaching response"
+        },
+        "vectors": [
+          [
+            0.1,
+            0.1,
+            0.1,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ]
+        ]
+      }
+    ]
+  }
+}

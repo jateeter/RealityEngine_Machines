@@ -1,0 +1,708 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Data Center Capacity Reservation Manager",
+    "description": "Data-center operations machine for capacity reservation manager. It monitors rack space, power budget, IP pools, VLANs, and procurement lead time and emits operational outputs for 24/7 incident response, maintenance planning, upgrade readiness, and steady-state assurance.",
+    "metadata": {
+      "category": "data-center",
+      "domain": "Data Center - 24x7 Operations",
+      "author": "Reality Engine",
+      "operationalFocus": "Capacity Reservation Manager",
+      "focusDescription": "rack space, power budget, IP pools, VLANs, and procurement lead time",
+      "upstreamMachine": null,
+      "upstreamOutputRegion": null,
+      "downstreamMachines": [
+        "Data Center Asset Lifecycle Tracker",
+        "Data Center Tenant Capacity Guard"
+      ],
+      "projectionHorizon": "24h",
+      "projectionWindows": [
+        "0-6h",
+        "6-12h",
+        "12-18h",
+        "18-24h"
+      ],
+      "prescriptiveMaintenanceRole": "Primary telemetry/source machine for prescriptive action on capacity reservation manager.",
+      "dispatchableAgent": "dc_compute_agent",
+      "aiTrigger": "data-center-capacity-reservation-manager-ops-maintenance-upgrade",
+      "agentActions": [
+        "Dispatch dc_compute_agent for immediate stabilization of capacity reservation manager.",
+        "Schedule maintenance for capacity reservation manager with rollback and staffing checks.",
+        "Plan upgrade or lifecycle change for capacity reservation manager using risk-gated rollout.",
+        "Keep 24/7 monitoring active for capacity reservation manager.",
+        "Project capacity reservation manager forward over the next 24 hours and prescribe maintenance or upgrade work before the risk window opens."
+      ],
+      "inputSpace": "4D binary at [1457:1461]",
+      "outputSpace": "4D binary at [1461:1465]: [1,0,0,0]=URGENT_INTERVENTION, [0,1,0,0]=SCHEDULE_MAINTENANCE, [0,0,1,0]=PLAN_UPGRADE, [0,0,0,1]=OPERATING_NOMINAL",
+      "inputSemantics": [
+        "availability margin",
+        "maintenance readiness",
+        "upgrade/lifecycle pressure",
+        "operational confidence"
+      ],
+      "tags": [
+        "24x7-operations",
+        "ai-trigger",
+        "capacity-reservation-manager",
+        "ces-sequences",
+        "ces-sequences-5",
+        "data-center",
+        "data-center-24x7-operations",
+        "data-center-capacity-reservation-manager",
+        "data-center-capacity-reservation-manager-ops-maintenance-upgrade",
+        "data-center-generated",
+        "dc-compute-agent",
+        "dcx025",
+        "dispatchable-agent",
+        "incident-response",
+        "input-sequences",
+        "input-sequences-6",
+        "machine-interconnect",
+        "maintenance",
+        "startup-loadable",
+        "upgrade-cycle"
+      ],
+      "sequenceCount": 5,
+      "reuseGuideline": "Use as a 24/7 operational guardrail. Map telemetry, CMDB, change, or AI-dispatch signals into the 4D input lane; map outputs to incident, maintenance, upgrade, or executive-summary machines.",
+      "downstreamPattern": "Output region [1461:1465] feeds Data Center Asset Lifecycle Tracker, Data Center Tenant Capacity Guard for prescriptive 24/7 operations.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "data-center",
+        "domainTags": [
+          "24x7-operations",
+          "data-center"
+        ],
+        "family": "data-center-generated",
+        "machineCode": "dcx025",
+        "capabilityTags": [
+          "capacity-reservation-manager",
+          "data-center-capacity-reservation-manager",
+          "data-center-capacity-reservation-manager-ops-maintenance-upgrade",
+          "maintenance"
+        ],
+        "workflowTags": [
+          "ai-trigger",
+          "data-center-24x7-operations",
+          "data-center-generated",
+          "dc-compute-agent",
+          "dispatchable-agent",
+          "incident-response",
+          "upgrade-cycle"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-5",
+          "input-sequences",
+          "input-sequences-6",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "24x7-operations",
+          "ai-trigger",
+          "capacity-reservation-manager",
+          "ces-sequences",
+          "ces-sequences-5",
+          "data-center",
+          "data-center-24x7-operations",
+          "data-center-capacity-reservation-manager",
+          "data-center-capacity-reservation-manager-ops-maintenance-upgrade",
+          "data-center-generated",
+          "dc-compute-agent",
+          "dcx025",
+          "dispatchable-agent",
+          "incident-response",
+          "input-sequences",
+          "input-sequences-6",
+          "machine-interconnect",
+          "maintenance",
+          "startup-loadable",
+          "upgrade-cycle"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "datacenter-noc",
+        "runbook": "https://runbooks.example.org/data-center/dcx025_capacity-reservation-manager",
+        "escalationPolicy": "pagerduty:datacenter-noc",
+        "contact": {
+          "primary": "datacenter-noc-primary@example.org",
+          "secondary": "datacenter-noc-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 300,
+          "error": 120
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"data-center\".  Review and tune the routing as the team owning DCX025_capacity-reservation-manager matures."
+      },
+      "triggerConfig": {
+        "processId": "DCX025_CAPACITY_RESERVATION_MANAGER",
+        "processName": "Data Center Capacity Reservation Manager",
+        "rules": [
+          {
+            "sequenceId": "dcx-025-urgent",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Capacity Reservation Manager: DEGRADED -> CRITICAL -> URGENT_INTERVENTION"
+          },
+          {
+            "sequenceId": "dcx-025-maintenance",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Capacity Reservation Manager: SERVICE_DUE -> SCHEDULE_MAINTENANCE"
+          },
+          {
+            "sequenceId": "dcx-025-upgrade",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Capacity Reservation Manager: LIFECYCLE_PRESSURE -> PLAN_UPGRADE"
+          },
+          {
+            "sequenceId": "dcx-025-nominal",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Capacity Reservation Manager: HEALTHY -> OPERATING_NOMINAL"
+          },
+          {
+            "sequenceId": "dcx-025-24h-projection",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Capacity Reservation Manager: 0-6H -> 6-12H -> 12-18H -> 18-24H -> PRESCRIPTIVE_ACTION"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1457,
+        "length": 4
+      },
+      "output": {
+        "offset": 1461,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "dcx-025-urgent",
+        "name": "Capacity Reservation Manager: DEGRADED -> CRITICAL -> URGENT_INTERVENTION",
+        "metadata": {
+          "description": "Escalates when availability and operational confidence collapse.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-025-degraded",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "nextVectorIds": [
+              "dcx-025-critical"
+            ]
+          },
+          {
+            "id": "dcx-025-critical",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "outputVectors": [
+              {
+                "id": "dcx-025-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch dc_compute_agent for immediate stabilization of capacity reservation manager."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-025-maintenance",
+        "name": "Capacity Reservation Manager: SERVICE_DUE -> SCHEDULE_MAINTENANCE",
+        "metadata": {
+          "description": "Schedules maintenance before service quality degrades.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-025-service-due",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "dcx-025-maintenance-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Schedule maintenance for capacity reservation manager with rollback and staffing checks."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-025-upgrade",
+        "name": "Capacity Reservation Manager: LIFECYCLE_PRESSURE -> PLAN_UPGRADE",
+        "metadata": {
+          "description": "Plans an upgrade, refresh, or lifecycle action under controlled change management.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-025-upgrade-needed",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "dcx-025-upgrade-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Plan upgrade or lifecycle change for capacity reservation manager using risk-gated rollout."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-025-nominal",
+        "name": "Capacity Reservation Manager: HEALTHY -> OPERATING_NOMINAL",
+        "metadata": {
+          "description": "Confirms stable 24/7 operational posture.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-025-healthy",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "dcx-025-nominal-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Keep 24/7 monitoring active for capacity reservation manager."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-025-24h-projection",
+        "name": "Capacity Reservation Manager: 0-6H -> 6-12H -> 12-18H -> 18-24H -> PRESCRIPTIVE_ACTION",
+        "metadata": {
+          "description": "Projects operational posture across a 24/7 horizon and prescribes work before the forecasted risk window opens.",
+          "projectionHorizon": "24h",
+          "projectionWindows": [
+            "0-6h",
+            "6-12h",
+            "12-18h",
+            "18-24h"
+          ],
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-025-projection-0-6h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "window": "0-6h",
+              "description": "Current posture is stable but lifecycle pressure is visible."
+            },
+            "nextVectorIds": [
+              "dcx-025-projection-6-12h"
+            ]
+          },
+          {
+            "id": "dcx-025-projection-6-12h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "window": "6-12h",
+              "description": "Operational confidence begins to degrade."
+            },
+            "nextVectorIds": [
+              "dcx-025-projection-12-18h"
+            ]
+          },
+          {
+            "id": "dcx-025-projection-12-18h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "window": "12-18h",
+              "description": "Maintenance readiness is no longer sufficient for the forecasted load."
+            },
+            "nextVectorIds": [
+              "dcx-025-projection-18-24h"
+            ]
+          },
+          {
+            "id": "dcx-025-projection-18-24h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "window": "18-24h",
+              "description": "Forecast crosses the prescriptive maintenance threshold."
+            },
+            "outputVectors": [
+              {
+                "id": "dcx-025-projection-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Project capacity reservation manager forward over the next 24 hours and prescribe maintenance or upgrade work before the risk window opens.",
+                  "projectionHorizon": "24h"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Urgent intervention",
+        "description": "Availability and confidence collapse after degraded operation.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-intervention"
+        }
+      },
+      {
+        "name": "Maintenance due",
+        "description": "Maintenance should be scheduled before degradation.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "schedule-maintenance"
+        }
+      },
+      {
+        "name": "Upgrade planning",
+        "description": "Lifecycle pressure requires upgrade planning.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "plan-upgrade"
+        }
+      },
+      {
+        "name": "Nominal operations",
+        "description": "The machine reports stable 24/7 operation.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "operating-nominal"
+        }
+      },
+      {
+        "name": "24-hour prescriptive projection",
+        "description": "Projects operations across four 6-hour windows and prescribes maintenance before the 24-hour risk window opens.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            1
+          ],
+          [
+            0,
+            1,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "24h-prescriptive-projection"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "A single degraded baseline arms the urgent path without firing.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

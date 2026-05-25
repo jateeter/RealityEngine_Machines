@@ -1,0 +1,428 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Benefits Eligibility Screener",
+    "description": "Monitors income threshold compliance, residency documentation status, categorical eligibility criteria, and application completeness for community benefits programs (SNAP, LIHEAP, housing assistance, childcare subsidies). Tracks the eligibility determination workflow from initial screening through confirmation, identifying documentation gaps and conditional holds before they stall service delivery. Output at [952:956] feeds the Enrollment Coordination Monitor.",
+    "metadata": {
+      "category": "community-services",
+      "domain": "Community Services — Benefits Eligibility / Qualification",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [952:956]: [1,0,0,0]=ELIGIBILITY_DENIED, [0,1,0,0]=ELIGIBILITY_CONDITIONAL, [0,0,1,0]=DOCUMENTATION_NEEDED, [0,0,0,1]=ELIGIBILITY_CONFIRMED",
+      "tags": [
+        "benefits-eligibility",
+        "benefits-eligibility-screener",
+        "ces-sequences",
+        "ces-sequences-3",
+        "community-services",
+        "community-services-benefits-eligibility-qualification",
+        "input-sequences",
+        "input-sequences-1",
+        "intake",
+        "kleene-plus",
+        "liheap",
+        "low-income",
+        "qualification",
+        "qualification-workflow",
+        "startup-loadable"
+      ],
+      "sequenceCount": 3,
+      "populationFocus": "Applicants for means-tested community benefits programs; newly unemployed; families with recent income changes; aging-out youth; immigrants with pending status",
+      "sensorNormalization": {
+        "income_threshold_norm": "0.0=income clearly above program threshold (ineligible), 0.5=income near threshold boundary (requires calculation), 1.0=income clearly within program limits",
+        "residency_documentation_norm": "0.0=no valid residency documentation (no ID, no address proof, no utility bill), 0.5=partial documentation (one of two required documents), 1.0=all residency documentation complete and valid",
+        "categorical_eligibility_norm": "0.0=no categorical qualifier met (not disabled, not elderly, no minor children, not pregnant), 0.5=one categorical qualifier pending verification, 1.0=categorical eligibility confirmed (SSI recipient, Medicaid enrolled, TANF active)",
+        "application_completeness_norm": "0.0=application not started or less than 50% complete, 0.5=application submitted but key fields missing, 1.0=application complete and all required fields populated"
+      },
+      "downstreamMachine": "EnrollmentCoordinationMonitor (reads [952:960])",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "benefits-eligibility",
+          "community-services",
+          "qualification"
+        ],
+        "family": "benefits-eligibility-screener",
+        "machineCode": "benefits-eligibility-screener",
+        "capabilityTags": [
+          "qualification-workflow"
+        ],
+        "workflowTags": [
+          "benefits-eligibility",
+          "community-services-benefits-eligibility-qualification",
+          "intake",
+          "kleene-plus",
+          "liheap",
+          "low-income"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "benefits-eligibility",
+          "benefits-eligibility-screener",
+          "ces-sequences",
+          "ces-sequences-3",
+          "community-services",
+          "community-services-benefits-eligibility-qualification",
+          "input-sequences",
+          "input-sequences-1",
+          "intake",
+          "kleene-plus",
+          "liheap",
+          "low-income",
+          "qualification",
+          "qualification-workflow",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/benefitseligibilityscreener",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning BenefitsEligibilityScreener matures."
+      },
+      "triggerConfig": {
+        "processId": "BENEFITSELIGIBILITYSCREENER",
+        "processName": "Benefits Eligibility Screener",
+        "rules": [
+          {
+            "sequenceId": "benefits-eligibility-denial",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "ELIGIBILITY_DENIED: applicant does not meet program criteria at [952:956]"
+          },
+          {
+            "sequenceId": "benefits-documentation-needed",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "DOCUMENTATION_NEEDED: applicant is income-eligible but missing required documentation at [952:956]"
+          },
+          {
+            "sequenceId": "benefits-confirmed",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "ELIGIBILITY_CONFIRMED: all criteria met; proceed to enrollment at [952:956]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 920,
+        "length": 4
+      },
+      "output": {
+        "offset": 952,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "benefits-eligibility-denial",
+        "name": "Eligibility Determination: ELIGIBLE+ → BORDERLINE → INELIGIBLE → ELIGIBILITY_DENIED",
+        "metadata": {
+          "description": "Tracks eligibility deterioration from a confirmed eligible baseline through income or documentation threshold crossings. In practice this sequence fires when a beneficiary's income changes (raise, new job, inheritance) or a categorical qualifier expires (child ages out, disability determination reversed). The ELIGIBLE+ baseline ensures at least one confirmed eligible period before denial can be signaled — preventing false negatives on initial applications.",
+          "path": "ELIGIBLE+ → BORDERLINE → INELIGIBLE → output[1,0,0,0]",
+          "output": "[1,0,0,0] (ELIGIBILITY_DENIED)"
+        },
+        "vectors": [
+          {
+            "id": "be-eligible",
+            "elements": [
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.68,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "ELIGIBLE",
+              "description": "ELIGIBLE+ — income within limits, residency documented, categorical qualifier confirmed, application complete. isInitial A*A = A+.",
+              "income_status": "0.60–0.78 (income 80–100% of program threshold)"
+            },
+            "nextVectorIds": [
+              "be-eligible",
+              "be-borderline"
+            ]
+          },
+          {
+            "id": "be-borderline",
+            "elements": [
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.45,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.42,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "BORDERLINE",
+              "description": "BORDERLINE — income approaching or slightly above threshold; documentation partially lapsing; categorical qualifier under review.",
+              "income_status": "0.30–0.48 (income 100–115% of threshold; marginal)"
+            },
+            "nextVectorIds": [
+              "be-ineligible"
+            ]
+          },
+          {
+            "id": "be-ineligible",
+            "elements": [
+              {
+                "value": 0.15,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.2,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.18,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.3,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "INELIGIBLE",
+              "description": "INELIGIBLE — income clearly over threshold OR categorical qualifier lost OR residency documentation expired. Fires ELIGIBILITY_DENIED.",
+              "income_status": "0.0–0.22 (income >130% of threshold; program ineligible)"
+            },
+            "outputVectors": [
+              {
+                "id": "be-denied-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "ELIGIBILITY_DENIED: applicant does not meet program criteria at [952:956]",
+                  "action": "Denial notice with appeal rights; alternative program screening; benefits navigator referral for near-miss cases"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "benefits-documentation-needed",
+        "name": "Documentation Gap: DOCS_PENDING+ → DOCUMENTATION_NEEDED signal",
+        "metadata": {
+          "description": "Fires DOCUMENTATION_NEEDED when income and categorical eligibility are met but application is stalled by missing documentation — the most common reason eligible households are not enrolled. Targets the gap between eligibility and enrollment.",
+          "pattern": "DOCS_PENDING+",
+          "output": "[0,0,1,0] (DOCUMENTATION_NEEDED)"
+        },
+        "vectors": [
+          {
+            "id": "be-docs-pending",
+            "elements": [
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.25,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.58,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "DOCS_PENDING",
+              "description": "DOCS_PENDING+ — income qualifies, categorical eligibility met, but residency documentation incomplete or application has missing fields. isInitial A*A = A+: fires DOCUMENTATION_NEEDED each cycle.",
+              "scenario": "Applicant has pay stubs and SSI letter but cannot produce current lease or utility bill after recent move"
+            },
+            "outputVectors": [
+              {
+                "id": "be-docs-needed-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "DOCUMENTATION_NEEDED: applicant is income-eligible but missing required documentation at [952:956]",
+                  "action": "Document checklist provision; benefits navigator document collection support; alternative documentation acceptance review; 30-day cure period activation"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "benefits-confirmed",
+        "name": "Eligibility Confirmed: CONFIRMED+ → ELIGIBILITY_CONFIRMED signal",
+        "metadata": {
+          "description": "Fires ELIGIBILITY_CONFIRMED when all four eligibility dimensions are above threshold — income qualifies, residency documented, categorical qualifier confirmed, and application complete. Downstream enrollment coordination monitor uses this signal to trigger active enrollment workflow.",
+          "pattern": "CONFIRMED+",
+          "output": "[0,0,0,1] (ELIGIBILITY_CONFIRMED)"
+        },
+        "vectors": [
+          {
+            "id": "be-confirmed",
+            "elements": [
+              {
+                "value": 0.68,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.72,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "CONFIRMED",
+              "description": "CONFIRMED+ — all eligibility criteria met; documentation complete; application verified and ready for enrollment. Fires ELIGIBILITY_CONFIRMED each cycle.",
+              "scenario": "SNAP applicant: income verified at 95% FPL, current lease provided, application complete — ready for 30-day determination"
+            },
+            "outputVectors": [
+              {
+                "id": "be-confirmed-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "ELIGIBILITY_CONFIRMED: all criteria met; proceed to enrollment at [952:956]",
+                  "action": "Enrollment coordination monitor receives ELIGIBILITY_CONFIRMED; benefit issuance workflow initiated"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Job Loss to SNAP Enrollment",
+        "pattern": "5-step: ELIGIBLE→ELIGIBLE→DOCS_PENDING (income verified but pay stub needed)→CONFIRMED→CONFIRMED",
+        "description": "Recently unemployed applicant; income clearly within limits after layoff; missing final pay stub initially; navigator assists with documentation; eligibility confirmed.",
+        "vectors": [
+          [
+            0.66,
+            0.63,
+            0.61,
+            0.69
+          ],
+          [
+            0.64,
+            0.61,
+            0.59,
+            0.67
+          ],
+          [
+            0.63,
+            0.24,
+            0.59,
+            0.34
+          ],
+          [
+            0.69,
+            0.66,
+            0.63,
+            0.73
+          ],
+          [
+            0.7,
+            0.67,
+            0.64,
+            0.74
+          ]
+        ],
+        "metadata": {
+          "scenario": "job-loss-snap-enrollment",
+          "expectedOutputs": {
+            "steps_1_2": "ELIGIBILITY_CONFIRMED fires [0,0,0,1]",
+            "step_3": "DOCUMENTATION_NEEDED fires [0,0,1,0]",
+            "steps_4_5": "ELIGIBILITY_CONFIRMED fires [0,0,0,1]"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

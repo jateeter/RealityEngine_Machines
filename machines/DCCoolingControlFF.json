@@ -1,0 +1,301 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "DC Cooling Control Flip-Flop",
+    "description": "RS flip-flop that latches the thermal alarm state. SET by DCThermalEscalation [1,0], RESET by safe-recovery signal [0,1].",
+    "metadata": {
+      "category": "data-center",
+      "domain": "Data Center — Thermal / Cooling Control",
+      "author": "Reality Engine",
+      "created": "2026-02-27T00:00:00Z",
+      "eventSpace": "2D binary control signal at [1375:1377]: [1,0]=ALARM, [0,1]=SAFE",
+      "outputSpace": "2D binary at [1371:1373]: [1,0]=COOLING_ACTIVE, [0,1]=COOLING_OFF",
+      "tags": [
+        "ces-sequences",
+        "ces-sequences-2",
+        "cooling-control",
+        "data-center",
+        "data-center-thermal-cooling-control",
+        "dc-cooling-control-flip-flop",
+        "dccooling-control-ff",
+        "digital-logic",
+        "flip-flop",
+        "input-sequences",
+        "input-sequences-3",
+        "machine-interconnect",
+        "startup-loadable",
+        "thermal",
+        "thermal-comfort"
+      ],
+      "sequenceCount": 2,
+      "role": "Latches thermal escalation alarm; downstream input to DCCriticalSynthesizer",
+      "upstreamMachine": "DCThermalEscalation (writes [1375:1377])",
+      "downstreamMachine": "DCCriticalSynthesizer (reads [1371:1373])",
+      "singleTransitionAssumption": {
+        "required": false,
+        "scope": "not applicable — all event vectors are isInitial (combinatorial)",
+        "compliant": true,
+        "notes": "Both SET and RESET events are isInitial. The FF responds combinatorially on every cycle. The 'state' persists through the perceptual space value retention: once SET writes [1,0] to [1371:1373], that value remains until RESET overwrites it with [0,1]. Multi-bit transitions between [1,0] and [0,1] (HD=2) work correctly since both events are always active."
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "data-center",
+        "domainTags": [
+          "cooling-control",
+          "data-center",
+          "thermal"
+        ],
+        "family": "dc-cooling-control-flip-flop",
+        "machineCode": "dccooling-control-ff",
+        "capabilityTags": [],
+        "workflowTags": [
+          "data-center",
+          "dc-cooling-control-flip-flop",
+          "dccooling-control-ff",
+          "flip-flop",
+          "thermal-comfort"
+        ],
+        "integrationTags": [
+          "digital-logic",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "input-sequences",
+          "input-sequences-3",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "cooling-control",
+          "data-center",
+          "data-center-thermal-cooling-control",
+          "dc-cooling-control-flip-flop",
+          "dccooling-control-ff",
+          "digital-logic",
+          "flip-flop",
+          "input-sequences",
+          "input-sequences-3",
+          "machine-interconnect",
+          "startup-loadable",
+          "thermal",
+          "thermal-comfort"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "datacenter-noc",
+        "runbook": "https://runbooks.example.org/data-center/dccoolingcontrolff",
+        "escalationPolicy": "pagerduty:datacenter-noc",
+        "contact": {
+          "primary": "datacenter-noc-primary@example.org",
+          "secondary": "datacenter-noc-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 300,
+          "error": 120
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"data-center\".  Review and tune the routing as the team owning DCCoolingControlFF matures."
+      },
+      "triggerConfig": {
+        "processId": "DCCOOLINGCONTROLFF",
+        "processName": "DC Cooling Control Flip-Flop",
+        "rules": [
+          {
+            "sequenceId": "dc-cooling-set-sequence",
+            "outputMatches": [
+              1,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "COOLING CONTROL ACTIVE: Emergency cooling engaged"
+          },
+          {
+            "sequenceId": "dc-cooling-reset-sequence",
+            "outputMatches": [
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "COOLING CONTROL INACTIVE: Normal cooling sufficient"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1375,
+        "length": 2
+      },
+      "output": {
+        "offset": 1371,
+        "length": 2
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "dc-cooling-set-sequence",
+        "name": "COOLING ALARM SET: [1,0] → [1,0]",
+        "metadata": {
+          "description": "Activates cooling alarm when thermal escalation fires [1,0] control signal",
+          "path": "[1,0] → [1,0]",
+          "output": "[1,0]",
+          "trigger": "DCThermalEscalation EMERGENCY state fires [1,0] to bytes [1375:1377]"
+        },
+        "vectors": [
+          {
+            "id": "dc-cooling-set-event",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "ALARM",
+              "description": "Control signal [1,0]: thermal alarm is active — activate cooling",
+              "state": "SET"
+            },
+            "outputVectors": [
+              {
+                "id": "dc-cooling-set-output",
+                "vector": [
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "COOLING CONTROL ACTIVE: Emergency cooling engaged",
+                  "state": "SET",
+                  "logicValue": "HIGH"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dc-cooling-reset-sequence",
+        "name": "COOLING ALARM RESET: [0,1] → [0,1]",
+        "metadata": {
+          "description": "Deactivates cooling alarm when safe-recovery signal [0,1] is received",
+          "path": "[0,1] → [0,1]",
+          "output": "[0,1]",
+          "trigger": "DCThermalEscalation SAFE state fires [0,1] to bytes [1375:1377]"
+        },
+        "vectors": [
+          {
+            "id": "dc-cooling-reset-event",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "SAFE",
+              "description": "Control signal [0,1]: thermal conditions safe — deactivate cooling alarm",
+              "state": "RESET"
+            },
+            "outputVectors": [
+              {
+                "id": "dc-cooling-reset-output",
+                "vector": [
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "COOLING CONTROL INACTIVE: Normal cooling sufficient",
+                  "state": "RESET",
+                  "logicValue": "LOW"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Thermal Alarm Activation",
+        "pattern": "[0,1] → [1,0]",
+        "description": "Simulate DCThermalEscalation firing: safe → alarm",
+        "vectors": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            0
+          ]
+        ]
+      },
+      {
+        "name": "Thermal Alarm Recovery",
+        "pattern": "[1,0] → [0,1]",
+        "description": "Simulate recovery: alarm → safe",
+        "vectors": [
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      },
+      {
+        "name": "Alarm Latch Cycle",
+        "pattern": "[0,1] → [1,0] → [1,0] → [1,0] → [0,1]",
+        "description": "Full cycle: safe baseline, alarm triggers, persists, clears on recovery",
+        "vectors": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputSequence": "[0,1], [1,0], [1,0], [1,0], [0,1]",
+          "note": "FF reflects control signal each cycle; state persists via perceptual space retention"
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

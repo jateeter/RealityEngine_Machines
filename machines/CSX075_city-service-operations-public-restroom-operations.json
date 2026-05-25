@@ -1,0 +1,515 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Community Services City Service Operations Public Restroom Operations",
+    "description": "Community-services machine for public restroom operations in the city service operations workstream. It monitors facility availability, cleaning state, supply status, and security concern and emits AI-triggered actions for health and human services, law enforcement/public safety coordination, homelessness response, and city operations.",
+    "metadata": {
+      "category": "community-services",
+      "domain": "Community Services - City Service Operations",
+      "author": "Reality Engine",
+      "workstream": "City Service Operations",
+      "operationalFocus": "Public Restroom Operations",
+      "focusDescription": "facility availability, cleaning state, supply status, and security concern",
+      "upstreamMachine": "health-services mapped output",
+      "upstreamDomain": "health-services",
+      "upstreamOutputRegion": "[3819:3823]",
+      "upstreamPurpose": "foundational public health signal",
+      "downstreamMachines": [
+        "Community Services City Service Operations Cooling Warming Center Activation"
+      ],
+      "crossDomainInterconnect": true,
+      "crossDomainOutputTarget": "transportation",
+      "crossDomainOutputPurpose": "center activation into fleet pullout readiness",
+      "dispatchableAgent": "behavioral_crisis_agent",
+      "aiTrigger": "community-services-city-service-operations-public-restroom-operations",
+      "predictiveFlowTrigger": "community-services-predictive-city-service-operations-public-restroom-operations",
+      "agentActions": [
+        "Dispatch behavioral_crisis_agent for urgent community-services intervention on public restroom operations.",
+        "Coordinate health, housing, public safety, transportation, or city service partners for public restroom operations.",
+        "Create field work order or mobile team task for public restroom operations.",
+        "Maintain monitored service path for public restroom operations."
+      ],
+      "inputSpace": "4D binary at [3819:3823]",
+      "outputSpace": "4D binary at [3859:3863]: [1,0,0,0]=URGENT_RESPONSE, [0,1,0,0]=COORDINATE_SERVICES, [0,0,1,0]=FIELD_WORK_ORDER, [0,0,0,1]=STABLE_SERVICE_PATH",
+      "inputSemantics": [
+        "resident need severity",
+        "eligibility and documentation readiness",
+        "field capacity or operational readiness",
+        "safety, mobility, and health risk"
+      ],
+      "tags": [
+        "ai-trigger",
+        "behavioral-crisis-agent",
+        "ces-sequences",
+        "ces-sequences-4",
+        "city-service-operations",
+        "city-services",
+        "community-services",
+        "community-services-city-service-operations",
+        "community-services-city-service-operations-public-restroom-operations",
+        "community-services-generated",
+        "community-services-predictive-city-service-operations-public-restroom-operations",
+        "cross-domain",
+        "cross-domain-interconnect",
+        "csx075",
+        "dispatchable-agent",
+        "health-and-human-services",
+        "health-services",
+        "homelessness",
+        "input-sequences",
+        "input-sequences-5",
+        "law-enforcement",
+        "machine-interconnect",
+        "public-restroom-operations",
+        "public-safety",
+        "startup-loadable",
+        "transportation"
+      ],
+      "sequenceCount": 5,
+      "reuseGuideline": "Map 311, case-management, CAD/RMS, shelter HMIS, benefit enrollment, outreach, public health, and transit-access signals into the 4D input lane. Route outputs to case workers, mobile crisis, public safety, housing navigators, field crews, transportation dispatch, or health-service agents.",
+      "downstreamPattern": "Output region [3859:3863] feeds Community Services City Service Operations Cooling Warming Center Activation.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "city-service-operations",
+          "community-services"
+        ],
+        "family": "community-services-generated",
+        "machineCode": "csx075",
+        "capabilityTags": [
+          "ai-triggers",
+          "community-services-predictive-city-service-operations-public-restroom-operations",
+          "dispatchable-agents"
+        ],
+        "workflowTags": [
+          "ai-trigger",
+          "behavioral-crisis-agent",
+          "city-services",
+          "community-services-city-service-operations",
+          "community-services-generated",
+          "cross-domain",
+          "dispatchable-agent",
+          "health-and-human-services",
+          "homelessness",
+          "law-enforcement",
+          "public-restroom-operations",
+          "public-safety",
+          "transportation"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "cross-domain-interconnect",
+          "dispatchable-agent",
+          "health-services",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ai-trigger",
+          "ai-triggers",
+          "behavioral-crisis-agent",
+          "ces-sequences",
+          "ces-sequences-4",
+          "city-service-operations",
+          "city-services",
+          "community-services",
+          "community-services-city-service-operations",
+          "community-services-city-service-operations-public-restroom-operations",
+          "community-services-generated",
+          "community-services-predictive-city-service-operations-public-restroom-operations",
+          "cross-domain",
+          "cross-domain-interconnect",
+          "csx075",
+          "dispatchable-agent",
+          "dispatchable-agents",
+          "health-and-human-services",
+          "health-services",
+          "homelessness",
+          "input-sequences",
+          "input-sequences-5",
+          "law-enforcement",
+          "machine-interconnect",
+          "public-restroom-operations",
+          "public-safety",
+          "startup-loadable",
+          "transportation"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/csx075_city-service-operations-public-restroom-operations",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning CSX075_city-service-operations-public-restroom-operations matures."
+      },
+      "triggerConfig": {
+        "processId": "CSX075_CITY_SERVICE_OPERATIONS_PUBLIC_RESTROOM_OPERATIONS",
+        "processName": "Community Services City Service Operations Public Restroom Operations",
+        "rules": [
+          {
+            "sequenceId": "csx-075-urgent-response",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Public Restroom Operations: WATCH -> URGENT_RESPONSE"
+          },
+          {
+            "sequenceId": "csx-075-coordinate-services",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Public Restroom Operations: COORDINATION_NEEDED -> COORDINATE_SERVICES"
+          },
+          {
+            "sequenceId": "csx-075-field-work-order",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Public Restroom Operations: FIELD_TASK_NEEDED -> FIELD_WORK_ORDER"
+          },
+          {
+            "sequenceId": "csx-075-stable-service-path",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Public Restroom Operations: STABLE_PATH -> STABLE_SERVICE_PATH"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 3819,
+        "length": 4
+      },
+      "output": {
+        "offset": 3859,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "csx-075-urgent-response",
+        "name": "Public Restroom Operations: WATCH -> URGENT_RESPONSE",
+        "metadata": {
+          "description": "Escalates resident or field risk into urgent response.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-075-watch",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "nextVectorIds": [
+              "csx-075-urgent"
+            ]
+          },
+          {
+            "id": "csx-075-urgent",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": false,
+            "outputVectors": [
+              {
+                "id": "csx-075-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch behavioral_crisis_agent for urgent community-services intervention on public restroom operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-075-coordinate-services",
+        "name": "Public Restroom Operations: COORDINATION_NEEDED -> COORDINATE_SERVICES",
+        "metadata": {
+          "description": "Triggers cross-agency coordination.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-075-coordinate",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-075-coordinate-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Coordinate health, housing, public safety, transportation, or city service partners for public restroom operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-075-field-work-order",
+        "name": "Public Restroom Operations: FIELD_TASK_NEEDED -> FIELD_WORK_ORDER",
+        "metadata": {
+          "description": "Creates a field crew, outreach, or mobile response task.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-075-field-task",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-075-field-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Create field work order or mobile team task for public restroom operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-075-stable-service-path",
+        "name": "Public Restroom Operations: STABLE_PATH -> STABLE_SERVICE_PATH",
+        "metadata": {
+          "description": "Confirms resident service path is stable and monitored.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "csx-075-stable",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-075-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Maintain monitored service path for public restroom operations."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Urgent response sequence",
+        "description": "Two-step community risk escalation ending in urgent response.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-response",
+          "sequenceLength": 2
+        }
+      },
+      {
+        "name": "Coordinate services",
+        "description": "Coordinates health, public safety, housing, transit, or city service partners.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "coordinate-services"
+        }
+      },
+      {
+        "name": "Field work order",
+        "description": "Creates a field response or outreach task.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "field-work-order"
+        }
+      },
+      {
+        "name": "Stable service path",
+        "description": "Confirms the resident or city service path is stable.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "stable-service-path"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Initial observation arms the urgent path without firing.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

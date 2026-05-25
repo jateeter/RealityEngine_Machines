@@ -1,0 +1,506 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Community Services Benefits And Eligibility SNAP Eligibility Monitor",
+    "description": "Community-services machine for snap eligibility monitor in the benefits and eligibility workstream. It monitors household income, food insecurity, documents, and recertification risk and emits AI-triggered actions for health and human services, law enforcement/public safety coordination, homelessness response, and city operations.",
+    "metadata": {
+      "category": "community-services",
+      "domain": "Community Services - Benefits And Eligibility",
+      "author": "Reality Engine",
+      "workstream": "Benefits And Eligibility",
+      "operationalFocus": "SNAP Eligibility Monitor",
+      "focusDescription": "household income, food insecurity, documents, and recertification risk",
+      "upstreamMachine": "Community Services Benefits And Eligibility Medicaid Renewal Watch",
+      "upstreamDomain": "community-services",
+      "upstreamOutputRegion": "[1044:1048]",
+      "upstreamPurpose": null,
+      "downstreamMachines": [
+        "Community Services Benefits And Eligibility TANF Case Pathway"
+      ],
+      "crossDomainInterconnect": false,
+      "crossDomainOutputTarget": null,
+      "crossDomainOutputPurpose": null,
+      "dispatchableAgent": "behavioral_crisis_agent",
+      "aiTrigger": "community-services-benefits-and-eligibility-snap-eligibility-monitor",
+      "predictiveFlowTrigger": "community-services-predictive-benefits-and-eligibility-snap-eligibility-monitor",
+      "agentActions": [
+        "Dispatch behavioral_crisis_agent for urgent community-services intervention on snap eligibility monitor.",
+        "Coordinate health, housing, public safety, transportation, or city service partners for snap eligibility monitor.",
+        "Create field work order or mobile team task for snap eligibility monitor.",
+        "Maintain monitored service path for snap eligibility monitor."
+      ],
+      "inputSpace": "4D binary at [1044:1048]",
+      "outputSpace": "4D binary at [1048:1052]: [1,0,0,0]=URGENT_RESPONSE, [0,1,0,0]=COORDINATE_SERVICES, [0,0,1,0]=FIELD_WORK_ORDER, [0,0,0,1]=STABLE_SERVICE_PATH",
+      "inputSemantics": [
+        "resident need severity",
+        "eligibility and documentation readiness",
+        "field capacity or operational readiness",
+        "safety, mobility, and health risk"
+      ],
+      "tags": [
+        "ai-trigger",
+        "behavioral-crisis-agent",
+        "benefits-and-eligibility",
+        "ces-sequences",
+        "ces-sequences-4",
+        "city-services",
+        "community-services",
+        "community-services-benefits-and-eligibility",
+        "community-services-benefits-and-eligibility-snap-eligibility-monitor",
+        "community-services-generated",
+        "community-services-predictive-benefits-and-eligibility-snap-eligibility-monitor",
+        "cross-domain",
+        "csx012",
+        "dispatchable-agent",
+        "health-and-human-services",
+        "homelessness",
+        "input-sequences",
+        "input-sequences-5",
+        "law-enforcement",
+        "machine-interconnect",
+        "public-safety",
+        "snap-eligibility-monitor",
+        "startup-loadable"
+      ],
+      "sequenceCount": 5,
+      "reuseGuideline": "Map 311, case-management, CAD/RMS, shelter HMIS, benefit enrollment, outreach, public health, and transit-access signals into the 4D input lane. Route outputs to case workers, mobile crisis, public safety, housing navigators, field crews, transportation dispatch, or health-service agents.",
+      "downstreamPattern": "Output region [1048:1052] feeds Community Services Benefits And Eligibility TANF Case Pathway.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "benefits-and-eligibility",
+          "community-services"
+        ],
+        "family": "community-services-generated",
+        "machineCode": "csx012",
+        "capabilityTags": [
+          "ai-triggers",
+          "community-services-predictive-benefits-and-eligibility-snap-eligibility-monitor",
+          "dispatchable-agents"
+        ],
+        "workflowTags": [
+          "ai-trigger",
+          "behavioral-crisis-agent",
+          "city-services",
+          "community-services-benefits-and-eligibility",
+          "community-services-generated",
+          "cross-domain",
+          "dispatchable-agent",
+          "health-and-human-services",
+          "homelessness",
+          "law-enforcement",
+          "public-safety",
+          "snap-eligibility-monitor"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ai-trigger",
+          "ai-triggers",
+          "behavioral-crisis-agent",
+          "benefits-and-eligibility",
+          "ces-sequences",
+          "ces-sequences-4",
+          "city-services",
+          "community-services",
+          "community-services-benefits-and-eligibility",
+          "community-services-benefits-and-eligibility-snap-eligibility-monitor",
+          "community-services-generated",
+          "community-services-predictive-benefits-and-eligibility-snap-eligibility-monitor",
+          "cross-domain",
+          "csx012",
+          "dispatchable-agent",
+          "dispatchable-agents",
+          "health-and-human-services",
+          "homelessness",
+          "input-sequences",
+          "input-sequences-5",
+          "law-enforcement",
+          "machine-interconnect",
+          "public-safety",
+          "snap-eligibility-monitor",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/csx012_benefits-and-eligibility-snap-eligibility-monitor",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning CSX012_benefits-and-eligibility-snap-eligibility-monitor matures."
+      },
+      "triggerConfig": {
+        "processId": "CSX012_BENEFITS_AND_ELIGIBILITY_SNAP_ELIGIBILITY_MONITOR",
+        "processName": "Community Services Benefits And Eligibility SNAP Eligibility Monitor",
+        "rules": [
+          {
+            "sequenceId": "csx-012-urgent-response",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "SNAP Eligibility Monitor: WATCH -> URGENT_RESPONSE"
+          },
+          {
+            "sequenceId": "csx-012-coordinate-services",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "SNAP Eligibility Monitor: COORDINATION_NEEDED -> COORDINATE_SERVICES"
+          },
+          {
+            "sequenceId": "csx-012-field-work-order",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "SNAP Eligibility Monitor: FIELD_TASK_NEEDED -> FIELD_WORK_ORDER"
+          },
+          {
+            "sequenceId": "csx-012-stable-service-path",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "SNAP Eligibility Monitor: STABLE_PATH -> STABLE_SERVICE_PATH"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1044,
+        "length": 4
+      },
+      "output": {
+        "offset": 1048,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "csx-012-urgent-response",
+        "name": "SNAP Eligibility Monitor: WATCH -> URGENT_RESPONSE",
+        "metadata": {
+          "description": "Escalates resident or field risk into urgent response.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-012-watch",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "nextVectorIds": [
+              "csx-012-urgent"
+            ]
+          },
+          {
+            "id": "csx-012-urgent",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": false,
+            "outputVectors": [
+              {
+                "id": "csx-012-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch behavioral_crisis_agent for urgent community-services intervention on snap eligibility monitor."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-012-coordinate-services",
+        "name": "SNAP Eligibility Monitor: COORDINATION_NEEDED -> COORDINATE_SERVICES",
+        "metadata": {
+          "description": "Triggers cross-agency coordination.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-012-coordinate",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-012-coordinate-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Coordinate health, housing, public safety, transportation, or city service partners for snap eligibility monitor."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-012-field-work-order",
+        "name": "SNAP Eligibility Monitor: FIELD_TASK_NEEDED -> FIELD_WORK_ORDER",
+        "metadata": {
+          "description": "Creates a field crew, outreach, or mobile response task.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "csx-012-field-task",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-012-field-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Create field work order or mobile team task for snap eligibility monitor."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "csx-012-stable-service-path",
+        "name": "SNAP Eligibility Monitor: STABLE_PATH -> STABLE_SERVICE_PATH",
+        "metadata": {
+          "description": "Confirms resident service path is stable and monitored.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "csx-012-stable",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csx-012-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Maintain monitored service path for snap eligibility monitor."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Urgent response sequence",
+        "description": "Two-step community risk escalation ending in urgent response.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-response",
+          "sequenceLength": 2
+        }
+      },
+      {
+        "name": "Coordinate services",
+        "description": "Coordinates health, public safety, housing, transit, or city service partners.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "coordinate-services"
+        }
+      },
+      {
+        "name": "Field work order",
+        "description": "Creates a field response or outreach task.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "field-work-order"
+        }
+      },
+      {
+        "name": "Stable service path",
+        "description": "Confirms the resident or city service path is stable.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "stable-service-path"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Initial observation arms the urgent path without firing.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

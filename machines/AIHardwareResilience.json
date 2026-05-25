@@ -1,0 +1,693 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "ai-hardware-resilience",
+    "name": "AI Hardware Resilience Monitor",
+    "description": "Monitors AI infrastructure hardware health — detects disk SMART failures, GPU/CPU memory ECC errors, network packet loss, and hardware fault accumulation to trigger proactive workload evacuation before catastrophic failure.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "gte",
+    "perceptualMapping": {
+      "input": {
+        "offset": 276,
+        "length": 4
+      },
+      "output": {
+        "offset": 3923,
+        "length": 6
+      },
+      "bitsPerElement": 8
+    },
+    "metadata": {
+      "category": "ai-services",
+      "domain": "AI Infrastructure — Hardware Health / Resilience",
+      "tags": [
+        "ai-hardware-resilience-monitor",
+        "ai-infrastructure",
+        "ai-infrastructure-hardware-health-resilience",
+        "ai-services",
+        "ai-workload",
+        "aihardware-resilience",
+        "ces-sequences",
+        "ces-sequences-2",
+        "data-center",
+        "ecc",
+        "hardware",
+        "hardware-health",
+        "input-sequences",
+        "input-sequences-3",
+        "logical-infrastructure",
+        "resilience",
+        "smart",
+        "startup-loadable"
+      ],
+      "rationale": "Disk SMART, ECC errors, and network fabric health are physical data-center hardware concerns.",
+      "eventSpace": "4D continuous fault severity vector at [276:280]: [disk_fault_score, memory_error_rate, network_packet_loss, hw_fault_accumulation]",
+      "outputSpace": "6D status/action at [3923:3929]: [STATUS_HEALTHY, STATUS_WARNING, STATUS_DEGRADED, STATUS_CRITICAL, ACT_EVACUATE_WORKLOADS, ACT_SCHEDULE_MAINTENANCE]",
+      "inputDimensions": [
+        {
+          "index": 0,
+          "name": "disk_fault_score",
+          "description": "0=all disks healthy (good SMART), 1=critical SMART failures (imminent disk death)"
+        },
+        {
+          "index": 1,
+          "name": "memory_error_rate",
+          "description": "0=no ECC errors, 1=uncorrectable error storm (DRAM/HBM failing)"
+        },
+        {
+          "index": 2,
+          "name": "network_packet_loss",
+          "description": "0=no packet loss, 1=severe packet loss (NIC/switch failure)"
+        },
+        {
+          "index": 3,
+          "name": "hw_fault_accumulation",
+          "description": "0=no hardware faults, 1=fault storm (multiple component failures)"
+        }
+      ],
+      "outputDimensions": [
+        {
+          "index": 0,
+          "name": "STATUS_HEALTHY"
+        },
+        {
+          "index": 1,
+          "name": "STATUS_WARNING"
+        },
+        {
+          "index": 2,
+          "name": "STATUS_DEGRADED"
+        },
+        {
+          "index": 3,
+          "name": "STATUS_CRITICAL"
+        },
+        {
+          "index": 4,
+          "name": "ACT_EVACUATE_WORKLOADS"
+        },
+        {
+          "index": 5,
+          "name": "ACT_SCHEDULE_MAINTENANCE"
+        }
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "ai-services",
+        "domainTags": [
+          "ai-infrastructure",
+          "ai-services",
+          "hardware-health",
+          "resilience"
+        ],
+        "family": "ai-hardware-resilience-monitor",
+        "machineCode": "aihardware-resilience",
+        "capabilityTags": [],
+        "workflowTags": [
+          "ai-hardware-resilience-monitor",
+          "ai-infrastructure-hardware-health-resilience",
+          "ai-workload",
+          "aihardware-resilience",
+          "data-center",
+          "ecc",
+          "hardware",
+          "logical-infrastructure",
+          "smart"
+        ],
+        "integrationTags": [
+          "ai-services"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "input-sequences",
+          "input-sequences-3",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ai-hardware-resilience-monitor",
+          "ai-infrastructure",
+          "ai-infrastructure-hardware-health-resilience",
+          "ai-services",
+          "ai-workload",
+          "aihardware-resilience",
+          "ces-sequences",
+          "ces-sequences-2",
+          "data-center",
+          "ecc",
+          "hardware",
+          "hardware-health",
+          "input-sequences",
+          "input-sequences-3",
+          "logical-infrastructure",
+          "resilience",
+          "smart",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "ml-platform-on-call",
+        "runbook": "https://runbooks.example.org/ai-services/aihardwareresilience",
+        "escalationPolicy": "pagerduty:ml-platform",
+        "contact": {
+          "primary": "ml-platform-on-call-primary@example.org",
+          "secondary": "ml-platform-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 300
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"ai-services\".  Review and tune the routing as the team owning AIHardwareResilience matures."
+      },
+      "triggerConfig": {
+        "processId": "AIHARDWARERESILIENCE",
+        "processName": "AI Hardware Resilience Monitor",
+        "rules": [
+          {
+            "sequenceId": "aihr-hw-degradation",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Hardware HEALTHY — all SMART indicators nominal, no ECC errors, network clean"
+          },
+          {
+            "sequenceId": "aihr-hw-degradation",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Hardware WARNING — early SMART deterioration and elevated ECC error rate"
+          },
+          {
+            "sequenceId": "aihr-hw-degradation",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Hardware DEGRADED — multiple components showing failure indicators, reliability compromised"
+          },
+          {
+            "sequenceId": "aihr-hw-degradation",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Action: Schedule immediate maintenance window for affected hardware replacement"
+          },
+          {
+            "sequenceId": "aihr-hw-degradation",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Hardware CRITICAL — imminent hardware failure, data loss and downtime risk"
+          },
+          {
+            "sequenceId": "aihr-hw-degradation",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Action: Immediately evacuate all workloads from affected nodes to healthy hardware"
+          },
+          {
+            "sequenceId": "aihr-hw-degradation",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Action: Emergency hardware replacement — pull from production immediately"
+          },
+          {
+            "sequenceId": "aihr-sudden-network-failure",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Network fabric FAULT — sudden packet loss spike, likely NIC or switch failure"
+          },
+          {
+            "sequenceId": "aihr-sudden-network-failure",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Action: Reroute traffic away from affected network segment, migrate dependent workloads"
+          }
+        ]
+      }
+    },
+    "sequences": [
+      {
+        "id": "aihr-hw-degradation",
+        "name": "Hardware Degradation Escalation",
+        "description": "4-step escalation: HEALTHY → WARNING → DEGRADED → CRITICAL as hardware fault indicators accumulate across disk, memory, network, and fault counters",
+        "vectors": [
+          {
+            "id": "aihr-healthy",
+            "isInitial": true,
+            "nextVectorIds": [
+              "aihr-warning"
+            ],
+            "elements": [
+              {
+                "value": 0.05,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.08,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.04,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.06,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aihr-out-healthy",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Hardware HEALTHY — all SMART indicators nominal, no ECC errors, network clean",
+                  "severity": "INFO"
+                }
+              }
+            ]
+          },
+          {
+            "id": "aihr-warning",
+            "isInitial": false,
+            "nextVectorIds": [
+              "aihr-degraded"
+            ],
+            "elements": [
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.52,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.58,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aihr-out-warning",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Hardware WARNING — early SMART deterioration and elevated ECC error rate",
+                  "severity": "WARNING"
+                }
+              }
+            ]
+          },
+          {
+            "id": "aihr-degraded",
+            "isInitial": false,
+            "nextVectorIds": [
+              "aihr-critical"
+            ],
+            "elements": [
+              {
+                "value": 0.78,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.75,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.72,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.8,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aihr-out-degraded",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Hardware DEGRADED — multiple components showing failure indicators, reliability compromised",
+                  "severity": "CRITICAL"
+                }
+              },
+              {
+                "id": "aihr-act-maintenance",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "Action: Schedule immediate maintenance window for affected hardware replacement",
+                  "severity": "ACTION"
+                }
+              }
+            ]
+          },
+          {
+            "id": "aihr-critical",
+            "isInitial": false,
+            "nextVectorIds": [],
+            "elements": [
+              {
+                "value": 0.92,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.88,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.94,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aihr-out-critical",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Hardware CRITICAL — imminent hardware failure, data loss and downtime risk",
+                  "severity": "EMERGENCY"
+                }
+              },
+              {
+                "id": "aihr-act-evacuate",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Action: Immediately evacuate all workloads from affected nodes to healthy hardware",
+                  "severity": "ACTION"
+                }
+              },
+              {
+                "id": "aihr-act-maintenance-crit",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "Action: Emergency hardware replacement — pull from production immediately",
+                  "severity": "ACTION"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "aihr-sudden-network-failure",
+        "name": "Sudden Network Fabric Failure",
+        "description": "2-step detection: NETWORK_NOMINAL → NETWORK_FAULT — fires when packet loss spikes HIGH while disk and memory health remain LOW (isolated network component failure)",
+        "vectors": [
+          {
+            "id": "aihr-net-nominal",
+            "isInitial": true,
+            "nextVectorIds": [
+              "aihr-net-fault"
+            ],
+            "elements": [
+              {
+                "value": 0.08,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.06,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.12,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": []
+          },
+          {
+            "id": "aihr-net-fault",
+            "isInitial": false,
+            "nextVectorIds": [],
+            "elements": [
+              {
+                "value": 0.08,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.85,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.12,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "aihr-out-net-warn",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Network fabric FAULT — sudden packet loss spike, likely NIC or switch failure",
+                  "severity": "WARNING"
+                }
+              },
+              {
+                "id": "aihr-act-evacuate-net",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Action: Reroute traffic away from affected network segment, migrate dependent workloads",
+                  "severity": "ACTION"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "id": "aihr-seq-1",
+        "name": "Healthy Hardware Baseline",
+        "description": "All hardware health metrics well within nominal ranges — no faults detected",
+        "vectors": [
+          [
+            0.04,
+            0.06,
+            0.03,
+            0.05
+          ],
+          [
+            0.05,
+            0.08,
+            0.04,
+            0.06
+          ],
+          [
+            0.06,
+            0.07,
+            0.05,
+            0.07
+          ]
+        ]
+      },
+      {
+        "id": "aihr-seq-2",
+        "name": "Hardware Degradation to Critical",
+        "description": "Progressive hardware failure escalation from healthy baseline through warning and degraded to critical failure state",
+        "metadata": {
+          "expectedOutputs": 4,
+          "scenario": "NVMe drive predictive failure cascade in AI training storage cluster"
+        },
+        "vectors": [
+          [
+            0.05,
+            0.08,
+            0.04,
+            0.06
+          ],
+          [
+            0.6,
+            0.55,
+            0.52,
+            0.58
+          ],
+          [
+            0.78,
+            0.75,
+            0.72,
+            0.8
+          ],
+          [
+            0.92,
+            0.9,
+            0.88,
+            0.94
+          ]
+        ]
+      },
+      {
+        "id": "aihr-seq-3",
+        "name": "Sudden Network Fault",
+        "description": "Sudden isolated network packet loss spike with disk and memory health remaining nominal",
+        "metadata": {
+          "expectedOutputs": 1,
+          "scenario": "Top-of-rack switch ASIC failure causing packet loss for GPU training cluster"
+        },
+        "vectors": [
+          [
+            0.06,
+            0.08,
+            0.05,
+            0.1
+          ],
+          [
+            0.08,
+            0.1,
+            0.87,
+            0.12
+          ]
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,507 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Kleene Star Operator",
+    "description": "Demonstrates Kleene star (*) operator in critical event sequences - zero or more repetitions with alternation. Note: initial (isInitial) trigger vectors implement A*A = A+ semantics — at least one match of the trigger is required before successors are armed.",
+    "metadata": {
+      "category": "digital-logic",
+      "author": "Reality Engine",
+      "created": "2026-02-02T00:00:00Z",
+      "eventSpace": "3D binary vectors: 000-111",
+      "outputSpace": "2D binary vectors: {01, 10}",
+      "tags": [
+        "ces-sequences",
+        "ces-sequences-2",
+        "digital-logic",
+        "input-sequences",
+        "input-sequences-4",
+        "kleene-star",
+        "kleene-star-operator",
+        "pattern-matching",
+        "repetition",
+        "self-loop",
+        "startup-loadable"
+      ],
+      "sequenceCount": 2,
+      "operator": "Kleene star (*) on loop body; Kleene plus (+) on isInitial trigger (A*A = A+)",
+      "description": "Two sequences demonstrating repetition patterns. Sequence notation uses standard regex: (+) = one-or-more, (*) = zero-or-more, (|) = alternation, adjacency = concatenation.",
+      "singleTransitionAssumption": {
+        "required": false,
+        "scope": "not applicable — pattern recognition, not state traversal",
+        "compliant": false,
+        "notes": "STA does NOT apply and is intentionally violated in the 'Zero Repetitions' input sequence. After the initial vector [0,0,1] fires (A*A: at least one match required), it activates both the loop body (kleene-seq1-000) and the terminal (kleene-seq1-010) simultaneously as successors. The 'Zero Repetitions' case demonstrates that [0,1,0] can arrive immediately after [0,0,1] — a HD=2 transition — and the terminal correctly matches. This is the canonical definition of 'zero or more' for the loop body: (000)* may be skipped entirely because the trigger (001)+ directly arms the terminal. Enforcing STA (requiring a [0,0,0] intermediate) would make zero-repetition semantics impossible to demonstrate. KleeneStar operates on pattern identity, not on transition topology. Important: the trigger (001) is (001)+ not (001) — the isInitial property means the trigger can re-arm successors on every match, not just once.",
+        "maxHammingDistanceInDefinedSequences": 2,
+        "violations": [
+          {
+            "sequence": "Sequence 1: Zero Repetitions",
+            "transition": "[0,0,1] → [0,1,0]",
+            "hammingDistance": 2,
+            "intent": "Zero loop iterations: directly from trigger (001)+ to terminal (010), bypassing the (000)* loop body.",
+            "behavior": "Correct — kleene-seq1-010 was activated by the initial vector and matches [0,1,0] immediately"
+          }
+        ]
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "digital-logic",
+        "domainTags": [
+          "digital-logic"
+        ],
+        "family": "kleene-star-operator",
+        "machineCode": "kleene-star",
+        "capabilityTags": [],
+        "workflowTags": [
+          "kleene-star",
+          "kleene-star-operator",
+          "pattern-matching",
+          "repetition",
+          "self-loop"
+        ],
+        "integrationTags": [
+          "digital-logic"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "input-sequences",
+          "input-sequences-4",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "digital-logic",
+          "input-sequences",
+          "input-sequences-4",
+          "kleene-star",
+          "kleene-star-operator",
+          "pattern-matching",
+          "repetition",
+          "self-loop",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "reliability-engineering",
+        "runbook": "https://runbooks.example.org/digital-logic/kleenestar",
+        "escalationPolicy": "slack:#reliability-test",
+        "contact": {
+          "primary": "reliability-engineering-primary@example.org",
+          "secondary": "reliability-engineering-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"digital-logic\".  Review and tune the routing as the team owning KleeneStar matures."
+      },
+      "triggerConfig": {
+        "processId": "KLEENESTAR",
+        "processName": "Kleene Star Operator",
+        "rules": [
+          {
+            "sequenceId": "kleene-seq1",
+            "outputMatches": [
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Sequence 1 complete: (001)+(000)*(010) matched"
+          },
+          {
+            "sequenceId": "kleene-seq2",
+            "outputMatches": [
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Sequence 2 complete: (010)+(000|001)*(001) matched"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 3913,
+        "length": 3
+      },
+      "output": {
+        "offset": 3917,
+        "length": 2
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "kleene-seq1",
+        "name": "Sequence 1: (001)+(000)*(010)→[01]",
+        "metadata": {
+          "description": "One or more 001 (isInitial, A*A = A+), then zero or more 000 (Kleene star loop body), then one 010 (terminal). The (001)+ is not a Kleene-star — at least one 001 match is required to arm both the 000 loop and the 010 terminal.",
+          "pattern": "(001)+(000)*(010)",
+          "output": "[0,1]",
+          "notationKey": "(X)+ = one-or-more X; (X)* = zero-or-more X; adjacency = concatenation",
+          "examples": [
+            "001, 010 → [0,1] (zero occurrences of 000 — 001 arms 010 directly)",
+            "001, 000, 010 → [0,1] (one occurrence of 000)",
+            "001, 000, 000, 010 → [0,1] (two occurrences of 000)"
+          ]
+        },
+        "vectors": [
+          {
+            "id": "kleene-seq1-001",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "001",
+              "description": "Trigger state (A*A = A+): isInitial, at least one 001 match required to arm the (000)* loop body and the (010) terminal. The isInitial self-loop re-arms successors on every subsequent 001 match.",
+              "role": "kleene-plus-initial"
+            },
+            "nextVectorIds": [
+              "kleene-seq1-000",
+              "kleene-seq1-010"
+            ]
+          },
+          {
+            "id": "kleene-seq1-000",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "000",
+              "description": "Kleene star loop: can repeat 0 or more times",
+              "role": "kleene-loop"
+            },
+            "nextVectorIds": [
+              "kleene-seq1-000",
+              "kleene-seq1-010"
+            ]
+          },
+          {
+            "id": "kleene-seq1-010",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "010",
+              "description": "Terminal state: pattern complete",
+              "role": "terminal"
+            },
+            "outputVectors": [
+              {
+                "id": "kleene-seq1-output",
+                "vector": [
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "Sequence 1 complete: (001)+(000)*(010) matched",
+                  "pattern": "(001)+(000)*(010)",
+                  "operator": "kleene-star"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "kleene-seq2",
+        "name": "Sequence 2: (010)+(000|001)*(001)→[10]",
+        "metadata": {
+          "description": "One or more 010 (isInitial, A*A = A+), then zero or more (000 or 001) (Kleene star with alternation), then one 001 (terminal). The (010)+ trigger arms both the loop body and the terminal; the loop body can be skipped (zero occurrences).",
+          "pattern": "(010)+(000|001)*(001)",
+          "output": "[1,0]",
+          "notationKey": "(X)+ = one-or-more X; (X)* = zero-or-more X; (A|B) = A or B alternation; adjacency = concatenation",
+          "examples": [
+            "010, 001 → [1,0] (zero loop iterations — 010 arms 001-final directly)",
+            "010, 000, 001 → [1,0] (one 000)",
+            "010, 001, 001 → [1,0] (one 001 in loop body, then terminal 001)",
+            "010, 000, 001, 000, 001 → [1,0] (mixed loop alternation)"
+          ]
+        },
+        "vectors": [
+          {
+            "id": "kleene-seq2-010",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "010",
+              "description": "Trigger state (A*A = A+): isInitial, at least one 010 match required to arm the (000|001)* loop body and the (001) terminal. The isInitial self-loop re-arms successors on every subsequent 010 match.",
+              "role": "kleene-plus-initial"
+            },
+            "nextVectorIds": [
+              "kleene-seq2-000",
+              "kleene-seq2-001-loop",
+              "kleene-seq2-001-final"
+            ]
+          },
+          {
+            "id": "kleene-seq2-000",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "000",
+              "description": "Kleene star loop alternative A",
+              "role": "kleene-loop-a"
+            },
+            "nextVectorIds": [
+              "kleene-seq2-000",
+              "kleene-seq2-001-loop",
+              "kleene-seq2-001-final"
+            ]
+          },
+          {
+            "id": "kleene-seq2-001-loop",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "001-loop",
+              "description": "Kleene star loop alternative B",
+              "role": "kleene-loop-b"
+            },
+            "nextVectorIds": [
+              "kleene-seq2-000",
+              "kleene-seq2-001-loop",
+              "kleene-seq2-001-final"
+            ]
+          },
+          {
+            "id": "kleene-seq2-001-final",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "001-final",
+              "description": "Terminal state: pattern complete",
+              "role": "terminal"
+            },
+            "outputVectors": [
+              {
+                "id": "kleene-seq2-output",
+                "vector": [
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Sequence 2 complete: (010)+(000|001)*(001) matched",
+                  "pattern": "(010)+(000|001)*(001)",
+                  "operator": "kleene-star"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Sequence 1: Zero Repetitions",
+        "pattern": "(001)(010)",
+        "description": "Minimal path: one 001 (arms terminal directly) → 010 (zero 000 loops). HD=2 intentional: (001)+ trigger directly armed (010) terminal.",
+        "vectors": [
+          [
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            1,
+            0
+          ]
+        ]
+      },
+      {
+        "name": "Sequence 1: Two Repetitions",
+        "pattern": "(001)(000)(000)(010)",
+        "description": "Path with 2 loop body iterations: 001 → 000 → 000 → 010",
+        "vectors": [
+          [
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ]
+        ]
+      },
+      {
+        "name": "Sequence 2: Alternation Pattern",
+        "pattern": "(010)(000)(001)(001)",
+        "description": "Path with alternation: 010 (trigger) → 000 (loop-A) → 001 (loop-B) → 001 (terminal)",
+        "vectors": [
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ]
+      },
+      {
+        "name": "Both Sequences Combined",
+        "pattern": "(001)+(000)*(010) ... (010)+(000|001)*(001)",
+        "description": "Execute both Kleene star sequences back-to-back",
+        "vectors": [
+          [
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ]
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

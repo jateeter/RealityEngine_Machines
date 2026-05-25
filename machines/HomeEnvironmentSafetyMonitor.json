@@ -1,0 +1,498 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Home Environment Safety Monitor",
+    "description": "Monitors housing quality conditions that directly affect resident health in low- and medium-income households. Tracks temperature stability (heating/cooling reliability), air quality (mold, lead, particulates), structural hazards, and utility shutoff risk. These social determinants of health are disproportionately present in aging rental housing stock occupied by economically vulnerable families. Output at [1999:2003] feeds the Adolescent Mental Health Monitor.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Home Health — Social Determinants / Housing Safety",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [1999:2003]: [1,0,0,0]=UNSAFE_HOUSING, [0,1,0,0]=UTILITY_FAILURE, [0,0,1,0]=HEALTH_HAZARD_RISK, [0,0,0,1]=ENVIRONMENT_SAFE",
+      "tags": [
+        "ces-sequences",
+        "ces-sequences-3",
+        "health-personal",
+        "home-environment-safety-monitor",
+        "home-health",
+        "home-health-social-determinants-housing-safety",
+        "housing-safety",
+        "input-sequences",
+        "input-sequences-1",
+        "kleene-plus",
+        "lead",
+        "low-income",
+        "mold",
+        "social-determinants",
+        "startup-loadable",
+        "utility"
+      ],
+      "sequenceCount": 3,
+      "populationFocus": "Renters in aging housing stock; low-income families; households in utility shutoff risk zones",
+      "sensorNormalization": {
+        "temp_stability_norm": "0.0=habitability crisis (chronic <55°F winter or >95°F summer), 0.5=livable but uncomfortable, 1.0=stable comfortable range",
+        "air_quality_norm": "0.0=severe mold/lead/particulate contamination confirmed, 0.5=detectable but manageable, 1.0=clean tested air",
+        "structural_safety_norm": "0.0=multiple active structural hazards (roof leak, electrical, falling plaster), 0.5=minor deferred maintenance, 1.0=structurally sound",
+        "utility_reliability_norm": "0.0=active shutoff notice or disconnected, 0.5=past-due balance with shutoff risk, 1.0=current and reliable service"
+      },
+      "downstreamMachine": "AdolescentMentalHealthMonitor (reads [1999:2003])",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "home-health",
+          "housing-safety",
+          "social-determinants"
+        ],
+        "family": "home-environment-safety-monitor",
+        "machineCode": "home-environment-safety-monitor",
+        "capabilityTags": [],
+        "workflowTags": [
+          "home-environment-safety-monitor",
+          "home-health-social-determinants-housing-safety",
+          "kleene-plus",
+          "lead",
+          "low-income",
+          "mold",
+          "utility"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "health-personal",
+          "home-environment-safety-monitor",
+          "home-health",
+          "home-health-social-determinants-housing-safety",
+          "housing-safety",
+          "input-sequences",
+          "input-sequences-1",
+          "kleene-plus",
+          "lead",
+          "low-income",
+          "mold",
+          "social-determinants",
+          "startup-loadable",
+          "utility"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/homeenvironmentsafetymonitor",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "patient-safety-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"health-personal\".  Review and tune the routing as the team owning HomeEnvironmentSafetyMonitor matures."
+      },
+      "triggerConfig": {
+        "processId": "HOMEENVIRONMENTSAFETYMONITOR",
+        "processName": "Home Environment Safety Monitor",
+        "rules": [
+          {
+            "sequenceId": "home-env-hazard-escalation",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "UNSAFE_HOUSING: habitability crisis requiring housing authority intervention at [1999:2003]"
+          },
+          {
+            "sequenceId": "home-env-utility-failure",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "UTILITY_FAILURE: utility shutoff imminent or active at [1999:2003]"
+          },
+          {
+            "sequenceId": "home-env-safe",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "ENVIRONMENT_SAFE: home environment supports healthy resident outcomes at [1999:2003]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1967,
+        "length": 4
+      },
+      "output": {
+        "offset": 1999,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "home-env-hazard-escalation",
+        "name": "Hazard Escalation: SOUND+ → DETERIORATING → HAZARDOUS → UNSAFE_HOUSING",
+        "metadata": {
+          "description": "Tracks progressive housing condition deterioration from sound baseline through hazardous conditions. Sustained deterioration across multiple housing dimensions (temp + structural + air quality) escalates to UNSAFE_HOUSING, indicating conditions that drive health outcomes worse than chronic illness alone.",
+          "path": "SOUND+ → DETERIORATING → HAZARDOUS → output[1,0,0,0]",
+          "output": "[1,0,0,0] (UNSAFE_HOUSING)"
+        },
+        "vectors": [
+          {
+            "id": "henv-sound",
+            "elements": [
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.7,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "SOUND",
+              "description": "SOUND+ — all housing dimensions above threshold: livable temperature, acceptable air quality, no major structural hazards, utilities current. isInitial A*A = A+.",
+              "scenario": "Baseline safe housing — may have minor deferred maintenance but not health-threatening"
+            },
+            "nextVectorIds": [
+              "henv-sound",
+              "henv-deteriorating"
+            ]
+          },
+          {
+            "id": "henv-deteriorating",
+            "elements": [
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.4,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.45,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "DETERIORATING",
+              "description": "DETERIORATING — multiple housing dimensions falling below adequate threshold: unreliable heating, suspected mold, past-due utility balance.",
+              "scenario": "Winter heating concerns; landlord non-responsive to maintenance; utility shutoff notice received"
+            },
+            "nextVectorIds": [
+              "henv-hazardous"
+            ]
+          },
+          {
+            "id": "henv-hazardous",
+            "elements": [
+              {
+                "value": 0.2,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.18,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.15,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.2,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "HAZARDOUS",
+              "description": "HAZARDOUS — temperature habitability threatened; confirmed mold or lead hazard; active utility shutoff risk. Fires UNSAFE_HOUSING.",
+              "scenario": "Below-freezing interior; children exposed to peeling lead paint; utility service disconnected"
+            },
+            "outputVectors": [
+              {
+                "id": "henv-unsafe-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "UNSAFE_HOUSING: habitability crisis requiring housing authority intervention at [1999:2003]",
+                  "action": "Housing code complaint; emergency shelter referral; children's services notification if children present"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "home-env-utility-failure",
+        "name": "Utility Failure: CURRENT+ → PAST_DUE → SHUTOFF_RISK → UTILITY_FAILURE",
+        "metadata": {
+          "description": "Tracks utility payment status deterioration toward shutoff. In low-income households, utility shutoffs directly cause health crises (hypothermia risk, medication spoilage, food loss). Requires CURRENT+ baseline before escalation arms, preventing false triggers from billing cycle gaps.",
+          "path": "CURRENT+ → PAST_DUE → SHUTOFF_RISK → output[0,1,0,0]",
+          "output": "[0,1,0,0] (UTILITY_FAILURE)"
+        },
+        "vectors": [
+          {
+            "id": "henv-utility-current",
+            "elements": [
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.65,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.82,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "CURRENT",
+              "description": "CURRENT+ — utilities paid and reliable; home temperature controlled; structural sound. isInitial A*A = A+.",
+              "utility_status": "0.78–0.90 (current; no arrears)"
+            },
+            "nextVectorIds": [
+              "henv-utility-current",
+              "henv-past-due"
+            ]
+          },
+          {
+            "id": "henv-past-due",
+            "elements": [
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.52,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "PAST_DUE",
+              "description": "PAST_DUE — utility balance past due; shutoff notice timeline starting; household managing but at risk.",
+              "utility_status": "0.25–0.48 (past-due balance; shutoff notice issued)"
+            },
+            "nextVectorIds": [
+              "henv-shutoff-risk"
+            ]
+          },
+          {
+            "id": "henv-shutoff-risk",
+            "elements": [
+              {
+                "value": 0.22,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.2,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.6,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "SHUTOFF_RISK",
+              "description": "SHUTOFF_RISK — imminent disconnection; temperature control failing; immediate intervention needed. Fires UTILITY_FAILURE.",
+              "utility_status": "0.0–0.15 (shutoff within 24–72 hours or already disconnected)"
+            },
+            "outputVectors": [
+              {
+                "id": "henv-utility-failure-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "UTILITY_FAILURE: utility shutoff imminent or active at [1999:2003]",
+                  "action": "LIHEAP/utility assistance referral; emergency fund application; health impacts assessment for vulnerable residents"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "home-env-safe",
+        "name": "Environment Safe: SAFE+ → ENVIRONMENT_SAFE signal",
+        "metadata": {
+          "description": "Fires ENVIRONMENT_SAFE when all housing dimensions are within safe operating parameters. Downstream adolescent mental health monitor uses this signal as a baseline stable-environment indicator.",
+          "pattern": "SAFE+",
+          "output": "[0,0,0,1] (ENVIRONMENT_SAFE)"
+        },
+        "vectors": [
+          {
+            "id": "henv-safe",
+            "elements": [
+              {
+                "value": 0.7,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.68,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.72,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.78,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "SAFE",
+              "description": "SAFE+ — all dimensions clearly above threshold: stable temperature, clean air, sound structure, current utilities. Fires ENVIRONMENT_SAFE each matching cycle.",
+              "scenario": "Well-maintained housing; utilities current; no known hazards"
+            },
+            "outputVectors": [
+              {
+                "id": "henv-safe-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "ENVIRONMENT_SAFE: home environment supports healthy resident outcomes at [1999:2003]",
+                  "action": "Downstream adolescent mental health monitor registers stable home environment"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Winter Heating Failure Cascade",
+        "pattern": "6-step: SOUND→SOUND→DETERIORATING→HAZARDOUS→UNSAFE→(intervention)→SAFE",
+        "description": "Heating system failure in January; landlord delayed response; temperature drops to hazardous; emergency housing assistance intervenes.",
+        "vectors": [
+          [
+            0.63,
+            0.61,
+            0.66,
+            0.81
+          ],
+          [
+            0.62,
+            0.59,
+            0.64,
+            0.8
+          ],
+          [
+            0.37,
+            0.34,
+            0.39,
+            0.44
+          ],
+          [
+            0.19,
+            0.17,
+            0.14,
+            0.19
+          ],
+          [
+            0.18,
+            0.16,
+            0.13,
+            0.08
+          ],
+          [
+            0.71,
+            0.69,
+            0.73,
+            0.79
+          ]
+        ],
+        "metadata": {
+          "scenario": "winter-heating-failure",
+          "expectedOutputs": {
+            "steps_1_2": "ENVIRONMENT_SAFE fires [0,0,0,1]",
+            "step_3": "no output (DETERIORATING intermediate)",
+            "steps_4_5": "UNSAFE_HOUSING fires [1,0,0,0]",
+            "step_6": "ENVIRONMENT_SAFE fires [0,0,0,1] (after intervention)"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

@@ -1,0 +1,302 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Hydration Monitor",
+    "description": "Infers hydration status from in-home intake proxies (smart-cup sips, fridge/faucet opens, bathroom visits). Signals the local AI when intake falls below daily targets so it can surface reminders or caregiver check-ins.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "wellness",
+      "author": "Reality Engine",
+      "created": "2026-04-21T00:00:00Z",
+      "workflow": "in-home-hydration",
+      "eventSpace": "2D binary: [below_half_target, below_quarter_target]",
+      "outputSpace": "2D binary: {[0,0]=ADEQUATE, [1,0]=LOW, [1,1]=CRITICAL}",
+      "tags": [
+        "ces-sequences",
+        "ces-sequences-3",
+        "elder-care",
+        "health-personal",
+        "hydration",
+        "hydration-monitor",
+        "in-home-monitoring",
+        "input-sequences",
+        "input-sequences-2",
+        "nutrition",
+        "startup-loadable",
+        "trigger",
+        "wellness"
+      ],
+      "sequenceCount": 3,
+      "triggerConfig": {
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "examples/triggers/graphql_trigger_template.py",
+        "processId": "HYDRATION-MONITOR",
+        "processName": "Hydration Monitor",
+        "rules": [
+          {
+            "sequenceId": "hydration-adequate",
+            "outputMatches": [
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "ok",
+            "description": "Intake on track"
+          },
+          {
+            "sequenceId": "hydration-low",
+            "outputMatches": [
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Below daily target at midday — remind the patient"
+          },
+          {
+            "sequenceId": "hydration-critical",
+            "outputMatches": [
+              1,
+              1
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Severely below target — escalate to caregiver"
+          }
+        ]
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "wellness"
+        ],
+        "family": "hydration-monitor",
+        "machineCode": "hydration-monitor",
+        "capabilityTags": [
+          "in-home-monitoring"
+        ],
+        "workflowTags": [
+          "elder-care",
+          "hydration",
+          "hydration-monitor",
+          "nutrition",
+          "trigger"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "elder-care",
+          "health-personal",
+          "hydration",
+          "hydration-monitor",
+          "in-home-monitoring",
+          "input-sequences",
+          "input-sequences-2",
+          "nutrition",
+          "startup-loadable",
+          "trigger",
+          "wellness"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/hydrationmonitor",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "patient-safety-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"health-personal\".  Review and tune the routing as the team owning HydrationMonitor matures."
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1947,
+        "length": 2
+      },
+      "output": {
+        "offset": 1949,
+        "length": 2
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "hydration-adequate",
+        "name": "Adequate hydration → GREEN",
+        "metadata": {
+          "description": "Daily intake proxies on track"
+        },
+        "vectors": [
+          {
+            "id": "hydration-ev-ok",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "adequate",
+              "state": "ADEQUATE"
+            },
+            "outputVectors": [
+              {
+                "id": "hydration-out-ok",
+                "vector": [
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "ragStatusCode": "GREEN",
+                  "state": "ADEQUATE"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hydration-low",
+        "name": "Low intake → AMBER",
+        "metadata": {
+          "description": "Intake below half-target at reminder checkpoint"
+        },
+        "vectors": [
+          {
+            "id": "hydration-ev-low",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "low",
+              "state": "LOW"
+            },
+            "outputVectors": [
+              {
+                "id": "hydration-out-low",
+                "vector": [
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "ragStatusCode": "AMBER",
+                  "state": "LOW"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hydration-critical",
+        "name": "Critical intake → RED",
+        "metadata": {
+          "description": "Intake below quarter-target near end of day"
+        },
+        "vectors": [
+          {
+            "id": "hydration-ev-crit",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "critical",
+              "state": "CRITICAL"
+            },
+            "outputVectors": [
+              {
+                "id": "hydration-out-crit",
+                "vector": [
+                  1,
+                  1
+                ],
+                "metadata": {
+                  "ragStatusCode": "RED",
+                  "state": "CRITICAL"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Normal hydration day",
+        "pattern": "[0,0]",
+        "description": "Intake on target — GREEN trigger",
+        "vectors": [
+          [
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "name": "Low → critical descent",
+        "pattern": "[1,0] → [1,1]",
+        "description": "Midday reminder (AMBER), then end-of-day escalation (RED)",
+        "vectors": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

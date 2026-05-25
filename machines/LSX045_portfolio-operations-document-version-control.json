@@ -1,0 +1,544 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Legal Services Portfolio Operations Document Version Control",
+    "description": "Legal services workflow machine for document version control in the portfolio operations workstream. It monitors govern drafts, exhibits, signed forms, figures, claims, specimens, and filing receipts. This is an operational workflow example for individual and corporate legal services, not legal advice.",
+    "metadata": {
+      "category": "legal-services",
+      "domain": "Legal Services - Portfolio Operations",
+      "author": "Reality Engine",
+      "workstream": "Portfolio Operations",
+      "operationalFocus": "Document Version Control",
+      "focusDescription": "govern drafts, exhibits, signed forms, figures, claims, specimens, and filing receipts",
+      "sourceGuidance": [
+        "USPTO provisional patent applications: complete written description, inventor naming, filing fee/cover sheet, 12-month nonprovisional benefit window",
+        "USPTO Patent Center: electronic filing and application management for patent submissions",
+        "USPTO trademark process and Trademark Center: mark/goods-services review, account identity verification, filing and docket tracking",
+        "U.S. Copyright Office eCO registration: application, fee, deposit copy/copies, work-type/form selection",
+        "U.S. Copyright Office preregistration: limited-use preregistration for eligible unpublished works likely to face prerelease infringement"
+      ],
+      "legalDisclaimer": "Workflow automation example only; attorney review is required for legal advice, filing decisions, and jurisdiction-specific analysis.",
+      "dispatchableAgent": "docketing_agent",
+      "aiTrigger": "legal-services-portfolio-operations-document-version-control",
+      "agentActions": [
+        "Route document version control to attorney review for deadline, ownership, or rights-risk triage.",
+        "Dispatch docketing_agent to optimize the next workstep for document version control.",
+        "Create or update docket/checklist tasks for document version control.",
+        "Mark document version control ready for the next controlled workflow step."
+      ],
+      "inputSpace": "4D binary at [2395:2399]",
+      "outputSpace": "4D binary at [2403:2407]: [1,0,0,0]=ATTORNEY_REVIEW, [0,1,0,0]=OPTIMIZE_WORKSTEP, [0,0,1,0]=DOCKET_ACTION, [0,0,0,1]=READY_FOR_NEXT_STEP",
+      "inputSemantics": [
+        "facts complete",
+        "rights/ownership clear",
+        "deadline or filing pressure",
+        "commercialization readiness"
+      ],
+      "tags": [
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-4",
+        "copyright",
+        "dispatchable-agent",
+        "docketing-agent",
+        "document-version-control",
+        "input-sequences",
+        "input-sequences-5",
+        "intellectual-property",
+        "legal-services",
+        "legal-services-generated",
+        "legal-services-portfolio-operations",
+        "legal-services-portfolio-operations-document-version-control",
+        "lsx045",
+        "machine-interconnect",
+        "portfolio-operations",
+        "productization",
+        "provisional-patent",
+        "startup-loadable",
+        "trademark"
+      ],
+      "sequenceCount": 4,
+      "reuseGuideline": "Map legal intake, docket, evidence, filing-portal, and AI review signals into the 4D input lane. Route outputs to attorney review, workstep optimization, docket updates, or product launch gates.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "legal-services",
+        "domainTags": [
+          "legal-services",
+          "portfolio-operations"
+        ],
+        "family": "legal-services-generated",
+        "machineCode": "lsx045",
+        "capabilityTags": [],
+        "workflowTags": [
+          "ai-trigger",
+          "copyright",
+          "dispatchable-agent",
+          "docketing-agent",
+          "document-version-control",
+          "intellectual-property",
+          "legal-services-generated",
+          "legal-services-portfolio-operations",
+          "productization",
+          "provisional-patent",
+          "trademark"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ai-trigger",
+          "ces-sequences",
+          "ces-sequences-4",
+          "copyright",
+          "dispatchable-agent",
+          "docketing-agent",
+          "document-version-control",
+          "input-sequences",
+          "input-sequences-5",
+          "intellectual-property",
+          "legal-services",
+          "legal-services-generated",
+          "legal-services-portfolio-operations",
+          "legal-services-portfolio-operations-document-version-control",
+          "lsx045",
+          "machine-interconnect",
+          "portfolio-operations",
+          "productization",
+          "provisional-patent",
+          "startup-loadable",
+          "trademark"
+        ]
+      },
+      "upstreamMachines": [
+        "Legal Services Portfolio Operations Docket Integrity Monitor"
+      ],
+      "upstreamMachine": "Legal Services Portfolio Operations Docket Integrity Monitor",
+      "downstreamMachines": [
+        "Legal Services Portfolio Operations Client Decision Packet"
+      ],
+      "workflowConnectionPolicy": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "legal-services-workflow-interconnect-update",
+        "primaryConnectionMode": "perceptual-output-overlap",
+        "commonActionMode": "metadata-dispatch-route when a machine participates in more than one common workflow action",
+        "commonActions": [
+          "ai-agent-assist",
+          "attorney-review",
+          "commercialization-and-enforcement",
+          "conflict-and-engagement-control",
+          "docket-integrity",
+          "evidence-preservation",
+          "filing-portal-readiness",
+          "matter-intake",
+          "portfolio-summary-and-learning"
+        ]
+      },
+      "workflowConnections": [
+        {
+          "type": "perceptual-output-overlap",
+          "action": "primary-controlled-workflow-step",
+          "targetMachine": "Legal Services Portfolio Operations Client Decision Packet",
+          "targetInputSpace": "[2403:2407]",
+          "description": "Machine output vector is written into the target machine input lane to advance the legal workflow."
+        }
+      ],
+      "perceptualInterconnect": true,
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "legal-operations",
+        "runbook": "https://runbooks.example.org/legal-services/lsx045_portfolio-operations-document-version-control",
+        "escalationPolicy": "pagerduty:legal-ops",
+        "contact": {
+          "primary": "legal-operations-primary@example.org",
+          "secondary": "legal-operations-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"legal-services\".  Review and tune the routing as the team owning LSX045_portfolio-operations-document-version-control matures."
+      },
+      "triggerConfig": {
+        "processId": "LSX045_PORTFOLIO_OPERATIONS_DOCUMENT_VERSION_CONTROL",
+        "processName": "Legal Services Portfolio Operations Document Version Control",
+        "rules": [
+          {
+            "sequenceId": "lsx-045-attorney-review",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Document Version Control: INCOMPLETE_OR_RISK -> ATTORNEY_REVIEW"
+          },
+          {
+            "sequenceId": "lsx-045-optimize",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Document Version Control: OPTIMIZATION_WINDOW -> OPTIMIZE_WORKSTEP"
+          },
+          {
+            "sequenceId": "lsx-045-docket",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Document Version Control: DOCKET_PRESSURE -> DOCKET_ACTION"
+          },
+          {
+            "sequenceId": "lsx-045-ready",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Document Version Control: READY -> READY_FOR_NEXT_STEP"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 2395,
+        "length": 4
+      },
+      "output": {
+        "offset": 2403,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "lsx-045-attorney-review",
+        "name": "Document Version Control: INCOMPLETE_OR_RISK -> ATTORNEY_REVIEW",
+        "metadata": {
+          "description": "Escalates when facts, rights, or deadline pressure require attorney review.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "lsx-045-risk-watch",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "nextVectorIds": [
+              "lsx-045-review-needed"
+            ]
+          },
+          {
+            "id": "lsx-045-review-needed",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "outputVectors": [
+              {
+                "id": "lsx-045-review-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route document version control to attorney review for deadline, ownership, or rights-risk triage."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "lsx-045-optimize",
+        "name": "Document Version Control: OPTIMIZATION_WINDOW -> OPTIMIZE_WORKSTEP",
+        "metadata": {
+          "description": "Fires when the matter can proceed more efficiently through AI-assisted workflow optimization.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "lsx-045-optimization",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "lsx-045-optimize-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch docketing_agent to optimize the next workstep for document version control."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "lsx-045-docket",
+        "name": "Document Version Control: DOCKET_PRESSURE -> DOCKET_ACTION",
+        "metadata": {
+          "description": "Creates a docket update or checklist task for the next controlled step.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "lsx-045-docket-needed",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "lsx-045-docket-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Create or update docket/checklist tasks for document version control."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "lsx-045-ready",
+        "name": "Document Version Control: READY -> READY_FOR_NEXT_STEP",
+        "metadata": {
+          "description": "Signals that facts, rights posture, timing, and commercialization readiness are aligned.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "lsx-045-ready-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "lsx-045-ready-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Mark document version control ready for the next controlled workflow step."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Attorney review escalation",
+        "description": "Risk or missing rights facts require attorney review.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "attorney-review"
+        }
+      },
+      {
+        "name": "Optimize workstep",
+        "description": "Matter is suitable for AI-assisted workflow optimization.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "optimize-workstep"
+        }
+      },
+      {
+        "name": "Docket action",
+        "description": "Deadline or filing pressure requires docket/checklist action.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "docket-action"
+        }
+      },
+      {
+        "name": "Ready for next step",
+        "description": "Matter is ready to advance to the next controlled step.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "ready-for-next-step"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "Initial risk-watch state arms escalation without completing the sequence.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,707 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Data Center Spares Inventory Manager",
+    "description": "Data-center operations machine for spares inventory manager. It monitors critical spare coverage, lead time, consumption rate, and shelf-life status and emits operational outputs for 24/7 incident response, maintenance planning, upgrade readiness, and steady-state assurance.",
+    "metadata": {
+      "category": "data-center",
+      "domain": "Data Center - 24x7 Operations",
+      "author": "Reality Engine",
+      "operationalFocus": "Spares Inventory Manager",
+      "focusDescription": "critical spare coverage, lead time, consumption rate, and shelf-life status",
+      "upstreamMachine": "Data Center Asset Lifecycle Tracker",
+      "upstreamOutputRegion": "[1465:1469]",
+      "downstreamMachines": [
+        "Data Center Change Risk Gatekeeper"
+      ],
+      "projectionHorizon": "24h",
+      "projectionWindows": [
+        "0-6h",
+        "6-12h",
+        "12-18h",
+        "18-24h"
+      ],
+      "prescriptiveMaintenanceRole": "Consumes Data Center Asset Lifecycle Tracker output to convert upstream operational posture into prescriptive action for spares inventory manager.",
+      "dispatchableAgent": "dc_security_agent",
+      "aiTrigger": "data-center-spares-inventory-manager-ops-maintenance-upgrade",
+      "agentActions": [
+        "Dispatch dc_security_agent for immediate stabilization of spares inventory manager.",
+        "Schedule maintenance for spares inventory manager with rollback and staffing checks.",
+        "Plan upgrade or lifecycle change for spares inventory manager using risk-gated rollout.",
+        "Keep 24/7 monitoring active for spares inventory manager.",
+        "Project spares inventory manager forward over the next 24 hours and prescribe maintenance or upgrade work before the risk window opens."
+      ],
+      "inputSpace": "4D binary at [1465:1469]",
+      "outputSpace": "4D binary at [1469:1473]: [1,0,0,0]=URGENT_INTERVENTION, [0,1,0,0]=SCHEDULE_MAINTENANCE, [0,0,1,0]=PLAN_UPGRADE, [0,0,0,1]=OPERATING_NOMINAL",
+      "inputSemantics": [
+        "availability margin",
+        "maintenance readiness",
+        "upgrade/lifecycle pressure",
+        "operational confidence"
+      ],
+      "tags": [
+        "24x7-operations",
+        "ai-trigger",
+        "ces-sequences",
+        "ces-sequences-5",
+        "data-center",
+        "data-center-24x7-operations",
+        "data-center-generated",
+        "data-center-spares-inventory-manager",
+        "data-center-spares-inventory-manager-ops-maintenance-upgrade",
+        "dc-security-agent",
+        "dcx027",
+        "dispatchable-agent",
+        "incident-response",
+        "input-sequences",
+        "input-sequences-6",
+        "machine-interconnect",
+        "maintenance",
+        "spares-inventory-manager",
+        "startup-loadable",
+        "upgrade-cycle"
+      ],
+      "sequenceCount": 5,
+      "reuseGuideline": "Use as a 24/7 operational guardrail. Map telemetry, CMDB, change, or AI-dispatch signals into the 4D input lane; map outputs to incident, maintenance, upgrade, or executive-summary machines.",
+      "downstreamPattern": "Output region [1469:1473] feeds Data Center Change Risk Gatekeeper for prescriptive 24/7 operations.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "data-center",
+        "domainTags": [
+          "24x7-operations",
+          "data-center"
+        ],
+        "family": "data-center-generated",
+        "machineCode": "dcx027",
+        "capabilityTags": [
+          "data-center-spares-inventory-manager-ops-maintenance-upgrade",
+          "maintenance"
+        ],
+        "workflowTags": [
+          "ai-trigger",
+          "data-center-24x7-operations",
+          "data-center-generated",
+          "data-center",
+          "dc-security-agent",
+          "dispatchable-agent",
+          "incident-response",
+          "spares-inventory-manager",
+          "upgrade-cycle"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-5",
+          "input-sequences",
+          "input-sequences-6",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "24x7-operations",
+          "ai-trigger",
+          "ces-sequences",
+          "ces-sequences-5",
+          "data-center",
+          "data-center-24x7-operations",
+          "data-center-generated",
+          "data-center-spares-inventory-manager",
+          "data-center-spares-inventory-manager-ops-maintenance-upgrade",
+          "dc-security-agent",
+          "dcx027",
+          "dispatchable-agent",
+          "incident-response",
+          "input-sequences",
+          "input-sequences-6",
+          "machine-interconnect",
+          "maintenance",
+          "spares-inventory-manager",
+          "startup-loadable",
+          "upgrade-cycle"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "datacenter-noc",
+        "runbook": "https://runbooks.example.org/data-center/dcx027_spares-inventory-manager",
+        "escalationPolicy": "pagerduty:datacenter-noc",
+        "contact": {
+          "primary": "datacenter-noc-primary@example.org",
+          "secondary": "datacenter-noc-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 300,
+          "error": 120
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"data-center\".  Review and tune the routing as the team owning DCX027_spares-inventory-manager matures."
+      },
+      "triggerConfig": {
+        "processId": "DCX027_SPARES_INVENTORY_MANAGER",
+        "processName": "Data Center Spares Inventory Manager",
+        "rules": [
+          {
+            "sequenceId": "dcx-027-urgent",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Spares Inventory Manager: DEGRADED -> CRITICAL -> URGENT_INTERVENTION"
+          },
+          {
+            "sequenceId": "dcx-027-maintenance",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Spares Inventory Manager: SERVICE_DUE -> SCHEDULE_MAINTENANCE"
+          },
+          {
+            "sequenceId": "dcx-027-upgrade",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Spares Inventory Manager: LIFECYCLE_PRESSURE -> PLAN_UPGRADE"
+          },
+          {
+            "sequenceId": "dcx-027-nominal",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Spares Inventory Manager: HEALTHY -> OPERATING_NOMINAL"
+          },
+          {
+            "sequenceId": "dcx-027-24h-projection",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Spares Inventory Manager: 0-6H -> 6-12H -> 12-18H -> 18-24H -> PRESCRIPTIVE_ACTION"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1465,
+        "length": 4
+      },
+      "output": {
+        "offset": 1469,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "dcx-027-urgent",
+        "name": "Spares Inventory Manager: DEGRADED -> CRITICAL -> URGENT_INTERVENTION",
+        "metadata": {
+          "description": "Escalates when availability and operational confidence collapse.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-027-degraded",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "nextVectorIds": [
+              "dcx-027-critical"
+            ]
+          },
+          {
+            "id": "dcx-027-critical",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "outputVectors": [
+              {
+                "id": "dcx-027-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Dispatch dc_security_agent for immediate stabilization of spares inventory manager."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-027-maintenance",
+        "name": "Spares Inventory Manager: SERVICE_DUE -> SCHEDULE_MAINTENANCE",
+        "metadata": {
+          "description": "Schedules maintenance before service quality degrades.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-027-service-due",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "dcx-027-maintenance-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Schedule maintenance for spares inventory manager with rollback and staffing checks."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-027-upgrade",
+        "name": "Spares Inventory Manager: LIFECYCLE_PRESSURE -> PLAN_UPGRADE",
+        "metadata": {
+          "description": "Plans an upgrade, refresh, or lifecycle action under controlled change management.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-027-upgrade-needed",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "dcx-027-upgrade-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Plan upgrade or lifecycle change for spares inventory manager using risk-gated rollout."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-027-nominal",
+        "name": "Spares Inventory Manager: HEALTHY -> OPERATING_NOMINAL",
+        "metadata": {
+          "description": "Confirms stable 24/7 operational posture.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-027-healthy",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "dcx-027-nominal-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Keep 24/7 monitoring active for spares inventory manager."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dcx-027-24h-projection",
+        "name": "Spares Inventory Manager: 0-6H -> 6-12H -> 12-18H -> 18-24H -> PRESCRIPTIVE_ACTION",
+        "metadata": {
+          "description": "Projects operational posture across a 24/7 horizon and prescribes work before the forecasted risk window opens.",
+          "projectionHorizon": "24h",
+          "projectionWindows": [
+            "0-6h",
+            "6-12h",
+            "12-18h",
+            "18-24h"
+          ],
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "dcx-027-projection-0-6h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "window": "0-6h",
+              "description": "Current posture is stable but lifecycle pressure is visible."
+            },
+            "nextVectorIds": [
+              "dcx-027-projection-6-12h"
+            ]
+          },
+          {
+            "id": "dcx-027-projection-6-12h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "window": "6-12h",
+              "description": "Operational confidence begins to degrade."
+            },
+            "nextVectorIds": [
+              "dcx-027-projection-12-18h"
+            ]
+          },
+          {
+            "id": "dcx-027-projection-12-18h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "window": "12-18h",
+              "description": "Maintenance readiness is no longer sufficient for the forecasted load."
+            },
+            "nextVectorIds": [
+              "dcx-027-projection-18-24h"
+            ]
+          },
+          {
+            "id": "dcx-027-projection-18-24h",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "window": "18-24h",
+              "description": "Forecast crosses the prescriptive maintenance threshold."
+            },
+            "outputVectors": [
+              {
+                "id": "dcx-027-projection-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Project spares inventory manager forward over the next 24 hours and prescribe maintenance or upgrade work before the risk window opens.",
+                  "projectionHorizon": "24h"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Urgent intervention",
+        "description": "Availability and confidence collapse after degraded operation.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-intervention"
+        }
+      },
+      {
+        "name": "Maintenance due",
+        "description": "Maintenance should be scheduled before degradation.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "schedule-maintenance"
+        }
+      },
+      {
+        "name": "Upgrade planning",
+        "description": "Lifecycle pressure requires upgrade planning.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "plan-upgrade"
+        }
+      },
+      {
+        "name": "Nominal operations",
+        "description": "The machine reports stable 24/7 operation.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "operating-nominal"
+        }
+      },
+      {
+        "name": "24-hour prescriptive projection",
+        "description": "Projects operations across four 6-hour windows and prescribes maintenance before the 24-hour risk window opens.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            1
+          ],
+          [
+            0,
+            1,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "24h-prescriptive-projection"
+        }
+      },
+      {
+        "name": "Baseline without output",
+        "description": "A single degraded baseline arms the urgent path without firing.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "baseline-no-output"
+        }
+      }
+    ]
+  }
+}

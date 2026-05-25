@@ -1,0 +1,3193 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "FacilitiesMaintenance",
+    "description": "Integrates facilities maintenance workflows into the eldercare patient health pipeline. Models janitorial, hygiene, and general living space maintenance activities as structured observational sequences. Each maintenance visit is an observational opportunity — facilities staff serve as a frontline sensing layer, reporting hygiene deficits, fall hazards, nutritional gaps, and patient wellness concerns to the clinical care workflow engines (DailyPatientCare, WellnessAnalytics). Produces six outputs: two completion signals (daily, weekly) and four clinical alert signals feeding downstream eldercare machines.",
+    "metadata": {
+      "category": "health-personal",
+      "author": "Reality Engine",
+      "created": "2026-04-10T00:00:00Z",
+      "domain": "Facilities Management — Eldercare Integration and Environmental Monitoring",
+      "eventSpace": "8D binary facilities observation space: [VISIT_ACTIVE, UNIT_ACCESSIBLE, HYGIENE_NORM, SPACE_NORM, NUTRITION_NORM, PATIENT_OBSERVED_NORM, TASKS_COMPLETE, CONCERN_ACTIVE]",
+      "outputSpace": "6D one-hot facilities outcome space: [DAILY_COMPLETE, WEEKLY_COMPLETE, HYGIENE_ALERT, SAFETY_ALERT, WELLNESS_CONCERN, INACCESSIBILITY_ALERT]",
+      "perceptualInterconnect": {
+        "downstream_daily": {
+          "machine": "DailyPatientCare",
+          "inputOffset": 186,
+          "inputLength": 8,
+          "routingOutputs": [
+            "HYGIENE_ALERT",
+            "SAFETY_ALERT"
+          ],
+          "semantics": "HYGIENE_ALERT: bathroom non-use or hygiene deficit observed by maintenance staff — feeds DailyPatientCare bathroom-nonuse and fall-response detection. SAFETY_ALERT: fall hazard or unsafe room condition observed — feeds DailyPatientCare fall detection and anomaly sequences."
+        },
+        "downstream_wellness": {
+          "machine": "WellnessAnalytics",
+          "inputOffset": 234,
+          "inputLength": 8,
+          "routingOutputs": [
+            "WELLNESS_CONCERN"
+          ],
+          "semantics": "WELLNESS_CONCERN: patient appears disoriented, unresponsive, distressed, or shows abnormal affect/cognition during maintenance visit. Integration layer translates WELLNESS_CONCERN into a WellnessAnalytics cumulative input vector, enriched with patient context (community vs. facility) and prior assessment history."
+        },
+        "downstream_emergency": {
+          "machine": "CareTransitionWorkflow",
+          "inputOffset": 218,
+          "inputLength": 8,
+          "routingOutputs": [
+            "INACCESSIBILITY_ALERT"
+          ],
+          "semantics": "INACCESSIBILITY_ALERT: unit repeatedly inaccessible — may indicate patient fall, medical emergency, or elopement. Triggers emergency response protocol and may activate CareTransitionWorkflow Sequence 1 (acute hospital transfer) or Sequence 5 (emergency escalation from facility)."
+        }
+      },
+      "observationalDesign": {
+        "principle": "Every scheduled maintenance activity is an observational opportunity. Facilities staff are trained to note environmental and patient-state indicators as part of their routine workflow. Observations are encoded into the machine input space as binary conditions (norm vs. concern) and flow through the same CES logic as clinical events. This makes the maintenance schedule a structured sensing cadence — daily visits observe hygiene, space, and patient state; weekly deep-clean visits additionally assess nutrition/hydration indicators.",
+        "dailyScope": "Bathroom cleanliness and hygiene product levels, bed linen condition, living space order and safety, medication accessibility, patient alertness and affect during normal interaction",
+        "weeklyScope": "All daily scope plus: refrigerator/food storage condition, hydration station replenishment, pantry and snack supply, patient weight or appetite change indicators, complete linen change and deep-clean log",
+        "staffTraining": "Facilities staff receive 2-hour observational training covering: (1) hygiene deficit indicators (soiled linens, bathroom odor, product depletion); (2) fall hazard identification (loose rugs, furniture displacement, cluttered pathways, wet surfaces); (3) nutrition/hydration indicators (expired or insufficient food, empty water bottles, missed meal trays); (4) wellness observation (patient recognition of familiar staff, response to greeting, apparent distress, disorientation). All concerns are reported immediately via a care alert workflow — facilities staff do not assess or diagnose; they observe and report.",
+        "integrationProtocol": "HYGIENE_ALERT, SAFETY_ALERT, and WELLNESS_CONCERN outputs from this machine are written to perceptual space output region (bytes 250-255). A care coordination integration layer reads these outputs and writes corresponding input vectors to the appropriate downstream machines: DailyPatientCare (for hygiene and safety), WellnessAnalytics (for patient wellness), and CareTransitionWorkflow (for inaccessibility emergencies)."
+      },
+      "dimensions": {
+        "D0_VISIT_ACTIVE": "A scheduled maintenance visit to the unit has been initiated. The maintenance worker has entered or is attempting to enter the unit. Always HIGH for any event in this machine. The anchor dimension — it persists throughout all sequences and never drops during a visit. A new visit resets the machine.",
+        "D1_UNIT_ACCESSIBLE": "Access to the unit has been confirmed. Door opens with staff key or patient responds to knock and permits entry. HIGH when the unit is successfully entered. LOW when access has not been confirmed — repeated LOW readings at this dimension (multiple knock attempts with no response) trigger the inaccessibility sequence.",
+        "D2_HYGIENE_NORM": "Bathroom, linens, and personal care areas are within acceptable hygiene standards. HIGH when: toilet/shower clean, no soiling of linens or personal area, hygiene products stocked (soap, toilet paper, personal care items), no significant odor. LOW when any hygiene deficit is observed — triggers HYGIENE_ALERT.",
+        "D3_SPACE_NORM": "The living space is in safe, orderly condition with no fall hazards. HIGH when: clear pathways, furniture in position, no loose rugs or tripping hazards, floors dry, no clutter in walking areas. LOW when a fall hazard or unsafe condition is observed — triggers SAFETY_ALERT.",
+        "D4_NUTRITION_NORM": "Food service and hydration indicators are within acceptable norms. Assessed during weekly deep-clean visits only. HIGH when: refrigerator stocked with fresh items (no expired food), water/beverage supply adequate, meal tray returned or absent (patient ate), pantry supplies intact. LOW when nutrition or hydration deficits are observed. Not assessed during daily visits (D4 remains LOW throughout daily-routine sequences).",
+        "D5_PATIENT_OBSERVED_NORM": "Patient appeared alert, recognized familiar staff, and showed normal affect during the maintenance visit. HIGH when: patient responds to greeting, shows normal orientation to person and place, displays appropriate affect, shows no signs of acute distress or confusion. LOW when patient observation raises welfare concern — triggers WELLNESS_CONCERN. If patient is not present in unit (e.g., at activities), D5 is not assessed and the daily or weekly sequence completes without D5 rising.",
+        "D6_TASKS_COMPLETE": "All scheduled maintenance tasks for this visit have been documented as complete in the maintenance log system. HIGH when: task checklist signed off, all routine items completed, maintenance log entry submitted. This is the final milestone in both daily and weekly completion sequences — D6 rising marks the visit as complete and ready for supervisor review.",
+        "D7_CONCERN_ACTIVE": "A welfare, safety, or access concern has been flagged for immediate clinical or supervisory follow-up. HIGH when a maintenance worker has identified a condition requiring escalation: hygiene deficit, fall hazard, nutritional deficit, patient welfare observation, or repeated inaccessibility. D7 rising forks any active sequence into an alert output path and triggers the care alert workflow. The concern is reported regardless of whether other sequence steps completed normally."
+      },
+      "namedInputVectors": {
+        "VISIT_ACTIVE": "[H,L,L,L,L,L,L,L] — maintenance worker initiating visit to unit; no access confirmation yet",
+        "ACCESSIBLE": "[H,H,L,L,L,L,L,L] — unit successfully entered; maintenance may begin",
+        "HYGIENE_OK": "[H,H,H,L,L,L,L,L] — hygiene inspection passed; bathroom, linens, personal area within norms",
+        "SPACE_OK": "[H,H,H,H,L,L,L,L] — living space inspection passed; no fall hazards or safety concerns",
+        "NUTRITION_OK": "[H,H,H,H,H,L,L,L] — nutrition/hydration inspection passed (weekly deep-clean step only)",
+        "PATIENT_OK": "[H,H,H,H,L,H,L,L] — patient observed; alert, recognized staff, normal affect",
+        "DAILY_DONE": "[H,H,H,H,L,H,H,L] — daily visit complete; all tasks logged; no concerns",
+        "PATIENT_OK_WEEKLY": "[H,H,H,H,H,H,L,L] — patient observed normal during weekly visit (after nutrition check)",
+        "DEEP_CLEAN_DONE": "[H,H,H,H,H,H,H,L] — weekly deep-clean complete; all tasks logged including nutrition; no concerns",
+        "HYGIENE_CONCERN": "[H,H,L,L,L,L,L,H] — hygiene deficit observed; D7↑ while D2 stays LOW (hygiene not normal)",
+        "SPACE_CONCERN": "[H,H,H,L,L,L,L,H] — fall hazard or unsafe condition found; D7↑ while D3 stays LOW",
+        "PATIENT_CONCERN": "[H,H,H,H,L,L,L,H] — patient welfare concern; D7↑ while D5 stays LOW (patient not observed normal)",
+        "INACCESSIBLE": "[H,L,L,L,L,L,L,H] — unit inaccessible after multiple attempts; D7↑ while D1 stays LOW"
+      },
+      "vectorEncoding": {
+        "H": 0.9,
+        "L": 0.1,
+        "threshold": 0.5,
+        "semantics": "GTE binary: value >= threshold → HIGH (condition met or event active), value < threshold → LOW (condition not met or inactive). All maintenance sequences accumulate observable norms monotonically (HD=1 per step). Concern paths diverge with D7↑ while the deficient dimension stays LOW, maintaining HD=1. Sequences 1 and 2 share steps 1-4 (VISIT through SPACE_OK) and diverge at step 5: Seq 1 skips D4 (nutrition) and raises D5 (patient), while Seq 2 raises D4 (nutrition) first. Sequence 6 diverges from Seqs 1-5 at step 2 by raising D7 (inaccessible) instead of D1 (accessible)."
+      },
+      "singleTransitionAssumption": {
+        "required": true,
+        "compliant": true,
+        "notes": "All 13 within-sequence transitions verified HD=1. Sequences 1-5 share the VISIT_ACTIVE initial [H,L,L,L,L,L,L,L]; all 5 proceed to ACCESSIBLE [H,H,L,L,L,L,L,L] via D1↑ before diverging. Sequence 6 diverges at step 2 with D7↑ (inaccessible) rather than D1↑. Sequences 3 diverges at step 3 with D7↑ instead of D2↑. Sequence 4 diverges at step 4 with D7↑ instead of D3↑. Sequences 1 and 5 share SPACE_OK at step 4; they diverge at step 5 where Seq 1 raises D5 (patient normal) and Seq 5 raises D7 (patient concern). All concern-path terminals raise D7 while leaving the failing dimension LOW — preserving HD=1 from the prior OK state."
+      },
+      "regex": "DAILY: (VISIT_ACTIVE)+ · ACCESSIBLE · HYGIENE_OK · SPACE_OK · PATIENT_OK · DAILY_DONE → DAILY_COMPLETE  |  WEEKLY: (VISIT_ACTIVE)+ · ACCESSIBLE · HYGIENE_OK · SPACE_OK · NUTRITION_OK · PATIENT_OK_WEEKLY · DEEP_CLEAN_DONE → WEEKLY_COMPLETE  |  HYGIENE: (VISIT_ACTIVE)+ · ACCESSIBLE · HYGIENE_CONCERN → HYGIENE_ALERT  |  SAFETY: (VISIT_ACTIVE)+ · ACCESSIBLE · HYGIENE_OK · SPACE_CONCERN → SAFETY_ALERT  |  WELLNESS: (VISIT_ACTIVE)+ · ACCESSIBLE · HYGIENE_OK · SPACE_OK · PATIENT_CONCERN → WELLNESS_CONCERN  |  ACCESS: (VISIT_ACTIVE)+ · INACCESSIBLE → INACCESSIBILITY_ALERT",
+      "sequenceCount": 6,
+      "testCaseCount": 8,
+      "tags": [
+        "ces-sequences",
+        "ces-sequences-6",
+        "elder-care",
+        "eldercare-integration-and-environmental-monitoring",
+        "facilities",
+        "facilities-maintenance",
+        "facilities-management",
+        "facilities-management-eldercare-integration-and-environmental-monitoring",
+        "fall-prevention",
+        "health-personal",
+        "hygiene",
+        "input-sequences",
+        "input-sequences-15",
+        "janitorial",
+        "machine-interconnect",
+        "security",
+        "startup-loadable",
+        "weekly-maintenance",
+        "wellness"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "eldercare-integration-and-environmental-monitoring",
+          "facilities-management",
+          "health-personal"
+        ],
+        "family": "facilities-maintenance",
+        "machineCode": "facilities-maintenance",
+        "capabilityTags": [
+          "eldercare-integration-and-environmental-monitoring",
+          "facilities-maintenance",
+          "facilities-management-eldercare-integration-and-environmental-monitoring",
+          "weekly-maintenance"
+        ],
+        "workflowTags": [
+          "elder-care",
+          "facilities",
+          "fall-prevention",
+          "hygiene",
+          "janitorial",
+          "security",
+          "wellness"
+        ],
+        "integrationTags": [
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-6",
+          "input-sequences",
+          "input-sequences-15",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ces-sequences",
+          "ces-sequences-6",
+          "elder-care",
+          "eldercare-integration-and-environmental-monitoring",
+          "facilities",
+          "facilities-maintenance",
+          "facilities-management",
+          "facilities-management-eldercare-integration-and-environmental-monitoring",
+          "fall-prevention",
+          "health-personal",
+          "hygiene",
+          "input-sequences",
+          "input-sequences-15",
+          "janitorial",
+          "machine-interconnect",
+          "security",
+          "startup-loadable",
+          "weekly-maintenance",
+          "wellness"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/facilitiesmaintenance",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "patient-safety-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"health-personal\".  Review and tune the routing as the team owning FacilitiesMaintenance matures."
+      },
+      "triggerConfig": {
+        "processId": "FACILITIESMAINTENANCE",
+        "processName": "FacilitiesMaintenance",
+        "rules": [
+          {
+            "sequenceId": "maint-daily-routine",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "DAILY_COMPLETE — routine daily maintenance visit completed with no concerns. Hygiene, safety, and patient observation all within norms. No downstream clinical alerts."
+          },
+          {
+            "sequenceId": "maint-weekly-deep-clean",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "WEEKLY_COMPLETE — full weekly deep-clean completed with no concerns. All dimensions (hygiene, safety, nutrition, patient observation) within norms."
+          },
+          {
+            "sequenceId": "maint-hygiene-concern",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "HYGIENE_ALERT — bathroom or linen hygiene deficit observed by facilities staff. Downstream: DailyPatientCare bathroom-nonuse detection."
+          },
+          {
+            "sequenceId": "maint-safety-concern",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "SAFETY_ALERT — fall hazard or unsafe living space condition identified by facilities staff. Downstream: DailyPatientCare fall detection."
+          },
+          {
+            "sequenceId": "maint-wellness-concern",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "WELLNESS_CONCERN — patient observation by facilities staff raised welfare flag. Downstream: WellnessAnalytics longitudinal tracking."
+          },
+          {
+            "sequenceId": "maint-inaccessible",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "INACCESSIBILITY_ALERT — unit inaccessible after multiple attempts by facilities staff. Welfare check protocol activated. Potential downstream: CareTransitionWorkflow emergency sequences."
+          }
+        ]
+      },
+      "severity": "life-safety"
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "gte",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1931,
+        "length": 8
+      },
+      "output": {
+        "offset": 3925,
+        "length": 6
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "maint-daily-routine",
+        "name": "Daily Maintenance Routine — Normal Completion",
+        "metadata": {
+          "description": "Standard daily maintenance visit covering hygiene inspection, living space safety check, and patient observation. All conditions are within norms — visit completes with DAILY_COMPLETE logged. No clinical alerts generated. Visit documents: bathroom cleaned, linens acceptable, pathways clear, patient alert and responsive. Daily visits occur 5-7 days per week per facility policy.",
+          "regex": "(VISIT_ACTIVE)+ · ACCESSIBLE · HYGIENE_OK · SPACE_OK · PATIENT_OK · DAILY_DONE → DAILY_COMPLETE",
+          "path": "VISIT_ACTIVE → ACCESSIBLE → HYGIENE_OK → SPACE_OK → PATIENT_OK → DAILY_DONE",
+          "output": "DAILY_COMPLETE=[1,0,0,0,0,0]",
+          "clinicalValue": "DAILY_COMPLETE provides a negative confirmation — no concerns observed during this visit. The accumulation of daily DAILY_COMPLETE signals over time establishes a baseline behavioral pattern. A gap in DAILY_COMPLETE signals (unit inaccessible, patient absent, task incomplete) flags a deviation worth clinical review.",
+          "staffNotes": "D4 (NUTRITION_NORM) is not assessed during daily visits — refrigerator/food inspection is a weekly task. The sequence skips D4 entirely, jumping from D3 (space OK) to D5 (patient observed). This is by design: daily visits are time-bounded to essential hygiene and safety checks."
+        },
+        "vectors": [
+          {
+            "id": "dr-visit",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "Visit Active",
+              "description": "Maintenance worker has initiated the unit visit — knocked, announced, or entered. D0_VISIT_ACTIVE=H. All other dimensions LOW: access not yet confirmed, no observations completed, no concerns. Kleene-plus: multiple VISIT_ACTIVE events may be recorded (e.g., worker arrives, pauses for a patient to respond, re-announces) before access is confirmed.",
+              "signal": "[H,L,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "dr-accessible"
+            ]
+          },
+          {
+            "id": "dr-accessible",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Unit Accessible",
+              "description": "Unit successfully entered. D1_UNIT_ACCESSIBLE=H. HD=1 from VISIT_ACTIVE (D1: L→H). Maintenance work may now begin. Patient is either present and has permitted entry, or unit is unoccupied (patient at activities/dining). Worker begins hygiene inspection.",
+              "signal": "[H,H,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "dr-hygiene-ok"
+            ]
+          },
+          {
+            "id": "dr-hygiene-ok",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Hygiene Inspection Passed",
+              "description": "Bathroom, linens, and personal care area are within hygiene norms. D2_HYGIENE_NORM=H. HD=1 from ACCESSIBLE (D2: L→H). Bathroom cleaned, toilet sanitized, shower/tub clean, linens in acceptable condition, hygiene products stocked (soap, toilet paper, personal care supplies), no significant odor. Worker proceeds to living space safety inspection.",
+              "signal": "[H,H,H,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "dr-space-ok"
+            ]
+          },
+          {
+            "id": "dr-space-ok",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Living Space Inspection Passed",
+              "description": "Living space is in safe, orderly condition. D3_SPACE_NORM=H. HD=1 from HYGIENE_OK (D3: L→H). Pathways clear, furniture in position, no loose rugs, floors dry, no clutter in walking areas, grab bars secure. Worker proceeds to patient observation (if patient is present) then task completion.",
+              "signal": "[H,H,H,H,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "dr-patient-ok"
+            ]
+          },
+          {
+            "id": "dr-patient-ok",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Patient Observed Normal",
+              "description": "Patient was observed during the visit and appeared within normal range. D5_PATIENT_OBSERVED_NORM=H. HD=1 from SPACE_OK (D5: L→H; D4 stays LOW — nutrition not assessed in daily visits). Patient recognized the maintenance worker, responded to greeting, showed appropriate orientation and affect. No signs of acute distress, confusion, or changed behavior. Worker completes task log.",
+              "signal": "[H,H,H,H,L,H,L,L]"
+            },
+            "nextVectorIds": [
+              "dr-daily-done"
+            ]
+          },
+          {
+            "id": "dr-daily-done",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Daily Visit Complete",
+              "description": "All daily maintenance tasks completed and logged. D6_TASKS_COMPLETE=H. HD=1 from PATIENT_OK (D6: L→H). Checklist signed off: hygiene tasks complete, safety check documented, patient observation recorded, maintenance log entry submitted to supervisor. Terminal — fires DAILY_COMPLETE.",
+              "signal": "[H,H,H,H,L,H,H,L]"
+            },
+            "outputVectors": [
+              {
+                "id": "out-daily-complete",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "DAILY_COMPLETE — routine daily maintenance visit completed with no concerns. Hygiene, safety, and patient observation all within norms. No downstream clinical alerts.",
+                  "decision": "DAILY_COMPLETE",
+                  "severity": "ROUTINE",
+                  "action": "Log visit completion. No clinical alert generated. Supervisor review during standard shift handoff. Contributes to longitudinal visit pattern baseline.",
+                  "downstreamMachine": "none",
+                  "typicalFrequency": "Daily, 5-7 days per week"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "maint-weekly-deep-clean",
+        "name": "Weekly Deep Clean — Full Inspection with Nutrition Assessment",
+        "metadata": {
+          "description": "Weekly deep-clean visit covering all daily scope plus a full nutrition and hydration assessment. Includes: refrigerator inspection (food freshness, quantity), hydration supplies, pantry/snack inventory, complete linen change, and thorough bathroom deep clean. The nutrition dimension (D4) is exclusively assessed during weekly visits. Completes with WEEKLY_COMPLETE if all conditions are within norms.",
+          "regex": "(VISIT_ACTIVE)+ · ACCESSIBLE · HYGIENE_OK · SPACE_OK · NUTRITION_OK · PATIENT_OK_WEEKLY · DEEP_DONE → WEEKLY_COMPLETE",
+          "path": "VISIT_ACTIVE → ACCESSIBLE → HYGIENE_OK → SPACE_OK → NUTRITION_OK → PATIENT_OK_WEEKLY → DEEP_DONE",
+          "output": "WEEKLY_COMPLETE=[0,1,0,0,0,0]",
+          "clinicalValue": "Weekly visits provide the only regular nutrition and hydration assessment in the maintenance workflow. A NUTRITION_NORM failure (D4 stays LOW, concern logged) is an early indicator of food insecurity, appetite change, or cognitive decline affecting self-care. This observation feeds into WellnessAnalytics and PatientWellness assessments.",
+          "divergenceFromSeq1": "Sequences 1 and 2 share VISIT_ACTIVE through SPACE_OK (steps 1-4). At step 5, Seq 1 raises D5 (patient observation, skipping nutrition), while Seq 2 raises D4 (nutrition first, then D5 at step 6). The weekly sequence adds one additional step."
+        },
+        "vectors": [
+          {
+            "id": "wd-visit",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "Visit Active (Weekly)",
+              "description": "Maintenance worker initiates the weekly deep-clean visit. Same initial vector as daily routine. Kleene-plus: worker announces, waits, re-announces if needed.",
+              "signal": "[H,L,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "wd-accessible"
+            ]
+          },
+          {
+            "id": "wd-accessible",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Unit Accessible (Weekly)",
+              "description": "Unit entered and weekly deep-clean begins. D1=H. HD=1 from VISIT_ACTIVE.",
+              "signal": "[H,H,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "wd-hygiene-ok"
+            ]
+          },
+          {
+            "id": "wd-hygiene-ok",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Hygiene Inspection Passed (Weekly)",
+              "description": "Full deep-clean hygiene inspection passed. D2=H. HD=1. Includes: complete bathroom scrub, grout and tile cleaning, linen change (bed and bath), personal care supply restocking.",
+              "signal": "[H,H,H,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "wd-space-ok"
+            ]
+          },
+          {
+            "id": "wd-space-ok",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Living Space Inspection Passed (Weekly)",
+              "description": "Safety and orderliness inspection passed. D3=H. HD=1. Weekly scope adds: furniture arrangement assessment, floor waxing or spot treatment, window cleaning, closet organization check.",
+              "signal": "[H,H,H,H,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "wd-nutrition-ok"
+            ]
+          },
+          {
+            "id": "wd-nutrition-ok",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Nutrition and Hydration Assessment Passed",
+              "description": "Food and hydration supply inspection passed. D4_NUTRITION_NORM=H. HD=1 from SPACE_OK (D4: L→H). Refrigerator contains fresh, unexpired food in adequate quantities. Water/beverage supply sufficient. Pantry/snack supply intact. Meal tray returned (patient ate) or patient was observed at dining. No signs of significant appetite change or food spoilage. This dimension is ONLY assessed during weekly visits — not present in the daily-routine sequence.",
+              "signal": "[H,H,H,H,H,L,L,L]"
+            },
+            "nextVectorIds": [
+              "wd-patient-ok"
+            ]
+          },
+          {
+            "id": "wd-patient-ok",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Patient Observed Normal (Weekly)",
+              "description": "Patient observed within normal range after nutrition assessment. D5=H. HD=1 from NUTRITION_OK (D5: L→H). Worker completes task log.",
+              "signal": "[H,H,H,H,H,H,L,L]"
+            },
+            "nextVectorIds": [
+              "wd-deep-done"
+            ]
+          },
+          {
+            "id": "wd-deep-done",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Weekly Deep Clean Complete",
+              "description": "All weekly deep-clean tasks completed and logged. D6_TASKS_COMPLETE=H. HD=1 from PATIENT_OK_WEEKLY (D6: L→H). Complete checklist signed off including nutrition assessment, linen change, deep-clean documentation. Terminal — fires WEEKLY_COMPLETE.",
+              "signal": "[H,H,H,H,H,H,H,L]"
+            },
+            "outputVectors": [
+              {
+                "id": "out-weekly-complete",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "WEEKLY_COMPLETE — full weekly deep-clean completed with no concerns. All dimensions (hygiene, safety, nutrition, patient observation) within norms.",
+                  "decision": "WEEKLY_COMPLETE",
+                  "severity": "ROUTINE",
+                  "action": "Log weekly visit completion with nutrition assessment results. Submit to supervisor for weekly review. If nutrition indicators were marginal but within threshold, note in visit record for trending.",
+                  "downstreamMachine": "none",
+                  "typicalFrequency": "Weekly, typically mid-week"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "maint-hygiene-concern",
+        "name": "Hygiene Concern — Bathroom or Linen Deficit Observed",
+        "metadata": {
+          "description": "Maintenance worker finds a hygiene deficit upon entering the unit: soiled or unchanged linens, uncleaned bathroom (soiling, odor, unflushed), depleted hygiene products, or evidence of incontinence-related hygiene failure. A concern is logged immediately — D7 rises while D2 stays LOW (hygiene not normal). HYGIENE_ALERT is written to perceptual space, feeding the DailyPatientCare machine's bathroom-nonuse detection path.",
+          "regex": "(VISIT_ACTIVE)+ · ACCESSIBLE · HYGIENE_CONCERN → HYGIENE_ALERT",
+          "path": "VISIT_ACTIVE → ACCESSIBLE → HYGIENE_CONCERN",
+          "output": "HYGIENE_ALERT=[0,0,1,0,0,0]",
+          "clinicalValue": "Hygiene deficits in eldercare settings often indicate functional decline (inability to manage personal hygiene), medication side effects (incontinence-related), cognitive deterioration, or depression (loss of motivation for self-care). Early detection by facilities staff before scheduled clinical assessments provides a leading indicator for DailyPatientCare and WellnessAnalytics.",
+          "downstreamMachine": "DailyPatientCare",
+          "externalCommunications": "Maintenance worker verbally alerts charge nurse immediately. Maintenance log documents: type of deficit, estimated duration (e.g., linens appear not changed in 3+ days), severity. Care alert notification sent to CNA or aide for follow-up hygiene assistance. Nurse assesses patient for contributing medical or cognitive factors within 4 hours."
+        },
+        "vectors": [
+          {
+            "id": "hc-visit",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "Visit Active",
+              "description": "Maintenance worker initiates visit. Same initial as all sequences.",
+              "signal": "[H,L,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "hc-accessible"
+            ]
+          },
+          {
+            "id": "hc-accessible",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Unit Accessible",
+              "description": "Unit entered. D1=H. HD=1. Worker begins hygiene inspection and immediately identifies a deficiency.",
+              "signal": "[H,H,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "hc-hygiene-concern"
+            ]
+          },
+          {
+            "id": "hc-hygiene-concern",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Hygiene Concern Flagged",
+              "description": "Hygiene deficit identified. D7_CONCERN_ACTIVE=H while D2_HYGIENE_NORM stays LOW. HD=1 from ACCESSIBLE (D7: L→H). The deficient condition (D2=L) and the concern flag (D7=H) together encode the clinical signal: hygiene is not normal and action is required. Terminal — fires HYGIENE_ALERT.",
+              "signal": "[H,H,L,L,L,L,L,H]"
+            },
+            "outputVectors": [
+              {
+                "id": "out-hygiene-alert",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "HYGIENE_ALERT — bathroom or linen hygiene deficit observed by facilities staff. Downstream: DailyPatientCare bathroom-nonuse detection.",
+                  "decision": "HYGIENE_ALERT",
+                  "severity": "CLINICAL_CONCERN",
+                  "action": "Alert charge nurse immediately. CNA dispatched for hygiene assistance within 1 hour. Nurse assesses for incontinence, mobility decline, or cognitive factors. Document in care record. Integration layer writes BATHROOM/ALERT input to DailyPatientCare perceptual region.",
+                  "downstreamMachine": "DailyPatientCare",
+                  "typicalResponseTime": "Verbal alert: immediate. CNA follow-up: within 1 hour. Nurse assessment: within 4 hours."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "maint-safety-concern",
+        "name": "Safety Concern — Fall Hazard or Unsafe Condition",
+        "metadata": {
+          "description": "Maintenance worker finds a fall hazard or unsafe condition after hygiene inspection passes: loose rug or mat, displaced furniture creating a pathway obstruction, wet floor without signage, unsecured grab bar, cluttered walking area, or evidence of a recent fall (overturned furniture, items scattered on floor). D7 rises while D3 stays LOW (space not safe). SAFETY_ALERT feeds DailyPatientCare fall detection.",
+          "regex": "(VISIT_ACTIVE)+ · ACCESSIBLE · HYGIENE_OK · SPACE_CONCERN → SAFETY_ALERT",
+          "path": "VISIT_ACTIVE → ACCESSIBLE → HYGIENE_OK → SPACE_CONCERN",
+          "output": "SAFETY_ALERT=[0,0,0,1,0,0]",
+          "clinicalValue": "Fall hazards identified by maintenance staff during routine visits prevent falls before they occur. Evidence of a past undetected fall (furniture displacement, items on floor) triggers the DailyPatientCare fall-response sequence even without a witnessed fall event. This closes the detection gap between fall occurrence and nursing round.",
+          "downstreamMachine": "DailyPatientCare",
+          "externalCommunications": "Maintenance worker immediately secures the hazard if safe to do so (places wet floor sign, removes rug temporarily, clears pathway). Alerts charge nurse with specific description of hazard and location. If evidence suggests a prior fall, nurse assesses patient immediately. Maintenance submits work order for permanent hazard remediation (grab bar repair, rug removal, furniture repositioning). Incident report filed per facility policy.",
+          "severity": "life-safety"
+        },
+        "vectors": [
+          {
+            "id": "sc-visit",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "Visit Active",
+              "description": "Maintenance worker initiates visit.",
+              "signal": "[H,L,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "sc-accessible"
+            ]
+          },
+          {
+            "id": "sc-accessible",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Unit Accessible",
+              "description": "Unit entered. D1=H. HD=1.",
+              "signal": "[H,H,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "sc-hygiene-ok"
+            ]
+          },
+          {
+            "id": "sc-hygiene-ok",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Hygiene Inspection Passed",
+              "description": "Hygiene check passed. D2=H. HD=1. Worker proceeds to living space inspection where the safety concern is discovered.",
+              "signal": "[H,H,H,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "sc-space-concern"
+            ]
+          },
+          {
+            "id": "sc-space-concern",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Safety Concern Flagged",
+              "description": "Fall hazard or unsafe condition identified. D7_CONCERN_ACTIVE=H while D3_SPACE_NORM stays LOW. HD=1 from HYGIENE_OK (D7: L→H). Terminal — fires SAFETY_ALERT.",
+              "signal": "[H,H,H,L,L,L,L,H]"
+            },
+            "outputVectors": [
+              {
+                "id": "out-safety-alert",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "SAFETY_ALERT — fall hazard or unsafe living space condition identified by facilities staff. Downstream: DailyPatientCare fall detection.",
+                  "decision": "SAFETY_ALERT",
+                  "severity": "CLINICAL_CONCERN",
+                  "action": "Immediately mitigate hazard (wet floor sign, remove rug, clear pathway). Alert charge nurse with specific hazard description. Nurse assesses patient for evidence of prior fall or injury. Submit work order for permanent remediation. File incident report per facility policy.",
+                  "downstreamMachine": "DailyPatientCare",
+                  "typicalResponseTime": "Hazard mitigation: immediate. Nurse notification: immediate. Nurse assessment: within 30 minutes if fall evidence present."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "maint-wellness-concern",
+        "name": "Wellness Concern — Patient Observation Raises Welfare Flag",
+        "metadata": {
+          "description": "Maintenance worker encounters the patient during the visit and observes concerning behavior: failure to recognize familiar staff, disorientation to place, unusual affect (tearful, agitated, withdrawn, flat), apparent pain or distress, significant change from prior visit appearance, or failure to respond to greeting. D7 rises while D5 stays LOW (patient not observed normal). WELLNESS_CONCERN feeds WellnessAnalytics.",
+          "regex": "(VISIT_ACTIVE)+ · ACCESSIBLE · HYGIENE_OK · SPACE_OK · PATIENT_CONCERN → WELLNESS_CONCERN",
+          "path": "VISIT_ACTIVE → ACCESSIBLE → HYGIENE_OK → SPACE_OK → PATIENT_CONCERN",
+          "output": "WELLNESS_CONCERN=[0,0,0,0,1,0]",
+          "clinicalValue": "Facilities staff often have a different observational relationship with patients than clinical staff — they interact during routine daily tasks in a less clinical context, which can reveal behavioral changes that patients may suppress during formal nursing assessments. A patient who appears alert during nursing rounds may be confused or distressed during the maintenance visit — facilities staff provide an additional observation window that complements clinical schedules.",
+          "downstreamMachine": "WellnessAnalytics",
+          "externalCommunications": "Maintenance worker immediately informs charge nurse of observed behavior with specific description. Worker does not assess or diagnose. Nurse conducts cognitive and affect assessment within 2 hours. If acute confusion or distress, nurse assessment is immediate. Integration layer evaluates WELLNESS_CONCERN in context of patient's care status (community vs. facility resident, prior WellnessAnalytics history) and writes appropriate cumulative vector to WellnessAnalytics input region at offset 234."
+        },
+        "vectors": [
+          {
+            "id": "wc-visit",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "Visit Active",
+              "description": "Maintenance worker initiates visit.",
+              "signal": "[H,L,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "wc-accessible"
+            ]
+          },
+          {
+            "id": "wc-accessible",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Unit Accessible",
+              "description": "Unit entered. D1=H. HD=1.",
+              "signal": "[H,H,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "wc-hygiene-ok"
+            ]
+          },
+          {
+            "id": "wc-hygiene-ok",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Hygiene Inspection Passed",
+              "description": "Hygiene check passed. D2=H. HD=1.",
+              "signal": "[H,H,H,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "wc-space-ok"
+            ]
+          },
+          {
+            "id": "wc-space-ok",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Living Space Inspection Passed",
+              "description": "Safety inspection passed. D3=H. HD=1. Worker interacts with patient and observes concerning behavior.",
+              "signal": "[H,H,H,H,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "wc-patient-concern"
+            ]
+          },
+          {
+            "id": "wc-patient-concern",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Patient Wellness Concern Flagged",
+              "description": "Patient welfare concern identified during observation. D7_CONCERN_ACTIVE=H while D5_PATIENT_OBSERVED_NORM stays LOW. HD=1 from SPACE_OK (D7: L→H). Terminal — fires WELLNESS_CONCERN.",
+              "signal": "[H,H,H,H,L,L,L,H]"
+            },
+            "outputVectors": [
+              {
+                "id": "out-wellness-concern",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "WELLNESS_CONCERN — patient observation by facilities staff raised welfare flag. Downstream: WellnessAnalytics longitudinal tracking.",
+                  "decision": "WELLNESS_CONCERN",
+                  "severity": "CLINICAL_CONCERN",
+                  "action": "Immediately inform charge nurse. Worker documents specific observed behaviors (did not recognize worker, appeared tearful, was unable to state the day). Nurse assesses within 2 hours (immediately if acute). Integration layer evaluates patient context and writes to WellnessAnalytics input at offset 234.",
+                  "downstreamMachine": "WellnessAnalytics",
+                  "typicalResponseTime": "Nurse notification: immediate. Nurse assessment: within 2 hours (immediate if acute confusion or distress)."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "maint-inaccessible",
+        "name": "Unit Inaccessible — Welfare Check Threshold Reached",
+        "metadata": {
+          "description": "Maintenance worker is unable to enter the unit after multiple attempts. Patient does not respond to repeated knocking and announcements, and unit key is not producing a response (e.g., room appears occupied but no movement). After a facility-defined threshold (typically 2-3 attempts over 15-30 minutes), an inaccessibility concern is logged. INACCESSIBILITY_ALERT triggers emergency welfare check protocol — the patient may be unconscious, fallen, medically compromised, or (in community settings) may have eloped.",
+          "regex": "(VISIT_ACTIVE)+ · INACCESSIBLE → INACCESSIBILITY_ALERT",
+          "path": "VISIT_ACTIVE → INACCESSIBLE",
+          "output": "INACCESSIBILITY_ALERT=[0,0,0,0,0,1]",
+          "clinicalValue": "Unexplained inaccessibility is a high-acuity signal in eldercare. A patient who is unconscious after a fall, experiencing a cardiac event, or in respiratory distress may not respond to a knock. Facilities staff are often the first to detect an inaccessible unit during morning rounds and their response triggers the emergency welfare check chain that can prevent a prolonged emergency.",
+          "downstreamMachine": "CareTransitionWorkflow",
+          "externalCommunications": "After threshold attempts: immediate notification to charge nurse and supervisor. Charge nurse accompanies facilities staff for emergency access. If patient found in medical emergency: 911 dispatched (activates CareTransitionWorkflow Sequence 1 or 5). If patient not found: elopement protocol activated. If patient found safe (sleeping, showering, hearing difficulty): visit documented as resolved. Incident report filed regardless of outcome. Facilities manager notified if unit access required emergency override."
+        },
+        "vectors": [
+          {
+            "id": "ia-visit",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "Visit Attempted",
+              "description": "Maintenance worker attempting to access the unit. D0_VISIT_ACTIVE=H, D1_UNIT_ACCESSIBLE=L (not yet confirmed). Kleene-plus: multiple visit attempts are recorded — worker knocks, waits, re-announces, attempts key entry — before the inaccessibility threshold is reached. The isInitial=true Kleene-plus models the repeated attempt pattern.",
+              "signal": "[H,L,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "ia-inaccessible"
+            ]
+          },
+          {
+            "id": "ia-inaccessible",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Inaccessibility Threshold Reached",
+              "description": "Unit inaccessibility threshold reached after multiple failed attempts. D7_CONCERN_ACTIVE=H while D1_UNIT_ACCESSIBLE stays LOW. HD=1 from VISIT_ATTEMPTED (D7: L→H). D1=L (never rose) distinguishes this from all other sequences where D1=H before any concern fires. Terminal — fires INACCESSIBILITY_ALERT.",
+              "signal": "[H,L,L,L,L,L,L,H]"
+            },
+            "outputVectors": [
+              {
+                "id": "out-inaccessibility-alert",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "INACCESSIBILITY_ALERT — unit inaccessible after multiple attempts by facilities staff. Welfare check protocol activated. Potential downstream: CareTransitionWorkflow emergency sequences.",
+                  "decision": "INACCESSIBILITY_ALERT",
+                  "severity": "EMERGENCY",
+                  "action": "Immediate: notify charge nurse and supervisor. Charge nurse accompanies facilities staff for emergency access (supervisor key or master key). Assess patient status on entry. If medical emergency: activate 911 and CareTransitionWorkflow Sequence 1. If not found: activate elopement protocol. If safe (sleeping, showering): document resolved incident. File incident report regardless.",
+                  "downstreamMachine": "CareTransitionWorkflow",
+                  "typicalResponseTime": "Nurse notification: immediate. Emergency access: within 5 minutes of notification."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "testSequences": [
+      {
+        "id": "maint-tc-01",
+        "name": "Daily Routine — Single Visit, All Clear",
+        "description": "Standard daily visit. Worker enters, passes hygiene and space inspection, observes patient normally, logs complete.",
+        "expectedOutput": "DAILY_COMPLETE",
+        "steps": [
+          {
+            "event": "VISIT_ACTIVE",
+            "signal": "[H,L,L,L,L,L,L,L]",
+            "note": "Worker arrives, knocks and announces"
+          },
+          {
+            "event": "ACCESSIBLE",
+            "signal": "[H,H,L,L,L,L,L,L]",
+            "note": "Patient opens door; worker enters"
+          },
+          {
+            "event": "HYGIENE_OK",
+            "signal": "[H,H,H,L,L,L,L,L]",
+            "note": "Bathroom clean, linens acceptable, products stocked"
+          },
+          {
+            "event": "SPACE_OK",
+            "signal": "[H,H,H,H,L,L,L,L]",
+            "note": "Pathways clear, no fall hazards"
+          },
+          {
+            "event": "PATIENT_OK",
+            "signal": "[H,H,H,H,L,H,L,L]",
+            "note": "Patient greeted worker by name, oriented and alert"
+          },
+          {
+            "event": "DAILY_DONE",
+            "signal": "[H,H,H,H,L,H,H,L]",
+            "note": "Checklist signed, log submitted"
+          }
+        ]
+      },
+      {
+        "id": "maint-tc-02",
+        "name": "Daily Routine — Multiple Knock Attempts Before Entry (Kleene+)",
+        "description": "Worker knocks three times before patient answers. Kleene-plus initial absorbs the repeated VISIT_ACTIVE events. Rest of sequence is clean.",
+        "expectedOutput": "DAILY_COMPLETE",
+        "steps": [
+          {
+            "event": "VISIT_ACTIVE",
+            "signal": "[H,L,L,L,L,L,L,L]",
+            "note": "First knock — no answer"
+          },
+          {
+            "event": "VISIT_ACTIVE",
+            "signal": "[H,L,L,L,L,L,L,L]",
+            "note": "Second knock — Kleene+ self-loop"
+          },
+          {
+            "event": "VISIT_ACTIVE",
+            "signal": "[H,L,L,L,L,L,L,L]",
+            "note": "Third knock announced louder — Kleene+ self-loop"
+          },
+          {
+            "event": "ACCESSIBLE",
+            "signal": "[H,H,L,L,L,L,L,L]",
+            "note": "Patient opens door after hearing louder knock"
+          },
+          {
+            "event": "HYGIENE_OK",
+            "signal": "[H,H,H,L,L,L,L,L]",
+            "note": "Hygiene within norms"
+          },
+          {
+            "event": "SPACE_OK",
+            "signal": "[H,H,H,H,L,L,L,L]",
+            "note": "Space safe and orderly"
+          },
+          {
+            "event": "PATIENT_OK",
+            "signal": "[H,H,H,H,L,H,L,L]",
+            "note": "Patient noted hearing aid battery was low — explains delayed response; alert and oriented"
+          },
+          {
+            "event": "DAILY_DONE",
+            "signal": "[H,H,H,H,L,H,H,L]",
+            "note": "Visit complete; hearing aid battery change noted in log for CNA follow-up"
+          }
+        ]
+      },
+      {
+        "id": "maint-tc-03",
+        "name": "Weekly Deep Clean — Full Sequence with Nutrition Assessment",
+        "description": "Full weekly deep-clean. All dimensions including nutrition/hydration inspection pass. Patient observed well.",
+        "expectedOutput": "WEEKLY_COMPLETE",
+        "steps": [
+          {
+            "event": "VISIT_ACTIVE",
+            "signal": "[H,L,L,L,L,L,L,L]",
+            "note": "Weekly visit initiated"
+          },
+          {
+            "event": "ACCESSIBLE",
+            "signal": "[H,H,L,L,L,L,L,L]",
+            "note": "Patient opens door, invites worker in"
+          },
+          {
+            "event": "HYGIENE_OK",
+            "signal": "[H,H,H,L,L,L,L,L]",
+            "note": "Full bathroom scrub complete; linen change performed; supplies restocked"
+          },
+          {
+            "event": "SPACE_OK",
+            "signal": "[H,H,H,H,L,L,L,L]",
+            "note": "Deep clean complete; furniture inspected; floors treated"
+          },
+          {
+            "event": "NUTRITION_OK",
+            "signal": "[H,H,H,H,H,L,L,L]",
+            "note": "Refrigerator: fresh food, nothing expired; water pitcher full; snack supply adequate"
+          },
+          {
+            "event": "PATIENT_OK_WEEKLY",
+            "signal": "[H,H,H,H,H,H,L,L]",
+            "note": "Patient chatted with worker, recalled their name, described plans for afternoon activity"
+          },
+          {
+            "event": "DEEP_CLEAN_DONE",
+            "signal": "[H,H,H,H,H,H,H,L]",
+            "note": "Full weekly checklist signed; supervisor copy submitted"
+          }
+        ]
+      },
+      {
+        "id": "maint-tc-04",
+        "name": "Hygiene Concern — Soiled Linens and Bathroom Odor",
+        "description": "Worker enters unit and immediately detects hygiene deficit: soiled bed linens, strong odor in bathroom, toilet unflushed. Concern flagged and clinical staff alerted.",
+        "expectedOutput": "HYGIENE_ALERT",
+        "steps": [
+          {
+            "event": "VISIT_ACTIVE",
+            "signal": "[H,L,L,L,L,L,L,L]",
+            "note": "Daily visit initiated"
+          },
+          {
+            "event": "ACCESSIBLE",
+            "signal": "[H,H,L,L,L,L,L,L]",
+            "note": "Patient opens door; appears embarrassed"
+          },
+          {
+            "event": "HYGIENE_CONCERN",
+            "signal": "[H,H,L,L,L,L,L,H]",
+            "note": "Soiled linens observed; strong bathroom odor; unflushed toilet — D7 rises, D2 stays LOW"
+          }
+        ]
+      },
+      {
+        "id": "maint-tc-05",
+        "name": "Safety Concern — Loose Rug and Wet Floor in Bathroom Doorway",
+        "description": "Hygiene inspection passes but worker finds loose area rug in the bathroom doorway and a wet floor where the patient dripped after showering. Fall hazard flagged.",
+        "expectedOutput": "SAFETY_ALERT",
+        "steps": [
+          {
+            "event": "VISIT_ACTIVE",
+            "signal": "[H,L,L,L,L,L,L,L]",
+            "note": "Daily visit initiated"
+          },
+          {
+            "event": "ACCESSIBLE",
+            "signal": "[H,H,L,L,L,L,L,L]",
+            "note": "Worker enters; patient is seated in living room"
+          },
+          {
+            "event": "HYGIENE_OK",
+            "signal": "[H,H,H,L,L,L,L,L]",
+            "note": "Bathroom cleaned after shower; linens fresh; products stocked"
+          },
+          {
+            "event": "SPACE_CONCERN",
+            "signal": "[H,H,H,L,L,L,L,H]",
+            "note": "Loose area rug at bathroom door entry; wet floor patch where patient stepped out of shower — D7 rises, D3 stays LOW"
+          }
+        ]
+      },
+      {
+        "id": "maint-tc-06",
+        "name": "Wellness Concern — Patient Disoriented, Does Not Recognize Familiar Worker",
+        "description": "Hygiene and space inspections pass. Worker attempts to greet patient (has visited weekly for 6 months). Patient does not recognize worker, asks who they are repeatedly, appears anxious and confused. Wellness concern flagged.",
+        "expectedOutput": "WELLNESS_CONCERN",
+        "steps": [
+          {
+            "event": "VISIT_ACTIVE",
+            "signal": "[H,L,L,L,L,L,L,L]",
+            "note": "Weekly visit initiated; worker expects normal interaction"
+          },
+          {
+            "event": "ACCESSIBLE",
+            "signal": "[H,H,L,L,L,L,L,L]",
+            "note": "Patient opens door; expression is blank — unusual"
+          },
+          {
+            "event": "HYGIENE_OK",
+            "signal": "[H,H,H,L,L,L,L,L]",
+            "note": "Hygiene acceptable; linen somewhat unkempt but within range"
+          },
+          {
+            "event": "SPACE_OK",
+            "signal": "[H,H,H,H,L,L,L,L]",
+            "note": "Room orderly; no hazards"
+          },
+          {
+            "event": "PATIENT_CONCERN",
+            "signal": "[H,H,H,H,L,L,L,H]",
+            "note": "Patient asks 'Who are you?' three times; cannot recall worker's name despite months of weekly visits; becomes anxious — D7 rises, D5 stays LOW"
+          }
+        ]
+      },
+      {
+        "id": "maint-tc-07",
+        "name": "Inaccessibility Alert — No Response After Four Attempts",
+        "description": "Maintenance worker attempts to access unit four times over 20 minutes. No response to knocking or announcements. Light visible under door suggesting patient is in. Inaccessibility threshold reached — welfare check initiated.",
+        "expectedOutput": "INACCESSIBILITY_ALERT",
+        "steps": [
+          {
+            "event": "VISIT_ACTIVE",
+            "signal": "[H,L,L,L,L,L,L,L]",
+            "note": "First attempt — knock and announce"
+          },
+          {
+            "event": "VISIT_ACTIVE",
+            "signal": "[H,L,L,L,L,L,L,L]",
+            "note": "Second attempt (5 min) — louder knock, called patient by name; Kleene+ loop"
+          },
+          {
+            "event": "VISIT_ACTIVE",
+            "signal": "[H,L,L,L,L,L,L,L]",
+            "note": "Third attempt (10 min) — supervisor contacted; told to try once more; Kleene+ loop"
+          },
+          {
+            "event": "VISIT_ACTIVE",
+            "signal": "[H,L,L,L,L,L,L,L]",
+            "note": "Fourth attempt (15 min) — light still visible under door, no response; threshold reached; Kleene+ loop"
+          },
+          {
+            "event": "INACCESSIBLE",
+            "signal": "[H,L,L,L,L,L,L,H]",
+            "note": "Inaccessibility concern logged — D7 rises, D1 stays LOW; charge nurse called for emergency access"
+          }
+        ]
+      },
+      {
+        "id": "maint-tc-08",
+        "name": "Wellness Concern Escalation — Integration with WellnessAnalytics",
+        "description": "Worker observes patient wellness concern (TC-06 scenario). Integration layer assesses patient context: facility resident, prior ALERT in WellnessAnalytics. Translates WELLNESS_CONCERN into a WellnessAnalytics FACILITY_ALERT_REPEAT cumulative vector and writes to offset 234. Demonstrates full facilities-to-wellness pipeline.",
+        "expectedOutput": "WELLNESS_CONCERN → WellnessAnalytics FACILITY_ALERT_REPEAT",
+        "steps": [
+          {
+            "event": "VISIT_ACTIVE",
+            "signal": "[H,L,L,L,L,L,L,L]",
+            "note": "FacilitiesMaintenance: visit initiated"
+          },
+          {
+            "event": "ACCESSIBLE",
+            "signal": "[H,H,L,L,L,L,L,L]",
+            "note": "FacilitiesMaintenance: unit entered"
+          },
+          {
+            "event": "HYGIENE_OK",
+            "signal": "[H,H,H,L,L,L,L,L]",
+            "note": "FacilitiesMaintenance: hygiene passed"
+          },
+          {
+            "event": "SPACE_OK",
+            "signal": "[H,H,H,H,L,L,L,L]",
+            "note": "FacilitiesMaintenance: space safe"
+          },
+          {
+            "event": "PATIENT_CONCERN",
+            "signal": "[H,H,H,H,L,L,L,H]",
+            "note": "FacilitiesMaintenance: WELLNESS_CONCERN output written to perceptual bytes 254 (offset 250 + D4)"
+          },
+          {
+            "event": "INTEGRATION_LAYER",
+            "signal": "—",
+            "note": "Integration layer reads WELLNESS_CONCERN from bytes 250-255; queries patient record: facility resident, prior ALERT assessment; writes [H,H,H,L,H,L,L,L] (FACILITY_ALERT_REPEAT) to WellnessAnalytics input at offset 234"
+          },
+          {
+            "event": "WA_TRANSITION_REVIEW",
+            "signal": "—",
+            "note": "WellnessAnalytics Sequence 3 (wa-sustained-alert-facility) advances; if sustained: TRANSITION_REVIEW output → CareTransitionWorkflow"
+          }
+        ]
+      }
+    ],
+    "testWorkstreams": [
+      {
+        "id": "ws-7day-residential-cycle",
+        "name": "7-Day Residential Maintenance Cycle",
+        "description": "A complete Monday-through-Sunday maintenance cycle for a single assisted living resident. The workstream follows one patient across all seven days with realistic daily visits, one mid-week deep clean, and a clinical escalation arc: hygiene concern (Tuesday) → safety hazard (Friday) → fall and inaccessibility event (Saturday) → post-fall wellness concern and downstream escalation (Sunday). Each day is an independent CES sequence pass. The seven outputs together compose a longitudinal picture of the patient's environmental and observational state.",
+        "patient": {
+          "id": "patient-ws-001",
+          "profile": "83-year-old assisted living resident, female; 2-year resident; mild cognitive decline noted at last quarterly assessment; independent ambulation with cane; hearing reduction (wears hearing aids, periodically uncharged); no prior fall history this admission",
+          "carePlan": "Daily aide check-in morning; nursing assessment twice weekly; maintenance daily visit 9:00-11:00 AM; weekly deep clean Wednesday"
+        },
+        "clinicalNarrative": "A normal week begins with a clear Monday visit. Tuesday reveals a hygiene deficit (soiled linens) suggesting the patient struggled with self-care overnight — possibly related to the mild cognitive decline or an unwitnessed incontinence episode. Wednesday's deep clean confirms the CNA hygiene follow-up resolved the immediate issue, and nutrition is satisfactory. Thursday is unremarkable. Friday a loose bath mat is found near the shower — the first structural fall-risk indicator. Saturday the unit is inaccessible; emergency access reveals the patient on the floor near the bathroom, conscious but unable to rise. EMS is activated. Sunday the patient returns from emergency department observation; the maintenance worker — who has been visiting weekly for two years — is not recognized. WELLNESS_CONCERN fires and routes to WellnessAnalytics as a FACILITY_ALERT, initiating the sustained-deterioration tracking sequence.",
+        "days": [
+          {
+            "day": 1,
+            "label": "Monday",
+            "visitType": "daily",
+            "expectedOutput": "DAILY_COMPLETE",
+            "clinicalContext": "Baseline visit; week starts normally. Patient rested well, room in order.",
+            "steps": [
+              {
+                "event": "VISIT_ACTIVE",
+                "signal": "[H,L,L,L,L,L,L,L]",
+                "note": "9:07 AM — worker knocks and announces; patient responds promptly"
+              },
+              {
+                "event": "ACCESSIBLE",
+                "signal": "[H,H,L,L,L,L,L,L]",
+                "note": "Patient opens door; greets worker by first name"
+              },
+              {
+                "event": "HYGIENE_OK",
+                "signal": "[H,H,H,L,L,L,L,L]",
+                "note": "Bathroom clean; toilet flushed; linens fresh from weekend linen change; soap and paper stocked"
+              },
+              {
+                "event": "SPACE_OK",
+                "signal": "[H,H,H,H,L,L,L,L]",
+                "note": "Pathways clear; cane in place beside bed; no hazards; furniture in standard position"
+              },
+              {
+                "event": "PATIENT_OK",
+                "signal": "[H,H,H,H,L,H,L,L]",
+                "note": "Patient in good spirits; mentions watching the morning news; oriented and interactive"
+              },
+              {
+                "event": "DAILY_DONE",
+                "signal": "[H,H,H,H,L,H,H,L]",
+                "note": "9:24 AM — routine tasks complete; log submitted; no concerns"
+              }
+            ],
+            "postVisitActions": "None. Log filed. Next visit: Tuesday AM."
+          },
+          {
+            "day": 2,
+            "label": "Tuesday",
+            "visitType": "daily",
+            "expectedOutput": "HYGIENE_ALERT",
+            "clinicalContext": "Hygiene deficit detected. Patient likely had a nighttime incontinence episode and was unable or unwilling to manage it. First observable signal of a self-care gap.",
+            "steps": [
+              {
+                "event": "VISIT_ACTIVE",
+                "signal": "[H,L,L,L,L,L,L,L]",
+                "note": "9:05 AM — worker knocks; brief delay before patient answers"
+              },
+              {
+                "event": "ACCESSIBLE",
+                "signal": "[H,H,L,L,L,L,L,L]",
+                "note": "Patient opens door in nightgown; appears self-conscious"
+              },
+              {
+                "event": "HYGIENE_CONCERN",
+                "signal": "[H,H,L,L,L,L,L,H]",
+                "note": "Strong odor in room; soiled bed linens visible; bathroom shows evidence of incontinence — D7↑, D2 stays LOW; worker calmly offers to get help before cleaning"
+              }
+            ],
+            "postVisitActions": "Worker verbally alerts charge nurse at 9:09 AM. CNA dispatched for personal hygiene assistance; linen change completed by 10:30 AM. Nurse documents incontinence episode in care record. No new orders placed — within care plan parameters. Incident noted for quarterly assessment review. Next visit: Wednesday (weekly deep clean)."
+          },
+          {
+            "day": 3,
+            "label": "Wednesday",
+            "visitType": "weekly",
+            "expectedOutput": "WEEKLY_COMPLETE",
+            "clinicalContext": "Weekly deep clean. CNA addressed Tuesday hygiene concern; patient has had fresh linens since 10:30 AM Tuesday. Nutrition assessment included. Patient mood improved from Tuesday.",
+            "steps": [
+              {
+                "event": "VISIT_ACTIVE",
+                "signal": "[H,L,L,L,L,L,L,L]",
+                "note": "9:12 AM — worker knocks with weekly supply cart; patient answers"
+              },
+              {
+                "event": "ACCESSIBLE",
+                "signal": "[H,H,L,L,L,L,L,L]",
+                "note": "Patient opens door; appears better rested than Tuesday; says she feels 'much better'"
+              },
+              {
+                "event": "HYGIENE_OK",
+                "signal": "[H,H,H,L,L,L,L,L]",
+                "note": "Full bathroom deep scrub; complete linen change (fresh set installed); personal care supplies fully restocked; no odor"
+              },
+              {
+                "event": "SPACE_OK",
+                "signal": "[H,H,H,H,L,L,L,L]",
+                "note": "Room thoroughly cleaned; furniture inspected; floors treated; closet organized; no safety concerns"
+              },
+              {
+                "event": "NUTRITION_OK",
+                "signal": "[H,H,H,H,H,L,L,L]",
+                "note": "Refrigerator: yogurt, fruit, water pitcher full — all fresh; pantry snacks adequate; meal tray from last night returned empty (patient ate dinner)"
+              },
+              {
+                "event": "PATIENT_OK_WEEKLY",
+                "signal": "[H,H,H,H,H,H,L,L]",
+                "note": "Patient chatted about her daughter's upcoming visit; recognized worker; oriented to day and month; appropriate affect"
+              },
+              {
+                "event": "DEEP_DONE",
+                "signal": "[H,H,H,H,H,H,H,L]",
+                "note": "10:05 AM — full weekly checklist complete; supervisor copy submitted"
+              }
+            ],
+            "postVisitActions": "Log filed. Nutrition within norms — no action. Hygiene concern from Tuesday resolved; notation added to ongoing care record. Next visit: Thursday AM."
+          },
+          {
+            "day": 4,
+            "label": "Thursday",
+            "visitType": "daily",
+            "expectedOutput": "DAILY_COMPLETE",
+            "clinicalContext": "Unremarkable daily visit. Patient in bathroom when worker arrived — hearing aid was in the charger, causing delayed response. Kleene-plus initial absorbs the extra knock attempt.",
+            "steps": [
+              {
+                "event": "VISIT_ACTIVE",
+                "signal": "[H,L,L,L,L,L,L,L]",
+                "note": "9:08 AM — knock and announce; no immediate response"
+              },
+              {
+                "event": "VISIT_ACTIVE",
+                "signal": "[H,L,L,L,L,L,L,L]",
+                "note": "9:10 AM — second knock, louder; heard shuffling inside; Kleene+ loop"
+              },
+              {
+                "event": "ACCESSIBLE",
+                "signal": "[H,H,L,L,L,L,L,L]",
+                "note": "Patient opens door; explains she was in the bathroom and hearing aid was charging; apologizes for the wait"
+              },
+              {
+                "event": "HYGIENE_OK",
+                "signal": "[H,H,H,L,L,L,L,L]",
+                "note": "Bathroom tidy from post-shower use; linens acceptable; products stocked"
+              },
+              {
+                "event": "SPACE_OK",
+                "signal": "[H,H,H,H,L,L,L,L]",
+                "note": "Pathways clear; cane beside bed; bath mat in place; no hazards observed"
+              },
+              {
+                "event": "PATIENT_OK",
+                "signal": "[H,H,H,H,L,H,L,L]",
+                "note": "Patient alert; mentions her daughter called and is coming Saturday; looking forward to the visit"
+              },
+              {
+                "event": "DAILY_DONE",
+                "signal": "[H,H,H,H,L,H,H,L]",
+                "note": "9:28 AM — routine tasks complete; note in log: hearing aid was charging, may benefit from backup or reminder system"
+              }
+            ],
+            "postVisitActions": "Log filed. Hearing aid charging noted — CNA informed for follow-up on hearing aid management routine. Next visit: Friday AM."
+          },
+          {
+            "day": 5,
+            "label": "Friday",
+            "visitType": "daily",
+            "expectedOutput": "SAFETY_ALERT",
+            "clinicalContext": "Fall hazard identified. Loose bath mat in bathroom entry zone — the same zone where the patient showers independently. Patient reports the mat 'keeps sliding around.' This is the structural precondition for Saturday's fall event.",
+            "steps": [
+              {
+                "event": "VISIT_ACTIVE",
+                "signal": "[H,L,L,L,L,L,L,L]",
+                "note": "9:04 AM — knock and announce; patient answers promptly; expecting daughter tomorrow"
+              },
+              {
+                "event": "ACCESSIBLE",
+                "signal": "[H,H,L,L,L,L,L,L]",
+                "note": "Patient opens door; animated and cheerful about the weekend visit"
+              },
+              {
+                "event": "HYGIENE_OK",
+                "signal": "[H,H,H,L,L,L,L,L]",
+                "note": "Bathroom clean; linens acceptable; hygiene products stocked"
+              },
+              {
+                "event": "SPACE_CONCERN",
+                "signal": "[H,H,H,L,L,L,L,H]",
+                "note": "Bath mat in bathroom entry is loose — slides easily; backing worn; patient mentions 'it moves when I step on it'; D7↑, D3 stays LOW; worker removes mat immediately and places wet floor sign"
+              }
+            ],
+            "postVisitActions": "Worker removes loose bath mat and places it aside. Wet floor sign placed. Charge nurse notified at 9:11 AM. Work order submitted for non-slip bath mat replacement (priority: same day). Nurse documents fall hazard and removal in care record. Supervisor notified of work order. Patient advised not to use that area of the bathroom floor without the new mat. New non-slip mat delivered and installed by 2:00 PM. Next visit: Saturday AM."
+          },
+          {
+            "day": 6,
+            "label": "Saturday",
+            "visitType": "daily",
+            "expectedOutput": "INACCESSIBILITY_ALERT",
+            "clinicalContext": "Patient does not respond to repeated knocking. Light visible under door. Daughter's planned visit is today. Emergency access reveals patient on bathroom floor — conscious but unable to rise; likely fell stepping out of the shower near the bathroom entry zone (consistent with Friday's SAFETY_ALERT, occurring after the new mat was installed but before the patient fully adjusted to the updated layout). EMS activated. CareTransitionWorkflow Sequence 1 (acute hospital transfer) initiated.",
+            "steps": [
+              {
+                "event": "VISIT_ACTIVE",
+                "signal": "[H,L,L,L,L,L,L,L]",
+                "note": "9:05 AM — knock and announce; no response; light visible under door"
+              },
+              {
+                "event": "VISIT_ACTIVE",
+                "signal": "[H,L,L,L,L,L,L,L]",
+                "note": "9:08 AM — second knock, louder; called patient by first name; no response; Kleene+ loop"
+              },
+              {
+                "event": "VISIT_ACTIVE",
+                "signal": "[H,L,L,L,L,L,L,L]",
+                "note": "9:11 AM — third knock; supervisor contacted by radio; told to attempt once more; water running noise heard faintly — possibly shower left on; Kleene+ loop"
+              },
+              {
+                "event": "INACCESSIBLE",
+                "signal": "[H,L,L,L,L,L,L,H]",
+                "note": "9:14 AM — inaccessibility threshold reached; D7↑, D1 stays LOW; charge nurse called immediately; worker stays at door"
+              }
+            ],
+            "postVisitActions": "Charge nurse arrives at 9:17 AM with emergency key. Unit entered: patient found on bathroom floor near shower exit, conscious, alert, unable to rise; reporting hip pain. Shower running. EMS dispatched at 9:18 AM (activates CareTransitionWorkflow Sequence 1 — acute hospital transfer). Daughter notified by charge nurse at 9:20 AM. EMS arrives at 9:24 AM; patient transported to hospital ED. Incident report filed. Daughter meets patient at ED. X-ray ordered for hip. Maintenance log updated: inaccessibility → welfare check → fall found → EMS transport."
+          },
+          {
+            "day": 7,
+            "label": "Sunday",
+            "visitType": "daily",
+            "expectedOutput": "WELLNESS_CONCERN → WellnessAnalytics FACILITY_ALERT",
+            "clinicalContext": "Patient returned from ED late Saturday evening — hip X-ray showed no fracture; ED observation for 6 hours; discharged back to facility. Sunday visit reveals cognitive and affect change: patient does not recognize the maintenance worker she has known for two years. Post-fall disorientation and possible subconcussion effect. WELLNESS_CONCERN fires and is translated by the integration layer into a WellnessAnalytics FACILITY_ALERT cumulative vector, initiating longitudinal deterioration tracking.",
+            "steps": [
+              {
+                "event": "VISIT_ACTIVE",
+                "signal": "[H,L,L,L,L,L,L,L]",
+                "note": "9:10 AM — worker knocks; patient's daughter answers (she stayed overnight); invites worker in"
+              },
+              {
+                "event": "ACCESSIBLE",
+                "signal": "[H,H,L,L,L,L,L,L]",
+                "note": "Unit entered; patient is in bed, awake; daughter present"
+              },
+              {
+                "event": "HYGIENE_OK",
+                "signal": "[H,H,H,L,L,L,L,L]",
+                "note": "Bathroom tidy; daughter had helped with hygiene this morning; linens freshly changed by CNA upon return from ED"
+              },
+              {
+                "event": "SPACE_OK",
+                "signal": "[H,H,H,H,L,L,L,L]",
+                "note": "New non-slip bath mat secured; pathways clear; no current fall hazards"
+              },
+              {
+                "event": "PATIENT_CONCERN",
+                "signal": "[H,H,H,H,L,L,L,H]",
+                "note": "Worker greets patient by name (2-year relationship); patient stares blankly and asks daughter 'Who is that?'; cannot recall worker's name or recognize her face; appears flat in affect and slightly confused about the day; D7↑, D5 stays LOW"
+              }
+            ],
+            "postVisitActions": "Worker informs charge nurse immediately. Daughter confirms patient was 'not quite herself' since returning from ED. Nurse conducts cognitive assessment at 9:30 AM. Integration layer reads WELLNESS_CONCERN from perceptual bytes 250-255; queries patient record: facility resident, no prior WellnessAnalytics ALERT history → writes FACILITY_ALERT [H,H,H,L,L,L,L,L] to WellnessAnalytics input at offset 234. WellnessAnalytics Sequence 3 (wa-sustained-alert-facility) initial fires — baseline ALERT now in progress. Nurse contacts attending physician. Post-fall cognitive follow-up ordered. Family meeting scheduled for Monday.",
+            "workstreamConclusion": {
+              "summary": "The 7-day workstream produced 5 outputs across 7 visits: DAILY_COMPLETE × 3, WEEKLY_COMPLETE × 1, HYGIENE_ALERT × 1, SAFETY_ALERT × 1, INACCESSIBILITY_ALERT × 1, WELLNESS_CONCERN × 1. The sequence of SAFETY_ALERT (Friday) followed by INACCESSIBILITY_ALERT (Saturday) followed by WELLNESS_CONCERN (Sunday) represents the facility maintenance contribution to a complete fall-escalation-and-cognitive-reassessment arc — a clinical narrative that no single machine alone could have captured.",
+              "downstreamActivations": [
+                "DailyPatientCare: HYGIENE_ALERT (Tuesday) feeds bathroom-nonuse detection; SAFETY_ALERT (Friday) feeds fall detection",
+                "CareTransitionWorkflow: INACCESSIBILITY_ALERT (Saturday) → Sequence 1 acute hospital transfer (hip injury confirmed, no fracture)",
+                "WellnessAnalytics: WELLNESS_CONCERN (Sunday) → FACILITY_ALERT initial; longitudinal deterioration tracking begins"
+              ],
+              "perceptualSpaceBytesWritten": [
+                250,
+                252,
+                253,
+                255,
+                254
+              ],
+              "seqOutputBytesMap": {
+                "byte_250_DAILY_COMPLETE": "Mon, Thu, Wed (partial — subsumed by WEEKLY_COMPLETE)",
+                "byte_251_WEEKLY_COMPLETE": "Wed",
+                "byte_252_HYGIENE_ALERT": "Tue",
+                "byte_253_SAFETY_ALERT": "Fri",
+                "byte_254_WELLNESS_CONCERN": "Sun",
+                "byte_255_INACCESSIBILITY_ALERT": "Sat"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "TC-01: Daily Routine — Single Visit, All Clear",
+        "description": "Standard daily visit: worker enters, hygiene and space pass, patient observed normal, tasks logged. → DAILY_COMPLETE",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.9,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.9,
+            0.9,
+            0.1
+          ]
+        ]
+      },
+      {
+        "name": "TC-02: Daily Routine — Kleene+ (3 Knocks Before Entry)",
+        "description": "Three knock attempts before patient answers (hearing aid charging). Kleene+ initial absorbs repeated VISIT_ACTIVE events. → DAILY_COMPLETE",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.9,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.9,
+            0.9,
+            0.1
+          ]
+        ]
+      },
+      {
+        "name": "TC-03: Weekly Deep Clean — Full Sequence with Nutrition Assessment",
+        "description": "Complete weekly visit including refrigerator/hydration inspection (D4) before patient observation. → WEEKLY_COMPLETE",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1
+          ]
+        ]
+      },
+      {
+        "name": "TC-04: Hygiene Concern — Soiled Linens and Bathroom Odor",
+        "description": "Hygiene deficit found on entry — D7 rises, D2 stays LOW. → HYGIENE_ALERT → DailyPatientCare",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ]
+        ]
+      },
+      {
+        "name": "TC-05: Safety Concern — Loose Rug and Wet Floor",
+        "description": "Hygiene passes; fall hazard found during space inspection — D7 rises, D3 stays LOW. → SAFETY_ALERT → DailyPatientCare",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ]
+        ]
+      },
+      {
+        "name": "TC-06: Wellness Concern — Patient Does Not Recognize Familiar Worker",
+        "description": "Hygiene and space pass; patient observation raises welfare flag — D7 rises, D5 stays LOW. → WELLNESS_CONCERN → WellnessAnalytics",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ]
+        ]
+      },
+      {
+        "name": "TC-07: Inaccessibility Alert — No Response After Four Attempts",
+        "description": "Unit inaccessible after four Kleene+ attempts — D7 rises, D1 stays LOW throughout. → INACCESSIBILITY_ALERT → CareTransitionWorkflow",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ]
+        ]
+      },
+      {
+        "name": "TC-08: Wellness Concern Escalation — FM Portion to WellnessAnalytics",
+        "description": "Facilities-machine portion of the full pipeline test. Patient welfare concern observed; WELLNESS_CONCERN written to perceptual bytes 250-255. Integration layer translates to WellnessAnalytics FACILITY_ALERT_REPEAT. → WELLNESS_CONCERN",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ]
+        ]
+      },
+      {
+        "name": "WS-Day1 (Mon): Daily Routine — Week Baseline",
+        "description": "7-day workstream Day 1. Normal daily visit; patient cheerful and alert. Week baseline established. → DAILY_COMPLETE",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.9,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.9,
+            0.9,
+            0.1
+          ]
+        ]
+      },
+      {
+        "name": "WS-Day2 (Tue): Hygiene Concern — Overnight Incontinence",
+        "description": "7-day workstream Day 2. Soiled linens discovered; first observable self-care gap. → HYGIENE_ALERT → DailyPatientCare",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ]
+        ]
+      },
+      {
+        "name": "WS-Day3 (Wed): Weekly Deep Clean — Post-Hygiene-Concern Follow-up",
+        "description": "7-day workstream Day 3. CNA resolved Tuesday hygiene concern; full deep clean including nutrition assessment passes. → WEEKLY_COMPLETE",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1
+          ]
+        ]
+      },
+      {
+        "name": "WS-Day4 (Thu): Daily Routine — Kleene+ (Hearing Aid Charging)",
+        "description": "7-day workstream Day 4. Two knocks before patient answers (hearing aid was charging). All clear. → DAILY_COMPLETE",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.9,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.9,
+            0.9,
+            0.1
+          ]
+        ]
+      },
+      {
+        "name": "WS-Day5 (Fri): Safety Concern — Loose Bath Mat at Shower Exit",
+        "description": "7-day workstream Day 5. Loose bath mat found; structural fall-risk precondition for Saturday. → SAFETY_ALERT → DailyPatientCare",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ]
+        ]
+      },
+      {
+        "name": "WS-Day6 (Sat): Inaccessibility — Patient Found Fallen",
+        "description": "7-day workstream Day 6. No response after three Kleene+ attempts; patient found on bathroom floor. → INACCESSIBILITY_ALERT → CareTransitionWorkflow Seq 1 (EMS/hospital)",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ]
+        ]
+      },
+      {
+        "name": "WS-Day7 (Sun): Wellness Concern — Post-Fall Cognitive Change",
+        "description": "7-day workstream Day 7. Patient returned from ED; does not recognize familiar worker of 2 years. → WELLNESS_CONCERN → WellnessAnalytics FACILITY_ALERT",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ]
+        ]
+      }
+    ]
+  }
+}

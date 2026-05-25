@@ -1,0 +1,627 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Ag Zone Temperature Controller",
+    "description": "Monitors air and root-zone temperature to detect overheating and frost risk in indoor growing zones. Implements two concurrent escalation patterns (OVERTEMP and UNDERTEMP) plus a continuous OPTIMAL signal. Upstream: raw zone sensors at [0:4]. Downstream: AgPlantGrowthCycleMonitor reads output at [20:24].",
+    "metadata": {
+      "category": "agriculture",
+      "domain": "Agriculture — Zone Climate / Temperature",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [20:24]: [1,0,0,0]=HEATING_ON, [0,1,0,0]=COOLING_ON, [0,0,1,0]=VPD_ALERT, [0,0,0,1]=TEMP_OK",
+      "tags": [
+        "ag-zone-temperature-controller",
+        "agriculture",
+        "agriculture-indoor-grow-house",
+        "agriculture-zone-climate-temperature",
+        "ces-sequences",
+        "ces-sequences-3",
+        "heating",
+        "indoor-growing",
+        "input-sequences",
+        "input-sequences-2",
+        "kleene-plus",
+        "startup-loadable",
+        "temperature",
+        "thermal-comfort",
+        "zone-climate",
+        "zone-temperature"
+      ],
+      "sequenceCount": 3,
+      "sensorNormalization": {
+        "air_temp_norm": "0.0=15°C, 0.5=24°C (optimal), 1.0=35°C",
+        "root_zone_temp_norm": "0.0=12°C, 0.5=22°C (optimal), 1.0=32°C",
+        "heater_status": "0.0=off, 1.0=on (active heating)",
+        "cooler_status": "0.0=off, 1.0=on (active cooling)"
+      },
+      "downstreamMachine": "AgPlantGrowthCycleMonitor (reads [20:24])",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "agriculture",
+        "domainTags": [
+          "agriculture",
+          "temperature",
+          "zone-climate"
+        ],
+        "family": "ag-zone-temperature-controller",
+        "machineCode": "ag-zone-temperature-controller",
+        "capabilityTags": [],
+        "workflowTags": [
+          "agriculture-indoor-grow-house",
+          "agriculture-zone-climate-temperature",
+          "heating",
+          "indoor-growing",
+          "kleene-plus",
+          "thermal-comfort",
+          "zone-temperature"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "ag-zone-temperature-controller",
+          "agriculture",
+          "agriculture-indoor-grow-house",
+          "agriculture-zone-climate-temperature",
+          "ces-sequences",
+          "ces-sequences-3",
+          "heating",
+          "indoor-growing",
+          "input-sequences",
+          "input-sequences-2",
+          "kleene-plus",
+          "startup-loadable",
+          "temperature",
+          "thermal-comfort",
+          "zone-climate",
+          "zone-temperature"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "agriculture-operations",
+        "runbook": "https://runbooks.example.org/agriculture/agzonetemperaturecontroller",
+        "escalationPolicy": "pagerduty:ag-ops",
+        "contact": {
+          "primary": "agriculture-operations-primary@example.org",
+          "secondary": "agriculture-operations-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 3600,
+          "error": 900
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"agriculture\".  Review and tune the routing as the team owning AgZoneTemperatureController matures."
+      },
+      "triggerConfig": {
+        "processId": "AGZONETEMPERATURECONTROLLER",
+        "processName": "Ag Zone Temperature Controller",
+        "rules": [
+          {
+            "sequenceId": "ag-zone-temp-overtemp",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "COOLING_ON: activate zone cooling system at [20:24]"
+          },
+          {
+            "sequenceId": "ag-zone-temp-undertemp",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "HEATING_ON: activate zone heating at [20:24]"
+          },
+          {
+            "sequenceId": "ag-zone-temp-optimal",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "TEMP_OK: zone temperature within optimal growth range at [20:24]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 0,
+        "length": 4
+      },
+      "output": {
+        "offset": 20,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ag-zone-temp-overtemp",
+        "name": "OverTemp Escalation: WATCH+ → WARM → HOT → CRITICAL → COOLING_ON",
+        "metadata": {
+          "description": "Detects sustained temperature rise from nominal through warm to critically hot. isInitial WATCH provides the A+ kleene-plus pattern, requiring at least one observation before advancing.",
+          "path": "WATCH+ → WARM → HOT → CRITICAL → output[0,1,0,0]",
+          "output": "[0,1,0,0] (COOLING_ON)"
+        },
+        "vectors": [
+          {
+            "id": "ag-zt-watch-high",
+            "elements": [
+              {
+                "value": 0.52,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "WATCH",
+              "description": "WATCH+ — nominal-to-slightly-warm: air_temp just above threshold. isInitial A*A = A+: at least one observation before WARM can arm.",
+              "air_temp_range": "0.50–0.62 (~24°C–28°C)",
+              "root_temp_range": "wildcard"
+            },
+            "nextVectorIds": [
+              "ag-zt-watch-high",
+              "ag-zt-warm"
+            ]
+          },
+          {
+            "id": "ag-zt-warm",
+            "elements": [
+              {
+                "value": 0.68,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.63,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "WARM",
+              "description": "WARM — temperatures clearly above optimal; single observation advances to HOT.",
+              "air_temp_range": "0.62–0.74 (~28°C–31°C)",
+              "root_temp_range": "0.58–0.68"
+            },
+            "nextVectorIds": [
+              "ag-zt-hot"
+            ]
+          },
+          {
+            "id": "ag-zt-hot",
+            "elements": [
+              {
+                "value": 0.82,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.77,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "HOT",
+              "description": "HOT — plant stress temperatures; requires WARM before activating.",
+              "air_temp_range": "0.74–0.88 (~31°C–34°C)",
+              "root_temp_range": "0.70–0.83"
+            },
+            "nextVectorIds": [
+              "ag-zt-critical"
+            ]
+          },
+          {
+            "id": "ag-zt-critical",
+            "elements": [
+              {
+                "value": 0.92,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.88,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "CRITICAL",
+              "description": "CRITICAL — thermal stress; fires COOLING_ON signal.",
+              "air_temp_range": "0.87–1.00 (>33°C)",
+              "root_temp_range": "0.83–1.00 (>29°C)"
+            },
+            "outputVectors": [
+              {
+                "id": "ag-zt-cooling-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "COOLING_ON: activate zone cooling system at [20:24]",
+                  "action": "Enable cooling; downstream AgPlantGrowthCycleMonitor will register high-temp condition"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ag-zone-temp-undertemp",
+        "name": "UnderTemp Escalation: COOL_WATCH+ → COOL → COLD → FROST → HEATING_ON",
+        "metadata": {
+          "description": "Detects progressive temperature drop toward frost conditions. Critical for protecting root zones and preventing cold-induced growth stall.",
+          "path": "COOL_WATCH+ → COOL → COLD → FROST → output[1,0,0,0]",
+          "output": "[1,0,0,0] (HEATING_ON)"
+        },
+        "vectors": [
+          {
+            "id": "ag-zt-cool-watch",
+            "elements": [
+              {
+                "value": 0.32,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "COOL_WATCH",
+              "description": "COOL_WATCH+ — temperatures slightly below optimal but not alarming. isInitial A*A = A+.",
+              "air_temp_range": "0.20–0.44 (~18°C–23°C)",
+              "root_temp_range": "0.23–0.45"
+            },
+            "nextVectorIds": [
+              "ag-zt-cool-watch",
+              "ag-zt-cool"
+            ]
+          },
+          {
+            "id": "ag-zt-cool",
+            "elements": [
+              {
+                "value": 0.2,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.22,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "COOL",
+              "description": "COOL — temperatures dropping; growth slowing.",
+              "air_temp_range": "0.12–0.28 (~17°C–20°C)"
+            },
+            "nextVectorIds": [
+              "ag-zt-cold"
+            ]
+          },
+          {
+            "id": "ag-zt-cold",
+            "elements": [
+              {
+                "value": 0.12,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.14,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "COLD",
+              "description": "COLD — dangerously low; root zone damage risk.",
+              "air_temp_range": "0.06–0.18 (~16°C–18°C)"
+            },
+            "nextVectorIds": [
+              "ag-zt-frost"
+            ]
+          },
+          {
+            "id": "ag-zt-frost",
+            "elements": [
+              {
+                "value": 0.05,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.06,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "FROST",
+              "description": "FROST — near-freezing conditions; fires HEATING_ON.",
+              "air_temp_range": "0.0–0.10 (<17°C with significant root-zone drop)"
+            },
+            "outputVectors": [
+              {
+                "id": "ag-zt-heating-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "HEATING_ON: activate zone heating at [20:24]",
+                  "action": "Enable heating; frost risk prevention mode"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ag-zone-temp-optimal",
+        "name": "Optimal Temperature: OPTIMAL+ → TEMP_OK",
+        "metadata": {
+          "description": "Fires TEMP_OK signal whenever zone temperatures are within the optimal growth range. Provides continuous 'all-clear' signal to downstream monitors.",
+          "pattern": "OPTIMAL+",
+          "output": "[0,0,0,1] (TEMP_OK)"
+        },
+        "vectors": [
+          {
+            "id": "ag-zt-optimal",
+            "elements": [
+              {
+                "value": 0.44,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.42,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "OPTIMAL",
+              "description": "OPTIMAL+ — both temps below threshold (within safe range). isInitial A*A = A+: fires TEMP_OK on every matching cycle.",
+              "air_temp_range": "0.36–0.50 (~22°C–26°C)",
+              "root_temp_range": "0.34–0.48 (~19°C–23°C)"
+            },
+            "outputVectors": [
+              {
+                "id": "ag-zt-ok-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "TEMP_OK: zone temperature within optimal growth range at [20:24]",
+                  "action": "Downstream AgPlantGrowthCycleMonitor registers healthy temp condition"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Gradual Summer Overheating Event",
+        "pattern": "8-step: WATCH → WATCH → WARM → HOT → CRITICAL → CRITICAL → WARM → OPTIMAL",
+        "description": "Afternoon heat build-up in zone; cooling activated at CRITICAL; zone recovers after intervention.",
+        "vectors": [
+          [
+            0.53,
+            0.5,
+            0.1,
+            0.1
+          ],
+          [
+            0.56,
+            0.52,
+            0.1,
+            0.1
+          ],
+          [
+            0.7,
+            0.65,
+            0.1,
+            0.1
+          ],
+          [
+            0.84,
+            0.79,
+            0.1,
+            0.1
+          ],
+          [
+            0.93,
+            0.9,
+            0.1,
+            0.1
+          ],
+          [
+            0.94,
+            0.91,
+            0.1,
+            0.9
+          ],
+          [
+            0.69,
+            0.64,
+            0.1,
+            0.9
+          ],
+          [
+            0.43,
+            0.41,
+            0.1,
+            0.1
+          ]
+        ],
+        "metadata": {
+          "scenario": "summer-overheating-recovery",
+          "expectedOutputs": {
+            "steps_1_2": "TEMP_OK fires [0,0,0,1] (WATCH range still within optimal boundary)",
+            "steps_3_4": "no output (WARM/HOT intermediate stages)",
+            "steps_5_6": "COOLING_ON fires [0,1,0,0]",
+            "step_7": "no output (cooling in progress, WARM stage)",
+            "step_8": "TEMP_OK fires [0,0,0,1]"
+          }
+        }
+      },
+      {
+        "name": "Night Cold Drift to Frost Risk",
+        "pattern": "6-step: COOL_WATCH → COOL → COLD → FROST → FROST → OPTIMAL (heaters on)",
+        "description": "Overnight temperature drop reaching frost threshold; HEATING_ON activated; recovery to optimal.",
+        "vectors": [
+          [
+            0.33,
+            0.36,
+            0.1,
+            0.1
+          ],
+          [
+            0.21,
+            0.23,
+            0.1,
+            0.1
+          ],
+          [
+            0.13,
+            0.15,
+            0.1,
+            0.1
+          ],
+          [
+            0.05,
+            0.06,
+            0.1,
+            0.1
+          ],
+          [
+            0.04,
+            0.05,
+            0.9,
+            0.1
+          ],
+          [
+            0.44,
+            0.42,
+            0.9,
+            0.1
+          ]
+        ],
+        "metadata": {
+          "scenario": "night-frost-risk-recovery",
+          "expectedOutputs": {
+            "step_1": "COOL_WATCH self-loop, no output",
+            "steps_2_3": "no output (COOL/COLD intermediate stages)",
+            "steps_4_5": "HEATING_ON fires [1,0,0,0]",
+            "step_6": "TEMP_OK fires [0,0,0,1]"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

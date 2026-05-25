@@ -1,0 +1,487 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "DC Network Burst Detector",
+    "description": "Monitors network bandwidth utilization and packet loss to detect burst traffic and congestion events. Implements the regular expression BASELINE+ → ELEVATED+ → BURST → CONGESTION+ → OVERFLOW → [alarm]. A concurrent NORMAL_FLOW+ sequence fires the reset signal when network conditions are nominal.",
+    "metadata": {
+      "category": "data-center",
+      "domain": "Data Center — Network / Burst Detection",
+      "author": "Reality Engine",
+      "created": "2026-02-27T00:00:00Z",
+      "eventSpace": "4D continuous sensor vector at [1348:1352]: [bandwidth_util_norm, packet_loss_norm, latency_norm, queue_depth_norm]",
+      "outputSpace": "2D binary at [1365:1367]: [1,0]=NETWORK_ALARM, [0,1]=NETWORK_NORMAL",
+      "tags": [
+        "anomaly-detection",
+        "burst-detection",
+        "ces-sequences",
+        "ces-sequences-2",
+        "data-center",
+        "data-center-network-burst-detection",
+        "dc-network-burst-detector",
+        "dcnetwork-burst-detector",
+        "input-sequences",
+        "input-sequences-1",
+        "monitoring",
+        "network",
+        "startup-loadable"
+      ],
+      "sequenceCount": 2,
+      "downstreamMachine": "DCNetworkThrottleFF (reads [1365:1367])",
+      "regularExpression": {
+        "escalation": "BASELINE+ → ELEVATED+ → BURST → CONGESTION+ → OVERFLOW → output[1,0]",
+        "recovery": "NORMAL_FLOW+ → output[0,1]",
+        "combined": "Detects network saturation events that require traffic shaping. Requires sustained elevated traffic (ELEVATED+) before BURST, and sustained congestion (CONGESTION+) before OVERFLOW. This prevents false alarms from brief micro-bursts.",
+        "isInitialNote": "BASELINE and NORMAL_FLOW are isInitial vectors implementing A*A = A+. At least one baseline reading is required to arm ELEVATED; at least one safe-flow reading is required to produce the reset output. There is no mechanism to advance the escalation sequence or generate output without a matching sensor observation."
+      },
+      "sensorNormalization": {
+        "bandwidth_util_norm": "0.0 = 0% utilization, 1.0 = 100% link capacity",
+        "packet_loss_norm": "0.0 = 0% loss, 1.0 = severe loss (>10%)",
+        "latency_norm": "wildcard (don't care — value=0.5, tolerance=0.5)",
+        "queue_depth_norm": "wildcard (don't care — value=0.5, tolerance=0.5)"
+      },
+      "singleTransitionAssumption": {
+        "required": false,
+        "scope": "continuous sensor space — STA not applicable as defined for binary vectors",
+        "compliant": true,
+        "notes": "Same continuous-space STA analog as DCThermalEscalation: gradual bandwidth progression through bands. Sudden traffic bursts that skip intermediate stages (e.g., BASELINE directly to OVERFLOW) will not trigger the alarm — consistent with the design requirement that genuine overflow events follow observable escalation patterns. BASELINE is isInitial (A*A = A+): at least one BASELINE reading is required to arm ELEVATED."
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "data-center",
+        "domainTags": [
+          "burst-detection",
+          "data-center",
+          "network"
+        ],
+        "family": "dc-network-burst-detector",
+        "machineCode": "dcnetwork-burst-detector",
+        "capabilityTags": [
+          "monitoring"
+        ],
+        "workflowTags": [
+          "anomaly-detection",
+          "data-center",
+          "dc-network-burst-detector",
+          "dcnetwork-burst-detector"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-2",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "anomaly-detection",
+          "burst-detection",
+          "ces-sequences",
+          "ces-sequences-2",
+          "data-center",
+          "data-center-network-burst-detection",
+          "dc-network-burst-detector",
+          "dcnetwork-burst-detector",
+          "input-sequences",
+          "input-sequences-1",
+          "monitoring",
+          "network",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "datacenter-noc",
+        "runbook": "https://runbooks.example.org/data-center/dcnetworkburstdetector",
+        "escalationPolicy": "pagerduty:datacenter-noc",
+        "contact": {
+          "primary": "datacenter-noc-primary@example.org",
+          "secondary": "datacenter-noc-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 300,
+          "error": 120
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"data-center\".  Review and tune the routing as the team owning DCNetworkBurstDetector matures."
+      },
+      "triggerConfig": {
+        "processId": "DCNETWORKBURSTDETECTOR",
+        "processName": "DC Network Burst Detector",
+        "rules": [
+          {
+            "sequenceId": "dc-network-escalation",
+            "outputMatches": [
+              1,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "NETWORK OVERFLOW: Alarm signal [1,0] to DCNetworkThrottleFF at [1365:1367]"
+          },
+          {
+            "sequenceId": "dc-network-normal-flow",
+            "outputMatches": [
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "NETWORK NORMAL: Reset signal [0,1] to DCNetworkThrottleFF at [1365:1367]"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 1348,
+        "length": 4
+      },
+      "output": {
+        "offset": 1365,
+        "length": 2
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "dc-network-escalation",
+        "name": "Network Escalation: BASELINE+ → ELEVATED+ → BURST → CONGESTION+ → OVERFLOW",
+        "metadata": {
+          "description": "5-stage network escalation from baseline traffic to catastrophic overflow. All isInitial states implement A*A = A+ semantics.",
+          "path": "BASELINE+ → ELEVATED+ → BURST → CONGESTION+ → OVERFLOW",
+          "output": "[1,0] (NETWORK ALARM)"
+        },
+        "vectors": [
+          {
+            "id": "dc-net-esc-baseline",
+            "elements": [
+              {
+                "value": 0.2,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.05,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "BASELINE",
+              "description": "BASELINE+ (= BASELINE*BASELINE, A*A) — one or more baseline readings required before ELEVATED is armed. isInitial provides the self-loop (A*); the mandatory match (A) activates ELEVATED via nextVectorIds.",
+              "role": "kleene-plus-initial",
+              "bandwidth_range": "0.05–0.35 (5%–35% utilization)",
+              "packet_loss_range": "0.00–0.10 (0%–1% loss)",
+              "kleeneOperator": "+"
+            },
+            "nextVectorIds": [
+              "dc-net-esc-baseline",
+              "dc-net-esc-elevated"
+            ]
+          },
+          {
+            "id": "dc-net-esc-elevated",
+            "elements": [
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.15,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "ELEVATED",
+              "description": "ELEVATED+ — sustained elevated traffic; one or more elevated readings required",
+              "role": "kleene-plus",
+              "bandwidth_range": "0.43–0.67 (43%–67% utilization)",
+              "packet_loss_range": "0.05–0.25 (0.5%–2.5% loss)",
+              "kleeneOperator": "+"
+            },
+            "nextVectorIds": [
+              "dc-net-esc-elevated",
+              "dc-net-esc-burst"
+            ]
+          },
+          {
+            "id": "dc-net-esc-burst",
+            "elements": [
+              {
+                "value": 0.75,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.3,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "BURST",
+              "description": "BURST — peak traffic burst; mandatory single transition before sustained congestion",
+              "role": "required-transition",
+              "bandwidth_range": "0.67–0.83 (67%–83% utilization)",
+              "packet_loss_range": "0.18–0.42 (1.8%–4.2% loss)",
+              "semantics": "Non-initial transitional (no self-loop): exactly one BURST reading advances to CONGESTION. Requires observable burst peak before declaring congestion."
+            },
+            "nextVectorIds": [
+              "dc-net-esc-congestion"
+            ]
+          },
+          {
+            "id": "dc-net-esc-congestion",
+            "elements": [
+              {
+                "value": 0.88,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "CONGESTION",
+              "description": "CONGESTION+ — sustained network congestion with significant packet loss",
+              "role": "kleene-plus",
+              "bandwidth_range": "0.82–0.94 (82%–94% utilization)",
+              "packet_loss_range": "0.45–0.65 (4.5%–6.5% loss)",
+              "kleeneOperator": "+"
+            },
+            "nextVectorIds": [
+              "dc-net-esc-congestion",
+              "dc-net-esc-overflow"
+            ]
+          },
+          {
+            "id": "dc-net-esc-overflow",
+            "elements": [
+              {
+                "value": 0.97,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.85,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "OVERFLOW",
+              "description": "OVERFLOW — link saturation with severe packet loss; fires network alarm",
+              "role": "terminal",
+              "bandwidth_range": "0.93–1.00 (>93% utilization)",
+              "packet_loss_range": "0.75–0.95 (7.5%–9.5%+ loss)"
+            },
+            "outputVectors": [
+              {
+                "id": "dc-net-esc-alarm-output",
+                "vector": [
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "NETWORK OVERFLOW: Alarm signal [1,0] to DCNetworkThrottleFF at [1365:1367]",
+                  "severity": "EMERGENCY",
+                  "action": "DCNetworkThrottleFF will SET; traffic shaping and rate limiting engaged"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dc-network-normal-flow",
+        "name": "Normal Flow Recovery: NORMAL_FLOW+ → output[0,1]",
+        "metadata": {
+          "description": "Fires reset signal [0,1] on every cycle that network traffic is within normal baseline parameters (A*A = A+: one or more matching cycles). Enables DCNetworkThrottleFF to RESET when conditions are normal.",
+          "pattern": "NORMAL_FLOW+",
+          "output": "[0,1] (NETWORK NORMAL)"
+        },
+        "vectors": [
+          {
+            "id": "dc-net-normal-event",
+            "elements": [
+              {
+                "value": 0.2,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.05,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "NORMAL_FLOW",
+              "description": "Network traffic at baseline — fires [0,1] reset signal on every matching cycle (A*A = A+: at least one matching cycle required to produce output)",
+              "role": "continuous-reset-plus",
+              "bandwidth_range": "0.05–0.35 (same as BASELINE)",
+              "packet_loss_range": "0.00–0.10 (same as BASELINE)"
+            },
+            "outputVectors": [
+              {
+                "id": "dc-net-normal-output",
+                "vector": [
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "NETWORK NORMAL: Reset signal [0,1] to DCNetworkThrottleFF at [1365:1367]",
+                  "severity": "INFO",
+                  "action": "DCNetworkThrottleFF will RESET; normal traffic flow"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Network Saturation Escalation",
+        "pattern": "12-step: BASELINE→BASELINE→ELEVATED→ELEVATED→ELEVATED→BURST→CONGESTION→CONGESTION→OVERFLOW→OVERFLOW→ELEVATED→BASELINE",
+        "description": "Complete network congestion event with recovery",
+        "vectors": [
+          [
+            0.2,
+            0.03,
+            0.5,
+            0.5
+          ],
+          [
+            0.22,
+            0.04,
+            0.5,
+            0.5
+          ],
+          [
+            0.5,
+            0.12,
+            0.5,
+            0.5
+          ],
+          [
+            0.58,
+            0.17,
+            0.5,
+            0.5
+          ],
+          [
+            0.63,
+            0.22,
+            0.5,
+            0.5
+          ],
+          [
+            0.74,
+            0.3,
+            0.5,
+            0.5
+          ],
+          [
+            0.84,
+            0.5,
+            0.5,
+            0.5
+          ],
+          [
+            0.9,
+            0.58,
+            0.5,
+            0.5
+          ],
+          [
+            0.95,
+            0.82,
+            0.5,
+            0.5
+          ],
+          [
+            0.97,
+            0.87,
+            0.5,
+            0.5
+          ],
+          [
+            0.58,
+            0.2,
+            0.5,
+            0.5
+          ],
+          [
+            0.2,
+            0.03,
+            0.5,
+            0.5
+          ]
+        ],
+        "metadata": {
+          "scenario": "network-saturation-recovery",
+          "stageTrace": "BASELINE,BASELINE,ELEVATED,ELEVATED,ELEVATED,BURST,CONGESTION,CONGESTION,OVERFLOW,OVERFLOW,ELEVATED,BASELINE",
+          "expectedOutputs": {
+            "steps_1_2": "NORMAL_FLOW fires [0,1]",
+            "steps_3_8": "no output (intermediate escalation stages)",
+            "steps_9_10": "OVERFLOW fires [1,0]",
+            "step_11": "no output (ELEVATED: traffic decreasing)",
+            "step_12": "NORMAL_FLOW fires [0,1] (network recovered)"
+          }
+        }
+      }
+    ],
+    "matchAlgorithm": "gte"
+  }
+}

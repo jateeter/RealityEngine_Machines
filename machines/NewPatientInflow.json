@@ -1,0 +1,1649 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "NewPatientInflow",
+    "description": "New patient evaluation workflow for an elder care assisted living organization. Detects structured intake sequences and classifies each candidate as ACCEPTED or PROVISIONAL_REJECT.",
+    "metadata": {
+      "category": "health-personal",
+      "author": "Reality Engine",
+      "created": "2026-04-09T00:00:00Z",
+      "domain": "Healthcare Intake — Assisted Living",
+      "eventSpace": "8D binary evaluation space: [CONTACT, PRESCREENED, MEDICAL_CLEAR, FUNCTIONAL_FIT, FINANCIAL_CLEAR, VACANCY, CONSENT, BARRIER]",
+      "outputSpace": "8D one-hot decision space: [ACCEPTED, PROVISIONAL_REJECT, _, _, _, _, _, _]",
+      "regex": "(CONTACT)+ · PRESCREENED · (MED_FUNC_CLEAR · (FIN_CLEAR · (VACANCY_CONF · ADMITTED | VACANCY_BARRIER) | FIN_BARRIER) | MED_BARRIER)",
+      "dimensions": {
+        "D0_CONTACT": "Initial inquiry received from patient or family — contact event flag",
+        "D1_PRESCREENED": "Basic eligibility confirmed: age ≥55, ADL dependency level in scope, referral valid",
+        "D2_MEDICAL_CLEAR": "Clinical assessment complete and within facility care scope (not requiring hospital-level acuity)",
+        "D3_FUNCTIONAL_FIT": "Activities of Daily Living (ADL) assessment passed; mobility/cognitive level within supported range",
+        "D4_FINANCIAL_CLEAR": "Insurance verification approved OR private-pay qualification confirmed",
+        "D5_VACANCY": "Appropriate room or memory-care unit currently available",
+        "D6_CONSENT": "Family/guardian consent obtained, care plan reviewed and signed",
+        "D7_BARRIER": "Hard-stop disqualification flag: set when any evaluation stage fails"
+      },
+      "vectorEncoding": {
+        "H": 0.9,
+        "L": 0.1,
+        "threshold": 0.5,
+        "semantics": "GTE binary: value>=threshold → HIGH (event present), value<threshold → LOW (event absent). Barrier path sets D7=H while clearing the failed dimension."
+      },
+      "inputVectors": {
+        "INQUIRY": "[H,L,L,L,L,L,L,L] — new contact event only",
+        "PRESCREENED": "[H,H,L,L,L,L,L,L] — contact + eligibility confirmed",
+        "MED_FUNC_CLEAR": "[H,H,H,H,L,L,L,L] — contact + prescreened + medical + functional all pass",
+        "MED_BARRIER": "[H,H,L,L,L,L,L,H] — contact + prescreened, medical FAILED, barrier raised",
+        "FIN_CLEAR": "[H,H,H,H,H,L,L,L] — medical/functional pass + financial verified",
+        "FIN_BARRIER": "[H,H,H,H,L,L,L,H] — medical/functional pass, financial FAILED, barrier raised",
+        "VACANCY_CONF": "[H,H,H,H,H,H,L,L] — full clinical/financial pass + room confirmed",
+        "VACANCY_BARRIER": "[H,H,H,H,H,L,L,H] — clinical/financial pass, no room available, barrier raised",
+        "ADMITTED": "[H,H,H,H,H,H,H,L] — all criteria met, consent obtained, care plan signed"
+      },
+      "singleTransitionAssumption": {
+        "required": true,
+        "compliant": true,
+        "notes": "All valid transitions change exactly one or two binary dimensions per step. INQUIRY→PRESCREENED: HD=1 (D1 L→H). PRESCREENED→MED_FUNC_CLEAR: HD=2 (D2,D3 simultaneously L→H — medical and functional assessment complete together). All other transitions: HD=1. Barrier transitions diverge by setting D7=H while the failed dimension stays L, maintaining Hamming distance ≤1 from the prior non-barrier state."
+      },
+      "sequenceCount": 4,
+      "tags": [
+        "assisted-living",
+        "ces-sequences",
+        "ces-sequences-4",
+        "digital-logic-generated",
+        "elder-care",
+        "health-personal",
+        "health-personal-operations",
+        "healthcare-intake",
+        "healthcare-intake-assisted-living",
+        "input-sequences",
+        "input-sequences-7",
+        "intake",
+        "new-patient-inflow",
+        "patient-evaluation",
+        "startup-loadable",
+        "workflow"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "assisted-living",
+          "health-personal",
+          "healthcare-intake"
+        ],
+        "family": "new-patient-inflow",
+        "machineCode": "new-patient-inflow",
+        "capabilityTags": [
+          "workflow"
+        ],
+        "workflowTags": [
+          "digital-logic-generated",
+          "elder-care",
+          "health-personal-operations",
+          "healthcare-intake-assisted-living",
+          "intake",
+          "patient-evaluation"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-7",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "assisted-living",
+          "ces-sequences",
+          "ces-sequences-4",
+          "digital-logic-generated",
+          "elder-care",
+          "health-personal",
+          "health-personal-operations",
+          "healthcare-intake",
+          "healthcare-intake-assisted-living",
+          "input-sequences",
+          "input-sequences-7",
+          "intake",
+          "new-patient-inflow",
+          "patient-evaluation",
+          "startup-loadable",
+          "workflow"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/newpatientinflow",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "patient-safety-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"health-personal\".  Review and tune the routing as the team owning NewPatientInflow matures."
+      },
+      "triggerConfig": {
+        "processId": "NEWPATIENTINFLOW",
+        "processName": "NewPatientInflow",
+        "rules": [
+          {
+            "sequenceId": "npi-acceptance",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Decision: ACCEPTED — patient admitted to assisted living facility"
+          },
+          {
+            "sequenceId": "npi-medical-rejection",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Decision: PROVISIONAL REJECT — medical acuity exceeds assisted living care scope"
+          },
+          {
+            "sequenceId": "npi-financial-rejection",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Decision: PROVISIONAL REJECT — financial qualification failed"
+          },
+          {
+            "sequenceId": "npi-vacancy-rejection",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Decision: PROVISIONAL REJECT — no appropriate vacancy at this time"
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "gte",
+    "perceptualMapping": {
+      "input": {
+        "offset": 3907,
+        "length": 8
+      },
+      "output": {
+        "offset": 3915,
+        "length": 8
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "npi-acceptance",
+        "name": "Full Acceptance Path",
+        "metadata": {
+          "description": "Patient passes all evaluation stages and is admitted",
+          "regex": "(CONTACT)+ · PRESCREENED · MED_FUNC_CLEAR · FIN_CLEAR · VACANCY_CONF · ADMITTED → ACCEPTED",
+          "path": "CONTACT → PRESCREENED → MED_FUNC_CLEAR → FIN_CLEAR → VACANCY_CONF → ADMITTED",
+          "output": "ACCEPTED=[1,0,0,0,0,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "acc-contact",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "Initial Contact",
+              "description": "Patient or family member contacts the facility to inquire about placement. Repeats until prescreening is scheduled (A+ semantics).",
+              "signal": "[H,L,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "acc-prescreened"
+            ]
+          },
+          {
+            "id": "acc-prescreened",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Pre-Screened",
+              "description": "Basic eligibility confirmed: age ≥55, level of care within facility scope, valid referral source.",
+              "signal": "[H,H,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "acc-med-func"
+            ]
+          },
+          {
+            "id": "acc-med-func",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Medical & Functional Cleared",
+              "description": "Physician review confirms medical acuity is within assisted living scope (not requiring SNF or hospital level care). ADL assessment shows patient needs assisted but not total care.",
+              "signal": "[H,H,H,H,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "acc-fin"
+            ]
+          },
+          {
+            "id": "acc-fin",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Financial Verified",
+              "description": "Insurance benefits confirmed (Medicare, Medicaid, long-term care policy) or private-pay capacity verified at current rate schedule.",
+              "signal": "[H,H,H,H,H,L,L,L]"
+            },
+            "nextVectorIds": [
+              "acc-vacancy"
+            ]
+          },
+          {
+            "id": "acc-vacancy",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Vacancy Confirmed",
+              "description": "An appropriate room or memory-care unit is available and matches the patient's assessed care level.",
+              "signal": "[H,H,H,H,H,H,L,L]"
+            },
+            "nextVectorIds": [
+              "acc-admitted"
+            ]
+          },
+          {
+            "id": "acc-admitted",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Admitted",
+              "description": "Family/guardian consent obtained. Care plan reviewed and countersigned. Move-in date scheduled. Patient formally admitted to assisted living.",
+              "signal": "[H,H,H,H,H,H,H,L]"
+            },
+            "outputVectors": [
+              {
+                "id": "out-accepted",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Decision: ACCEPTED — patient admitted to assisted living facility",
+                  "decision": "ACCEPTED",
+                  "severity": "INFO"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "npi-medical-rejection",
+        "name": "Provisional Rejection — Medical Scope Exceeded",
+        "metadata": {
+          "description": "Patient's medical acuity exceeds the facility's licensed care scope. Requires SNF, memory care unit not offered, or complex wound/IV care beyond staff capability.",
+          "regex": "(CONTACT)+ · PRESCREENED · MED_BARRIER → PROVISIONAL_REJECT",
+          "path": "CONTACT → PRESCREENED → MED_BARRIER",
+          "output": "PROVISIONAL_REJECT=[0,1,0,0,0,0,0,0]",
+          "disposition": "Refer to skilled nursing facility (SNF) or hospital-affiliated long-term care. Re-evaluate if medical status stabilizes."
+        },
+        "vectors": [
+          {
+            "id": "mr-contact",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "Initial Contact",
+              "description": "Patient or family contacts facility. Kleene-plus: may repeat multiple times before progressing.",
+              "signal": "[H,L,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "mr-prescreened"
+            ]
+          },
+          {
+            "id": "mr-prescreened",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Pre-Screened",
+              "description": "Initial eligibility passed. Medical and functional assessment is ordered.",
+              "signal": "[H,H,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "mr-barrier"
+            ]
+          },
+          {
+            "id": "mr-barrier",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Medical Barrier",
+              "description": "Physician review finds acuity level beyond facility scope. D2_MEDICAL_CLEAR=L (medical failed), D7_BARRIER=H (disqualification event). Examples: ventilator dependency, advanced dementia requiring locked memory care unit, complex wound requiring daily RN intervention.",
+              "signal": "[H,H,L,L,L,L,L,H]"
+            },
+            "outputVectors": [
+              {
+                "id": "out-med-reject",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Decision: PROVISIONAL REJECT — medical acuity exceeds assisted living care scope",
+                  "decision": "PROVISIONAL_REJECT",
+                  "reason": "MEDICAL_SCOPE_EXCEEDED",
+                  "referral": "Skilled Nursing Facility (SNF) or hospital-based LTC",
+                  "reconsideration": "Re-apply if medical status stabilizes to assisted-living acuity level"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "npi-financial-rejection",
+        "name": "Provisional Rejection — Financial Qualification Failed",
+        "metadata": {
+          "description": "Patient passed medical and functional assessment but insurance coverage was denied, benefits exhausted, or private-pay capacity is insufficient at current rates.",
+          "regex": "(CONTACT)+ · PRESCREENED · MED_FUNC_CLEAR · FIN_BARRIER → PROVISIONAL_REJECT",
+          "path": "CONTACT → PRESCREENED → MED_FUNC_CLEAR → FIN_BARRIER",
+          "output": "PROVISIONAL_REJECT=[0,1,0,0,0,0,0,0]",
+          "disposition": "Refer to social worker for Medicaid spend-down planning or alternative funding. Re-evaluate when financial situation is resolved."
+        },
+        "vectors": [
+          {
+            "id": "fr-contact",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "Initial Contact",
+              "description": "Patient or family contacts facility. Kleene-plus: repeats until prescreening scheduled.",
+              "signal": "[H,L,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "fr-prescreened"
+            ]
+          },
+          {
+            "id": "fr-prescreened",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Pre-Screened",
+              "description": "Basic eligibility confirmed. Financial verification ordered alongside clinical assessment.",
+              "signal": "[H,H,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "fr-med-func"
+            ]
+          },
+          {
+            "id": "fr-med-func",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Medical & Functional Cleared",
+              "description": "Clinical assessment passes. Patient is a good medical fit. Financial verification is still pending.",
+              "signal": "[H,H,H,H,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "fr-barrier"
+            ]
+          },
+          {
+            "id": "fr-barrier",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Financial Barrier",
+              "description": "Insurance denied or benefits exhausted. D4_FINANCIAL_CLEAR=L (failed), D7_BARRIER=H. Examples: Medicare days exhausted with no supplement, Medicaid pending but assets above threshold, private-pay monthly rate exceeds available funds.",
+              "signal": "[H,H,H,H,L,L,L,H]"
+            },
+            "outputVectors": [
+              {
+                "id": "out-fin-reject",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Decision: PROVISIONAL REJECT — financial qualification failed",
+                  "decision": "PROVISIONAL_REJECT",
+                  "reason": "FINANCIAL_QUALIFICATION_FAILED",
+                  "referral": "Social worker for Medicaid spend-down planning or elder law attorney",
+                  "reconsideration": "Re-apply once insurance approved or private-pay funding secured"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "npi-vacancy-rejection",
+        "name": "Provisional Rejection — No Appropriate Vacancy",
+        "metadata": {
+          "description": "Patient is fully qualified (clinical and financial) but no appropriate room or care unit is currently available. Patient is placed on a waiting list.",
+          "regex": "(CONTACT)+ · PRESCREENED · MED_FUNC_CLEAR · FIN_CLEAR · VACANCY_BARRIER → PROVISIONAL_REJECT",
+          "path": "CONTACT → PRESCREENED → MED_FUNC_CLEAR → FIN_CLEAR → VACANCY_BARRIER",
+          "output": "PROVISIONAL_REJECT=[0,1,0,0,0,0,0,0]",
+          "disposition": "Add to priority wait list. Re-evaluate when appropriate vacancy opens. No re-qualification required."
+        },
+        "vectors": [
+          {
+            "id": "vr-contact",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "Initial Contact",
+              "description": "Patient or family contacts facility. Kleene-plus: repeats until intake appointment is scheduled.",
+              "signal": "[H,L,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "vr-prescreened"
+            ]
+          },
+          {
+            "id": "vr-prescreened",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Pre-Screened",
+              "description": "Basic eligibility confirmed. Full intake evaluation proceeds.",
+              "signal": "[H,H,L,L,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "vr-med-func"
+            ]
+          },
+          {
+            "id": "vr-med-func",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Medical & Functional Cleared",
+              "description": "Clinical assessment passes. Financial verification ordered.",
+              "signal": "[H,H,H,H,L,L,L,L]"
+            },
+            "nextVectorIds": [
+              "vr-fin"
+            ]
+          },
+          {
+            "id": "vr-fin",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Financial Verified",
+              "description": "Insurance or private-pay confirmed. Facility census is checked for vacancy.",
+              "signal": "[H,H,H,H,H,L,L,L]"
+            },
+            "nextVectorIds": [
+              "vr-barrier"
+            ]
+          },
+          {
+            "id": "vr-barrier",
+            "elements": [
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.9,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "Vacancy Barrier",
+              "description": "Facility at capacity. D5_VACANCY=L (no room), D7_BARRIER=H. Patient is fully qualified but placement must be deferred. Waitlist priority assigned based on acuity and application date.",
+              "signal": "[H,H,H,H,H,L,L,H]"
+            },
+            "outputVectors": [
+              {
+                "id": "out-vacancy-reject",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Decision: PROVISIONAL REJECT — no appropriate vacancy at this time",
+                  "decision": "PROVISIONAL_REJECT",
+                  "reason": "NO_VACANCY",
+                  "disposition": "Priority waitlist — no re-qualification required when vacancy opens",
+                  "reconsideration": "Automatic re-evaluation when appropriate room becomes available"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "TC-01: Direct Acceptance — Single Inquiry",
+        "pattern": "CONTACT · PRESCREENED · MED_FUNC_CLEAR · FIN_CLEAR · VACANCY_CONF · ADMITTED",
+        "description": "ACCEPTANCE: Patient contacts facility once, passes all evaluation stages cleanly, and is admitted. Tests the primary happy path with no friction or repetition.",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1
+          ]
+        ],
+        "metadata": {
+          "expectedDecision": "ACCEPTED",
+          "expectedOutputVector": "[1,0,0,0,0,0,0,0]",
+          "expectedOutputCount": 1,
+          "scenario": "83-year-old female, assisted living appropriate acuity, Medicare + supplement confirmed, semi-private room available, daughter as healthcare proxy — all clear."
+        }
+      },
+      {
+        "name": "TC-02: Acceptance after Multiple Inquiries (Kleene+ CONTACT)",
+        "pattern": "(CONTACT)³ · PRESCREENED · MED_FUNC_CLEAR · FIN_CLEAR · VACANCY_CONF · ADMITTED",
+        "description": "ACCEPTANCE: Family makes three separate inquiry calls before scheduling the intake appointment. Validates the A+ (Kleene-plus) semantics of the CONTACT initial state — the sequence does not advance until PRESCREENED arrives.",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1
+          ]
+        ],
+        "metadata": {
+          "expectedDecision": "ACCEPTED",
+          "expectedOutputVector": "[1,0,0,0,0,0,0,0]",
+          "expectedOutputCount": 1,
+          "scenario": "Son calls three times over two weeks asking questions before scheduling the in-person intake. Outcome unchanged — admission proceeds normally."
+        }
+      },
+      {
+        "name": "TC-03: Provisional Rejection — Medical Scope Exceeded",
+        "pattern": "CONTACT · PRESCREENED · MED_BARRIER",
+        "description": "PROVISIONAL REJECTION: Patient's care needs exceed what the facility is licensed to provide. Medical assessment raises the BARRIER flag. Referral to SNF or hospital-based LTC is indicated.",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ]
+        ],
+        "metadata": {
+          "expectedDecision": "PROVISIONAL_REJECT",
+          "expectedOutputVector": "[0,1,0,0,0,0,0,0]",
+          "expectedOutputCount": 1,
+          "scenario": "78-year-old male with stage 4 pressure ulcer requiring daily wound care by RN and IV antibiotics. Facility is unlicensed for IV therapy. Referred to subacute SNF; re-apply if wound resolves.",
+          "reason": "MEDICAL_SCOPE_EXCEEDED"
+        }
+      },
+      {
+        "name": "TC-04: Provisional Rejection — Medical, after Multiple Inquiries",
+        "pattern": "(CONTACT)² · PRESCREENED · MED_BARRIER",
+        "description": "PROVISIONAL REJECTION: Two inquiry contacts, prescreening passes, but clinical assessment reveals acuity exceeds assisted living scope. Demonstrates Kleene-plus + barrier combination.",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ]
+        ],
+        "metadata": {
+          "expectedDecision": "PROVISIONAL_REJECT",
+          "expectedOutputVector": "[0,1,0,0,0,0,0,0]",
+          "expectedOutputCount": 1,
+          "scenario": "Family calls twice before scheduling. On-site assessment reveals patient has moderate-to-severe dementia requiring a secured memory care unit the facility does not operate.",
+          "reason": "MEDICAL_SCOPE_EXCEEDED"
+        }
+      },
+      {
+        "name": "TC-05: Provisional Rejection — Financial Qualification Failed",
+        "pattern": "CONTACT · PRESCREENED · MED_FUNC_CLEAR · FIN_BARRIER",
+        "description": "PROVISIONAL REJECTION: Patient is an excellent clinical fit but insurance benefits are exhausted and private-pay funds are insufficient. Social worker referral for Medicaid planning is issued.",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.9
+          ]
+        ],
+        "metadata": {
+          "expectedDecision": "PROVISIONAL_REJECT",
+          "expectedOutputVector": "[0,1,0,0,0,0,0,0]",
+          "expectedOutputCount": 1,
+          "scenario": "76-year-old woman, excellent clinical fit. Medicare days exhausted, no supplement, assets above Medicaid threshold but insufficient for private-pay rates. Referred for Medicaid spend-down planning.",
+          "reason": "FINANCIAL_QUALIFICATION_FAILED"
+        }
+      },
+      {
+        "name": "TC-06: Provisional Rejection — No Vacancy",
+        "pattern": "CONTACT · PRESCREENED · MED_FUNC_CLEAR · FIN_CLEAR · VACANCY_BARRIER",
+        "description": "PROVISIONAL REJECTION: Patient passes every evaluation criterion but the facility is at capacity. Patient placed on priority waitlist with no re-qualification required when a room opens.",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.9
+          ]
+        ],
+        "metadata": {
+          "expectedDecision": "PROVISIONAL_REJECT",
+          "expectedOutputVector": "[0,1,0,0,0,0,0,0]",
+          "expectedOutputCount": 1,
+          "scenario": "81-year-old veteran, ideal clinical and financial profile. Facility census is 100% — no assisted living units available. Placed on priority waitlist, re-evaluated automatically when next vacancy opens.",
+          "reason": "NO_VACANCY"
+        }
+      },
+      {
+        "name": "TC-07: Provisional Rejection — No Vacancy, after Multiple Inquiries",
+        "pattern": "(CONTACT)⁴ · PRESCREENED · MED_FUNC_CLEAR · FIN_CLEAR · VACANCY_BARRIER",
+        "description": "PROVISIONAL REJECTION: Family is persistent (four inquiries over several weeks). Full evaluation clears every stage, but facility remains at capacity. Illustrates that CONTACT repetition has no bearing on the outcome.",
+        "vectors": [
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            0.1,
+            0.1,
+            0.9
+          ]
+        ],
+        "metadata": {
+          "expectedDecision": "PROVISIONAL_REJECT",
+          "expectedOutputVector": "[0,1,0,0,0,0,0,0]",
+          "expectedOutputCount": 1,
+          "scenario": "Family calls monthly for three months before scheduling intake. Evaluation is perfect but census is still full. Priority waitlist placement confirmed.",
+          "reason": "NO_VACANCY"
+        }
+      }
+    ]
+  }
+}

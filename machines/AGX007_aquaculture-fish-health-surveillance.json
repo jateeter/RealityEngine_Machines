@@ -1,0 +1,576 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Agriculture Aquaculture Fish Health Surveillance",
+    "description": "Agriculture domain machine for aquaculture operations focused on fish health surveillance. It monitors behavior, mortality trend, lesion observations, and treatment routing and emits AI-dispatchable outputs at [76:80] for automation, maintenance, and optimization workflows.",
+    "metadata": {
+      "category": "agriculture",
+      "domain": "Agriculture - Aquaculture",
+      "author": "Reality Engine",
+      "operationalFocus": "Fish Health Surveillance",
+      "focusDescription": "behavior, mortality trend, lesion observations, and treatment routing",
+      "upstreamMachine": "Agriculture Aquaculture Quarantine Biosecurity",
+      "upstreamOutputRegion": "[100:104]",
+      "predictiveManagementRole": "Consumes Agriculture Aquaculture Quarantine Biosecurity output to make fish health surveillance predictive rather than purely reactive.",
+      "aiTrigger": "aquaculture-fish-health-surveillance-risk-maintenance-or-optimization",
+      "dispatchableAgent": "growhouse_irrigation_agent",
+      "agentActions": [
+        "Dispatch growhouse_irrigation_agent to stabilize fish health surveillance and record corrective action.",
+        "Run AI optimization for fish health surveillance using the latest operating window and production targets.",
+        "Create preventive-maintenance work for fish health surveillance and verify completion telemetry.",
+        "Continue automated monitoring for fish health surveillance while preserving current setpoints."
+      ],
+      "outputSpace": "4D binary at [76:80]: [1,0,0,0]=URGENT_STABILIZE, [0,1,0,0]=OPTIMIZE_OPERATION, [0,0,1,0]=PREVENTIVE_MAINTENANCE, [0,0,0,1]=OPERATING_WINDOW_OK",
+      "tags": [
+        "agriculture",
+        "agriculture-aquaculture",
+        "agriculture-aquaculture-fish-health-surveillance",
+        "agriculture-generated",
+        "agx007",
+        "ai-trigger",
+        "aquaculture",
+        "aquaculture-fish-health-surveillance-risk-maintenance-or-optimization",
+        "ces-sequences",
+        "ces-sequences-4",
+        "dispatchable-agent",
+        "fish-health-surveillance",
+        "growhouse-irrigation-agent",
+        "input-sequences",
+        "input-sequences-5",
+        "machine-interconnect",
+        "maintenance",
+        "operational-management",
+        "startup-loadable"
+      ],
+      "sequenceCount": 4,
+      "sensorNormalization": {
+        "process_stability_norm": "0.0=unstable or outside safe operating band; 0.5=watch band; 1.0=stable in target band",
+        "resource_efficiency_norm": "0.0=wasteful or constrained; 0.5=acceptable; 1.0=efficient and available",
+        "biosecurity_or_ipm_norm": "0.0=active biological threat; 0.5=mitigated watch state; 1.0=controlled and documented",
+        "maintenance_readiness_norm": "0.0=overdue or faulted; 0.5=service due soon; 1.0=maintained and verified"
+      },
+      "inputSemantics": [
+        "process stability",
+        "resource efficiency",
+        "biosecurity or IPM status",
+        "maintenance readiness"
+      ],
+      "downstreamMachines": [
+        "Agriculture Aquaculture Hatchery Nursery Transition",
+        "Agriculture Aquaculture Harvest Readiness",
+        "Agriculture Aquaculture Probiotic Treatment Tracking"
+      ],
+      "downstreamPattern": "Output region [76:80] feeds Agriculture Aquaculture Hatchery Nursery Transition, Agriculture Aquaculture Harvest Readiness, Agriculture Aquaculture Probiotic Treatment Tracking for predictive agriculture management.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "agriculture",
+        "domainTags": [
+          "agriculture",
+          "aquaculture"
+        ],
+        "family": "agriculture-generated",
+        "machineCode": "agx007",
+        "capabilityTags": [
+          "ai-triggers",
+          "aquaculture-fish-health-surveillance-risk-maintenance-or-optimization",
+          "dispatchable-agents",
+          "maintenance"
+        ],
+        "workflowTags": [
+          "agriculture-aquaculture",
+          "agriculture-generated",
+          "ai-trigger",
+          "dispatchable-agent",
+          "fish-health-surveillance",
+          "growhouse-irrigation-agent",
+          "operational-management"
+        ],
+        "integrationTags": [
+          "ai-trigger",
+          "dispatchable-agent",
+          "machine-interconnect"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-5",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "agriculture",
+          "agriculture-aquaculture",
+          "agriculture-aquaculture-fish-health-surveillance",
+          "agriculture-generated",
+          "agx007",
+          "ai-trigger",
+          "ai-triggers",
+          "aquaculture",
+          "aquaculture-fish-health-surveillance-risk-maintenance-or-optimization",
+          "ces-sequences",
+          "ces-sequences-4",
+          "dispatchable-agent",
+          "dispatchable-agents",
+          "fish-health-surveillance",
+          "growhouse-irrigation-agent",
+          "input-sequences",
+          "input-sequences-5",
+          "machine-interconnect",
+          "maintenance",
+          "operational-management",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "agriculture-operations",
+        "runbook": "https://runbooks.example.org/agriculture/agx007_aquaculture-fish-health-surveillance",
+        "escalationPolicy": "pagerduty:ag-ops",
+        "contact": {
+          "primary": "agriculture-operations-primary@example.org",
+          "secondary": "agriculture-operations-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 3600,
+          "error": 900
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"agriculture\".  Review and tune the routing as the team owning AGX007_aquaculture-fish-health-surveillance matures."
+      },
+      "triggerConfig": {
+        "processId": "AGX007_AQUACULTURE_FISH_HEALTH_SURVEILLANCE",
+        "processName": "Agriculture Aquaculture Fish Health Surveillance",
+        "rules": [
+          {
+            "sequenceId": "agx-007-urgent-stabilize",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Urgent stabilization required."
+          },
+          {
+            "sequenceId": "agx-007-optimize-operation",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Optimization workflow should run."
+          },
+          {
+            "sequenceId": "agx-007-preventive-maintenance",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Preventive maintenance required."
+          },
+          {
+            "sequenceId": "agx-007-operating-window-ok",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Operating window is stable."
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 100,
+        "length": 4
+      },
+      "output": {
+        "offset": 76,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "agx-007-urgent-stabilize",
+        "name": "Fish Health Surveillance: NORMAL -> WATCH -> CRITICAL -> URGENT_STABILIZE",
+        "metadata": {
+          "description": "Escalates from stable operation to a critical process or welfare risk.",
+          "path": "NORMAL -> WATCH -> CRITICAL",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "agx-007-normal",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "NORMAL",
+              "description": "Operating window is stable and maintenance is current."
+            },
+            "nextVectorIds": [
+              "agx-007-watch"
+            ]
+          },
+          {
+            "id": "agx-007-watch",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "WATCH",
+              "description": "Efficiency and maintenance signals are weakening."
+            },
+            "nextVectorIds": [
+              "agx-007-critical"
+            ]
+          },
+          {
+            "id": "agx-007-critical",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": false,
+            "metadata": {
+              "name": "CRITICAL",
+              "description": "Operation requires immediate stabilization and AI dispatch."
+            },
+            "outputVectors": [
+              {
+                "id": "agx-007-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Urgent stabilization required.",
+                  "action": "Dispatch growhouse_irrigation_agent to stabilize fish health surveillance and record corrective action."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agx-007-optimize-operation",
+        "name": "Fish Health Surveillance: OPTIMIZATION_WINDOW -> OPTIMIZE_OPERATION",
+        "metadata": {
+          "description": "Fires when the process is safe but AI can improve yield, welfare, resource use, or labor timing.",
+          "pattern": "OPTIMIZATION_WINDOW",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "agx-007-optimize",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "OPTIMIZATION_WINDOW",
+              "description": "Optimization can improve the operating plan before risk accumulates."
+            },
+            "outputVectors": [
+              {
+                "id": "agx-007-optimize-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "Optimization workflow should run.",
+                  "action": "Run AI optimization for fish health surveillance using the latest operating window and production targets."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agx-007-preventive-maintenance",
+        "name": "Fish Health Surveillance: SERVICE_DUE -> PREVENTIVE_MAINTENANCE",
+        "metadata": {
+          "description": "Fires when service should be scheduled before a fault or production loss.",
+          "pattern": "SERVICE_DUE",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "agx-007-service-due",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "SERVICE_DUE",
+              "description": "Maintenance work should be created while the operation remains controllable."
+            },
+            "outputVectors": [
+              {
+                "id": "agx-007-maintenance-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "Preventive maintenance required.",
+                  "action": "Create preventive-maintenance work for fish health surveillance and verify completion telemetry."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agx-007-operating-window-ok",
+        "name": "Fish Health Surveillance: STABLE -> OPERATING_WINDOW_OK",
+        "metadata": {
+          "description": "Fires when the operation is stable and should continue under current automation settings.",
+          "pattern": "STABLE",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "agx-007-stable",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "STABLE",
+              "description": "Current setpoints are acceptable and no intervention is required."
+            },
+            "outputVectors": [
+              {
+                "id": "agx-007-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "description": "Operating window is stable.",
+                  "action": "Continue automated monitoring for fish health surveillance while preserving current setpoints."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Escalation to urgent stabilization",
+        "description": "A stable operation degrades through watch conditions and then reaches a critical state.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "urgent-stabilize"
+        }
+      },
+      {
+        "name": "Optimization opportunity",
+        "description": "AI can improve production, welfare, efficiency, or labor timing before critical risk appears.",
+        "vectors": [
+          [
+            0,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "optimize-operation"
+        }
+      },
+      {
+        "name": "Preventive maintenance required",
+        "description": "Maintenance should be scheduled before a preventable failure occurs.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,1,0]",
+          "scenario": "preventive-maintenance"
+        }
+      },
+      {
+        "name": "Stable operating window",
+        "description": "The process is inside the target operating band and should continue monitoring.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,0,0,1]",
+          "scenario": "operating-window-ok"
+        }
+      },
+      {
+        "name": "Normal baseline without output",
+        "description": "A single normal signal arms the escalation path without dispatching an agent.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 0,
+          "scenario": "normal-baseline"
+        }
+      }
+    ]
+  }
+}
