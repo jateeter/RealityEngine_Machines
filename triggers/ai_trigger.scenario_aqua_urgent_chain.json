@@ -1,0 +1,45 @@
+{
+  "$comment": "Operational scenario — what the dispatcher emits when a single live MQTT payload from yuma.lateraledge.cloud trips both AGX051 (tier-1 maintenance) and AGX055 (cross-domain synthesis bridge) on consecutive steps. Both envelopes carry the same correlationId so localAIStack can stitch the chain: raw broker → AGX051 → aquaculture_predictive_maintenance_agent AND AGX051 → AGX055 → agriculture_yield_optimization_ai. The agents act in parallel; the AI side reads `cascade.position` to know its place in the chain and `cascade.causedBy` to find the upstream envelope.",
+
+  "correlationId": "f1e2d3c4-b5a6-4789-abcd-1234567890ab",
+  "scenario":      "yuma.lateraledge.cloud → URGENT_MAINT cascade",
+  "envelopes": [
+    {
+      "cascade": { "position": 1, "causedBy": null, "triggers": ["envelopeId:9c4a8b1e-7d3f-4c2a-8b5e-1a2b3c4d5e6f"] },
+      "$ref":    "ai_trigger.agx051_urgent_maint.example.json"
+    },
+    {
+      "cascade": { "position": 2, "causedBy": "envelopeId:3f8e7d2c-1b4a-4956-9c0d-2e1f8a7b6c5d", "triggers": [] },
+      "$ref":    "ai_trigger.agx055_aqua_urgent.example.json"
+    }
+  ],
+
+  "flow": [
+    {
+      "step":  18420,
+      "where": "yuma.lateraledge.cloud broker → mqtt-mappings.yuma-agriculture.json → perceptualSpace[40:44)",
+      "what":  "pH/EC/ORP/turbidity readings land outside MQTT-defined nominal bands."
+    },
+    {
+      "step":  18420,
+      "where": "AGX051 (Yuma Aqua Maintenance Forecaster)",
+      "what":  "Reads perceptualSpace[40:44), CES fires `agx-051-urgent-maint`, writes [1,0,0,0] to perceptualSpace[256:260). triggerConfig matches → envelope #1 emitted to localAIStack with dispatch.agent='aquaculture_predictive_maintenance_agent'."
+    },
+    {
+      "step":  18421,
+      "where": "AGX055 (Yuma Facility AI Synthesis Bridge)",
+      "what":  "Reads perceptualSpace[256:272) — sees AQUA URGENT bit set by AGX051. CES fires `agx-055-aqua-urgent`, writes the 12-cell one-hot [1,0,0,0,0,0,0,0,0,0,0,0] to perceptualSpace[3959:3971). triggerConfig matches → envelope #2 emitted to localAIStack with dispatch.agent='agriculture_yield_optimization_ai' and projection.schemaOverlay='agriculture-yuma-bridge-v1'."
+    },
+    {
+      "step":  18422,
+      "where": "AgYieldOptimizationAI",
+      "what":  "Reads perceptualSpace[3959:3971). Native inputSignalMap would read elem_0 as NUTRIENT_LOCKOUT — but the schemaOverlay carried on envelope #2 tells the AI to apply 'agriculture-yuma-bridge-v1', under which elem_0 means AQUA_URGENT. AI dispatches cross-domain optimization (or escalation to ag-emergency-response per AGX055.agentActions[2])."
+    }
+  ],
+
+  "invariants": [
+    "Both envelopes are produced by the SAME dispatcher pipeline driven by the same MergeOperation stream — `examples/triggers/graphql_trigger_template.py` is the canonical implementation.",
+    "Receiver de-duplication is keyed on (correlationId, envelopeId), not (machine, sequence) — a re-fire of the same sequence on a later step is a distinct envelope.",
+    "If AGX055's projection.schemaOverlay is dropped by the dispatcher, AgYieldOptimizationAI will mis-classify the AQUA_URGENT bit pattern as a NUTRIENT_LOCKOUT crisis. The overlay name is load-bearing — treat it like a content-type header."
+  ]
+}

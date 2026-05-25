@@ -1,0 +1,100 @@
+{
+  "schemaVersion":  "1.0.0",
+  "envelopeType":   "ces.terminal.event",
+  "envelopeId":     "3f8e7d2c-1b4a-4956-9c0d-2e1f8a7b6c5d",
+  "correlationId":  "f1e2d3c4-b5a6-4789-abcd-1234567890ab",
+  "emittedAt":      "2026-05-17T18:42:10.918Z",
+
+  "source": {
+    "engine":   "RE",
+    "instance": "reality-engine-yuma-01",
+    "endpoint": "https://localhost:3001"
+  },
+
+  "ces": {
+    "machineId":    "machine-agx051-yuma-aqua-maintenance-forecaster",
+    "machineName":  "Agriculture Yuma Aqua Maintenance Forecaster",
+    "machineCode":  "AGX051",
+    "sequenceId":   "agx-051-urgent-maint",
+    "sequenceName": "Aqua Maintenance: URGENT_MAINT",
+    "outputIndex":  0,
+    "stepNumber":   18420,
+    "perceptualMapping": {
+      "input":  { "offset": 40,  "length": 4 },
+      "output": { "offset": 256, "length": 4 }
+    },
+    "provenance": [
+      "lateral-watersuite-dev0000001-sensorreadings-v1-tick-918",
+      "agx-051-urgent-maint-event"
+    ],
+    "deprecation": null
+  },
+
+  "outputVector": {
+    "values":   [1, 0, 0, 0],
+    "encoding": "one-hot",
+    "semantics": [
+      { "index": 0, "label": "URGENT_MAINT",    "phase": "URGENT" },
+      { "index": 1, "label": "FORECAST_MAINT",  "phase": "FORECAST" },
+      { "index": 2, "label": "CALIBRATE",       "phase": "CALIBRATE" },
+      { "index": 3, "label": "NORMAL",          "phase": "STABLE" }
+    ],
+    "assertedLabel": "URGENT_MAINT"
+  },
+
+  "projection": {
+    "kind": "perceptual-overlay",
+    "target": {
+      "machineId":   "machine-agx055-yuma-facility-ai-synthesis-bridge",
+      "machineName": "Agriculture Yuma Facility AI Synthesis Bridge",
+      "inputRegion": { "offset": 256, "length": 16 }
+    },
+    "bitMapping": [
+      { "outIndex": 0, "targetCell": 256, "targetInputElement": "agx055.elem_0", "targetNativeSemantic": "AQUA_URGENT slot",    "bridgeSemantic": "URGENT_MAINT" },
+      { "outIndex": 1, "targetCell": 257, "targetInputElement": "agx055.elem_1", "targetNativeSemantic": "AQUA_FORECAST slot",  "bridgeSemantic": "FORECAST_MAINT" },
+      { "outIndex": 2, "targetCell": 258, "targetInputElement": "agx055.elem_2", "targetNativeSemantic": "AQUA_CALIBRATE slot", "bridgeSemantic": "CALIBRATE" },
+      { "outIndex": 3, "targetCell": 259, "targetInputElement": "agx055.elem_3", "targetNativeSemantic": "AQUA_STABLE slot",    "bridgeSemantic": "NORMAL" }
+    ],
+    "schemaOverlay": "agriculture-yuma-bridge-v1",
+    "notes": "AGX051's 4-cell output is the AQUA sub-cluster (cells [256:260)) inside AGX055's 16-cell input window [256:272). The bridge re-projects these four bits into the [3959:3971) AgYieldOptimizationAI window on the next step — see the chained envelope under the same correlationId."
+  },
+
+  "governance": {
+    "ragStatusCode":    "RED",
+    "processStatus":    "error",
+    "ownerTeam":        "agriculture-operations",
+    "slaSeconds":       900,
+    "runbook":          "https://runbooks.example.org/agriculture/agx051_yuma-aqua-maintenance-forecaster",
+    "escalationPolicy": "pagerduty:ag-ops",
+    "contact": {
+      "primary":   "agriculture-operations-primary@example.org",
+      "secondary": "agriculture-operations-secondary@example.org"
+    },
+    "description": "Urgent maintenance dispatch required."
+  },
+
+  "dispatch": {
+    "agent":  "aquaculture_predictive_maintenance_agent",
+    "action": "Dispatch aquaculture_predictive_maintenance_agent for urgent maintenance and record corrective action.",
+    "agentActionsCatalog": [
+      "Dispatch aquaculture_predictive_maintenance_agent for urgent maintenance and record corrective action.",
+      "Schedule preventive maintenance via aquaculture_predictive_maintenance_agent and verify completion telemetry.",
+      "Run sensor-calibration workflow via aquaculture_predictive_maintenance_agent for the yuma aqua maintenance forecast stream.",
+      "Continue automated monitoring for yuma aqua maintenance forecast while preserving current setpoints."
+    ],
+    "trigger": "agriculture-yuma-aqua-maintenance-forecaster-maintenance",
+    "endpoint": {
+      "kind":      "graphql",
+      "url":       "http://localhost:4000/graphql",
+      "mutation":  "updateProcessState",
+      "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+    }
+  },
+
+  "mqttContext": {
+    "configFile":  "RealityEngine_CPP/config/mqtt-mappings.yuma-agriculture.json",
+    "topicFilter": "LATERAL/WaterSuite/DEV0000001/SensorReadings/v1",
+    "broker":      "yuma.lateraledge.cloud:8883",
+    "inputRegion": { "offset": 40, "length": 4 }
+  }
+}

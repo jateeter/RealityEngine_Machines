@@ -1,0 +1,108 @@
+{
+  "schemaVersion":  "1.0.0",
+  "envelopeType":   "ces.terminal.event",
+  "envelopeId":     "9c4a8b1e-7d3f-4c2a-8b5e-1a2b3c4d5e6f",
+  "correlationId":  "f1e2d3c4-b5a6-4789-abcd-1234567890ab",
+  "emittedAt":      "2026-05-17T18:42:11.073Z",
+
+  "source": {
+    "engine":   "RE",
+    "instance": "reality-engine-yuma-01",
+    "endpoint": "https://localhost:3001"
+  },
+
+  "ces": {
+    "machineId":    "machine-agx055-yuma-facility-ai-synthesis-bridge",
+    "machineName":  "Agriculture Yuma Facility AI Synthesis Bridge",
+    "machineCode":  "AGX055",
+    "sequenceId":   "agx-055-aqua-urgent",
+    "sequenceName": "Facility Bridge: AQUA_URGENT",
+    "outputIndex":  0,
+    "stepNumber":   18421,
+    "perceptualMapping": {
+      "input":  { "offset": 256,  "length": 16 },
+      "output": { "offset": 3959, "length": 12 }
+    },
+    "provenance": [
+      "agx-051-urgent-maint-output",
+      "agx-055-aqua-urgent-event"
+    ],
+    "deprecation": null
+  },
+
+  "outputVector": {
+    "values":   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "encoding": "one-hot",
+    "semantics": [
+      { "index": 0,  "label": "AQUA_URGENT",     "cluster": "AQUA",    "phase": "URGENT",   "sourceMachine": "AGX051" },
+      { "index": 1,  "label": "AQUA_FORECAST",   "cluster": "AQUA",    "phase": "FORECAST", "sourceMachine": "AGX051" },
+      { "index": 2,  "label": "AQUA_STABLE",     "cluster": "AQUA",    "phase": "STABLE",   "sourceMachine": "AGX051" },
+      { "index": 3,  "label": "DO_URGENT",       "cluster": "DO",      "phase": "URGENT",   "sourceMachine": "AGX052" },
+      { "index": 4,  "label": "DO_FORECAST",     "cluster": "DO",      "phase": "FORECAST", "sourceMachine": "AGX052" },
+      { "index": 5,  "label": "DO_STABLE",       "cluster": "DO",      "phase": "STABLE",   "sourceMachine": "AGX052" },
+      { "index": 6,  "label": "CLIMATE_URGENT",  "cluster": "CLIMATE", "phase": "URGENT",   "sourceMachine": "AGX053" },
+      { "index": 7,  "label": "CLIMATE_FORECAST","cluster": "CLIMATE", "phase": "FORECAST", "sourceMachine": "AGX053" },
+      { "index": 8,  "label": "CLIMATE_STABLE",  "cluster": "CLIMATE", "phase": "STABLE",   "sourceMachine": "AGX053" },
+      { "index": 9,  "label": "SAFETY_URGENT",   "cluster": "SAFETY",  "phase": "URGENT",   "sourceMachine": "AGX054" },
+      { "index": 10, "label": "SAFETY_FORECAST", "cluster": "SAFETY",  "phase": "FORECAST", "sourceMachine": "AGX054" },
+      { "index": 11, "label": "FACILITY_STABLE", "cluster": "FACILITY","phase": "STABLE",   "sourceMachine": "AGX051+052+053+054" }
+    ],
+    "assertedLabel": "AQUA_URGENT"
+  },
+
+  "projection": {
+    "kind": "perceptual-overlay",
+    "target": {
+      "machineId":   "machine-agyieldoptimizationai",
+      "machineName": "Ag Yield Optimization AI",
+      "inputRegion": { "offset": 3959, "length": 12 }
+    },
+    "bitMapping": [
+      { "outIndex": 0,  "targetCell": 3959, "targetInputElement": "elem_0",  "targetNativeSemantic": "NUTRIENT_LOCKOUT",     "bridgeSemantic": "AQUA_URGENT" },
+      { "outIndex": 1,  "targetCell": 3960, "targetInputElement": "elem_1",  "targetNativeSemantic": "UPTAKE_MISMATCH",      "bridgeSemantic": "AQUA_FORECAST" },
+      { "outIndex": 2,  "targetCell": 3961, "targetInputElement": "elem_2",  "targetNativeSemantic": "NIGHT_REST",           "bridgeSemantic": "AQUA_STABLE" },
+      { "outIndex": 3,  "targetCell": 3962, "targetInputElement": "elem_3",  "targetNativeSemantic": "NUTRIENT_OK",          "bridgeSemantic": "DO_URGENT" },
+      { "outIndex": 4,  "targetCell": 3963, "targetInputElement": "elem_4",  "targetNativeSemantic": "FUNGAL_ALERT",         "bridgeSemantic": "DO_FORECAST" },
+      { "outIndex": 5,  "targetCell": 3964, "targetInputElement": "elem_5",  "targetNativeSemantic": "INSECT_ALERT",         "bridgeSemantic": "DO_STABLE" },
+      { "outIndex": 6,  "targetCell": 3965, "targetInputElement": "elem_6",  "targetNativeSemantic": "IPM_WARNING",          "bridgeSemantic": "CLIMATE_URGENT" },
+      { "outIndex": 7,  "targetCell": 3966, "targetInputElement": "elem_7",  "targetNativeSemantic": "IPM_OK",               "bridgeSemantic": "CLIMATE_FORECAST" },
+      { "outIndex": 8,  "targetCell": 3967, "targetInputElement": "elem_8",  "targetNativeSemantic": "HARVEST_DELAYED",      "bridgeSemantic": "CLIMATE_STABLE" },
+      { "outIndex": 9,  "targetCell": 3968, "targetInputElement": "elem_9",  "targetNativeSemantic": "STRESS_RECOVERY",      "bridgeSemantic": "SAFETY_URGENT" },
+      { "outIndex": 10, "targetCell": 3969, "targetInputElement": "elem_10", "targetNativeSemantic": "HARVEST_APPROACHING",  "bridgeSemantic": "SAFETY_FORECAST" },
+      { "outIndex": 11, "targetCell": 3970, "targetInputElement": "elem_11", "targetNativeSemantic": "HARVEST_READY",        "bridgeSemantic": "FACILITY_STABLE" }
+    ],
+    "schemaOverlay": "agriculture-yuma-bridge-v1",
+    "notes": "AGX055 writes to AgYieldOptimizationAI's native input window. The 12 cells share storage but carry yuma-facility-maintenance semantics, not nutrient/IPM/harvest. The AI agent receiving this envelope MUST switch on schemaOverlay='agriculture-yuma-bridge-v1' before interpreting the values; falling through to the native inputSignalMap will mis-classify AQUA_URGENT as NUTRIENT_LOCKOUT and trigger the wrong corrective regex."
+  },
+
+  "governance": {
+    "ragStatusCode":    "RED",
+    "processStatus":    "error",
+    "ownerTeam":        "agriculture-operations",
+    "slaSeconds":       600,
+    "runbook":          "https://runbooks.example.org/agriculture/agx055_yuma-facility-ai-synthesis-bridge",
+    "escalationPolicy": "pagerduty:ag-ops",
+    "contact": {
+      "primary":   "agriculture-operations-primary@example.org",
+      "secondary": "agriculture-operations-secondary@example.org"
+    },
+    "description": "Aqua maintenance is critical — escalate via AgYieldOptimizationAI."
+  },
+
+  "dispatch": {
+    "agent":  "agriculture_yield_optimization_ai",
+    "action": "Project synthesis vector onto AgYieldOptimizationAI input window at [3959:3971]; AI dispatches cross-domain optimization.",
+    "agentActionsCatalog": [
+      "Project synthesis vector onto AgYieldOptimizationAI input window at [3959:3971]; AI dispatches cross-domain optimization.",
+      "Run facility-wide AI optimization when all sources stable.",
+      "Escalate to ag-emergency-response when any source is URGENT."
+    ],
+    "trigger": "ag-yield-optimization-ai-yuma-facility-bridge",
+    "endpoint": {
+      "kind":      "graphql",
+      "url":       "http://localhost:4000/graphql",
+      "mutation":  "updateProcessState",
+      "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+    }
+  }
+}

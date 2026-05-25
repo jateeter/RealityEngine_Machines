@@ -1,0 +1,99 @@
+{
+  "$schema": "https://realityengine.example.org/schemas/ai-trigger-envelope-1.0.0.json",
+  "$comment": "Canonical RE/PE → localAIStack trigger envelope. Emit one of these for every CES MergeOperation whose triggerConfig rule matches. The receiver (graphql_trigger_template.py / localAIStack /graphql) reads the top-level scalar fields for the existing updateProcessState mutation; the `outputVector`, `projection`, and `dispatch` blocks are the extension that carries CES-terminal-event semantics. Populate by mapping fields straight off the MergeOperation (src/engine/PerceptualSpaceSimulator.ts) and the machine's metadata.triggerConfig / metadata.mqttIntegration / governance / dispatchableAgent.",
+
+  "schemaVersion":  "1.0.0",
+  "envelopeType":   "ces.terminal.event",
+  "envelopeId":     "<uuid v4 — one per emitted event>",
+  "correlationId":  "<uuid v4 — shared across a causal cascade so the AI can stitch RE→AI→RE→AI chains>",
+  "emittedAt":      "<ISO-8601 timestamp at emission>",
+
+  "source": {
+    "$comment":  "Which engine emitted the event. RE = Reality Engine (TS, src/), PE = Perception Engine (RealityEngine_CPP). `endpoint` is the HTTPS base URL the dispatcher was watching.",
+    "engine":    "RE",
+    "instance":  "<hostname or container id>",
+    "endpoint":  "https://localhost:3001"
+  },
+
+  "ces": {
+    "$comment":          "Mirrors MergeOperation fields one-for-one. machineCode = the AGX###/HHX### prefix from the JSON filename.",
+    "machineId":         "<machine.id>",
+    "machineName":       "<machine.name>",
+    "machineCode":       "<AGX###>",
+    "sequenceId":        "<sequenceId fired>",
+    "sequenceName":      "<sequence.name>",
+    "outputIndex":       0,
+    "stepNumber":        0,
+    "perceptualMapping": {
+      "input":  { "offset": 0, "length": 0 },
+      "output": { "offset": 0, "length": 0 }
+    },
+    "provenance":  ["<vectorId chain leading to this assertion>"],
+    "deprecation": null
+  },
+
+  "outputVector": {
+    "$comment":      "The terminal event's payload. `values` is the raw bit-vector that just landed in perceptual space. `semantics[i].label` is the producer's name for cell i; this is the schema-on-write that lets the receiver decode the vector without consulting the machine JSON. `assertedLabel` is the one-hot category (or the join of multi-hot labels) — convenient for switch/case dispatch on the AI side.",
+    "values":        [0, 0, 0, 0],
+    "encoding":      "one-hot",
+    "semantics": [
+      { "index": 0, "label": "<LABEL>", "cluster": "<optional sub-cluster, e.g. AQUA>", "phase": "<optional phase, e.g. URGENT>", "sourceMachine": "<optional upstream AGX>" }
+    ],
+    "assertedLabel": "<LABEL>"
+  },
+
+  "projection": {
+    "$comment": "OPTIONAL. Populate when the producer's output region is intentionally overlaid onto another machine's input region (the AGX055 → AgYieldOptimizationAI pattern). `bitMapping[]` enumerates how each producer output cell lands on the target's input cells, AND what semantic schema the target should apply when interpreting them. `schemaOverlay` names the interpretation: the target's native inputSignalMap is bypassed in favour of the named overlay.",
+    "kind": "perceptual-overlay",
+    "target": {
+      "machineId":   "<target.machine.id>",
+      "machineName": "<target machine name>",
+      "inputRegion": { "offset": 0, "length": 0 }
+    },
+    "bitMapping": [
+      {
+        "outIndex":            0,
+        "targetCell":          0,
+        "targetInputElement":  "elem_0",
+        "targetNativeSemantic":"<what the target normally reads at this cell>",
+        "bridgeSemantic":      "<what THIS envelope means at this cell>"
+      }
+    ],
+    "schemaOverlay": "<overlay name registered with the target AI agent>",
+    "notes": "Bridge machines re-purpose a shared perceptual region. The receiver MUST switch on schemaOverlay before interpreting the cells."
+  },
+
+  "governance": {
+    "$comment":         "Copied verbatim from PagingDecision (services/GovernanceResolver.ts:resolveForOutput). The RE side computes this; the AI side does not re-derive it.",
+    "ragStatusCode":    "RED",
+    "processStatus":    "error",
+    "ownerTeam":        "<team>",
+    "slaSeconds":       null,
+    "runbook":          null,
+    "escalationPolicy": null,
+    "contact":          { "primary": null, "secondary": null },
+    "description":      null
+  },
+
+  "dispatch": {
+    "$comment":            "Which agent in localAIStack receives this envelope and what it should do. `agent` = the machine's metadata.dispatchableAgent. `action` = the matched rule's primary agentActions entry. `agentActionsCatalog` = the full machine.metadata.agentActions array so the AI can pick alternates. `trigger` = metadata.aiTrigger (the named hook the agent advertises). `endpoint.mutation` references the strawberry schema in localAIStack/services/api/routers/graphql_endpoint.py.",
+    "agent":               "<agent id, e.g. agriculture_yield_optimization_ai>",
+    "action":              "<primary action for this firing>",
+    "agentActionsCatalog": [],
+    "trigger":             "<metadata.aiTrigger>",
+    "endpoint": {
+      "kind":      "graphql",
+      "url":       "http://localhost:4000/graphql",
+      "mutation":  "updateProcessState",
+      "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+    }
+  },
+
+  "mqttContext": {
+    "$comment":    "OPTIONAL. Populate for MQTT-driven machines (metadata.mqttIntegration present) so the AI can correlate the firing back to the raw broker payload. Omit when not applicable.",
+    "configFile":  "<RealityEngine_CPP/config/mqtt-mappings.*.json>",
+    "topicFilter": "<topic that fed this event>",
+    "broker":      "<host:port>",
+    "inputRegion": { "offset": 0, "length": 0 }
+  }
+}
