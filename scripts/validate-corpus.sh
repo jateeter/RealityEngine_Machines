@@ -4,8 +4,8 @@
 #
 # Checks each file for:
 #   1. Valid JSON (parseable by python3)
-#   2. Required top-level fields: id, name, ces
-#   3. Non-empty id and name strings
+#   2. Top-level 'machine' object with non-empty 'name' string
+#   3. Non-empty 'machine.sequences' array (the CES)
 #
 # Usage:  ./scripts/validate-corpus.sh
 # Exit:   0 on success, 1 if any file fails validation.
@@ -48,22 +48,27 @@ except json.JSONDecodeError as e:
     sys.exit(1)
 
 errors = []
-for field in ('id', 'name', 'ces'):
-    if field not in m:
-        errors.append(f"missing required field '{field}'")
-    elif field in ('id', 'name') and not str(m[field]).strip():
-        errors.append(f"'{field}' must be a non-empty string")
+machine = m.get('machine')
+if not isinstance(machine, dict):
+    errors.append("top-level 'machine' object missing or not a dict")
+else:
+    name = machine.get('name', '')
+    if not str(name).strip():
+        errors.append("'machine.name' must be a non-empty string")
+    seqs = machine.get('sequences')
+    if not isinstance(seqs, list) or len(seqs) == 0:
+        errors.append("'machine.sequences' must be a non-empty array")
 
 if errors:
     print("SCHEMA_ERROR: " + "; ".join(errors))
     sys.exit(1)
 
-print(f"OK id={m['id']}")
+print(f"OK name={machine['name']}")
 PYEOF
 ) || true
 
     if echo "$RESULT" | grep -q "^OK"; then
-        ok "$rel  ($(echo "$RESULT" | sed 's/^OK //'))"
+        ok "$rel  ($(echo "$RESULT" | sed 's/^OK //' | cut -c1-60))"
         PASS=$((PASS+1))
     else
         fail "$rel  — $RESULT"
