@@ -60,7 +60,7 @@ if errors:
 
 print(f"OK id={m['id']}")
 PYEOF
-    || true)
+) || true
 
     if echo "$RESULT" | grep -q "^OK"; then
         ok "$rel  ($(echo "$RESULT" | sed 's/^OK //'))"
