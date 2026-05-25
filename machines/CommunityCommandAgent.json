@@ -1,0 +1,298 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "machine-community-command-agent",
+    "name": "Community Command Agent",
+    "description": "Meta-CES \u2014 orchestrates a referral workflow across community-services leaf machines.  Its 'inputs' are event-bus bits latched by the engine when {benefits-eligibility, intake-triage, housing-placement} sequences fire.  Asserts referral-complete when all three milestones have fired in order.",
+    "metadata": {
+      "category": "meta-ces",
+      "domain": "community-services",
+      "compose": {
+        "version": "1.0.0",
+        "description": "Each subscription latches `1.0` at bitOffset in the perceptual space whenever the producer's sequence fires.  The meta-machine's perceptualMapping.input region covers those bits, so the meta-CES sees fire-events as ordinary input.",
+        "subscriptions": [
+          {
+            "producerMachineId": "machine-benefits-eligibility",
+            "producerSequenceId": "bel-finalize",
+            "bitOffset": 5500
+          },
+          {
+            "producerMachineId": "machine-intake-triage",
+            "producerSequenceId": "intake-finalize",
+            "bitOffset": 5501
+          },
+          {
+            "producerMachineId": "machine-housing-placement",
+            "producerSequenceId": "housing-place",
+            "bitOffset": 5502
+          }
+        ]
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "primaryDomain": "community-services",
+        "domainTags": [
+          "community-services"
+        ],
+        "family": "command-agent",
+        "machineCode": "community-command-agent",
+        "capabilityTags": [
+          "meta-ces",
+          "composition",
+          "referral-orchestration"
+        ],
+        "workflowTags": [
+          "referral-workflow",
+          "case-coordination"
+        ],
+        "validationTags": [
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "social-services-on-call",
+        "runbook": "https://runbooks.example.org/community-services/communitycommandagent",
+        "escalationPolicy": "pagerduty:social-services",
+        "contact": {
+          "primary": "social-services-on-call-primary@example.org",
+          "secondary": "social-services-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 1800,
+          "error": 600
+        },
+        "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"community-services\".  Review and tune the routing as the team owning CommunityCommandAgent matures."
+      },
+      "triggerConfig": {
+        "processId": "COMMUNITYCOMMANDAGENT",
+        "processName": "Community Command Agent",
+        "rules": [
+          {
+            "sequenceId": "referral-completion",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "All three milestones (benefits, intake, housing) have been confirmed.  Hand off to case management."
+          },
+          {
+            "sequenceId": "referral-incomplete",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "No milestones latched yet \u2014 workflow not started."
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 5500,
+        "length": 3
+      },
+      "output": {
+        "offset": 5503,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "referral-completion",
+        "name": "Referral completion \u2014 all three milestones latched",
+        "metadata": {
+          "description": "The meta-CES asserts referral-complete once {benefits-eligible.fired, intake-complete.fired, housing-placed.fired} have all been latched on the event bus.  Latching is monotonic \u2014 once a producer fires, the bit stays 1 until the simulator is reset \u2014 so this conjunction terminates the workflow regardless of arrival order.  Order discipline (benefits \u2192 intake \u2192 housing) is enforced upstream by the producer agents, not by the meta-CES."
+        },
+        "vectors": [
+          {
+            "id": "ccr-all-milestones-reached",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "ccr-out-referral-complete",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "label": "REFERRAL_COMPLETE",
+                  "severity": "INFO",
+                  "description": "All three milestones (benefits, intake, housing) have been confirmed.  Hand off to case management."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "referral-incomplete",
+        "name": "Referral incomplete \u2014 milestones missing",
+        "metadata": {
+          "description": "Continuously asserts that referral is NOT complete (terminal value [0,1,0,0]) while at least one milestone is unmet.  Pairs with the referral-completion sequence on the same output region \u2014 final write wins per merge ordering, so once all three latch, REFERRAL_COMPLETE supersedes."
+        },
+        "vectors": [
+          {
+            "id": "ccr-await-all",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "ccr-out-referral-pending",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "label": "REFERRAL_PENDING",
+                  "severity": "INFO",
+                  "description": "No milestones latched yet \u2014 workflow not started."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "No milestones \u2014 referral not started",
+        "description": "All three event-bus bits are unlatched. Machine asserts REFERRAL_PENDING immediately.",
+        "vectors": [
+          [
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "referral-incomplete"
+        }
+      },
+      {
+        "name": "Benefits eligible only \u2014 first milestone latched",
+        "description": "Only the benefits-eligibility bit is set. Intake and housing are still pending; referral remains incomplete.",
+        "vectors": [
+          [
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "partial-benefits-only"
+        }
+      },
+      {
+        "name": "Benefits + intake \u2014 two of three milestones",
+        "description": "Benefits-eligibility and intake-triage have fired. Housing placement is still outstanding; referral remains incomplete.",
+        "vectors": [
+          [
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0,1,0,0]",
+          "scenario": "partial-benefits-intake"
+        }
+      },
+      {
+        "name": "All milestones latched \u2014 referral complete",
+        "description": "All three event-bus bits are set simultaneously. Machine asserts REFERRAL_COMPLETE.",
+        "vectors": [
+          [
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "referral-completion"
+        }
+      },
+      {
+        "name": "Full workflow progression \u2014 none through completion",
+        "description": "Replays the nominal happy-path: workflow starts with no milestones, benefits fires first, intake second, housing last. Final vector asserts REFERRAL_COMPLETE.",
+        "vectors": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            1,
+            1,
+            0
+          ],
+          [
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1,0,0,0]",
+          "scenario": "full-workflow-progression"
+        }
+      }
+    ]
+  }
+}

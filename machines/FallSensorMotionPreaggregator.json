@@ -1,0 +1,330 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "machine-fall-sensor-motion-preaggregator",
+    "name": "Fall Sensor Motion Pre-aggregator",
+    "description": "Lifts the previously prose-only sensor pre-aggregation contract from FallDetection.metadata.designNotes into an executable CES.  Input is a raw active-sample count per tick (typically derived by the wearable firmware from a window of accelerometer samples whose magnitude exceeds a motion threshold).  Output is the motion-progression ordinal (0=none, 1=brief, 2=sustained, 3=severe) that FallDetection's motion-channel input region expects.  The wearable firmware is testable against this CES \u2014 given the same raw count, both the firmware and the engine must classify into the same ordinal.",
+    "metadata": {
+      "category": "sensor-preaggregator",
+      "domain": "health-personal",
+      "author": "Reality Engine",
+      "created": "2026-05-13T00:00:00Z",
+      "schemaVersion": "1.0.0",
+      "downstream": {
+        "consumerMachineId": "machine-falldetection",
+        "consumerInputElement": 0,
+        "note": "Output region 3813..3813 overlaps FallDetection.perceptualMapping.input[0] (motion-progression).  Pre-aggregator \u2192 FallDetection is a 1-tick pipeline: the ordinal written this step becomes FallDetection's snapshot next step."
+      },
+      "eventSpace": "1D ordinal: input[0] = count of above-threshold accelerometer samples in the last firmware window (range 0..6+; firmware clamps higher counts at 6).",
+      "outputSpace": "1D ordinal: output[0] = motion-progression (0=none, 1=brief, 2=sustained, 3=severe).",
+      "designNotes": "The 4 sequences are mutually exclusive thanks to non-overlapping THRESHOLD bands:\n  - none      input\u2208[-0.4, 0.4]   \u2192 ordinal 0\n  - brief     input\u2208[0.9, 2.1]    \u2192 ordinal 1\n  - sustained input\u2208[2.9, 4.1]    \u2192 ordinal 2\n  - severe    input\u2208[4.5, 7.5]    \u2192 ordinal 3\nWith counts always integer, [0]\u2192none, [1,2]\u2192brief, [3,4]\u2192sustained, [5,6,7]\u2192severe.  Firmware tests assert the same mapping byte-for-byte.",
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "wellness"
+        ],
+        "family": "fall-detection-pipeline",
+        "machineCode": "fall-sensor-motion-preaggregator",
+        "capabilityTags": [
+          "sensor-preaggregator",
+          "firmware-contract"
+        ],
+        "workflowTags": [
+          "fall-detection-pipeline",
+          "imu-binning"
+        ],
+        "validationTags": [
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/patient-safety/fall-sensor-preaggregator",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-team@example.org",
+          "secondary": "wearables-firmware-oncall@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Pre-aggregator misclassification \u2192 FallDetection misses RED.  Treat severity equal to FallDetection itself."
+      },
+      "triggerConfig": {
+        "processId": "FALL_SENSOR_MOTION_PREAGGREGATOR",
+        "processName": "Fall Sensor Motion Pre-aggregator",
+        "rules": [
+          {
+            "sequenceId": "motion-none",
+            "outputMatches": [
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "ok",
+            "description": "Quiescent \u2014 no motion samples above threshold this tick."
+          },
+          {
+            "sequenceId": "motion-brief",
+            "outputMatches": [
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Brief motion \u2014 1 to 2 above-threshold samples."
+          },
+          {
+            "sequenceId": "motion-sustained",
+            "outputMatches": [
+              2
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Sustained motion \u2014 3 to 4 above-threshold samples."
+          },
+          {
+            "sequenceId": "motion-severe",
+            "outputMatches": [
+              3
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Severe motion \u2014 5 or more above-threshold samples."
+          }
+        ]
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4300,
+        "length": 1
+      },
+      "output": {
+        "offset": 3813,
+        "length": 1
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "motion-none",
+        "name": "No motion \u2192 ordinal 0",
+        "schemaVersion": "1.0.0",
+        "metadata": {
+          "band": "[-0.4, 0.4]"
+        },
+        "vectors": [
+          {
+            "id": "preagg-motion-none",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.4,
+                "comparatorType": "threshold"
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "preagg-motion-none-out",
+                "vector": [
+                  0
+                ],
+                "metadata": {
+                  "ordinal": 0,
+                  "label": "MOTION_NONE"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "motion-brief",
+        "name": "Brief motion \u2192 ordinal 1",
+        "schemaVersion": "1.0.0",
+        "metadata": {
+          "band": "[0.9, 2.1]"
+        },
+        "vectors": [
+          {
+            "id": "preagg-motion-brief",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.5,
+                "threshold": 0.6,
+                "comparatorType": "threshold"
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "preagg-motion-brief-out",
+                "vector": [
+                  1
+                ],
+                "metadata": {
+                  "ordinal": 1,
+                  "label": "MOTION_BRIEF"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "motion-sustained",
+        "name": "Sustained motion \u2192 ordinal 2",
+        "schemaVersion": "1.0.0",
+        "metadata": {
+          "band": "[2.9, 4.1]"
+        },
+        "vectors": [
+          {
+            "id": "preagg-motion-sustained",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 3.5,
+                "threshold": 0.6,
+                "comparatorType": "threshold"
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "preagg-motion-sustained-out",
+                "vector": [
+                  2
+                ],
+                "metadata": {
+                  "ordinal": 2,
+                  "label": "MOTION_SUSTAINED"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "motion-severe",
+        "name": "Severe motion \u2192 ordinal 3",
+        "schemaVersion": "1.0.0",
+        "metadata": {
+          "band": "[4.5, 7.5]"
+        },
+        "vectors": [
+          {
+            "id": "preagg-motion-severe",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 6,
+                "threshold": 1.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "outputVectors": [
+              {
+                "id": "preagg-motion-severe-out",
+                "vector": [
+                  3
+                ],
+                "metadata": {
+                  "ordinal": 3,
+                  "label": "MOTION_SEVERE"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Quiescent \u2014 no above-threshold samples",
+        "description": "Count of 0: firmware reports no motion samples above threshold this tick. Pre-aggregator classifies as MOTION_NONE (ordinal 0).",
+        "vectors": [
+          [
+            0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[0]",
+          "scenario": "motion-none"
+        }
+      },
+      {
+        "name": "Brief motion \u2014 count 1",
+        "description": "Count of 1: a single above-threshold sample, lower edge of the brief band [1,2]. Pre-aggregator classifies as MOTION_BRIEF (ordinal 1).",
+        "vectors": [
+          [
+            1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1]",
+          "scenario": "motion-brief-low"
+        }
+      },
+      {
+        "name": "Brief motion \u2014 count 2",
+        "description": "Count of 2: upper edge of the brief band. Pre-aggregator classifies as MOTION_BRIEF (ordinal 1). Validates the upper boundary of the brief threshold.",
+        "vectors": [
+          [
+            2
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[1]",
+          "scenario": "motion-brief-high"
+        }
+      },
+      {
+        "name": "Sustained motion \u2014 count 4",
+        "description": "Count of 4: upper edge of the sustained band [3,4]. Pre-aggregator classifies as MOTION_SUSTAINED (ordinal 2).",
+        "vectors": [
+          [
+            4
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[2]",
+          "scenario": "motion-sustained"
+        }
+      },
+      {
+        "name": "Escalation \u2014 quiescent through severe",
+        "description": "Replays a firmware escalation window: 0 (quiescent) \u2192 1 (brief) \u2192 3 (sustained) \u2192 6 (severe, firmware ceiling). Each step exercises a different threshold band. Final tick must classify as MOTION_SEVERE (ordinal 3).",
+        "vectors": [
+          [
+            0
+          ],
+          [
+            1
+          ],
+          [
+            3
+          ],
+          [
+            6
+          ]
+        ],
+        "metadata": {
+          "expectedOutputCount": 1,
+          "expectedOutputVector": "[3]",
+          "scenario": "escalation-quiescent-to-severe"
+        }
+      }
+    ]
+  }
+}
