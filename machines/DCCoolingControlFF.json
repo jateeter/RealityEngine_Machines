@@ -5,7 +5,7 @@
     "description": "RS flip-flop that latches the thermal alarm state. SET by DCThermalEscalation [1,0], RESET by safe-recovery signal [0,1].",
     "metadata": {
       "category": "data-center",
-      "domain": "Data Center — Thermal / Cooling Control",
+      "domain": "Data Center \u2014 Thermal / Cooling Control",
       "author": "Reality Engine",
       "created": "2026-02-27T00:00:00Z",
       "eventSpace": "2D binary control signal at [1375:1377]: [1,0]=ALARM, [0,1]=SAFE",
@@ -33,7 +33,7 @@
       "downstreamMachine": "DCCriticalSynthesizer (reads [1371:1373])",
       "singleTransitionAssumption": {
         "required": false,
-        "scope": "not applicable — all event vectors are isInitial (combinatorial)",
+        "scope": "not applicable \u2014 all event vectors are isInitial (combinatorial)",
         "compliant": true,
         "notes": "Both SET and RESET events are isInitial. The FF responds combinatorially on every cycle. The 'state' persists through the perceptual space value retention: once SET writes [1,0] to [1371:1373], that value remains until RESET overwrites it with [0,1]. Multi-bit transitions between [1,0] and [0,1] (HD=2) work correctly since both events are always active."
       },
@@ -127,7 +127,8 @@
             "description": "COOLING CONTROL INACTIVE: Normal cooling sufficient"
           }
         ]
-      }
+      },
+      "machineClass": "outcome-stabilizer"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -144,10 +145,10 @@
     "sequences": [
       {
         "id": "dc-cooling-set-sequence",
-        "name": "COOLING ALARM SET: [1,0] → [1,0]",
+        "name": "COOLING ALARM SET: [1,0] \u2192 [1,0]",
         "metadata": {
           "description": "Activates cooling alarm when thermal escalation fires [1,0] control signal",
-          "path": "[1,0] → [1,0]",
+          "path": "[1,0] \u2192 [1,0]",
           "output": "[1,0]",
           "trigger": "DCThermalEscalation EMERGENCY state fires [1,0] to bytes [1375:1377]"
         },
@@ -167,7 +168,7 @@
             "isInitial": true,
             "metadata": {
               "name": "ALARM",
-              "description": "Control signal [1,0]: thermal alarm is active — activate cooling",
+              "description": "Control signal [1,0]: thermal alarm is active \u2014 activate cooling",
               "state": "SET"
             },
             "outputVectors": [
@@ -189,10 +190,10 @@
       },
       {
         "id": "dc-cooling-reset-sequence",
-        "name": "COOLING ALARM RESET: [0,1] → [0,1]",
+        "name": "COOLING ALARM RESET: [0,1] \u2192 [0,1]",
         "metadata": {
           "description": "Deactivates cooling alarm when safe-recovery signal [0,1] is received",
-          "path": "[0,1] → [0,1]",
+          "path": "[0,1] \u2192 [0,1]",
           "output": "[0,1]",
           "trigger": "DCThermalEscalation SAFE state fires [0,1] to bytes [1375:1377]"
         },
@@ -212,7 +213,7 @@
             "isInitial": true,
             "metadata": {
               "name": "SAFE",
-              "description": "Control signal [0,1]: thermal conditions safe — deactivate cooling alarm",
+              "description": "Control signal [0,1]: thermal conditions safe \u2014 deactivate cooling alarm",
               "state": "RESET"
             },
             "outputVectors": [
@@ -236,8 +237,8 @@
     "inputSequences": [
       {
         "name": "Thermal Alarm Activation",
-        "pattern": "[0,1] → [1,0]",
-        "description": "Simulate DCThermalEscalation firing: safe → alarm",
+        "pattern": "[0,1] \u2192 [1,0]",
+        "description": "Simulate DCThermalEscalation firing: safe \u2192 alarm",
         "vectors": [
           [
             0,
@@ -251,8 +252,8 @@
       },
       {
         "name": "Thermal Alarm Recovery",
-        "pattern": "[1,0] → [0,1]",
-        "description": "Simulate recovery: alarm → safe",
+        "pattern": "[1,0] \u2192 [0,1]",
+        "description": "Simulate recovery: alarm \u2192 safe",
         "vectors": [
           [
             1,
@@ -266,7 +267,7 @@
       },
       {
         "name": "Alarm Latch Cycle",
-        "pattern": "[0,1] → [1,0] → [1,0] → [1,0] → [0,1]",
+        "pattern": "[0,1] \u2192 [1,0] \u2192 [1,0] \u2192 [1,0] \u2192 [0,1]",
         "description": "Full cycle: safe baseline, alarm triggers, persists, clears on recovery",
         "vectors": [
           [

@@ -210,7 +210,79 @@
             "processStatus": "info",
             "description": "Operator Assault Risk: NOMINAL -> SERVICE_NOMINAL"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "transit_command_center_agent",
+        "mode": "advise",
+        "trigger": "transportation-fleet-security-and-safety-operator-assault-risk",
+        "allowedActions": [
+          "Dispatch transit_command_center_agent for critical 100-bus fleet intervention on operator assault risk.",
+          "Trigger predictive flow management for operator assault risk using rider, vehicle, and route context.",
+          "Create maintenance, cleaning, security, or service task for operator assault risk.",
+          "Keep 24/7 monitoring active for operator assault risk."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.tfx045.transit.command.center.agent.completion",
+          "name": "localAIStack tfx045 transit.command.center.agent completion",
+          "region": {
+            "offset": 3419,
+            "length": 4
+          },
+          "semantics": [
+            "service reliability",
+            "rider impact",
+            "asset readiness",
+            "safety/security risk"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-tfx045-completion",
+            "sensorId": "localai.tfx045.transit.command.center.agent.completion",
+            "name": "localAIStack tfx045 transit.command.center.agent completion",
+            "region": {
+              "offset": 3419,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

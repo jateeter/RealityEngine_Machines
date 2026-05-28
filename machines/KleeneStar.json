@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "machine": {
     "name": "Kleene Star Operator",
-    "description": "Demonstrates Kleene star (*) operator in critical event sequences - zero or more repetitions with alternation. Note: initial (isInitial) trigger vectors implement A*A = A+ semantics — at least one match of the trigger is required before successors are armed.",
+    "description": "Demonstrates Kleene star (*) operator in critical event sequences - zero or more repetitions with alternation. Note: initial (isInitial) trigger vectors implement A*A = A+ semantics \u2014 at least one match of the trigger is required before successors are armed.",
     "metadata": {
       "category": "digital-logic",
       "author": "Reality Engine",
@@ -27,17 +27,17 @@
       "description": "Two sequences demonstrating repetition patterns. Sequence notation uses standard regex: (+) = one-or-more, (*) = zero-or-more, (|) = alternation, adjacency = concatenation.",
       "singleTransitionAssumption": {
         "required": false,
-        "scope": "not applicable — pattern recognition, not state traversal",
+        "scope": "not applicable \u2014 pattern recognition, not state traversal",
         "compliant": false,
-        "notes": "STA does NOT apply and is intentionally violated in the 'Zero Repetitions' input sequence. After the initial vector [0,0,1] fires (A*A: at least one match required), it activates both the loop body (kleene-seq1-000) and the terminal (kleene-seq1-010) simultaneously as successors. The 'Zero Repetitions' case demonstrates that [0,1,0] can arrive immediately after [0,0,1] — a HD=2 transition — and the terminal correctly matches. This is the canonical definition of 'zero or more' for the loop body: (000)* may be skipped entirely because the trigger (001)+ directly arms the terminal. Enforcing STA (requiring a [0,0,0] intermediate) would make zero-repetition semantics impossible to demonstrate. KleeneStar operates on pattern identity, not on transition topology. Important: the trigger (001) is (001)+ not (001) — the isInitial property means the trigger can re-arm successors on every match, not just once.",
+        "notes": "STA does NOT apply and is intentionally violated in the 'Zero Repetitions' input sequence. After the initial vector [0,0,1] fires (A*A: at least one match required), it activates both the loop body (kleene-seq1-000) and the terminal (kleene-seq1-010) simultaneously as successors. The 'Zero Repetitions' case demonstrates that [0,1,0] can arrive immediately after [0,0,1] \u2014 a HD=2 transition \u2014 and the terminal correctly matches. This is the canonical definition of 'zero or more' for the loop body: (000)* may be skipped entirely because the trigger (001)+ directly arms the terminal. Enforcing STA (requiring a [0,0,0] intermediate) would make zero-repetition semantics impossible to demonstrate. KleeneStar operates on pattern identity, not on transition topology. Important: the trigger (001) is (001)+ not (001) \u2014 the isInitial property means the trigger can re-arm successors on every match, not just once.",
         "maxHammingDistanceInDefinedSequences": 2,
         "violations": [
           {
             "sequence": "Sequence 1: Zero Repetitions",
-            "transition": "[0,0,1] → [0,1,0]",
+            "transition": "[0,0,1] \u2192 [0,1,0]",
             "hammingDistance": 2,
             "intent": "Zero loop iterations: directly from trigger (001)+ to terminal (010), bypassing the (000)* loop body.",
-            "behavior": "Correct — kleene-seq1-010 was activated by the initial vector and matches [0,1,0] immediately"
+            "behavior": "Correct \u2014 kleene-seq1-010 was activated by the initial vector and matches [0,1,0] immediately"
           }
         ]
       },
@@ -124,7 +124,8 @@
             "description": "Sequence 2 complete: (010)+(000|001)*(001) matched"
           }
         ]
-      }
+      },
+      "machineClass": "signal-monitor"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -141,16 +142,16 @@
     "sequences": [
       {
         "id": "kleene-seq1",
-        "name": "Sequence 1: (001)+(000)*(010)→[01]",
+        "name": "Sequence 1: (001)+(000)*(010)\u2192[01]",
         "metadata": {
-          "description": "One or more 001 (isInitial, A*A = A+), then zero or more 000 (Kleene star loop body), then one 010 (terminal). The (001)+ is not a Kleene-star — at least one 001 match is required to arm both the 000 loop and the 010 terminal.",
+          "description": "One or more 001 (isInitial, A*A = A+), then zero or more 000 (Kleene star loop body), then one 010 (terminal). The (001)+ is not a Kleene-star \u2014 at least one 001 match is required to arm both the 000 loop and the 010 terminal.",
           "pattern": "(001)+(000)*(010)",
           "output": "[0,1]",
           "notationKey": "(X)+ = one-or-more X; (X)* = zero-or-more X; adjacency = concatenation",
           "examples": [
-            "001, 010 → [0,1] (zero occurrences of 000 — 001 arms 010 directly)",
-            "001, 000, 010 → [0,1] (one occurrence of 000)",
-            "001, 000, 000, 010 → [0,1] (two occurrences of 000)"
+            "001, 010 \u2192 [0,1] (zero occurrences of 000 \u2014 001 arms 010 directly)",
+            "001, 000, 010 \u2192 [0,1] (one occurrence of 000)",
+            "001, 000, 000, 010 \u2192 [0,1] (two occurrences of 000)"
           ]
         },
         "vectors": [
@@ -249,17 +250,17 @@
       },
       {
         "id": "kleene-seq2",
-        "name": "Sequence 2: (010)+(000|001)*(001)→[10]",
+        "name": "Sequence 2: (010)+(000|001)*(001)\u2192[10]",
         "metadata": {
           "description": "One or more 010 (isInitial, A*A = A+), then zero or more (000 or 001) (Kleene star with alternation), then one 001 (terminal). The (010)+ trigger arms both the loop body and the terminal; the loop body can be skipped (zero occurrences).",
           "pattern": "(010)+(000|001)*(001)",
           "output": "[1,0]",
           "notationKey": "(X)+ = one-or-more X; (X)* = zero-or-more X; (A|B) = A or B alternation; adjacency = concatenation",
           "examples": [
-            "010, 001 → [1,0] (zero loop iterations — 010 arms 001-final directly)",
-            "010, 000, 001 → [1,0] (one 000)",
-            "010, 001, 001 → [1,0] (one 001 in loop body, then terminal 001)",
-            "010, 000, 001, 000, 001 → [1,0] (mixed loop alternation)"
+            "010, 001 \u2192 [1,0] (zero loop iterations \u2014 010 arms 001-final directly)",
+            "010, 000, 001 \u2192 [1,0] (one 000)",
+            "010, 001, 001 \u2192 [1,0] (one 001 in loop body, then terminal 001)",
+            "010, 000, 001, 000, 001 \u2192 [1,0] (mixed loop alternation)"
           ]
         },
         "vectors": [
@@ -391,7 +392,7 @@
       {
         "name": "Sequence 1: Zero Repetitions",
         "pattern": "(001)(010)",
-        "description": "Minimal path: one 001 (arms terminal directly) → 010 (zero 000 loops). HD=2 intentional: (001)+ trigger directly armed (010) terminal.",
+        "description": "Minimal path: one 001 (arms terminal directly) \u2192 010 (zero 000 loops). HD=2 intentional: (001)+ trigger directly armed (010) terminal.",
         "vectors": [
           [
             0,
@@ -408,7 +409,7 @@
       {
         "name": "Sequence 1: Two Repetitions",
         "pattern": "(001)(000)(000)(010)",
-        "description": "Path with 2 loop body iterations: 001 → 000 → 000 → 010",
+        "description": "Path with 2 loop body iterations: 001 \u2192 000 \u2192 000 \u2192 010",
         "vectors": [
           [
             0,
@@ -435,7 +436,7 @@
       {
         "name": "Sequence 2: Alternation Pattern",
         "pattern": "(010)(000)(001)(001)",
-        "description": "Path with alternation: 010 (trigger) → 000 (loop-A) → 001 (loop-B) → 001 (terminal)",
+        "description": "Path with alternation: 010 (trigger) \u2192 000 (loop-A) \u2192 001 (loop-B) \u2192 001 (terminal)",
         "vectors": [
           [
             0,

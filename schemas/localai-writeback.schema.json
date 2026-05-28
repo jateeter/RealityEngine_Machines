@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.example.org/schemas/localai-writeback-1.0.0.json",
+  "title": "localAIStack to Perception Engine Write-Back",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["none", "pe-sensor", "pe-domain-vector"]
+    },
+    "sensorId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider": {
+      "type": "string",
+      "minLength": 1,
+      "default": "localai"
+    },
+    "region": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["offset", "length"],
+      "properties": {
+        "offset": { "type": "integer", "minimum": 0 },
+        "length": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "semantics": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "ttlMs": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 30000
+    },
+    "normalization": {
+      "type": "string",
+      "enum": ["already-normalized-0-1", "one-hot", "binary", "scalar-risk"]
+    },
+    "ingest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["endpoint", "method", "triggerPush", "compactPush"],
+      "properties": {
+        "endpoint": {
+          "type": "string",
+          "enum": ["/api/integrations/completions", "/api/signals", "/api/sensors/{sensorId}"]
+        },
+        "method": {
+          "type": "string",
+          "enum": ["POST"]
+        },
+        "triggerPush": {
+          "type": "boolean",
+          "default": false
+        },
+        "compactPush": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "sourceMapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "sensorId", "region", "ttlMs"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "sensorId": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "region": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["offset", "length"],
+          "properties": {
+            "offset": { "type": "integer", "minimum": 0 },
+            "length": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "ttlMs": { "type": "integer", "minimum": 1 }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "type": { "const": "pe-sensor" } }
+      },
+      "then": {
+        "required": ["provider", "sensorId", "region", "ttlMs", "normalization", "ingest", "sourceMapping"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "pe-domain-vector" } }
+      },
+      "then": {
+        "required": ["region"]
+      }
+    }
+  ]
+}

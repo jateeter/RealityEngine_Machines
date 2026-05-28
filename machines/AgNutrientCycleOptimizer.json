@@ -5,7 +5,7 @@
     "description": "Correlates nutrient solution quality signals with active photoperiod state to optimize nutrient uptake timing. Reads binary outputs from AgNutrientSolutionMonitor [28:32] and AgPhotoPeriodLightingController [32:36]. During active photosynthesis, elevated nutrient demand is expected; mismatches between solution quality and light state indicate suboptimal scheduling. Output feeds AgHarvestReadinessAssessor and AgYieldOptimizationAI at [3959:3963].",
     "metadata": {
       "category": "agriculture",
-      "domain": "Agriculture — Nutrient Management / Crop Optimization",
+      "domain": "Agriculture \u2014 Nutrient Management / Crop Optimization",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [3959:3963]: [1,0,0,0]=NUTRIENT_LOCKOUT, [0,1,0,0]=UPTAKE_MISMATCH, [0,0,1,0]=NIGHT_REST, [0,0,0,1]=NUTRIENT_OK",
       "tags": [
@@ -154,7 +154,8 @@
             "description": "NIGHT_REST: dark period with optimal solution ready at [3959:3963]"
           }
         ]
-      }
+      },
+      "machineClass": "risk-forecaster"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -171,10 +172,10 @@
     "sequences": [
       {
         "id": "ag-nutrient-optimal-uptake",
-        "name": "Active Uptake: LIGHT_SOLUTION_OK+ → PEAK_UPTAKE → NUTRIENT_OK",
+        "name": "Active Uptake: LIGHT_SOLUTION_OK+ \u2192 PEAK_UPTAKE \u2192 NUTRIENT_OK",
         "metadata": {
           "description": "Fires NUTRIENT_OK when lights are actively on (photosynthesis driving nutrient demand) AND solution quality is optimal. This is the peak nutrient uptake window in the plant's daily cycle.",
-          "path": "LIGHT_SOLUTION_OK+ → PEAK_UPTAKE → output[0,0,0,1]",
+          "path": "LIGHT_SOLUTION_OK+ \u2192 PEAK_UPTAKE \u2192 output[0,0,0,1]",
           "output": "[0,0,0,1] (NUTRIENT_OK)"
         },
         "vectors": [
@@ -217,7 +218,7 @@
             "isInitial": true,
             "metadata": {
               "name": "LIGHT_SOLUTION_OK",
-              "description": "LIGHT_SOLUTION_OK+ — SOLUTION_OK=1, LIGHTS_ON=1, PHOTO_OK=1: active photosynthesis with quality nutrient solution. isInitial A*A = A+.",
+              "description": "LIGHT_SOLUTION_OK+ \u2014 SOLUTION_OK=1, LIGHTS_ON=1, PHOTO_OK=1: active photosynthesis with quality nutrient solution. isInitial A*A = A+.",
               "condition": "SOLUTION_OK=1, LIGHTS_ON=1, PHOTO_OK=1, no alerts"
             },
             "nextVectorIds": [
@@ -264,7 +265,7 @@
             "isInitial": false,
             "metadata": {
               "name": "PEAK_UPTAKE",
-              "description": "PEAK_UPTAKE — sustained light+solution quality; peak root nutrient absorption. Fires NUTRIENT_OK.",
+              "description": "PEAK_UPTAKE \u2014 sustained light+solution quality; peak root nutrient absorption. Fires NUTRIENT_OK.",
               "condition": "Confirmed sustained optimal uptake window"
             },
             "outputVectors": [
@@ -287,10 +288,10 @@
       },
       {
         "id": "ag-nutrient-lockout",
-        "name": "Nutrient Lockout: SOLUTION_WATCH+ → ALERT_WITH_LIGHT → LOCKOUT → NUTRIENT_LOCKOUT",
+        "name": "Nutrient Lockout: SOLUTION_WATCH+ \u2192 ALERT_WITH_LIGHT \u2192 LOCKOUT \u2192 NUTRIENT_LOCKOUT",
         "metadata": {
-          "description": "Detects pH or EC alert during an active light period — the most damaging scenario, as plants are actively trying to absorb nutrients but solution quality prevents it. pH-induced lockout during peak photosynthesis can cause rapid visible deficiency symptoms.",
-          "path": "SOLUTION_WATCH+ → ALERT_WITH_LIGHT → LOCKOUT → output[1,0,0,0]",
+          "description": "Detects pH or EC alert during an active light period \u2014 the most damaging scenario, as plants are actively trying to absorb nutrients but solution quality prevents it. pH-induced lockout during peak photosynthesis can cause rapid visible deficiency symptoms.",
+          "path": "SOLUTION_WATCH+ \u2192 ALERT_WITH_LIGHT \u2192 LOCKOUT \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (NUTRIENT_LOCKOUT)"
         },
         "vectors": [
@@ -333,7 +334,7 @@
             "isInitial": true,
             "metadata": {
               "name": "SOLUTION_WATCH",
-              "description": "SOLUTION_WATCH+ — PH_ALERT=1 while LIGHTS_ON and PHOTO_OK: solution problem during active photoperiod. isInitial A*A = A+.",
+              "description": "SOLUTION_WATCH+ \u2014 PH_ALERT=1 while LIGHTS_ON and PHOTO_OK: solution problem during active photoperiod. isInitial A*A = A+.",
               "condition": "PH_ALERT=1, LIGHTS_ON=1, PHOTO_OK=1"
             },
             "nextVectorIds": [
@@ -380,7 +381,7 @@
             "isInitial": false,
             "metadata": {
               "name": "ALERT_WITH_LIGHT",
-              "description": "ALERT_WITH_LIGHT — PH_ALERT persisting; PHOTO_OK lost (plants responding to nutrient stress; photosynthesis dropping).",
+              "description": "ALERT_WITH_LIGHT \u2014 PH_ALERT persisting; PHOTO_OK lost (plants responding to nutrient stress; photosynthesis dropping).",
               "condition": "PH_ALERT=1, LIGHTS_ON=1, PHOTO_OK=0"
             },
             "nextVectorIds": [
@@ -426,7 +427,7 @@
             "isInitial": false,
             "metadata": {
               "name": "LOCKOUT",
-              "description": "LOCKOUT — PH_ALERT + DEFICIENCY_ALERT together during light period: pH lockout has caused measurable deficiency. Fires NUTRIENT_LOCKOUT.",
+              "description": "LOCKOUT \u2014 PH_ALERT + DEFICIENCY_ALERT together during light period: pH lockout has caused measurable deficiency. Fires NUTRIENT_LOCKOUT.",
               "condition": "PH_ALERT=1, DEFICIENCY_ALERT=1, LIGHTS_ON=1"
             },
             "outputVectors": [
@@ -449,7 +450,7 @@
       },
       {
         "id": "ag-nutrient-night-rest",
-        "name": "Night Nutrient Rest: DARK_SOLUTION_OK+ → NIGHT_REST signal",
+        "name": "Night Nutrient Rest: DARK_SOLUTION_OK+ \u2192 NIGHT_REST signal",
         "metadata": {
           "description": "Fires NIGHT_REST when lights are off and solution quality is maintained. During dark periods, nutrient uptake slows but root zone should still have clean solution available for early-morning uptake surge.",
           "pattern": "DARK_SOLUTION_OK+",
@@ -495,7 +496,7 @@
             "isInitial": true,
             "metadata": {
               "name": "DARK_SOLUTION_OK",
-              "description": "DARK_SOLUTION_OK+ — LIGHTS_OFF=1, SOLUTION_OK=1: dark period with clean solution ready for next light cycle. isInitial A*A = A+.",
+              "description": "DARK_SOLUTION_OK+ \u2014 LIGHTS_OFF=1, SOLUTION_OK=1: dark period with clean solution ready for next light cycle. isInitial A*A = A+.",
               "condition": "LIGHTS_OFF=1, SOLUTION_OK=1, no alerts"
             },
             "outputVectors": [
@@ -520,7 +521,7 @@
     "inputSequences": [
       {
         "name": "Day-Night Nutrient Cycle",
-        "pattern": "6-step: DARK_OK→LIGHTS_ON(ok)→PEAK→PEAK→DLI_MET→DARK_OK",
+        "pattern": "6-step: DARK_OK\u2192LIGHTS_ON(ok)\u2192PEAK\u2192PEAK\u2192DLI_MET\u2192DARK_OK",
         "description": "Full 24-hour nutrient-photoperiod cycle: night rest, morning ramp, peak uptake, lights-off, next night.",
         "vectors": [
           [

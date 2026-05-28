@@ -209,7 +209,86 @@
             "processStatus": "info",
             "description": "Route Adherence Controller: NOMINAL -> SERVICE_NOMINAL"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "transit_planning_agent",
+        "mode": "automated-act",
+        "trigger": "transportation-fleet-vehicle-operations-route-adherence-controller",
+        "allowedActions": [
+          "Dispatch transit_planning_agent for critical 100-bus fleet intervention on route adherence controller.",
+          "Trigger predictive flow management for route adherence controller using rider, vehicle, and route context.",
+          "Create maintenance, cleaning, security, or service task for route adherence controller.",
+          "Keep 24/7 monitoring active for route adherence controller."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.tfx012.transit.planning.agent.completion",
+          "name": "localAIStack tfx012 transit.planning.agent completion",
+          "region": {
+            "offset": 3283,
+            "length": 4
+          },
+          "semantics": [
+            "service reliability",
+            "rider impact",
+            "asset readiness",
+            "safety/security risk"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-tfx012-completion",
+            "sensorId": "localai.tfx012.transit.planning.agent.completion",
+            "name": "localAIStack tfx012 transit.planning.agent completion",
+            "region": {
+              "offset": 3283,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": true,
+          "maxAutonomy": "automated-act",
+          "blockedWhenRag": [
+            "AMBER",
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "automated-act",
+          "stage": 3,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": true,
+          "requiresHumanApproval": false,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "AMBER",
+            "RED"
+          ],
+          "rollbackRequired": true
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

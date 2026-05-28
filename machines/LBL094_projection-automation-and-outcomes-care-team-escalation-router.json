@@ -221,7 +221,83 @@
             "processStatus": "warning",
             "description": "Care Team Escalation Router: STABLE -> STABLE_BALANCE"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "movement_health_agent",
+        "mode": "supervised-act",
+        "trigger": "life-balance-projection-automation-and-outcomes-care-team-escalation-router",
+        "allowedActions": [
+          "Route care team escalation router concern to licensed care-team review.",
+          "Adjust the life-balance plan for care team escalation router using patient goals, barriers, and preferences.",
+          "Create monitoring or follow-up task for care team escalation router.",
+          "Continue stable life-balance monitoring for care team escalation router."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.lbl094.movement.health.agent.completion",
+          "name": "localAIStack lbl094 movement.health.agent completion",
+          "region": {
+            "offset": 3215,
+            "length": 4
+          },
+          "semantics": [
+            "symptom or functional concern",
+            "lifestyle barrier or preference",
+            "monitoring data quality or readiness",
+            "risk, safety, or care-team urgency"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-lbl094-completion",
+            "sensorId": "localai.lbl094.movement.health.agent.completion",
+            "name": "localAIStack lbl094 movement.health.agent completion",
+            "region": {
+              "offset": 3215,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": [
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "RED"
+          ]
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

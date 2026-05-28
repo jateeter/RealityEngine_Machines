@@ -27,16 +27,16 @@
         "required": true,
         "scope": "intra-sequence",
         "compliant": true,
-        "notes": "STA is required within each sequence: intermediate transitional vectors (ms-seq1-001, ms-seq2-101) are only activated by their predecessors and will deactivate on any non-matching input. A multi-bit jump (e.g. [0,0,0]→[0,1,1], HD=2) would skip the intermediate step and silently abort the sequence. The defined intra-sequence paths all use HD=1. The 'Both Sequences Interleaved' input sequence contains a HD=3 inter-sequence jump ([0,1,1]→[1,0,0]) which is safe because Seq2's initial vector (ms-seq2-100) is always active and requires no predecessor.",
+        "notes": "STA is required within each sequence: intermediate transitional vectors (ms-seq1-001, ms-seq2-101) are only activated by their predecessors and will deactivate on any non-matching input. A multi-bit jump (e.g. [0,0,0]\u2192[0,1,1], HD=2) would skip the intermediate step and silently abort the sequence. The defined intra-sequence paths all use HD=1. The 'Both Sequences Interleaved' input sequence contains a HD=3 inter-sequence jump ([0,1,1]\u2192[1,0,0]) which is safe because Seq2's initial vector (ms-seq2-100) is always active and requires no predecessor.",
         "maxHammingDistanceInDefinedSequences": 3,
         "maxHammingDistanceIntraSequence": 1,
         "violations": [
           {
             "sequence": "Both Sequences Interleaved",
-            "transition": "[0,1,1] → [1,0,0]",
+            "transition": "[0,1,1] \u2192 [1,0,0]",
             "hammingDistance": 3,
-            "intent": "Inter-sequence jump: Seq1 final → Seq2 initial. Safe because initial vectors are always active.",
-            "behavior": "Correct — ms-seq2-100 matches immediately"
+            "intent": "Inter-sequence jump: Seq1 final \u2192 Seq2 initial. Safe because initial vectors are always active.",
+            "behavior": "Correct \u2014 ms-seq2-100 matches immediately"
           }
         ]
       },
@@ -121,7 +121,8 @@
             "description": "Sequence 2 complete: output [1,0]"
           }
         ]
-      }
+      },
+      "machineClass": "signal-monitor"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -138,10 +139,10 @@
     "sequences": [
       {
         "id": "multi-step-seq1",
-        "name": "Sequence 1: 000→001→011→[01]",
+        "name": "Sequence 1: 000\u2192001\u2192011\u2192[01]",
         "metadata": {
           "description": "3-step sequence producing [0,1] output",
-          "path": "000→001→011",
+          "path": "000\u2192001\u2192011",
           "output": "[0,1]"
         },
         "vectors": [
@@ -234,10 +235,10 @@
       },
       {
         "id": "multi-step-seq2",
-        "name": "Sequence 2: 100→101→111→[10]",
+        "name": "Sequence 2: 100\u2192101\u2192111\u2192[10]",
         "metadata": {
           "description": "3-step sequence producing [1,0] output",
-          "path": "100→101→111",
+          "path": "100\u2192101\u2192111",
           "output": "[1,0]"
         },
         "vectors": [
@@ -332,7 +333,7 @@
     "inputSequences": [
       {
         "name": "Sequence 1 Complete Path",
-        "pattern": "000→001→011",
+        "pattern": "000\u2192001\u2192011",
         "description": "3-step sequence producing [0,1] output",
         "vectors": [
           [
@@ -354,7 +355,7 @@
       },
       {
         "name": "Sequence 2 Complete Path",
-        "pattern": "100→101→111",
+        "pattern": "100\u2192101\u2192111",
         "description": "3-step sequence producing [1,0] output",
         "vectors": [
           [
@@ -376,7 +377,7 @@
       },
       {
         "name": "Both Sequences Interleaved",
-        "pattern": "000→001→011...100→101→111",
+        "pattern": "000\u2192001\u2192011...100\u2192101\u2192111",
         "description": "Execute both sequences with outputs",
         "vectors": [
           [

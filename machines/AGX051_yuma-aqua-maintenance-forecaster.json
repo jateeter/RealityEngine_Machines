@@ -183,7 +183,79 @@
             "processStatus": "info",
             "description": "Equipment in normal operating window."
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "aquaculture_predictive_maintenance_agent",
+        "mode": "advise",
+        "trigger": "agriculture-yuma-aqua-maintenance-forecaster-maintenance",
+        "allowedActions": [
+          "Dispatch aquaculture_predictive_maintenance_agent for urgent maintenance and record corrective action.",
+          "Schedule preventive maintenance via aquaculture_predictive_maintenance_agent and verify completion telemetry.",
+          "Run sensor-calibration workflow via aquaculture_predictive_maintenance_agent for the yuma aqua maintenance forecast stream.",
+          "Continue automated monitoring for yuma aqua maintenance forecast while preserving current setpoints."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.agx051.aquaculture.predictive.maintenance.agent.completion",
+          "name": "localAIStack agx051 aquaculture.predictive.maintenance.agent completion",
+          "region": {
+            "offset": 40,
+            "length": 4
+          },
+          "semantics": [
+            "water pH in band",
+            "water EC in band",
+            "water ORP in band",
+            "water turbidity in band"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-agx051-completion",
+            "sensorId": "localai.agx051.aquaculture.predictive.maintenance.agent.completion",
+            "name": "localAIStack agx051 aquaculture.predictive.maintenance.agent completion",
+            "region": {
+              "offset": 40,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

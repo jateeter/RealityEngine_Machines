@@ -206,7 +206,80 @@
             "processStatus": "info",
             "description": "Capacity Reservation Manager: 0-6H -> 6-12H -> 12-18H -> 18-24H -> PRESCRIPTIVE_ACTION"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "dc_compute_agent",
+        "mode": "advise",
+        "trigger": "data-center-capacity-reservation-manager-ops-maintenance-upgrade",
+        "allowedActions": [
+          "Dispatch dc_compute_agent for immediate stabilization of capacity reservation manager.",
+          "Schedule maintenance for capacity reservation manager with rollback and staffing checks.",
+          "Plan upgrade or lifecycle change for capacity reservation manager using risk-gated rollout.",
+          "Keep 24/7 monitoring active for capacity reservation manager.",
+          "Project capacity reservation manager forward over the next 24 hours and prescribe maintenance or upgrade work before the risk window opens."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.dcx025.dc.compute.agent.completion",
+          "name": "localAIStack dcx025 dc.compute.agent completion",
+          "region": {
+            "offset": 1457,
+            "length": 4
+          },
+          "semantics": [
+            "availability margin",
+            "maintenance readiness",
+            "upgrade/lifecycle pressure",
+            "operational confidence"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-dcx025-completion",
+            "sensorId": "localai.dcx025.dc.compute.agent.completion",
+            "name": "localAIStack dcx025 dc.compute.agent completion",
+            "region": {
+              "offset": 1457,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

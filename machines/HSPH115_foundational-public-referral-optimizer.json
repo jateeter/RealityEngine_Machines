@@ -186,7 +186,82 @@
             "processStatus": "info",
             "description": "Ideal-state progress is stable."
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "evaluation_analyst_agent",
+        "mode": "supervised-act",
+        "trigger": "foundational-public-health-services-referral-optimizer-risk-or-optimization-signal",
+        "allowedActions": [
+          "Dispatch evaluation_analyst_agent to resolve foundational public health services delivery risk and update the evaluation plan matrix.",
+          "Trigger optimization agent workflow for foundational public health services using current logic-model outputs and measures.",
+          "Record sustained progress toward the ideal state for foundational public health services and keep monitoring."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.hsph115.evaluation.analyst.agent.completion",
+          "name": "localAIStack hsph115 evaluation.analyst.agent completion",
+          "region": {
+            "offset": 3819,
+            "length": 4
+          },
+          "semantics": [
+            "evaluability readiness",
+            "service delivery pressure",
+            "equity signal",
+            "measure confidence"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-hsph115-completion",
+            "sensorId": "localai.hsph115.evaluation.analyst.agent.completion",
+            "name": "localAIStack hsph115 evaluation.analyst.agent completion",
+            "region": {
+              "offset": 3819,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": [
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "RED"
+          ]
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

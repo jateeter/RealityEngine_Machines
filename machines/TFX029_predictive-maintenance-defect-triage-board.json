@@ -211,7 +211,79 @@
             "processStatus": "info",
             "description": "Defect Triage Board: NOMINAL -> SERVICE_NOMINAL"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "transit_finance_agent",
+        "mode": "advise",
+        "trigger": "transportation-fleet-predictive-maintenance-defect-triage-board",
+        "allowedActions": [
+          "Dispatch transit_finance_agent for critical 100-bus fleet intervention on defect triage board.",
+          "Trigger predictive flow management for defect triage board using rider, vehicle, and route context.",
+          "Create maintenance, cleaning, security, or service task for defect triage board.",
+          "Keep 24/7 monitoring active for defect triage board."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.tfx029.transit.finance.agent.completion",
+          "name": "localAIStack tfx029 transit.finance.agent completion",
+          "region": {
+            "offset": 3355,
+            "length": 4
+          },
+          "semantics": [
+            "service reliability",
+            "rider impact",
+            "asset readiness",
+            "safety/security risk"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-tfx029-completion",
+            "sensorId": "localai.tfx029.transit.finance.agent.completion",
+            "name": "localAIStack tfx029 transit.finance.agent completion",
+            "region": {
+              "offset": 3355,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

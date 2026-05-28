@@ -2,10 +2,10 @@
   "version": "1.0.0",
   "machine": {
     "name": "Ag Harvest Readiness Assessor",
-    "description": "Evaluates plant readiness for harvest by correlating growth cycle state with nutrient cycle quality. Reads binary outputs from AgPlantGrowthCycleMonitor [3955:3959] and AgNutrientCycleOptimizer [3959:3963]. HARVEST_READY fires only after sustained GROWTH_OK + NUTRIENT_OK signals — ensuring plants have completed adequate vegetative cycles with quality nutrition. Also detects when stress conditions have delayed or compromised the harvest window. Output feeds AgYieldOptimizationAI at [3967:3971].",
+    "description": "Evaluates plant readiness for harvest by correlating growth cycle state with nutrient cycle quality. Reads binary outputs from AgPlantGrowthCycleMonitor [3955:3959] and AgNutrientCycleOptimizer [3959:3963]. HARVEST_READY fires only after sustained GROWTH_OK + NUTRIENT_OK signals \u2014 ensuring plants have completed adequate vegetative cycles with quality nutrition. Also detects when stress conditions have delayed or compromised the harvest window. Output feeds AgYieldOptimizationAI at [3967:3971].",
     "metadata": {
       "category": "agriculture",
-      "domain": "Agriculture — Harvest Management / Crop Readiness",
+      "domain": "Agriculture \u2014 Harvest Management / Crop Readiness",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [3967:3971]: [1,0,0,0]=HARVEST_DELAYED, [0,1,0,0]=STRESS_RECOVERY, [0,0,1,0]=HARVEST_APPROACHING, [0,0,0,1]=HARVEST_READY",
       "tags": [
@@ -161,7 +161,8 @@
             "description": "STRESS_RECOVERY: growth resuming after stress event at [3967:3971]"
           }
         ]
-      }
+      },
+      "machineClass": "risk-forecaster"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -178,10 +179,10 @@
     "sequences": [
       {
         "id": "ag-harvest-ready-sequence",
-        "name": "Harvest Ready: GROWTH_NUTRIENT_OK+ → APPROACHING → READY → HARVEST_READY",
+        "name": "Harvest Ready: GROWTH_NUTRIENT_OK+ \u2192 APPROACHING \u2192 READY \u2192 HARVEST_READY",
         "metadata": {
-          "description": "Fires HARVEST_READY after sustained combined GROWTH_OK + NUTRIENT_OK signals. Requires multiple consecutive cycles of both conditions — models the requirement that plants must have completed several healthy growth-and-nutrition cycles to develop marketable yield. The A*A = A+ pattern prevents premature harvest signals from brief recovery windows.",
-          "path": "GROWTH_NUTRIENT_OK+ → APPROACHING → READY → output[0,0,0,1]",
+          "description": "Fires HARVEST_READY after sustained combined GROWTH_OK + NUTRIENT_OK signals. Requires multiple consecutive cycles of both conditions \u2014 models the requirement that plants must have completed several healthy growth-and-nutrition cycles to develop marketable yield. The A*A = A+ pattern prevents premature harvest signals from brief recovery windows.",
+          "path": "GROWTH_NUTRIENT_OK+ \u2192 APPROACHING \u2192 READY \u2192 output[0,0,0,1]",
           "output": "[0,0,0,1] (HARVEST_READY)"
         },
         "vectors": [
@@ -224,7 +225,7 @@
             "isInitial": true,
             "metadata": {
               "name": "GROWTH_NUTRIENT_OK",
-              "description": "GROWTH_NUTRIENT_OK+ — GROWTH_OK=1, NUTRIENT_OK=1, no stress or lockout signals. isInitial A*A = A+: sustained confirmation required before harvest window can open.",
+              "description": "GROWTH_NUTRIENT_OK+ \u2014 GROWTH_OK=1, NUTRIENT_OK=1, no stress or lockout signals. isInitial A*A = A+: sustained confirmation required before harvest window can open.",
               "condition": "GROWTH_OK=1, NUTRIENT_OK=1, all stress flags=0"
             },
             "nextVectorIds": [
@@ -271,7 +272,7 @@
             "isInitial": false,
             "metadata": {
               "name": "APPROACHING",
-              "description": "APPROACHING — GROWTH_OK + NUTRIENT_OK + NIGHT_REST: plant completing full diurnal cycles with quality nutrition. NIGHT_REST indicates established day-night rhythm (late-stage maturation signal).",
+              "description": "APPROACHING \u2014 GROWTH_OK + NUTRIENT_OK + NIGHT_REST: plant completing full diurnal cycles with quality nutrition. NIGHT_REST indicates established day-night rhythm (late-stage maturation signal).",
               "condition": "GROWTH_OK=1, NUTRIENT_OK=1, NIGHT_REST=1 (late vegetative / pre-flower)"
             },
             "outputVectors": [
@@ -332,7 +333,7 @@
             "isInitial": false,
             "metadata": {
               "name": "READY",
-              "description": "READY — confirmed sustained peak-condition cycles. Fires HARVEST_READY.",
+              "description": "READY \u2014 confirmed sustained peak-condition cycles. Fires HARVEST_READY.",
               "condition": "Final confirmation: multiple full-cycle completions verified"
             },
             "outputVectors": [
@@ -355,10 +356,10 @@
       },
       {
         "id": "ag-harvest-delayed",
-        "name": "Harvest Delayed: STRESS_WATCH+ → STRESS_SUSTAINED → HARVEST_DELAYED",
+        "name": "Harvest Delayed: STRESS_WATCH+ \u2192 STRESS_SUSTAINED \u2192 HARVEST_DELAYED",
         "metadata": {
           "description": "Detects when growth or nutrient stress signals prevent harvest readiness from being achieved. Any combination of TEMP_STRESS, WATER_STRESS, or NUTRIENT_LOCKOUT during what should be the harvest window triggers a delay signal.",
-          "path": "STRESS_WATCH+ → STRESS_SUSTAINED → output[1,0,0,0]",
+          "path": "STRESS_WATCH+ \u2192 STRESS_SUSTAINED \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (HARVEST_DELAYED)"
         },
         "vectors": [
@@ -401,7 +402,7 @@
             "isInitial": true,
             "metadata": {
               "name": "STRESS_WATCH",
-              "description": "STRESS_WATCH+ — TEMP_STRESS=1: temperature stress observed during expected harvest window. isInitial A*A = A+.",
+              "description": "STRESS_WATCH+ \u2014 TEMP_STRESS=1: temperature stress observed during expected harvest window. isInitial A*A = A+.",
               "condition": "TEMP_STRESS=1 (or WATER_STRESS), no OK signals"
             },
             "nextVectorIds": [
@@ -448,7 +449,7 @@
             "isInitial": false,
             "metadata": {
               "name": "STRESS_SUSTAINED",
-              "description": "STRESS_SUSTAINED — WATER_STRESS + NUTRIENT_LOCKOUT: compounding stress signals; harvest window has slipped. Fires HARVEST_DELAYED.",
+              "description": "STRESS_SUSTAINED \u2014 WATER_STRESS + NUTRIENT_LOCKOUT: compounding stress signals; harvest window has slipped. Fires HARVEST_DELAYED.",
               "condition": "WATER_STRESS=1, NUTRIENT_LOCKOUT=1"
             },
             "outputVectors": [
@@ -471,7 +472,7 @@
       },
       {
         "id": "ag-harvest-stress-recovery",
-        "name": "Stress Recovery: RECOVERING+ → STRESS_RECOVERY signal",
+        "name": "Stress Recovery: RECOVERING+ \u2192 STRESS_RECOVERY signal",
         "metadata": {
           "description": "Fires STRESS_RECOVERY when the system transitions from stress states back to growth-ok conditions. Indicates the plant has survived the stress event and is resuming healthy growth toward harvest.",
           "pattern": "RECOVERING+",
@@ -517,7 +518,7 @@
             "isInitial": true,
             "metadata": {
               "name": "RECOVERING",
-              "description": "RECOVERING+ — GROWTH_OK=1, NIGHT_REST=1 but NUTRIENT_OK not yet firing: plant recovering from stress; diurnal rhythm restored but solution quality still normalizing.",
+              "description": "RECOVERING+ \u2014 GROWTH_OK=1, NIGHT_REST=1 but NUTRIENT_OK not yet firing: plant recovering from stress; diurnal rhythm restored but solution quality still normalizing.",
               "condition": "GROWTH_OK=1, NIGHT_REST=1, NUTRIENT_OK=0 (transitional recovery state)"
             },
             "outputVectors": [
@@ -542,7 +543,7 @@
     "inputSequences": [
       {
         "name": "Healthy Growth Cycle Leading to Harvest Ready",
-        "pattern": "6-step: GROWTH_OK+NUTRIENT_OK (×3) → APPROACHING → APPROACHING+NIGHT_REST → READY",
+        "pattern": "6-step: GROWTH_OK+NUTRIENT_OK (\u00d73) \u2192 APPROACHING \u2192 APPROACHING+NIGHT_REST \u2192 READY",
         "description": "Multiple healthy grow-nutrient cycles culminating in harvest readiness signal.",
         "vectors": [
           [

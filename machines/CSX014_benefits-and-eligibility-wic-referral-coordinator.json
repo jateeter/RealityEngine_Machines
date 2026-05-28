@@ -204,7 +204,83 @@
             "processStatus": "info",
             "description": "WIC Referral Coordinator: STABLE_PATH -> STABLE_SERVICE_PATH"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "victim_services_agent",
+        "mode": "supervised-act",
+        "trigger": "community-services-benefits-and-eligibility-wic-referral-coordinator",
+        "allowedActions": [
+          "Dispatch victim_services_agent for urgent community-services intervention on wic referral coordinator.",
+          "Coordinate health, housing, public safety, transportation, or city service partners for wic referral coordinator.",
+          "Create field work order or mobile team task for wic referral coordinator.",
+          "Maintain monitored service path for wic referral coordinator."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.csx014.victim.services.agent.completion",
+          "name": "localAIStack csx014 victim.services.agent completion",
+          "region": {
+            "offset": 1052,
+            "length": 4
+          },
+          "semantics": [
+            "resident need severity",
+            "eligibility and documentation readiness",
+            "field capacity or operational readiness",
+            "safety, mobility, and health risk"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-csx014-completion",
+            "sensorId": "localai.csx014.victim.services.agent.completion",
+            "name": "localAIStack csx014 victim.services.agent completion",
+            "region": {
+              "offset": 1052,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": [
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "RED"
+          ]
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

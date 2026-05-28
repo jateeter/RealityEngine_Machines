@@ -203,7 +203,80 @@
             "processStatus": "info",
             "description": "SRE Handoff Completeness: 0-6H -> 6-12H -> 12-18H -> 18-24H -> PRESCRIPTIVE_ACTION"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "dc_cooling_agent",
+        "mode": "advise",
+        "trigger": "data-center-sre-handoff-completeness-ops-maintenance-upgrade",
+        "allowedActions": [
+          "Dispatch dc_cooling_agent for immediate stabilization of sre handoff completeness.",
+          "Schedule maintenance for sre handoff completeness with rollback and staffing checks.",
+          "Plan upgrade or lifecycle change for sre handoff completeness using risk-gated rollout.",
+          "Keep 24/7 monitoring active for sre handoff completeness.",
+          "Project sre handoff completeness forward over the next 24 hours and prescribe maintenance or upgrade work before the risk window opens."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.dcx043.dc.cooling.agent.completion",
+          "name": "localAIStack dcx043 dc.cooling.agent completion",
+          "region": {
+            "offset": 1481,
+            "length": 4
+          },
+          "semantics": [
+            "availability margin",
+            "maintenance readiness",
+            "upgrade/lifecycle pressure",
+            "operational confidence"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-dcx043-completion",
+            "sensorId": "localai.dcx043.dc.cooling.agent.completion",
+            "name": "localAIStack dcx043 dc.cooling.agent completion",
+            "region": {
+              "offset": 1481,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

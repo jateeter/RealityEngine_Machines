@@ -7,13 +7,13 @@
       "category": "health-personal",
       "author": "Reality Engine",
       "created": "2026-04-09T00:00:00Z",
-      "domain": "Healthcare Intake — Assisted Living",
+      "domain": "Healthcare Intake \u2014 Assisted Living",
       "eventSpace": "8D binary evaluation space: [CONTACT, PRESCREENED, MEDICAL_CLEAR, FUNCTIONAL_FIT, FINANCIAL_CLEAR, VACANCY, CONSENT, BARRIER]",
       "outputSpace": "8D one-hot decision space: [ACCEPTED, PROVISIONAL_REJECT, _, _, _, _, _, _]",
-      "regex": "(CONTACT)+ · PRESCREENED · (MED_FUNC_CLEAR · (FIN_CLEAR · (VACANCY_CONF · ADMITTED | VACANCY_BARRIER) | FIN_BARRIER) | MED_BARRIER)",
+      "regex": "(CONTACT)+ \u00b7 PRESCREENED \u00b7 (MED_FUNC_CLEAR \u00b7 (FIN_CLEAR \u00b7 (VACANCY_CONF \u00b7 ADMITTED | VACANCY_BARRIER) | FIN_BARRIER) | MED_BARRIER)",
       "dimensions": {
-        "D0_CONTACT": "Initial inquiry received from patient or family — contact event flag",
-        "D1_PRESCREENED": "Basic eligibility confirmed: age ≥55, ADL dependency level in scope, referral valid",
+        "D0_CONTACT": "Initial inquiry received from patient or family \u2014 contact event flag",
+        "D1_PRESCREENED": "Basic eligibility confirmed: age \u226555, ADL dependency level in scope, referral valid",
         "D2_MEDICAL_CLEAR": "Clinical assessment complete and within facility care scope (not requiring hospital-level acuity)",
         "D3_FUNCTIONAL_FIT": "Activities of Daily Living (ADL) assessment passed; mobility/cognitive level within supported range",
         "D4_FINANCIAL_CLEAR": "Insurance verification approved OR private-pay qualification confirmed",
@@ -25,23 +25,23 @@
         "H": 0.9,
         "L": 0.1,
         "threshold": 0.5,
-        "semantics": "GTE binary: value>=threshold → HIGH (event present), value<threshold → LOW (event absent). Barrier path sets D7=H while clearing the failed dimension."
+        "semantics": "GTE binary: value>=threshold \u2192 HIGH (event present), value<threshold \u2192 LOW (event absent). Barrier path sets D7=H while clearing the failed dimension."
       },
       "inputVectors": {
-        "INQUIRY": "[H,L,L,L,L,L,L,L] — new contact event only",
-        "PRESCREENED": "[H,H,L,L,L,L,L,L] — contact + eligibility confirmed",
-        "MED_FUNC_CLEAR": "[H,H,H,H,L,L,L,L] — contact + prescreened + medical + functional all pass",
-        "MED_BARRIER": "[H,H,L,L,L,L,L,H] — contact + prescreened, medical FAILED, barrier raised",
-        "FIN_CLEAR": "[H,H,H,H,H,L,L,L] — medical/functional pass + financial verified",
-        "FIN_BARRIER": "[H,H,H,H,L,L,L,H] — medical/functional pass, financial FAILED, barrier raised",
-        "VACANCY_CONF": "[H,H,H,H,H,H,L,L] — full clinical/financial pass + room confirmed",
-        "VACANCY_BARRIER": "[H,H,H,H,H,L,L,H] — clinical/financial pass, no room available, barrier raised",
-        "ADMITTED": "[H,H,H,H,H,H,H,L] — all criteria met, consent obtained, care plan signed"
+        "INQUIRY": "[H,L,L,L,L,L,L,L] \u2014 new contact event only",
+        "PRESCREENED": "[H,H,L,L,L,L,L,L] \u2014 contact + eligibility confirmed",
+        "MED_FUNC_CLEAR": "[H,H,H,H,L,L,L,L] \u2014 contact + prescreened + medical + functional all pass",
+        "MED_BARRIER": "[H,H,L,L,L,L,L,H] \u2014 contact + prescreened, medical FAILED, barrier raised",
+        "FIN_CLEAR": "[H,H,H,H,H,L,L,L] \u2014 medical/functional pass + financial verified",
+        "FIN_BARRIER": "[H,H,H,H,L,L,L,H] \u2014 medical/functional pass, financial FAILED, barrier raised",
+        "VACANCY_CONF": "[H,H,H,H,H,H,L,L] \u2014 full clinical/financial pass + room confirmed",
+        "VACANCY_BARRIER": "[H,H,H,H,H,L,L,H] \u2014 clinical/financial pass, no room available, barrier raised",
+        "ADMITTED": "[H,H,H,H,H,H,H,L] \u2014 all criteria met, consent obtained, care plan signed"
       },
       "singleTransitionAssumption": {
         "required": true,
         "compliant": true,
-        "notes": "All valid transitions change exactly one or two binary dimensions per step. INQUIRY→PRESCREENED: HD=1 (D1 L→H). PRESCREENED→MED_FUNC_CLEAR: HD=2 (D2,D3 simultaneously L→H — medical and functional assessment complete together). All other transitions: HD=1. Barrier transitions diverge by setting D7=H while the failed dimension stays L, maintaining Hamming distance ≤1 from the prior non-barrier state."
+        "notes": "All valid transitions change exactly one or two binary dimensions per step. INQUIRY\u2192PRESCREENED: HD=1 (D1 L\u2192H). PRESCREENED\u2192MED_FUNC_CLEAR: HD=2 (D2,D3 simultaneously L\u2192H \u2014 medical and functional assessment complete together). All other transitions: HD=1. Barrier transitions diverge by setting D7=H while the failed dimension stays L, maintaining Hamming distance \u22641 from the prior non-barrier state."
       },
       "sequenceCount": 4,
       "tags": [
@@ -146,7 +146,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "Decision: ACCEPTED — patient admitted to assisted living facility"
+            "description": "Decision: ACCEPTED \u2014 patient admitted to assisted living facility"
           },
           {
             "sequenceId": "npi-medical-rejection",
@@ -162,7 +162,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "Decision: PROVISIONAL REJECT — medical acuity exceeds assisted living care scope"
+            "description": "Decision: PROVISIONAL REJECT \u2014 medical acuity exceeds assisted living care scope"
           },
           {
             "sequenceId": "npi-financial-rejection",
@@ -178,7 +178,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "Decision: PROVISIONAL REJECT — financial qualification failed"
+            "description": "Decision: PROVISIONAL REJECT \u2014 financial qualification failed"
           },
           {
             "sequenceId": "npi-vacancy-rejection",
@@ -194,10 +194,11 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "Decision: PROVISIONAL REJECT — no appropriate vacancy at this time"
+            "description": "Decision: PROVISIONAL REJECT \u2014 no appropriate vacancy at this time"
           }
         ]
-      }
+      },
+      "machineClass": "signal-monitor"
     },
     "arbiterRule": "PASSTHROUGH",
     "matchAlgorithm": "gte",
@@ -218,8 +219,8 @@
         "name": "Full Acceptance Path",
         "metadata": {
           "description": "Patient passes all evaluation stages and is admitted",
-          "regex": "(CONTACT)+ · PRESCREENED · MED_FUNC_CLEAR · FIN_CLEAR · VACANCY_CONF · ADMITTED → ACCEPTED",
-          "path": "CONTACT → PRESCREENED → MED_FUNC_CLEAR → FIN_CLEAR → VACANCY_CONF → ADMITTED",
+          "regex": "(CONTACT)+ \u00b7 PRESCREENED \u00b7 MED_FUNC_CLEAR \u00b7 FIN_CLEAR \u00b7 VACANCY_CONF \u00b7 ADMITTED \u2192 ACCEPTED",
+          "path": "CONTACT \u2192 PRESCREENED \u2192 MED_FUNC_CLEAR \u2192 FIN_CLEAR \u2192 VACANCY_CONF \u2192 ADMITTED",
           "output": "ACCEPTED=[1,0,0,0,0,0,0,0]"
         },
         "vectors": [
@@ -308,7 +309,7 @@
             "isInitial": false,
             "metadata": {
               "name": "Pre-Screened",
-              "description": "Basic eligibility confirmed: age ≥55, level of care within facility scope, valid referral source.",
+              "description": "Basic eligibility confirmed: age \u226555, level of care within facility scope, valid referral source.",
               "signal": "[H,H,L,L,L,L,L,L]"
             },
             "nextVectorIds": [
@@ -509,7 +510,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "Decision: ACCEPTED — patient admitted to assisted living facility",
+                  "description": "Decision: ACCEPTED \u2014 patient admitted to assisted living facility",
                   "decision": "ACCEPTED",
                   "severity": "INFO"
                 }
@@ -520,11 +521,11 @@
       },
       {
         "id": "npi-medical-rejection",
-        "name": "Provisional Rejection — Medical Scope Exceeded",
+        "name": "Provisional Rejection \u2014 Medical Scope Exceeded",
         "metadata": {
           "description": "Patient's medical acuity exceeds the facility's licensed care scope. Requires SNF, memory care unit not offered, or complex wound/IV care beyond staff capability.",
-          "regex": "(CONTACT)+ · PRESCREENED · MED_BARRIER → PROVISIONAL_REJECT",
-          "path": "CONTACT → PRESCREENED → MED_BARRIER",
+          "regex": "(CONTACT)+ \u00b7 PRESCREENED \u00b7 MED_BARRIER \u2192 PROVISIONAL_REJECT",
+          "path": "CONTACT \u2192 PRESCREENED \u2192 MED_BARRIER",
           "output": "PROVISIONAL_REJECT=[0,1,0,0,0,0,0,0]",
           "disposition": "Refer to skilled nursing facility (SNF) or hospital-affiliated long-term care. Re-evaluate if medical status stabilizes."
         },
@@ -677,7 +678,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "Decision: PROVISIONAL REJECT — medical acuity exceeds assisted living care scope",
+                  "description": "Decision: PROVISIONAL REJECT \u2014 medical acuity exceeds assisted living care scope",
                   "decision": "PROVISIONAL_REJECT",
                   "reason": "MEDICAL_SCOPE_EXCEEDED",
                   "referral": "Skilled Nursing Facility (SNF) or hospital-based LTC",
@@ -690,11 +691,11 @@
       },
       {
         "id": "npi-financial-rejection",
-        "name": "Provisional Rejection — Financial Qualification Failed",
+        "name": "Provisional Rejection \u2014 Financial Qualification Failed",
         "metadata": {
           "description": "Patient passed medical and functional assessment but insurance coverage was denied, benefits exhausted, or private-pay capacity is insufficient at current rates.",
-          "regex": "(CONTACT)+ · PRESCREENED · MED_FUNC_CLEAR · FIN_BARRIER → PROVISIONAL_REJECT",
-          "path": "CONTACT → PRESCREENED → MED_FUNC_CLEAR → FIN_BARRIER",
+          "regex": "(CONTACT)+ \u00b7 PRESCREENED \u00b7 MED_FUNC_CLEAR \u00b7 FIN_BARRIER \u2192 PROVISIONAL_REJECT",
+          "path": "CONTACT \u2192 PRESCREENED \u2192 MED_FUNC_CLEAR \u2192 FIN_BARRIER",
           "output": "PROVISIONAL_REJECT=[0,1,0,0,0,0,0,0]",
           "disposition": "Refer to social worker for Medicaid spend-down planning or alternative funding. Re-evaluate when financial situation is resolved."
         },
@@ -893,7 +894,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "Decision: PROVISIONAL REJECT — financial qualification failed",
+                  "description": "Decision: PROVISIONAL REJECT \u2014 financial qualification failed",
                   "decision": "PROVISIONAL_REJECT",
                   "reason": "FINANCIAL_QUALIFICATION_FAILED",
                   "referral": "Social worker for Medicaid spend-down planning or elder law attorney",
@@ -906,11 +907,11 @@
       },
       {
         "id": "npi-vacancy-rejection",
-        "name": "Provisional Rejection — No Appropriate Vacancy",
+        "name": "Provisional Rejection \u2014 No Appropriate Vacancy",
         "metadata": {
           "description": "Patient is fully qualified (clinical and financial) but no appropriate room or care unit is currently available. Patient is placed on a waiting list.",
-          "regex": "(CONTACT)+ · PRESCREENED · MED_FUNC_CLEAR · FIN_CLEAR · VACANCY_BARRIER → PROVISIONAL_REJECT",
-          "path": "CONTACT → PRESCREENED → MED_FUNC_CLEAR → FIN_CLEAR → VACANCY_BARRIER",
+          "regex": "(CONTACT)+ \u00b7 PRESCREENED \u00b7 MED_FUNC_CLEAR \u00b7 FIN_CLEAR \u00b7 VACANCY_BARRIER \u2192 PROVISIONAL_REJECT",
+          "path": "CONTACT \u2192 PRESCREENED \u2192 MED_FUNC_CLEAR \u2192 FIN_CLEAR \u2192 VACANCY_BARRIER",
           "output": "PROVISIONAL_REJECT=[0,1,0,0,0,0,0,0]",
           "disposition": "Add to priority wait list. Re-evaluate when appropriate vacancy opens. No re-qualification required."
         },
@@ -1155,10 +1156,10 @@
                   0
                 ],
                 "metadata": {
-                  "description": "Decision: PROVISIONAL REJECT — no appropriate vacancy at this time",
+                  "description": "Decision: PROVISIONAL REJECT \u2014 no appropriate vacancy at this time",
                   "decision": "PROVISIONAL_REJECT",
                   "reason": "NO_VACANCY",
-                  "disposition": "Priority waitlist — no re-qualification required when vacancy opens",
+                  "disposition": "Priority waitlist \u2014 no re-qualification required when vacancy opens",
                   "reconsideration": "Automatic re-evaluation when appropriate room becomes available"
                 }
               }
@@ -1169,8 +1170,8 @@
     ],
     "inputSequences": [
       {
-        "name": "TC-01: Direct Acceptance — Single Inquiry",
-        "pattern": "CONTACT · PRESCREENED · MED_FUNC_CLEAR · FIN_CLEAR · VACANCY_CONF · ADMITTED",
+        "name": "TC-01: Direct Acceptance \u2014 Single Inquiry",
+        "pattern": "CONTACT \u00b7 PRESCREENED \u00b7 MED_FUNC_CLEAR \u00b7 FIN_CLEAR \u00b7 VACANCY_CONF \u00b7 ADMITTED",
         "description": "ACCEPTANCE: Patient contacts facility once, passes all evaluation stages cleanly, and is admitted. Tests the primary happy path with no friction or repetition.",
         "vectors": [
           [
@@ -1238,13 +1239,13 @@
           "expectedDecision": "ACCEPTED",
           "expectedOutputVector": "[1,0,0,0,0,0,0,0]",
           "expectedOutputCount": 1,
-          "scenario": "83-year-old female, assisted living appropriate acuity, Medicare + supplement confirmed, semi-private room available, daughter as healthcare proxy — all clear."
+          "scenario": "83-year-old female, assisted living appropriate acuity, Medicare + supplement confirmed, semi-private room available, daughter as healthcare proxy \u2014 all clear."
         }
       },
       {
         "name": "TC-02: Acceptance after Multiple Inquiries (Kleene+ CONTACT)",
-        "pattern": "(CONTACT)³ · PRESCREENED · MED_FUNC_CLEAR · FIN_CLEAR · VACANCY_CONF · ADMITTED",
-        "description": "ACCEPTANCE: Family makes three separate inquiry calls before scheduling the intake appointment. Validates the A+ (Kleene-plus) semantics of the CONTACT initial state — the sequence does not advance until PRESCREENED arrives.",
+        "pattern": "(CONTACT)\u00b3 \u00b7 PRESCREENED \u00b7 MED_FUNC_CLEAR \u00b7 FIN_CLEAR \u00b7 VACANCY_CONF \u00b7 ADMITTED",
+        "description": "ACCEPTANCE: Family makes three separate inquiry calls before scheduling the intake appointment. Validates the A+ (Kleene-plus) semantics of the CONTACT initial state \u2014 the sequence does not advance until PRESCREENED arrives.",
         "vectors": [
           [
             0.9,
@@ -1331,12 +1332,12 @@
           "expectedDecision": "ACCEPTED",
           "expectedOutputVector": "[1,0,0,0,0,0,0,0]",
           "expectedOutputCount": 1,
-          "scenario": "Son calls three times over two weeks asking questions before scheduling the in-person intake. Outcome unchanged — admission proceeds normally."
+          "scenario": "Son calls three times over two weeks asking questions before scheduling the in-person intake. Outcome unchanged \u2014 admission proceeds normally."
         }
       },
       {
-        "name": "TC-03: Provisional Rejection — Medical Scope Exceeded",
-        "pattern": "CONTACT · PRESCREENED · MED_BARRIER",
+        "name": "TC-03: Provisional Rejection \u2014 Medical Scope Exceeded",
+        "pattern": "CONTACT \u00b7 PRESCREENED \u00b7 MED_BARRIER",
         "description": "PROVISIONAL REJECTION: Patient's care needs exceed what the facility is licensed to provide. Medical assessment raises the BARRIER flag. Referral to SNF or hospital-based LTC is indicated.",
         "vectors": [
           [
@@ -1379,8 +1380,8 @@
         }
       },
       {
-        "name": "TC-04: Provisional Rejection — Medical, after Multiple Inquiries",
-        "pattern": "(CONTACT)² · PRESCREENED · MED_BARRIER",
+        "name": "TC-04: Provisional Rejection \u2014 Medical, after Multiple Inquiries",
+        "pattern": "(CONTACT)\u00b2 \u00b7 PRESCREENED \u00b7 MED_BARRIER",
         "description": "PROVISIONAL REJECTION: Two inquiry contacts, prescreening passes, but clinical assessment reveals acuity exceeds assisted living scope. Demonstrates Kleene-plus + barrier combination.",
         "vectors": [
           [
@@ -1433,8 +1434,8 @@
         }
       },
       {
-        "name": "TC-05: Provisional Rejection — Financial Qualification Failed",
-        "pattern": "CONTACT · PRESCREENED · MED_FUNC_CLEAR · FIN_BARRIER",
+        "name": "TC-05: Provisional Rejection \u2014 Financial Qualification Failed",
+        "pattern": "CONTACT \u00b7 PRESCREENED \u00b7 MED_FUNC_CLEAR \u00b7 FIN_BARRIER",
         "description": "PROVISIONAL REJECTION: Patient is an excellent clinical fit but insurance benefits are exhausted and private-pay funds are insufficient. Social worker referral for Medicaid planning is issued.",
         "vectors": [
           [
@@ -1487,8 +1488,8 @@
         }
       },
       {
-        "name": "TC-06: Provisional Rejection — No Vacancy",
-        "pattern": "CONTACT · PRESCREENED · MED_FUNC_CLEAR · FIN_CLEAR · VACANCY_BARRIER",
+        "name": "TC-06: Provisional Rejection \u2014 No Vacancy",
+        "pattern": "CONTACT \u00b7 PRESCREENED \u00b7 MED_FUNC_CLEAR \u00b7 FIN_CLEAR \u00b7 VACANCY_BARRIER",
         "description": "PROVISIONAL REJECTION: Patient passes every evaluation criterion but the facility is at capacity. Patient placed on priority waitlist with no re-qualification required when a room opens.",
         "vectors": [
           [
@@ -1546,13 +1547,13 @@
           "expectedDecision": "PROVISIONAL_REJECT",
           "expectedOutputVector": "[0,1,0,0,0,0,0,0]",
           "expectedOutputCount": 1,
-          "scenario": "81-year-old veteran, ideal clinical and financial profile. Facility census is 100% — no assisted living units available. Placed on priority waitlist, re-evaluated automatically when next vacancy opens.",
+          "scenario": "81-year-old veteran, ideal clinical and financial profile. Facility census is 100% \u2014 no assisted living units available. Placed on priority waitlist, re-evaluated automatically when next vacancy opens.",
           "reason": "NO_VACANCY"
         }
       },
       {
-        "name": "TC-07: Provisional Rejection — No Vacancy, after Multiple Inquiries",
-        "pattern": "(CONTACT)⁴ · PRESCREENED · MED_FUNC_CLEAR · FIN_CLEAR · VACANCY_BARRIER",
+        "name": "TC-07: Provisional Rejection \u2014 No Vacancy, after Multiple Inquiries",
+        "pattern": "(CONTACT)\u2074 \u00b7 PRESCREENED \u00b7 MED_FUNC_CLEAR \u00b7 FIN_CLEAR \u00b7 VACANCY_BARRIER",
         "description": "PROVISIONAL REJECTION: Family is persistent (four inquiries over several weeks). Full evaluation clears every stage, but facility remains at capacity. Illustrates that CONTACT repetition has no bearing on the outcome.",
         "vectors": [
           [

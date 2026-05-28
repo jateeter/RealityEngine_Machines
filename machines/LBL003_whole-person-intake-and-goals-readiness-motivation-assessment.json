@@ -213,7 +213,83 @@
             "processStatus": "info",
             "description": "Readiness Motivation Assessment: STABLE -> STABLE_BALANCE"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "sleep_circadian_agent",
+        "mode": "supervised-act",
+        "trigger": "life-balance-whole-person-intake-and-goals-readiness-motivation-assessment",
+        "allowedActions": [
+          "Route readiness motivation assessment concern to licensed care-team review.",
+          "Adjust the life-balance plan for readiness motivation assessment using patient goals, barriers, and preferences.",
+          "Create monitoring or follow-up task for readiness motivation assessment.",
+          "Continue stable life-balance monitoring for readiness motivation assessment."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.lbl003.sleep.circadian.agent.completion",
+          "name": "localAIStack lbl003 sleep.circadian.agent completion",
+          "region": {
+            "offset": 2851,
+            "length": 4
+          },
+          "semantics": [
+            "symptom or functional concern",
+            "lifestyle barrier or preference",
+            "monitoring data quality or readiness",
+            "risk, safety, or care-team urgency"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-lbl003-completion",
+            "sensorId": "localai.lbl003.sleep.circadian.agent.completion",
+            "name": "localAIStack lbl003 sleep.circadian.agent completion",
+            "region": {
+              "offset": 2851,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": [
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "RED"
+          ]
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

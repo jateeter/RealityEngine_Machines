@@ -210,7 +210,86 @@
             "processStatus": "info",
             "description": "Frequency Optimization: NOMINAL -> SERVICE_NOMINAL"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "transit_compliance_agent",
+        "mode": "automated-act",
+        "trigger": "transportation-fleet-network-planning-frequency-optimization",
+        "allowedActions": [
+          "Dispatch transit_compliance_agent for critical 100-bus fleet intervention on frequency optimization.",
+          "Trigger predictive flow management for frequency optimization using rider, vehicle, and route context.",
+          "Create maintenance, cleaning, security, or service task for frequency optimization.",
+          "Keep 24/7 monitoring active for frequency optimization."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.tfx115.transit.compliance.agent.completion",
+          "name": "localAIStack tfx115 transit.compliance.agent completion",
+          "region": {
+            "offset": 3671,
+            "length": 4
+          },
+          "semantics": [
+            "service reliability",
+            "rider impact",
+            "asset readiness",
+            "safety/security risk"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-tfx115-completion",
+            "sensorId": "localai.tfx115.transit.compliance.agent.completion",
+            "name": "localAIStack tfx115 transit.compliance.agent completion",
+            "region": {
+              "offset": 3671,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": true,
+          "maxAutonomy": "automated-act",
+          "blockedWhenRag": [
+            "AMBER",
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "automated-act",
+          "stage": 3,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": true,
+          "requiresHumanApproval": false,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "AMBER",
+            "RED"
+          ],
+          "rollbackRequired": true
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

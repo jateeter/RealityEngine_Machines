@@ -215,7 +215,83 @@
             "processStatus": "info",
             "description": "Medication Movement Effects: STABLE -> STABLE_BALANCE"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "adolescent_family_agent",
+        "mode": "supervised-act",
+        "trigger": "life-balance-movement-and-physical-health-medication-movement-effects",
+        "allowedActions": [
+          "Route medication movement effects concern to licensed care-team review.",
+          "Adjust the life-balance plan for medication movement effects using patient goals, barriers, and preferences.",
+          "Create monitoring or follow-up task for medication movement effects.",
+          "Continue stable life-balance monitoring for medication movement effects."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.lbl037.adolescent.family.agent.completion",
+          "name": "localAIStack lbl037 adolescent.family.agent completion",
+          "region": {
+            "offset": 2987,
+            "length": 4
+          },
+          "semantics": [
+            "symptom or functional concern",
+            "lifestyle barrier or preference",
+            "monitoring data quality or readiness",
+            "risk, safety, or care-team urgency"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-lbl037-completion",
+            "sensorId": "localai.lbl037.adolescent.family.agent.completion",
+            "name": "localAIStack lbl037 adolescent.family.agent completion",
+            "region": {
+              "offset": 2987,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": [
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "RED"
+          ]
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

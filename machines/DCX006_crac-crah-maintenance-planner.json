@@ -203,7 +203,87 @@
             "processStatus": "info",
             "description": "CRAC CRAH Maintenance Planner: 0-6H -> 6-12H -> 12-18H -> 18-24H -> PRESCRIPTIVE_ACTION"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "dc_storage_agent",
+        "mode": "automated-act",
+        "trigger": "data-center-crac-crah-maintenance-planner-ops-maintenance-upgrade",
+        "allowedActions": [
+          "Dispatch dc_storage_agent for immediate stabilization of crac crah maintenance planner.",
+          "Schedule maintenance for crac crah maintenance planner with rollback and staffing checks.",
+          "Plan upgrade or lifecycle change for crac crah maintenance planner using risk-gated rollout.",
+          "Keep 24/7 monitoring active for crac crah maintenance planner.",
+          "Project crac crah maintenance planner forward over the next 24 hours and prescribe maintenance or upgrade work before the risk window opens."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.dcx006.dc.storage.agent.completion",
+          "name": "localAIStack dcx006 dc.storage.agent completion",
+          "region": {
+            "offset": 4083,
+            "length": 4
+          },
+          "semantics": [
+            "availability margin",
+            "maintenance readiness",
+            "upgrade/lifecycle pressure",
+            "operational confidence"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-dcx006-completion",
+            "sensorId": "localai.dcx006.dc.storage.agent.completion",
+            "name": "localAIStack dcx006 dc.storage.agent completion",
+            "region": {
+              "offset": 4083,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": true,
+          "maxAutonomy": "automated-act",
+          "blockedWhenRag": [
+            "AMBER",
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "automated-act",
+          "stage": 3,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": true,
+          "requiresHumanApproval": false,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "AMBER",
+            "RED"
+          ],
+          "rollbackRequired": true
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

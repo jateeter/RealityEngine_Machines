@@ -2,10 +2,10 @@
   "version": "1.0.0",
   "machine": {
     "name": "Service Delivery Integrity Monitor",
-    "description": "Integration machine that reads combined output signals from the Case Worker Capacity Monitor [968:972] and the Service Delivery Compliance Monitor [972:976] to detect service delivery integrity failures — conditions where compliance obligations cannot be met because worker capacity has been exhausted. In community services, the most dangerous failure mode is when capacity pressure forces regulatory corners to be cut: documentation skipped, contacts missed, timelines violated. These are compliance violations whose root cause is a staffing crisis, not a process failure. Output at [992:996] is available to downstream care coordination systems.",
+    "description": "Integration machine that reads combined output signals from the Case Worker Capacity Monitor [968:972] and the Service Delivery Compliance Monitor [972:976] to detect service delivery integrity failures \u2014 conditions where compliance obligations cannot be met because worker capacity has been exhausted. In community services, the most dangerous failure mode is when capacity pressure forces regulatory corners to be cut: documentation skipped, contacts missed, timelines violated. These are compliance violations whose root cause is a staffing crisis, not a process failure. Output at [992:996] is available to downstream care coordination systems.",
     "metadata": {
       "category": "community-services",
-      "domain": "Community Services — Service Delivery Integrity / Operations",
+      "domain": "Community Services \u2014 Service Delivery Integrity / Operations",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [992:996]: [1,0,0,0]=INTEGRITY_FAILURE, [0,1,0,0]=INTEGRITY_AT_RISK, [0,0,1,0]=INTEGRITY_STRAINED, [0,0,0,1]=SERVICE_INTEGRITY_OK",
       "tags": [
@@ -145,7 +145,8 @@
             "description": "SERVICE_INTEGRITY_OK: worker capacity and compliance both maintained; sustainable operations confirmed at [992:996]"
           }
         ]
-      }
+      },
+      "machineClass": "safety-compliance-checker"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -162,10 +163,10 @@
     "sequences": [
       {
         "id": "integrity-failure-escalation",
-        "name": "Integrity Collapse: OK+ → STRAINED → AT_RISK → INTEGRITY_FAILURE",
+        "name": "Integrity Collapse: OK+ \u2192 STRAINED \u2192 AT_RISK \u2192 INTEGRITY_FAILURE",
         "metadata": {
           "description": "Tracks service delivery integrity collapse from an OK baseline through strain to full failure. The critical escalation path: capacity crisis occurs (CAPACITY_CRISIS), which directly causes compliance violations because overloaded workers cannot complete documentation, contacts, or timelines. Both upstream machines simultaneously in crisis = integrity system failure requiring external intervention. Requires OK+ baseline before failure escalation arms.",
-          "path": "OK+ → STRAINED → AT_RISK → output[1,0,0,0]",
+          "path": "OK+ \u2192 STRAINED \u2192 AT_RISK \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (INTEGRITY_FAILURE)"
         },
         "vectors": [
@@ -208,7 +209,7 @@
             "isInitial": true,
             "metadata": {
               "name": "OK",
-              "description": "OK+ — CAPACITY_ADEQUATE (bit 449) and COMPLIANT (bit 453) both high. Workers are resourced adequately and compliance is being maintained. isInitial A*A = A+.",
+              "description": "OK+ \u2014 CAPACITY_ADEQUATE (bit 449) and COMPLIANT (bit 453) both high. Workers are resourced adequately and compliance is being maintained. isInitial A*A = A+.",
               "upstream_state": "CaseWorkerCapacity=CAPACITY_ADEQUATE, ServiceCompliance=COMPLIANT"
             },
             "nextVectorIds": [
@@ -255,7 +256,7 @@
             "isInitial": false,
             "metadata": {
               "name": "STRAINED",
-              "description": "STRAINED — CAPACITY_STRAINED (bit 448) and MONITORING_REQUIRED (bit 452). Capacity above recommended levels; compliance trending toward concern. Integrity under pressure.",
+              "description": "STRAINED \u2014 CAPACITY_STRAINED (bit 448) and MONITORING_REQUIRED (bit 452). Capacity above recommended levels; compliance trending toward concern. Integrity under pressure.",
               "upstream_state": "CaseWorkerCapacity=CAPACITY_STRAINED, ServiceCompliance=MONITORING_REQUIRED"
             },
             "nextVectorIds": [
@@ -301,7 +302,7 @@
             "isInitial": false,
             "metadata": {
               "name": "AT_RISK",
-              "description": "AT_RISK — CAPACITY_CRISIS (bit 446) and COMPLIANCE_VIOLATION (bit 450). Both upstream machines in crisis. Compliance violations are directly attributable to capacity failure. Fires INTEGRITY_FAILURE.",
+              "description": "AT_RISK \u2014 CAPACITY_CRISIS (bit 446) and COMPLIANCE_VIOLATION (bit 450). Both upstream machines in crisis. Compliance violations are directly attributable to capacity failure. Fires INTEGRITY_FAILURE.",
               "upstream_state": "CaseWorkerCapacity=CAPACITY_CRISIS, ServiceCompliance=COMPLIANCE_VIOLATION"
             },
             "outputVectors": [
@@ -324,9 +325,9 @@
       },
       {
         "id": "integrity-at-risk",
-        "name": "Integrity At Risk: PRESSURE+ → INTEGRITY_AT_RISK signal",
+        "name": "Integrity At Risk: PRESSURE+ \u2192 INTEGRITY_AT_RISK signal",
         "metadata": {
-          "description": "Fires INTEGRITY_AT_RISK when capacity is in crisis but compliance has not yet been formally violated — the narrow window for intervention before compliance failures begin cascading from the staffing crisis.",
+          "description": "Fires INTEGRITY_AT_RISK when capacity is in crisis but compliance has not yet been formally violated \u2014 the narrow window for intervention before compliance failures begin cascading from the staffing crisis.",
           "pattern": "PRESSURE+",
           "output": "[0,1,0,0] (INTEGRITY_AT_RISK)"
         },
@@ -370,7 +371,7 @@
             "isInitial": true,
             "metadata": {
               "name": "PRESSURE",
-              "description": "PRESSURE+ — CAPACITY_CRISIS (bit 446) but MONITORING_REQUIRED (bit 452). Staffing in crisis but compliance not yet violated; the brief intervention window. isInitial A*A = A+: fires INTEGRITY_AT_RISK each cycle.",
+              "description": "PRESSURE+ \u2014 CAPACITY_CRISIS (bit 446) but MONITORING_REQUIRED (bit 452). Staffing in crisis but compliance not yet violated; the brief intervention window. isInitial A*A = A+: fires INTEGRITY_AT_RISK each cycle.",
               "scenario": "Three workers left this week; caseloads redistributed; compliance not yet violated but documentation will start slipping within days without intervention"
             },
             "outputVectors": [
@@ -393,9 +394,9 @@
       },
       {
         "id": "integrity-ok",
-        "name": "Service Integrity OK: STABLE+ → SERVICE_INTEGRITY_OK signal",
+        "name": "Service Integrity OK: STABLE+ \u2192 SERVICE_INTEGRITY_OK signal",
         "metadata": {
-          "description": "Fires SERVICE_INTEGRITY_OK when both capacity and compliance are confirmed adequate — the sustainable operations state where workers are resourced to meet compliance requirements without cutting corners.",
+          "description": "Fires SERVICE_INTEGRITY_OK when both capacity and compliance are confirmed adequate \u2014 the sustainable operations state where workers are resourced to meet compliance requirements without cutting corners.",
           "pattern": "STABLE+",
           "output": "[0,0,0,1] (SERVICE_INTEGRITY_OK)"
         },
@@ -439,7 +440,7 @@
             "isInitial": true,
             "metadata": {
               "name": "STABLE",
-              "description": "STABLE+ — CAPACITY_ADEQUATE (bit 449) and COMPLIANT (bit 453) both high. Fully resourced and compliant operations. Fires SERVICE_INTEGRITY_OK each cycle.",
+              "description": "STABLE+ \u2014 CAPACITY_ADEQUATE (bit 449) and COMPLIANT (bit 453) both high. Fully resourced and compliant operations. Fires SERVICE_INTEGRITY_OK each cycle.",
               "scenario": "Fully staffed team; passing all contract performance metrics; documentation current; no open compliance actions"
             },
             "outputVectors": [
@@ -464,7 +465,7 @@
     "inputSequences": [
       {
         "name": "Funding Cut Triggers Staffing-Compliance Cascade",
-        "pattern": "5-step: OK→OK→STRAINED (layoffs announced)→INTEGRITY_AT_RISK (capacity crisis, compliance holding)→INTEGRITY_FAILURE (violations begin)→OK (emergency funding restored)",
+        "pattern": "5-step: OK\u2192OK\u2192STRAINED (layoffs announced)\u2192INTEGRITY_AT_RISK (capacity crisis, compliance holding)\u2192INTEGRITY_FAILURE (violations begin)\u2192OK (emergency funding restored)",
         "description": "Mid-year budget cut forces 30% staff reduction; caseloads spike; documentation begins falling behind; compliance violations triggered; emergency supplemental grant restores capacity.",
         "vectors": [
           [

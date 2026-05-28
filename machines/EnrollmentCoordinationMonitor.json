@@ -2,10 +2,10 @@
   "version": "1.0.0",
   "machine": {
     "name": "Enrollment Coordination Monitor",
-    "description": "Integration machine that reads combined output signals from the Benefits Eligibility Screener [952:956] and the Service Intake Assessment Monitor [956:960] to detect enrollment coordination failures — cases where eligible, assessed clients are not transitioning into active services. The gap between confirmed eligibility and actual enrollment is the most significant service delivery failure in community programs: eligible people who never get enrolled. Output at [984:988] is available to downstream care coordination systems.",
+    "description": "Integration machine that reads combined output signals from the Benefits Eligibility Screener [952:956] and the Service Intake Assessment Monitor [956:960] to detect enrollment coordination failures \u2014 cases where eligible, assessed clients are not transitioning into active services. The gap between confirmed eligibility and actual enrollment is the most significant service delivery failure in community programs: eligible people who never get enrolled. Output at [984:988] is available to downstream care coordination systems.",
     "metadata": {
       "category": "community-services",
-      "domain": "Community Services — Enrollment Coordination / Access",
+      "domain": "Community Services \u2014 Enrollment Coordination / Access",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [984:988]: [1,0,0,0]=ENROLLMENT_FAILURE, [0,1,0,0]=ENROLLMENT_BARRIER, [0,0,1,0]=ENROLLMENT_DELAYED, [0,0,0,1]=ENROLLMENT_ON_TRACK",
       "tags": [
@@ -139,7 +139,8 @@
             "description": "ENROLLMENT_ON_TRACK: eligible client through intake and moving toward active enrollment at [984:988]"
           }
         ]
-      }
+      },
+      "machineClass": "signal-monitor"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -156,10 +157,10 @@
     "sequences": [
       {
         "id": "enrollment-failure-escalation",
-        "name": "Enrollment Failure: ON_TRACK+ → STALLED → LAPSED → ENROLLMENT_FAILURE",
+        "name": "Enrollment Failure: ON_TRACK+ \u2192 STALLED \u2192 LAPSED \u2192 ENROLLMENT_FAILURE",
         "metadata": {
-          "description": "Detects clients who were confirmed eligible and intake-complete but whose enrollment has stalled and then lapsed — the invisible failure where eligible clients simply never receive services. This is the most consequential gap in community services: the determination was made correctly, the intake was done, but the handoff to enrollment broke down. Requires ON_TRACK+ baseline before failure escalation arms.",
-          "path": "ON_TRACK+ → STALLED → LAPSED → output[1,0,0,0]",
+          "description": "Detects clients who were confirmed eligible and intake-complete but whose enrollment has stalled and then lapsed \u2014 the invisible failure where eligible clients simply never receive services. This is the most consequential gap in community services: the determination was made correctly, the intake was done, but the handoff to enrollment broke down. Requires ON_TRACK+ baseline before failure escalation arms.",
+          "path": "ON_TRACK+ \u2192 STALLED \u2192 LAPSED \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (ENROLLMENT_FAILURE)"
         },
         "vectors": [
@@ -202,7 +203,7 @@
             "isInitial": true,
             "metadata": {
               "name": "ON_TRACK",
-              "description": "ON_TRACK+ — ELIGIBILITY_CONFIRMED (bit 433) and INTAKE_COMPLETE (bit 437) both high. Eligible applicant has completed intake; enrollment should proceed. isInitial A*A = A+.",
+              "description": "ON_TRACK+ \u2014 ELIGIBILITY_CONFIRMED (bit 433) and INTAKE_COMPLETE (bit 437) both high. Eligible applicant has completed intake; enrollment should proceed. isInitial A*A = A+.",
               "upstream_state": "BenefitsEligibility=ELIGIBILITY_CONFIRMED, ServiceIntake=INTAKE_COMPLETE"
             },
             "nextVectorIds": [
@@ -249,7 +250,7 @@
             "isInitial": false,
             "metadata": {
               "name": "STALLED",
-              "description": "STALLED — DOCUMENTATION_NEEDED (bit 432) and COMPLEX_INTAKE (bit 435). Eligibility gated by documentation; intake revealed complexity requiring more intensive handling. Enrollment stalled.",
+              "description": "STALLED \u2014 DOCUMENTATION_NEEDED (bit 432) and COMPLEX_INTAKE (bit 435). Eligibility gated by documentation; intake revealed complexity requiring more intensive handling. Enrollment stalled.",
               "upstream_state": "BenefitsEligibility=DOCUMENTATION_NEEDED, ServiceIntake=COMPLEX_INTAKE"
             },
             "nextVectorIds": [
@@ -295,7 +296,7 @@
             "isInitial": false,
             "metadata": {
               "name": "LAPSED",
-              "description": "LAPSED — ELIGIBILITY_DENIED (bit 430) and PRIORITY_INTAKE (bit 434). Eligibility has lapsed or been denied while intake revealed urgent needs. Client in crisis with no enrollment path. Fires ENROLLMENT_FAILURE.",
+              "description": "LAPSED \u2014 ELIGIBILITY_DENIED (bit 430) and PRIORITY_INTAKE (bit 434). Eligibility has lapsed or been denied while intake revealed urgent needs. Client in crisis with no enrollment path. Fires ENROLLMENT_FAILURE.",
               "upstream_state": "BenefitsEligibility=ELIGIBILITY_DENIED, ServiceIntake=PRIORITY_INTAKE"
             },
             "outputVectors": [
@@ -318,9 +319,9 @@
       },
       {
         "id": "enrollment-barrier",
-        "name": "Enrollment Barrier: BLOCKED+ → ENROLLMENT_BARRIER signal",
+        "name": "Enrollment Barrier: BLOCKED+ \u2192 ENROLLMENT_BARRIER signal",
         "metadata": {
-          "description": "Fires ENROLLMENT_BARRIER when eligibility is confirmed but intake reveals complex barriers that are preventing enrollment from proceeding — the common state for clients with multiple barriers who need intensive support to complete the enrollment process itself.",
+          "description": "Fires ENROLLMENT_BARRIER when eligibility is confirmed but intake reveals complex barriers that are preventing enrollment from proceeding \u2014 the common state for clients with multiple barriers who need intensive support to complete the enrollment process itself.",
           "pattern": "BLOCKED+",
           "output": "[0,1,0,0] (ENROLLMENT_BARRIER)"
         },
@@ -364,7 +365,7 @@
             "isInitial": true,
             "metadata": {
               "name": "BLOCKED",
-              "description": "BLOCKED+ — ELIGIBILITY_CONFIRMED (bit 433) but COMPLEX_INTAKE (bit 435). Eligible but intake revealed functional, literacy, or logistical barriers preventing standard enrollment. isInitial A*A = A+: fires ENROLLMENT_BARRIER each cycle.",
+              "description": "BLOCKED+ \u2014 ELIGIBILITY_CONFIRMED (bit 433) but COMPLEX_INTAKE (bit 435). Eligible but intake revealed functional, literacy, or logistical barriers preventing standard enrollment. isInitial A*A = A+: fires ENROLLMENT_BARRIER each cycle.",
               "scenario": "Eligible SNAP applicant with cognitive disability who completed intake but cannot navigate online enrollment portal; needs navigator to complete enrollment on their behalf"
             },
             "outputVectors": [
@@ -387,9 +388,9 @@
       },
       {
         "id": "enrollment-on-track-ok",
-        "name": "Enrollment On Track: PROCEEDING+ → ENROLLMENT_ON_TRACK signal",
+        "name": "Enrollment On Track: PROCEEDING+ \u2192 ENROLLMENT_ON_TRACK signal",
         "metadata": {
-          "description": "Fires ENROLLMENT_ON_TRACK when both upstream machines confirm eligibility and intake completion — the client has cleared both gates and enrollment should be proceeding normally.",
+          "description": "Fires ENROLLMENT_ON_TRACK when both upstream machines confirm eligibility and intake completion \u2014 the client has cleared both gates and enrollment should be proceeding normally.",
           "pattern": "PROCEEDING+",
           "output": "[0,0,0,1] (ENROLLMENT_ON_TRACK)"
         },
@@ -433,7 +434,7 @@
             "isInitial": true,
             "metadata": {
               "name": "PROCEEDING",
-              "description": "PROCEEDING+ — ELIGIBILITY_CONFIRMED (bit 433) and INTAKE_COMPLETE (bit 437) both high. Fires ENROLLMENT_ON_TRACK each cycle.",
+              "description": "PROCEEDING+ \u2014 ELIGIBILITY_CONFIRMED (bit 433) and INTAKE_COMPLETE (bit 437) both high. Fires ENROLLMENT_ON_TRACK each cycle.",
               "upstream_state": "BenefitsEligibility=ELIGIBILITY_CONFIRMED, ServiceIntake=INTAKE_COMPLETE"
             },
             "outputVectors": [
@@ -458,7 +459,7 @@
     "inputSequences": [
       {
         "name": "Eligible Client Lost Between Eligibility and Enrollment",
-        "pattern": "5-step: ON_TRACK→ON_TRACK→STALLED (documentation gap)→LAPSED (deadline missed)→ON_TRACK (after navigator intervention)",
+        "pattern": "5-step: ON_TRACK\u2192ON_TRACK\u2192STALLED (documentation gap)\u2192LAPSED (deadline missed)\u2192ON_TRACK (after navigator intervention)",
         "description": "Eligible client's 30-day SNAP determination window lapses while documentation gap unresolved; priority re-intake triggers navigator intervention; eligibility confirmed again; enrollment completed.",
         "vectors": [
           [

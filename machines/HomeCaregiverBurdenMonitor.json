@@ -5,7 +5,7 @@
     "description": "Integration machine that reads combined output signals from the Pediatric Nutrition Monitor [2003:2007] and the Child Development Monitor [2007:2011] to assess caregiver burden driven by child health challenges. Child nutritional problems and developmental delays are the primary pediatric-driven stressors for at-home caregivers in low-income settings. Caregiver burnout reduces care quality across all household members and is a leading predictor of preventable pediatric ED visits. Output at [2031:2035] is available to downstream care coordination systems.",
     "metadata": {
       "category": "health-personal",
-      "domain": "Home Health — Caregiver Support / Burden Assessment",
+      "domain": "Home Health \u2014 Caregiver Support / Burden Assessment",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [2031:2035]: [1,0,0,0]=CAREGIVER_BURNOUT, [0,1,0,0]=HIGH_BURDEN, [0,0,1,0]=MODERATE_BURDEN, [0,0,0,1]=CAREGIVER_COPING",
       "tags": [
@@ -148,7 +148,8 @@
             "description": "CAREGIVER_COPING: child health and development supported; caregiver managing adequately at [2031:2035]"
           }
         ]
-      }
+      },
+      "machineClass": "risk-forecaster"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -165,10 +166,10 @@
     "sequences": [
       {
         "id": "caregiver-burnout-escalation",
-        "name": "Burnout Cascade: COPING+ → STRAINED → HIGH_BURDEN_STATE → CAREGIVER_BURNOUT",
+        "name": "Burnout Cascade: COPING+ \u2192 STRAINED \u2192 HIGH_BURDEN_STATE \u2192 CAREGIVER_BURNOUT",
         "metadata": {
-          "description": "Tracks caregiver burden escalation driven by simultaneous pediatric health and developmental challenges. When both upstream machines signal concern simultaneously, caregiver coping is overwhelmed — especially in single-parent, low-income households with no respite network. The COPING+ baseline requires at least one confirmed adequate period before burnout escalation can arm.",
-          "path": "COPING+ → STRAINED → HIGH_BURDEN_STATE → output[1,0,0,0]",
+          "description": "Tracks caregiver burden escalation driven by simultaneous pediatric health and developmental challenges. When both upstream machines signal concern simultaneously, caregiver coping is overwhelmed \u2014 especially in single-parent, low-income households with no respite network. The COPING+ baseline requires at least one confirmed adequate period before burnout escalation can arm.",
+          "path": "COPING+ \u2192 STRAINED \u2192 HIGH_BURDEN_STATE \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (CAREGIVER_BURNOUT)"
         },
         "vectors": [
@@ -211,7 +212,7 @@
             "isInitial": true,
             "metadata": {
               "name": "COPING",
-              "description": "COPING+ — NUTRITION_OK bit high (353) and DEVELOPMENT_OK bit high (357) from upstream. Child health and development adequate; caregiver managing. isInitial A*A = A+.",
+              "description": "COPING+ \u2014 NUTRITION_OK bit high (353) and DEVELOPMENT_OK bit high (357) from upstream. Child health and development adequate; caregiver managing. isInitial A*A = A+.",
               "upstream_state": "PediatricNutrition=NUTRITION_OK, ChildDevelopment=DEVELOPMENT_OK"
             },
             "nextVectorIds": [
@@ -258,7 +259,7 @@
             "isInitial": false,
             "metadata": {
               "name": "STRAINED",
-              "description": "STRAINED — one child health concern active: MICRONUTRIENT_CONCERN (bit 352) OR SOCIAL_DEVELOPMENTAL_CONCERN (bit 355). Caregiver stress elevated; help-seeking beginning.",
+              "description": "STRAINED \u2014 one child health concern active: MICRONUTRIENT_CONCERN (bit 352) OR SOCIAL_DEVELOPMENTAL_CONCERN (bit 355). Caregiver stress elevated; help-seeking beginning.",
               "upstream_state": "One concern signal from either upstream machine; caregiver reporting fatigue"
             },
             "nextVectorIds": [
@@ -304,7 +305,7 @@
             "isInitial": false,
             "metadata": {
               "name": "HIGH_BURDEN_STATE",
-              "description": "HIGH_BURDEN_STATE — dual crisis: GROWTH_ALERT (bit 350) AND REFERRAL_NEEDED (bit 354). Both pediatric domains in alert state. Caregiver overwhelmed. Fires CAREGIVER_BURNOUT.",
+              "description": "HIGH_BURDEN_STATE \u2014 dual crisis: GROWTH_ALERT (bit 350) AND REFERRAL_NEEDED (bit 354). Both pediatric domains in alert state. Caregiver overwhelmed. Fires CAREGIVER_BURNOUT.",
               "upstream_state": "PediatricNutrition=GROWTH_ALERT, ChildDevelopment=REFERRAL_NEEDED"
             },
             "outputVectors": [
@@ -327,9 +328,9 @@
       },
       {
         "id": "caregiver-high-burden",
-        "name": "High Burden: BURDEN+ → HIGH_BURDEN signal",
+        "name": "High Burden: BURDEN+ \u2192 HIGH_BURDEN signal",
         "metadata": {
-          "description": "Fires HIGH_BURDEN when one upstream machine is in an alert state and the other is in concern state — the most common high-stress caregiver presentation, where one major child health issue compounds a second moderate concern. Common in WIC-enrolled families with a child in early intervention.",
+          "description": "Fires HIGH_BURDEN when one upstream machine is in an alert state and the other is in concern state \u2014 the most common high-stress caregiver presentation, where one major child health issue compounds a second moderate concern. Common in WIC-enrolled families with a child in early intervention.",
           "pattern": "BURDEN+",
           "output": "[0,1,0,0] (HIGH_BURDEN)"
         },
@@ -373,7 +374,7 @@
             "isInitial": true,
             "metadata": {
               "name": "BURDEN",
-              "description": "BURDEN+ — GROWTH_ALERT (bit 350) AND SOCIAL_DEVELOPMENTAL_CONCERN (bit 355): one alert + one concern from different machines. isInitial A*A = A+: fires HIGH_BURDEN each cycle.",
+              "description": "BURDEN+ \u2014 GROWTH_ALERT (bit 350) AND SOCIAL_DEVELOPMENTAL_CONCERN (bit 355): one alert + one concern from different machines. isInitial A*A = A+: fires HIGH_BURDEN each cycle.",
               "scenario": "Child with failure-to-thrive AND social withdrawal; caregiver managing dual referral systems without support"
             },
             "outputVectors": [
@@ -396,9 +397,9 @@
       },
       {
         "id": "caregiver-coping-ok",
-        "name": "Caregiver Coping: MANAGING+ → CAREGIVER_COPING signal",
+        "name": "Caregiver Coping: MANAGING+ \u2192 CAREGIVER_COPING signal",
         "metadata": {
-          "description": "Fires CAREGIVER_COPING when both upstream child health machines report adequate states. Confirms that caregiver support systems and child health status are balanced — often reflecting successful WIC, Head Start, and home visiting program engagement.",
+          "description": "Fires CAREGIVER_COPING when both upstream child health machines report adequate states. Confirms that caregiver support systems and child health status are balanced \u2014 often reflecting successful WIC, Head Start, and home visiting program engagement.",
           "pattern": "MANAGING+",
           "output": "[0,0,0,1] (CAREGIVER_COPING)"
         },
@@ -442,7 +443,7 @@
             "isInitial": true,
             "metadata": {
               "name": "MANAGING",
-              "description": "MANAGING+ — NUTRITION_OK (bit 353) and DEVELOPMENT_OK (bit 357) both high. Child thriving on all monitored dimensions; caregiver burden within normal range. Fires CAREGIVER_COPING each cycle.",
+              "description": "MANAGING+ \u2014 NUTRITION_OK (bit 353) and DEVELOPMENT_OK (bit 357) both high. Child thriving on all monitored dimensions; caregiver burden within normal range. Fires CAREGIVER_COPING each cycle.",
               "scenario": "Child enrolled in WIC and Head Start; caregiver receiving home visiting support; family stable"
             },
             "outputVectors": [
@@ -467,7 +468,7 @@
     "inputSequences": [
       {
         "name": "WIC Lapse and Developmental Regression",
-        "pattern": "6-step: COPING→COPING→STRAINED (one concern)→HIGH_BURDEN (one alert)→BURNOUT (dual crisis)→COPING (after stabilization)",
+        "pattern": "6-step: COPING\u2192COPING\u2192STRAINED (one concern)\u2192HIGH_BURDEN (one alert)\u2192BURNOUT (dual crisis)\u2192COPING (after stabilization)",
         "description": "WIC benefits lapse causes growth alert; simultaneous housing move triggers developmental regression and social withdrawal referral; caregiver decompensates; coordinated intervention resolves both.",
         "vectors": [
           [

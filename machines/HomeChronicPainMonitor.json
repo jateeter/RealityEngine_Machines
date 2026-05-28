@@ -5,7 +5,7 @@
     "description": "Monitors pain intensity, functional impairment, opioid risk indicators, and physical activity for adults managing chronic pain at home in low- and medium-income settings. Chronic pain is disproportionately prevalent in low-income populations due to occupational injury, inadequate early treatment, and limited access to non-pharmacological interventions. Unmanaged chronic pain is a primary driver of depression and social isolation. Output at [2023:2027] feeds the Home Mental Health Access Monitor alongside the Chronic Disease Monitor.",
     "metadata": {
       "category": "health-personal",
-      "domain": "Home Health — Chronic Pain Management",
+      "domain": "Home Health \u2014 Chronic Pain Management",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [2023:2027]: [1,0,0,0]=PAIN_CRISIS, [0,1,0,0]=OPIOID_RISK_ELEVATED, [0,0,1,0]=FUNCTIONAL_IMPAIRMENT, [0,0,0,1]=PAIN_MANAGED",
       "tags": [
@@ -29,7 +29,7 @@
       "sequenceCount": 4,
       "populationFocus": "Adults with chronic pain from occupational injury, musculoskeletal conditions, fibromyalgia; opioid-prescribed patients in home care; low-income adults with limited PT/pain clinic access",
       "sensorNormalization": {
-        "pain_scale_norm": "0.0=pain 9–10/10 constant, unable to function, 0.5=pain 4–6/10 manageable with medication, 1.0=pain 0–2/10 minimal or absent",
+        "pain_scale_norm": "0.0=pain 9\u201310/10 constant, unable to function, 0.5=pain 4\u20136/10 manageable with medication, 1.0=pain 0\u20132/10 minimal or absent",
         "functional_impairment_norm": "0.0=bedbound or homebound due to pain; unable to perform basic ADLs, 0.5=significantly limited but managing key daily activities with help, 1.0=fully functional with minimal pain interference",
         "opioid_risk_norm": "0.0=multiple opioid risk flags (early refills, sedation signs, diversion indicators, dose escalation without consult), 0.5=one risk factor present (borderline early refill; PRN overuse), 1.0=no opioid risk indicators; stable prescribed use or non-opioid pain management",
         "physical_activity_norm": "0.0=zero physical activity; complete deconditioning, 0.5=minimal movement with assistance; ADL-level activity only, 1.0=regular therapeutic activity; walking program or PT adherent"
@@ -155,7 +155,8 @@
             "description": "PAIN_MANAGED: chronic pain adequately controlled with maintained function at [2023:2027]"
           }
         ]
-      }
+      },
+      "machineClass": "risk-forecaster"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -172,10 +173,10 @@
     "sequences": [
       {
         "id": "chronic-pain-crisis",
-        "name": "Pain Crisis: MANAGED+ → WORSENING → SEVERE → PAIN_CRISIS",
+        "name": "Pain Crisis: MANAGED+ \u2192 WORSENING \u2192 SEVERE \u2192 PAIN_CRISIS",
         "metadata": {
           "description": "Tracks progressive pain control failure toward functional crisis. In low-income home care, pain crisis episodes are often precipitated by medication access failures (opioid prior auth denied, pharmacy unable to fill, cost), weather-related flares, or loss of PT access. The MANAGED+ baseline confirms prior pain control before escalation can signal.",
-          "path": "MANAGED+ → WORSENING → SEVERE → output[1,0,0,0]",
+          "path": "MANAGED+ \u2192 WORSENING \u2192 SEVERE \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (PAIN_CRISIS)"
         },
         "vectors": [
@@ -202,8 +203,8 @@
             "isInitial": true,
             "metadata": {
               "name": "MANAGED",
-              "description": "MANAGED+ — pain 3–5/10 manageable; functional for essential ADLs; opioid use stable; some physical activity maintained. isInitial A*A = A+.",
-              "pain_scale": "0.55–0.72 (pain 3–5/10; functional)"
+              "description": "MANAGED+ \u2014 pain 3\u20135/10 manageable; functional for essential ADLs; opioid use stable; some physical activity maintained. isInitial A*A = A+.",
+              "pain_scale": "0.55\u20130.72 (pain 3\u20135/10; functional)"
             },
             "nextVectorIds": [
               "cp-managed",
@@ -233,8 +234,8 @@
             "isInitial": false,
             "metadata": {
               "name": "WORSENING",
-              "description": "WORSENING — pain escalating to 6–7/10; functional limitations increasing; activity declining; PRN medication use increasing.",
-              "pain_scale": "0.30–0.48 (pain 5–7/10; functional decline)"
+              "description": "WORSENING \u2014 pain escalating to 6\u20137/10; functional limitations increasing; activity declining; PRN medication use increasing.",
+              "pain_scale": "0.30\u20130.48 (pain 5\u20137/10; functional decline)"
             },
             "nextVectorIds": [
               "cp-severe"
@@ -263,8 +264,8 @@
             "isInitial": false,
             "metadata": {
               "name": "SEVERE",
-              "description": "SEVERE — pain 8–10/10; ADL-dependent; activity ceased; medication inadequate. Fires PAIN_CRISIS.",
-              "pain_scale": "0.0–0.18 (pain 8–10/10; crisis requiring urgent pain management intervention)"
+              "description": "SEVERE \u2014 pain 8\u201310/10; ADL-dependent; activity ceased; medication inadequate. Fires PAIN_CRISIS.",
+              "pain_scale": "0.0\u20130.18 (pain 8\u201310/10; crisis requiring urgent pain management intervention)"
             },
             "outputVectors": [
               {
@@ -286,10 +287,10 @@
       },
       {
         "id": "chronic-pain-opioid-risk",
-        "name": "Opioid Risk: STABLE_RX+ → RISK_SIGNAL → OPIOID_RISK_ELEVATED",
+        "name": "Opioid Risk: STABLE_RX+ \u2192 RISK_SIGNAL \u2192 OPIOID_RISK_ELEVATED",
         "metadata": {
-          "description": "Tracks opioid risk escalation patterns — early refill requests, dose escalation without physician contact, sedation signs — in home care patients on prescribed opioids. Low-income patients are at higher opioid misuse risk due to untreated pain, mental health comorbidities, and limited alternative pain management access.",
-          "path": "STABLE_RX+ → RISK_SIGNAL → output[0,1,0,0]",
+          "description": "Tracks opioid risk escalation patterns \u2014 early refill requests, dose escalation without physician contact, sedation signs \u2014 in home care patients on prescribed opioids. Low-income patients are at higher opioid misuse risk due to untreated pain, mental health comorbidities, and limited alternative pain management access.",
+          "path": "STABLE_RX+ \u2192 RISK_SIGNAL \u2192 output[0,1,0,0]",
           "output": "[0,1,0,0] (OPIOID_RISK_ELEVATED)"
         },
         "vectors": [
@@ -316,8 +317,8 @@
             "isInitial": true,
             "metadata": {
               "name": "STABLE_RX",
-              "description": "STABLE_RX+ — opioid prescription adherent; no early refill requests; function adequate; no sedation signs. isInitial A*A = A+.",
-              "opioid_risk": "0.65–0.80 (no risk flags; stable prescribed use)"
+              "description": "STABLE_RX+ \u2014 opioid prescription adherent; no early refill requests; function adequate; no sedation signs. isInitial A*A = A+.",
+              "opioid_risk": "0.65\u20130.80 (no risk flags; stable prescribed use)"
             },
             "nextVectorIds": [
               "cp-stable-rx",
@@ -347,8 +348,8 @@
             "isInitial": false,
             "metadata": {
               "name": "RISK_SIGNAL",
-              "description": "RISK_SIGNAL — one or more opioid risk flags present: early refill request; reported sedation; pain score escalating despite stable rx. Fires OPIOID_RISK_ELEVATED.",
-              "opioid_risk": "0.28–0.45 (one or more ORT risk factors active)"
+              "description": "RISK_SIGNAL \u2014 one or more opioid risk flags present: early refill request; reported sedation; pain score escalating despite stable rx. Fires OPIOID_RISK_ELEVATED.",
+              "opioid_risk": "0.28\u20130.45 (one or more ORT risk factors active)"
             },
             "outputVectors": [
               {
@@ -370,9 +371,9 @@
       },
       {
         "id": "chronic-pain-functional-impairment",
-        "name": "Functional Impairment: IMPAIRED+ → FUNCTIONAL_IMPAIRMENT signal",
+        "name": "Functional Impairment: IMPAIRED+ \u2192 FUNCTIONAL_IMPAIRMENT signal",
         "metadata": {
-          "description": "Fires FUNCTIONAL_IMPAIRMENT when pain causes persistent ADL limitation without reaching crisis level. The largest chronic pain population segment — patients managing at home with significant daily function loss but not acute enough for emergency escalation. Drives depression, social withdrawal, and caregiver burden.",
+          "description": "Fires FUNCTIONAL_IMPAIRMENT when pain causes persistent ADL limitation without reaching crisis level. The largest chronic pain population segment \u2014 patients managing at home with significant daily function loss but not acute enough for emergency escalation. Drives depression, social withdrawal, and caregiver burden.",
           "pattern": "IMPAIRED+",
           "output": "[0,0,1,0] (FUNCTIONAL_IMPAIRMENT)"
         },
@@ -400,7 +401,7 @@
             "isInitial": true,
             "metadata": {
               "name": "FUNCTIONALLY_IMPAIRED",
-              "description": "FUNCTIONALLY_IMPAIRED+ — pain limiting major functional activities; opioid use stable but inadequate; minimal physical activity. isInitial A*A = A+: fires FUNCTIONAL_IMPAIRMENT each cycle.",
+              "description": "FUNCTIONALLY_IMPAIRED+ \u2014 pain limiting major functional activities; opioid use stable but inadequate; minimal physical activity. isInitial A*A = A+: fires FUNCTIONAL_IMPAIRMENT each cycle.",
               "scenario": "Back injury patient; pain 6/10 daily; cannot work; on long-term opioid rx; no PT access due to transport/cost"
             },
             "outputVectors": [
@@ -423,9 +424,9 @@
       },
       {
         "id": "chronic-pain-managed-ok",
-        "name": "Pain Managed: PAIN_CONTROLLED+ → PAIN_MANAGED signal",
+        "name": "Pain Managed: PAIN_CONTROLLED+ \u2192 PAIN_MANAGED signal",
         "metadata": {
-          "description": "Fires PAIN_MANAGED when pain is adequately controlled, function maintained, opioid use stable, and activity preserved. In home care this reflects successful multimodal pain management — often the outcome of community health worker support combined with medication management.",
+          "description": "Fires PAIN_MANAGED when pain is adequately controlled, function maintained, opioid use stable, and activity preserved. In home care this reflects successful multimodal pain management \u2014 often the outcome of community health worker support combined with medication management.",
           "pattern": "PAIN_CONTROLLED+",
           "output": "[0,0,0,1] (PAIN_MANAGED)"
         },
@@ -453,7 +454,7 @@
             "isInitial": true,
             "metadata": {
               "name": "PAIN_CONTROLLED",
-              "description": "PAIN_CONTROLLED+ — pain ≤4/10 with current regimen; functional for most ADLs; opioid use stable with no risk flags; maintaining therapeutic activity. Fires PAIN_MANAGED each matching cycle.",
+              "description": "PAIN_CONTROLLED+ \u2014 pain \u22644/10 with current regimen; functional for most ADLs; opioid use stable with no risk flags; maintaining therapeutic activity. Fires PAIN_MANAGED each matching cycle.",
               "scenario": "Patient on stable opioid + NSAID combination; enrolled in home PT program; CHW support for activity"
             },
             "outputVectors": [
@@ -478,7 +479,7 @@
     "inputSequences": [
       {
         "name": "Winter Flare with Prior Auth Denial",
-        "pattern": "6-step: MANAGED→MANAGED→WORSENING→SEVERE (crisis)→OPIOID_RISK→PAIN_MANAGED (after consult)",
+        "pattern": "6-step: MANAGED\u2192MANAGED\u2192WORSENING\u2192SEVERE (crisis)\u2192OPIOID_RISK\u2192PAIN_MANAGED (after consult)",
         "description": "Patient's prior authorization for extended-release opioid denied by insurer; winter cold worsens back pain; flare to crisis; early short-acting use flags risk; pain management review resolves.",
         "vectors": [
           [

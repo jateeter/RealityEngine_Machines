@@ -213,7 +213,83 @@
             "processStatus": "info",
             "description": "Care Visit Preparation: STABLE -> STABLE_BALANCE"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "connection_harm_reduction_agent",
+        "mode": "supervised-act",
+        "trigger": "life-balance-medication-and-psychiatric-care-care-visit-preparation",
+        "allowedActions": [
+          "Route care visit preparation concern to licensed care-team review.",
+          "Adjust the life-balance plan for care visit preparation using patient goals, barriers, and preferences.",
+          "Create monitoring or follow-up task for care visit preparation.",
+          "Continue stable life-balance monitoring for care visit preparation."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.lbl059.connection.harm.reduction.agent.completion",
+          "name": "localAIStack lbl059 connection.harm.reduction.agent completion",
+          "region": {
+            "offset": 3075,
+            "length": 4
+          },
+          "semantics": [
+            "symptom or functional concern",
+            "lifestyle barrier or preference",
+            "monitoring data quality or readiness",
+            "risk, safety, or care-team urgency"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-lbl059-completion",
+            "sensorId": "localai.lbl059.connection.harm.reduction.agent.completion",
+            "name": "localAIStack lbl059 connection.harm.reduction.agent completion",
+            "region": {
+              "offset": 3075,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": [
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "RED"
+          ]
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

@@ -7,44 +7,44 @@
       "category": "health-personal",
       "author": "Reality Engine",
       "created": "2026-04-13T00:00:00Z",
-      "domain": "Healthcare Operations — Care Level Transition Management",
+      "domain": "Healthcare Operations \u2014 Care Level Transition Management",
       "eventSpace": "8D binary transition-readiness space: [CLINICAL_CRITERION, ADMIN_AUTH, RECEIVING_READY, FAMILY_NOTIFIED, CARE_DOCS_READY, TRANSPORT_ARRANGED, BARRIER, EMERGENCY]",
       "outputSpace": "8D one-hot transition outcome space: [HOSPITAL_TRANSFER, REHAB_TRANSFER, ALF_TRANSFER, TRANSFER_BLOCKED, EMERGENCY_ESCALATION, _, _, _]",
       "transitionScenarios": {
         "scenario_1_home_to_hospital": {
-          "name": "Acute Emergency Transfer — Home/Community to Hospital",
+          "name": "Acute Emergency Transfer \u2014 Home/Community to Hospital",
           "trigger": "Life-threatening condition: cardiac event (MI, CHF decompensation, arrhythmia), traumatic injury (fall with hip/femur fracture, head injury), acute neurological event (stroke, TIA), acute respiratory failure",
-          "urgency": "EMERGENT — transport within minutes; standard authorization bypass; EMTALA governs hospital admission",
+          "urgency": "EMERGENT \u2014 transport within minutes; standard authorization bypass; EMTALA governs hospital admission",
           "clinicalCriterion": "D0=H when life-threatening condition confirmed by 911 response, family observation, or facility staff; vital signs outside safe range; patient unable to self-care",
           "regulatoryContext": "Emergency Medical Treatment and Active Labor Act (EMTALA): hospitals must provide stabilizing treatment regardless of insurance status. Prior authorization not required for emergency admission.",
           "sequenceId": "transition-acute-emergency"
         },
         "scenario_2_hospital_to_rehab": {
-          "name": "Planned Discharge — Acute Hospital to Rehabilitation Facility",
+          "name": "Planned Discharge \u2014 Acute Hospital to Rehabilitation Facility",
           "trigger": "Medical stabilization reached; acute condition resolved to subacute; patient requires continued skilled therapy (PT/OT/ST) but no longer meets criteria for acute inpatient level of care",
-          "urgency": "PLANNED — typically 24-72 hours from discharge decision to execution; authorization required",
+          "urgency": "PLANNED \u2014 typically 24-72 hours from discharge decision to execution; authorization required",
           "clinicalCriterion": "D0=H when: acute diagnosis resolved/controlled; patient medically stable (vitals, labs); patient demonstrates rehabilitation potential (able to participate in 3 hrs/day therapy); attending physician signs discharge order",
           "regulatoryContext": "Medicare Part A: SNF admission requires 3-day qualifying hospital stay. Prior auth required for most commercial payers. Discharge planning (42 CFR 482.43) mandates patient/family education and choice of receiving facility.",
           "sequenceId": "transition-hospital-to-rehab"
         },
         "scenario_3_rehab_to_alf": {
-          "name": "Planned Discharge — Rehabilitation Facility to Assisted Living",
+          "name": "Planned Discharge \u2014 Rehabilitation Facility to Assisted Living",
           "trigger": "Rehabilitation goals met or plateaued; patient has reached maximum functional recovery achievable; long-term care level matches assisted living scope; patient/family accept ALF as next-phase living arrangement",
-          "urgency": "PLANNED — typically 5-14 days from goal-plateau determination to discharge; family engagement is primary prerequisite",
+          "urgency": "PLANNED \u2014 typically 5-14 days from goal-plateau determination to discharge; family engagement is primary prerequisite",
           "clinicalCriterion": "D0=H when: OT/PT/ST goals met or plateau documented; ADL assessment confirms assisted-living-level functional dependency; physician concurs with discharge to ALF; no acute medical issues requiring skilled nursing",
           "regulatoryContext": "Assisted living is state-regulated (not federally); ALF licensing determines scope of care. Patient/resident rights require advance notice of discharge and alternative placement options. Family/proxy consent is central to ALF placement decisions.",
           "sequenceId": "transition-rehab-to-alf"
         }
       },
       "dimensions": {
-        "D0_CLINICAL_CRITERION": "Primary clinical threshold for the transition is met. Semantics differ by scenario: (Emergency) life-threatening condition confirmed; (Hospital→Rehab) medical stability and rehab potential certified; (Rehab→ALF) rehabilitation goals met or clinically plateaued. The assessor encodes D0=H when the clinical condition justifies the specific transition being processed.",
+        "D0_CLINICAL_CRITERION": "Primary clinical threshold for the transition is met. Semantics differ by scenario: (Emergency) life-threatening condition confirmed; (Hospital\u2192Rehab) medical stability and rehab potential certified; (Rehab\u2192ALF) rehabilitation goals met or clinically plateaued. The assessor encodes D0=H when the clinical condition justifies the specific transition being processed.",
         "D1_ADMIN_AUTH": "Payer/insurance authorization is obtained or confirmed waived. Emergency transfers bypass prior auth (EMTALA). Planned transfers require: Medicare/Medicaid certification, commercial prior-auth approval, or private-pay confirmation. External actor: Case Manager or Utilization Review Nurse contacts payer authorization line or portal.",
         "D2_RECEIVING_READY": "Destination facility has confirmed capacity and acceptance. For hospital: ED bed or ICU bed available. For rehab: SNF/IRF bed available matching patient's care level. For ALF: unit or room available matching assessed care level. External actor: Receiving facility Admissions Coordinator confirms via phone or referral portal.",
         "D3_FAMILY_NOTIFIED": "Patient's family or designated healthcare proxy has been notified of the proposed transition, provided relevant education, and offered involvement in placement decisions. For emergency transfers, notification may follow after transport. For planned transitions, D3 must precede execution. External actor: Social Worker or Discharge Planner conducts care conference or direct family call.",
         "D4_CARE_DOCS_READY": "Complete care documentation package has been prepared and transmitted to the receiving facility: physician discharge summary or transfer order, medication reconciliation list, relevant diagnostics (labs, imaging reports), functional assessment (ADL/MDS if applicable), care plan, and advance directive/POLST/DNR. External actor: Nursing staff and Health Information Management (HIM) prepare and fax/portal-transmit records.",
         "D5_TRANSPORT_ARRANGED": "Transportation to the destination facility has been confirmed. Emergency: EMS/ambulance dispatched (911 or direct ALS/BLS call). Planned: medical transport scheduled, family transport confirmed, or ambulance/paratransit booked. External actor: Transport coordinator or family confirms time and level of transport (ALS vs BLS vs wheelchair van).",
         "D6_BARRIER": "Administrative, clinical, or social barrier has been raised that blocks or delays the transfer. Examples: payer authorization denied (appeals process initiated), receiving facility at capacity (waitlist triggered), family objection (ethics consult or mediation initiated), patient clinical deterioration requiring higher level of care than planned destination, bed-hold lapse, or missing legal documentation (no healthcare proxy, contested POA).",
-        "D7_EMERGENCY": "Acute emergency flag — set when the transfer is triggered by a life-threatening condition requiring immediate action, bypassing standard pre-authorization and sequencing requirements. D7=H activates the emergency workflow (Sequence 1 or 5), where family notification may follow transport rather than precede it, and authorization is retrospective."
+        "D7_EMERGENCY": "Acute emergency flag \u2014 set when the transfer is triggered by a life-threatening condition requiring immediate action, bypassing standard pre-authorization and sequencing requirements. D7=H activates the emergency workflow (Sequence 1 or 5), where family notification may follow transport rather than precede it, and authorization is retrospective."
       },
       "externalCommunicationsMatrix": {
         "description": "Each workflow step activates specific external communications. These must be initiated by designated care team roles. Sequencing is governed by regulatory requirements and clinical urgency.",
@@ -188,14 +188,14 @@
         "H": 0.9,
         "L": 0.1,
         "threshold": 0.5,
-        "semantics": "GTE binary: value>=threshold → HIGH (readiness criterion met or event active), value<threshold → LOW (criterion not yet met or inactive). Emergency sequences use D7=H from initiation. Planned sequences accumulate readiness dimensions monotonically (HD=1 per step) as each workflow milestone is completed. D6_BARRIER is orthogonal to the readiness chain — it fires when a block is detected and forks into the TRANSFER_BLOCKED output. Sequences 2 and 3 share the terminal vector [H,H,H,H,H,H,L,L] but bind to different output nodes by sequence ID — CES node identity (not vector value alone) determines which output fires."
+        "semantics": "GTE binary: value>=threshold \u2192 HIGH (readiness criterion met or event active), value<threshold \u2192 LOW (criterion not yet met or inactive). Emergency sequences use D7=H from initiation. Planned sequences accumulate readiness dimensions monotonically (HD=1 per step) as each workflow milestone is completed. D6_BARRIER is orthogonal to the readiness chain \u2014 it fires when a block is detected and forks into the TRANSFER_BLOCKED output. Sequences 2 and 3 share the terminal vector [H,H,H,H,H,H,L,L] but bind to different output nodes by sequence ID \u2014 CES node identity (not vector value alone) determines which output fires."
       },
       "singleTransitionAssumption": {
         "required": true,
         "compliant": true,
         "notes": "All within-sequence transitions change exactly one binary dimension (HD=1). Planned transitions (Seq 2, 3) accumulate readiness dimensions one per step. Emergency transitions (Seq 1, 5) add one readiness or notification dimension per step under the persistent D7=H emergency flag. Seq 4 (blocked) diverges from the planned path at step 3 by adding D6 instead of D2 (HD=1 from auth-attempted state). Sequences 2 and 4 share initials v1 and v2; they diverge cleanly at v3 where D2 (bed confirmed) vs D6 (barrier) differentiate the outcome."
       },
-      "regex": "EMERGENCY: (CRISIS)+ · TRANSPORT · FAMILY · ADMITTED → HOSPITAL_TRANSFER  |  PLANNED_REHAB: (STABLE)+ · AUTH · BED · DOCS · FAMILY · TRANSPORT → REHAB_TRANSFER  |  PLANNED_ALF: (REHAB_DONE)+ · FAMILY · AUTH · DOCS · BED · TRANSPORT → ALF_TRANSFER  |  BLOCKED: (STABLE)+ · AUTH_ATTEMPT · BARRIER → TRANSFER_BLOCKED  |  ESCALATION: (FACILITY_DECLINE)+ · FAMILY_ALERT · TRANSPORT → EMERGENCY_ESCALATION",
+      "regex": "EMERGENCY: (CRISIS)+ \u00b7 TRANSPORT \u00b7 FAMILY \u00b7 ADMITTED \u2192 HOSPITAL_TRANSFER  |  PLANNED_REHAB: (STABLE)+ \u00b7 AUTH \u00b7 BED \u00b7 DOCS \u00b7 FAMILY \u00b7 TRANSPORT \u2192 REHAB_TRANSFER  |  PLANNED_ALF: (REHAB_DONE)+ \u00b7 FAMILY \u00b7 AUTH \u00b7 DOCS \u00b7 BED \u00b7 TRANSPORT \u2192 ALF_TRANSFER  |  BLOCKED: (STABLE)+ \u00b7 AUTH_ATTEMPT \u00b7 BARRIER \u2192 TRANSFER_BLOCKED  |  ESCALATION: (FACILITY_DECLINE)+ \u00b7 FAMILY_ALERT \u00b7 TRANSPORT \u2192 EMERGENCY_ESCALATION",
       "sequenceCount": 5,
       "tags": [
         "assisted-living",
@@ -312,7 +312,7 @@
             ],
             "ragStatusCode": "RED",
             "processStatus": "error",
-            "description": "HOSPITAL_TRANSFER_COMPLETE — patient successfully transferred to acute hospital. Emergency intake protocol active."
+            "description": "HOSPITAL_TRANSFER_COMPLETE \u2014 patient successfully transferred to acute hospital. Emergency intake protocol active."
           },
           {
             "sequenceId": "transition-hospital-to-rehab",
@@ -328,7 +328,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "REHAB_TRANSFER_COMPLETE — all readiness criteria met; patient cleared for transfer to rehabilitation facility"
+            "description": "REHAB_TRANSFER_COMPLETE \u2014 all readiness criteria met; patient cleared for transfer to rehabilitation facility"
           },
           {
             "sequenceId": "transition-rehab-to-alf",
@@ -344,7 +344,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "ALF_TRANSFER_COMPLETE — all readiness criteria met; patient cleared for transition to assisted living"
+            "description": "ALF_TRANSFER_COMPLETE \u2014 all readiness criteria met; patient cleared for transition to assisted living"
           },
           {
             "sequenceId": "transition-blocked",
@@ -360,7 +360,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "TRANSFER_BLOCKED — barrier detected during planned transfer authorization; resolution pathway initiated; transfer suspended pending clearance"
+            "description": "TRANSFER_BLOCKED \u2014 barrier detected during planned transfer authorization; resolution pathway initiated; transfer suspended pending clearance"
           },
           {
             "sequenceId": "transition-emergency-escalation",
@@ -376,11 +376,12 @@
             ],
             "ragStatusCode": "RED",
             "processStatus": "error",
-            "description": "EMERGENCY_ESCALATION — acute deterioration in post-acute/assisted living facility; patient transferred emergently to hospital for higher level of care"
+            "description": "EMERGENCY_ESCALATION \u2014 acute deterioration in post-acute/assisted living facility; patient transferred emergently to hospital for higher level of care"
           }
         ]
       },
-      "severity": "life-safety"
+      "severity": "life-safety",
+      "machineClass": "risk-forecaster"
     },
     "arbiterRule": "PASSTHROUGH",
     "matchAlgorithm": "gte",
@@ -398,13 +399,13 @@
     "sequences": [
       {
         "id": "transition-acute-emergency",
-        "name": "Scenario 1 — Acute Emergency Transfer to Hospital",
+        "name": "Scenario 1 \u2014 Acute Emergency Transfer to Hospital",
         "metadata": {
           "description": "Life-threatening condition triggers immediate hospital transfer. D7_EMERGENCY=H throughout. Transport is dispatched before or concurrently with family notification. Authorization is retrospective (EMTALA governs). Applies to: cardiac events, falls with fracture, stroke, respiratory failure, acute decompensation from any cause.",
-          "regex": "(CRISIS_OBSERVED)+ · EMERGENCY_DISPATCH · FAMILY_NOTIFIED · HOSPITAL_ADMITTED → HOSPITAL_TRANSFER_COMPLETE",
-          "path": "CRISIS_OBSERVED → EMERGENCY_DISPATCH → FAMILY_NOTIFIED → HOSPITAL_ADMITTED",
+          "regex": "(CRISIS_OBSERVED)+ \u00b7 EMERGENCY_DISPATCH \u00b7 FAMILY_NOTIFIED \u00b7 HOSPITAL_ADMITTED \u2192 HOSPITAL_TRANSFER_COMPLETE",
+          "path": "CRISIS_OBSERVED \u2192 EMERGENCY_DISPATCH \u2192 FAMILY_NOTIFIED \u2192 HOSPITAL_ADMITTED",
           "output": "HOSPITAL_TRANSFER_COMPLETE=[1,0,0,0,0,0,0,0]",
-          "externalCommunications": "Step 1: 911 or emergency dispatch called (D5↑). Step 2: Family notified by staff or responders (D3↑). Step 3: Hospital ED confirms bed and accepts patient; EMS gives patient report on arrival (D2↑). Retrospective: Insurance notified within 24 hours per payer contract. EMR transfer documentation completed within 24 hours of admission.",
+          "externalCommunications": "Step 1: 911 or emergency dispatch called (D5\u2191). Step 2: Family notified by staff or responders (D3\u2191). Step 3: Hospital ED confirms bed and accepts patient; EMS gives patient report on arrival (D2\u2191). Retrospective: Insurance notified within 24 hours per payer contract. EMR transfer documentation completed within 24 hours of admission.",
           "severity": "life-safety"
         },
         "vectors": [
@@ -493,7 +494,7 @@
             "isInitial": false,
             "metadata": {
               "name": "Emergency Transport Dispatched",
-              "description": "EMS/ambulance dispatched (911 confirmed). D5_TRANSPORT_ARRANGED=H. D7 persists. HD=1 from CRISIS_OBSERVED (D5: L→H). External: EMS dispatch CAD system records call; ALS vs BLS level determined by dispatch; estimated arrival communicated to staff. Concurrent: charge nurse prepares patient paperwork and copies of any available records.",
+              "description": "EMS/ambulance dispatched (911 confirmed). D5_TRANSPORT_ARRANGED=H. D7 persists. HD=1 from CRISIS_OBSERVED (D5: L\u2192H). External: EMS dispatch CAD system records call; ALS vs BLS level determined by dispatch; estimated arrival communicated to staff. Concurrent: charge nurse prepares patient paperwork and copies of any available records.",
               "signal": "[H,L,L,L,L,H,L,H]"
             },
             "nextVectorIds": [
@@ -539,7 +540,7 @@
             "isInitial": false,
             "metadata": {
               "name": "Family Notified",
-              "description": "Family or designated healthcare proxy notified of the emergency and transport destination. D3_FAMILY_NOTIFIED=H. HD=1 from EMERGENCY_DISPATCH (D3: L→H). External: charge nurse or social worker calls emergency contact; hospital name and ED address provided; family instructed to bring advance directive/POLST if available. If no answer: voicemail left; second contact attempted; documented in EMR.",
+              "description": "Family or designated healthcare proxy notified of the emergency and transport destination. D3_FAMILY_NOTIFIED=H. HD=1 from EMERGENCY_DISPATCH (D3: L\u2192H). External: charge nurse or social worker calls emergency contact; hospital name and ED address provided; family instructed to bring advance directive/POLST if available. If no answer: voicemail left; second contact attempted; documented in EMR.",
               "signal": "[H,L,L,H,L,H,L,H]"
             },
             "nextVectorIds": [
@@ -585,7 +586,7 @@
             "isInitial": false,
             "metadata": {
               "name": "Hospital Admitted",
-              "description": "Patient received and admitted at hospital ED or direct to unit. D2_RECEIVING_READY=H (ED has accepted patient). HD=1 from FAMILY_NOTIFIED (D2: L→H). External: EMS hands off to ED team with verbal report; hospital assigns ED bed or direct admit order; EMTALA medical screening exam initiated; originating facility faxes/portals available records within 24 hours; insurer notified of emergency admission per contract (typically within 24-48 hours).",
+              "description": "Patient received and admitted at hospital ED or direct to unit. D2_RECEIVING_READY=H (ED has accepted patient). HD=1 from FAMILY_NOTIFIED (D2: L\u2192H). External: EMS hands off to ED team with verbal report; hospital assigns ED bed or direct admit order; EMTALA medical screening exam initiated; originating facility faxes/portals available records within 24 hours; insurer notified of emergency admission per contract (typically within 24-48 hours).",
               "signal": "[H,L,H,H,L,H,L,H]"
             },
             "outputVectors": [
@@ -602,7 +603,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "HOSPITAL_TRANSFER_COMPLETE — patient successfully transferred to acute hospital. Emergency intake protocol active.",
+                  "description": "HOSPITAL_TRANSFER_COMPLETE \u2014 patient successfully transferred to acute hospital. Emergency intake protocol active.",
                   "decision": "HOSPITAL_TRANSFER_COMPLETE",
                   "severity": "CRITICAL",
                   "postTransferActions": [
@@ -625,13 +626,13 @@
       },
       {
         "id": "transition-hospital-to-rehab",
-        "name": "Scenario 2 — Planned Discharge: Acute Hospital to Rehabilitation Facility",
+        "name": "Scenario 2 \u2014 Planned Discharge: Acute Hospital to Rehabilitation Facility",
         "metadata": {
-          "description": "Patient has reached medical stability and no longer meets acute inpatient criteria. Clinical team determines rehabilitation potential. Discharge planning sequence: clinical certification → payer authorization → bed confirmation → documentation transfer → family briefing → transport. D7=L (planned, non-emergency). Medicare requires 3-day qualifying hospital stay for SNF coverage.",
-          "regex": "(MEDICAL_STABLE)+ · ADMIN_AUTH · RECEIVING_READY · CARE_DOCS_SENT · FAMILY_BRIEF · TRANSPORT_SET → REHAB_TRANSFER_COMPLETE",
-          "path": "MEDICAL_STABLE → ADMIN_AUTH → RECEIVING_READY → CARE_DOCS_SENT → FAMILY_BRIEF → TRANSPORT_SET",
+          "description": "Patient has reached medical stability and no longer meets acute inpatient criteria. Clinical team determines rehabilitation potential. Discharge planning sequence: clinical certification \u2192 payer authorization \u2192 bed confirmation \u2192 documentation transfer \u2192 family briefing \u2192 transport. D7=L (planned, non-emergency). Medicare requires 3-day qualifying hospital stay for SNF coverage.",
+          "regex": "(MEDICAL_STABLE)+ \u00b7 ADMIN_AUTH \u00b7 RECEIVING_READY \u00b7 CARE_DOCS_SENT \u00b7 FAMILY_BRIEF \u00b7 TRANSPORT_SET \u2192 REHAB_TRANSFER_COMPLETE",
+          "path": "MEDICAL_STABLE \u2192 ADMIN_AUTH \u2192 RECEIVING_READY \u2192 CARE_DOCS_SENT \u2192 FAMILY_BRIEF \u2192 TRANSPORT_SET",
           "output": "REHAB_TRANSFER_COMPLETE=[0,1,0,0,0,0,0,0]",
-          "externalCommunications": "Step 1 (D1↑): Case manager submits prior auth to payer; Medicare benefit verified (3-day stay confirmed). Step 2 (D2↑): Discharge planner sends referral to rehab facilities; admissions coordinator at SNF/IRF confirms bed. Step 3 (D4↑): Nursing prepares transfer packet; physician signs discharge summary; pharmacist completes med rec. Step 4 (D3↑): Social worker conducts care conference with patient and family; placement choice confirmed. Step 5 (D5↑): Transport scheduled; receiving facility notified of ETA.",
+          "externalCommunications": "Step 1 (D1\u2191): Case manager submits prior auth to payer; Medicare benefit verified (3-day stay confirmed). Step 2 (D2\u2191): Discharge planner sends referral to rehab facilities; admissions coordinator at SNF/IRF confirms bed. Step 3 (D4\u2191): Nursing prepares transfer packet; physician signs discharge summary; pharmacist completes med rec. Step 4 (D3\u2191): Social worker conducts care conference with patient and family; placement choice confirmed. Step 5 (D5\u2191): Transport scheduled; receiving facility notified of ETA.",
           "divergenceNote": "This sequence shares its initial vector [H,L,L,L,L,L,L,L] and v2 vector [H,H,L,L,L,L,L,L] with Sequence 4 (transition-blocked). The sequences diverge at v3: this sequence adds D2 (bed confirmed), while Sequence 4 adds D6 (barrier raised). CES evaluates both paths simultaneously until the v3 vector disambiguates."
         },
         "vectors": [
@@ -673,7 +674,7 @@
             ],
             "isInitial": true,
             "metadata": {
-              "name": "Medically Stable — Discharge Planning Initiated",
+              "name": "Medically Stable \u2014 Discharge Planning Initiated",
               "description": "Attending physician certifies patient is medically stable and ready for subacute/rehab level of care. D0_CLINICAL_CRITERION=H. Discharge planning officially begins. Kleene-plus: daily reassessments may repeat this state (e.g., over a 2-3 day discharge planning window) before the authorization step is confirmed. External: case manager opens discharge planning workflow in EMR; interqual/milliman criteria documented for medical necessity.",
               "signal": "[H,L,L,L,L,L,L,L]"
             },
@@ -720,7 +721,7 @@
             "isInitial": false,
             "metadata": {
               "name": "Payer Authorization Obtained",
-              "description": "Insurance/payer prior authorization for post-acute placement approved, or Medicare benefit eligibility confirmed (3-day qualifying inpatient stay met). D1_ADMIN_AUTH=H. HD=1 from MEDICAL_STABLE (D1: L→H). External: case manager submits auth request with clinical documentation to payer; auth approval number recorded in EMR; Medicare Part A SNF benefit eligibility verified via Medicare DDE or beneficiary lookup. Commercial: NaviHealth, eviCore, or payer-specific portal used.",
+              "description": "Insurance/payer prior authorization for post-acute placement approved, or Medicare benefit eligibility confirmed (3-day qualifying inpatient stay met). D1_ADMIN_AUTH=H. HD=1 from MEDICAL_STABLE (D1: L\u2192H). External: case manager submits auth request with clinical documentation to payer; auth approval number recorded in EMR; Medicare Part A SNF benefit eligibility verified via Medicare DDE or beneficiary lookup. Commercial: NaviHealth, eviCore, or payer-specific portal used.",
               "signal": "[H,H,L,L,L,L,L,L]"
             },
             "nextVectorIds": [
@@ -766,7 +767,7 @@
             "isInitial": false,
             "metadata": {
               "name": "Rehabilitation Bed Confirmed",
-              "description": "Receiving SNF or IRF has confirmed bed availability and patient acceptance. D2_RECEIVING_READY=H. HD=1 from ADMIN_AUTH (D2: L→H). External: discharge planner sends referral packet to 1-3 preferred facilities via CarePort, Ensocare, or direct fax; admissions coordinator at accepting facility confirms bed, level of care match, and acceptance of patient clinical profile; written or portal-confirmed acceptance documented; bed-hold arrangements confirmed if same-day transfer not possible.",
+              "description": "Receiving SNF or IRF has confirmed bed availability and patient acceptance. D2_RECEIVING_READY=H. HD=1 from ADMIN_AUTH (D2: L\u2192H). External: discharge planner sends referral packet to 1-3 preferred facilities via CarePort, Ensocare, or direct fax; admissions coordinator at accepting facility confirms bed, level of care match, and acceptance of patient clinical profile; written or portal-confirmed acceptance documented; bed-hold arrangements confirmed if same-day transfer not possible.",
               "signal": "[H,H,H,L,L,L,L,L]"
             },
             "nextVectorIds": [
@@ -812,7 +813,7 @@
             "isInitial": false,
             "metadata": {
               "name": "Care Documentation Package Sent",
-              "description": "Complete transfer documentation package prepared and transmitted to receiving facility. D4_CARE_DOCS_READY=H. HD=1 from RECEIVING_READY (D4: L→H; D3 family briefing deferred — documentation precedes formal family sign-off in hospital→rehab workflow). External: physician dictates and signs discharge summary; nurse prepares medication reconciliation; HIM transmits records via secure fax or Carequality/CommonWell exchange; POLST/advance directive included; relevant labs, imaging, and consult notes compiled.",
+              "description": "Complete transfer documentation package prepared and transmitted to receiving facility. D4_CARE_DOCS_READY=H. HD=1 from RECEIVING_READY (D4: L\u2192H; D3 family briefing deferred \u2014 documentation precedes formal family sign-off in hospital\u2192rehab workflow). External: physician dictates and signs discharge summary; nurse prepares medication reconciliation; HIM transmits records via secure fax or Carequality/CommonWell exchange; POLST/advance directive included; relevant labs, imaging, and consult notes compiled.",
               "signal": "[H,H,H,L,H,L,L,L]"
             },
             "nextVectorIds": [
@@ -858,7 +859,7 @@
             "isInitial": false,
             "metadata": {
               "name": "Family Briefed on Discharge",
-              "description": "Family or healthcare proxy briefed on discharge destination, care plan, and next steps. D3_FAMILY_NOTIFIED=H. HD=1 from CARE_DOCS_SENT (D3: L→H). External: social worker or discharge planner conducts discharge conference (in-person or video); patient rights regarding facility choice reviewed per 42 CFR 482.43; family provided receiving facility address, phone, and assigned care team contact; any family questions or objections documented. Medicare: facility choice list provided in writing.",
+              "description": "Family or healthcare proxy briefed on discharge destination, care plan, and next steps. D3_FAMILY_NOTIFIED=H. HD=1 from CARE_DOCS_SENT (D3: L\u2192H). External: social worker or discharge planner conducts discharge conference (in-person or video); patient rights regarding facility choice reviewed per 42 CFR 482.43; family provided receiving facility address, phone, and assigned care team contact; any family questions or objections documented. Medicare: facility choice list provided in writing.",
               "signal": "[H,H,H,H,H,L,L,L]"
             },
             "nextVectorIds": [
@@ -903,8 +904,8 @@
             ],
             "isInitial": false,
             "metadata": {
-              "name": "Transport Confirmed — All Readiness Criteria Met",
-              "description": "Medical transport or ambulance scheduled; all six readiness criteria confirmed. D5_TRANSPORT_ARRANGED=H. HD=1 from FAMILY_BRIEF (D5: L→H). Terminal node — fires REHAB_TRANSFER_COMPLETE output. External: transport coordinator books BLS/ALS ambulance or wheelchair van based on patient's mobility and medical needs; receiving facility notified of ETA; nurse provides transport crew with current vital signs, medications, and any oxygen/IV requirements; patient dressed and ready at departure time.",
+              "name": "Transport Confirmed \u2014 All Readiness Criteria Met",
+              "description": "Medical transport or ambulance scheduled; all six readiness criteria confirmed. D5_TRANSPORT_ARRANGED=H. HD=1 from FAMILY_BRIEF (D5: L\u2192H). Terminal node \u2014 fires REHAB_TRANSFER_COMPLETE output. External: transport coordinator books BLS/ALS ambulance or wheelchair van based on patient's mobility and medical needs; receiving facility notified of ETA; nurse provides transport crew with current vital signs, medications, and any oxygen/IV requirements; patient dressed and ready at departure time.",
               "signal": "[H,H,H,H,H,H,L,L]"
             },
             "outputVectors": [
@@ -921,7 +922,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "REHAB_TRANSFER_COMPLETE — all readiness criteria met; patient cleared for transfer to rehabilitation facility",
+                  "description": "REHAB_TRANSFER_COMPLETE \u2014 all readiness criteria met; patient cleared for transfer to rehabilitation facility",
                   "decision": "REHAB_TRANSFER_COMPLETE",
                   "severity": "INFO",
                   "postTransferActions": [
@@ -939,14 +940,14 @@
       },
       {
         "id": "transition-rehab-to-alf",
-        "name": "Scenario 3 — Planned Discharge: Rehabilitation Facility to Assisted Living",
+        "name": "Scenario 3 \u2014 Planned Discharge: Rehabilitation Facility to Assisted Living",
         "metadata": {
-          "description": "Patient has met or plateaued on rehabilitation goals. Long-term functional level is established. ALF is the appropriate next-phase living environment. Family meeting is the first and primary step — ALF placement is a major life decision requiring genuine family/proxy engagement before administrative processes proceed. Sequence: clinical goal certification → family meeting → payer/financial confirmation → care plan transfer → ALF bed → transport.",
-          "regex": "(REHAB_GOALS_MET)+ · FAMILY_MEETING · ADMIN_AUTH · CARE_PLAN_READY · ALF_BED_CONFIRMED · TRANSPORT_SET → ALF_TRANSFER_COMPLETE",
-          "path": "REHAB_GOALS_MET → FAMILY_MEETING → ADMIN_AUTH → CARE_PLAN_READY → ALF_BED_CONFIRMED → TRANSPORT_SET",
+          "description": "Patient has met or plateaued on rehabilitation goals. Long-term functional level is established. ALF is the appropriate next-phase living environment. Family meeting is the first and primary step \u2014 ALF placement is a major life decision requiring genuine family/proxy engagement before administrative processes proceed. Sequence: clinical goal certification \u2192 family meeting \u2192 payer/financial confirmation \u2192 care plan transfer \u2192 ALF bed \u2192 transport.",
+          "regex": "(REHAB_GOALS_MET)+ \u00b7 FAMILY_MEETING \u00b7 ADMIN_AUTH \u00b7 CARE_PLAN_READY \u00b7 ALF_BED_CONFIRMED \u00b7 TRANSPORT_SET \u2192 ALF_TRANSFER_COMPLETE",
+          "path": "REHAB_GOALS_MET \u2192 FAMILY_MEETING \u2192 ADMIN_AUTH \u2192 CARE_PLAN_READY \u2192 ALF_BED_CONFIRMED \u2192 TRANSPORT_SET",
           "output": "ALF_TRANSFER_COMPLETE=[0,0,1,0,0,0,0,0]",
-          "externalCommunications": "Step 1 (D3↑): Social worker schedules and conducts family care conference; patient/proxy discuss ALF options; patient participates in placement decision per resident rights. Step 2 (D1↑): Financial counselor confirms ALF payment arrangement (private pay, long-term care insurance, or Medicaid waiver program). Step 3 (D4↑): Rehab team prepares discharge summary with functional status, therapy goals, and ongoing care needs; ALF receives care plan via fax or portal. Step 4 (D2↑): ALF admissions coordinator confirms room availability and care level match. Step 5 (D5↑): Transport arranged; family often participates in move-in day.",
-          "familyEngagementNote": "Unlike the hospital→rehab transition, family meeting PRECEDES authorization in this sequence because: (a) ALF placement is a permanent or long-term decision; (b) family often co-manages finances (private pay, long-term care insurance); (c) state ALF regulations typically require patient/proxy signature on admission agreements; (d) family coordination of personal belongings and room setup requires advance notice."
+          "externalCommunications": "Step 1 (D3\u2191): Social worker schedules and conducts family care conference; patient/proxy discuss ALF options; patient participates in placement decision per resident rights. Step 2 (D1\u2191): Financial counselor confirms ALF payment arrangement (private pay, long-term care insurance, or Medicaid waiver program). Step 3 (D4\u2191): Rehab team prepares discharge summary with functional status, therapy goals, and ongoing care needs; ALF receives care plan via fax or portal. Step 4 (D2\u2191): ALF admissions coordinator confirms room availability and care level match. Step 5 (D5\u2191): Transport arranged; family often participates in move-in day.",
+          "familyEngagementNote": "Unlike the hospital\u2192rehab transition, family meeting PRECEDES authorization in this sequence because: (a) ALF placement is a permanent or long-term decision; (b) family often co-manages finances (private pay, long-term care insurance); (c) state ALF regulations typically require patient/proxy signature on admission agreements; (d) family coordination of personal belongings and room setup requires advance notice."
         },
         "vectors": [
           {
@@ -1033,8 +1034,8 @@
             ],
             "isInitial": false,
             "metadata": {
-              "name": "Family Meeting Conducted — Placement Decision Made",
-              "description": "Social worker facilitates care conference with patient, family/proxy, and key care team members. Placement options presented and discussed. D3_FAMILY_NOTIFIED=H (first step: family engagement precedes authorization for ALF transition). HD=1 from REHAB_GOALS_MET (D3: L→H). External: social worker prepares list of local ALF options with cost ranges and care specialties; patient and family tour preferred facilities (in-person or video); placement decision documented with patient/proxy signature; family notified of expected timeline; personal belongings plan discussed.",
+              "name": "Family Meeting Conducted \u2014 Placement Decision Made",
+              "description": "Social worker facilitates care conference with patient, family/proxy, and key care team members. Placement options presented and discussed. D3_FAMILY_NOTIFIED=H (first step: family engagement precedes authorization for ALF transition). HD=1 from REHAB_GOALS_MET (D3: L\u2192H). External: social worker prepares list of local ALF options with cost ranges and care specialties; patient and family tour preferred facilities (in-person or video); placement decision documented with patient/proxy signature; family notified of expected timeline; personal belongings plan discussed.",
               "signal": "[H,L,L,H,L,L,L,L]"
             },
             "nextVectorIds": [
@@ -1080,7 +1081,7 @@
             "isInitial": false,
             "metadata": {
               "name": "Financial/Administrative Authorization Confirmed",
-              "description": "Payment arrangement for ALF confirmed. D1_ADMIN_AUTH=H. HD=1 from FAMILY_MEETING (D1: L→H). External: Financial counselor or social worker reviews: (a) private pay — family confirms monthly budget and deposit availability; (b) long-term care insurance — policy benefits verified and LTC insurer notified of placement; (c) Medicaid waiver — HCBS waiver enrollment verified or initiated with state agency; ALF admissions coordinator confirms move-in cost, deposit, and contract terms. Contract reviewed with patient/proxy.",
+              "description": "Payment arrangement for ALF confirmed. D1_ADMIN_AUTH=H. HD=1 from FAMILY_MEETING (D1: L\u2192H). External: Financial counselor or social worker reviews: (a) private pay \u2014 family confirms monthly budget and deposit availability; (b) long-term care insurance \u2014 policy benefits verified and LTC insurer notified of placement; (c) Medicaid waiver \u2014 HCBS waiver enrollment verified or initiated with state agency; ALF admissions coordinator confirms move-in cost, deposit, and contract terms. Contract reviewed with patient/proxy.",
               "signal": "[H,H,L,H,L,L,L,L]"
             },
             "nextVectorIds": [
@@ -1126,7 +1127,7 @@
             "isInitial": false,
             "metadata": {
               "name": "Care Plan and Records Transmitted to ALF",
-              "description": "Complete care documentation package prepared and transmitted. D4_CARE_DOCS_READY=H. HD=1 from ADMIN_AUTH (D4: L→H). External: OT/PT/ST discharge summaries finalized with functional status and ongoing therapy recommendations; physician signs discharge orders; nursing prepares comprehensive care plan including: ADL assistance needs, medication administration schedule (MARs), dietary requirements, behavioral notes, fall risk, skin integrity status; POLST/advance directive transmitted; ALF director of nursing reviews and acknowledges receipt.",
+              "description": "Complete care documentation package prepared and transmitted. D4_CARE_DOCS_READY=H. HD=1 from ADMIN_AUTH (D4: L\u2192H). External: OT/PT/ST discharge summaries finalized with functional status and ongoing therapy recommendations; physician signs discharge orders; nursing prepares comprehensive care plan including: ADL assistance needs, medication administration schedule (MARs), dietary requirements, behavioral notes, fall risk, skin integrity status; POLST/advance directive transmitted; ALF director of nursing reviews and acknowledges receipt.",
               "signal": "[H,H,L,H,H,L,L,L]"
             },
             "nextVectorIds": [
@@ -1172,7 +1173,7 @@
             "isInitial": false,
             "metadata": {
               "name": "ALF Room Confirmed Ready",
-              "description": "ALF has confirmed specific room assignment, move-in date, and care team readiness. D2_RECEIVING_READY=H. HD=1 from CARE_DOCS_SENT (D2: L→H). External: ALF admissions coordinator confirms room number and wing; move-in packet provided to family (welcome letter, parking, personal items allowed); ALF care coordinator assigned; medication order re-entry into ALF system initiated; family notified to bring personal belongings on move-in day.",
+              "description": "ALF has confirmed specific room assignment, move-in date, and care team readiness. D2_RECEIVING_READY=H. HD=1 from CARE_DOCS_SENT (D2: L\u2192H). External: ALF admissions coordinator confirms room number and wing; move-in packet provided to family (welcome letter, parking, personal items allowed); ALF care coordinator assigned; medication order re-entry into ALF system initiated; family notified to bring personal belongings on move-in day.",
               "signal": "[H,H,H,H,H,L,L,L]"
             },
             "nextVectorIds": [
@@ -1217,8 +1218,8 @@
             ],
             "isInitial": false,
             "metadata": {
-              "name": "Transport Confirmed — All ALF Readiness Criteria Met",
-              "description": "Transport arranged; all six readiness criteria met. D5_TRANSPORT_ARRANGED=H. HD=1 from ALF_BED_CONFIRMED (D5: L→H). Terminal — fires ALF_TRANSFER_COMPLETE output. Note: this terminal vector [H,H,H,H,H,H,L,L] is identical to the terminal of Sequence 2. CES binds outputs to node IDs, not vector values — this node fires ALF_TRANSFER_COMPLETE, while Sequence 2's terminal fires REHAB_TRANSFER_COMPLETE. External: transport arranged (often family vehicle for ALF — less clinical acuity); departure date/time confirmed with ALF; patient given orientation materials; rehab facility nursing staff ensures medications sent with patient; medication reconciliation at ALF completed on arrival.",
+              "name": "Transport Confirmed \u2014 All ALF Readiness Criteria Met",
+              "description": "Transport arranged; all six readiness criteria met. D5_TRANSPORT_ARRANGED=H. HD=1 from ALF_BED_CONFIRMED (D5: L\u2192H). Terminal \u2014 fires ALF_TRANSFER_COMPLETE output. Note: this terminal vector [H,H,H,H,H,H,L,L] is identical to the terminal of Sequence 2. CES binds outputs to node IDs, not vector values \u2014 this node fires ALF_TRANSFER_COMPLETE, while Sequence 2's terminal fires REHAB_TRANSFER_COMPLETE. External: transport arranged (often family vehicle for ALF \u2014 less clinical acuity); departure date/time confirmed with ALF; patient given orientation materials; rehab facility nursing staff ensures medications sent with patient; medication reconciliation at ALF completed on arrival.",
               "signal": "[H,H,H,H,H,H,L,L]"
             },
             "outputVectors": [
@@ -1235,7 +1236,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "ALF_TRANSFER_COMPLETE — all readiness criteria met; patient cleared for transition to assisted living",
+                  "description": "ALF_TRANSFER_COMPLETE \u2014 all readiness criteria met; patient cleared for transition to assisted living",
                   "decision": "ALF_TRANSFER_COMPLETE",
                   "severity": "INFO",
                   "postTransferActions": [
@@ -1255,11 +1256,11 @@
       },
       {
         "id": "transition-blocked",
-        "name": "Transfer Blocked — Administrative or Clinical Barrier",
+        "name": "Transfer Blocked \u2014 Administrative or Clinical Barrier",
         "metadata": {
           "description": "A barrier is raised during the planned transfer authorization process, preventing transfer execution. Common causes: payer authorization denied (peer-to-peer review initiated), receiving facility at capacity (waitlist activated), family objection requiring mediation, patient clinical deterioration requiring higher level of care than planned destination, missing legal documentation (no healthcare proxy, contested POA), or bed-hold lapse.",
-          "regex": "(CLINICAL_STABLE)+ · ADMIN_ATTEMPTED · BARRIER_RAISED → TRANSFER_BLOCKED",
-          "path": "CLINICAL_STABLE → ADMIN_ATTEMPTED → BARRIER_RAISED",
+          "regex": "(CLINICAL_STABLE)+ \u00b7 ADMIN_ATTEMPTED \u00b7 BARRIER_RAISED \u2192 TRANSFER_BLOCKED",
+          "path": "CLINICAL_STABLE \u2192 ADMIN_ATTEMPTED \u2192 BARRIER_RAISED",
           "output": "TRANSFER_BLOCKED=[0,0,0,1,0,0,0,0]",
           "barrierResolutionPaths": {
             "authorization_denial": "Case manager requests peer-to-peer review between attending physician and payer medical director. If upheld: formal appeal submitted with additional documentation. If overturned: ADMIN_AUTH confirmed, sequence resumes.",
@@ -1308,8 +1309,8 @@
             ],
             "isInitial": true,
             "metadata": {
-              "name": "Clinical Criterion Met — Transfer Planning Active",
-              "description": "Patient meets clinical criteria for the planned transition. Initial state shared with Sequences 2 and 3. Kleene-plus: multiple clinical status confirmations during discharge planning period. The sequence advances to ADMIN_ATTEMPTED state — the same v2 as Sequence 2 — and diverges at v3 when a barrier is detected instead of a bed confirmation.",
+              "name": "Clinical Criterion Met \u2014 Transfer Planning Active",
+              "description": "Patient meets clinical criteria for the planned transition. Initial state shared with Sequences 2 and 3. Kleene-plus: multiple clinical status confirmations during discharge planning period. The sequence advances to ADMIN_ATTEMPTED state \u2014 the same v2 as Sequence 2 \u2014 and diverges at v3 when a barrier is detected instead of a bed confirmation.",
               "signal": "[H,L,L,L,L,L,L,L]"
             },
             "nextVectorIds": [
@@ -1355,7 +1356,7 @@
             "isInitial": false,
             "metadata": {
               "name": "Authorization Attempted",
-              "description": "Case manager submitted prior authorization request or verified Medicare eligibility. D1_ADMIN_AUTH=H (auth was attempted and initially appeared approved or was in process). HD=1 from CLINICAL_STABLE (D1: L→H). This vector is identical to Sequence 2 step 2 — the CES evaluates both Sequence 2 (planned success) and Sequence 4 (blocked) in parallel until the next event (D2 bed confirmed vs D6 barrier) distinguishes the outcome.",
+              "description": "Case manager submitted prior authorization request or verified Medicare eligibility. D1_ADMIN_AUTH=H (auth was attempted and initially appeared approved or was in process). HD=1 from CLINICAL_STABLE (D1: L\u2192H). This vector is identical to Sequence 2 step 2 \u2014 the CES evaluates both Sequence 2 (planned success) and Sequence 4 (blocked) in parallel until the next event (D2 bed confirmed vs D6 barrier) distinguishes the outcome.",
               "signal": "[H,H,L,L,L,L,L,L]"
             },
             "nextVectorIds": [
@@ -1400,8 +1401,8 @@
             ],
             "isInitial": false,
             "metadata": {
-              "name": "Barrier Raised — Transfer Blocked",
-              "description": "A block has been detected in the transfer workflow. D6_BARRIER=H. HD=1 from ADMIN_ATTEMPTED (D6: L→H). This is the terminal divergence from Sequence 2 — instead of D2 (bed confirmed), D6 (barrier) fires. External: case manager documents barrier type in EMR; initiates appropriate resolution pathway (appeals, alternative facility search, family mediation, legal review); attending physician notified; current bed-hold status assessed; family notified of delay and timeline estimate.",
+              "name": "Barrier Raised \u2014 Transfer Blocked",
+              "description": "A block has been detected in the transfer workflow. D6_BARRIER=H. HD=1 from ADMIN_ATTEMPTED (D6: L\u2192H). This is the terminal divergence from Sequence 2 \u2014 instead of D2 (bed confirmed), D6 (barrier) fires. External: case manager documents barrier type in EMR; initiates appropriate resolution pathway (appeals, alternative facility search, family mediation, legal review); attending physician notified; current bed-hold status assessed; family notified of delay and timeline estimate.",
               "signal": "[H,H,L,L,L,L,H,L]"
             },
             "outputVectors": [
@@ -1418,7 +1419,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "TRANSFER_BLOCKED — barrier detected during planned transfer authorization; resolution pathway initiated; transfer suspended pending clearance",
+                  "description": "TRANSFER_BLOCKED \u2014 barrier detected during planned transfer authorization; resolution pathway initiated; transfer suspended pending clearance",
                   "decision": "TRANSFER_BLOCKED",
                   "severity": "HIGH",
                   "resolutionTimeline": "Authorization denial: peer-to-peer review within 24 hours; formal appeal within 3 business days. No bed: daily facility search until placement; bed-hold negotiated at current facility. Family objection: care conference within 48 hours.",
@@ -1433,7 +1434,7 @@
                     "Document barrier type and resolution pathway in EMR",
                     "Notify attending physician and charge nurse",
                     "Contact family with status update and estimated resolution timeline",
-                    "Reassess clinical status daily while blocked — patient may deteriorate or improve",
+                    "Reassess clinical status daily while blocked \u2014 patient may deteriorate or improve",
                     "Re-initiate appropriate sequence when barrier resolves"
                   ]
                 }
@@ -1444,14 +1445,14 @@
       },
       {
         "id": "transition-emergency-escalation",
-        "name": "Emergency Re-escalation — Any Care Facility to Acute Hospital",
+        "name": "Emergency Re-escalation \u2014 Any Care Facility to Acute Hospital",
         "metadata": {
-          "description": "Patient in a post-acute or assisted living facility experiences acute clinical deterioration requiring emergency hospital transfer. Common causes: new cardiac event, respiratory failure, sepsis, acute stroke, fall with suspected fracture, severe medication reaction, acute altered mental status. D6=H and D7=H together distinguish this sequence from Sequence 1 (which has D7=H but D6=L — no prior facility context). This sequence handles both SNF→Hospital and ALF→Hospital emergency escalations.",
-          "regex": "(FACILITY_DECLINE)+ · EMERGENCY_FAMILY_ALERT · FACILITY_TRANSPORT → EMERGENCY_ESCALATION_COMPLETE",
-          "path": "FACILITY_DECLINE → EMERGENCY_FAMILY_ALERT → FACILITY_TRANSPORT",
+          "description": "Patient in a post-acute or assisted living facility experiences acute clinical deterioration requiring emergency hospital transfer. Common causes: new cardiac event, respiratory failure, sepsis, acute stroke, fall with suspected fracture, severe medication reaction, acute altered mental status. D6=H and D7=H together distinguish this sequence from Sequence 1 (which has D7=H but D6=L \u2014 no prior facility context). This sequence handles both SNF\u2192Hospital and ALF\u2192Hospital emergency escalations.",
+          "regex": "(FACILITY_DECLINE)+ \u00b7 EMERGENCY_FAMILY_ALERT \u00b7 FACILITY_TRANSPORT \u2192 EMERGENCY_ESCALATION_COMPLETE",
+          "path": "FACILITY_DECLINE \u2192 EMERGENCY_FAMILY_ALERT \u2192 FACILITY_TRANSPORT",
           "output": "EMERGENCY_ESCALATION=[0,0,0,0,1,0,0,0]",
-          "distinctionFromSequence1": "Sequence 1 initial [H,L,L,L,L,L,L,H] (D0+D7) represents a crisis with no prior post-acute care context (home or community). Sequence 5 initial [H,L,L,L,L,L,H,H] (D0+D6+D7) uses D6=H to signal that the patient was already in a post-acute care setting (SNF/rehab/ALF) when the crisis occurred — the prior care trajectory (D6 represents 'existing care relationship that is now disrupted') is part of the clinical context and affects the receiving hospital's intake and discharge planning.",
-          "externalCommunications": "Step 1 (D3↑): Facility charge nurse calls family/proxy FIRST, before transport if time permits — post-acute facilities have established family relationships requiring direct notification. Step 2 (D5↑): 911 called; transport dispatched; facility nurse gives full clinical report to EMS including medications, advance directives, and current care plan. Concurrent: facility social worker initiates hospital notification; sends care plan and medication list with patient or via fax to receiving ED.",
+          "distinctionFromSequence1": "Sequence 1 initial [H,L,L,L,L,L,L,H] (D0+D7) represents a crisis with no prior post-acute care context (home or community). Sequence 5 initial [H,L,L,L,L,L,H,H] (D0+D6+D7) uses D6=H to signal that the patient was already in a post-acute care setting (SNF/rehab/ALF) when the crisis occurred \u2014 the prior care trajectory (D6 represents 'existing care relationship that is now disrupted') is part of the clinical context and affects the receiving hospital's intake and discharge planning.",
+          "externalCommunications": "Step 1 (D3\u2191): Facility charge nurse calls family/proxy FIRST, before transport if time permits \u2014 post-acute facilities have established family relationships requiring direct notification. Step 2 (D5\u2191): 911 called; transport dispatched; facility nurse gives full clinical report to EMS including medications, advance directives, and current care plan. Concurrent: facility social worker initiates hospital notification; sends care plan and medication list with patient or via fax to receiving ED.",
           "severity": "life-safety"
         },
         "vectors": [
@@ -1494,7 +1495,7 @@
             "isInitial": true,
             "metadata": {
               "name": "Acute Deterioration in Post-Acute Facility",
-              "description": "Patient in SNF/rehab/ALF demonstrates acute clinical deterioration requiring emergency hospital-level care. D0_CLINICAL_CRITERION=H (emergency threshold met). D6_BARRIER=H (used here to signal active post-acute care context now disrupted — not an administrative barrier but a clinical crisis within an established care relationship). D7_EMERGENCY=H (immediate/urgent). Kleene-plus: multiple staff observations before 911 is called. External: charge nurse assesses patient, contacts on-call physician or NP for telephone orders; physician directs transfer or calls 911 directly.",
+              "description": "Patient in SNF/rehab/ALF demonstrates acute clinical deterioration requiring emergency hospital-level care. D0_CLINICAL_CRITERION=H (emergency threshold met). D6_BARRIER=H (used here to signal active post-acute care context now disrupted \u2014 not an administrative barrier but a clinical crisis within an established care relationship). D7_EMERGENCY=H (immediate/urgent). Kleene-plus: multiple staff observations before 911 is called. External: charge nurse assesses patient, contacts on-call physician or NP for telephone orders; physician directs transfer or calls 911 directly.",
               "signal": "[H,L,L,L,L,L,H,H]"
             },
             "nextVectorIds": [
@@ -1540,7 +1541,7 @@
             "isInitial": false,
             "metadata": {
               "name": "Family Emergency Notification",
-              "description": "Family/healthcare proxy notified of acute decline and impending hospital transfer. D3_FAMILY_NOTIFIED=H. HD=1 from FACILITY_DECLINE (D3: L→H). Unlike Sequence 1 (home emergency), post-acute facilities have well-established family contact protocols — family is called BEFORE or concurrent with 911 when clinically possible. External: charge nurse calls primary family contact; provides clinical status, transfer destination, and ETA; reviews advance directive status with family; if POLST/DNR exists, clarifies whether it applies to the transport situation; family notified to meet patient at receiving ED. POLST and current medication list prepared for EMS.",
+              "description": "Family/healthcare proxy notified of acute decline and impending hospital transfer. D3_FAMILY_NOTIFIED=H. HD=1 from FACILITY_DECLINE (D3: L\u2192H). Unlike Sequence 1 (home emergency), post-acute facilities have well-established family contact protocols \u2014 family is called BEFORE or concurrent with 911 when clinically possible. External: charge nurse calls primary family contact; provides clinical status, transfer destination, and ETA; reviews advance directive status with family; if POLST/DNR exists, clarifies whether it applies to the transport situation; family notified to meet patient at receiving ED. POLST and current medication list prepared for EMS.",
               "signal": "[H,L,L,H,L,L,H,H]"
             },
             "nextVectorIds": [
@@ -1585,8 +1586,8 @@
             ],
             "isInitial": false,
             "metadata": {
-              "name": "Emergency Transport Dispatched — Escalation Confirmed",
-              "description": "EMS dispatched; patient being transferred to hospital. D5_TRANSPORT_ARRANGED=H. HD=1 from FAMILY_ALERT (D5: L→H). Terminal — fires EMERGENCY_ESCALATION output. External: facility nurse gives full clinical report to EMS crew: current diagnosis, medications, vitals trend, reason for transfer, advance directive status; POLST copy sent with patient; facility social worker faxes/portals care plan and recent labs to receiving ED ahead of patient arrival; receiving ED notified of incoming by EMS or direct facility call; bed-hold at sending facility released or maintained per physician order.",
+              "name": "Emergency Transport Dispatched \u2014 Escalation Confirmed",
+              "description": "EMS dispatched; patient being transferred to hospital. D5_TRANSPORT_ARRANGED=H. HD=1 from FAMILY_ALERT (D5: L\u2192H). Terminal \u2014 fires EMERGENCY_ESCALATION output. External: facility nurse gives full clinical report to EMS crew: current diagnosis, medications, vitals trend, reason for transfer, advance directive status; POLST copy sent with patient; facility social worker faxes/portals care plan and recent labs to receiving ED ahead of patient arrival; receiving ED notified of incoming by EMS or direct facility call; bed-hold at sending facility released or maintained per physician order.",
               "signal": "[H,L,L,H,L,H,H,H]"
             },
             "outputVectors": [
@@ -1603,7 +1604,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "EMERGENCY_ESCALATION — acute deterioration in post-acute/assisted living facility; patient transferred emergently to hospital for higher level of care",
+                  "description": "EMERGENCY_ESCALATION \u2014 acute deterioration in post-acute/assisted living facility; patient transferred emergently to hospital for higher level of care",
                   "decision": "EMERGENCY_ESCALATION",
                   "severity": "CRITICAL",
                   "postEscalationActions": [
@@ -1615,7 +1616,7 @@
                     "Quality/risk department notified if escalation involves fall, medication event, or unexpected decline",
                     "Bed-hold policy reviewed: Medicare allows 14-day bed-hold for hospitalization (state rules vary for ALF)"
                   ],
-                  "bedHoldNote": "Medicare SNF: 14-day bed-hold period for hospitalization (if benefit days remain). ALF: bed-hold policies vary by state and facility — family must confirm within 24-48 hours to preserve the room."
+                  "bedHoldNote": "Medicare SNF: 14-day bed-hold period for hospitalization (if benefit days remain). ALF: bed-hold policies vary by state and facility \u2014 family must confirm within 24-48 hours to preserve the room."
                 }
               }
             ]
@@ -1625,9 +1626,9 @@
     ],
     "inputSequences": [
       {
-        "name": "TC-01: Scenario 1 — Acute Cardiac Event (Home → Hospital, Emergency)",
-        "pattern": "CRISIS_OBSERVED · EMERGENCY_DISPATCH · FAMILY_NOTIFIED · HOSPITAL_ADMITTED",
-        "description": "HOSPITAL_TRANSFER: 78-year-old male living alone in independent apartment experiences chest pain with dyspnea and diaphoresis. Neighbor calls 911. EMS arrives, 12-lead shows STEMI. ALS transport to nearest cardiac center. Daughter called en route — met patient at ED. Hospital admits directly to cath lab. Authorization retrospectively filed by hospital within 24 hours.",
+        "name": "TC-01: Scenario 1 \u2014 Acute Cardiac Event (Home \u2192 Hospital, Emergency)",
+        "pattern": "CRISIS_OBSERVED \u00b7 EMERGENCY_DISPATCH \u00b7 FAMILY_NOTIFIED \u00b7 HOSPITAL_ADMITTED",
+        "description": "HOSPITAL_TRANSFER: 78-year-old male living alone in independent apartment experiences chest pain with dyspnea and diaphoresis. Neighbor calls 911. EMS arrives, 12-lead shows STEMI. ALS transport to nearest cardiac center. Daughter called en route \u2014 met patient at ED. Hospital admits directly to cath lab. Authorization retrospectively filed by hospital within 24 hours.",
         "vectors": [
           [
             0.9,
@@ -1674,14 +1675,14 @@
           "expectedDecision": "HOSPITAL_TRANSFER_COMPLETE",
           "expectedOutputVector": "[1,0,0,0,0,0,0,0]",
           "expectedOutputCount": 1,
-          "scenario": "STEMI transfer — time-sensitive. EMS dispatch-to-door target ≤90 minutes. No authorization required pre-transport. Family notified concurrent with transport. Insurance notification filed by hospital within 24 hours per CMS rules.",
+          "scenario": "STEMI transfer \u2014 time-sensitive. EMS dispatch-to-door target \u226490 minutes. No authorization required pre-transport. Family notified concurrent with transport. Insurance notification filed by hospital within 24 hours per CMS rules.",
           "clinicalContext": "D0=H (STEMI confirmed by EMS 12-lead), D7=H (emergency mode active throughout)"
         }
       },
       {
-        "name": "TC-02: Scenario 1 — Fall with Hip Fracture, Multiple Crisis Observations (Kleene+, Home → Hospital)",
-        "pattern": "(CRISIS_OBSERVED)² · EMERGENCY_DISPATCH · FAMILY_NOTIFIED · HOSPITAL_ADMITTED",
-        "description": "HOSPITAL_TRANSFER: 83-year-old female in independent living apartment. Staff makes morning wellness check — patient found on floor, unable to rise, in pain. Staff assesses, calls charge nurse. Both observations recorded before 911 is called. ALS dispatched; suspected right femur/hip fracture. Son called; meets patient at ED. Orthopedic surgeon on call evaluates. Admitted for surgical repair.",
+        "name": "TC-02: Scenario 1 \u2014 Fall with Hip Fracture, Multiple Crisis Observations (Kleene+, Home \u2192 Hospital)",
+        "pattern": "(CRISIS_OBSERVED)\u00b2 \u00b7 EMERGENCY_DISPATCH \u00b7 FAMILY_NOTIFIED \u00b7 HOSPITAL_ADMITTED",
+        "description": "HOSPITAL_TRANSFER: 83-year-old female in independent living apartment. Staff makes morning wellness check \u2014 patient found on floor, unable to rise, in pain. Staff assesses, calls charge nurse. Both observations recorded before 911 is called. ALS dispatched; suspected right femur/hip fracture. Son called; meets patient at ED. Orthopedic surgeon on call evaluates. Admitted for surgical repair.",
         "vectors": [
           [
             0.9,
@@ -1738,14 +1739,14 @@
           "expectedDecision": "HOSPITAL_TRANSFER_COMPLETE",
           "expectedOutputVector": "[1,0,0,0,0,0,0,0]",
           "expectedOutputCount": 1,
-          "scenario": "Fall/fracture transfer. Two crisis observations (staff check + charge nurse assessment) before 911 dispatch — validates Kleene+ CRISIS_OBSERVED initial semantics. POLST retrieved from resident file and sent with patient.",
-          "kleenePlusNote": "The two CRISIS_OBSERVED vectors are identical — the Kleene-plus initial self-loops on matching events before the sequence advances."
+          "scenario": "Fall/fracture transfer. Two crisis observations (staff check + charge nurse assessment) before 911 dispatch \u2014 validates Kleene+ CRISIS_OBSERVED initial semantics. POLST retrieved from resident file and sent with patient.",
+          "kleenePlusNote": "The two CRISIS_OBSERVED vectors are identical \u2014 the Kleene-plus initial self-loops on matching events before the sequence advances."
         }
       },
       {
-        "name": "TC-03: Scenario 2 — Hip Surgery Recovery (Hospital → Rehabilitation SNF)",
-        "pattern": "MEDICAL_STABLE · ADMIN_AUTH · RECEIVING_READY · CARE_DOCS_SENT · FAMILY_BRIEF · TRANSPORT_SET",
-        "description": "REHAB_TRANSFER: Same 83-year-old female from TC-02, post-operative day 3 after right hip ORIF. Orthopedic team certifies medical stability; PT evaluation confirms rehab potential (able to participate in 3 hours therapy/day). Case manager verifies 3-day qualifying inpatient stay for Medicare Part A SNF benefit. Auth obtained. Preferred SNF has bed available. Discharge summary signed. Family care conference — daughter selects preferred SNF near home. Wheelchair van transport scheduled.",
+        "name": "TC-03: Scenario 2 \u2014 Hip Surgery Recovery (Hospital \u2192 Rehabilitation SNF)",
+        "pattern": "MEDICAL_STABLE \u00b7 ADMIN_AUTH \u00b7 RECEIVING_READY \u00b7 CARE_DOCS_SENT \u00b7 FAMILY_BRIEF \u00b7 TRANSPORT_SET",
+        "description": "REHAB_TRANSFER: Same 83-year-old female from TC-02, post-operative day 3 after right hip ORIF. Orthopedic team certifies medical stability; PT evaluation confirms rehab potential (able to participate in 3 hours therapy/day). Case manager verifies 3-day qualifying inpatient stay for Medicare Part A SNF benefit. Auth obtained. Preferred SNF has bed available. Discharge summary signed. Family care conference \u2014 daughter selects preferred SNF near home. Wheelchair van transport scheduled.",
         "vectors": [
           [
             0.9,
@@ -1817,8 +1818,8 @@
         }
       },
       {
-        "name": "TC-04: Scenario 2 Blocked — Insurance Authorization Denied for SNF (Hospital → Rehab Blocked)",
-        "pattern": "MEDICAL_STABLE · ADMIN_ATTEMPTED · BARRIER_RAISED",
+        "name": "TC-04: Scenario 2 Blocked \u2014 Insurance Authorization Denied for SNF (Hospital \u2192 Rehab Blocked)",
+        "pattern": "MEDICAL_STABLE \u00b7 ADMIN_ATTEMPTED \u00b7 BARRIER_RAISED",
         "description": "TRANSFER_BLOCKED: 74-year-old male admitted for CHF exacerbation, 3-day hospital stay. Case manager submits SNF prior auth to commercial insurer. Payer denies: 'patient does not meet medical necessity criteria for skilled nursing level of care.' D6_BARRIER raised. Case manager initiates peer-to-peer review; attending cardiologist argues continued skilled monitoring of newly adjusted diuretic regimen is medically necessary. Resolution pathway: peer-to-peer scheduled within 24 hours.",
         "vectors": [
           [
@@ -1856,15 +1857,15 @@
           "expectedDecision": "TRANSFER_BLOCKED",
           "expectedOutputVector": "[0,0,0,1,0,0,0,0]",
           "expectedOutputCount": 1,
-          "scenario": "Commercial payer denial — most common barrier type (28% of SNF prior auth requests denied on first submission, per industry data). Resolution: peer-to-peer review or first-level appeal. Typical resolution time: 24-48 hours. Patient remains in hospital on observation or inpatient status during appeal.",
+          "scenario": "Commercial payer denial \u2014 most common barrier type (28% of SNF prior auth requests denied on first submission, per industry data). Resolution: peer-to-peer review or first-level appeal. Typical resolution time: 24-48 hours. Patient remains in hospital on observation or inpatient status during appeal.",
           "barrierType": "AUTHORIZATION_DENIED",
-          "resolutionPath": "Peer-to-peer review → if denied, formal appeal with supporting documentation → if upheld, alternative lower-acuity placement assessed"
+          "resolutionPath": "Peer-to-peer review \u2192 if denied, formal appeal with supporting documentation \u2192 if upheld, alternative lower-acuity placement assessed"
         }
       },
       {
-        "name": "TC-05: Scenario 3 — Completed Rehabilitation to Assisted Living",
-        "pattern": "REHAB_GOALS_MET · FAMILY_MEETING · ADMIN_AUTH · CARE_PLAN_READY · ALF_BED_CONFIRMED · TRANSPORT_SET",
-        "description": "ALF_TRANSFER: Same 83-year-old female, post-hip ORIF, 3-week SNF rehabilitation. OT/PT document goal plateau: independent ambulation with walker achieved; stair training complete; ADL assist level stable at supervision only. Physician concurs with discharge to ALF. Social worker conducts family care conference with patient and daughter — patient tours two ALF facilities, selects preferred option. Long-term care insurance policy verified; financial clearance confirmed. Care plan transmitted. Room confirmed. Daughter drives patient on move-in day.",
+        "name": "TC-05: Scenario 3 \u2014 Completed Rehabilitation to Assisted Living",
+        "pattern": "REHAB_GOALS_MET \u00b7 FAMILY_MEETING \u00b7 ADMIN_AUTH \u00b7 CARE_PLAN_READY \u00b7 ALF_BED_CONFIRMED \u00b7 TRANSPORT_SET",
+        "description": "ALF_TRANSFER: Same 83-year-old female, post-hip ORIF, 3-week SNF rehabilitation. OT/PT document goal plateau: independent ambulation with walker achieved; stair training complete; ADL assist level stable at supervision only. Physician concurs with discharge to ALF. Social worker conducts family care conference with patient and daughter \u2014 patient tours two ALF facilities, selects preferred option. Long-term care insurance policy verified; financial clearance confirmed. Care plan transmitted. Room confirmed. Daughter drives patient on move-in day.",
         "vectors": [
           [
             0.9,
@@ -1931,14 +1932,14 @@
           "expectedDecision": "ALF_TRANSFER_COMPLETE",
           "expectedOutputVector": "[0,0,1,0,0,0,0,0]",
           "expectedOutputCount": 1,
-          "scenario": "Post-hip-replacement progression through the full care continuum: home → hospital → SNF rehab → ALF. ALF selected: memory-care optional unit for future cognitive flexibility. Long-term care insurance: $180/day benefit, 90-day elimination period waived (already met by SNF stay).",
+          "scenario": "Post-hip-replacement progression through the full care continuum: home \u2192 hospital \u2192 SNF rehab \u2192 ALF. ALF selected: memory-care optional unit for future cognitive flexibility. Long-term care insurance: $180/day benefit, 90-day elimination period waived (already met by SNF stay).",
           "continuum": "This test case represents the complete Episode of Care arc initiated in TC-01/TC-02 through TC-03."
         }
       },
       {
-        "name": "TC-06: Scenario 3 — Multiple Rehab Goal Assessments Before Family Meeting (Kleene+)",
-        "pattern": "(REHAB_GOALS_MET)³ · FAMILY_MEETING · ADMIN_AUTH · CARE_PLAN_READY · ALF_BED_CONFIRMED · TRANSPORT_SET",
-        "description": "ALF_TRANSFER: 80-year-old male, post-stroke rehabilitation. Rehab team reassesses goals weekly — three consecutive assessments (weeks 4, 5, and 6) all confirm plateau in functional improvement. Physician documents medical necessity of discharge to ALF after third plateau assessment. Family meeting subsequently scheduled. Validates Kleene-plus REHAB_GOALS_MET initial semantics — multiple assessments before family meeting is triggered.",
+        "name": "TC-06: Scenario 3 \u2014 Multiple Rehab Goal Assessments Before Family Meeting (Kleene+)",
+        "pattern": "(REHAB_GOALS_MET)\u00b3 \u00b7 FAMILY_MEETING \u00b7 ADMIN_AUTH \u00b7 CARE_PLAN_READY \u00b7 ALF_BED_CONFIRMED \u00b7 TRANSPORT_SET",
+        "description": "ALF_TRANSFER: 80-year-old male, post-stroke rehabilitation. Rehab team reassesses goals weekly \u2014 three consecutive assessments (weeks 4, 5, and 6) all confirm plateau in functional improvement. Physician documents medical necessity of discharge to ALF after third plateau assessment. Family meeting subsequently scheduled. Validates Kleene-plus REHAB_GOALS_MET initial semantics \u2014 multiple assessments before family meeting is triggered.",
         "vectors": [
           [
             0.9,
@@ -2025,14 +2026,14 @@
           "expectedDecision": "ALF_TRANSFER_COMPLETE",
           "expectedOutputVector": "[0,0,1,0,0,0,0,0]",
           "expectedOutputCount": 1,
-          "scenario": "Post-stroke rehabilitation plateau. Three weekly goal assessments confirm no further functional improvement — standard practice before initiating ALF discharge planning. Medicare SNF coverage continues until medically appropriate discharge, not plateau alone.",
-          "kleenePlusNote": "Three identical REHAB_GOALS_MET vectors — Kleene-plus initial accommodates repeated weekly assessments."
+          "scenario": "Post-stroke rehabilitation plateau. Three weekly goal assessments confirm no further functional improvement \u2014 standard practice before initiating ALF discharge planning. Medicare SNF coverage continues until medically appropriate discharge, not plateau alone.",
+          "kleenePlusNote": "Three identical REHAB_GOALS_MET vectors \u2014 Kleene-plus initial accommodates repeated weekly assessments."
         }
       },
       {
-        "name": "TC-07: Emergency Escalation — Sepsis in Rehabilitation Facility (SNF → Hospital)",
-        "pattern": "FACILITY_DECLINE · EMERGENCY_FAMILY_ALERT · FACILITY_TRANSPORT",
-        "description": "EMERGENCY_ESCALATION: 83-year-old female (post-hip surgery), day 10 of SNF rehabilitation. Nursing notes fever 39.4°C, BP drop, confusion, decreased urine output. Charge nurse calls on-call NP — sepsis protocol initiated. Family called before 911 (family already on the way for a scheduled visit). ALS dispatched; hospital notified. POLST (Full Code) and medication list sent with patient. SNF social worker faxes care summary to ED.",
+        "name": "TC-07: Emergency Escalation \u2014 Sepsis in Rehabilitation Facility (SNF \u2192 Hospital)",
+        "pattern": "FACILITY_DECLINE \u00b7 EMERGENCY_FAMILY_ALERT \u00b7 FACILITY_TRANSPORT",
+        "description": "EMERGENCY_ESCALATION: 83-year-old female (post-hip surgery), day 10 of SNF rehabilitation. Nursing notes fever 39.4\u00b0C, BP drop, confusion, decreased urine output. Charge nurse calls on-call NP \u2014 sepsis protocol initiated. Family called before 911 (family already on the way for a scheduled visit). ALS dispatched; hospital notified. POLST (Full Code) and medication list sent with patient. SNF social worker faxes care summary to ED.",
         "vectors": [
           [
             0.9,
@@ -2074,9 +2075,9 @@
         }
       },
       {
-        "name": "TC-08: Emergency Escalation — Acute Fall in Assisted Living (ALF → Hospital), Multiple Decline Observations (Kleene+)",
-        "pattern": "(FACILITY_DECLINE)² · EMERGENCY_FAMILY_ALERT · FACILITY_TRANSPORT",
-        "description": "EMERGENCY_ESCALATION: 85-year-old female (post-hip ORIF, now 3 months into ALF placement). Staff finds resident sitting on floor of room — unclear if fall or slide from chair. Second staff member called to assess (two observations before 911). Patient reports hip pain; cannot bear weight. Daughter called concurrently with 911 dispatch. BLS transport dispatched — suspected re-fracture or hardware failure. POLST and current medication list sent with patient.",
+        "name": "TC-08: Emergency Escalation \u2014 Acute Fall in Assisted Living (ALF \u2192 Hospital), Multiple Decline Observations (Kleene+)",
+        "pattern": "(FACILITY_DECLINE)\u00b2 \u00b7 EMERGENCY_FAMILY_ALERT \u00b7 FACILITY_TRANSPORT",
+        "description": "EMERGENCY_ESCALATION: 85-year-old female (post-hip ORIF, now 3 months into ALF placement). Staff finds resident sitting on floor of room \u2014 unclear if fall or slide from chair. Second staff member called to assess (two observations before 911). Patient reports hip pain; cannot bear weight. Daughter called concurrently with 911 dispatch. BLS transport dispatched \u2014 suspected re-fracture or hardware failure. POLST and current medication list sent with patient.",
         "vectors": [
           [
             0.9,
@@ -2123,8 +2124,8 @@
           "expectedDecision": "EMERGENCY_ESCALATION",
           "expectedOutputVector": "[0,0,0,0,1,0,0,0]",
           "expectedOutputCount": 1,
-          "scenario": "ALF fall escalation. Two decline observations before action — validates Kleene+ FACILITY_DECLINE initial. ALF bed-hold policy: ALF may require family to confirm bed-hold within 24-48 hours and may charge hold fee. ALF must file state-required incident report for fall. Family meets patient at hospital ED.",
-          "continuumNote": "This test case represents a potential re-entry into the care continuum for the same patient tracked across TC-01 through TC-05 — completing the full eldercare episode model.",
+          "scenario": "ALF fall escalation. Two decline observations before action \u2014 validates Kleene+ FACILITY_DECLINE initial. ALF bed-hold policy: ALF may require family to confirm bed-hold within 24-48 hours and may charge hold fee. ALF must file state-required incident report for fall. Family meets patient at hospital ED.",
+          "continuumNote": "This test case represents a potential re-entry into the care continuum for the same patient tracked across TC-01 through TC-05 \u2014 completing the full eldercare episode model.",
           "externalRequirements": [
             "State incident report (ALF fall reporting)",
             "Insurance notification within 48 hours",

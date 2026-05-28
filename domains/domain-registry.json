@@ -1,0 +1,300 @@
+{
+  "schemaVersion": "1.0.0",
+  "purpose": "Architecture registry for accepting new RealityEngine domains and machines.",
+  "autonomyModes": {
+    "observe": "AI receives CES events and stores context only.",
+    "advise": "AI may write recommendations back to PE sensor sources.",
+    "supervised-act": "AI may draft or stage actions, but human/governance confirmation is required.",
+    "automated-act": "AI may execute approved actions within explicit runbook and rollback limits."
+  },
+  "autonomyPolicy": {
+    "observe": {
+      "stage": 0,
+      "writeBackType": "none",
+      "canWriteBack": false,
+      "canStageActions": false,
+      "canExecuteActions": false,
+      "requiresHumanApproval": false,
+      "requiresRunbook": false,
+      "blockedWhenRag": []
+    },
+    "advise": {
+      "stage": 1,
+      "writeBackType": "pe-sensor",
+      "canWriteBack": true,
+      "canStageActions": false,
+      "canExecuteActions": false,
+      "requiresHumanApproval": false,
+      "requiresRunbook": false,
+      "blockedWhenRag": []
+    },
+    "supervised-act": {
+      "stage": 2,
+      "writeBackType": "pe-sensor",
+      "canWriteBack": true,
+      "canStageActions": true,
+      "canExecuteActions": false,
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "blockedWhenRag": ["RED"]
+    },
+    "automated-act": {
+      "stage": 3,
+      "writeBackType": "pe-sensor",
+      "canWriteBack": true,
+      "canStageActions": true,
+      "canExecuteActions": true,
+      "requiresHumanApproval": false,
+      "requiresRunbook": true,
+      "blockedWhenRag": ["AMBER", "RED"],
+      "rollbackRequired": true
+    }
+  },
+  "machineClasses": {
+    "signal-monitor": "Converts live or derived source state into a CES terminal output.",
+    "risk-forecaster": "Consumes predictive service output as PE sensor input.",
+    "agent-dispatcher": "Maps CES outputs to localAIStack agent dispatch envelopes.",
+    "outcome-stabilizer": "Monitors post-intervention recovery or regression.",
+    "governance-escalator": "Routes high-risk states to owner teams and runbooks.",
+    "bridge": "Projects one domain output into another machine input range with explicit schemaOverlay.",
+    "sensor-preaggregator": "Normalizes raw device/event streams before downstream machines consume them.",
+    "safety-compliance-checker": "Applies life-safety, legal, or policy gates before action.",
+    "evidence-archive": "Captures evidence and provenance without direct actuation.",
+    "optimizer": "Selects low-risk tuning or prioritization recommendations."
+  },
+  "agentReadyMachineClasses": {
+    "sensor-preaggregator": {
+      "workflowStage": 1,
+      "stageName": "ingest-normalize",
+      "role": "Normalize raw device, event, or provider streams into bounded PE source values.",
+      "inputContract": "raw-source-stream",
+      "outputContract": "normalized-pe-source",
+      "requiresGovernance": true,
+      "requiresTriggerConfig": true,
+      "requiresInputSemantics": true,
+      "requiresSensorNormalization": true,
+      "requiresAgentBinding": false,
+      "allowedAutonomyModes": ["observe", "advise"],
+      "allowedWriteBackTypes": ["none", "pe-sensor"],
+      "emitsTo": ["signal-monitor", "risk-forecaster"]
+    },
+    "signal-monitor": {
+      "workflowStage": 2,
+      "stageName": "detect-state",
+      "role": "Detect current critical, warning, or nominal state from PE input ranges.",
+      "inputContract": "pe-source-vector",
+      "outputContract": "ces-terminal-output",
+      "requiresGovernance": true,
+      "requiresTriggerConfig": true,
+      "requiresInputSemantics": true,
+      "requiresSensorNormalization": false,
+      "requiresAgentBinding": false,
+      "allowedAutonomyModes": ["observe", "advise", "supervised-act"],
+      "allowedWriteBackTypes": ["none", "pe-sensor"],
+      "emitsTo": ["agent-dispatcher", "governance-escalator", "outcome-stabilizer"]
+    },
+    "risk-forecaster": {
+      "workflowStage": 3,
+      "stageName": "predict-risk",
+      "role": "Consume predictive service or localAIStack output as PE input for future-state risk.",
+      "inputContract": "prediction-or-telemetry-source",
+      "outputContract": "forecast-risk-output",
+      "requiresGovernance": true,
+      "requiresTriggerConfig": true,
+      "requiresInputSemantics": true,
+      "requiresSensorNormalization": false,
+      "requiresAgentBinding": false,
+      "allowedAutonomyModes": ["observe", "advise", "supervised-act"],
+      "allowedWriteBackTypes": ["none", "pe-sensor"],
+      "emitsTo": ["agent-dispatcher", "governance-escalator", "optimizer"]
+    },
+    "agent-dispatcher": {
+      "workflowStage": 4,
+      "stageName": "dispatch-agent",
+      "role": "Route deterministic CES outputs to localAIStack with the canonical trigger envelope.",
+      "inputContract": "ces-terminal-output",
+      "outputContract": "localai-trigger-envelope",
+      "requiresGovernance": true,
+      "requiresTriggerConfig": true,
+      "requiresInputSemantics": false,
+      "requiresSensorNormalization": false,
+      "requiresAgentBinding": true,
+      "allowedAutonomyModes": ["observe", "advise", "supervised-act", "automated-act"],
+      "allowedWriteBackTypes": ["none", "pe-sensor"],
+      "emitsTo": ["outcome-stabilizer", "governance-escalator"]
+    },
+    "outcome-stabilizer": {
+      "workflowStage": 5,
+      "stageName": "watch-recovery",
+      "role": "Monitor post-action recovery, regression, recurrence, and completion evidence.",
+      "inputContract": "post-action-pe-source",
+      "outputContract": "stabilization-state",
+      "requiresGovernance": true,
+      "requiresTriggerConfig": true,
+      "requiresInputSemantics": true,
+      "requiresSensorNormalization": false,
+      "requiresAgentBinding": false,
+      "allowedAutonomyModes": ["observe", "advise", "supervised-act"],
+      "allowedWriteBackTypes": ["none", "pe-sensor"],
+      "emitsTo": ["signal-monitor", "governance-escalator"]
+    },
+    "governance-escalator": {
+      "workflowStage": 6,
+      "stageName": "route-governance",
+      "role": "Route AMBER or RED decisions to owner teams, SLAs, runbooks, and approval channels.",
+      "inputContract": "governed-ces-output",
+      "outputContract": "governance-decision",
+      "requiresGovernance": true,
+      "requiresTriggerConfig": true,
+      "requiresInputSemantics": false,
+      "requiresSensorNormalization": false,
+      "requiresAgentBinding": false,
+      "allowedAutonomyModes": ["observe", "advise", "supervised-act"],
+      "allowedWriteBackTypes": ["none", "pe-sensor"],
+      "emitsTo": ["agent-dispatcher", "outcome-stabilizer"]
+    },
+    "bridge": {
+      "workflowStage": 7,
+      "stageName": "project-range",
+      "role": "Project one machine output into another input range with explicit overlay semantics.",
+      "inputContract": "producer-output-region",
+      "outputContract": "overlay-or-bridge-input-region",
+      "requiresGovernance": true,
+      "requiresTriggerConfig": true,
+      "requiresInputSemantics": false,
+      "requiresSensorNormalization": false,
+      "requiresAgentBinding": false,
+      "allowedAutonomyModes": ["observe", "advise"],
+      "allowedWriteBackTypes": ["none", "pe-sensor"],
+      "emitsTo": ["signal-monitor", "risk-forecaster"]
+    },
+    "safety-compliance-checker": {
+      "workflowStage": 8,
+      "stageName": "apply-safety-gate",
+      "role": "Apply life-safety, legal, security, compliance, or policy gates before action.",
+      "inputContract": "governed-ces-output",
+      "outputContract": "safety-compliance-decision",
+      "requiresGovernance": true,
+      "requiresTriggerConfig": true,
+      "requiresInputSemantics": false,
+      "requiresSensorNormalization": false,
+      "requiresAgentBinding": false,
+      "allowedAutonomyModes": ["observe", "advise", "supervised-act"],
+      "allowedWriteBackTypes": ["none", "pe-sensor"],
+      "emitsTo": ["governance-escalator", "agent-dispatcher"]
+    },
+    "evidence-archive": {
+      "workflowStage": 9,
+      "stageName": "capture-evidence",
+      "role": "Capture evidence, provenance, and decision context without direct actuation.",
+      "inputContract": "event-or-document-source",
+      "outputContract": "evidence-state",
+      "requiresGovernance": true,
+      "requiresTriggerConfig": true,
+      "requiresInputSemantics": false,
+      "requiresSensorNormalization": false,
+      "requiresAgentBinding": false,
+      "allowedAutonomyModes": ["observe", "advise", "supervised-act"],
+      "allowedWriteBackTypes": ["none", "pe-sensor"],
+      "emitsTo": ["governance-escalator", "agent-dispatcher"]
+    },
+    "optimizer": {
+      "workflowStage": 10,
+      "stageName": "optimize-action",
+      "role": "Select low-risk tuning, scheduling, routing, or prioritization recommendations.",
+      "inputContract": "operational-state-and-forecast",
+      "outputContract": "optimization-recommendation",
+      "requiresGovernance": true,
+      "requiresTriggerConfig": true,
+      "requiresInputSemantics": true,
+      "requiresSensorNormalization": false,
+      "requiresAgentBinding": false,
+      "allowedAutonomyModes": ["advise", "supervised-act", "automated-act"],
+      "allowedWriteBackTypes": ["pe-sensor"],
+      "emitsTo": ["agent-dispatcher", "outcome-stabilizer"]
+    }
+  },
+  "rangePolicy": {
+    "default": "exclusive",
+    "allowedOverlapKinds": ["exclusive", "overlay", "bridge", "deprecated"],
+    "requirements": [
+      "Every new domain must declare allocated input and output windows before machines are added.",
+      "Any overlap must be classified as overlay, bridge, or deprecated and referenced by trigger envelope projection.schemaOverlay.",
+      "Sensor-driven machines must declare inputSemantics and sensorNormalization."
+    ]
+  },
+  "domains": {
+    "health-services": {
+      "codePrefixes": ["HSPH"],
+      "defaultAutonomy": "supervised-act",
+      "requiredMachineClasses": ["signal-monitor", "agent-dispatcher", "outcome-stabilizer", "governance-escalator"],
+      "defaultAgentFamilies": ["care_coordinator_agent", "community_health_worker_agent", "public_health_nurse_agent", "quality_improvement_agent"]
+    },
+    "health-personal": {
+      "codePrefixes": ["Home", "Medication", "Fall", "Sleep", "Hydration", "Daily", "Pediatric", "Patient", "Wellness"],
+      "defaultAutonomy": "supervised-act",
+      "requiredMachineClasses": ["sensor-preaggregator", "signal-monitor", "risk-forecaster", "agent-dispatcher", "outcome-stabilizer"],
+      "defaultAgentFamilies": ["wellness_coach_agent", "caregiver_support_agent", "medication_adherence_agent", "fall_risk_agent"]
+    },
+    "life-balance": {
+      "codePrefixes": ["LBL"],
+      "defaultAutonomy": "supervised-act",
+      "requiredMachineClasses": ["signal-monitor", "risk-forecaster", "agent-dispatcher", "outcome-stabilizer"],
+      "defaultAgentFamilies": ["sleep_circadian_agent", "movement_health_agent", "psychiatric_care_agent", "testing_personalization_agent"]
+    },
+    "agriculture": {
+      "codePrefixes": ["AGX", "Ag"],
+      "defaultAutonomy": "advise",
+      "requiredMachineClasses": ["signal-monitor", "risk-forecaster", "agent-dispatcher", "optimizer", "bridge"],
+      "defaultAgentFamilies": ["growhouse_climate_agent", "aquaculture_predictive_maintenance_agent", "agriculture_yield_optimization_ai"]
+    },
+    "built-space": {
+      "codePrefixes": ["BSX"],
+      "defaultAutonomy": "advise",
+      "requiredMachineClasses": ["signal-monitor", "evidence-archive", "agent-dispatcher", "optimizer"],
+      "defaultAgentFamilies": ["well_air_quality_agent", "well_water_quality_agent", "well_thermal_comfort_agent"]
+    },
+    "transportation": {
+      "codePrefixes": ["TFX"],
+      "defaultAutonomy": "advise",
+      "requiredMachineClasses": ["signal-monitor", "risk-forecaster", "agent-dispatcher", "optimizer"],
+      "defaultAgentFamilies": ["transit_dispatch_agent", "transit_maintenance_agent", "transit_cleaning_agent"]
+    },
+    "community-services": {
+      "codePrefixes": ["CSX"],
+      "defaultAutonomy": "supervised-act",
+      "requiredMachineClasses": ["signal-monitor", "agent-dispatcher", "governance-escalator", "outcome-stabilizer"],
+      "defaultAgentFamilies": ["benefits_navigation_agent", "housing_navigation_agent", "behavioral_health_crisis_agent"]
+    },
+    "legal-services": {
+      "codePrefixes": ["LSX"],
+      "defaultAutonomy": "supervised-act",
+      "requiredMachineClasses": ["evidence-archive", "signal-monitor", "agent-dispatcher", "safety-compliance-checker"],
+      "defaultAgentFamilies": ["ip_docketing_agent", "contract_review_agent", "claims_review_agent"]
+    },
+    "data-center": {
+      "codePrefixes": ["DC", "DCX"],
+      "defaultAutonomy": "advise",
+      "requiredMachineClasses": ["sensor-preaggregator", "signal-monitor", "risk-forecaster", "agent-dispatcher", "optimizer"],
+      "defaultAgentFamilies": ["data_center_ops_agent", "capacity_planning_agent", "incident_response_agent"]
+    },
+    "digital-logic": {
+      "codePrefixes": ["DLX", "RS"],
+      "defaultAutonomy": "observe",
+      "requiredMachineClasses": ["signal-monitor", "bridge"],
+      "defaultAgentFamilies": ["logic_validation_agent"]
+    },
+    "ai-services": {
+      "codePrefixes": ["AI"],
+      "defaultAutonomy": "advise",
+      "requiredMachineClasses": ["signal-monitor", "risk-forecaster", "agent-dispatcher", "governance-escalator"],
+      "defaultAgentFamilies": ["model_wellness_agent", "ai_capacity_agent", "ai_security_agent"]
+    },
+    "energy": {
+      "codePrefixes": ["ENX"],
+      "defaultAutonomy": "advise",
+      "requiredMachineClasses": ["signal-monitor", "risk-forecaster", "agent-dispatcher", "safety-compliance-checker", "optimizer"],
+      "defaultAgentFamilies": ["community_microgrid_ops_agent"]
+    }
+  }
+}

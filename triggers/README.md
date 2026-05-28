@@ -55,6 +55,37 @@ Each entry maps a sequence's output vector to a RAG code:
 
 See `examples/machines/RSFlipFlopTrigger.json` for a minimal working example.
 
+AI-capable machines must add `metadata.agentBinding`; legacy
+`dispatchableAgent`, `agentActions`, and `aiTrigger` may remain as
+compatibility aliases, but `dispatchableAgent` without `agentBinding` fails
+corpus validation. `agentBinding` is the first-class contract validated by
+`schemas/agent-binding.schema.json`:
+
+```json
+"agentBinding": {
+  "agent": "care_coordinator_agent",
+  "mode": "supervised-act",
+  "trigger": "care-gap-risk",
+  "allowedActions": [
+    "Summarize current risk state.",
+    "Draft a care coordination plan."
+  ],
+  "writeBack": {
+    "type": "pe-sensor",
+    "sensorId": "localai.care_gap_prediction",
+    "region": { "offset": 2100, "length": 4 },
+    "ttlMs": 30000,
+    "normalization": "already-normalized-0-1"
+  },
+  "riskControls": {
+    "requiresHumanApproval": true,
+    "requiresRunbook": true,
+    "maxAutonomy": "supervised-act",
+    "blockedWhenRag": ["RED"]
+  }
+}
+```
+
 ### In-home wellness machines
 
 Five health & wellness workflows ship with trigger configuration pre-wired.
@@ -83,37 +114,94 @@ loaded at engine startup with no allowlist to edit.  Adding a new machine JSON
 and restarting Reality Engine (`./startUniverse.sh` or `./startUniverse.sh
 --fresh` to rebuild without cache) is sufficient.
 
-## Dispatcher responsibilities
+## Canonical RE to localAIStack Dispatch
 
-The dispatcher (currently a template — wire it into visualizer-backend or a
-local Python worker) observes machine output events from the RE WebSocket
-stream (`perceptual-simulation-stepped`) and for each matched rule builds the
-event payload:
+The dispatcher observes terminal CES output events from RE/PE, resolves the
+matching `metadata.triggerConfig.rules[]` entry, and emits the canonical
+`ces.terminal.event` envelope defined by:
 
-```python
-event = {
-  "processState": {
-    "id":     "RS-FLIPFLOP-TRIGGER",
-    "name":   "RS Flipflop Trigger",
-    "status": "warning",     # derived from ragStatusCode
-  },
-  "context": {
-    "sourceMachine":  "RSFlipFlopTrigger",
-    "sourceSequence": "rs-set-sequence",
-    "outputVector":   [1, 0],
-  },
+- `triggers/ai_trigger_envelope.template.json`
+- `schemas/ai-trigger-envelope.schema.json`
+
+Every agent-bound machine has this dispatch contract in
+`metadata.triggerConfig`:
+
+```json
+"endpoint": "http://localhost:4000/graphql",
+"template": "triggers/graphql_trigger_template.py",
+"dispatch": {
+  "target": "localAIStack",
+  "transport": "graphql",
+  "mutation": "updateProcessState",
+  "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+  "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
 }
 ```
 
-Then calls the template:
+The GraphQL template accepts both the canonical envelope and the older
+`processState/context` shape. Runtime dispatch should use the canonical
+envelope:
 
 ```python
-from examples.triggers.graphql_trigger_template import dispatch
-dispatch(event)
+from triggers.graphql_trigger_template import dispatch
+
+dispatch(envelope)
 ```
 
 `dispatch()` POSTs the mutation, raises `TriggerError` on failure, and returns
 the echoed `processState`.
+
+To inspect the canonical envelope shape for a machine:
+
+```bash
+npm run dispatch-envelope:example
+```
+
+## localAIStack to PE Write-Back
+
+Agent completions return through PE, not directly into RE. Non-observe
+`metadata.agentBinding.writeBack` blocks use `type: "pe-sensor"` and target the
+provider-neutral PE completion endpoint:
+
+```json
+"writeBack": {
+  "type": "pe-sensor",
+  "provider": "localai",
+  "sensorId": "localai.agx001.aquaculture.water.quality.agent.completion",
+  "region": { "offset": 40, "length": 4 },
+  "ttlMs": 300000,
+  "normalization": "already-normalized-0-1",
+  "ingest": {
+    "endpoint": "/api/integrations/completions",
+    "method": "POST",
+    "triggerPush": false,
+    "compactPush": true
+  }
+}
+```
+
+The completion payload shape is captured in
+`schemas/localai-completion-writeback.schema.json`.
+
+To inspect a PE completion-ingest payload for a machine:
+
+```bash
+npm run writeback-payload:example
+```
+
+## Agent Autonomy
+
+`metadata.agentBinding.mode` uses the four-mode autonomy policy:
+
+| Mode | Write-back | Stage actions | Execute actions | Required gates |
+|---|---:|---:|---:|---|
+| `observe` | no | no | no | none |
+| `advise` | PE sensor | no | no | none |
+| `supervised-act` | PE sensor | yes | no | human approval, runbook, RED block |
+| `automated-act` | PE sensor | yes | yes | runbook, rollback, AMBER/RED block |
+
+Each binding carries `autonomyPolicy` plus matching `riskControls`; corpus
+validation fails when the mode, policy, write-back type, or RAG blocks drift.
 
 ## Manual test
 

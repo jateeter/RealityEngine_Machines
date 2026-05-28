@@ -5,7 +5,7 @@
     "description": "Integrated Pest Management monitor that correlates lighting and atmospheric conditions to assess pest and disease pressure. High humidity during dark periods creates botrytis risk; poor air circulation during active light cycles creates spider mite and aphid habitat. Reads outputs from AgPhotoPeriodLightingController [32:36] and AgAtmosphericController [36:40]. Output feeds AgYieldOptimizationAI at [3963:3967].",
     "metadata": {
       "category": "agriculture",
-      "domain": "Agriculture — IPM / Pest Management",
+      "domain": "Agriculture \u2014 IPM / Pest Management",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [3963:3967]: [1,0,0,0]=FUNGAL_ALERT, [0,1,0,0]=INSECT_ALERT, [0,0,1,0]=IPM_WARNING, [0,0,0,1]=IPM_OK",
       "tags": [
@@ -153,7 +153,8 @@
             "description": "IPM_OK: low pest pressure; optimal environmental controls active at [3963:3967]"
           }
         ]
-      }
+      },
+      "machineClass": "risk-forecaster"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -170,10 +171,10 @@
     "sequences": [
       {
         "id": "ag-ipm-fungal-escalation",
-        "name": "Fungal Disease Risk: DARK_HUMID_WATCH+ → DARK_HUMID → CONDENSATION_DARK → FUNGAL_ALERT",
+        "name": "Fungal Disease Risk: DARK_HUMID_WATCH+ \u2192 DARK_HUMID \u2192 CONDENSATION_DARK \u2192 FUNGAL_ALERT",
         "metadata": {
           "description": "Detects the highest-risk botrytis/powdery mildew scenario: humidity alert during dark period with ventilation not responding. Dark + humid + stagnant air creates ideal spore germination conditions. Requires sustained occurrence before firing to exclude brief humidity transients.",
-          "path": "DARK_HUMID_WATCH+ → DARK_HUMID → CONDENSATION_DARK → output[1,0,0,0]",
+          "path": "DARK_HUMID_WATCH+ \u2192 DARK_HUMID \u2192 CONDENSATION_DARK \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (FUNGAL_ALERT)"
         },
         "vectors": [
@@ -216,7 +217,7 @@
             "isInitial": true,
             "metadata": {
               "name": "DARK_HUMID_WATCH",
-              "description": "DARK_HUMID_WATCH+ — LIGHTS_OFF=1, HUMIDITY_ALERT=1: elevated humidity during dark period. isInitial A*A = A+: at least one cycle of dark+humidity confirmed before escalating.",
+              "description": "DARK_HUMID_WATCH+ \u2014 LIGHTS_OFF=1, HUMIDITY_ALERT=1: elevated humidity during dark period. isInitial A*A = A+: at least one cycle of dark+humidity confirmed before escalating.",
               "condition": "LIGHTS_OFF=1, HUMIDITY_ALERT=1, ATMOS_OK=0"
             },
             "nextVectorIds": [
@@ -263,7 +264,7 @@
             "isInitial": false,
             "metadata": {
               "name": "DARK_HUMID",
-              "description": "DARK_HUMID — LIGHTS_OFF + VENT_OPEN response triggered but HUMIDITY_ALERT persists: ventilation insufficient to resolve humidity.",
+              "description": "DARK_HUMID \u2014 LIGHTS_OFF + VENT_OPEN response triggered but HUMIDITY_ALERT persists: ventilation insufficient to resolve humidity.",
               "condition": "LIGHTS_OFF=1, VENT_OPEN=1, HUMIDITY_ALERT=1"
             },
             "nextVectorIds": [
@@ -309,7 +310,7 @@
             "isInitial": false,
             "metadata": {
               "name": "CONDENSATION_DARK",
-              "description": "CONDENSATION_DARK — sustained dark+humidity+vent-open with no resolution: condensation forming on plant surfaces. Fires FUNGAL_ALERT.",
+              "description": "CONDENSATION_DARK \u2014 sustained dark+humidity+vent-open with no resolution: condensation forming on plant surfaces. Fires FUNGAL_ALERT.",
               "condition": "LIGHTS_OFF=1, VENT_OPEN=1, HUMIDITY_ALERT=1 (sustained)"
             },
             "outputVectors": [
@@ -332,10 +333,10 @@
       },
       {
         "id": "ag-ipm-insect-pressure",
-        "name": "Insect Pressure: LIGHT_STAGNANT+ → CO2_PEAK_LIGHT → INSECT_ALERT",
+        "name": "Insect Pressure: LIGHT_STAGNANT+ \u2192 CO2_PEAK_LIGHT \u2192 INSECT_ALERT",
         "metadata": {
           "description": "Detects insect-favorable conditions: active light period with CO2 injection demand (indicating stagnant zones where CO2 depletes) and no active ventilation. Stagnant warm air during peak photoperiod is prime habitat for spider mites, aphids, and fungus gnats.",
-          "path": "LIGHT_STAGNANT+ → CO2_PEAK_LIGHT → output[0,1,0,0]",
+          "path": "LIGHT_STAGNANT+ \u2192 CO2_PEAK_LIGHT \u2192 output[0,1,0,0]",
           "output": "[0,1,0,0] (INSECT_ALERT)"
         },
         "vectors": [
@@ -378,7 +379,7 @@
             "isInitial": true,
             "metadata": {
               "name": "LIGHT_STAGNANT",
-              "description": "LIGHT_STAGNANT+ — LIGHTS_ON=1, PHOTO_OK=1, CO2_INJECT=1 (CO2 depleted in stagnant zones), ATMOS_OK=0. isInitial A*A = A+.",
+              "description": "LIGHT_STAGNANT+ \u2014 LIGHTS_ON=1, PHOTO_OK=1, CO2_INJECT=1 (CO2 depleted in stagnant zones), ATMOS_OK=0. isInitial A*A = A+.",
               "condition": "LIGHTS_ON=1, PHOTO_OK=1, CO2_INJECT=1 (poor air mixing)"
             },
             "nextVectorIds": [
@@ -425,7 +426,7 @@
             "isInitial": false,
             "metadata": {
               "name": "CO2_PEAK_LIGHT",
-              "description": "CO2_PEAK_LIGHT — LIGHTS_ON + CO2_INJECT, PHOTO_OK lost: hot stagnant microclimate zones forming around canopy. Fires INSECT_ALERT.",
+              "description": "CO2_PEAK_LIGHT \u2014 LIGHTS_ON + CO2_INJECT, PHOTO_OK lost: hot stagnant microclimate zones forming around canopy. Fires INSECT_ALERT.",
               "condition": "LIGHTS_ON=1, CO2_INJECT=1, PHOTO_OK=0 (canopy stress)"
             },
             "outputVectors": [
@@ -448,7 +449,7 @@
       },
       {
         "id": "ag-ipm-clear",
-        "name": "IPM Clear: CLEAR+ → IPM_OK",
+        "name": "IPM Clear: CLEAR+ \u2192 IPM_OK",
         "metadata": {
           "description": "Fires IPM_OK when atmospheric conditions are clean and photoperiod is healthy: no humidity alert, ventilation adequate, lights optimal. Represents low pest-pressure baseline.",
           "pattern": "CLEAR+",
@@ -494,7 +495,7 @@
             "isInitial": true,
             "metadata": {
               "name": "CLEAR",
-              "description": "CLEAR+ — LIGHTS_ON=1, PHOTO_OK=1, ATMOS_OK=1: active photoperiod with clean atmosphere and no humidity alert. Fires IPM_OK each matching cycle.",
+              "description": "CLEAR+ \u2014 LIGHTS_ON=1, PHOTO_OK=1, ATMOS_OK=1: active photoperiod with clean atmosphere and no humidity alert. Fires IPM_OK each matching cycle.",
               "condition": "LIGHTS_ON=1, PHOTO_OK=1, ATMOS_OK=1, no alerts"
             },
             "outputVectors": [
@@ -519,7 +520,7 @@
     "inputSequences": [
       {
         "name": "Night Humidity Spike Leading to Fungal Alert",
-        "pattern": "6-step: CLEAR(day)→DARK_OK→DARK_HUMID_WATCH→DARK_HUMID→CONDENSATION→CLEAR(next day)",
+        "pattern": "6-step: CLEAR(day)\u2192DARK_OK\u2192DARK_HUMID_WATCH\u2192DARK_HUMID\u2192CONDENSATION\u2192CLEAR(next day)",
         "description": "Photoperiod transition to dark period; humidity rises beyond ventilation capacity; FUNGAL_ALERT fires before canopy inspection.",
         "vectors": [
           [

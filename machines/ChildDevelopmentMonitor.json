@@ -2,10 +2,10 @@
   "version": "1.0.0",
   "machine": {
     "name": "Child Development Monitor",
-    "description": "Tracks developmental milestone progress, social-emotional engagement, language acquisition, and learning readiness for children ages 0–12 in low- and medium-income home care settings. Early identification of developmental delays in economically vulnerable households is critical because access to early intervention services (EI, speech therapy, occupational therapy) is income- and geography-dependent. Output at [2007:2011] feeds the Home Caregiver Burden Monitor alongside the Pediatric Nutrition Monitor.",
+    "description": "Tracks developmental milestone progress, social-emotional engagement, language acquisition, and learning readiness for children ages 0\u201312 in low- and medium-income home care settings. Early identification of developmental delays in economically vulnerable households is critical because access to early intervention services (EI, speech therapy, occupational therapy) is income- and geography-dependent. Output at [2007:2011] feeds the Home Caregiver Burden Monitor alongside the Pediatric Nutrition Monitor.",
     "metadata": {
       "category": "health-personal",
-      "domain": "Home Health — Pediatric / Child Development",
+      "domain": "Home Health \u2014 Pediatric / Child Development",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [2007:2011]: [1,0,0,0]=REFERRAL_NEEDED, [0,1,0,0]=SOCIAL_DEVELOPMENTAL_CONCERN, [0,0,1,0]=LEARNING_CONCERN, [0,0,0,1]=DEVELOPMENT_OK",
       "tags": [
@@ -26,7 +26,7 @@
         "startup-loadable"
       ],
       "sequenceCount": 3,
-      "populationFocus": "Children ages 0–12; families in early intervention program gaps; low-income households with limited developmental support access",
+      "populationFocus": "Children ages 0\u201312; families in early intervention program gaps; low-income households with limited developmental support access",
       "sensorNormalization": {
         "milestone_completion_norm": "0.0=significant delay (>2 standard deviations behind age norms), 0.5=mild delay or age-appropriate borderline, 1.0=meeting or exceeding age milestones",
         "peer_interaction_norm": "0.0=social withdrawal or isolation; no peer engagement, 0.5=limited but functional peer interaction, 1.0=age-appropriate social engagement",
@@ -139,7 +139,8 @@
             "description": "DEVELOPMENT_OK: child development on track for age and context at [2007:2011]"
           }
         ]
-      }
+      },
+      "machineClass": "risk-forecaster"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -156,10 +157,10 @@
     "sequences": [
       {
         "id": "child-dev-delay-escalation",
-        "name": "Developmental Delay: TYPICAL+ → BORDERLINE → DELAYED → SIGNIFICANT_DELAY → REFERRAL_NEEDED",
+        "name": "Developmental Delay: TYPICAL+ \u2192 BORDERLINE \u2192 DELAYED \u2192 SIGNIFICANT_DELAY \u2192 REFERRAL_NEEDED",
         "metadata": {
-          "description": "Tracks progressive developmental deviation from age norms. In low-income settings, developmental delays frequently go undetected until school age due to lack of well-child visit access. This pattern catches multi-domain developmental regression before the critical early intervention window closes at age 3–5.",
-          "path": "TYPICAL+ → BORDERLINE → DELAYED → SIGNIFICANT_DELAY → output[1,0,0,0]",
+          "description": "Tracks progressive developmental deviation from age norms. In low-income settings, developmental delays frequently go undetected until school age due to lack of well-child visit access. This pattern catches multi-domain developmental regression before the critical early intervention window closes at age 3\u20135.",
+          "path": "TYPICAL+ \u2192 BORDERLINE \u2192 DELAYED \u2192 SIGNIFICANT_DELAY \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (REFERRAL_NEEDED)"
         },
         "vectors": [
@@ -186,8 +187,8 @@
             "isInitial": true,
             "metadata": {
               "name": "TYPICAL",
-              "description": "TYPICAL+ — milestones met; peer interaction present; language developing; learning engagement observed. isInitial A*A = A+.",
-              "milestone_completion": "0.55–0.72 (on-track to slightly above age norms)"
+              "description": "TYPICAL+ \u2014 milestones met; peer interaction present; language developing; learning engagement observed. isInitial A*A = A+.",
+              "milestone_completion": "0.55\u20130.72 (on-track to slightly above age norms)"
             },
             "nextVectorIds": [
               "cd-typical",
@@ -217,8 +218,8 @@
             "isInitial": false,
             "metadata": {
               "name": "BORDERLINE",
-              "description": "BORDERLINE — one or more milestone domains lagging; language slightly behind; reduced learning engagement.",
-              "milestone_completion": "0.30–0.48 (1 standard deviation behind; watchful waiting zone)"
+              "description": "BORDERLINE \u2014 one or more milestone domains lagging; language slightly behind; reduced learning engagement.",
+              "milestone_completion": "0.30\u20130.48 (1 standard deviation behind; watchful waiting zone)"
             },
             "nextVectorIds": [
               "cd-delayed"
@@ -247,8 +248,8 @@
             "isInitial": false,
             "metadata": {
               "name": "DELAYED",
-              "description": "DELAYED — multiple milestone domains behind; limited language; reduced engagement across settings.",
-              "milestone_completion": "0.15–0.28 (1.5–2 standard deviations behind; EI referral zone)"
+              "description": "DELAYED \u2014 multiple milestone domains behind; limited language; reduced engagement across settings.",
+              "milestone_completion": "0.15\u20130.28 (1.5\u20132 standard deviations behind; EI referral zone)"
             },
             "nextVectorIds": [
               "cd-significant-delay"
@@ -277,8 +278,8 @@
             "isInitial": false,
             "metadata": {
               "name": "SIGNIFICANT_DELAY",
-              "description": "SIGNIFICANT_DELAY — global developmental delay across milestones, language, and social-emotional domains. Fires REFERRAL_NEEDED for early intervention or specialist evaluation.",
-              "milestone_completion": "0.0–0.15 (>2 standard deviations; urgent EI referral)"
+              "description": "SIGNIFICANT_DELAY \u2014 global developmental delay across milestones, language, and social-emotional domains. Fires REFERRAL_NEEDED for early intervention or specialist evaluation.",
+              "milestone_completion": "0.0\u20130.15 (>2 standard deviations; urgent EI referral)"
             },
             "outputVectors": [
               {
@@ -300,10 +301,10 @@
       },
       {
         "id": "child-dev-social-concern",
-        "name": "Social Withdrawal: ENGAGED+ → WITHDRAWING → ISOLATED → SOCIAL_DEVELOPMENTAL_CONCERN",
+        "name": "Social Withdrawal: ENGAGED+ \u2192 WITHDRAWING \u2192 ISOLATED \u2192 SOCIAL_DEVELOPMENTAL_CONCERN",
         "metadata": {
           "description": "Tracks social-emotional withdrawal trajectory. In low-income households social isolation in children is driven by housing instability, caregiver stress, and limited play access. This pattern fires before full withdrawal and is associated with adverse childhood experience (ACE) accumulation.",
-          "path": "ENGAGED+ → WITHDRAWING → ISOLATED → output[0,1,0,0]",
+          "path": "ENGAGED+ \u2192 WITHDRAWING \u2192 ISOLATED \u2192 output[0,1,0,0]",
           "output": "[0,1,0,0] (SOCIAL_DEVELOPMENTAL_CONCERN)"
         },
         "vectors": [
@@ -330,8 +331,8 @@
             "isInitial": true,
             "metadata": {
               "name": "ENGAGED",
-              "description": "ENGAGED+ — child socially active with peers; language used for communication; responsive and curious. isInitial A*A = A+.",
-              "peer_interaction": "0.55–0.70 (age-appropriate social engagement)"
+              "description": "ENGAGED+ \u2014 child socially active with peers; language used for communication; responsive and curious. isInitial A*A = A+.",
+              "peer_interaction": "0.55\u20130.70 (age-appropriate social engagement)"
             },
             "nextVectorIds": [
               "cd-engaged",
@@ -361,8 +362,8 @@
             "isInitial": false,
             "metadata": {
               "name": "WITHDRAWING",
-              "description": "WITHDRAWING — reduced peer initiation; quieter; less responsive; possible regression in established skills.",
-              "peer_interaction": "0.22–0.42 (social withdrawal beginning; caregiver-reported change)"
+              "description": "WITHDRAWING \u2014 reduced peer initiation; quieter; less responsive; possible regression in established skills.",
+              "peer_interaction": "0.22\u20130.42 (social withdrawal beginning; caregiver-reported change)"
             },
             "nextVectorIds": [
               "cd-isolated"
@@ -391,8 +392,8 @@
             "isInitial": false,
             "metadata": {
               "name": "ISOLATED",
-              "description": "ISOLATED — no peer interaction; avoidant behavior; minimal communication. Fires SOCIAL_DEVELOPMENTAL_CONCERN.",
-              "peer_interaction": "0.0–0.18 (socially withdrawn across all settings)"
+              "description": "ISOLATED \u2014 no peer interaction; avoidant behavior; minimal communication. Fires SOCIAL_DEVELOPMENTAL_CONCERN.",
+              "peer_interaction": "0.0\u20130.18 (socially withdrawn across all settings)"
             },
             "outputVectors": [
               {
@@ -414,7 +415,7 @@
       },
       {
         "id": "child-dev-on-track",
-        "name": "Development On Track: ON_TRACK+ → DEVELOPMENT_OK signal",
+        "name": "Development On Track: ON_TRACK+ \u2192 DEVELOPMENT_OK signal",
         "metadata": {
           "description": "Fires DEVELOPMENT_OK when all developmental dimensions are within age-appropriate ranges. In low-income home health contexts, this confirms that existing caregiving and community support (Head Start, home visiting programs) are maintaining positive developmental trajectory.",
           "pattern": "ON_TRACK+",
@@ -444,7 +445,7 @@
             "isInitial": true,
             "metadata": {
               "name": "ON_TRACK",
-              "description": "ON_TRACK+ — all developmental dimensions above threshold; child thriving within available resources. Fires DEVELOPMENT_OK each matching cycle.",
+              "description": "ON_TRACK+ \u2014 all developmental dimensions above threshold; child thriving within available resources. Fires DEVELOPMENT_OK each matching cycle.",
               "scenario": "Child in Head Start or home visiting program; caregiver engaged; developmental milestones met"
             },
             "outputVectors": [
@@ -469,7 +470,7 @@
     "inputSequences": [
       {
         "name": "Language Delay After Housing Disruption",
-        "pattern": "6-step: TYPICAL→TYPICAL→BORDERLINE→DELAYED→SIGNIFICANT_DELAY (referral)→ON_TRACK (after EI)",
+        "pattern": "6-step: TYPICAL\u2192TYPICAL\u2192BORDERLINE\u2192DELAYED\u2192SIGNIFICANT_DELAY (referral)\u2192ON_TRACK (after EI)",
         "description": "Family experiences eviction; child's language and social development regress during shelter stay; early intervention referral and stabilization restore on-track trajectory.",
         "vectors": [
           [

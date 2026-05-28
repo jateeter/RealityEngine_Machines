@@ -187,7 +187,82 @@
             "processStatus": "info",
             "description": "Ideal-state progress is stable."
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "equity_review_agent",
+        "mode": "supervised-act",
+        "trigger": "governance-modernization-referral-optimizer-risk-or-optimization-signal",
+        "allowedActions": [
+          "Dispatch equity_review_agent to resolve governance modernization delivery risk and update the evaluation plan matrix.",
+          "Trigger optimization agent workflow for governance modernization using current logic-model outputs and measures.",
+          "Record sustained progress toward the ideal state for governance modernization and keep monitoring."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.hsph045.equity.review.agent.completion",
+          "name": "localAIStack hsph045 equity.review.agent completion",
+          "region": {
+            "offset": 1783,
+            "length": 4
+          },
+          "semantics": [
+            "evaluability readiness",
+            "service delivery pressure",
+            "equity signal",
+            "measure confidence"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-hsph045-completion",
+            "sensorId": "localai.hsph045.equity.review.agent.completion",
+            "name": "localAIStack hsph045 equity.review.agent completion",
+            "region": {
+              "offset": 1783,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": [
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "RED"
+          ]
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

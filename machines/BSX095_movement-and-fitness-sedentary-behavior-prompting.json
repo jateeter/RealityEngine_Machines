@@ -220,7 +220,79 @@
             "processStatus": "info",
             "description": "Sedentary Behavior Prompting: 0-6H -> 6-12H -> 12-18H -> 18-24H -> PREDICTIVE_OPTIMIZE"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "well_light_agent",
+        "mode": "advise",
+        "trigger": "built-space-well-movement-and-fitness-sedentary-behavior-prompting",
+        "allowedActions": [
+          "Dispatch well_light_agent to verify WELL operational conformance for sedentary behavior prompting.",
+          "Run predictive optimization for sedentary behavior prompting using occupant, system, and evidence trends.",
+          "Create an operations, maintenance, policy, or evidence work order for sedentary behavior prompting.",
+          "Mark sedentary behavior prompting in the current compliant operating window."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.bsx095.well.light.agent.completion",
+          "name": "localAIStack bsx095 well.light.agent completion",
+          "region": {
+            "offset": 692,
+            "length": 4
+          },
+          "semantics": [
+            "health-performance signal stable",
+            "evidence or policy current",
+            "maintenance or operational drift pressure",
+            "occupant impact or wellness risk"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-bsx095-completion",
+            "sensorId": "localai.bsx095.well.light.agent.completion",
+            "name": "localAIStack bsx095 well.light.agent completion",
+            "region": {
+              "offset": 692,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

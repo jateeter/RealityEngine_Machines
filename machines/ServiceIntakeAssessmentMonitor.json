@@ -2,10 +2,10 @@
   "version": "1.0.0",
   "machine": {
     "name": "Service Intake Assessment Monitor",
-    "description": "Monitors intake and needs assessment workflow for community service recipients — tracking need severity, functional status, safety risk, and support network adequacy. Determines intake priority and routing for case assignment. In community services, intake triage determines whether a person receives immediate crisis response, intensive case management, or standard program enrollment. Output at [956:960] feeds the Enrollment Coordination Monitor.",
+    "description": "Monitors intake and needs assessment workflow for community service recipients \u2014 tracking need severity, functional status, safety risk, and support network adequacy. Determines intake priority and routing for case assignment. In community services, intake triage determines whether a person receives immediate crisis response, intensive case management, or standard program enrollment. Output at [956:960] feeds the Enrollment Coordination Monitor.",
     "metadata": {
       "category": "community-services",
-      "domain": "Community Services — Intake / Needs Assessment",
+      "domain": "Community Services \u2014 Intake / Needs Assessment",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [956:960]: [1,0,0,0]=PRIORITY_INTAKE, [0,1,0,0]=COMPLEX_INTAKE, [0,0,1,0]=STANDARD_INTAKE, [0,0,0,1]=INTAKE_COMPLETE",
       "tags": [
@@ -136,7 +136,8 @@
             "description": "INTAKE_COMPLETE: needs assessment finished; ready for program enrollment at [956:960]"
           }
         ]
-      }
+      },
+      "machineClass": "risk-forecaster"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -153,10 +154,10 @@
     "sequences": [
       {
         "id": "intake-priority-escalation",
-        "name": "Crisis Intake: STANDARD+ → COMPLEX → PRIORITY → PRIORITY_INTAKE",
+        "name": "Crisis Intake: STANDARD+ \u2192 COMPLEX \u2192 PRIORITY \u2192 PRIORITY_INTAKE",
         "metadata": {
-          "description": "Tracks intake complexity escalation from a standard baseline. In community services, initial assessment sometimes reveals acute safety risks or multi-domain crises that require immediate priority routing. The STANDARD+ baseline ensures at least one standard intake before crisis escalation can trigger — preventing initial crisis walk-ins from being misrouted through this sequence.",
-          "path": "STANDARD+ → COMPLEX → PRIORITY → output[1,0,0,0]",
+          "description": "Tracks intake complexity escalation from a standard baseline. In community services, initial assessment sometimes reveals acute safety risks or multi-domain crises that require immediate priority routing. The STANDARD+ baseline ensures at least one standard intake before crisis escalation can trigger \u2014 preventing initial crisis walk-ins from being misrouted through this sequence.",
+          "path": "STANDARD+ \u2192 COMPLEX \u2192 PRIORITY \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (PRIORITY_INTAKE)"
         },
         "vectors": [
@@ -183,8 +184,8 @@
             "isInitial": true,
             "metadata": {
               "name": "STANDARD",
-              "description": "STANDARD+ — moderate need; functional for intake; no acute safety concerns; some support present. isInitial A*A = A+.",
-              "need_severity": "0.50–0.65 (single-domain need; manageable)"
+              "description": "STANDARD+ \u2014 moderate need; functional for intake; no acute safety concerns; some support present. isInitial A*A = A+.",
+              "need_severity": "0.50\u20130.65 (single-domain need; manageable)"
             },
             "nextVectorIds": [
               "ia-standard",
@@ -214,8 +215,8 @@
             "isInitial": false,
             "metadata": {
               "name": "COMPLEX",
-              "description": "COMPLEX — multiple need domains; functional barriers requiring intake support; risk factors present.",
-              "need_severity": "0.25–0.45 (two or more need domains; requires complex case management)"
+              "description": "COMPLEX \u2014 multiple need domains; functional barriers requiring intake support; risk factors present.",
+              "need_severity": "0.25\u20130.45 (two or more need domains; requires complex case management)"
             },
             "nextVectorIds": [
               "ia-priority"
@@ -244,8 +245,8 @@
             "isInitial": false,
             "metadata": {
               "name": "PRIORITY",
-              "description": "PRIORITY — acute multi-domain crisis; significant functional barriers; active safety risk. Fires PRIORITY_INTAKE for immediate crisis response routing.",
-              "need_severity": "0.0–0.18 (acute crisis across multiple domains)"
+              "description": "PRIORITY \u2014 acute multi-domain crisis; significant functional barriers; active safety risk. Fires PRIORITY_INTAKE for immediate crisis response routing.",
+              "need_severity": "0.0\u20130.18 (acute crisis across multiple domains)"
             },
             "outputVectors": [
               {
@@ -267,7 +268,7 @@
       },
       {
         "id": "intake-complex-routing",
-        "name": "Complex Intake: COMPLEX_STABLE+ → COMPLEX_INTAKE signal",
+        "name": "Complex Intake: COMPLEX_STABLE+ \u2192 COMPLEX_INTAKE signal",
         "metadata": {
           "description": "Fires COMPLEX_INTAKE for applicants with multi-domain needs or functional barriers who require intensive case management routing rather than standard program enrollment. These cases need a dedicated case manager, not just a benefits referral.",
           "pattern": "COMPLEX_STABLE+",
@@ -297,7 +298,7 @@
             "isInitial": true,
             "metadata": {
               "name": "COMPLEX_STABLE",
-              "description": "COMPLEX_STABLE+ — significant need severity; functional barriers requiring intake support; no acute safety risk; limited support. isInitial A*A = A+: fires COMPLEX_INTAKE each cycle.",
+              "description": "COMPLEX_STABLE+ \u2014 significant need severity; functional barriers requiring intake support; no acute safety risk; limited support. isInitial A*A = A+: fires COMPLEX_INTAKE each cycle.",
               "scenario": "Elderly applicant with cognitive decline; needs housing, meals, and health aide; cannot complete intake independently but not in acute danger"
             },
             "outputVectors": [
@@ -320,9 +321,9 @@
       },
       {
         "id": "intake-complete",
-        "name": "Intake Complete: RESOLVED+ → INTAKE_COMPLETE signal",
+        "name": "Intake Complete: RESOLVED+ \u2192 INTAKE_COMPLETE signal",
         "metadata": {
-          "description": "Fires INTAKE_COMPLETE when needs have been assessed, functional barriers addressed, safety screening is clear, and support network is confirmed — ready for program enrollment and case assignment. Downstream enrollment coordination monitor reads this alongside eligibility confirmation.",
+          "description": "Fires INTAKE_COMPLETE when needs have been assessed, functional barriers addressed, safety screening is clear, and support network is confirmed \u2014 ready for program enrollment and case assignment. Downstream enrollment coordination monitor reads this alongside eligibility confirmation.",
           "pattern": "RESOLVED+",
           "output": "[0,0,0,1] (INTAKE_COMPLETE)"
         },
@@ -350,7 +351,7 @@
             "isInitial": true,
             "metadata": {
               "name": "RESOLVED",
-              "description": "RESOLVED+ — needs assessed; functional barriers cleared; safety screening clear; support network identified. Fires INTAKE_COMPLETE each cycle.",
+              "description": "RESOLVED+ \u2014 needs assessed; functional barriers cleared; safety screening clear; support network identified. Fires INTAKE_COMPLETE each cycle.",
               "scenario": "Applicant completed intake with navigator support; safety screened clear; connected to case manager; ready for enrollment"
             },
             "outputVectors": [
@@ -374,8 +375,8 @@
     ],
     "inputSequences": [
       {
-        "name": "Domestic Violence Survivor — Priority Intake",
-        "pattern": "5-step: STANDARD→STANDARD→COMPLEX (DV disclosed)→PRIORITY (imminent risk identified)→RESOLVED (after safety plan)",
+        "name": "Domestic Violence Survivor \u2014 Priority Intake",
+        "pattern": "5-step: STANDARD\u2192STANDARD\u2192COMPLEX (DV disclosed)\u2192PRIORITY (imminent risk identified)\u2192RESOLVED (after safety plan)",
         "description": "New housing assistance applicant discloses DV during intake; safety risk elevated; priority crisis services engaged; safety plan stabilizes situation; intake completed.",
         "vectors": [
           [

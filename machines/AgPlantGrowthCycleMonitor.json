@@ -5,7 +5,7 @@
     "description": "Aggregates temperature and irrigation state signals to assess overall plant growth conditions. Reads binary output signals from AgZoneTemperatureController [20:24] and AgIrrigationFlowController [24:28]. Detects temperature stress, water stress, and dual-stress combinations that suppress vegetative growth rate. Output feeds AgHarvestReadinessAssessor at [3955:3959].",
     "metadata": {
       "category": "agriculture",
-      "domain": "Agriculture — Plant Growth / Crop Monitoring",
+      "domain": "Agriculture \u2014 Plant Growth / Crop Monitoring",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [3955:3959]: [1,0,0,0]=TEMP_STRESS, [0,1,0,0]=WATER_STRESS, [0,0,1,0]=DUAL_STRESS, [0,0,0,1]=GROWTH_OK",
       "tags": [
@@ -144,7 +144,8 @@
             "description": "WATER_STRESS: water-deficit growth suppression detected at [3955:3959]"
           }
         ]
-      }
+      },
+      "machineClass": "risk-forecaster"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -161,10 +162,10 @@
     "sequences": [
       {
         "id": "ag-growth-optimal",
-        "name": "Optimal Growth: BASELINE+ → GROWING → VIGOROUS → GROWTH_OK",
+        "name": "Optimal Growth: BASELINE+ \u2192 GROWING \u2192 VIGOROUS \u2192 GROWTH_OK",
         "metadata": {
           "description": "Tracks sustained optimal conditions (TEMP_OK + FLOW_OK, no active alerts) through vegetative stages. The BASELINE+ initial state requires confirmed healthy conditions before declaring vigorous growth. Models the A*A = A+ pattern for reliable growth state confirmation.",
-          "path": "BASELINE+ → GROWING → VIGOROUS → output[0,0,0,1]",
+          "path": "BASELINE+ \u2192 GROWING \u2192 VIGOROUS \u2192 output[0,0,0,1]",
           "output": "[0,0,0,1] (GROWTH_OK)"
         },
         "vectors": [
@@ -207,7 +208,7 @@
             "isInitial": true,
             "metadata": {
               "name": "BASELINE",
-              "description": "BASELINE+ — TEMP_OK=HIGH, FLOW_OK=HIGH, all stress alerts=LOW. Represents healthy baseline conditions. isInitial A*A = A+: at least one confirmed baseline before GROWING arms.",
+              "description": "BASELINE+ \u2014 TEMP_OK=HIGH, FLOW_OK=HIGH, all stress alerts=LOW. Represents healthy baseline conditions. isInitial A*A = A+: at least one confirmed baseline before GROWING arms.",
               "condition": "TEMP_OK=1, FLOW_OK=1, no alerts active"
             },
             "nextVectorIds": [
@@ -254,7 +255,7 @@
             "isInitial": false,
             "metadata": {
               "name": "GROWING",
-              "description": "GROWING — sustained healthy conditions; vegetative growth active.",
+              "description": "GROWING \u2014 sustained healthy conditions; vegetative growth active.",
               "condition": "TEMP_OK=1, FLOW_OK=1, no alerts"
             },
             "nextVectorIds": [
@@ -300,7 +301,7 @@
             "isInitial": false,
             "metadata": {
               "name": "VIGOROUS",
-              "description": "VIGOROUS — confirmed sustained growth cycle. Fires GROWTH_OK.",
+              "description": "VIGOROUS \u2014 confirmed sustained growth cycle. Fires GROWTH_OK.",
               "condition": "Three or more consecutive healthy cycles confirmed"
             },
             "outputVectors": [
@@ -323,10 +324,10 @@
       },
       {
         "id": "ag-growth-temp-stress",
-        "name": "Temperature Stress: TEMP_WATCH+ → TEMP_ALERT → GROWTH_STALL → TEMP_STRESS",
+        "name": "Temperature Stress: TEMP_WATCH+ \u2192 TEMP_ALERT \u2192 GROWTH_STALL \u2192 TEMP_STRESS",
         "metadata": {
           "description": "Detects temperature-induced growth suppression when heating or cooling systems activate but TEMP_OK has dropped. Single or sustained activation of HVAC without recovery triggers growth stall assessment.",
-          "path": "TEMP_WATCH+ → TEMP_ALERT → GROWTH_STALL → output[1,0,0,0]",
+          "path": "TEMP_WATCH+ \u2192 TEMP_ALERT \u2192 GROWTH_STALL \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (TEMP_STRESS)"
         },
         "vectors": [
@@ -369,7 +370,7 @@
             "isInitial": true,
             "metadata": {
               "name": "TEMP_WATCH",
-              "description": "TEMP_WATCH+ — COOLING_ON active; TEMP_OK gone but irrigation still healthy. Monitors for sustained temperature stress. isInitial A*A = A+.",
+              "description": "TEMP_WATCH+ \u2014 COOLING_ON active; TEMP_OK gone but irrigation still healthy. Monitors for sustained temperature stress. isInitial A*A = A+.",
               "condition": "COOLING_ON=1, TEMP_OK=0, FLOW_OK=1"
             },
             "nextVectorIds": [
@@ -416,7 +417,7 @@
             "isInitial": false,
             "metadata": {
               "name": "TEMP_ALERT",
-              "description": "TEMP_ALERT — COOLING_ON and irrigation demand active simultaneously; heat stress affecting transpiration.",
+              "description": "TEMP_ALERT \u2014 COOLING_ON and irrigation demand active simultaneously; heat stress affecting transpiration.",
               "condition": "COOLING_ON=1, IRRIGATE_ON=1 (stress-driven demand)"
             },
             "nextVectorIds": [
@@ -462,7 +463,7 @@
             "isInitial": false,
             "metadata": {
               "name": "GROWTH_STALL",
-              "description": "GROWTH_STALL — heating demand alongside irrigation deficit; growth suppression confirmed. Fires TEMP_STRESS.",
+              "description": "GROWTH_STALL \u2014 heating demand alongside irrigation deficit; growth suppression confirmed. Fires TEMP_STRESS.",
               "condition": "HEATING_ON=1, IRRIGATE_ON=1, no OK signals"
             },
             "outputVectors": [
@@ -485,10 +486,10 @@
       },
       {
         "id": "ag-growth-water-stress",
-        "name": "Water Stress: WATER_WATCH+ → IRRIGATION_ACTIVE → DROUGHT_STRESS → WATER_STRESS",
+        "name": "Water Stress: WATER_WATCH+ \u2192 IRRIGATION_ACTIVE \u2192 DROUGHT_STRESS \u2192 WATER_STRESS",
         "metadata": {
           "description": "Detects water-deficit-driven growth suppression. Active irrigation demand combined with loss of FLOW_OK signals persistent water stress beyond normal dry-down cycles.",
-          "path": "WATER_WATCH+ → IRRIGATION_ACTIVE → DROUGHT_STRESS → output[0,1,0,0]",
+          "path": "WATER_WATCH+ \u2192 IRRIGATION_ACTIVE \u2192 DROUGHT_STRESS \u2192 output[0,1,0,0]",
           "output": "[0,1,0,0] (WATER_STRESS)"
         },
         "vectors": [
@@ -531,7 +532,7 @@
             "isInitial": true,
             "metadata": {
               "name": "WATER_WATCH",
-              "description": "WATER_WATCH+ — TEMP_OK=1 but IRRIGATE_ON active; substrate entering deficit. isInitial A*A = A+.",
+              "description": "WATER_WATCH+ \u2014 TEMP_OK=1 but IRRIGATE_ON active; substrate entering deficit. isInitial A*A = A+.",
               "condition": "TEMP_OK=1, IRRIGATE_ON=1, FLOW_OK=0"
             },
             "nextVectorIds": [
@@ -578,7 +579,7 @@
             "isInitial": false,
             "metadata": {
               "name": "IRRIGATION_ACTIVE",
-              "description": "IRRIGATION_ACTIVE — sustained irrigation demand; no OK signals active; potential pump failure or channel blockage.",
+              "description": "IRRIGATION_ACTIVE \u2014 sustained irrigation demand; no OK signals active; potential pump failure or channel blockage.",
               "condition": "IRRIGATE_ON=1, no TEMP_OK or FLOW_OK"
             },
             "nextVectorIds": [
@@ -624,7 +625,7 @@
             "isInitial": false,
             "metadata": {
               "name": "DROUGHT_STRESS",
-              "description": "DROUGHT_STRESS — IRRIGATE_ON with EC_ALERT (concentrated nutrients in drying substrate). Fires WATER_STRESS.",
+              "description": "DROUGHT_STRESS \u2014 IRRIGATE_ON with EC_ALERT (concentrated nutrients in drying substrate). Fires WATER_STRESS.",
               "condition": "IRRIGATE_ON=1, EC_ALERT=1 (salt accumulation in dry substrate)"
             },
             "outputVectors": [
@@ -649,7 +650,7 @@
     "inputSequences": [
       {
         "name": "Healthy Growth then Temp Stress Recovery",
-        "pattern": "7-step: BASELINE→BASELINE→GROWING→VIGOROUS (ok)→TEMP_WATCH→TEMP_ALERT→GROWTH_STALL",
+        "pattern": "7-step: BASELINE\u2192BASELINE\u2192GROWING\u2192VIGOROUS (ok)\u2192TEMP_WATCH\u2192TEMP_ALERT\u2192GROWTH_STALL",
         "description": "Three cycles of healthy growth followed by afternoon heat event triggering temperature stress cascade.",
         "vectors": [
           [

@@ -183,7 +183,86 @@
             "processStatus": "info",
             "description": "Equipment in normal operating window."
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "growhouse_hvac_service_agent",
+        "mode": "automated-act",
+        "trigger": "agriculture-yuma-vpd-hvac-service-planner-maintenance",
+        "allowedActions": [
+          "Dispatch growhouse_hvac_service_agent for urgent maintenance and record corrective action.",
+          "Schedule preventive maintenance via growhouse_hvac_service_agent and verify completion telemetry.",
+          "Run sensor-calibration workflow via growhouse_hvac_service_agent for the yuma vpd hvac service plan stream.",
+          "Continue automated monitoring for yuma vpd hvac service plan while preserving current setpoints."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.agx053.growhouse.hvac.service.agent.completion",
+          "name": "localAIStack agx053 growhouse.hvac.service.agent completion",
+          "region": {
+            "offset": 184,
+            "length": 4
+          },
+          "semantics": [
+            "ambient temp in band",
+            "ambient humidity in band",
+            "ambient temp high watch",
+            "ambient humidity low watch"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-agx053-completion",
+            "sensorId": "localai.agx053.growhouse.hvac.service.agent.completion",
+            "name": "localAIStack agx053 growhouse.hvac.service.agent completion",
+            "region": {
+              "offset": 184,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": true,
+          "maxAutonomy": "automated-act",
+          "blockedWhenRag": [
+            "AMBER",
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "automated-act",
+          "stage": 3,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": true,
+          "requiresHumanApproval": false,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "AMBER",
+            "RED"
+          ],
+          "rollbackRequired": true
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

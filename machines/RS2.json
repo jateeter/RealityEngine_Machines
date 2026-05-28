@@ -22,27 +22,27 @@
         "two-step"
       ],
       "sequenceCount": 2,
-      "description": "Two 2-step sequences: SET (00→10) and RESET (00→01)",
+      "description": "Two 2-step sequences: SET (00\u219210) and RESET (00\u219201)",
       "singleTransitionAssumption": {
         "required": true,
         "scope": "full sequence",
         "compliant": true,
-        "notes": "STA is required. SET and RESET are 2-step sequences: the HOLD state [0,0] must precede [1,0] or [0,1] for output to be produced. A direct [0,0]→[1,1] jump (HD=2) silently fails: [1,1] matches neither rs2-set-10 nor rs2-reset-01 and both deactivate. A direct [1,0]→[0,1] jump (HD=2) may inadvertently trigger RESET if rs2-reset-01 happens to be pre-seeded from a prior [0,0] step (since both successors are activated simultaneously after every [0,0] input). The [1,1] state (S=R=1 simultaneously) invalidates all active successors; recovery requires a subsequent [0,0] to re-seed them. All defined input sequences use HD≤1 transitions.",
+        "notes": "STA is required. SET and RESET are 2-step sequences: the HOLD state [0,0] must precede [1,0] or [0,1] for output to be produced. A direct [0,0]\u2192[1,1] jump (HD=2) silently fails: [1,1] matches neither rs2-set-10 nor rs2-reset-01 and both deactivate. A direct [1,0]\u2192[0,1] jump (HD=2) may inadvertently trigger RESET if rs2-reset-01 happens to be pre-seeded from a prior [0,0] step (since both successors are activated simultaneously after every [0,0] input). The [1,1] state (S=R=1 simultaneously) invalidates all active successors; recovery requires a subsequent [0,0] to re-seed them. All defined input sequences use HD\u22641 transitions.",
         "maxHammingDistanceInDefinedSequences": 1,
         "forbiddenState": {
           "input": "[1,1]",
           "reachableViaSingleTransition": true,
           "behavior": "Deactivates both rs2-set-10 and rs2-reset-01 (no-match). No output. Requires [0,0] to recover.",
-          "explicitlyTestedIn": "Complete Test Sequence step [1,0]→[1,1]→[0,1]: produces no output on final [0,1]"
+          "explicitlyTestedIn": "Complete Test Sequence step [1,0]\u2192[1,1]\u2192[0,1]: produces no output on final [0,1]"
         },
         "violations": [
           {
-            "transition": "[0,0] → [1,1]",
+            "transition": "[0,0] \u2192 [1,1]",
             "hammingDistance": 2,
-            "behavior": "No output — both successors deactivate on [1,1] mismatch"
+            "behavior": "No output \u2014 both successors deactivate on [1,1] mismatch"
           },
           {
-            "transition": "[1,0] → [0,1]",
+            "transition": "[1,0] \u2192 [0,1]",
             "hammingDistance": 2,
             "behavior": "May inadvertently RESET if rs2-reset-01 was pre-seeded by a prior [0,0] step; otherwise no output"
           }
@@ -129,7 +129,8 @@
             "description": "RS2 RESET to LOW (0,1)"
           }
         ]
-      }
+      },
+      "machineClass": "signal-monitor"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -146,10 +147,10 @@
     "sequences": [
       {
         "id": "rs2-set-sequence",
-        "name": "SET Sequence: (0,0)→(1,0)→[1,0]",
+        "name": "SET Sequence: (0,0)\u2192(1,0)\u2192[1,0]",
         "metadata": {
           "description": "From hold state, set input produces HIGH output",
-          "path": "(0,0)→(1,0)",
+          "path": "(0,0)\u2192(1,0)",
           "output": "[1,0]"
         },
         "vectors": [
@@ -212,10 +213,10 @@
       },
       {
         "id": "rs2-reset-sequence",
-        "name": "RESET Sequence: (0,0)→(0,1)→[0,1]",
+        "name": "RESET Sequence: (0,0)\u2192(0,1)\u2192[0,1]",
         "metadata": {
           "description": "From hold state, reset input produces LOW output",
-          "path": "(0,0)→(0,1)",
+          "path": "(0,0)\u2192(0,1)",
           "output": "[0,1]"
         },
         "vectors": [
@@ -280,7 +281,7 @@
     "inputSequences": [
       {
         "name": "SET Operation",
-        "pattern": "(0,0)→(1,0)",
+        "pattern": "(0,0)\u2192(1,0)",
         "description": "Transition from hold to set state",
         "vectors": [
           [
@@ -295,7 +296,7 @@
       },
       {
         "name": "RESET Operation",
-        "pattern": "(0,0)→(0,1)",
+        "pattern": "(0,0)\u2192(0,1)",
         "description": "Transition from hold to reset state",
         "vectors": [
           [
@@ -310,7 +311,7 @@
       },
       {
         "name": "Complete Test Sequence",
-        "pattern": "(0,0)→(1,0)→(0,0)→(0,1)→(0,0)→(1,0)→(1,1)→(0,1)",
+        "pattern": "(0,0)\u2192(1,0)\u2192(0,0)\u2192(0,1)\u2192(0,0)\u2192(1,0)\u2192(1,1)\u2192(0,1)",
         "description": "Full test sequence with SET, RESET, and invalid states",
         "vectors": [
           [

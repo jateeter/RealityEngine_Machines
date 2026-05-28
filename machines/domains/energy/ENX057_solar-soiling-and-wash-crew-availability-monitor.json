@@ -220,7 +220,16 @@
             "processStatus": "info",
             "description": "Operating window is stable and local grid electric quality signals are inside limits."
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
       },
       "localGridElectricQualityStabilitySignals": {
         "inputDimension": 2,
@@ -243,6 +252,38 @@
           "island-ready, islanded, and restoration mode gating",
           "preventive maintenance prioritization for assets degrading grid quality"
         ]
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "community_microgrid_ops_agent",
+        "mode": "observe",
+        "trigger": "community-microgrid-solar-soiling-and-wash-crew-availability-monitor",
+        "allowedActions": [
+          "Dispatch community_microgrid_ops_agent for urgent stabilization of solar soiling and wash crew availability monitor using local voltage, frequency, harmonic, phase-balance, PCC, and feeder/protection signals.",
+          "Optimize solar, battery, inverter grid-support, import/export, and flexible-load setpoints for solar soiling and wash crew availability monitor.",
+          "Schedule preventive maintenance for solar soiling and wash crew availability monitor when equipment drift threatens local electric quality, grid stability, or safety margins.",
+          "Continue community microgrid monitoring for solar soiling and wash crew availability monitor while preserving the current local grid quality/stability operating plan."
+        ],
+        "writeBack": {
+          "type": "none"
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "observe",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "observe",
+          "stage": 0,
+          "writeBackType": "none",
+          "canWriteBack": false,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

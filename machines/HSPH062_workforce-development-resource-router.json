@@ -186,7 +186,82 @@
             "processStatus": "info",
             "description": "Ideal-state progress is stable."
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "resource_dispatch_agent",
+        "mode": "supervised-act",
+        "trigger": "workforce-development-resource-router-risk-or-optimization-signal",
+        "allowedActions": [
+          "Dispatch resource_dispatch_agent to resolve workforce development delivery risk and update the evaluation plan matrix.",
+          "Trigger optimization agent workflow for workforce development using current logic-model outputs and measures.",
+          "Record sustained progress toward the ideal state for workforce development and keep monitoring."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.hsph062.resource.dispatch.agent.completion",
+          "name": "localAIStack hsph062 resource.dispatch.agent completion",
+          "region": {
+            "offset": 1807,
+            "length": 4
+          },
+          "semantics": [
+            "evaluability readiness",
+            "service delivery pressure",
+            "equity signal",
+            "measure confidence"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-hsph062-completion",
+            "sensorId": "localai.hsph062.resource.dispatch.agent.completion",
+            "name": "localAIStack hsph062 resource.dispatch.agent completion",
+            "region": {
+              "offset": 1807,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": [
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "RED"
+          ]
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

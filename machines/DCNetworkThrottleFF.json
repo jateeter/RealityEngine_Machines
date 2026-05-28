@@ -5,7 +5,7 @@
     "description": "RS flip-flop that latches the network burst alarm state. SET by DCNetworkBurstDetector [1,0], RESET by normal-flow signal [0,1].",
     "metadata": {
       "category": "data-center",
-      "domain": "Data Center — Network / Throttle Control",
+      "domain": "Data Center \u2014 Network / Throttle Control",
       "author": "Reality Engine",
       "created": "2026-02-27T00:00:00Z",
       "eventSpace": "2D binary control signal at [1365:1367]: [1,0]=ALARM, [0,1]=SAFE",
@@ -32,7 +32,7 @@
       "downstreamMachine": "DCCriticalSynthesizer (reads [1373:1375])",
       "singleTransitionAssumption": {
         "required": false,
-        "scope": "not applicable — all event vectors are isInitial (combinatorial)",
+        "scope": "not applicable \u2014 all event vectors are isInitial (combinatorial)",
         "compliant": true,
         "notes": "Both SET and RESET events are isInitial. The FF responds combinatorially on every cycle. The 'state' persists through the perceptual space value retention: once SET writes [1,0] to [1373:1375], that value remains until RESET overwrites it with [0,1]."
       },
@@ -124,7 +124,8 @@
             "description": "NETWORK THROTTLE INACTIVE: Normal traffic flow"
           }
         ]
-      }
+      },
+      "machineClass": "signal-monitor"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -141,10 +142,10 @@
     "sequences": [
       {
         "id": "dc-net-throttle-set-sequence",
-        "name": "NETWORK THROTTLE SET: [1,0] → [1,0]",
+        "name": "NETWORK THROTTLE SET: [1,0] \u2192 [1,0]",
         "metadata": {
           "description": "Activates network throttle when burst detector fires [1,0] control signal",
-          "path": "[1,0] → [1,0]",
+          "path": "[1,0] \u2192 [1,0]",
           "output": "[1,0]",
           "trigger": "DCNetworkBurstDetector OVERFLOW state fires [1,0] to bytes [1365:1367]"
         },
@@ -164,7 +165,7 @@
             "isInitial": true,
             "metadata": {
               "name": "ALARM",
-              "description": "Control signal [1,0]: network burst alarm active — enable throttling",
+              "description": "Control signal [1,0]: network burst alarm active \u2014 enable throttling",
               "state": "SET"
             },
             "outputVectors": [
@@ -186,10 +187,10 @@
       },
       {
         "id": "dc-net-throttle-reset-sequence",
-        "name": "NETWORK THROTTLE RESET: [0,1] → [0,1]",
+        "name": "NETWORK THROTTLE RESET: [0,1] \u2192 [0,1]",
         "metadata": {
           "description": "Deactivates network throttle when normal-flow signal [0,1] is received",
-          "path": "[0,1] → [0,1]",
+          "path": "[0,1] \u2192 [0,1]",
           "output": "[0,1]",
           "trigger": "DCNetworkBurstDetector NORMAL_FLOW state fires [0,1] to bytes [1365:1367]"
         },
@@ -209,7 +210,7 @@
             "isInitial": true,
             "metadata": {
               "name": "SAFE",
-              "description": "Control signal [0,1]: network flow normal — disable throttle",
+              "description": "Control signal [0,1]: network flow normal \u2014 disable throttle",
               "state": "RESET"
             },
             "outputVectors": [
@@ -233,8 +234,8 @@
     "inputSequences": [
       {
         "name": "Network Alarm Activation",
-        "pattern": "[0,1] → [1,0]",
-        "description": "Simulate DCNetworkBurstDetector firing: normal → alarm",
+        "pattern": "[0,1] \u2192 [1,0]",
+        "description": "Simulate DCNetworkBurstDetector firing: normal \u2192 alarm",
         "vectors": [
           [
             0,
@@ -248,8 +249,8 @@
       },
       {
         "name": "Network Alarm Recovery",
-        "pattern": "[1,0] → [0,1]",
-        "description": "Simulate recovery: alarm → normal",
+        "pattern": "[1,0] \u2192 [0,1]",
+        "description": "Simulate recovery: alarm \u2192 normal",
         "vectors": [
           [
             1,
@@ -263,7 +264,7 @@
       },
       {
         "name": "Network Throttle Cycle",
-        "pattern": "[0,1] → [1,0] → [1,0] → [0,1]",
+        "pattern": "[0,1] \u2192 [1,0] \u2192 [1,0] \u2192 [0,1]",
         "description": "Full cycle: normal, alarm triggers, persists, recovers",
         "vectors": [
           [

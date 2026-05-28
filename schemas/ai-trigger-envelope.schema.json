@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.example.org/schemas/ai-trigger-envelope-1.0.0.json",
+  "title": "RealityEngine RE to localAIStack Dispatch Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "envelopeType",
+    "envelopeId",
+    "correlationId",
+    "emittedAt",
+    "source",
+    "ces",
+    "outputVector",
+    "governance",
+    "dispatch"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "envelopeType": { "const": "ces.terminal.event" },
+    "envelopeId": { "type": "string", "minLength": 1 },
+    "correlationId": { "type": "string", "minLength": 1 },
+    "emittedAt": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["engine", "instance", "endpoint"],
+      "properties": {
+        "engine": { "enum": ["RE", "PE"] },
+        "instance": { "type": "string", "minLength": 1 },
+        "endpoint": { "type": "string", "minLength": 1 }
+      }
+    },
+    "ces": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "machineId",
+        "machineName",
+        "machineCode",
+        "sequenceId",
+        "sequenceName",
+        "outputIndex",
+        "stepNumber",
+        "perceptualMapping",
+        "provenance"
+      ],
+      "properties": {
+        "machineId": { "type": "string", "minLength": 1 },
+        "machineName": { "type": "string", "minLength": 1 },
+        "machineCode": { "type": "string", "minLength": 1 },
+        "sequenceId": { "type": "string", "minLength": 1 },
+        "sequenceName": { "type": "string", "minLength": 1 },
+        "outputIndex": { "type": "integer", "minimum": 0 },
+        "stepNumber": { "type": "integer", "minimum": 0 },
+        "perceptualMapping": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["input", "output"],
+          "properties": {
+            "input": { "$ref": "#/$defs/region" },
+            "output": { "$ref": "#/$defs/region" }
+          }
+        },
+        "provenance": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "deprecation": {
+          "type": ["object", "null"]
+        }
+      }
+    },
+    "outputVector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["values", "encoding", "semantics", "assertedLabel"],
+      "properties": {
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "number" }
+        },
+        "encoding": { "enum": ["one-hot", "multi-hot", "dense"] },
+        "semantics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["index", "label"],
+            "properties": {
+              "index": { "type": "integer", "minimum": 0 },
+              "label": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "assertedLabel": { "type": "string", "minLength": 1 }
+      }
+    },
+    "projection": { "type": ["object", "null"] },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ragStatusCode", "processStatus", "ownerTeam", "slaSeconds", "runbook"],
+      "properties": {
+        "ragStatusCode": { "enum": ["GREEN", "AMBER", "RED"] },
+        "processStatus": { "type": "string", "minLength": 1 },
+        "ownerTeam": { "type": ["string", "null"] },
+        "slaSeconds": { "type": ["integer", "null"], "minimum": 0 },
+        "runbook": { "type": ["string", "null"] },
+        "escalationPolicy": { "type": ["string", "null"] },
+        "contact": { "type": ["object", "null"] },
+        "description": { "type": ["string", "null"] }
+      }
+    },
+    "dispatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "processId",
+        "processName",
+        "agent",
+        "action",
+        "agentActionsCatalog",
+        "trigger",
+        "autonomyMode",
+        "writeBack",
+        "endpoint"
+      ],
+      "properties": {
+        "processId": { "type": "string", "minLength": 1 },
+        "processName": { "type": "string", "minLength": 1 },
+        "agent": { "type": "string", "minLength": 1 },
+        "action": { "type": "string", "minLength": 1 },
+        "agentActionsCatalog": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "trigger": { "type": "string", "minLength": 1 },
+        "autonomyMode": { "enum": ["observe", "advise", "supervised-act", "automated-act"] },
+        "writeBack": { "type": ["object", "null"] },
+        "endpoint": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "url", "mutation", "schemaRef"],
+          "properties": {
+            "kind": { "const": "graphql" },
+            "url": { "type": "string", "minLength": 1 },
+            "mutation": { "const": "updateProcessState" },
+            "schemaRef": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "mqttContext": { "type": ["object", "null"] }
+  },
+  "$defs": {
+    "region": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["offset", "length"],
+      "properties": {
+        "offset": { "type": "integer", "minimum": 0 },
+        "length": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

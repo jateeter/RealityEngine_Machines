@@ -5,7 +5,7 @@
     "description": "Monitors substrate moisture, flow rate, and electrical conductivity to detect irrigation deficits and waterlogging in hydroponic and soil-based indoor systems. Two escalation sequences (DRY_DOWN and WATERLOG) plus a BALANCED signal for optimal drainage cycles. Upstream: raw flow sensors at [4:8]. Downstream: AgPlantGrowthCycleMonitor reads output at [24:28].",
     "metadata": {
       "category": "agriculture",
-      "domain": "Agriculture — Water Management / Irrigation",
+      "domain": "Agriculture \u2014 Water Management / Irrigation",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [24:28]: [1,0,0,0]=IRRIGATE_ON, [0,1,0,0]=DRAIN_ALERT, [0,0,1,0]=EC_ALERT, [0,0,0,1]=FLOW_OK",
       "tags": [
@@ -30,7 +30,7 @@
         "soil_moisture_norm": "0.0=bone dry, 0.5=optimal field capacity (60% WHC), 1.0=fully saturated",
         "flow_rate_norm": "0.0=no flow, 0.5=nominal irrigation rate, 1.0=max pump capacity",
         "substrate_ec_norm": "0.0=distilled water, 0.5=2.0 mS/cm (target), 1.0=4.0+ mS/cm (toxic)",
-        "runoff_ratio_norm": "0.0=zero runoff, 0.5=15–20% (healthy drainage), 1.0=100% runoff"
+        "runoff_ratio_norm": "0.0=zero runoff, 0.5=15\u201320% (healthy drainage), 1.0=100% runoff"
       },
       "downstreamMachine": "AgPlantGrowthCycleMonitor (reads [24:28])",
       "tagging": {
@@ -137,7 +137,8 @@
             "description": "FLOW_OK: optimal irrigation cycle active at [24:28]"
           }
         ]
-      }
+      },
+      "machineClass": "signal-monitor"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -154,10 +155,10 @@
     "sequences": [
       {
         "id": "ag-irrig-drydown",
-        "name": "Dry-Down Escalation: MOIST+ → DRY → VERY_DRY → DEFICIT → IRRIGATE_ON",
+        "name": "Dry-Down Escalation: MOIST+ \u2192 DRY \u2192 VERY_DRY \u2192 DEFICIT \u2192 IRRIGATE_ON",
         "metadata": {
           "description": "Tracks progressive substrate drying from adequate moisture through deficit. The MOIST+ initial state primes the sequence before DRY can arm, ensuring transient low readings don't trigger false irrigation.",
-          "path": "MOIST+ → DRY → VERY_DRY → DEFICIT → output[1,0,0,0]",
+          "path": "MOIST+ \u2192 DRY \u2192 VERY_DRY \u2192 DEFICIT \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (IRRIGATE_ON)"
         },
         "vectors": [
@@ -184,9 +185,9 @@
             "isInitial": true,
             "metadata": {
               "name": "MOIST",
-              "description": "MOIST+ — substrate near field capacity; flow nominal; healthy runoff fraction. isInitial A*A = A+.",
-              "moisture_range": "0.38–0.52 (adequate)",
-              "runoff_range": "0.15–0.35 (healthy drainage)"
+              "description": "MOIST+ \u2014 substrate near field capacity; flow nominal; healthy runoff fraction. isInitial A*A = A+.",
+              "moisture_range": "0.38\u20130.52 (adequate)",
+              "runoff_range": "0.15\u20130.35 (healthy drainage)"
             },
             "nextVectorIds": [
               "ag-irr-moist",
@@ -216,9 +217,9 @@
             "isInitial": false,
             "metadata": {
               "name": "DRY",
-              "description": "DRY — moisture declining; reduced runoff indicates substrate drying out.",
-              "moisture_range": "0.22–0.38",
-              "runoff_range": "0.05–0.15"
+              "description": "DRY \u2014 moisture declining; reduced runoff indicates substrate drying out.",
+              "moisture_range": "0.22\u20130.38",
+              "runoff_range": "0.05\u20130.15"
             },
             "nextVectorIds": [
               "ag-irr-very-dry"
@@ -247,8 +248,8 @@
             "isInitial": false,
             "metadata": {
               "name": "VERY_DRY",
-              "description": "VERY_DRY — critical moisture depletion; plants entering water stress.",
-              "moisture_range": "0.10–0.22"
+              "description": "VERY_DRY \u2014 critical moisture depletion; plants entering water stress.",
+              "moisture_range": "0.10\u20130.22"
             },
             "nextVectorIds": [
               "ag-irr-deficit"
@@ -277,8 +278,8 @@
             "isInitial": false,
             "metadata": {
               "name": "DEFICIT",
-              "description": "DEFICIT — severe water deficit; fires IRRIGATE_ON immediately.",
-              "moisture_range": "0.0–0.12 (wilting point)"
+              "description": "DEFICIT \u2014 severe water deficit; fires IRRIGATE_ON immediately.",
+              "moisture_range": "0.0\u20130.12 (wilting point)"
             },
             "outputVectors": [
               {
@@ -300,10 +301,10 @@
       },
       {
         "id": "ag-irrig-waterlog",
-        "name": "Waterlogging Escalation: WET_WATCH+ → WET → SATURATED → WATERLOGGED → DRAIN_ALERT",
+        "name": "Waterlogging Escalation: WET_WATCH+ \u2192 WET \u2192 SATURATED \u2192 WATERLOGGED \u2192 DRAIN_ALERT",
         "metadata": {
           "description": "Detects progressive waterlogging from elevated moisture through saturation. Prevents root rot by triggering drain alerts before anaerobic conditions develop.",
-          "path": "WET_WATCH+ → WET → SATURATED → WATERLOGGED → output[0,1,0,0]",
+          "path": "WET_WATCH+ \u2192 WET \u2192 SATURATED \u2192 WATERLOGGED \u2192 output[0,1,0,0]",
           "output": "[0,1,0,0] (DRAIN_ALERT)"
         },
         "vectors": [
@@ -330,9 +331,9 @@
             "isInitial": true,
             "metadata": {
               "name": "WET_WATCH",
-              "description": "WET_WATCH+ — slightly above field capacity; elevated runoff indicates over-irrigation starting. isInitial A*A = A+.",
-              "moisture_range": "0.55–0.70",
-              "runoff_range": "0.50–0.65 (excessive)"
+              "description": "WET_WATCH+ \u2014 slightly above field capacity; elevated runoff indicates over-irrigation starting. isInitial A*A = A+.",
+              "moisture_range": "0.55\u20130.70",
+              "runoff_range": "0.50\u20130.65 (excessive)"
             },
             "nextVectorIds": [
               "ag-irr-wet-watch",
@@ -362,8 +363,8 @@
             "isInitial": false,
             "metadata": {
               "name": "WET",
-              "description": "WET — substrate retaining excess water; drain channels may be restricted.",
-              "moisture_range": "0.68–0.82"
+              "description": "WET \u2014 substrate retaining excess water; drain channels may be restricted.",
+              "moisture_range": "0.68\u20130.82"
             },
             "nextVectorIds": [
               "ag-irr-saturated"
@@ -392,8 +393,8 @@
             "isInitial": false,
             "metadata": {
               "name": "SATURATED",
-              "description": "SATURATED — near-total pore saturation; oxygen displacement beginning.",
-              "moisture_range": "0.80–0.92"
+              "description": "SATURATED \u2014 near-total pore saturation; oxygen displacement beginning.",
+              "moisture_range": "0.80\u20130.92"
             },
             "nextVectorIds": [
               "ag-irr-waterlogged"
@@ -422,8 +423,8 @@
             "isInitial": false,
             "metadata": {
               "name": "WATERLOGGED",
-              "description": "WATERLOGGED — anaerobic root zone conditions; fires DRAIN_ALERT.",
-              "moisture_range": "0.92–1.00 (fully saturated)"
+              "description": "WATERLOGGED \u2014 anaerobic root zone conditions; fires DRAIN_ALERT.",
+              "moisture_range": "0.92\u20131.00 (fully saturated)"
             },
             "outputVectors": [
               {
@@ -445,7 +446,7 @@
       },
       {
         "id": "ag-irrig-balanced",
-        "name": "Balanced Irrigation: BALANCED+ → FLOW_OK",
+        "name": "Balanced Irrigation: BALANCED+ \u2192 FLOW_OK",
         "metadata": {
           "description": "Fires FLOW_OK when substrate moisture, flow rate, and runoff fraction are all within optimal ranges. Provides continuous healthy-cycle signal to downstream plant growth monitors.",
           "pattern": "BALANCED+",
@@ -475,9 +476,9 @@
             "isInitial": true,
             "metadata": {
               "name": "BALANCED",
-              "description": "BALANCED+ — moisture at field capacity, flow nominal, healthy 20–30% runoff fraction. Fires FLOW_OK each cycle conditions are met.",
-              "moisture_range": "0.44–0.56 (field capacity band)",
-              "runoff_range": "0.20–0.35 (ideal drainage)"
+              "description": "BALANCED+ \u2014 moisture at field capacity, flow nominal, healthy 20\u201330% runoff fraction. Fires FLOW_OK each cycle conditions are met.",
+              "moisture_range": "0.44\u20130.56 (field capacity band)",
+              "runoff_range": "0.20\u20130.35 (ideal drainage)"
             },
             "outputVectors": [
               {
@@ -501,7 +502,7 @@
     "inputSequences": [
       {
         "name": "Dry-Down Cycle and Recovery",
-        "pattern": "8-step: MOIST→MOIST→DRY→VERY_DRY→DEFICIT→(irrigate)→MOIST→BALANCED",
+        "pattern": "8-step: MOIST\u2192MOIST\u2192DRY\u2192VERY_DRY\u2192DEFICIT\u2192(irrigate)\u2192MOIST\u2192BALANCED",
         "description": "Substrate dries between irrigation events; IRRIGATE_ON fires at DEFICIT; system recovers to BALANCED.",
         "vectors": [
           [

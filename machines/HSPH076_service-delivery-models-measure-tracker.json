@@ -185,7 +185,82 @@
             "processStatus": "info",
             "description": "Ideal-state progress is stable."
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "benefits_navigation_agent",
+        "mode": "supervised-act",
+        "trigger": "service-delivery-models-measure-tracker-risk-or-optimization-signal",
+        "allowedActions": [
+          "Dispatch benefits_navigation_agent to resolve service delivery models delivery risk and update the evaluation plan matrix.",
+          "Trigger optimization agent workflow for service delivery models using current logic-model outputs and measures.",
+          "Record sustained progress toward the ideal state for service delivery models and keep monitoring."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.hsph076.benefits.navigation.agent.completion",
+          "name": "localAIStack hsph076 benefits.navigation.agent completion",
+          "region": {
+            "offset": 1823,
+            "length": 4
+          },
+          "semantics": [
+            "evaluability readiness",
+            "service delivery pressure",
+            "equity signal",
+            "measure confidence"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-hsph076-completion",
+            "sensorId": "localai.hsph076.benefits.navigation.agent.completion",
+            "name": "localAIStack hsph076 benefits.navigation.agent completion",
+            "region": {
+              "offset": 1823,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": [
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "RED"
+          ]
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

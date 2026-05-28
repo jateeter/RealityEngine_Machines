@@ -2,10 +2,10 @@
   "version": "1.0.0",
   "machine": {
     "name": "Service Delivery Compliance Monitor",
-    "description": "Monitors delivery timeliness, service quality metrics, regulatory adherence, and documentation completeness for community service programs subject to federal, state, or contract compliance requirements. Community services organizations that receive public funding operate under strict delivery timelines — SNAP must be issued within 30 days of application, housing assistance waitlist notifications have required timeframes, and case documentation must be current for billing and audit purposes. Output at [972:976] feeds the Service Delivery Integrity Monitor.",
+    "description": "Monitors delivery timeliness, service quality metrics, regulatory adherence, and documentation completeness for community service programs subject to federal, state, or contract compliance requirements. Community services organizations that receive public funding operate under strict delivery timelines \u2014 SNAP must be issued within 30 days of application, housing assistance waitlist notifications have required timeframes, and case documentation must be current for billing and audit purposes. Output at [972:976] feeds the Service Delivery Integrity Monitor.",
     "metadata": {
       "category": "community-services",
-      "domain": "Community Services — Service Delivery / Compliance",
+      "domain": "Community Services \u2014 Service Delivery / Compliance",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [972:976]: [1,0,0,0]=COMPLIANCE_VIOLATION, [0,1,0,0]=COMPLIANCE_AT_RISK, [0,0,1,0]=MONITORING_REQUIRED, [0,0,0,1]=COMPLIANT",
       "tags": [
@@ -138,7 +138,8 @@
             "description": "COMPLIANT: all service delivery metrics meeting regulatory and contract requirements at [972:976]"
           }
         ]
-      }
+      },
+      "machineClass": "safety-compliance-checker"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -155,10 +156,10 @@
     "sequences": [
       {
         "id": "compliance-violation-escalation",
-        "name": "Compliance Failure: COMPLIANT+ → AT_RISK → MONITORING → COMPLIANCE_VIOLATION",
+        "name": "Compliance Failure: COMPLIANT+ \u2192 AT_RISK \u2192 MONITORING \u2192 COMPLIANCE_VIOLATION",
         "metadata": {
           "description": "Tracks compliance status deterioration from a confirmed compliant baseline through risk indicators to formal violation. In community services, violations often stem from capacity failures (case workers too overloaded to complete documentation) or from systemic process breakdowns revealed during funder monitoring visits. Requires COMPLIANT+ baseline before violation escalation can arm.",
-          "path": "COMPLIANT+ → AT_RISK → MONITORING → output[1,0,0,0]",
+          "path": "COMPLIANT+ \u2192 AT_RISK \u2192 MONITORING \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (COMPLIANCE_VIOLATION)"
         },
         "vectors": [
@@ -185,8 +186,8 @@
             "isInitial": true,
             "metadata": {
               "name": "COMPLIANT",
-              "description": "COMPLIANT+ — timeliness targets met; quality indicators green; no regulatory findings; documentation current. isInitial A*A = A+.",
-              "timeliness_status": "0.60–0.78 (meeting or exceeding contract timelines)"
+              "description": "COMPLIANT+ \u2014 timeliness targets met; quality indicators green; no regulatory findings; documentation current. isInitial A*A = A+.",
+              "timeliness_status": "0.60\u20130.78 (meeting or exceeding contract timelines)"
             },
             "nextVectorIds": [
               "dc-compliant",
@@ -216,8 +217,8 @@
             "isInitial": false,
             "metadata": {
               "name": "AT_RISK",
-              "description": "AT_RISK — timeliness slipping; one or two quality failures; regulatory risk factor present; documentation lag.",
-              "timeliness_status": "0.30–0.45 (approaching deadline thresholds; corrective action recommended)"
+              "description": "AT_RISK \u2014 timeliness slipping; one or two quality failures; regulatory risk factor present; documentation lag.",
+              "timeliness_status": "0.30\u20130.45 (approaching deadline thresholds; corrective action recommended)"
             },
             "nextVectorIds": [
               "dc-monitoring"
@@ -246,8 +247,8 @@
             "isInitial": false,
             "metadata": {
               "name": "MONITORING",
-              "description": "MONITORING — regulatory timeline violations occurring; quality failures unresolved; funder monitoring plan initiated; documentation critically deficient. Fires COMPLIANCE_VIOLATION.",
-              "timeliness_status": "0.0–0.20 (regulatory thresholds crossed; formal corrective action required)"
+              "description": "MONITORING \u2014 regulatory timeline violations occurring; quality failures unresolved; funder monitoring plan initiated; documentation critically deficient. Fires COMPLIANCE_VIOLATION.",
+              "timeliness_status": "0.0\u20130.20 (regulatory thresholds crossed; formal corrective action required)"
             },
             "outputVectors": [
               {
@@ -269,9 +270,9 @@
       },
       {
         "id": "compliance-monitoring-required",
-        "name": "Monitoring Required: BORDERLINE+ → MONITORING_REQUIRED signal",
+        "name": "Monitoring Required: BORDERLINE+ \u2192 MONITORING_REQUIRED signal",
         "metadata": {
-          "description": "Fires MONITORING_REQUIRED when compliance metrics are not yet violating thresholds but trajectory and risk factors indicate corrective action is needed before the next funder review. The proactive compliance management signal — catches deterioration before formal violation.",
+          "description": "Fires MONITORING_REQUIRED when compliance metrics are not yet violating thresholds but trajectory and risk factors indicate corrective action is needed before the next funder review. The proactive compliance management signal \u2014 catches deterioration before formal violation.",
           "pattern": "BORDERLINE+",
           "output": "[0,0,1,0] (MONITORING_REQUIRED)"
         },
@@ -299,7 +300,7 @@
             "isInitial": true,
             "metadata": {
               "name": "BORDERLINE",
-              "description": "BORDERLINE+ — timeliness slipping but not yet violating; quality borderline; no current regulatory finding but new requirement pending implementation; documentation partially lagging. isInitial A*A = A+: fires MONITORING_REQUIRED each cycle.",
+              "description": "BORDERLINE+ \u2014 timeliness slipping but not yet violating; quality borderline; no current regulatory finding but new requirement pending implementation; documentation partially lagging. isInitial A*A = A+: fires MONITORING_REQUIRED each cycle.",
               "scenario": "SNAP office processing 28-day average (30-day limit); new documentation requirement effective next month; quality score 85% (contract requires 90%)"
             },
             "outputVectors": [
@@ -322,7 +323,7 @@
       },
       {
         "id": "compliance-ok",
-        "name": "Compliant: IN_COMPLIANCE+ → COMPLIANT signal",
+        "name": "Compliant: IN_COMPLIANCE+ \u2192 COMPLIANT signal",
         "metadata": {
           "description": "Fires COMPLIANT when all delivery, quality, regulatory, and documentation metrics are meeting or exceeding requirements. Service delivery integrity monitor uses this alongside worker capacity adequate state to confirm sustainable compliant operations.",
           "pattern": "IN_COMPLIANCE+",
@@ -352,7 +353,7 @@
             "isInitial": true,
             "metadata": {
               "name": "IN_COMPLIANCE",
-              "description": "IN_COMPLIANCE+ — all timeliness, quality, regulatory, and documentation metrics at or above requirement. Fires COMPLIANT each cycle.",
+              "description": "IN_COMPLIANCE+ \u2014 all timeliness, quality, regulatory, and documentation metrics at or above requirement. Fires COMPLIANT each cycle.",
               "scenario": "Agency passing annual federal SNAP review; all case files current; timeliness at 98%; no open corrective actions"
             },
             "outputVectors": [
@@ -377,7 +378,7 @@
     "inputSequences": [
       {
         "name": "Funder Monitoring Visit Reveals Documentation Gap",
-        "pattern": "5-step: COMPLIANT→COMPLIANT→BORDERLINE (documentation audit)→AT_RISK (quality failures identified)→COMPLIANT (after remediation)",
+        "pattern": "5-step: COMPLIANT\u2192COMPLIANT\u2192BORDERLINE (documentation audit)\u2192AT_RISK (quality failures identified)\u2192COMPLIANT (after remediation)",
         "description": "Annual state monitoring visit reveals 15% of case files missing required 90-day assessments; quality score drops below contract minimum; corrective action implemented; compliance restored.",
         "vectors": [
           [

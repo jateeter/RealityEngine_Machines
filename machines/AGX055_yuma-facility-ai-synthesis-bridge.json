@@ -235,7 +235,90 @@
             "processStatus": "info",
             "description": "All four Yuma sources stable \u2014 AI may run optimization passes."
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "agriculture_yield_optimization_ai",
+        "mode": "advise",
+        "trigger": "ag-yield-optimization-ai-yuma-facility-bridge",
+        "allowedActions": [
+          "Project synthesis vector onto AgYieldOptimizationAI input window at [3959:3971]; AI dispatches cross-domain optimization.",
+          "Run facility-wide AI optimization when all sources stable.",
+          "Escalate to ag-emergency-response when any source is URGENT."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.agx055.agriculture.yield.optimization.ai.completion",
+          "name": "localAIStack agx055 agriculture.yield.optimization.ai completion",
+          "region": {
+            "offset": 256,
+            "length": 16
+          },
+          "semantics": [
+            "localai_writeback_0",
+            "localai_writeback_1",
+            "localai_writeback_2",
+            "localai_writeback_3",
+            "localai_writeback_4",
+            "localai_writeback_5",
+            "localai_writeback_6",
+            "localai_writeback_7",
+            "localai_writeback_8",
+            "localai_writeback_9",
+            "localai_writeback_10",
+            "localai_writeback_11",
+            "localai_writeback_12",
+            "localai_writeback_13",
+            "localai_writeback_14",
+            "localai_writeback_15"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-agx055-completion",
+            "sensorId": "localai.agx055.agriculture.yield.optimization.ai.completion",
+            "name": "localAIStack agx055 agriculture.yield.optimization.ai completion",
+            "region": {
+              "offset": 256,
+              "length": 16
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

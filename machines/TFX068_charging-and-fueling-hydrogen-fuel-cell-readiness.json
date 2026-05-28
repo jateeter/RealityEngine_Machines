@@ -209,7 +209,48 @@
             "processStatus": "info",
             "description": "Hydrogen Fuel Cell Readiness: NOMINAL -> SERVICE_NOMINAL"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "transit_depot_agent",
+        "mode": "observe",
+        "trigger": "transportation-fleet-charging-and-fueling-hydrogen-fuel-cell-readiness",
+        "allowedActions": [
+          "Dispatch transit_depot_agent for critical 100-bus fleet intervention on hydrogen fuel cell readiness.",
+          "Trigger predictive flow management for hydrogen fuel cell readiness using rider, vehicle, and route context.",
+          "Create maintenance, cleaning, security, or service task for hydrogen fuel cell readiness.",
+          "Keep 24/7 monitoring active for hydrogen fuel cell readiness."
+        ],
+        "writeBack": {
+          "type": "none"
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "observe",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "observe",
+          "stage": 0,
+          "writeBackType": "none",
+          "canWriteBack": false,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

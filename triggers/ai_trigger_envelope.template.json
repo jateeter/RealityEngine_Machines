@@ -76,11 +76,15 @@
   },
 
   "dispatch": {
-    "$comment":            "Which agent in localAIStack receives this envelope and what it should do. `agent` = the machine's metadata.dispatchableAgent. `action` = the matched rule's primary agentActions entry. `agentActionsCatalog` = the full machine.metadata.agentActions array so the AI can pick alternates. `trigger` = metadata.aiTrigger (the named hook the agent advertises). `endpoint.mutation` references the strawberry schema in localAIStack/services/api/routers/graphql_endpoint.py.",
+    "$comment":            "Which agent in localAIStack receives this envelope and what it should do. `processId` and `processName` come from metadata.triggerConfig. Agent, trigger, autonomy, writeBack, and action catalog come from metadata.agentBinding. `endpoint.mutation` references the strawberry schema in localAIStack/services/api/routers/graphql_endpoint.py.",
+    "processId":            "<metadata.triggerConfig.processId>",
+    "processName":          "<metadata.triggerConfig.processName>",
     "agent":               "<agent id, e.g. agriculture_yield_optimization_ai>",
     "action":              "<primary action for this firing>",
     "agentActionsCatalog": [],
     "trigger":             "<metadata.aiTrigger>",
+    "autonomyMode":         "<observe | advise | supervised-act | automated-act>",
+    "writeBack":            null,
     "endpoint": {
       "kind":      "graphql",
       "url":       "http://localhost:4000/graphql",

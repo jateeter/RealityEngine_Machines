@@ -228,7 +228,83 @@
             "processStatus": "info",
             "description": "Solo Inventor Intake: READY -> READY_FOR_NEXT_STEP"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "patent_workflow_agent",
+        "mode": "supervised-act",
+        "trigger": "legal-services-individual-creator-services-solo-inventor-intake",
+        "allowedActions": [
+          "Route solo inventor intake to attorney review for deadline, ownership, or rights-risk triage.",
+          "Dispatch patent_workflow_agent to optimize the next workstep for solo inventor intake.",
+          "Create or update docket/checklist tasks for solo inventor intake.",
+          "Mark solo inventor intake ready for the next controlled workflow step."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.lsx061.patent.workflow.agent.completion",
+          "name": "localAIStack lsx061 patent.workflow.agent completion",
+          "region": {
+            "offset": 2523,
+            "length": 4
+          },
+          "semantics": [
+            "facts complete",
+            "rights/ownership clear",
+            "deadline or filing pressure",
+            "commercialization readiness"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-lsx061-completion",
+            "sensorId": "localai.lsx061.patent.workflow.agent.completion",
+            "name": "localAIStack lsx061 patent.workflow.agent completion",
+            "region": {
+              "offset": 2523,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": [
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "RED"
+          ]
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

@@ -219,7 +219,86 @@
             "processStatus": "info",
             "description": "Sound Executive Optimization: 0-6H -> 6-12H -> 12-18H -> 18-24H -> PREDICTIVE_OPTIMIZE"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "well_light_agent",
+        "mode": "automated-act",
+        "trigger": "built-space-well-sound-and-acoustics-sound-executive-optimization",
+        "allowedActions": [
+          "Dispatch well_light_agent to verify WELL operational conformance for sound executive optimization.",
+          "Run predictive optimization for sound executive optimization using occupant, system, and evidence trends.",
+          "Create an operations, maintenance, policy, or evidence work order for sound executive optimization.",
+          "Mark sound executive optimization in the current compliant operating window."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.bsx080.well.light.agent.completion",
+          "name": "localAIStack bsx080 well.light.agent completion",
+          "region": {
+            "offset": 632,
+            "length": 4
+          },
+          "semantics": [
+            "health-performance signal stable",
+            "evidence or policy current",
+            "maintenance or operational drift pressure",
+            "occupant impact or wellness risk"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-bsx080-completion",
+            "sensorId": "localai.bsx080.well.light.agent.completion",
+            "name": "localAIStack bsx080 well.light.agent completion",
+            "region": {
+              "offset": 632,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": true,
+          "maxAutonomy": "automated-act",
+          "blockedWhenRag": [
+            "AMBER",
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "automated-act",
+          "stage": 3,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": true,
+          "requiresHumanApproval": false,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "AMBER",
+            "RED"
+          ],
+          "rollbackRequired": true
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

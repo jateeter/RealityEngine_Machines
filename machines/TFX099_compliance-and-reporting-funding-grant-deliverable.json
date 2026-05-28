@@ -211,7 +211,48 @@
             "processStatus": "info",
             "description": "Funding Grant Deliverable: NOMINAL -> SERVICE_NOMINAL"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "transit_workforce_agent",
+        "mode": "observe",
+        "trigger": "transportation-fleet-compliance-and-reporting-funding-grant-deliverable",
+        "allowedActions": [
+          "Dispatch transit_workforce_agent for critical 100-bus fleet intervention on funding grant deliverable.",
+          "Trigger predictive flow management for funding grant deliverable using rider, vehicle, and route context.",
+          "Create maintenance, cleaning, security, or service task for funding grant deliverable.",
+          "Keep 24/7 monitoring active for funding grant deliverable."
+        ],
+        "writeBack": {
+          "type": "none"
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "observe",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "observe",
+          "stage": 0,
+          "writeBackType": "none",
+          "canWriteBack": false,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

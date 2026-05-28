@@ -5,7 +5,7 @@
     "description": "Monitors hydroponic nutrient solution quality including pH, electrical conductivity, and nitrogen concentration. Three concurrent patterns detect: pH acidification drift, EC toxicity escalation, and macronutrient deficiency. Upstream: raw nutrient sensors at [8:12]. Downstream: AgNutrientCycleOptimizer reads output at [28:32].",
     "metadata": {
       "category": "agriculture",
-      "domain": "Agriculture — Nutrient Management / Hydroponics",
+      "domain": "Agriculture \u2014 Nutrient Management / Hydroponics",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [28:32]: [1,0,0,0]=PH_ALERT, [0,1,0,0]=EC_ALERT, [0,0,1,0]=DEFICIENCY_ALERT, [0,0,0,1]=SOLUTION_OK",
       "tags": [
@@ -137,7 +137,8 @@
             "description": "DEFICIENCY_ALERT: replenish nutrient stock solution at [28:32]"
           }
         ]
-      }
+      },
+      "machineClass": "optimizer"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -154,10 +155,10 @@
     "sequences": [
       {
         "id": "ag-nutrient-ph-drift",
-        "name": "pH Acidification Drift: BALANCED+ → DRIFT → ACIDIC → CRITICAL_PH → PH_ALERT",
+        "name": "pH Acidification Drift: BALANCED+ \u2192 DRIFT \u2192 ACIDIC \u2192 CRITICAL_PH \u2192 PH_ALERT",
         "metadata": {
           "description": "Tracks progressive pH acidification from balanced solution through critical low-pH. Common in active nutrient uptake cycles where plants release H+ ions. Requires sustained drift before alert fires.",
-          "path": "BALANCED+ → DRIFT → ACIDIC → CRITICAL_PH → output[1,0,0,0]",
+          "path": "BALANCED+ \u2192 DRIFT \u2192 ACIDIC \u2192 CRITICAL_PH \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (PH_ALERT)"
         },
         "vectors": [
@@ -184,9 +185,9 @@
             "isInitial": true,
             "metadata": {
               "name": "BALANCED",
-              "description": "BALANCED+ — all solution parameters near optimal threshold. isInitial A*A = A+: represents the neutral starting state before drift occurs.",
-              "ph_range": "0.44–0.56 (pH6.1–6.9)",
-              "ec_range": "0.44–0.56 (1.8–2.2 mS/cm)"
+              "description": "BALANCED+ \u2014 all solution parameters near optimal threshold. isInitial A*A = A+: represents the neutral starting state before drift occurs.",
+              "ph_range": "0.44\u20130.56 (pH6.1\u20136.9)",
+              "ec_range": "0.44\u20130.56 (1.8\u20132.2 mS/cm)"
             },
             "nextVectorIds": [
               "ag-nut-ph-balanced",
@@ -216,8 +217,8 @@
             "isInitial": false,
             "metadata": {
               "name": "DRIFT",
-              "description": "DRIFT — pH drifting acidic; EC still nominal; nutrients beginning to affect uptake.",
-              "ph_range": "0.27–0.44 (pH5.7–6.3)"
+              "description": "DRIFT \u2014 pH drifting acidic; EC still nominal; nutrients beginning to affect uptake.",
+              "ph_range": "0.27\u20130.44 (pH5.7\u20136.3)"
             },
             "nextVectorIds": [
               "ag-nut-ph-acidic"
@@ -246,8 +247,8 @@
             "isInitial": false,
             "metadata": {
               "name": "ACIDIC",
-              "description": "ACIDIC — pH clearly outside optimal range; nutrient lockout beginning for Fe, Mn, Zn.",
-              "ph_range": "0.12–0.28 (pH4.8–5.7)"
+              "description": "ACIDIC \u2014 pH clearly outside optimal range; nutrient lockout beginning for Fe, Mn, Zn.",
+              "ph_range": "0.12\u20130.28 (pH4.8\u20135.7)"
             },
             "nextVectorIds": [
               "ag-nut-ph-critical"
@@ -276,8 +277,8 @@
             "isInitial": false,
             "metadata": {
               "name": "CRITICAL_PH",
-              "description": "CRITICAL_PH — severe acidification; broad nutrient lockout imminent. Fires PH_ALERT.",
-              "ph_range": "0.0–0.12 (pH<4.8)"
+              "description": "CRITICAL_PH \u2014 severe acidification; broad nutrient lockout imminent. Fires PH_ALERT.",
+              "ph_range": "0.0\u20130.12 (pH<4.8)"
             },
             "outputVectors": [
               {
@@ -299,10 +300,10 @@
       },
       {
         "id": "ag-nutrient-ec-escalation",
-        "name": "EC Toxicity Escalation: NOMINAL+ → ELEVATED → HIGH → TOXIC → EC_ALERT",
+        "name": "EC Toxicity Escalation: NOMINAL+ \u2192 ELEVATED \u2192 HIGH \u2192 TOXIC \u2192 EC_ALERT",
         "metadata": {
           "description": "Detects rising nutrient salt concentration (EC) toward plant toxicity. High EC causes osmotic stress and can lock out water uptake.",
-          "path": "NOMINAL+ → ELEVATED → HIGH → TOXIC → output[0,1,0,0]",
+          "path": "NOMINAL+ \u2192 ELEVATED \u2192 HIGH \u2192 TOXIC \u2192 output[0,1,0,0]",
           "output": "[0,1,0,0] (EC_ALERT)"
         },
         "vectors": [
@@ -329,8 +330,8 @@
             "isInitial": true,
             "metadata": {
               "name": "NOMINAL",
-              "description": "NOMINAL+ — EC below target midpoint; solution is safe. isInitial A*A = A+.",
-              "ec_range": "0.38–0.50 (1.5–2.0 mS/cm)"
+              "description": "NOMINAL+ \u2014 EC below target midpoint; solution is safe. isInitial A*A = A+.",
+              "ec_range": "0.38\u20130.50 (1.5\u20132.0 mS/cm)"
             },
             "nextVectorIds": [
               "ag-nut-ec-nominal",
@@ -360,8 +361,8 @@
             "isInitial": false,
             "metadata": {
               "name": "ELEVATED",
-              "description": "ELEVATED — EC above target; salts accumulating from evapotranspiration.",
-              "ec_range": "0.58–0.72 (2.3–2.9 mS/cm)"
+              "description": "ELEVATED \u2014 EC above target; salts accumulating from evapotranspiration.",
+              "ec_range": "0.58\u20130.72 (2.3\u20132.9 mS/cm)"
             },
             "nextVectorIds": [
               "ag-nut-ec-high"
@@ -390,8 +391,8 @@
             "isInitial": false,
             "metadata": {
               "name": "HIGH",
-              "description": "HIGH EC — osmotic pressure increasing; growth reduction likely.",
-              "ec_range": "0.75–0.88 (3.0–3.5 mS/cm)"
+              "description": "HIGH EC \u2014 osmotic pressure increasing; growth reduction likely.",
+              "ec_range": "0.75\u20130.88 (3.0\u20133.5 mS/cm)"
             },
             "nextVectorIds": [
               "ag-nut-ec-toxic"
@@ -420,8 +421,8 @@
             "isInitial": false,
             "metadata": {
               "name": "TOXIC",
-              "description": "TOXIC EC — severe osmotic stress; burns and wilting imminent. Fires EC_ALERT.",
-              "ec_range": "0.90–1.00 (>3.5 mS/cm)"
+              "description": "TOXIC EC \u2014 severe osmotic stress; burns and wilting imminent. Fires EC_ALERT.",
+              "ec_range": "0.90\u20131.00 (>3.5 mS/cm)"
             },
             "outputVectors": [
               {
@@ -443,10 +444,10 @@
       },
       {
         "id": "ag-nutrient-deficiency",
-        "name": "Nutrient Deficiency: ADEQUATE+ → DECLINING → DEFICIENT → DEFICIENCY_ALERT",
+        "name": "Nutrient Deficiency: ADEQUATE+ \u2192 DECLINING \u2192 DEFICIENT \u2192 DEFICIENCY_ALERT",
         "metadata": {
           "description": "Monitors macronutrient (N) and micronutrient levels for depletion. Detects the pattern of declining concentrations before plants show visible deficiency symptoms.",
-          "path": "ADEQUATE+ → DECLINING → DEFICIENT → output[0,0,1,0]",
+          "path": "ADEQUATE+ \u2192 DECLINING \u2192 DEFICIENT \u2192 output[0,0,1,0]",
           "output": "[0,0,1,0] (DEFICIENCY_ALERT)"
         },
         "vectors": [
@@ -473,9 +474,9 @@
             "isInitial": true,
             "metadata": {
               "name": "ADEQUATE",
-              "description": "ADEQUATE+ — both N and micronutrients at sufficient levels. isInitial A*A = A+.",
-              "nitrogen_range": "0.48–0.62 (optimal N availability)",
-              "micronutrient_range": "0.48–0.62 (balanced trace minerals)"
+              "description": "ADEQUATE+ \u2014 both N and micronutrients at sufficient levels. isInitial A*A = A+.",
+              "nitrogen_range": "0.48\u20130.62 (optimal N availability)",
+              "micronutrient_range": "0.48\u20130.62 (balanced trace minerals)"
             },
             "nextVectorIds": [
               "ag-nut-adequate",
@@ -505,9 +506,9 @@
             "isInitial": false,
             "metadata": {
               "name": "DECLINING",
-              "description": "DECLINING — nutrient uptake exceeding replenishment; concentrations falling.",
-              "nitrogen_range": "0.28–0.45",
-              "micronutrient_range": "0.28–0.45"
+              "description": "DECLINING \u2014 nutrient uptake exceeding replenishment; concentrations falling.",
+              "nitrogen_range": "0.28\u20130.45",
+              "micronutrient_range": "0.28\u20130.45"
             },
             "nextVectorIds": [
               "ag-nut-deficient"
@@ -536,9 +537,9 @@
             "isInitial": false,
             "metadata": {
               "name": "DEFICIENT",
-              "description": "DEFICIENT — critical nutrient depletion; chlorosis and growth arrest imminent. Fires DEFICIENCY_ALERT.",
-              "nitrogen_range": "0.0–0.28 (N-starved)",
-              "micronutrient_range": "0.0–0.28 (trace lockout)"
+              "description": "DEFICIENT \u2014 critical nutrient depletion; chlorosis and growth arrest imminent. Fires DEFICIENCY_ALERT.",
+              "nitrogen_range": "0.0\u20130.28 (N-starved)",
+              "micronutrient_range": "0.0\u20130.28 (trace lockout)"
             },
             "outputVectors": [
               {
@@ -562,7 +563,7 @@
     "inputSequences": [
       {
         "name": "pH Drift and Recovery Cycle",
-        "pattern": "7-step: BALANCED→BALANCED→DRIFT→ACIDIC→CRITICAL_PH→(ph-up dosed)→BALANCED→SOLUTION_OK",
+        "pattern": "7-step: BALANCED\u2192BALANCED\u2192DRIFT\u2192ACIDIC\u2192CRITICAL_PH\u2192(ph-up dosed)\u2192BALANCED\u2192SOLUTION_OK",
         "description": "Typical 4-day pH drift in an active crop reservoir; pH-up dosed after alert; solution restabilizes.",
         "vectors": [
           [

@@ -189,7 +189,79 @@
             "processStatus": "info",
             "description": "Operating window is stable."
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "aquaculture_compliance_agent",
+        "mode": "advise",
+        "trigger": "aquaculture-dissolved-oxygen-control-risk-maintenance-or-optimization",
+        "allowedActions": [
+          "Dispatch aquaculture_compliance_agent to stabilize dissolved oxygen control and record corrective action.",
+          "Run AI optimization for dissolved oxygen control using the latest operating window and production targets.",
+          "Create preventive-maintenance work for dissolved oxygen control and verify completion telemetry.",
+          "Continue automated monitoring for dissolved oxygen control while preserving current setpoints."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.agx005.aquaculture.compliance.agent.completion",
+          "name": "localAIStack agx005 aquaculture.compliance.agent completion",
+          "region": {
+            "offset": 84,
+            "length": 4
+          },
+          "semantics": [
+            "process stability",
+            "resource efficiency",
+            "biosecurity or IPM status",
+            "maintenance readiness"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-agx005-completion",
+            "sensorId": "localai.agx005.aquaculture.compliance.agent.completion",
+            "name": "localAIStack agx005 aquaculture.compliance.agent completion",
+            "region": {
+              "offset": 84,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.example.org/schemas/agent-ready-machine-class-1.0.0.json",
+  "title": "RealityEngine Agent-Ready Machine Class",
+  "type": "object",
+  "required": [
+    "workflowStage",
+    "stageName",
+    "role",
+    "inputContract",
+    "outputContract",
+    "requiresGovernance",
+    "requiresTriggerConfig",
+    "requiresInputSemantics",
+    "requiresSensorNormalization",
+    "requiresAgentBinding",
+    "allowedAutonomyModes",
+    "allowedWriteBackTypes",
+    "emitsTo"
+  ],
+  "properties": {
+    "workflowStage": { "type": "integer", "minimum": 1 },
+    "stageName": { "type": "string", "minLength": 1 },
+    "role": { "type": "string", "minLength": 1 },
+    "inputContract": { "type": "string", "minLength": 1 },
+    "outputContract": { "type": "string", "minLength": 1 },
+    "requiresGovernance": { "type": "boolean" },
+    "requiresTriggerConfig": { "type": "boolean" },
+    "requiresInputSemantics": { "type": "boolean" },
+    "requiresSensorNormalization": { "type": "boolean" },
+    "requiresAgentBinding": { "type": "boolean" },
+    "allowedAutonomyModes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["observe", "advise", "supervised-act", "automated-act"] }
+    },
+    "allowedWriteBackTypes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["none", "pe-sensor", "pe-domain-vector"] }
+    },
+    "emitsTo": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "machine-class.schema.json" }
+    }
+  },
+  "additionalProperties": false
+}

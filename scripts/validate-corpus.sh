@@ -1,81 +1,17 @@
 #!/bin/bash
-# =============================================================================
-# validate-corpus.sh — schema-check all machine JSON files before seeding
+# Architecture-aware corpus validation before seeding or accepting new domains.
 #
-# Checks each file for:
-#   1. Valid JSON (parseable by python3)
-#   2. Top-level 'machine' object with non-empty 'name' string
-#   3. Non-empty 'machine.sequences' array (the CES)
-#
-# Usage:  ./scripts/validate-corpus.sh
-# Exit:   0 on success, 1 if any file fails validation.
-# =============================================================================
+# Default mode is compatibility-safe: hard schema errors fail the build, while
+# migration gaps such as legacy dispatchableAgent without agentBinding are
+# reported as warnings.  Set STRICT_DOMAIN_CONTRACT=1 to make warnings fail.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MACHINES_ROOT="$SCRIPT_DIR/../machines"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-GREEN='\033[0;32m'; RED='\033[0;31m'; YELLOW='\033[1;33m'; NC='\033[0m'
-ok()   { echo -e "${GREEN}✓${NC} $*"; }
-fail() { echo -e "${RED}✗${NC} $*"; }
-warn() { echo -e "${YELLOW}⚠${NC} $*"; }
-
-FILES=()
-while IFS= read -r _f; do FILES+=("$_f"); done < <(find "$MACHINES_ROOT" -name "*.json" | sort)
-
-if [ "${#FILES[@]}" -eq 0 ]; then
-    warn "No machine JSON files found in $MACHINES_ROOT"
-    exit 0
+ARGS=("--machines-root" "$REPO_ROOT/machines")
+if [ "${STRICT_DOMAIN_CONTRACT:-0}" != "0" ]; then
+  ARGS+=("--strict")
 fi
 
-echo "Validating ${#FILES[@]} machine files..."
-echo ""
-
-PASS=0
-FAIL=0
-
-for file in "${FILES[@]}"; do
-    rel="${file#$MACHINES_ROOT/}"
-    RESULT=$(python3 - "$file" <<'PYEOF' 2>&1
-import json, sys
-
-path = sys.argv[1]
-try:
-    with open(path) as f:
-        m = json.load(f)
-except json.JSONDecodeError as e:
-    print(f"INVALID_JSON: {e}")
-    sys.exit(1)
-
-errors = []
-machine = m.get('machine')
-if not isinstance(machine, dict):
-    errors.append("top-level 'machine' object missing or not a dict")
-else:
-    name = machine.get('name', '')
-    if not str(name).strip():
-        errors.append("'machine.name' must be a non-empty string")
-    seqs = machine.get('sequences')
-    if not isinstance(seqs, list) or len(seqs) == 0:
-        errors.append("'machine.sequences' must be a non-empty array")
-
-if errors:
-    print("SCHEMA_ERROR: " + "; ".join(errors))
-    sys.exit(1)
-
-print(f"OK name={machine['name']}")
-PYEOF
-) || true
-
-    if echo "$RESULT" | grep -q "^OK"; then
-        ok "$rel  ($(echo "$RESULT" | sed 's/^OK //' | cut -c1-60))"
-        PASS=$((PASS+1))
-    else
-        fail "$rel  — $RESULT"
-        FAIL=$((FAIL+1))
-    fi
-done
-
-echo ""
-echo "Result: $PASS valid, $FAIL invalid"
-[ "$FAIL" -gt 0 ] && exit 1 || exit 0
+python3 "$SCRIPT_DIR/audit-corpus.py" "${ARGS[@]}" "$@"

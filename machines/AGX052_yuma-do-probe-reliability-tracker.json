@@ -183,7 +183,79 @@
             "processStatus": "info",
             "description": "Equipment in normal operating window."
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "aquaculture_do_probe_reliability_agent",
+        "mode": "advise",
+        "trigger": "agriculture-yuma-do-probe-reliability-tracker-maintenance",
+        "allowedActions": [
+          "Dispatch aquaculture_do_probe_reliability_agent for urgent maintenance and record corrective action.",
+          "Schedule preventive maintenance via aquaculture_do_probe_reliability_agent and verify completion telemetry.",
+          "Run sensor-calibration workflow via aquaculture_do_probe_reliability_agent for the yuma do probe reliability stream.",
+          "Continue automated monitoring for yuma do probe reliability while preserving current setpoints."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.agx052.aquaculture.do.probe.reliability.agent.completion",
+          "name": "localAIStack agx052 aquaculture.do.probe.reliability.agent completion",
+          "region": {
+            "offset": 84,
+            "length": 4
+          },
+          "semantics": [
+            "DO level in nominal band",
+            "DO temp in nominal band",
+            "low-DO watch band",
+            "high-DO-temp watch band"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-agx052-completion",
+            "sensorId": "localai.agx052.aquaculture.do.probe.reliability.agent.completion",
+            "name": "localAIStack agx052 aquaculture.do.probe.reliability.agent completion",
+            "region": {
+              "offset": 84,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

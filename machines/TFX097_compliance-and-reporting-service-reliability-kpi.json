@@ -211,7 +211,48 @@
             "processStatus": "info",
             "description": "Service Reliability KPI: NOMINAL -> SERVICE_NOMINAL"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "transit_energy_agent",
+        "mode": "observe",
+        "trigger": "transportation-fleet-compliance-and-reporting-service-reliability-kpi",
+        "allowedActions": [
+          "Dispatch transit_energy_agent for critical 100-bus fleet intervention on service reliability kpi.",
+          "Trigger predictive flow management for service reliability kpi using rider, vehicle, and route context.",
+          "Create maintenance, cleaning, security, or service task for service reliability kpi.",
+          "Keep 24/7 monitoring active for service reliability kpi."
+        ],
+        "writeBack": {
+          "type": "none"
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "observe",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "observe",
+          "stage": 0,
+          "writeBackType": "none",
+          "canWriteBack": false,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

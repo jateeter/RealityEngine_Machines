@@ -220,7 +220,48 @@
             "processStatus": "info",
             "description": "Special Diet Availability: 0-6H -> 6-12H -> 12-18H -> 18-24H -> PREDICTIVE_OPTIMIZE"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "well_water_quality_agent",
+        "mode": "observe",
+        "trigger": "built-space-well-nourishment-special-diet-availability",
+        "allowedActions": [
+          "Dispatch well_water_quality_agent to verify WELL operational conformance for special diet availability.",
+          "Run predictive optimization for special diet availability using occupant, system, and evidence trends.",
+          "Create an operations, maintenance, policy, or evidence work order for special diet availability.",
+          "Mark special diet availability in the current compliant operating window."
+        ],
+        "writeBack": {
+          "type": "none"
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "observe",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "observe",
+          "stage": 0,
+          "writeBackType": "none",
+          "canWriteBack": false,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

@@ -209,7 +209,79 @@
             "processStatus": "info",
             "description": "Run Cut Adjustment: NOMINAL -> SERVICE_NOMINAL"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "transit_finance_agent",
+        "mode": "advise",
+        "trigger": "transportation-fleet-dispatch-and-flow-control-run-cut-adjustment",
+        "allowedActions": [
+          "Dispatch transit_finance_agent for critical 100-bus fleet intervention on run cut adjustment.",
+          "Trigger predictive flow management for run cut adjustment using rider, vehicle, and route context.",
+          "Create maintenance, cleaning, security, or service task for run cut adjustment.",
+          "Keep 24/7 monitoring active for run cut adjustment."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.tfx059.transit.finance.agent.completion",
+          "name": "localAIStack tfx059 transit.finance.agent completion",
+          "region": {
+            "offset": 3459,
+            "length": 4
+          },
+          "semantics": [
+            "service reliability",
+            "rider impact",
+            "asset readiness",
+            "safety/security risk"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-tfx059-completion",
+            "sensorId": "localai.tfx059.transit.finance.agent.completion",
+            "name": "localAIStack tfx059 transit.finance.agent completion",
+            "region": {
+              "offset": 3459,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

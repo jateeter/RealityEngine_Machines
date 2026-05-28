@@ -2,10 +2,10 @@
   "version": "1.0.0",
   "machine": {
     "name": "Home Mental Health Access Monitor",
-    "description": "Integration machine that reads combined output signals from the Home Chronic Disease Monitor [2019:2023] and the Home Chronic Pain Monitor [2023:2027] to detect mental health access needs driven by chronic illness burden. Chronic disease and chronic pain are bidirectionally linked to depression and anxiety — each worsens the other — and low-income patients carrying both have the least access to mental health services. This machine identifies patients who need mental health integration into their medical home care plan. Output at [2039:2043] is available to downstream care coordination systems.",
+    "description": "Integration machine that reads combined output signals from the Home Chronic Disease Monitor [2019:2023] and the Home Chronic Pain Monitor [2023:2027] to detect mental health access needs driven by chronic illness burden. Chronic disease and chronic pain are bidirectionally linked to depression and anxiety \u2014 each worsens the other \u2014 and low-income patients carrying both have the least access to mental health services. This machine identifies patients who need mental health integration into their medical home care plan. Output at [2039:2043] is available to downstream care coordination systems.",
     "metadata": {
       "category": "health-personal",
-      "domain": "Home Health — Mental Health Access / Chronic Illness Comorbidity",
+      "domain": "Home Health \u2014 Mental Health Access / Chronic Illness Comorbidity",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [2039:2043]: [1,0,0,0]=MENTAL_HEALTH_CRISIS, [0,1,0,0]=MH_REFERRAL_NEEDED, [0,0,1,0]=COMORBIDITY_RISK, [0,0,0,1]=MH_ACCESS_ADEQUATE",
       "tags": [
@@ -32,7 +32,7 @@
       "sensorNormalization": {
         "disease_burden_signal_norm": "0.0=[1,0,0,0] DISEASE_EXACERBATION from ChronicDisease (bit 366), 0.5=[0,1,0,0] POOR_CONTROL (bit 367), 1.0=[0,0,0,1] DISEASE_CONTROLLED (bit 369)",
         "pain_burden_signal_norm": "0.0=[1,0,0,0] PAIN_CRISIS from ChronicPain (bit 370), 0.5=[0,0,1,0] FUNCTIONAL_IMPAIRMENT (bit 372), 1.0=[0,0,0,1] PAIN_MANAGED (bit 373)",
-        "depression_screen_norm": "0.0=PHQ-9 score >15 (severe depression); active suicidal ideation screening positive, 0.5=PHQ-9 score 5–14 (mild to moderate); hopelessness reported, 1.0=PHQ-9 score <5; mood adequate",
+        "depression_screen_norm": "0.0=PHQ-9 score >15 (severe depression); active suicidal ideation screening positive, 0.5=PHQ-9 score 5\u201314 (mild to moderate); hopelessness reported, 1.0=PHQ-9 score <5; mood adequate",
         "mh_access_norm": "0.0=no mental health provider access; no telehealth option; no peer support; all cost barriers, 0.5=limited access (long waitlist; one session per month; crisis line only), 1.0=regular mental health engagement; adequate support"
       },
       "upstreamMachines": [
@@ -148,7 +148,8 @@
             "description": "MH_ACCESS_ADEQUATE: chronic illness managed; mental health comorbidity risk low; no access gap at [2039:2043]"
           }
         ]
-      }
+      },
+      "machineClass": "signal-monitor"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -165,10 +166,10 @@
     "sequences": [
       {
         "id": "mh-access-crisis",
-        "name": "MH Crisis: STABLE+ → DISTRESSED → MH_DETERIORATING → MENTAL_HEALTH_CRISIS",
+        "name": "MH Crisis: STABLE+ \u2192 DISTRESSED \u2192 MH_DETERIORATING \u2192 MENTAL_HEALTH_CRISIS",
         "metadata": {
-          "description": "Tracks mental health deterioration driven by dual chronic illness burden — simultaneous disease exacerbation and pain crisis produce the highest depression and suicidality risk in home care populations. The bidirectional relationship means physical crisis accelerates mental health crisis and vice versa. Requires STABLE+ baseline before the crisis escalation arm can activate.",
-          "path": "STABLE+ → DISTRESSED → MH_DETERIORATING → output[1,0,0,0]",
+          "description": "Tracks mental health deterioration driven by dual chronic illness burden \u2014 simultaneous disease exacerbation and pain crisis produce the highest depression and suicidality risk in home care populations. The bidirectional relationship means physical crisis accelerates mental health crisis and vice versa. Requires STABLE+ baseline before the crisis escalation arm can activate.",
+          "path": "STABLE+ \u2192 DISTRESSED \u2192 MH_DETERIORATING \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (MENTAL_HEALTH_CRISIS)"
         },
         "vectors": [
@@ -211,7 +212,7 @@
             "isInitial": true,
             "metadata": {
               "name": "STABLE",
-              "description": "STABLE+ — DISEASE_CONTROLLED (bit 369) and PAIN_MANAGED (bit 373) both high. Chronic illness managed; pain controlled; mental health not acutely burdened. isInitial A*A = A+.",
+              "description": "STABLE+ \u2014 DISEASE_CONTROLLED (bit 369) and PAIN_MANAGED (bit 373) both high. Chronic illness managed; pain controlled; mental health not acutely burdened. isInitial A*A = A+.",
               "upstream_state": "ChronicDisease=DISEASE_CONTROLLED, ChronicPain=PAIN_MANAGED"
             },
             "nextVectorIds": [
@@ -258,7 +259,7 @@
             "isInitial": false,
             "metadata": {
               "name": "DISTRESSED",
-              "description": "DISTRESSED — POOR_CONTROL (bit 367) and FUNCTIONAL_IMPAIRMENT (bit 372). Disease slipping; pain limiting function. PHQ-9 score rising; hopelessness reported.",
+              "description": "DISTRESSED \u2014 POOR_CONTROL (bit 367) and FUNCTIONAL_IMPAIRMENT (bit 372). Disease slipping; pain limiting function. PHQ-9 score rising; hopelessness reported.",
               "upstream_state": "ChronicDisease=POOR_CONTROL, ChronicPain=FUNCTIONAL_IMPAIRMENT"
             },
             "nextVectorIds": [
@@ -304,7 +305,7 @@
             "isInitial": false,
             "metadata": {
               "name": "MH_DETERIORATING",
-              "description": "MH_DETERIORATING — dual crisis: DISEASE_EXACERBATION (bit 366) and PAIN_CRISIS (bit 370). Both upstream machines in acute crisis. Severe depression likely; suicidality screening mandatory. Fires MENTAL_HEALTH_CRISIS.",
+              "description": "MH_DETERIORATING \u2014 dual crisis: DISEASE_EXACERBATION (bit 366) and PAIN_CRISIS (bit 370). Both upstream machines in acute crisis. Severe depression likely; suicidality screening mandatory. Fires MENTAL_HEALTH_CRISIS.",
               "upstream_state": "ChronicDisease=DISEASE_EXACERBATION, ChronicPain=PAIN_CRISIS"
             },
             "outputVectors": [
@@ -327,9 +328,9 @@
       },
       {
         "id": "mh-referral-needed",
-        "name": "MH Referral: COMORBID+ → MH_REFERRAL_NEEDED signal",
+        "name": "MH Referral: COMORBID+ \u2192 MH_REFERRAL_NEEDED signal",
         "metadata": {
-          "description": "Fires MH_REFERRAL_NEEDED when one upstream machine is in exacerbation/crisis and the other is in poor control/impairment — the most common unaddressed mental health comorbidity state in home care. Identifies the patient population where integrated behavioral health in medical care would prevent escalation to crisis.",
+          "description": "Fires MH_REFERRAL_NEEDED when one upstream machine is in exacerbation/crisis and the other is in poor control/impairment \u2014 the most common unaddressed mental health comorbidity state in home care. Identifies the patient population where integrated behavioral health in medical care would prevent escalation to crisis.",
           "pattern": "COMORBID+",
           "output": "[0,1,0,0] (MH_REFERRAL_NEEDED)"
         },
@@ -373,7 +374,7 @@
             "isInitial": true,
             "metadata": {
               "name": "COMORBID",
-              "description": "COMORBID+ — DISEASE_EXACERBATION (bit 366) and FUNCTIONAL_IMPAIRMENT (bit 372). One upstream in acute crisis; other in sustained impairment. PHQ-9 moderate to severe range expected. isInitial A*A = A+: fires MH_REFERRAL_NEEDED each cycle.",
+              "description": "COMORBID+ \u2014 DISEASE_EXACERBATION (bit 366) and FUNCTIONAL_IMPAIRMENT (bit 372). One upstream in acute crisis; other in sustained impairment. PHQ-9 moderate to severe range expected. isInitial A*A = A+: fires MH_REFERRAL_NEEDED each cycle.",
               "scenario": "COPD exacerbation patient with chronic back pain; scoring PHQ-9=12; no mental health provider; home health nurse is only contact"
             },
             "outputVectors": [
@@ -396,7 +397,7 @@
       },
       {
         "id": "mh-access-adequate",
-        "name": "MH Access Adequate: SUPPORTED+ → MH_ACCESS_ADEQUATE signal",
+        "name": "MH Access Adequate: SUPPORTED+ \u2192 MH_ACCESS_ADEQUATE signal",
         "metadata": {
           "description": "Fires MH_ACCESS_ADEQUATE when chronic illness burden is managed and mental health access or coping is adequate. Confirms that the chronic illness-mental health comorbidity loop is not active and current care coordination is sufficient.",
           "pattern": "SUPPORTED+",
@@ -442,7 +443,7 @@
             "isInitial": true,
             "metadata": {
               "name": "SUPPORTED",
-              "description": "SUPPORTED+ — DISEASE_CONTROLLED (bit 369) and PAIN_MANAGED (bit 373) both high. Chronic illness and pain managed; mental health comorbidity not active; access adequate. Fires MH_ACCESS_ADEQUATE each cycle.",
+              "description": "SUPPORTED+ \u2014 DISEASE_CONTROLLED (bit 369) and PAIN_MANAGED (bit 373) both high. Chronic illness and pain managed; mental health comorbidity not active; access adequate. Fires MH_ACCESS_ADEQUATE each cycle.",
               "scenario": "Patient stable on CHW-supported chronic disease program; pain controlled; enrolled in telehealth therapy group"
             },
             "outputVectors": [
@@ -467,7 +468,7 @@
     "inputSequences": [
       {
         "name": "Chronic Disease Crisis Driving Depression Spiral",
-        "pattern": "6-step: STABLE→STABLE→DISTRESSED→COMORBID (referral needed)→MH_CRISIS→STABLE (after integrated care)",
+        "pattern": "6-step: STABLE\u2192STABLE\u2192DISTRESSED\u2192COMORBID (referral needed)\u2192MH_CRISIS\u2192STABLE (after integrated care)",
         "description": "Diabetic patient with chronic back pain loses job and insurance; A1c spikes to 11.5 while pain worsens; PHQ-9=18; suicidal ideation at home visit; integrated behavioral health enrollment resolves cycle.",
         "vectors": [
           [

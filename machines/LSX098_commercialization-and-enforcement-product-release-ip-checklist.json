@@ -230,7 +230,83 @@
             "processStatus": "info",
             "description": "Product Release IP Checklist: READY -> READY_FOR_NEXT_STEP"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "legal_ops_agent",
+        "mode": "supervised-act",
+        "trigger": "legal-services-commercialization-and-enforcement-product-release-ip-checklist",
+        "allowedActions": [
+          "Route product release ip checklist to attorney review for deadline, ownership, or rights-risk triage.",
+          "Dispatch legal_ops_agent to optimize the next workstep for product release ip checklist.",
+          "Create or update docket/checklist tasks for product release ip checklist.",
+          "Mark product release ip checklist ready for the next controlled workflow step."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.lsx098.legal.ops.agent.completion",
+          "name": "localAIStack lsx098 legal.ops.agent completion",
+          "region": {
+            "offset": 2819,
+            "length": 4
+          },
+          "semantics": [
+            "facts complete",
+            "rights/ownership clear",
+            "deadline or filing pressure",
+            "commercialization readiness"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-lsx098-completion",
+            "sensorId": "localai.lsx098.legal.ops.agent.completion",
+            "name": "localAIStack lsx098 legal.ops.agent completion",
+            "region": {
+              "offset": 2819,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": [
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "RED"
+          ]
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

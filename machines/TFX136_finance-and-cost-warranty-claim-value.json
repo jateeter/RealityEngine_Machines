@@ -209,7 +209,79 @@
             "processStatus": "info",
             "description": "Warranty Claim Value: NOMINAL -> SERVICE_NOMINAL"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "transit_rider_experience_agent",
+        "mode": "advise",
+        "trigger": "transportation-fleet-finance-and-cost-warranty-claim-value",
+        "allowedActions": [
+          "Dispatch transit_rider_experience_agent for critical 100-bus fleet intervention on warranty claim value.",
+          "Trigger predictive flow management for warranty claim value using rider, vehicle, and route context.",
+          "Create maintenance, cleaning, security, or service task for warranty claim value.",
+          "Keep 24/7 monitoring active for warranty claim value."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.tfx136.transit.rider.experience.agent.completion",
+          "name": "localAIStack tfx136 transit.rider.experience.agent completion",
+          "region": {
+            "offset": 3751,
+            "length": 4
+          },
+          "semantics": [
+            "service reliability",
+            "rider impact",
+            "asset readiness",
+            "safety/security risk"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-tfx136-completion",
+            "sensorId": "localai.tfx136.transit.rider.experience.agent.completion",
+            "name": "localAIStack tfx136 transit.rider.experience.agent completion",
+            "region": {
+              "offset": 3751,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

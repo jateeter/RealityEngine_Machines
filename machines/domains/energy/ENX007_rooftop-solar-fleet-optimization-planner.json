@@ -218,7 +218,16 @@
             "processStatus": "info",
             "description": "Operating window is stable and local grid electric quality signals are inside limits."
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
       },
       "localGridElectricQualityStabilitySignals": {
         "inputDimension": 2,
@@ -241,6 +250,76 @@
           "island-ready, islanded, and restoration mode gating",
           "preventive maintenance prioritization for assets degrading grid quality"
         ]
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "community_microgrid_ops_agent",
+        "mode": "automated-act",
+        "trigger": "community-microgrid-rooftop-solar-fleet-optimization-planner",
+        "allowedActions": [
+          "Dispatch community_microgrid_ops_agent for urgent stabilization of rooftop solar fleet optimization planner using local voltage, frequency, harmonic, phase-balance, PCC, and feeder/protection signals.",
+          "Optimize solar, battery, inverter grid-support, import/export, and flexible-load setpoints for rooftop solar fleet optimization planner.",
+          "Schedule preventive maintenance for rooftop solar fleet optimization planner when equipment drift threatens local electric quality, grid stability, or safety margins.",
+          "Continue community microgrid monitoring for rooftop solar fleet optimization planner while preserving the current local grid quality/stability operating plan."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.enx007.community.microgrid.ops.agent.completion",
+          "name": "localAIStack enx007 community.microgrid.ops.agent completion",
+          "region": {
+            "offset": 6048,
+            "length": 4
+          },
+          "semantics": [
+            "solar or asset health",
+            "battery storage or flexible load margin",
+            "local grid electric quality and stability",
+            "preventive maintenance readiness"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-enx007-completion",
+            "sensorId": "localai.enx007.community.microgrid.ops.agent.completion",
+            "name": "localAIStack enx007 community.microgrid.ops.agent completion",
+            "region": {
+              "offset": 6048,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": true,
+          "maxAutonomy": "automated-act",
+          "blockedWhenRag": [
+            "AMBER",
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "automated-act",
+          "stage": 3,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": true,
+          "requiresHumanApproval": false,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "AMBER",
+            "RED"
+          ],
+          "rollbackRequired": true
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

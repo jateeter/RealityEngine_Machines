@@ -37,7 +37,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "Machine latched SET — signal AMBER to local AI"
+            "description": "Machine latched SET \u2014 signal AMBER to local AI"
           },
           {
             "sequenceId": "rs-reset-sequence",
@@ -47,7 +47,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "ok",
-            "description": "Machine reset — clear upstream AMBER/RED"
+            "description": "Machine reset \u2014 clear upstream AMBER/RED"
           }
         ]
       },
@@ -108,7 +108,8 @@
           "error": null
         },
         "notes": "Auto-backfilled by scripts/backfill-governance.mjs from primaryDomain=\"digital-logic\".  Review and tune the routing as the team owning RSFlipFlopTrigger matures."
-      }
+      },
+      "machineClass": "bridge"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -125,10 +126,10 @@
     "sequences": [
       {
         "id": "rs-set-sequence",
-        "name": "SET → trigger AMBER",
+        "name": "SET \u2192 trigger AMBER",
         "metadata": {
           "description": "SET input (S=1, R=0) drives output HIGH and fires the upstream AMBER trigger",
-          "path": "10→[1,0]",
+          "path": "10\u2192[1,0]",
           "output": "[1,0]",
           "triggerOn": "output",
           "ragStatusCode": "AMBER"
@@ -149,7 +150,7 @@
             "isInitial": true,
             "metadata": {
               "name": "10",
-              "description": "SET state — trigger condition",
+              "description": "SET state \u2014 trigger condition",
               "state": "SET"
             },
             "outputVectors": [
@@ -160,7 +161,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "SET asserted — upstream AMBER",
+                  "description": "SET asserted \u2014 upstream AMBER",
                   "state": "SET",
                   "logicValue": "HIGH",
                   "ragStatusCode": "AMBER"
@@ -172,10 +173,10 @@
       },
       {
         "id": "rs-reset-sequence",
-        "name": "RESET → trigger GREEN",
+        "name": "RESET \u2192 trigger GREEN",
         "metadata": {
           "description": "RESET input (S=0, R=1) drives output LOW and fires the upstream GREEN trigger",
-          "path": "01→[0,1]",
+          "path": "01\u2192[0,1]",
           "output": "[0,1]",
           "triggerOn": "output",
           "ragStatusCode": "GREEN"
@@ -196,7 +197,7 @@
             "isInitial": true,
             "metadata": {
               "name": "01",
-              "description": "RESET state — trigger clear",
+              "description": "RESET state \u2014 trigger clear",
               "state": "RESET"
             },
             "outputVectors": [
@@ -207,7 +208,7 @@
                   1
                 ],
                 "metadata": {
-                  "description": "RESET asserted — upstream GREEN",
+                  "description": "RESET asserted \u2014 upstream GREEN",
                   "state": "RESET",
                   "logicValue": "LOW",
                   "ragStatusCode": "GREEN"
@@ -220,9 +221,9 @@
     ],
     "inputSequences": [
       {
-        "name": "SET — fires AMBER trigger",
-        "pattern": "00→10",
-        "description": "Hold → SET. Expected upstream effect: updateProcessState(id=RS-FLIPFLOP-TRIGGER, ragStatusCode=AMBER)",
+        "name": "SET \u2014 fires AMBER trigger",
+        "pattern": "00\u219210",
+        "description": "Hold \u2192 SET. Expected upstream effect: updateProcessState(id=RS-FLIPFLOP-TRIGGER, ragStatusCode=AMBER)",
         "vectors": [
           [
             0,
@@ -235,9 +236,9 @@
         ]
       },
       {
-        "name": "RESET — fires GREEN trigger",
-        "pattern": "00→01",
-        "description": "Hold → RESET. Expected upstream effect: updateProcessState(id=RS-FLIPFLOP-TRIGGER, ragStatusCode=GREEN)",
+        "name": "RESET \u2014 fires GREEN trigger",
+        "pattern": "00\u219201",
+        "description": "Hold \u2192 RESET. Expected upstream effect: updateProcessState(id=RS-FLIPFLOP-TRIGGER, ragStatusCode=GREEN)",
         "vectors": [
           [
             0,
@@ -251,7 +252,7 @@
       },
       {
         "name": "SET then RESET round-trip",
-        "pattern": "00→10→00→01→00",
+        "pattern": "00\u219210\u219200\u219201\u219200",
         "description": "Validates both triggers fire in sequence: AMBER on SET, GREEN on RESET",
         "vectors": [
           [

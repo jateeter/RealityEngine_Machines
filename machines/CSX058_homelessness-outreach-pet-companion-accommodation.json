@@ -203,7 +203,83 @@
             "processStatus": "info",
             "description": "Pet Companion Accommodation: STABLE_PATH -> STABLE_SERVICE_PATH"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "public_safety_agent",
+        "mode": "supervised-act",
+        "trigger": "community-services-homelessness-outreach-pet-companion-accommodation",
+        "allowedActions": [
+          "Dispatch public_safety_agent for urgent community-services intervention on pet companion accommodation.",
+          "Coordinate health, housing, public safety, transportation, or city service partners for pet companion accommodation.",
+          "Create field work order or mobile team task for pet companion accommodation.",
+          "Maintain monitored service path for pet companion accommodation."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.csx058.public.safety.agent.completion",
+          "name": "localAIStack csx058 public.safety.agent completion",
+          "region": {
+            "offset": 1220,
+            "length": 4
+          },
+          "semantics": [
+            "resident need severity",
+            "eligibility and documentation readiness",
+            "field capacity or operational readiness",
+            "safety, mobility, and health risk"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-csx058-completion",
+            "sensorId": "localai.csx058.public.safety.agent.completion",
+            "name": "localAIStack csx058 public.safety.agent completion",
+            "region": {
+              "offset": 1220,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": [
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "RED"
+          ]
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

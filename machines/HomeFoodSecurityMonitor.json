@@ -5,7 +5,7 @@
     "description": "Monitors household food access, meal frequency, and nutrition assistance engagement for low- and medium-income families receiving home-based care. Tracks the progression from adequate food access through food insecurity to crisis conditions requiring immediate SNAP, WIC, or food-bank referral. Output at [1995:1999] feeds the Adolescent Mental Health Monitor, reflecting the documented link between food insecurity and adolescent behavioral health outcomes.",
     "metadata": {
       "category": "health-personal",
-      "domain": "Home Health — Social Determinants / Food Security",
+      "domain": "Home Health \u2014 Social Determinants / Food Security",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [1995:1999]: [1,0,0,0]=FOOD_CRISIS, [0,1,0,0]=FOOD_INSECURE, [0,0,1,0]=ASSISTANCE_NEEDED, [0,0,0,1]=FOOD_SECURE",
       "tags": [
@@ -28,9 +28,9 @@
       "sequenceCount": 3,
       "populationFocus": "Low- and medium-income households; families with children; adults on fixed incomes",
       "sensorNormalization": {
-        "meal_frequency_norm": "0.0=zero adequate meals/day, 0.5=2–3 adequate meals/day (sufficient), 1.0=4+ meals/day",
+        "meal_frequency_norm": "0.0=zero adequate meals/day, 0.5=2\u20133 adequate meals/day (sufficient), 1.0=4+ meals/day",
         "food_quality_norm": "0.0=no nutritious food available, 0.5=adequate caloric and nutritional balance, 1.0=optimal nutrition with variety",
-        "pantry_days_norm": "0.0=empty pantry (0 days supply), 0.5=3–5 day supply, 1.0=2+ week supply",
+        "pantry_days_norm": "0.0=empty pantry (0 days supply), 0.5=3\u20135 day supply, 1.0=2+ week supply",
         "food_assistance_norm": "0.0=no assistance active (not enrolled or access lapsed), 0.5=partial benefit (SNAP pending/partial), 1.0=full assistance active (SNAP/WIC/food bank regular)"
       },
       "downstreamMachine": "AdolescentMentalHealthMonitor (reads [1995:1999])",
@@ -139,7 +139,8 @@
             "description": "FOOD_SECURE: household food access adequate at [1995:1999]"
           }
         ]
-      }
+      },
+      "machineClass": "signal-monitor"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -156,10 +157,10 @@
     "sequences": [
       {
         "id": "home-food-crisis-escalation",
-        "name": "Food Security Deterioration: ADEQUATE+ → STRAINED → INSECURE → CRISIS → FOOD_CRISIS",
+        "name": "Food Security Deterioration: ADEQUATE+ \u2192 STRAINED \u2192 INSECURE \u2192 CRISIS \u2192 FOOD_CRISIS",
         "metadata": {
-          "description": "Tracks progressive food access deterioration from adequate household supply through food insecurity to acute crisis. The ADEQUATE+ initial state requires at least one confirmed adequate period before escalation can proceed — distinguishing genuine decline from temporary data gaps.",
-          "path": "ADEQUATE+ → STRAINED → INSECURE → CRISIS → output[1,0,0,0]",
+          "description": "Tracks progressive food access deterioration from adequate household supply through food insecurity to acute crisis. The ADEQUATE+ initial state requires at least one confirmed adequate period before escalation can proceed \u2014 distinguishing genuine decline from temporary data gaps.",
+          "path": "ADEQUATE+ \u2192 STRAINED \u2192 INSECURE \u2192 CRISIS \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (FOOD_CRISIS)"
         },
         "vectors": [
@@ -186,9 +187,9 @@
             "isInitial": true,
             "metadata": {
               "name": "ADEQUATE",
-              "description": "ADEQUATE+ — 2–3 meals/day, reasonable food quality, several-day pantry supply. isInitial A*A = A+: at least one adequate period confirmed before STRAINED can arm.",
-              "meal_frequency": "0.55–0.70 (2–3 solid meals/day)",
-              "pantry_supply": "0.50–0.65 (3–7 day supply)"
+              "description": "ADEQUATE+ \u2014 2\u20133 meals/day, reasonable food quality, several-day pantry supply. isInitial A*A = A+: at least one adequate period confirmed before STRAINED can arm.",
+              "meal_frequency": "0.55\u20130.70 (2\u20133 solid meals/day)",
+              "pantry_supply": "0.50\u20130.65 (3\u20137 day supply)"
             },
             "nextVectorIds": [
               "hf-adequate",
@@ -218,9 +219,9 @@
             "isInitial": false,
             "metadata": {
               "name": "STRAINED",
-              "description": "STRAINED — meal frequency dropping below 2/day; reduced food quality; pantry below 3-day supply.",
-              "meal_frequency": "0.28–0.45 (1–2 meals/day)",
-              "pantry_supply": "0.22–0.38 (1–3 day supply)"
+              "description": "STRAINED \u2014 meal frequency dropping below 2/day; reduced food quality; pantry below 3-day supply.",
+              "meal_frequency": "0.28\u20130.45 (1\u20132 meals/day)",
+              "pantry_supply": "0.22\u20130.38 (1\u20133 day supply)"
             },
             "nextVectorIds": [
               "hf-insecure"
@@ -249,9 +250,9 @@
             "isInitial": false,
             "metadata": {
               "name": "INSECURE",
-              "description": "INSECURE — one meal or fewer per day; poor nutritional quality; near-empty pantry; assistance not active.",
-              "meal_frequency": "0.12–0.28 (<1 adequate meal/day)",
-              "pantry_supply": "0.08–0.18 (<1 day supply)"
+              "description": "INSECURE \u2014 one meal or fewer per day; poor nutritional quality; near-empty pantry; assistance not active.",
+              "meal_frequency": "0.12\u20130.28 (<1 adequate meal/day)",
+              "pantry_supply": "0.08\u20130.18 (<1 day supply)"
             },
             "nextVectorIds": [
               "hf-crisis"
@@ -280,9 +281,9 @@
             "isInitial": false,
             "metadata": {
               "name": "CRISIS",
-              "description": "CRISIS — household not eating; no pantry supply; no food assistance active. Fires FOOD_CRISIS.",
-              "meal_frequency": "0.0–0.10 (hunger; no adequate meals)",
-              "food_assistance": "0.0–0.15 (no active benefits)"
+              "description": "CRISIS \u2014 household not eating; no pantry supply; no food assistance active. Fires FOOD_CRISIS.",
+              "meal_frequency": "0.0\u20130.10 (hunger; no adequate meals)",
+              "food_assistance": "0.0\u20130.15 (no active benefits)"
             },
             "outputVectors": [
               {
@@ -304,9 +305,9 @@
       },
       {
         "id": "home-food-assistance-needed",
-        "name": "Assistance Gap: STRUGGLING+ → ASSISTANCE_NEEDED signal",
+        "name": "Assistance Gap: STRUGGLING+ \u2192 ASSISTANCE_NEEDED signal",
         "metadata": {
-          "description": "Fires ASSISTANCE_NEEDED when household shows moderate food strain without active food assistance enrollment — the common scenario for working families just above benefit thresholds who still face food access barriers.",
+          "description": "Fires ASSISTANCE_NEEDED when household shows moderate food strain without active food assistance enrollment \u2014 the common scenario for working families just above benefit thresholds who still face food access barriers.",
           "pattern": "STRUGGLING+",
           "output": "[0,0,1,0] (ASSISTANCE_NEEDED)"
         },
@@ -334,7 +335,7 @@
             "isInitial": true,
             "metadata": {
               "name": "STRUGGLING",
-              "description": "STRUGGLING+ — reduced meals and food quality, limited pantry, no food assistance active. isInitial A*A = A+: fires ASSISTANCE_NEEDED on each matching cycle.",
+              "description": "STRUGGLING+ \u2014 reduced meals and food quality, limited pantry, no food assistance active. isInitial A*A = A+: fires ASSISTANCE_NEEDED on each matching cycle.",
               "scenario": "Working family missing SNAP/WIC enrollment; income drop not yet reflected in benefits"
             },
             "outputVectors": [
@@ -357,9 +358,9 @@
       },
       {
         "id": "home-food-secure",
-        "name": "Food Secure: SECURE+ → FOOD_SECURE signal",
+        "name": "Food Secure: SECURE+ \u2192 FOOD_SECURE signal",
         "metadata": {
-          "description": "Fires FOOD_SECURE when household maintains consistent meals, adequate nutrition, and a stable pantry supply — either through income, active benefits, or community food programs.",
+          "description": "Fires FOOD_SECURE when household maintains consistent meals, adequate nutrition, and a stable pantry supply \u2014 either through income, active benefits, or community food programs.",
           "pattern": "SECURE+",
           "output": "[0,0,0,1] (FOOD_SECURE)"
         },
@@ -387,7 +388,7 @@
             "isInitial": true,
             "metadata": {
               "name": "SECURE",
-              "description": "SECURE+ — consistent meals, reasonable nutrition quality, multi-day pantry, active food assistance or stable income. Fires FOOD_SECURE each matching cycle.",
+              "description": "SECURE+ \u2014 consistent meals, reasonable nutrition quality, multi-day pantry, active food assistance or stable income. Fires FOOD_SECURE each matching cycle.",
               "scenario": "Household stable on SNAP or income; food bank regular pickup confirmed"
             },
             "outputVectors": [
@@ -412,8 +413,8 @@
     "inputSequences": [
       {
         "name": "Month-End Financial Stress Cycle",
-        "pattern": "6-step: SECURE → SECURE → STRAINED → INSECURE → CRISIS → ASSISTANCE_ENROLLMENT",
-        "description": "Typical month-end pattern for low-income households: benefits exhausted by day 25–28; food crisis peaks; emergency enrollment/food bank restores SECURE state.",
+        "pattern": "6-step: SECURE \u2192 SECURE \u2192 STRAINED \u2192 INSECURE \u2192 CRISIS \u2192 ASSISTANCE_ENROLLMENT",
+        "description": "Typical month-end pattern for low-income households: benefits exhausted by day 25\u201328; food crisis peaks; emergency enrollment/food bank restores SECURE state.",
         "vectors": [
           [
             0.62,
@@ -465,7 +466,7 @@
       },
       {
         "name": "Working Family Without Benefits",
-        "pattern": "4-step: STRUGGLING(×3) → ASSISTANCE_NEEDED confirmed",
+        "pattern": "4-step: STRUGGLING(\u00d73) \u2192 ASSISTANCE_NEEDED confirmed",
         "description": "Family above SNAP threshold but below food-stable income; no active benefits; assistance navigator needed.",
         "vectors": [
           [

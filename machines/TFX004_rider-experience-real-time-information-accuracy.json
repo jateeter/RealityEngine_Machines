@@ -206,7 +206,79 @@
             "processStatus": "info",
             "description": "Real Time Information Accuracy: NOMINAL -> SERVICE_NOMINAL"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "transit_maintenance_agent",
+        "mode": "advise",
+        "trigger": "transportation-fleet-rider-experience-real-time-information-accuracy",
+        "allowedActions": [
+          "Dispatch transit_maintenance_agent for critical 100-bus fleet intervention on real time information accuracy.",
+          "Trigger predictive flow management for real time information accuracy using rider, vehicle, and route context.",
+          "Create maintenance, cleaning, security, or service task for real time information accuracy.",
+          "Keep 24/7 monitoring active for real time information accuracy."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.tfx004.transit.maintenance.agent.completion",
+          "name": "localAIStack tfx004 transit.maintenance.agent completion",
+          "region": {
+            "offset": 3255,
+            "length": 4
+          },
+          "semantics": [
+            "service reliability",
+            "rider impact",
+            "asset readiness",
+            "safety/security risk"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-tfx004-completion",
+            "sensorId": "localai.tfx004.transit.maintenance.agent.completion",
+            "name": "localAIStack tfx004 transit.maintenance.agent completion",
+            "region": {
+              "offset": 3255,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

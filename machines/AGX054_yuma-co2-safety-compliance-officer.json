@@ -183,9 +183,81 @@
             "processStatus": "info",
             "description": "Equipment in normal operating window."
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
       },
-      "severity": "life-safety"
+      "severity": "life-safety",
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "growhouse_safety_compliance_agent",
+        "mode": "advise",
+        "trigger": "agriculture-yuma-co2-safety-compliance-officer-maintenance",
+        "allowedActions": [
+          "Dispatch growhouse_safety_compliance_agent for urgent maintenance and record corrective action.",
+          "Schedule preventive maintenance via growhouse_safety_compliance_agent and verify completion telemetry.",
+          "Run sensor-calibration workflow via growhouse_safety_compliance_agent for the yuma co2 safety compliance stream.",
+          "Continue automated monitoring for yuma co2 safety compliance while preserving current setpoints."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.agx054.growhouse.safety.compliance.agent.completion",
+          "name": "localAIStack agx054 growhouse.safety.compliance.agent completion",
+          "region": {
+            "offset": 228,
+            "length": 4
+          },
+          "semantics": [
+            "CO2 in enrichment band (600-1500 ppm)",
+            "CO2 in watch band (1500-3000 ppm)",
+            "CO2 in danger band (3000-5000 ppm)",
+            "ambient temp in band"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-agx054-completion",
+            "sensorId": "localai.agx054.growhouse.safety.compliance.agent.completion",
+            "name": "localAIStack agx054 growhouse.safety.compliance.agent completion",
+            "region": {
+              "offset": 228,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {

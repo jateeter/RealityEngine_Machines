@@ -189,7 +189,79 @@
             "processStatus": "info",
             "description": "Operating window is stable."
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "growhouse_crop_steering_agent",
+        "mode": "advise",
+        "trigger": "aquaculture-water-exchange-planning-risk-maintenance-or-optimization",
+        "allowedActions": [
+          "Dispatch growhouse_crop_steering_agent to stabilize water exchange planning and record corrective action.",
+          "Run AI optimization for water exchange planning using the latest operating window and production targets.",
+          "Create preventive-maintenance work for water exchange planning and verify completion telemetry.",
+          "Continue automated monitoring for water exchange planning while preserving current setpoints."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.agx010.growhouse.crop.steering.agent.completion",
+          "name": "localAIStack agx010 growhouse.crop.steering.agent completion",
+          "region": {
+            "offset": 88,
+            "length": 4
+          },
+          "semantics": [
+            "process stability",
+            "resource efficiency",
+            "biosecurity or IPM status",
+            "maintenance readiness"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-agx010-completion",
+            "sensorId": "localai.agx010.growhouse.crop.steering.agent.completion",
+            "name": "localAIStack agx010 growhouse.crop.steering.agent completion",
+            "region": {
+              "offset": 88,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

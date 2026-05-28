@@ -87,17 +87,41 @@ def dispatch(event: dict[str, Any], *, endpoint: str | None = None,
              timeout_s: float = 5.0) -> dict[str, Any]:
     """
     Fire the upstream GraphQL mutation for the given machine-output event.
+    Accepts the canonical `ces.terminal.event` envelope as well as the older
+    `{processState, context}` event used by early trigger examples.
 
     Raises TriggerError on HTTP failure or GraphQL error; returns the
     `updateProcessState.processState` payload on success.
     """
-    process_state = event.get("processState") or {}
-    context = event.get("context") or {}
-
-    rag_status_code = (
-        event.get("ragStatusCode")
-        or _status_to_rag_code(process_state.get("status"))
-    )
+    if event.get("envelopeType") == "ces.terminal.event":
+        ces = event.get("ces") or {}
+        governance = event.get("governance") or {}
+        dispatch_block = event.get("dispatch") or {}
+        context = {
+            "envelopeType": event.get("envelopeType"),
+            "envelopeId": event.get("envelopeId"),
+            "correlationId": event.get("correlationId"),
+            "source": event.get("source"),
+            "ces": ces,
+            "outputVector": event.get("outputVector"),
+            "governance": governance,
+            "dispatch": dispatch_block,
+            "projection": event.get("projection"),
+            "mqttContext": event.get("mqttContext"),
+        }
+        process_state = {
+            "id": dispatch_block.get("processId") or ces.get("machineCode") or "UNKNOWN",
+            "name": dispatch_block.get("processName") or ces.get("machineName"),
+            "status": governance.get("processStatus"),
+        }
+        rag_status_code = governance.get("ragStatusCode") or _status_to_rag_code(process_state.get("status"))
+    else:
+        process_state = event.get("processState") or {}
+        context = event.get("context") or {}
+        rag_status_code = (
+            event.get("ragStatusCode")
+            or _status_to_rag_code(process_state.get("status"))
+        )
 
     variables = {
         "input": {

@@ -5,7 +5,7 @@
     "description": "RS flip-flop that latches the multi-system critical alert state. SET by DCCriticalSynthesizer [1,0] when multiple alarms coexist, RESET when all clear.",
     "metadata": {
       "category": "data-center",
-      "domain": "Data Center — Critical Alert / Latch",
+      "domain": "Data Center \u2014 Critical Alert / Latch",
       "author": "Reality Engine",
       "created": "2026-02-27T00:00:00Z",
       "eventSpace": "2D binary control signal at [1369:1371]: [1,0]=CRITICAL, [0,1]=ALL_CLEAR",
@@ -32,7 +32,7 @@
       "downstreamMachine": "External alert system / human operator (reads [1379:1381])",
       "singleTransitionAssumption": {
         "required": false,
-        "scope": "not applicable — all event vectors are isInitial (combinatorial)",
+        "scope": "not applicable \u2014 all event vectors are isInitial (combinatorial)",
         "compliant": true,
         "notes": "Both CRITICAL and ALL_CLEAR events are isInitial. Combinatorial RS flip-flop; state persists via perceptual space value retention. The [1379:1381] byte region holds the current critical alert state and drives external alerting systems."
       },
@@ -111,7 +111,7 @@
             ],
             "ragStatusCode": "RED",
             "processStatus": "error",
-            "description": "CRITICAL ALERT ACTIVE: Multi-system failure — immediate intervention required"
+            "description": "CRITICAL ALERT ACTIVE: Multi-system failure \u2014 immediate intervention required"
           },
           {
             "sequenceId": "dc-critical-alert-reset-sequence",
@@ -124,7 +124,8 @@
             "description": "CRITICAL ALERT CLEARED: All monitored subsystems nominal"
           }
         ]
-      }
+      },
+      "machineClass": "signal-monitor"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -141,10 +142,10 @@
     "sequences": [
       {
         "id": "dc-critical-alert-set-sequence",
-        "name": "CRITICAL ALERT SET: [1,0] → [1,0]",
+        "name": "CRITICAL ALERT SET: [1,0] \u2192 [1,0]",
         "metadata": {
           "description": "Activates critical alert when synthesizer detects multi-system failure",
-          "path": "[1,0] → [1,0]",
+          "path": "[1,0] \u2192 [1,0]",
           "output": "[1,0]",
           "trigger": "DCCriticalSynthesizer MULTI_ALARM pattern fires [1,0] to bytes [1369:1371]"
         },
@@ -164,7 +165,7 @@
             "isInitial": true,
             "metadata": {
               "name": "CRITICAL",
-              "description": "Synthesizer signal [1,0]: multiple subsystems in alarm — activate critical alert",
+              "description": "Synthesizer signal [1,0]: multiple subsystems in alarm \u2014 activate critical alert",
               "state": "SET"
             },
             "outputVectors": [
@@ -175,7 +176,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "CRITICAL ALERT ACTIVE: Multi-system failure — immediate intervention required",
+                  "description": "CRITICAL ALERT ACTIVE: Multi-system failure \u2014 immediate intervention required",
                   "state": "SET",
                   "logicValue": "HIGH",
                   "severity": "CRITICAL"
@@ -187,10 +188,10 @@
       },
       {
         "id": "dc-critical-alert-reset-sequence",
-        "name": "CRITICAL ALERT RESET: [0,1] → [0,1]",
+        "name": "CRITICAL ALERT RESET: [0,1] \u2192 [0,1]",
         "metadata": {
           "description": "Clears critical alert when synthesizer confirms all subsystems clear",
-          "path": "[0,1] → [0,1]",
+          "path": "[0,1] \u2192 [0,1]",
           "output": "[0,1]",
           "trigger": "DCCriticalSynthesizer ALL_CLEAR pattern fires [0,1] to bytes [1369:1371]"
         },
@@ -210,7 +211,7 @@
             "isInitial": true,
             "metadata": {
               "name": "ALL_CLEAR",
-              "description": "Synthesizer signal [0,1]: all subsystems normal — clear critical alert",
+              "description": "Synthesizer signal [0,1]: all subsystems normal \u2014 clear critical alert",
               "state": "RESET"
             },
             "outputVectors": [
@@ -235,7 +236,7 @@
     "inputSequences": [
       {
         "name": "Critical Alert Activation",
-        "pattern": "[0,1] → [1,0]",
+        "pattern": "[0,1] \u2192 [1,0]",
         "description": "All-clear to critical: multiple subsystems fail simultaneously",
         "vectors": [
           [
@@ -250,7 +251,7 @@
       },
       {
         "name": "Critical Alert Resolution",
-        "pattern": "[1,0] → [0,1]",
+        "pattern": "[1,0] \u2192 [0,1]",
         "description": "Critical to all-clear: all subsystems recover",
         "vectors": [
           [
@@ -265,8 +266,8 @@
       },
       {
         "name": "Critical Event Lifecycle",
-        "pattern": "[0,1] → [1,0] → [1,0] → [1,0] → [0,1]",
-        "description": "Full critical event: nominal → alert fires → persists → resolves",
+        "pattern": "[0,1] \u2192 [1,0] \u2192 [1,0] \u2192 [1,0] \u2192 [0,1]",
+        "description": "Full critical event: nominal \u2192 alert fires \u2192 persists \u2192 resolves",
         "vectors": [
           [
             0,

@@ -2,10 +2,10 @@
   "version": "1.0.0",
   "machine": {
     "name": "DC Thermal Escalation Detector",
-    "description": "Monitors CPU temperature and load to detect thermal runaway. Implements the regular expression pattern NORMAL+ → WARM+ → HOT → CRITICAL+ → EMERGENCY → [alarm]. A concurrent SAFE+ sequence fires the reset signal whenever conditions return to normal, enabling RS flip-flop recovery.",
+    "description": "Monitors CPU temperature and load to detect thermal runaway. Implements the regular expression pattern NORMAL+ \u2192 WARM+ \u2192 HOT \u2192 CRITICAL+ \u2192 EMERGENCY \u2192 [alarm]. A concurrent SAFE+ sequence fires the reset signal whenever conditions return to normal, enabling RS flip-flop recovery.",
     "metadata": {
       "category": "data-center",
-      "domain": "Data Center — Thermal / Escalation",
+      "domain": "Data Center \u2014 Thermal / Escalation",
       "author": "Reality Engine",
       "outputSpace": "2D binary at [1375:1377]: [1,0]=THERMAL_ALARM, [0,1]=THERMAL_SAFE",
       "tags": [
@@ -27,22 +27,22 @@
       "sequenceCount": 2,
       "downstreamMachine": "DCCoolingControlFF (reads [1375:1377])",
       "regularExpression": {
-        "escalation": "NORMAL+ → WARM+ → HOT → CRITICAL+ → EMERGENCY → output[1,0]",
-        "recovery": "SAFE+ → output[0,1]",
+        "escalation": "NORMAL+ \u2192 WARM+ \u2192 HOT \u2192 CRITICAL+ \u2192 EMERGENCY \u2192 output[1,0]",
+        "recovery": "SAFE+ \u2192 output[0,1]",
         "combined": "The escalation and recovery sequences run concurrently. SAFE+ fires [0,1] during nominal conditions (effectively resetting any downstream FF). EMERGENCY fires [1,0] at peak thermal stress (setting the FF). Between these extremes (WARM/HOT/CRITICAL), no output is written and the downstream FF retains its last state.",
-        "isInitialNote": "NORMAL and SAFE are isInitial vectors. In CES, isInitial vectors implement A*A = A+: the isInitial property provides the self-loop (A*), but at least one match (A) is required before any nextVectorIds are activated. There is no mechanism to arm WARM or produce SAFE output without a matching sensor reading — therefore NORMAL* and SAFE* would be incorrect; the true semantics are NORMAL+ and SAFE+."
+        "isInitialNote": "NORMAL and SAFE are isInitial vectors. In CES, isInitial vectors implement A*A = A+: the isInitial property provides the self-loop (A*), but at least one match (A) is required before any nextVectorIds are activated. There is no mechanism to arm WARM or produce SAFE output without a matching sensor reading \u2014 therefore NORMAL* and SAFE* would be incorrect; the true semantics are NORMAL+ and SAFE+."
       },
       "sensorNormalization": {
-        "cpu_temp_norm": "0.0 = 20°C, 0.5 = 60°C, 1.0 = 100°C",
+        "cpu_temp_norm": "0.0 = 20\u00b0C, 0.5 = 60\u00b0C, 1.0 = 100\u00b0C",
         "cpu_load_norm": "0.0 = idle, 1.0 = 100% utilization",
-        "cpu_throttle_norm": "wildcard (don't care — value=0.5, tolerance=0.5)",
-        "cpu_efficiency_norm": "wildcard (don't care — value=0.5, tolerance=0.5)"
+        "cpu_throttle_norm": "wildcard (don't care \u2014 value=0.5, tolerance=0.5)",
+        "cpu_efficiency_norm": "wildcard (don't care \u2014 value=0.5, tolerance=0.5)"
       },
       "singleTransitionAssumption": {
         "required": false,
-        "scope": "continuous sensor space — STA is not applicable as defined for binary vectors",
+        "scope": "continuous sensor space \u2014 STA is not applicable as defined for binary vectors",
         "compliant": true,
-        "notes": "The continuous-space analog of STA is 'gradual monotonic progression' — sensor values advance by bounded increments per step. The THRESHOLD comparator (with per-element tolerances) provides natural tolerance for sensor noise. The escalation sequence NORMAL+ → WARM+ → HOT → CRITICAL+ → EMERGENCY defines overlapping threshold bands; adjacent bands share boundary values so gradual progressions correctly advance through all stages. Abrupt jumps (e.g., direct NORMAL → EMERGENCY) would skip intermediate states and fail to fire intermediate actions — consistent with the design intent that requires observable escalation before triggering the alarm.",
+        "notes": "The continuous-space analog of STA is 'gradual monotonic progression' \u2014 sensor values advance by bounded increments per step. The THRESHOLD comparator (with per-element tolerances) provides natural tolerance for sensor noise. The escalation sequence NORMAL+ \u2192 WARM+ \u2192 HOT \u2192 CRITICAL+ \u2192 EMERGENCY defines overlapping threshold bands; adjacent bands share boundary values so gradual progressions correctly advance through all stages. Abrupt jumps (e.g., direct NORMAL \u2192 EMERGENCY) would skip intermediate states and fail to fire intermediate actions \u2014 consistent with the design intent that requires observable escalation before triggering the alarm.",
         "stageThresholds": {
           "NORMAL": "cpu_temp [0.15, 0.45], cpu_load [0.17, 0.53]",
           "WARM": "cpu_temp [0.43, 0.67], cpu_load [0.52, 0.78]",
@@ -139,7 +139,8 @@
             "description": "THERMAL SAFE: Reset signal [0,1] to DCCoolingControlFF at [1375:1377]"
           }
         ]
-      }
+      },
+      "machineClass": "outcome-stabilizer"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -156,10 +157,10 @@
     "sequences": [
       {
         "id": "dc-thermal-escalation",
-        "name": "Thermal Escalation: NORMAL+ → WARM+ → HOT → CRITICAL+ → EMERGENCY",
+        "name": "Thermal Escalation: NORMAL+ \u2192 WARM+ \u2192 HOT \u2192 CRITICAL+ \u2192 EMERGENCY",
         "metadata": {
           "description": "5-stage thermal escalation using Kleene-plus operators on continuous sensor values. All isInitial states implement A*A = A+ semantics.",
-          "path": "NORMAL+ → WARM+ → HOT → CRITICAL+ → EMERGENCY",
+          "path": "NORMAL+ \u2192 WARM+ \u2192 HOT \u2192 CRITICAL+ \u2192 EMERGENCY",
           "output": "[1,0] (THERMAL ALARM)"
         },
         "vectors": [
@@ -186,12 +187,12 @@
             "isInitial": true,
             "metadata": {
               "name": "NORMAL",
-              "description": "NORMAL+ (= NORMAL*NORMAL, A*A) — one or more normal readings required before WARM is armed. The isInitial property provides the self-loop (A*); the mandatory match (A) is what activates WARM via nextVectorIds. Zero NORMAL readings → WARM is never activated.",
+              "description": "NORMAL+ (= NORMAL*NORMAL, A*A) \u2014 one or more normal readings required before WARM is armed. The isInitial property provides the self-loop (A*); the mandatory match (A) is what activates WARM via nextVectorIds. Zero NORMAL readings \u2192 WARM is never activated.",
               "role": "kleene-plus-initial",
-              "cpu_temp_range": "0.15–0.45 (20°C–56°C)",
-              "cpu_load_range": "0.17–0.53 (17%–53%)",
+              "cpu_temp_range": "0.15\u20130.45 (20\u00b0C\u201356\u00b0C)",
+              "cpu_load_range": "0.17\u20130.53 (17%\u201353%)",
               "kleeneOperator": "+",
-              "semantics": "isInitial (A*A = A+): never deactivates; on each match fires nextVectorIds — activating WARM (and keeping NORMAL active via self-loop). At least one NORMAL match is required to prime WARM. This is A*A not A*."
+              "semantics": "isInitial (A*A = A+): never deactivates; on each match fires nextVectorIds \u2014 activating WARM (and keeping NORMAL active via self-loop). At least one NORMAL match is required to prime WARM. This is A*A not A*."
             },
             "nextVectorIds": [
               "dc-therm-esc-normal",
@@ -221,10 +222,10 @@
             "isInitial": false,
             "metadata": {
               "name": "WARM",
-              "description": "WARM+ — one or more warm readings required before advancing to HOT",
+              "description": "WARM+ \u2014 one or more warm readings required before advancing to HOT",
               "role": "kleene-plus",
-              "cpu_temp_range": "0.43–0.67 (54°C–73°C)",
-              "cpu_load_range": "0.52–0.78 (52%–78%)",
+              "cpu_temp_range": "0.43\u20130.67 (54\u00b0C\u201373\u00b0C)",
+              "cpu_load_range": "0.52\u20130.78 (52%\u201378%)",
               "kleeneOperator": "+",
               "semantics": "Non-initial transitional with self-loop: deactivates after match, re-activated by its own nextVectorId. Also activates HOT when matched."
             },
@@ -256,10 +257,10 @@
             "isInitial": false,
             "metadata": {
               "name": "HOT",
-              "description": "HOT — single sustained hot reading; mandatory transition point before critical",
+              "description": "HOT \u2014 single sustained hot reading; mandatory transition point before critical",
               "role": "required-transition",
-              "cpu_temp_range": "0.67–0.83 (73°C–83°C)",
-              "cpu_load_range": "0.75–0.91 (75%–91%)",
+              "cpu_temp_range": "0.67\u20130.83 (73\u00b0C\u201383\u00b0C)",
+              "cpu_load_range": "0.75\u20130.91 (75%\u201391%)",
               "semantics": "Non-initial transitional (no self-loop): exactly one HOT observation advances to CRITICAL. Prevents false critical triggers from transient spikes."
             },
             "nextVectorIds": [
@@ -289,10 +290,10 @@
             "isInitial": false,
             "metadata": {
               "name": "CRITICAL",
-              "description": "CRITICAL+ — one or more critical readings sustaining the high-temperature condition",
+              "description": "CRITICAL+ \u2014 one or more critical readings sustaining the high-temperature condition",
               "role": "kleene-plus",
-              "cpu_temp_range": "0.81–0.95 (81°C–95°C)",
-              "cpu_load_range": "0.87–0.97 (87%–97%)",
+              "cpu_temp_range": "0.81\u20130.95 (81\u00b0C\u201395\u00b0C)",
+              "cpu_load_range": "0.87\u20130.97 (87%\u201397%)",
               "kleeneOperator": "+",
               "semantics": "Non-initial transitional with self-loop: must be observed at least once before EMERGENCY. Models a sustained critical condition rather than a transient spike."
             },
@@ -324,10 +325,10 @@
             "isInitial": false,
             "metadata": {
               "name": "EMERGENCY",
-              "description": "EMERGENCY — thermal shutdown imminent; fires alarm output [1,0]",
+              "description": "EMERGENCY \u2014 thermal shutdown imminent; fires alarm output [1,0]",
               "role": "terminal",
-              "cpu_temp_range": "0.93–1.00 (>93°C)",
-              "cpu_load_range": "0.95–1.00 (>95%)",
+              "cpu_temp_range": "0.93\u20131.00 (>93\u00b0C)",
+              "cpu_load_range": "0.95\u20131.00 (>95%)",
               "semantics": "Final vector with output: stays active on match (fires alarm each cycle), deactivates on no-match (temperature drops below threshold)."
             },
             "outputVectors": [
@@ -349,7 +350,7 @@
       },
       {
         "id": "dc-thermal-safe-recovery",
-        "name": "Thermal Safe Recovery: SAFE+ → output[0,1]",
+        "name": "Thermal Safe Recovery: SAFE+ \u2192 output[0,1]",
         "metadata": {
           "description": "Fires reset signal [0,1] on every cycle that CPU temperature and load are within safe operating range (one or more times). Concurrently active with the escalation sequence. Enables downstream DCCoolingControlFF to RESET when conditions are safe. SAFE is isInitial: A*A = A+, so at least one matching sensor reading is required to produce any output.",
           "pattern": "SAFE+",
@@ -379,11 +380,11 @@
             "isInitial": true,
             "metadata": {
               "name": "SAFE",
-              "description": "Thermal conditions within safe range — fires [0,1] reset signal on every cycle conditions are nominal (A*A = A+: at least one match required to produce output)",
+              "description": "Thermal conditions within safe range \u2014 fires [0,1] reset signal on every cycle conditions are nominal (A*A = A+: at least one match required to produce output)",
               "role": "continuous-reset-plus",
-              "cpu_temp_range": "0.15–0.45 (same as NORMAL)",
-              "cpu_load_range": "0.17–0.53 (same as NORMAL)",
-              "semantics": "isInitial (A*A = A+): always active; fires [0,1] to [1375:1377] on each matching cycle. At least one safe sensor reading is required before any reset output is produced. SAFE* would be incorrect — it would imply output is possible without any sensor match."
+              "cpu_temp_range": "0.15\u20130.45 (same as NORMAL)",
+              "cpu_load_range": "0.17\u20130.53 (same as NORMAL)",
+              "semantics": "isInitial (A*A = A+): always active; fires [0,1] to [1375:1377] on each matching cycle. At least one safe sensor reading is required before any reset output is produced. SAFE* would be incorrect \u2014 it would imply output is possible without any sensor match."
             },
             "outputVectors": [
               {
@@ -406,7 +407,7 @@
     "inputSequences": [
       {
         "name": "Gradual Thermal Escalation to Emergency",
-        "pattern": "12-step: NORMAL→NORMAL→WARM→WARM→WARM→HOT→CRITICAL→CRITICAL→EMERGENCY→EMERGENCY→WARM→NORMAL",
+        "pattern": "12-step: NORMAL\u2192NORMAL\u2192WARM\u2192WARM\u2192WARM\u2192HOT\u2192CRITICAL\u2192CRITICAL\u2192EMERGENCY\u2192EMERGENCY\u2192WARM\u2192NORMAL",
         "description": "Complete escalation-and-recovery scenario demonstrating all 5 thermal stages",
         "vectors": [
           [
@@ -499,7 +500,7 @@
       },
       {
         "name": "Abrupt Spike (Non-Escalating)",
-        "pattern": "NORMAL → HOT → NORMAL (skips WARM — fails to trigger escalation)",
+        "pattern": "NORMAL \u2192 HOT \u2192 NORMAL (skips WARM \u2014 fails to trigger escalation)",
         "description": "Demonstrates that abrupt temperature spikes without gradual escalation cannot trigger the alarm. HOT requires WARM+ to have been active first.",
         "vectors": [
           [
@@ -525,7 +526,7 @@
           "scenario": "abrupt-spike-no-alarm",
           "expectedOutputs": {
             "step_1": "SAFE fires [0,1]",
-            "step_2": "no output — HOT not yet activated (WARM+ was never satisfied)",
+            "step_2": "no output \u2014 HOT not yet activated (WARM+ was never satisfied)",
             "step_3": "SAFE fires [0,1]"
           },
           "note": "HOT vector is only activated after WARM has matched at least once. An abrupt jump from NORMAL to HOT bypasses the WARM+ requirement, preventing false alarms from transient spikes."

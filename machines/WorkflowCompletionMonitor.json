@@ -2,10 +2,10 @@
   "version": "1.0.0",
   "machine": {
     "name": "Workflow Completion Monitor",
-    "description": "Integration machine that reads combined output signals from the Document Signing Workflow Monitor [960:964] and the Qualification Verification Monitor [964:968] to detect workflow completion failures — cases where signing and qualification are both required before services can be delivered but one or both remain incomplete. In community services, unclosed workflow loops (unsigned forms + unverified qualifications) create audit risk, delay benefit issuance, and prevent inter-agency coordination. Output at [988:992] is available to downstream care coordination systems.",
+    "description": "Integration machine that reads combined output signals from the Document Signing Workflow Monitor [960:964] and the Qualification Verification Monitor [964:968] to detect workflow completion failures \u2014 cases where signing and qualification are both required before services can be delivered but one or both remain incomplete. In community services, unclosed workflow loops (unsigned forms + unverified qualifications) create audit risk, delay benefit issuance, and prevent inter-agency coordination. Output at [988:992] is available to downstream care coordination systems.",
     "metadata": {
       "category": "community-services",
-      "domain": "Community Services — Workflow Completion / Qualification",
+      "domain": "Community Services \u2014 Workflow Completion / Qualification",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [988:992]: [1,0,0,0]=WORKFLOW_BLOCKED, [0,1,0,0]=WORKFLOW_STALLED, [0,0,1,0]=WORKFLOW_PARTIAL, [0,0,0,1]=WORKFLOW_COMPLETE",
       "tags": [
@@ -30,7 +30,7 @@
       "sensorNormalization": {
         "signing_signal_norm": "0.0=[1,0,0,0] SIGNING_BLOCKED from DocSigning (bit 438), 0.5=[0,0,1,0] PARTIAL_SIGNING (bit 440), 1.0=[0,0,0,1] SIGNING_COMPLETE (bit 441)",
         "qualification_signal_norm": "0.0=[1,0,0,0] QUALIFICATION_FAILED from QualVerification (bit 442), 0.5=[0,1,0,0] REVERIFICATION_REQUIRED (bit 443), 1.0=[0,0,0,1] FULLY_QUALIFIED (bit 445)",
-        "workflow_age_norm": "0.0=workflow open >45 days without completion (stale; client likely disengaged), 0.5=workflow open 15–45 days (active but aging), 1.0=workflow open <15 days (fresh; on-track for timely completion)",
+        "workflow_age_norm": "0.0=workflow open >45 days without completion (stale; client likely disengaged), 0.5=workflow open 15\u201345 days (active but aging), 1.0=workflow open <15 days (fresh; on-track for timely completion)",
         "completion_likelihood_norm": "0.0=client unreachable; documents not returned; no recent activity, 0.5=partial progress; some items completed; client intermittently responsive, 1.0=active engagement; all steps progressing; completion imminent"
       },
       "upstreamMachines": [
@@ -144,7 +144,8 @@
             "description": "WORKFLOW_COMPLETE: all signing and qualification requirements met; unrestricted service delivery authorized at [988:992]"
           }
         ]
-      }
+      },
+      "machineClass": "risk-forecaster"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -161,10 +162,10 @@
     "sequences": [
       {
         "id": "workflow-blocked-escalation",
-        "name": "Dual Block: COMPLETE+ → PARTIAL → STALLED → WORKFLOW_BLOCKED",
+        "name": "Dual Block: COMPLETE+ \u2192 PARTIAL \u2192 STALLED \u2192 WORKFLOW_BLOCKED",
         "metadata": {
-          "description": "Detects workflows where both signing and qualification have failed simultaneously — the highest-severity workflow state, where service delivery is fully blocked. Requires COMPLETE+ baseline confirming that a completed workflow state was previously achieved before the block escalation can arm.",
-          "path": "COMPLETE+ → PARTIAL → STALLED → output[1,0,0,0]",
+          "description": "Detects workflows where both signing and qualification have failed simultaneously \u2014 the highest-severity workflow state, where service delivery is fully blocked. Requires COMPLETE+ baseline confirming that a completed workflow state was previously achieved before the block escalation can arm.",
+          "path": "COMPLETE+ \u2192 PARTIAL \u2192 STALLED \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (WORKFLOW_BLOCKED)"
         },
         "vectors": [
@@ -207,7 +208,7 @@
             "isInitial": true,
             "metadata": {
               "name": "COMPLETE",
-              "description": "COMPLETE+ — SIGNING_COMPLETE (bit 441) and FULLY_QUALIFIED (bit 445) both high. All workflow requirements met; unrestricted service delivery authorized. isInitial A*A = A+.",
+              "description": "COMPLETE+ \u2014 SIGNING_COMPLETE (bit 441) and FULLY_QUALIFIED (bit 445) both high. All workflow requirements met; unrestricted service delivery authorized. isInitial A*A = A+.",
               "upstream_state": "DocSigning=SIGNING_COMPLETE, QualVerification=FULLY_QUALIFIED"
             },
             "nextVectorIds": [
@@ -254,7 +255,7 @@
             "isInitial": false,
             "metadata": {
               "name": "PARTIAL",
-              "description": "PARTIAL — PARTIAL_SIGNING (bit 440) and REVERIFICATION_REQUIRED (bit 443). Both workflows have outstanding items; services partially restricted.",
+              "description": "PARTIAL \u2014 PARTIAL_SIGNING (bit 440) and REVERIFICATION_REQUIRED (bit 443). Both workflows have outstanding items; services partially restricted.",
               "upstream_state": "DocSigning=PARTIAL_SIGNING, QualVerification=REVERIFICATION_REQUIRED"
             },
             "nextVectorIds": [
@@ -300,7 +301,7 @@
             "isInitial": false,
             "metadata": {
               "name": "STALLED",
-              "description": "STALLED — SIGNING_BLOCKED (bit 438) and QUALIFICATION_FAILED (bit 442). Both upstream workflows in failure state. Full service delivery block. Fires WORKFLOW_BLOCKED.",
+              "description": "STALLED \u2014 SIGNING_BLOCKED (bit 438) and QUALIFICATION_FAILED (bit 442). Both upstream workflows in failure state. Full service delivery block. Fires WORKFLOW_BLOCKED.",
               "upstream_state": "DocSigning=SIGNING_BLOCKED, QualVerification=QUALIFICATION_FAILED"
             },
             "outputVectors": [
@@ -323,9 +324,9 @@
       },
       {
         "id": "workflow-partial-open",
-        "name": "Partial Completion: PARTIAL_OPEN+ → WORKFLOW_PARTIAL signal",
+        "name": "Partial Completion: PARTIAL_OPEN+ \u2192 WORKFLOW_PARTIAL signal",
         "metadata": {
-          "description": "Fires WORKFLOW_PARTIAL when one workflow is complete and the other is partially completed — the common transitional state where primary services can begin while supplementary authorizations are still in progress.",
+          "description": "Fires WORKFLOW_PARTIAL when one workflow is complete and the other is partially completed \u2014 the common transitional state where primary services can begin while supplementary authorizations are still in progress.",
           "pattern": "PARTIAL_OPEN+",
           "output": "[0,0,1,0] (WORKFLOW_PARTIAL)"
         },
@@ -369,7 +370,7 @@
             "isInitial": true,
             "metadata": {
               "name": "PARTIAL_OPEN",
-              "description": "PARTIAL_OPEN+ — SIGNING_COMPLETE (bit 441) but REVERIFICATION_REQUIRED (bit 443). Documents signed; qualification needs renewal. Primary services active; full authorization pending reverification. isInitial A*A = A+: fires WORKFLOW_PARTIAL each cycle.",
+              "description": "PARTIAL_OPEN+ \u2014 SIGNING_COMPLETE (bit 441) but REVERIFICATION_REQUIRED (bit 443). Documents signed; qualification needs renewal. Primary services active; full authorization pending reverification. isInitial A*A = A+: fires WORKFLOW_PARTIAL each cycle.",
               "scenario": "Medicaid managed care enrollment: all consent forms signed; annual reverification of income due; services continue during reverification window"
             },
             "outputVectors": [
@@ -392,7 +393,7 @@
       },
       {
         "id": "workflow-complete-ok",
-        "name": "Workflow Complete: BOTH_COMPLETE+ → WORKFLOW_COMPLETE signal",
+        "name": "Workflow Complete: BOTH_COMPLETE+ \u2192 WORKFLOW_COMPLETE signal",
         "metadata": {
           "description": "Fires WORKFLOW_COMPLETE when both signing and qualification workflows are confirmed complete. Full inter-agency coordination authorized; audit trail complete; no service delivery restrictions.",
           "pattern": "BOTH_COMPLETE+",
@@ -438,7 +439,7 @@
             "isInitial": true,
             "metadata": {
               "name": "BOTH_COMPLETE",
-              "description": "BOTH_COMPLETE+ — SIGNING_COMPLETE (bit 441) and FULLY_QUALIFIED (bit 445). All workflow requirements satisfied. Fires WORKFLOW_COMPLETE each cycle.",
+              "description": "BOTH_COMPLETE+ \u2014 SIGNING_COMPLETE (bit 441) and FULLY_QUALIFIED (bit 445). All workflow requirements satisfied. Fires WORKFLOW_COMPLETE each cycle.",
               "upstream_state": "DocSigning=SIGNING_COMPLETE, QualVerification=FULLY_QUALIFIED"
             },
             "outputVectors": [
@@ -463,7 +464,7 @@
     "inputSequences": [
       {
         "name": "Redetermination Creates Simultaneous Signing and Qualification Gap",
-        "pattern": "5-step: COMPLETE→COMPLETE→PARTIAL (reverification due)→STALLED (forms expired + qualification failed)→COMPLETE (after in-person resolution)",
+        "pattern": "5-step: COMPLETE\u2192COMPLETE\u2192PARTIAL (reverification due)\u2192STALLED (forms expired + qualification failed)\u2192COMPLETE (after in-person resolution)",
         "description": "Annual redetermination triggers simultaneous signing expiry and income verification failure; both workflows stall; case manager conducts in-person session resolving both; workflow complete.",
         "vectors": [
           [

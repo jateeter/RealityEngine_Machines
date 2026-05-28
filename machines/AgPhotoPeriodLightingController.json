@@ -5,7 +5,7 @@
     "description": "Controls photoperiod and light intensity for indoor growing zones. Monitors PAR (photosynthetically active radiation) intensity, accumulated daily light integral (DLI), and dark-period integrity. Fires LIGHTS_ON/OFF transitions and DLI insufficiency alerts. Upstream: light sensors at [12:16]. Downstream: AgNutrientCycleOptimizer and AgIPMPestAlertMonitor read output at [32:36].",
     "metadata": {
       "category": "agriculture",
-      "domain": "Agriculture — Photoperiod / Lighting Control",
+      "domain": "Agriculture \u2014 Photoperiod / Lighting Control",
       "author": "Reality Engine",
       "outputSpace": "4D binary at [32:36]: [1,0,0,0]=LIGHTS_ON, [0,1,0,0]=LIGHTS_OFF, [0,0,1,0]=DLI_ALERT, [0,0,0,1]=PHOTO_OK",
       "tags": [
@@ -30,9 +30,9 @@
       ],
       "sequenceCount": 3,
       "sensorNormalization": {
-        "par_intensity_norm": "0.0=dark, 0.5=400 µmol/m²/s (vegetative optimal), 1.0=1000 µmol/m²/s",
+        "par_intensity_norm": "0.0=dark, 0.5=400 \u00b5mol/m\u00b2/s (vegetative optimal), 1.0=1000 \u00b5mol/m\u00b2/s",
         "photoperiod_elapsed_norm": "0.0=start of light period, 0.5=mid-period, 1.0=full period complete",
-        "dli_accumulated_norm": "0.0=0 mol/m²/d, 0.5=20 mol/m²/d (vegetative target), 1.0=40+ mol/m²/d",
+        "dli_accumulated_norm": "0.0=0 mol/m\u00b2/d, 0.5=20 mol/m\u00b2/d (vegetative target), 1.0=40+ mol/m\u00b2/d",
         "dark_period_integrity_norm": "0.0=dark period fully satisfied, 0.5=partial dark, 1.0=no dark period (light leak)"
       },
       "downstreamMachines": [
@@ -150,7 +150,8 @@
             "description": "PHOTO_OK: photoperiod within optimal parameters at [32:36]"
           }
         ]
-      }
+      },
+      "machineClass": "optimizer"
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -167,10 +168,10 @@
     "sequences": [
       {
         "id": "ag-photo-lights-on-cycle",
-        "name": "Light Cycle Start: DARK_PERIOD+ → TRANSITION → ACTIVE → PEAK → LIGHTS_ON",
+        "name": "Light Cycle Start: DARK_PERIOD+ \u2192 TRANSITION \u2192 ACTIVE \u2192 PEAK \u2192 LIGHTS_ON",
         "metadata": {
-          "description": "Detects when the scheduled dark period has been satisfied and the photoperiod timer arms the light cycle. DARK_PERIOD+ ensures adequate dark rest before re-activating lights — critical for photoperiod-sensitive crops.",
-          "path": "DARK_PERIOD+ → TRANSITION → ACTIVE → PEAK → output[1,0,0,0]",
+          "description": "Detects when the scheduled dark period has been satisfied and the photoperiod timer arms the light cycle. DARK_PERIOD+ ensures adequate dark rest before re-activating lights \u2014 critical for photoperiod-sensitive crops.",
+          "path": "DARK_PERIOD+ \u2192 TRANSITION \u2192 ACTIVE \u2192 PEAK \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (LIGHTS_ON)"
         },
         "vectors": [
@@ -197,9 +198,9 @@
             "isInitial": true,
             "metadata": {
               "name": "DARK_PERIOD",
-              "description": "DARK_PERIOD+ — PAR near zero, early in period, DLI not yet accumulated, dark period active. isInitial A*A = A+: at least one full dark cycle confirmed before lights can arm.",
-              "par_range": "0.0–0.10 (near-dark, no light leak)",
-              "dark_integrity": "0.0–0.15 (dark period fully active)"
+              "description": "DARK_PERIOD+ \u2014 PAR near zero, early in period, DLI not yet accumulated, dark period active. isInitial A*A = A+: at least one full dark cycle confirmed before lights can arm.",
+              "par_range": "0.0\u20130.10 (near-dark, no light leak)",
+              "dark_integrity": "0.0\u20130.15 (dark period fully active)"
             },
             "nextVectorIds": [
               "ag-ph-dark-period",
@@ -229,8 +230,8 @@
             "isInitial": false,
             "metadata": {
               "name": "TRANSITION",
-              "description": "TRANSITION — lamp warm-up; PAR rising from dark to active level.",
-              "par_range": "0.10–0.40 (ramp-up)"
+              "description": "TRANSITION \u2014 lamp warm-up; PAR rising from dark to active level.",
+              "par_range": "0.10\u20130.40 (ramp-up)"
             },
             "nextVectorIds": [
               "ag-ph-active"
@@ -259,8 +260,8 @@
             "isInitial": false,
             "metadata": {
               "name": "ACTIVE",
-              "description": "ACTIVE — lights at photosynthetically effective intensity; photoperiod in progress.",
-              "par_range": "0.50–0.70 (400–600 µmol/m²/s)"
+              "description": "ACTIVE \u2014 lights at photosynthetically effective intensity; photoperiod in progress.",
+              "par_range": "0.50\u20130.70 (400\u2013600 \u00b5mol/m\u00b2/s)"
             },
             "nextVectorIds": [
               "ag-ph-peak"
@@ -289,8 +290,8 @@
             "isInitial": false,
             "metadata": {
               "name": "PEAK",
-              "description": "PEAK — maximum scheduled PAR intensity; DLI accumulating well. Fires LIGHTS_ON confirmation.",
-              "par_range": "0.75–0.90 (700–900 µmol/m²/s)"
+              "description": "PEAK \u2014 maximum scheduled PAR intensity; DLI accumulating well. Fires LIGHTS_ON confirmation.",
+              "par_range": "0.75\u20130.90 (700\u2013900 \u00b5mol/m\u00b2/s)"
             },
             "outputVectors": [
               {
@@ -312,10 +313,10 @@
       },
       {
         "id": "ag-photo-lights-off-cycle",
-        "name": "DLI Target Met: DLI_BUILDING+ → DLI_NEAR_TARGET → DLI_MET → LIGHTS_OFF",
+        "name": "DLI Target Met: DLI_BUILDING+ \u2192 DLI_NEAR_TARGET \u2192 DLI_MET \u2192 LIGHTS_OFF",
         "metadata": {
           "description": "Fires LIGHTS_OFF when the daily DLI target has been met. Prevents over-lighting (photooxidative stress) by terminating the light period once sufficient photons have been delivered.",
-          "path": "DLI_BUILDING+ → DLI_NEAR_TARGET → DLI_MET → output[0,1,0,0]",
+          "path": "DLI_BUILDING+ \u2192 DLI_NEAR_TARGET \u2192 DLI_MET \u2192 output[0,1,0,0]",
           "output": "[0,1,0,0] (LIGHTS_OFF)"
         },
         "vectors": [
@@ -342,8 +343,8 @@
             "isInitial": true,
             "metadata": {
               "name": "DLI_BUILDING",
-              "description": "DLI_BUILDING+ — lights active, DLI accumulating toward target. isInitial A*A = A+.",
-              "dli_range": "0.25–0.45 (10–18 mol/m²/d accumulated)"
+              "description": "DLI_BUILDING+ \u2014 lights active, DLI accumulating toward target. isInitial A*A = A+.",
+              "dli_range": "0.25\u20130.45 (10\u201318 mol/m\u00b2/d accumulated)"
             },
             "nextVectorIds": [
               "ag-ph-dli-building",
@@ -373,8 +374,8 @@
             "isInitial": false,
             "metadata": {
               "name": "DLI_NEAR_TARGET",
-              "description": "DLI_NEAR_TARGET — approaching daily target; prepare to transition lights off.",
-              "dli_range": "0.65–0.82 (26–33 mol/m²/d)"
+              "description": "DLI_NEAR_TARGET \u2014 approaching daily target; prepare to transition lights off.",
+              "dli_range": "0.65\u20130.82 (26\u201333 mol/m\u00b2/d)"
             },
             "nextVectorIds": [
               "ag-ph-dli-met"
@@ -403,8 +404,8 @@
             "isInitial": false,
             "metadata": {
               "name": "DLI_MET",
-              "description": "DLI_MET — daily light integral target reached. Fires LIGHTS_OFF to begin dark period.",
-              "dli_range": "0.88–1.00 (35+ mol/m²/d)"
+              "description": "DLI_MET \u2014 daily light integral target reached. Fires LIGHTS_OFF to begin dark period.",
+              "dli_range": "0.88\u20131.00 (35+ mol/m\u00b2/d)"
             },
             "outputVectors": [
               {
@@ -426,7 +427,7 @@
       },
       {
         "id": "ag-photo-ok",
-        "name": "Optimal Photoperiod: PHOTO_OK+ → PHOTO_OK signal",
+        "name": "Optimal Photoperiod: PHOTO_OK+ \u2192 PHOTO_OK signal",
         "metadata": {
           "description": "Fires PHOTO_OK when lights are actively delivering PAR within optimal range and dark period integrity is maintained. Provides continuous healthy-lighting signal.",
           "pattern": "PHOTO_OK+",
@@ -456,9 +457,9 @@
             "isInitial": true,
             "metadata": {
               "name": "PHOTO_OK",
-              "description": "PHOTO_OK+ — PAR in optimal vegetative range, mid-photoperiod, DLI building well, dark period clean. Fires on every matching cycle.",
-              "par_range": "0.52–0.68 (400–550 µmol/m²/s, optimal vegetative)",
-              "dli_range": "0.40–0.55 (mid-accumulation)"
+              "description": "PHOTO_OK+ \u2014 PAR in optimal vegetative range, mid-photoperiod, DLI building well, dark period clean. Fires on every matching cycle.",
+              "par_range": "0.52\u20130.68 (400\u2013550 \u00b5mol/m\u00b2/s, optimal vegetative)",
+              "dli_range": "0.40\u20130.55 (mid-accumulation)"
             },
             "outputVectors": [
               {
@@ -482,7 +483,7 @@
     "inputSequences": [
       {
         "name": "18/6 Vegetative Photoperiod Cycle",
-        "pattern": "8-step: DARK→DARK→TRANSITION→ACTIVE→PEAK→PHOTO_OK→DLI_NEAR→DLI_MET",
+        "pattern": "8-step: DARK\u2192DARK\u2192TRANSITION\u2192ACTIVE\u2192PEAK\u2192PHOTO_OK\u2192DLI_NEAR\u2192DLI_MET",
         "description": "Full 18-hour light / 6-hour dark vegetative cycle compressed to representative samples.",
         "vectors": [
           [

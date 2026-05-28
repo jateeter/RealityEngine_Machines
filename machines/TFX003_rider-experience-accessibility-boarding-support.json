@@ -206,7 +206,79 @@
             "processStatus": "info",
             "description": "Accessibility Boarding Support: NOMINAL -> SERVICE_NOMINAL"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "transit_vehicle_health_agent",
+        "mode": "advise",
+        "trigger": "transportation-fleet-rider-experience-accessibility-boarding-support",
+        "allowedActions": [
+          "Dispatch transit_vehicle_health_agent for critical 100-bus fleet intervention on accessibility boarding support.",
+          "Trigger predictive flow management for accessibility boarding support using rider, vehicle, and route context.",
+          "Create maintenance, cleaning, security, or service task for accessibility boarding support.",
+          "Keep 24/7 monitoring active for accessibility boarding support."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.tfx003.transit.vehicle.health.agent.completion",
+          "name": "localAIStack tfx003 transit.vehicle.health.agent completion",
+          "region": {
+            "offset": 3251,
+            "length": 4
+          },
+          "semantics": [
+            "service reliability",
+            "rider impact",
+            "asset readiness",
+            "safety/security risk"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-tfx003-completion",
+            "sensorId": "localai.tfx003.transit.vehicle.health.agent.completion",
+            "name": "localAIStack tfx003 transit.vehicle.health.agent completion",
+            "region": {
+              "offset": 3251,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

@@ -186,7 +186,82 @@
             "processStatus": "info",
             "description": "Ideal-state progress is stable."
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "quality_improvement_agent",
+        "mode": "supervised-act",
+        "trigger": "learning-health-system-signal-monitor-risk-or-optimization-signal",
+        "allowedActions": [
+          "Dispatch quality_improvement_agent to resolve learning health system delivery risk and update the evaluation plan matrix.",
+          "Trigger optimization agent workflow for learning health system using current logic-model outputs and measures.",
+          "Record sustained progress toward the ideal state for learning health system and keep monitoring."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.hsph191.quality.improvement.agent.completion",
+          "name": "localAIStack hsph191 quality.improvement.agent completion",
+          "region": {
+            "offset": 3847,
+            "length": 4
+          },
+          "semantics": [
+            "evaluability readiness",
+            "service delivery pressure",
+            "equity signal",
+            "measure confidence"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-hsph191-completion",
+            "sensorId": "localai.hsph191.quality.improvement.agent.completion",
+            "name": "localAIStack hsph191 quality.improvement.agent completion",
+            "region": {
+              "offset": 3847,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": [
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "RED"
+          ]
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",

@@ -209,7 +209,86 @@
             "processStatus": "error",
             "description": "Dynamic Dispatch Rebalancer: NOMINAL -> SERVICE_NOMINAL"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
+      },
+      "machineClass": "agent-dispatcher",
+      "agentBinding": {
+        "agent": "transit_energy_agent",
+        "mode": "automated-act",
+        "trigger": "transportation-fleet-dispatch-and-flow-control-dynamic-dispatch-rebalancer",
+        "allowedActions": [
+          "Dispatch transit_energy_agent for critical 100-bus fleet intervention on dynamic dispatch rebalancer.",
+          "Trigger predictive flow management for dynamic dispatch rebalancer using rider, vehicle, and route context.",
+          "Create maintenance, cleaning, security, or service task for dynamic dispatch rebalancer.",
+          "Keep 24/7 monitoring active for dynamic dispatch rebalancer."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.tfx052.transit.energy.agent.completion",
+          "name": "localAIStack tfx052 transit.energy.agent completion",
+          "region": {
+            "offset": 3875,
+            "length": 4
+          },
+          "semantics": [
+            "service reliability",
+            "rider impact",
+            "asset readiness",
+            "safety/security risk"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-tfx052-completion",
+            "sensorId": "localai.tfx052.transit.energy.agent.completion",
+            "name": "localAIStack tfx052 transit.energy.agent completion",
+            "region": {
+              "offset": 3875,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": true,
+          "maxAutonomy": "automated-act",
+          "blockedWhenRag": [
+            "AMBER",
+            "RED"
+          ]
+        },
+        "autonomyPolicy": {
+          "mode": "automated-act",
+          "stage": 3,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": true,
+          "requiresHumanApproval": false,
+          "requiresRunbook": true,
+          "blockedWhenRag": [
+            "AMBER",
+            "RED"
+          ],
+          "rollbackRequired": true
+        }
       }
     },
     "arbiterRule": "PASSTHROUGH",
