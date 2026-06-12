@@ -41,6 +41,94 @@ fi
 echo "Seeding ${#MACHINE_FILES[@]} machines → RE: $RE_URL  PE: $PE_URL"
 echo ""
 
+# ── Pre-flight 1: JSON schema validation ────────────────────────────────────
+SCHEMA_ERRORS=0
+for file in "${MACHINE_FILES[@]}"; do
+    filename=$(basename "$file" .json)
+    ERRS=$(python3 - "$file" <<'PYEOF' 2>/dev/null
+import json, sys
+path = sys.argv[1]
+errs = []
+try:
+    with open(path) as f:
+        data = json.load(f)
+except Exception as e:
+    print(f"JSON parse error: {e}")
+    sys.exit(0)
+
+if not isinstance(data.get('version'), str):
+    errs.append("missing/invalid 'version'")
+m = data.get('machine')
+if not isinstance(m, dict):
+    errs.append("missing 'machine' object")
+    print('\n'.join(errs))
+    sys.exit(0)
+if not m.get('name'):
+    errs.append("missing machine.name")
+if 'description' not in m:
+    errs.append("missing machine.description")
+rule = m.get('arbiterRule', '')
+if rule.upper() not in ('PASSTHROUGH', 'AND', 'OR'):
+    errs.append(f"invalid machine.arbiterRule '{rule}' (must be PASSTHROUGH, AND, or OR)")
+if not isinstance(m.get('sequences'), list):
+    errs.append("machine.sequences must be an array")
+print('\n'.join(errs))
+PYEOF
+)
+    if [ -n "$ERRS" ]; then
+        warn "$filename — schema errors:"
+        while IFS= read -r line; do warn "  $line"; done <<< "$ERRS"
+        SCHEMA_ERRORS=$((SCHEMA_ERRORS+1))
+    fi
+done
+if [ "$SCHEMA_ERRORS" -gt 0 ]; then
+    echo ""
+    warn "Schema validation failed for $SCHEMA_ERRORS machine(s). Fix errors before seeding."
+    exit 1
+fi
+ok "Schema validation passed (${#MACHINE_FILES[@]} files)"
+
+# ── Pre-flight 2: perceptual interconnect validation ────────────────────────
+INTERCONNECT_ISSUES=$(python3 - "${MACHINE_FILES[@]}" <<'PYEOF' 2>/dev/null
+import json, sys
+files = sys.argv[1:]
+name_to_pm = {}
+for path in files:
+    with open(path) as f:
+        data = json.load(f)
+    m = data.get('machine', {})
+    name_to_pm[m.get('name', '')] = m.get('perceptualMapping', {})
+
+for path in files:
+    with open(path) as f:
+        data = json.load(f)
+    m = data.get('machine', {})
+    name   = m.get('name', '')
+    up_out = m.get('perceptualMapping', {}).get('output')
+    if not up_out:
+        continue
+    for ds_name in m.get('metadata', {}).get('downstreamMachines', []):
+        ds_pm = name_to_pm.get(ds_name)
+        if ds_pm is None:
+            print(f"{name}: downstream '{ds_name}' not found in corpus")
+            continue
+        ds_in = ds_pm.get('input')
+        if ds_in is None:
+            print(f"{name} → {ds_name}: downstream has no perceptualMapping.input")
+            continue
+        if up_out.get('offset') != ds_in.get('offset') or up_out.get('length') != ds_in.get('length'):
+            print(f"{name} output {up_out} ≠ {ds_name} input {ds_in}")
+PYEOF
+)
+if [ -n "$INTERCONNECT_ISSUES" ]; then
+    warn "Interconnect region mismatches:"
+    while IFS= read -r line; do warn "  $line"; done <<< "$INTERCONNECT_ISSUES"
+    echo ""
+else
+    ok "Interconnect validation passed"
+fi
+echo ""
+
 # Fetch existing PE test source names once for idempotency checks
 PE_TEST_NAMES=$(curl -sk "$PE_URL/api/sources" --max-time 5 2>/dev/null \
     | python3 -c "
