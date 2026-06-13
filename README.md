@@ -7,6 +7,7 @@ A collection of machines that represent the skills known to the RealityEngine.
 This repository also owns the machine-domain constraints used to admit new
 domains and agent-capable machines:
 
+- [RealityEngine and PerceptionEngine operations](docs/REALITY_PERCEPTION_OPERATIONS.md)
 - [Architecture audit and agent workflow roadmap](docs/ARCHITECTURE_AUDIT.md)
 - [Domain manifest](domains/domain-manifest.json)
 - [Domain registry](domains/domain-registry.json)

@@ -7,8 +7,8 @@ import { test, expect } from '@playwright/test';
  * (RE_REGISTRY_URL env var must be set and the universe must have been
  * started with --engines=<two or more instances>).
  *
- * They are skipped automatically when only a single instance or no registry
- * is available, so they are safe to include in every CI run.
+ * They fail visibly when the registry is present but has fewer than two
+ * instances. Single-instance smoke coverage belongs in a separate test path.
  */
 
 const REGISTRY_URL = process.env.RE_REGISTRY_URL ?? '';
@@ -35,9 +35,9 @@ async function fetchRegistry(request: Parameters<Parameters<typeof test>[1]>[0][
 test.describe('Multi-Engine Instance Tests', () => {
   test.skip(() => !REGISTRY_URL, 'RE_REGISTRY_URL not set — skipping multi-engine tests');
 
-  test('registry lists at least one instance', async ({ request }) => {
+  test('registry lists at least two instances', async ({ request }) => {
     const instances = await fetchRegistry(request);
-    expect(instances.length, 'Registry must have at least one instance').toBeGreaterThanOrEqual(1);
+    expect(instances.length, 'Registry must have at least two instances for multi-engine conformance').toBeGreaterThanOrEqual(2);
     for (const inst of instances) {
       expect(inst.id).toBeTruthy();
       expect(inst.re_url).toMatch(/^https?:\/\//);
@@ -75,7 +75,7 @@ test.describe('Multi-Engine Instance Tests', () => {
 
   test('Manager /api/engines returns all registry instances', async ({ request }) => {
     const registryInstances = await fetchRegistry(request);
-    test.skip(registryInstances.length < 1, 'No registry instances');
+    test.skip(registryInstances.length < 2, 'Need at least 2 instances for multi-engine manager conformance');
 
     const resp = await request.get(`${VIZ_URL}/api/engines`, { ignoreHTTPSErrors: true });
     expect(resp.ok()).toBeTruthy();
