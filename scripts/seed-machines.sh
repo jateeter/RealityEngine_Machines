@@ -29,6 +29,13 @@ ok()   { echo -e "${GREEN}✓${NC} $*"; }
 warn() { echo -e "${YELLOW}⚠${NC} $*"; }
 info() { echo -e "  $*"; }
 
+# ── Audit log setup ────────────────────────────────────────────────────────────
+SEED_LOG="${SEED_LOG:-$HOME/.realityengine/seed-audit.log}"
+mkdir -p "$(dirname "$SEED_LOG")" 2>/dev/null || true
+_SEED_TS=$(date -u +%FT%TZ 2>/dev/null || date +%FT%TZ)
+_audit() { printf '%s\t%s\n' "$_SEED_TS" "$*" >> "$SEED_LOG" 2>/dev/null || true; }
+_audit "RUN\tre=$RE_URL\tpe=$PE_URL"
+
 # Collect all machine JSON files
 MACHINE_FILES=()
 while IFS= read -r _f; do MACHINE_FILES+=("$_f"); done < <(find "$MACHINES_ROOT" -name "*.json" | sort)
@@ -169,6 +176,7 @@ except Exception:
     print('')
 " 2>/dev/null || true)
             RE_SEEDED=$((RE_SEEDED+1))
+            _audit "SEEDED\t$filename\t$MACHINE_ID"
             ;;
         409)
             # Already in RE — still need to check PE binding
@@ -180,11 +188,13 @@ except Exception:
     print('')
 " 2>/dev/null || true)
             RE_SKIPPED=$((RE_SKIPPED+1))
+            _audit "SKIPPED\t$filename\t$MACHINE_ID"
             ;;
         *)
             BODY=$(cat /tmp/_seed_resp.json 2>/dev/null | head -c 120 || echo "")
             warn "$filename — RE HTTP $RESP  $BODY"
             RE_FAILED=$((RE_FAILED+1))
+            _audit "FAILED\t$filename\tre_http=$RESP"
             continue
             ;;
     esac
@@ -280,5 +290,8 @@ done
 echo ""
 echo "RE  — seeded: $RE_SEEDED  skipped: $RE_SKIPPED  failed: $RE_FAILED"
 echo "PE  — bound:  $PE_BOUND   skipped: $PE_SKIPPED  failed: $PE_FAILED"
+
+_audit "SUMMARY\tre_seeded=$RE_SEEDED\tre_skipped=$RE_SKIPPED\tre_failed=$RE_FAILED\tpe_bound=$PE_BOUND\tpe_skipped=$PE_SKIPPED\tpe_failed=$PE_FAILED"
+echo "  Audit log: $SEED_LOG"
 
 [ "$RE_FAILED" -gt 0 ] || [ "$PE_FAILED" -gt 0 ] && exit 1 || exit 0
