@@ -4,14 +4,19 @@
 #                    TestSourceConfig entries in the PE.
 #
 # Usage:
-#   ./scripts/seed-machines.sh [RE_URL] [PE_URL]
+#   ./scripts/seed-machines.sh [--re-only] [RE_URL] [PE_URL]
 #
 # RE_URL defaults to https://localhost:3000.
 # PE_URL defaults to https://localhost:3004.
 #
+# Flags:
+#   --re-only   Skip Phase 2 (PE TestSourceConfig binding).  Use when PE
+#               sources will be materialised separately via the PE's own
+#               POST /api/sources/bootstrap-from-machines endpoint.
+#
 # For each machine file:
 #   1. POST machine definition (CES) to RE /api/machines
-#   2. If new (200/201), POST a TestSourceConfig to PE /api/sources
+#   2. (unless --re-only) POST a TestSourceConfig to PE /api/sources
 #      binding the machine's inputSequences to its perceptualMapping.input
 #      region.  active=false so sources sit idle until explicitly started.
 #
@@ -21,8 +26,25 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MACHINES_ROOT="$SCRIPT_DIR/../machines"
-RE_URL="${1:-https://localhost:3000}"
-PE_URL="${2:-https://localhost:3004}"
+
+RE_URL="https://localhost:3000"
+PE_URL="https://localhost:3004"
+RE_ONLY=false
+
+_pos=0
+for _arg in "$@"; do
+  case "$_arg" in
+    --re-only) RE_ONLY=true ;;
+    --*) echo "Unknown flag: $_arg" >&2; exit 1 ;;
+    *)
+      _pos=$((_pos+1))
+      case "$_pos" in
+        1) RE_URL="$_arg" ;;
+        2) PE_URL="$_arg" ;;
+      esac
+      ;;
+  esac
+done
 
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
 ok()   { echo -e "${GREEN}✓${NC} $*"; }
@@ -136,7 +158,9 @@ else
 fi
 echo ""
 
-# Fetch existing PE test source names once for idempotency checks
+# Fetch existing PE test source names once for idempotency checks (skipped in --re-only mode)
+PE_TEST_NAMES=""
+if [ "$RE_ONLY" = false ]; then
 PE_TEST_NAMES=$(curl -sk "$PE_URL/api/sources" --max-time 5 2>/dev/null \
     | python3 -c "
 import json, sys
@@ -147,6 +171,7 @@ try:
 except Exception:
     pass
 " 2>/dev/null || true)
+fi
 
 RE_SEEDED=0
 RE_SKIPPED=0
@@ -200,6 +225,9 @@ except Exception:
     esac
 
     # ── Phase 2: register TestSourceConfig in PE ────────────────────────────
+    # Skipped when --re-only is set; use pe-source-bootstrap.sh instead.
+    [ "$RE_ONLY" = true ] && continue
+
     PE_BODY=$(python3 - "$file" "$MACHINE_ID" <<'PYEOF' 2>/dev/null
 import json, sys
 
@@ -289,7 +317,11 @@ done
 
 echo ""
 echo "RE  — seeded: $RE_SEEDED  skipped: $RE_SKIPPED  failed: $RE_FAILED"
-echo "PE  — bound:  $PE_BOUND   skipped: $PE_SKIPPED  failed: $PE_FAILED"
+if [ "$RE_ONLY" = false ]; then
+  echo "PE  — bound:  $PE_BOUND   skipped: $PE_SKIPPED  failed: $PE_FAILED"
+else
+  echo "PE  — skipped (--re-only; use pe-source-bootstrap.sh for PE source binding)"
+fi
 
 _audit "SUMMARY\tre_seeded=$RE_SEEDED\tre_skipped=$RE_SKIPPED\tre_failed=$RE_FAILED\tpe_bound=$PE_BOUND\tpe_skipped=$PE_SKIPPED\tpe_failed=$PE_FAILED"
 echo "  Audit log: $SEED_LOG"
