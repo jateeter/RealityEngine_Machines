@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from collections import Counter
@@ -151,7 +152,7 @@ class AgentContractTests(unittest.TestCase):
 
     def test_dispatch_envelope_builder_preserves_agent_contract(self) -> None:
         result = subprocess.run(
-            ["python3", "scripts/build-dispatch-envelope.py", str(SAMPLE_AGENT_MACHINE)],
+            [sys.executable, "scripts/build-dispatch-envelope.py", str(SAMPLE_AGENT_MACHINE)],
             cwd=REPO_ROOT,
             check=True,
             text=True,
@@ -172,7 +173,7 @@ class AgentContractTests(unittest.TestCase):
 
     def test_writeback_payload_builder_preserves_pe_sensor_contract(self) -> None:
         result = subprocess.run(
-            ["python3", "scripts/build-writeback-completion.py", str(SAMPLE_AGENT_MACHINE)],
+            [sys.executable, "scripts/build-writeback-completion.py", str(SAMPLE_AGENT_MACHINE)],
             cwd=REPO_ROOT,
             check=True,
             text=True,
@@ -192,7 +193,7 @@ class AgentContractTests(unittest.TestCase):
 
     def test_observe_machine_rejects_writeback_payload_generation(self) -> None:
         result = subprocess.run(
-            ["python3", "scripts/build-writeback-completion.py", str(SAMPLE_OBSERVE_MACHINE)],
+            [sys.executable, "scripts/build-writeback-completion.py", str(SAMPLE_OBSERVE_MACHINE)],
             cwd=REPO_ROOT,
             text=True,
             capture_output=True,
@@ -210,7 +211,7 @@ class AgentContractTests(unittest.TestCase):
             target.write_text(json.dumps(data, indent=2) + "\n")
 
             result = subprocess.run(
-                ["python3", "scripts/audit-corpus.py", "--machines-root", str(tmp_root)],
+                [sys.executable, "scripts/audit-corpus.py", "--machines-root", str(tmp_root)],
                 cwd=REPO_ROOT,
                 text=True,
                 capture_output=True,
@@ -230,7 +231,7 @@ class AgentContractTests(unittest.TestCase):
             target.write_text(json.dumps(data, indent=2) + "\n")
 
             result = subprocess.run(
-                ["python3", "scripts/audit-corpus.py", "--machines-root", str(tmp_root)],
+                [sys.executable, "scripts/audit-corpus.py", "--machines-root", str(tmp_root)],
                 cwd=REPO_ROOT,
                 text=True,
                 capture_output=True,
