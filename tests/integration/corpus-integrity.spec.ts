@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
  * Every machine JSON in machines/ must be present in RE after seeding.
  */
 
-const RE_URL = 'https://localhost:3000';
+const RE_URL = process.env.RE_BASE_URL ?? 'https://localhost:5001';
 const MACHINES_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../..', 'machines');
 
 async function collectMachineFiles(dir: string): Promise<string[]> {

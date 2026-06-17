@@ -77,7 +77,7 @@ def build_envelope(path: Path, sequence_id: str | None = None) -> dict[str, Any]
         "source": {
             "engine": "RE",
             "instance": "local",
-            "endpoint": "http://localhost:3000",
+            "endpoint": "http://localhost:5001",
         },
         "ces": {
             "machineId": str(machine.get("id") or path.stem),

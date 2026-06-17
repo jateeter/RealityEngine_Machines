@@ -6,7 +6,7 @@
 # Usage:
 #   ./scripts/seed-machines.sh [--re-only] [RE_URL] [PE_URL]
 #
-# RE_URL defaults to https://localhost:3000.
+# RE_URL defaults to https://localhost:5001.
 # PE_URL defaults to https://localhost:3004.
 #
 # Flags:
@@ -27,7 +27,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MACHINES_ROOT="$SCRIPT_DIR/../machines"
 
-RE_URL="https://localhost:3000"
+RE_URL="https://localhost:5001"
 PE_URL="https://localhost:3004"
 RE_ONLY=false
 

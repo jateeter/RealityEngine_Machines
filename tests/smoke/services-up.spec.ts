@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
  * verified independently.  Falls back to single-instance env vars when not set.
  */
 
-const RE_URL  = process.env.RE_BASE_URL   ?? 'https://localhost:3000';
+const RE_URL  = process.env.RE_BASE_URL   ?? 'https://localhost:5001';
 const VIZ_URL = process.env.VIZ_BASE_URL  ?? 'https://localhost:3001';
 const PE_URL  = process.env.PE_BASE_URL   ?? 'https://localhost:3004';
 const LAS_URL = process.env.LAS_BASE_URL  ?? 'http://localhost:4000';
