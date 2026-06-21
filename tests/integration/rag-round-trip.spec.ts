@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
 
 const LAS_URL  = 'http://localhost:4000';
 const RE_URL   = process.env.RE_BASE_URL ?? 'https://localhost:5001';
-const PE_URL   = 'https://localhost:3004';
+const PE_URL   = process.env.PE_BASE_URL ?? 'https://localhost:3004';
 const QD_URL   = 'http://localhost:4333';
 
 test.describe('RAG Round-Trip', () => {

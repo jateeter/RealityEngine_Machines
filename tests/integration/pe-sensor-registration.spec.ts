@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
  * Verifies that sensors are registered in the Perception Engine after startup.
  */
 
-const PE_URL = 'https://localhost:3004';
+const PE_URL = process.env.PE_BASE_URL ?? 'https://localhost:3004';
 const LAS_URL = 'http://localhost:4000';
 
 test.describe('PE Sensor Registration', () => {

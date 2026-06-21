@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
  */
 
 const RE_URL = process.env.RE_BASE_URL ?? 'https://localhost:5001';
-const MACHINES_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../..', 'machines');
+const MACHINES_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..', 'machines');
 
 async function collectMachineFiles(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true }).catch(() => []);
