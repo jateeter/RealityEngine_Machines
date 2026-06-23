@@ -429,10 +429,41 @@ def validate_machine_class(
         warnings.append(f"metadata.machineClass={value!r} expects metadata.sensorNormalization")
 
 
+def check_reserved_ranges(
+    region: tuple[int, int] | None,
+    label: str,
+    reserved_ranges: list[dict[str, Any]],
+    warnings: list[str],
+) -> None:
+    """Warn when a machine window intrudes on a provider-owned reserved band.
+
+    Reserved bands (rangePolicy.reservedRanges) hold provider write-back sources
+    such as derived OpenClaw/ACP agent completions; machines must not map there.
+    Reported as a compatibility warning, so it becomes a hard failure under
+    STRICT_DOMAIN_CONTRACT without breaking existing corpus loads.
+    """
+    if not region:
+        return
+    start, length = region
+    end = start + length
+    for reserved in reserved_ranges:
+        r_off = reserved.get("offset")
+        r_len = reserved.get("length")
+        if not isinstance(r_off, int) or not isinstance(r_len, int):
+            continue
+        if start < r_off + r_len and r_off < end:
+            warnings.append(
+                f"perceptualMapping.{label} [{start}:{end}] overlaps reserved range "
+                f"{reserved.get('id', '?')} [{r_off}:{r_off + r_len}] "
+                f"(owner={reserved.get('owner', '?')})"
+            )
+
+
 def audit_machine(
     path: Path,
     registry: dict[str, Any],
     agent_ready_classes: dict[str, Any],
+    reserved_ranges: list[dict[str, Any]] | None = None,
 ) -> tuple[list[str], list[str], dict[str, Any]]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -468,6 +499,9 @@ def audit_machine(
         errors.append("machine.perceptualMapping must be an object")
     input_region = validate_region(mapping.get("input"), "input", errors)
     output_region = validate_region(mapping.get("output"), "output", errors)
+    reserved_ranges = reserved_ranges or []
+    check_reserved_ranges(input_region, "input", reserved_ranges, warnings)
+    check_reserved_ranges(output_region, "output", reserved_ranges, warnings)
     bits = mapping.get("bitsPerElement")
     if bits not in ALLOWED_BITS:
         errors.append("perceptualMapping.bitsPerElement must be one of 1, 2, 4, 8")
@@ -547,6 +581,7 @@ def main() -> int:
     registry_root = load_registry_root(repo_root)
     registry = as_object(registry_root.get("domains"))
     agent_ready_classes = as_object(registry_root.get("agentReadyMachineClasses"))
+    reserved_ranges = as_list(as_object(registry_root.get("rangePolicy")).get("reservedRanges"))
     manifest = load_domain_manifest(repo_root)
     files = sorted(machines_root.rglob("*.json"))
 
@@ -558,7 +593,7 @@ def main() -> int:
     agent_binding_count = 0
 
     for path in files:
-        errors, warnings, facts = audit_machine(path, registry, agent_ready_classes)
+        errors, warnings, facts = audit_machine(path, registry, agent_ready_classes, reserved_ranges)
         rel = str(path.relative_to(machines_root))
         if errors:
             errors_by_file[rel] = errors

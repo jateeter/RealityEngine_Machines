@@ -220,7 +220,21 @@
     "requirements": [
       "Every new domain must declare allocated input and output windows before machines are added.",
       "Any overlap must be classified as overlay, bridge, or deprecated and referenced by trigger envelope projection.schemaOverlay.",
-      "Sensor-driven machines must declare inputSemantics and sensorNormalization."
+      "Sensor-driven machines must declare inputSemantics and sensorNormalization.",
+      "Machine perceptualMapping input/output windows must not fall inside a reservedRange; those bands are owned by provider write-back sources, not machines."
+    ],
+    "reservedRanges": [
+      {
+        "id": "acp-openclaw-agent-completions",
+        "offset": 7300,
+        "length": 5000,
+        "ownership": "exclusive",
+        "provider": "acp",
+        "owner": "machine-behaviors (localOpenClawStack)",
+        "writeBack": true,
+        "sensorIdPattern": "acp.openclaw.<machineCode>.<agent>.completion",
+        "purpose": "Perceptual-space band reserved for OpenClaw/ACP agent completion write-back sensors derived corpus-wide by localOpenClawStack/machine-behaviors. Machines must not map input/output here; PE completion sources land here and RE reads them as ordinary input. Sits above the current corpus max offset (7280); length covers all 1047 corpus write-back agents (~4632 positions) with headroom."
+      }
     ]
   },
   "domains": {
