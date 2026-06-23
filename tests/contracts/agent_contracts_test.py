@@ -94,7 +94,7 @@ class AgentContractTests(unittest.TestCase):
 
         self.assertFalse(exceptions, "\n".join(exceptions))
         self.assertEqual(class_counts["agent-dispatcher"], agent_bound_counts["agent-dispatcher"])
-        self.assertEqual(agent_bound_counts["agent-dispatcher"], 1055)
+        self.assertEqual(agent_bound_counts["agent-dispatcher"], 1056)
 
     def test_agent_binding_autonomy_policy_matches_registry(self) -> None:
         registry_policy = self.registry["autonomyPolicy"]
@@ -117,7 +117,7 @@ class AgentContractTests(unittest.TestCase):
                 self.assertEqual(risk_controls.get("maxAutonomy"), mode)
                 self.assertEqual(risk_controls.get("blockedWhenRag"), expected_policy["blockedWhenRag"])
 
-        self.assertEqual(checked, 1055)
+        self.assertEqual(checked, 1056)
 
     def test_non_observe_writeback_is_pe_sensor_and_observe_has_none(self) -> None:
         observe_count = 0
