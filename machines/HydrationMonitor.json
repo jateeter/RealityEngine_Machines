@@ -128,9 +128,61 @@
       },
       "machineClass": "signal-monitor",
       "inputSemantics": [
-        "Hydration Monitor input 1",
-        "Hydration Monitor input 2"
-      ]
+        "below_half_daily_intake_target_bit",
+        "below_quarter_daily_intake_target_bit"
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.daily-activity-wellness.hydration-status",
+          "type": "published-domain-bus-producer",
+          "role": "hydration_status",
+          "sourceMachine": "Hydration Monitor",
+          "sourceOutputRegion": {
+            "offset": 1949,
+            "length": 2
+          },
+          "targetInputElements": [
+            4,
+            5
+          ],
+          "normalizedElements": [
+            "below half daily target bit from HydrationMonitor [1949]",
+            "below quarter daily target bit from HydrationMonitor [1950]"
+          ],
+          "purpose": "Publish hydration risk into the personal-health daily activity wellness bus.",
+          "privacyBoundary": "PE composes normalized hydration status bits only; raw smart-cup, fridge, faucet, and bathroom event streams remain outside the universal reality vector.",
+          "busId": "health-personal.daily-activity-wellness",
+          "busTag": "published-bus-health-personal-daily-activity-wellness",
+          "targetMachine": "Daily Activity Wellness Interconnect",
+          "targetMachineFile": "DailyActivityWellnessInterconnect.json",
+          "busInputRegion": {
+            "offset": 4310,
+            "length": 10
+          },
+          "busOutputRegion": {
+            "offset": 4320,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait"
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-hydration-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1947,
+          "length": 2
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "below_half_daily_intake_target_bit",
+          "below_quarter_daily_intake_target_bit"
+        ],
+        "peContract": "OpenClaw maps hydration observations to native machine input bits; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {

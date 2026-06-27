@@ -148,15 +148,77 @@
       },
       "machineClass": "signal-monitor",
       "inputSemantics": [
-        "Home Social Isolation Monitor input 1",
-        "Home Social Isolation Monitor input 2",
-        "Home Social Isolation Monitor input 3",
-        "Home Social Isolation Monitor input 4",
-        "Home Social Isolation Monitor input 5",
-        "Home Social Isolation Monitor input 6",
-        "Home Social Isolation Monitor input 7",
-        "Home Social Isolation Monitor input 8"
-      ]
+        "medication-adherence-crisis-bit",
+        "medication-cost-barrier-active-bit",
+        "medication-access-risk-bit",
+        "medication-managed-bit",
+        "transport-critical-access-failure-bit",
+        "transport-appointment-barrier-bit",
+        "transport-dependent-risk-bit",
+        "transportation-adequate-bit"
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.daily-activity-wellness.social-context",
+          "type": "published-domain-bus-producer",
+          "role": "social_context",
+          "sourceMachine": "Home Social Isolation Monitor",
+          "sourceOutputRegion": {
+            "offset": 2035,
+            "length": 4
+          },
+          "targetInputElements": [
+            6,
+            7,
+            8,
+            9
+          ],
+          "normalizedElements": [
+            "severe isolation bit from HomeSocialIsolationMonitor [2035]",
+            "social withdrawal bit from HomeSocialIsolationMonitor [2036]",
+            "isolation risk bit from HomeSocialIsolationMonitor [2037]",
+            "socially connected bit from HomeSocialIsolationMonitor [2038]"
+          ],
+          "purpose": "Publish social isolation context into the personal-health daily activity wellness bus.",
+          "privacyBoundary": "PE composes normalized isolation status bits only; raw call logs, visit notes, and access-barrier records remain outside the universal reality vector.",
+          "busId": "health-personal.daily-activity-wellness",
+          "busTag": "published-bus-health-personal-daily-activity-wellness",
+          "targetMachine": "Daily Activity Wellness Interconnect",
+          "targetMachineFile": "DailyActivityWellnessInterconnect.json",
+          "busInputRegion": {
+            "offset": 4310,
+            "length": 10
+          },
+          "busOutputRegion": {
+            "offset": 4320,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait"
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-home-social-isolation-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 2011,
+          "length": 8
+        },
+        "normalization": "machine-native-scalar",
+        "semantics": [
+          "medication-adherence-crisis-bit",
+          "medication-cost-barrier-active-bit",
+          "medication-access-risk-bit",
+          "medication-managed-bit",
+          "transport-critical-access-failure-bit",
+          "transport-appointment-barrier-bit",
+          "transport-dependent-risk-bit",
+          "transportation-adequate-bit"
+        ],
+        "peContract": "Normal path is deterministic PE composition from medication and transportation outputs. OpenClaw may populate the same native lane only for external social-access observations that bypass those upstream machines."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {

@@ -1,0 +1,932 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Daily Activity Wellness Interconnect",
+    "description": "Published personal-health bridge bus that composes daily activity, sleep quality, hydration status, and social-isolation context into a compact wellness deterioration lane. PE owns source composition and writes the compact input lane; RE evaluates this machine as ordinary vector state.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Published Daily Activity Wellness Bus",
+      "author": "Reality Engine",
+      "domainLevelTag": "published-bus-health-personal-daily-activity-wellness",
+      "publishedDomainBus": {
+        "id": "health-personal.daily-activity-wellness",
+        "tag": "published-bus-health-personal-daily-activity-wellness",
+        "domain": "health-personal",
+        "name": "Personal Health Daily Activity Wellness Bus",
+        "description": "Domain-level published bus for daily activity decline, sleep disruption, hydration risk, and social-isolation interconnection.",
+        "inputRegion": {
+          "offset": 4310,
+          "length": 10
+        },
+        "outputRegion": {
+          "offset": 4320,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "activity_burden",
+            "sourceMachine": "DailyActivityMonitor.json",
+            "machineInputRegion": {
+              "offset": 1951,
+              "length": 2
+            },
+            "machineOutputRegion": {
+              "offset": 1953,
+              "length": 2
+            },
+            "composedInputElements": [
+              0,
+              1
+            ],
+            "mapping": {
+              "belowBaselineToday": "DailyActivityMonitor output[0]",
+              "sedentaryStreakActive": "DailyActivityMonitor output[1]"
+            }
+          },
+          {
+            "role": "sleep_quality",
+            "sourceMachine": "SleepQualityMonitor.json",
+            "machineInputRegion": {
+              "offset": 1943,
+              "length": 2
+            },
+            "machineOutputRegion": {
+              "offset": 1945,
+              "length": 2
+            },
+            "composedInputElements": [
+              2,
+              3
+            ],
+            "mapping": {
+              "shortOrPoorSleep": "SleepQualityMonitor output[0]",
+              "disturbedOrFragmentedSleep": "SleepQualityMonitor output[1]"
+            }
+          },
+          {
+            "role": "hydration_status",
+            "sourceMachine": "HydrationMonitor.json",
+            "machineInputRegion": {
+              "offset": 1947,
+              "length": 2
+            },
+            "machineOutputRegion": {
+              "offset": 1949,
+              "length": 2
+            },
+            "composedInputElements": [
+              4,
+              5
+            ],
+            "mapping": {
+              "belowHalfTarget": "HydrationMonitor output[0]",
+              "belowQuarterTarget": "HydrationMonitor output[1]"
+            }
+          },
+          {
+            "role": "social_context",
+            "sourceMachine": "HomeSocialIsolationMonitor.json",
+            "machineInputRegion": {
+              "offset": 2011,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 2035,
+              "length": 4
+            },
+            "composedInputElements": [
+              6,
+              7,
+              8,
+              9
+            ],
+            "mapping": {
+              "severeIsolation": "HomeSocialIsolationMonitor output[0]",
+              "socialWithdrawal": "HomeSocialIsolationMonitor output[1]",
+              "isolationRisk": "HomeSocialIsolationMonitor output[2]",
+              "sociallyConnected": "HomeSocialIsolationMonitor output[3]"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "HSPH131_care-coordination-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4320,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_wellness_check",
+              "activity_support_needed",
+              "hydration_sleep_recovery"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "care coordination signal monitoring"
+          },
+          {
+            "machine": "HSPH132_care-coordination-resource-router.json",
+            "inputRegion": {
+              "offset": 4320,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_wellness_check",
+              "activity_support_needed",
+              "hydration_sleep_recovery"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "care coordination resource routing"
+          },
+          {
+            "machine": "HSPH137_care-coordination-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4320,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_wellness_check",
+              "activity_support_needed"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "care coordination agent dispatch"
+          },
+          {
+            "machine": "HSPH138_care-coordination-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4320,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_wellness_check"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "urgent wellness governance escalation"
+          },
+          {
+            "machine": "LBL031_movement-and-physical-health-movement-baseline.json",
+            "inputRegion": {
+              "offset": 4320,
+              "length": 4
+            },
+            "lanes": [
+              "activity_support_needed",
+              "stable_routine"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "movement baseline reset and routine support"
+          },
+          {
+            "machine": "LBL033_movement-and-physical-health-zone-two-activity-plan.json",
+            "inputRegion": {
+              "offset": 4320,
+              "length": 4
+            },
+            "lanes": [
+              "activity_support_needed",
+              "stable_routine"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "graded activity planning"
+          },
+          {
+            "machine": "LBL015_nutrition-and-metabolic-health-hydration-electrolyte-monitor.json",
+            "inputRegion": {
+              "offset": 4320,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_wellness_check",
+              "hydration_sleep_recovery"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "hydration and electrolyte follow-up"
+          },
+          {
+            "machine": "LBL030_sleep-and-circadian-rhythm-sleep-executive-stabilizer.json",
+            "inputRegion": {
+              "offset": 4320,
+              "length": 4
+            },
+            "lanes": [
+              "hydration_sleep_recovery",
+              "stable_routine"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "sleep routine stabilization"
+          },
+          {
+            "machine": "LBL038_movement-and-physical-health-exercise-anxiety-depression-response.json",
+            "inputRegion": {
+              "offset": 4320,
+              "length": 4
+            },
+            "lanes": [
+              "activity_support_needed",
+              "hydration_sleep_recovery"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "exercise mood-response support when activity decline and sleep/hydration stress interact"
+          }
+        ],
+        "fanOutPolicy": {
+          "owner": "perception-engine",
+          "mode": "lane-scoped",
+          "dispatchMode": "asynchronous-no-wait",
+          "defaultAction": "do-not-dispatch-unmatched-consumer",
+          "notes": "PE selects consumers from outputMatchesAny after RE emits the bus output. The compact output lane is not broadcast indiscriminately to every downstream machine."
+        },
+        "peContract": {
+          "compositionOwner": "perception-engine",
+          "startupConfigured": true,
+          "dispatchMode": "asynchronous-no-wait",
+          "sourcePayloadPolicy": "normalized-status-only",
+          "rawPayloadPolicy": "remain-in-source-ledger-or-upstream-system"
+        },
+        "localAIResolver": {
+          "resolverId": "localai.health-personal.daily-activity-wellness.resolver",
+          "provider": "ollama-localai",
+          "dispatchMode": "accepted-no-wait",
+          "inputRegion": {
+            "offset": 4320,
+            "length": 4
+          },
+          "writeBack": {
+            "type": "pe-sensor",
+            "provider": "localai",
+            "sensorId": "localai.health-personal.daily-activity-wellness.resolver.completion",
+            "name": "localAIStack daily activity wellness resolver completion",
+            "region": {
+              "offset": 4320,
+              "length": 4
+            },
+            "semantics": [
+              "urgent wellness check resolved or acknowledged",
+              "activity support resolved or acknowledged",
+              "hydration sleep recovery resolved or acknowledged",
+              "stable routine resolved or acknowledged"
+            ],
+            "ttlMs": 300000,
+            "normalization": "machine-native-binary",
+            "ingest": {
+              "endpoint": "/api/integrations/completions",
+              "method": "POST",
+              "triggerPush": false,
+              "compactPush": true
+            },
+            "sourceMapping": {
+              "id": "localai-daily-activity-wellness-resolver-completion",
+              "sensorId": "localai.health-personal.daily-activity-wellness.resolver.completion",
+              "name": "localAIStack daily activity wellness resolver completion",
+              "region": {
+                "offset": 4320,
+                "length": 4
+              },
+              "ttlMs": 300000
+            }
+          },
+          "contractSurface": "publishedDomainBus.localAIResolver",
+          "notes": "Resolver metadata is consumed by PE startup configuration. It intentionally does not create metadata.agentBinding because this bridge machine is not an agent-dispatcher and RE should see only ordinary vector state."
+        }
+      },
+      "outputSpace": "4D binary at [4320:4324]: [1,0,0,0]=URGENT_WELLNESS_CHECK, [0,1,0,0]=ACTIVITY_SUPPORT_NEEDED, [0,0,1,0]=HYDRATION_SLEEP_RECOVERY, [0,0,0,1]=STABLE_ROUTINE",
+      "tags": [
+        "activity-support",
+        "bridge",
+        "cross-domain-interconnect",
+        "daily-activity-monitor",
+        "elder-care",
+        "health-personal",
+        "health-personal-published-bus",
+        "hydration",
+        "machine-interconnect",
+        "published-bus-health-personal-daily-activity-wellness",
+        "sleep",
+        "social-isolation",
+        "startup-loadable",
+        "wellness"
+      ],
+      "sequenceCount": 4,
+      "inputSemantics": [
+        "below baseline today bit",
+        "sedentary streak active bit",
+        "short or poor sleep bit",
+        "disturbed or fragmented sleep bit",
+        "below half hydration target bit",
+        "below quarter hydration target bit",
+        "severe isolation bit",
+        "social withdrawal bit",
+        "isolation risk bit",
+        "socially connected bit"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "manual-corpus-interconnect",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "wellness",
+          "health-personal-published-bus",
+          "published-bus-health-personal-daily-activity-wellness"
+        ],
+        "family": "health-personal-interconnect",
+        "machineCode": "daily-activity-wellness-interconnect",
+        "capabilityTags": [
+          "bridge",
+          "machine-interconnect",
+          "activity-support"
+        ],
+        "workflowTags": [
+          "daily-activity-monitor",
+          "elder-care",
+          "hydration",
+          "sleep",
+          "social-isolation",
+          "wellness"
+        ],
+        "integrationTags": [
+          "cross-domain-interconnect",
+          "machine-interconnect",
+          "published-bus-health-personal-daily-activity-wellness"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "activity-support",
+          "bridge",
+          "ces-sequences",
+          "ces-sequences-4",
+          "cross-domain-interconnect",
+          "daily-activity-monitor",
+          "elder-care",
+          "health-personal",
+          "health-personal-interconnect",
+          "health-personal-published-bus",
+          "hydration",
+          "input-sequences",
+          "input-sequences-2",
+          "machine-interconnect",
+          "published-bus-health-personal-daily-activity-wellness",
+          "sleep",
+          "social-isolation",
+          "startup-loadable",
+          "wellness",
+          "daily-activity-wellness-interconnect"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/daily-activity-wellness-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "wellness-coaching-team-primary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for activity decline, sleep disruption, hydration risk, and social isolation. RE evaluates only vector state; PE owns source provenance and completion ingestion."
+      },
+      "triggerConfig": {
+        "processId": "DAILY_ACTIVITY_WELLNESS_INTERCONNECT",
+        "processName": "Daily Activity Wellness Interconnect",
+        "rules": [
+          {
+            "sequenceId": "daily-activity-wellness-urgent-check",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Prolonged inactivity with poor sleep, critical hydration, and severe isolation requires urgent wellness check."
+          },
+          {
+            "sequenceId": "daily-activity-wellness-activity-support",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Activity decline requires movement baseline review and graded activity support."
+          },
+          {
+            "sequenceId": "daily-activity-wellness-hydration-sleep-recovery",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Sedentary activity with sleep and hydration stress requires recovery planning."
+          },
+          {
+            "sequenceId": "daily-activity-wellness-stable-routine",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Activity, sleep, hydration, and social context support stable daily routine."
+          }
+        ]
+      },
+      "machineClass": "bridge"
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4310,
+        "length": 10
+      },
+      "output": {
+        "offset": 4320,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "daily-activity-wellness-urgent-check",
+        "name": "Prolonged inactivity + poor sleep + critical hydration + severe isolation -> urgent wellness check",
+        "metadata": {
+          "description": "All four source domains report high-risk status. Publish urgent wellness check.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "daily-activity-wellness-urgent-check-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "daily-activity-wellness-urgent-check-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route urgent wellness check, caregiver contact, and clinician review."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "daily-activity-wellness-activity-support",
+        "name": "Sedentary streak with stable sleep/hydration/social context -> activity support",
+        "metadata": {
+          "description": "Activity decline is primary while other domains remain stable. Publish graded activity support.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "daily-activity-wellness-activity-support-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "daily-activity-wellness-activity-support-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route movement baseline review and graded activity plan."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "daily-activity-wellness-hydration-sleep-recovery",
+        "name": "Sedentary day + disturbed sleep + low hydration + isolation risk -> recovery plan",
+        "metadata": {
+          "description": "Activity, sleep, hydration, and social context are degraded but below urgent threshold. Publish recovery support.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "daily-activity-wellness-hydration-sleep-recovery-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "daily-activity-wellness-hydration-sleep-recovery-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route hydration, sleep, and gentle recovery support."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "daily-activity-wellness-stable-routine",
+        "name": "Active day + restful sleep + adequate hydration + social connection -> stable routine",
+        "metadata": {
+          "description": "All source domains are stable. Publish routine monitoring.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "daily-activity-wellness-stable-routine-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "daily-activity-wellness-stable-routine-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Continue stable monitoring and routine wellness coaching."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Daily activity urgent wellness fan-out",
+        "pattern": "PE composed bus input: prolonged inactivity + poor sleep + critical hydration + severe isolation.",
+        "description": "Applies the compact PE-composed input lane at [4310:4320] to activate urgent wellness check and emit [1,0,0,0] to [4320:4324].",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "daily-activity-wellness-urgent-fanout",
+          "sourceRegionInputs": {
+            "DailyActivityMonitor[1953:1955]": [
+              1,
+              1
+            ],
+            "SleepQualityMonitor[1945:1947]": [
+              1,
+              1
+            ],
+            "HydrationMonitor[1949:1951]": [
+              1,
+              1
+            ],
+            "HomeSocialIsolationMonitor[2035:2039]": [
+              1,
+              0,
+              0,
+              0
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4310,
+            "length": 10
+          },
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4320,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH137_care-coordination-agent-dispatcher",
+            "HSPH138_care-coordination-governance-escalator",
+            "LBL015_nutrition-and-metabolic-health-hydration-electrolyte-monitor"
+          ],
+          "fanOutPolicy": "lane-scoped urgent_wellness_check only"
+        }
+      },
+      {
+        "name": "Daily activity stable routine",
+        "pattern": "PE composed bus input: active + restful + hydrated + connected.",
+        "description": "Applies stable routine inputs to keep the workflow in monitoring state.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "daily-activity-wellness-stable-routine",
+          "expectedOutputVector": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "expectedOutputRegion": {
+            "offset": 4320,
+            "length": 4
+          },
+          "fanOutPolicy": "lane-scoped stable_routine only"
+        }
+      }
+    ]
+  }
+}
