@@ -160,11 +160,69 @@
       },
       "machineClass": "safety-compliance-checker",
       "inputSemantics": [
-        "Home Chronic Disease Monitor input 1",
-        "Home Chronic Disease Monitor input 2",
-        "Home Chronic Disease Monitor input 3",
-        "Home Chronic Disease Monitor input 4"
-      ]
+        "biomarker_control_norm",
+        "symptom_burden_norm",
+        "self_management_norm",
+        "lifestyle_adherence_norm"
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.chronic-pain-mental-health-access.disease-burden",
+          "type": "published-domain-bus-producer",
+          "role": "disease_burden",
+          "sourceMachine": "Home Chronic Disease Monitor",
+          "sourceOutputRegion": {
+            "offset": 2019,
+            "length": 4
+          },
+          "targetInputElements": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "normalizedElements": [
+            "disease exacerbation bit from HomeChronicDiseaseMonitor [2019]",
+            "disease poor control bit from HomeChronicDiseaseMonitor [2020]",
+            "disease borderline control bit from HomeChronicDiseaseMonitor [2021]",
+            "disease controlled bit from HomeChronicDiseaseMonitor [2022]"
+          ],
+          "purpose": "Publish chronic disease burden into the personal-health chronic-pain mental-health access bus.",
+          "busId": "health-personal.chronic-pain-mental-health-access",
+          "busTag": "published-bus-health-personal-chronic-pain-mental-health-access",
+          "targetMachine": "Chronic Pain Mental Health Access Interconnect",
+          "peCompositionRequired": true,
+          "privacyBoundary": "PE composes normalized status bits only; raw clinical observations remain outside the universal reality vector.",
+          "targetMachineFile": "HomeChronicPainMentalHealthAccessInterconnect.json",
+          "busInputRegion": {
+            "offset": 4320,
+            "length": 12
+          },
+          "busOutputRegion": {
+            "offset": 4332,
+            "length": 4
+          },
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait"
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-home-chronic-disease-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1987,
+          "length": 4
+        },
+        "normalization": "machine-native-scalar",
+        "semantics": [
+          "biomarker_control_norm",
+          "symptom_burden_norm",
+          "self_management_norm",
+          "lifestyle_adherence_norm"
+        ],
+        "peContract": "OpenClaw may produce machine-native input values for PE ingestion; RE remains authoritative for CES sequence evaluation."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {

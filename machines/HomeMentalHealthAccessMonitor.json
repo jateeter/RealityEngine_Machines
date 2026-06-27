@@ -27,7 +27,7 @@
         "mental-health-access",
         "startup-loadable"
       ],
-      "sequenceCount": 3,
+      "sequenceCount": 4,
       "populationFocus": "Adults managing chronic disease and/or chronic pain with comorbid depression/anxiety risk; home care patients without mental health access; low-income adults below mental health parity enforcement threshold",
       "sensorNormalization": {
         "disease_burden_signal_norm": "0.0=[1,0,0,0] DISEASE_EXACERBATION from ChronicDisease (bit 366), 0.5=[0,1,0,0] POOR_CONTROL (bit 367), 1.0=[0,0,0,1] DISEASE_CONTROLLED (bit 369)",
@@ -136,6 +136,18 @@
             "description": "MH_REFERRAL_NEEDED: chronic illness burden driving mental health comorbidity requiring behavioral health integration at [2039:2043]"
           },
           {
+            "sequenceId": "mh-comorbidity-risk",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "COMORBIDITY_RISK: chronic disease or pain burden is degrading mental health resilience but has not reached referral/crisis threshold at [2039:2043]"
+          },
+          {
             "sequenceId": "mh-access-adequate",
             "outputMatches": [
               0,
@@ -143,23 +155,85 @@
               0,
               1
             ],
-            "ragStatusCode": "AMBER",
-            "processStatus": "warning",
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
             "description": "MH_ACCESS_ADEQUATE: chronic illness managed; mental health comorbidity risk low; no access gap at [2039:2043]"
           }
         ]
       },
       "machineClass": "signal-monitor",
       "inputSemantics": [
-        "Home Mental Health Access Monitor input 1",
-        "Home Mental Health Access Monitor input 2",
-        "Home Mental Health Access Monitor input 3",
-        "Home Mental Health Access Monitor input 4",
-        "Home Mental Health Access Monitor input 5",
-        "Home Mental Health Access Monitor input 6",
-        "Home Mental Health Access Monitor input 7",
-        "Home Mental Health Access Monitor input 8"
-      ]
+        "disease-exacerbation-bit",
+        "disease-poor-control-bit",
+        "disease-borderline-control-bit",
+        "disease-controlled-bit",
+        "pain-crisis-bit",
+        "opioid-risk-elevated-bit",
+        "functional-impairment-bit",
+        "pain-managed-bit"
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.chronic-pain-mental-health-access.mental-health-access",
+          "type": "published-domain-bus-producer",
+          "role": "mental_health_access",
+          "sourceMachine": "Home Mental Health Access Monitor",
+          "sourceOutputRegion": {
+            "offset": 2039,
+            "length": 4
+          },
+          "targetInputElements": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "normalizedElements": [
+            "mental health crisis bit from HomeMentalHealthAccessMonitor [2039]",
+            "mental health referral needed bit from HomeMentalHealthAccessMonitor [2040]",
+            "comorbidity risk bit from HomeMentalHealthAccessMonitor [2041]",
+            "mental health access adequate bit from HomeMentalHealthAccessMonitor [2042]"
+          ],
+          "purpose": "Publish chronic illness mental-health access status into the personal-health chronic-pain mental-health access bus.",
+          "busId": "health-personal.chronic-pain-mental-health-access",
+          "busTag": "published-bus-health-personal-chronic-pain-mental-health-access",
+          "targetMachine": "Chronic Pain Mental Health Access Interconnect",
+          "peCompositionRequired": true,
+          "privacyBoundary": "PE composes normalized status bits only; PHQ-9, crisis notes, and behavioral health records remain outside the universal reality vector.",
+          "targetMachineFile": "HomeChronicPainMentalHealthAccessInterconnect.json",
+          "busInputRegion": {
+            "offset": 4320,
+            "length": 12
+          },
+          "busOutputRegion": {
+            "offset": 4332,
+            "length": 4
+          },
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait"
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-home-mental-health-access-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 2019,
+          "length": 8
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "disease-exacerbation-bit",
+          "disease-poor-control-bit",
+          "disease-borderline-control-bit",
+          "disease-controlled-bit",
+          "pain-crisis-bit",
+          "opioid-risk-elevated-bit",
+          "functional-impairment-bit",
+          "pain-managed-bit"
+        ],
+        "peContract": "Normal path is deterministic PE composition from chronic disease and chronic pain outputs. OpenClaw may populate the same native bit lane only for external mental-health access observations that bypass those upstream machines."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -399,6 +473,75 @@
                 "metadata": {
                   "description": "MH_REFERRAL_NEEDED: chronic illness burden driving mental health comorbidity requiring behavioral health integration at [2039:2043]",
                   "action": "Integrated behavioral health referral; telehealth therapy option assessment; peer support program enrollment; PHQ-9 formal scoring; SBIRT screening"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mh-comorbidity-risk",
+        "name": "Comorbidity Risk: SUBCLINICAL_COMORBIDITY+ -> COMORBIDITY_RISK signal",
+        "metadata": {
+          "description": "Fires COMORBIDITY_RISK when chronic disease burden and chronic pain impairment are co-present but not yet severe enough for referral/crisis. This preserves the declared output lane [0,0,1,0] and gives PE a lower-acuity fan-out signal.",
+          "pattern": "SUBCLINICAL_COMORBIDITY+",
+          "output": "[0,0,1,0] (COMORBIDITY_RISK)"
+        },
+        "vectors": [
+          {
+            "id": "mh-comorbidity-risk-state",
+            "elements": [
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.62,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "SUBCLINICAL_COMORBIDITY",
+              "description": "POOR_CONTROL plus FUNCTIONAL_IMPAIRMENT without acute disease or pain crisis. Depression/anxiety risk is elevated, but immediate crisis/referral thresholds are not yet met.",
+              "upstream_state": "ChronicDisease=POOR_CONTROL, ChronicPain=FUNCTIONAL_IMPAIRMENT"
+            },
+            "outputVectors": [
+              {
+                "id": "mh-comorbidity-risk-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "COMORBIDITY_RISK: chronic disease and pain burden are degrading mental health resilience at [2039:2043]",
+                  "action": "Monitor PHQ-9/GAD-7 trend; offer low-intensity behavioral health support; review pain/disease plan before crisis escalation."
                 }
               }
             ]

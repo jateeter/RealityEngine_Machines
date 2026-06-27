@@ -1,0 +1,1005 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Hydration Risk Response Interconnect",
+    "description": "Published personal-health bridge bus that composes hydration status, activity tolerance, sleep recovery, and food/fluid access into a compact hydration response lane. PE owns source composition and writes the compact input lane; RE evaluates this machine as ordinary vector state.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Published Hydration Risk Response Bus",
+      "author": "Reality Engine",
+      "domainLevelTag": "published-bus-health-personal-hydration-risk-response",
+      "publishedDomainBus": {
+        "id": "health-personal.hydration-risk-response",
+        "tag": "published-bus-health-personal-hydration-risk-response",
+        "domain": "health-personal",
+        "name": "Personal Health Hydration Risk Response Bus",
+        "description": "Domain-level published bus for hydration risk, electrolyte review, environmental access support, and stable hydration monitoring.",
+        "inputRegion": {
+          "offset": 4336,
+          "length": 10
+        },
+        "outputRegion": {
+          "offset": 4346,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "hydration_status",
+            "sourceMachine": "HydrationMonitor.json",
+            "machineInputRegion": {
+              "offset": 1947,
+              "length": 2
+            },
+            "machineOutputRegion": {
+              "offset": 1949,
+              "length": 2
+            },
+            "composedInputElements": [
+              0,
+              1
+            ],
+            "mapping": {
+              "belowHalfTarget": "HydrationMonitor output[0]",
+              "belowQuarterTarget": "HydrationMonitor output[1]"
+            }
+          },
+          {
+            "role": "activity_tolerance",
+            "sourceMachine": "DailyActivityMonitor.json",
+            "machineInputRegion": {
+              "offset": 1951,
+              "length": 2
+            },
+            "machineOutputRegion": {
+              "offset": 1953,
+              "length": 2
+            },
+            "composedInputElements": [
+              2,
+              3
+            ],
+            "mapping": {
+              "belowBaselineToday": "DailyActivityMonitor output[0]",
+              "sedentaryStreakActive": "DailyActivityMonitor output[1]"
+            }
+          },
+          {
+            "role": "sleep_recovery",
+            "sourceMachine": "SleepQualityMonitor.json",
+            "machineInputRegion": {
+              "offset": 1943,
+              "length": 2
+            },
+            "machineOutputRegion": {
+              "offset": 1945,
+              "length": 2
+            },
+            "composedInputElements": [
+              4,
+              5
+            ],
+            "mapping": {
+              "shortOrPoorSleep": "SleepQualityMonitor output[0]",
+              "disturbedOrFragmentedSleep": "SleepQualityMonitor output[1]"
+            }
+          },
+          {
+            "role": "nutrition_access",
+            "sourceMachine": "HomeFoodSecurityMonitor.json",
+            "machineInputRegion": {
+              "offset": 1963,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 1995,
+              "length": 4
+            },
+            "composedInputElements": [
+              6,
+              7,
+              8,
+              9
+            ],
+            "mapping": {
+              "foodCrisis": "HomeFoodSecurityMonitor output[0]",
+              "foodInsecure": "HomeFoodSecurityMonitor output[1]",
+              "assistanceNeeded": "HomeFoodSecurityMonitor output[2]",
+              "foodSecure": "HomeFoodSecurityMonitor output[3]"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "HSPH131_care-coordination-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4346,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_hydration_check",
+              "electrolyte_review",
+              "access_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "care coordination signal monitoring for hydration deterioration"
+          },
+          {
+            "machine": "HSPH132_care-coordination-resource-router.json",
+            "inputRegion": {
+              "offset": 4346,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_hydration_check",
+              "electrolyte_review",
+              "access_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route hydration response resources"
+          },
+          {
+            "machine": "HSPH137_care-coordination-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4346,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_hydration_check",
+              "access_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "dispatch care coordination agent for urgent or access-driven hydration risk"
+          },
+          {
+            "machine": "HSPH138_care-coordination-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4346,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_hydration_check"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "govern urgent hydration escalation"
+          },
+          {
+            "machine": "LBL015_nutrition-and-metabolic-health-hydration-electrolyte-monitor.json",
+            "inputRegion": {
+              "offset": 4346,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_hydration_check",
+              "electrolyte_review",
+              "hydration_stable"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "electrolyte and hydration monitoring follow-up"
+          },
+          {
+            "machine": "CSX055_homelessness-outreach-heat-smoke-outreach.json",
+            "inputRegion": {
+              "offset": 4346,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_hydration_check",
+              "access_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "heat/smoke hydration outreach when fluid access or environmental exposure is implicated"
+          },
+          {
+            "machine": "CSX057_homelessness-outreach-meal-outreach-routing.json",
+            "inputRegion": {
+              "offset": 4346,
+              "length": 4
+            },
+            "lanes": [
+              "access_support"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "meal and hydration access outreach when food/fluid security is unstable"
+          },
+          {
+            "machine": "BSX039_water-quality-hydration-access-monitor.json",
+            "inputRegion": {
+              "offset": 4346,
+              "length": 4
+            },
+            "lanes": [
+              "access_support"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "facility or built-space hydration access verification when water access is the suspected contributor"
+          },
+          {
+            "machine": "LBL030_sleep-and-circadian-rhythm-sleep-executive-stabilizer.json",
+            "inputRegion": {
+              "offset": 4346,
+              "length": 4
+            },
+            "lanes": [
+              "electrolyte_review",
+              "hydration_stable"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "sleep recovery support when hydration deficit and sleep disruption interact"
+          },
+          {
+            "machine": "LBL031_movement-and-physical-health-movement-baseline.json",
+            "inputRegion": {
+              "offset": 4346,
+              "length": 4
+            },
+            "lanes": [
+              "electrolyte_review",
+              "hydration_stable"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "movement baseline adjustment when dehydration limits activity tolerance"
+          },
+          {
+            "machine": "LBL076_testing-personalization-and-monitoring-wearable-sleep-activity-intake.json",
+            "inputRegion": {
+              "offset": 4346,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_hydration_check",
+              "electrolyte_review",
+              "access_support",
+              "hydration_stable"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "wearable sleep/activity/intake monitoring feedback loop"
+          }
+        ],
+        "fanOutPolicy": {
+          "owner": "perception-engine",
+          "mode": "lane-scoped",
+          "dispatchMode": "asynchronous-no-wait",
+          "defaultAction": "do-not-dispatch-unmatched-consumer",
+          "notes": "PE selects consumers from outputMatchesAny after RE emits the bus output. Urgent hydration, electrolyte review, access support, and stable monitoring intentionally fan out to different consumers."
+        },
+        "peContract": {
+          "compositionOwner": "perception-engine",
+          "startupConfigured": true,
+          "dispatchMode": "asynchronous-no-wait",
+          "sourcePayloadPolicy": "normalized-status-only",
+          "rawPayloadPolicy": "remain-in-source-ledger-or-upstream-system"
+        },
+        "localAIResolver": {
+          "resolverId": "localai.health-personal.hydration-risk-response.resolver",
+          "provider": "ollama-localai",
+          "dispatchMode": "accepted-no-wait",
+          "inputRegion": {
+            "offset": 4346,
+            "length": 4
+          },
+          "writeBack": {
+            "type": "pe-sensor",
+            "provider": "localai",
+            "sensorId": "localai.health-personal.hydration-risk-response.resolver.completion",
+            "name": "localAIStack hydration risk response resolver completion",
+            "region": {
+              "offset": 4346,
+              "length": 4
+            },
+            "semantics": [
+              "urgent hydration check resolved or acknowledged",
+              "electrolyte review resolved or acknowledged",
+              "access support resolved or acknowledged",
+              "hydration stable monitoring resolved or acknowledged"
+            ],
+            "ttlMs": 300000,
+            "normalization": "machine-native-binary",
+            "ingest": {
+              "endpoint": "/api/integrations/completions",
+              "method": "POST",
+              "triggerPush": false,
+              "compactPush": true
+            },
+            "sourceMapping": {
+              "id": "localai-hydration-risk-response-resolver-completion",
+              "sensorId": "localai.health-personal.hydration-risk-response.resolver.completion",
+              "name": "localAIStack hydration risk response resolver completion",
+              "region": {
+                "offset": 4346,
+                "length": 4
+              },
+              "ttlMs": 300000
+            }
+          },
+          "contractSurface": "publishedDomainBus.localAIResolver",
+          "notes": "Resolver metadata is consumed by PE startup configuration. It intentionally does not create metadata.agentBinding because this bridge machine is not an agent-dispatcher and RE should see only ordinary vector state."
+        }
+      },
+      "outputSpace": "4D binary at [4346:4350]: [1,0,0,0]=URGENT_HYDRATION_CHECK, [0,1,0,0]=ELECTROLYTE_REVIEW, [0,0,1,0]=ACCESS_SUPPORT, [0,0,0,1]=HYDRATION_STABLE",
+      "tags": [
+        "access-support",
+        "bridge",
+        "cross-domain-interconnect",
+        "elder-care",
+        "food-security",
+        "health-personal",
+        "health-personal-published-bus",
+        "hydration",
+        "hydration-monitor",
+        "machine-interconnect",
+        "nutrition",
+        "published-bus-health-personal-hydration-risk-response",
+        "sleep",
+        "startup-loadable",
+        "wellness"
+      ],
+      "sequenceCount": 4,
+      "inputSemantics": [
+        "below half hydration target bit",
+        "below quarter hydration target bit",
+        "below baseline today bit",
+        "sedentary streak active bit",
+        "short or poor sleep bit",
+        "disturbed or fragmented sleep bit",
+        "food crisis bit",
+        "food insecure bit",
+        "assistance needed bit",
+        "food secure bit"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "manual-corpus-interconnect",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "wellness",
+          "health-personal-published-bus",
+          "published-bus-health-personal-hydration-risk-response"
+        ],
+        "family": "health-personal-interconnect",
+        "machineCode": "hydration-risk-response-interconnect",
+        "capabilityTags": [
+          "bridge",
+          "machine-interconnect",
+          "access-support"
+        ],
+        "workflowTags": [
+          "elder-care",
+          "food-security",
+          "hydration",
+          "hydration-monitor",
+          "nutrition",
+          "sleep",
+          "wellness"
+        ],
+        "integrationTags": [
+          "cross-domain-interconnect",
+          "machine-interconnect",
+          "published-bus-health-personal-hydration-risk-response"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "access-support",
+          "bridge",
+          "ces-sequences",
+          "ces-sequences-4",
+          "cross-domain-interconnect",
+          "elder-care",
+          "food-security",
+          "health-personal",
+          "health-personal-interconnect",
+          "health-personal-published-bus",
+          "hydration",
+          "hydration-monitor",
+          "input-sequences",
+          "input-sequences-2",
+          "machine-interconnect",
+          "nutrition",
+          "published-bus-health-personal-hydration-risk-response",
+          "sleep",
+          "startup-loadable",
+          "wellness",
+          "hydration-risk-response-interconnect"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/hydration-risk-response-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "wellness-coaching-team-primary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for hydration risk, electrolyte review, access support, and stable monitoring. RE evaluates only vector state; PE owns source provenance and completion ingestion."
+      },
+      "triggerConfig": {
+        "processId": "HYDRATION_RISK_RESPONSE_INTERCONNECT",
+        "processName": "Hydration Risk Response Interconnect",
+        "rules": [
+          {
+            "sequenceId": "hydration-risk-urgent-check",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Critical hydration with inactivity, poor sleep, and food/fluid access crisis requires urgent hydration check."
+          },
+          {
+            "sequenceId": "hydration-risk-electrolyte-review",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Hydration deficit with sleep or activity impairment requires electrolyte and recovery review."
+          },
+          {
+            "sequenceId": "hydration-risk-access-support",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Hydration risk appears access-driven and requires food/fluid, outreach, or water-access support."
+          },
+          {
+            "sequenceId": "hydration-risk-stable-monitoring",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Hydration, activity, sleep, and food/fluid access support stable monitoring."
+          }
+        ]
+      },
+      "machineClass": "bridge"
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4336,
+        "length": 10
+      },
+      "output": {
+        "offset": 4346,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "hydration-risk-urgent-check",
+        "name": "Critical hydration + inactivity + poor sleep + food crisis -> urgent hydration check",
+        "metadata": {
+          "description": "Hydration is critical while function, recovery, and access context are also degraded. Publish urgent hydration check.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "hydration-risk-urgent-check-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "hydration-risk-urgent-check-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route urgent hydration check, caregiver contact, and clinician review."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hydration-risk-electrolyte-review",
+        "name": "Low hydration + activity and sleep impairment -> electrolyte review",
+        "metadata": {
+          "description": "Hydration is low and linked to activity tolerance and recovery concerns. Publish electrolyte review.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "hydration-risk-electrolyte-review-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "hydration-risk-electrolyte-review-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route electrolyte review, hydration plan adjustment, and recovery monitoring."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hydration-risk-access-support",
+        "name": "Low hydration + food/fluid access support need -> access support",
+        "metadata": {
+          "description": "Hydration risk is likely access-driven. Publish food/fluid access support.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "hydration-risk-access-support-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "hydration-risk-access-support-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route food/fluid access support, heat outreach if needed, and water access verification."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hydration-risk-stable-monitoring",
+        "name": "Adequate hydration + stable function/recovery/access -> stable monitoring",
+        "metadata": {
+          "description": "All source domains are stable. Publish hydration stable monitoring.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "hydration-risk-stable-monitoring-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "hydration-risk-stable-monitoring-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Continue stable hydration monitoring and routine wellness support."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Hydration urgent risk fan-out",
+        "pattern": "PE composed bus input: critical hydration + inactivity + poor sleep + food crisis.",
+        "description": "Applies the compact PE-composed input lane at [4336:4346] to activate urgent hydration check and emit [1,0,0,0] to [4346:4350].",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "hydration-risk-urgent-fanout",
+          "sourceRegionInputs": {
+            "HydrationMonitor[1949:1951]": [
+              1,
+              1
+            ],
+            "DailyActivityMonitor[1953:1955]": [
+              1,
+              1
+            ],
+            "SleepQualityMonitor[1945:1947]": [
+              1,
+              1
+            ],
+            "HomeFoodSecurityMonitor[1995:1999]": [
+              1,
+              0,
+              0,
+              0
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4336,
+            "length": 10
+          },
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4346,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH137_care-coordination-agent-dispatcher",
+            "HSPH138_care-coordination-governance-escalator",
+            "LBL015_nutrition-and-metabolic-health-hydration-electrolyte-monitor",
+            "CSX055_homelessness-outreach-heat-smoke-outreach",
+            "LBL076_testing-personalization-and-monitoring-wearable-sleep-activity-intake"
+          ],
+          "fanOutPolicy": "lane-scoped urgent_hydration_check only"
+        }
+      },
+      {
+        "name": "Hydration access support fan-out",
+        "pattern": "PE composed bus input: low hydration + food/fluid assistance needed.",
+        "description": "Applies access-driven hydration risk inputs to route support without urgent clinical escalation.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "hydration-risk-access-support-fanout",
+          "expectedOutputVector": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4346,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH137_care-coordination-agent-dispatcher",
+            "CSX055_homelessness-outreach-heat-smoke-outreach",
+            "CSX057_homelessness-outreach-meal-outreach-routing",
+            "BSX039_water-quality-hydration-access-monitor",
+            "LBL076_testing-personalization-and-monitoring-wearable-sleep-activity-intake"
+          ],
+          "fanOutPolicy": "lane-scoped access_support only"
+        }
+      }
+    ]
+  }
+}

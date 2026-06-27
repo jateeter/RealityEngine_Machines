@@ -184,7 +184,43 @@
           "wellness"
         ]
       },
-      "machineClass": "signal-monitor"
+      "machineClass": "signal-monitor",
+      "interconnections": [
+        {
+          "id": "health-personal.patient-safety-transport.fall-outcome",
+          "type": "published-domain-bus-producer",
+          "role": "fall_outcome",
+          "sourceMachine": "Fall Detection",
+          "sourceOutputRegion": {
+            "offset": 1941,
+            "length": 2
+          },
+          "targetInputElements": [
+            0,
+            1,
+            2
+          ],
+          "normalizedElements": [
+            "fall red tier bit derived from FallDetection output[0] == 4",
+            "fall amber-high tier bit derived from FallDetection output[0] == 3",
+            "fall high-confidence bit derived from FallDetection output[1] >= 3"
+          ],
+          "purpose": "Publish fall severity and confidence into the personal-health patient-safety transport bus.",
+          "busId": "health-personal.patient-safety-transport",
+          "busTag": "published-bus-health-personal-patient-safety-transport",
+          "targetMachine": "Patient Safety Transport Interconnect",
+          "targetInputRegion": {
+            "offset": 4310,
+            "length": 10
+          },
+          "publishedOutputRegion": {
+            "offset": 3827,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
+        }
+      ]
     },
     "arbiterRule": "PASSTHROUGH",
     "matchAlgorithm": "equals",
