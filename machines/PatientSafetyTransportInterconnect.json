@@ -1,0 +1,614 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Patient Safety Transport Interconnect",
+    "description": "Published personal-health bridge bus that composes fall outcome, transportation access, and social isolation status into the existing care-coordination vector lane. PE owns the source composition and writes the compact input lane; RE evaluates this machine as ordinary vector state and emits to [3827:3831] for downstream health-services, life-balance, and community-service consumers.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Published Patient Safety Transport Bus",
+      "author": "Reality Engine",
+      "domainLevelTag": "published-bus-health-personal-patient-safety-transport",
+      "publishedDomainBus": {
+        "id": "health-personal.patient-safety-transport",
+        "tag": "published-bus-health-personal-patient-safety-transport",
+        "domain": "health-personal",
+        "name": "Personal Health Patient Safety Transport Bus",
+        "description": "Domain-level published bus for fall detection and medical transportation interconnection.",
+        "inputRegion": {
+          "offset": 4310,
+          "length": 10
+        },
+        "outputRegion": {
+          "offset": 3827,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "fall_outcome",
+            "sourceMachine": "FallDetection.json",
+            "machineInputRegion": {
+              "offset": 3813,
+              "length": 2
+            },
+            "machineOutputRegion": {
+              "offset": 1941,
+              "length": 2
+            },
+            "composedInputElements": [
+              0,
+              1,
+              2
+            ],
+            "mapping": {
+              "redFall": "FallDetection output[0] == 4",
+              "amberHighFall": "FallDetection output[0] == 3",
+              "highConfidence": "FallDetection output[1] >= 3"
+            }
+          },
+          {
+            "role": "transport_access",
+            "sourceMachine": "HomeTransportationBarrierMonitor.json",
+            "machineInputRegion": {
+              "offset": 1983,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 2015,
+              "length": 4
+            },
+            "composedInputElements": [
+              3,
+              4,
+              5,
+              6
+            ],
+            "mapping": {
+              "criticalAccessFailure": "HomeTransportationBarrierMonitor output[0]",
+              "appointmentBarrier": "HomeTransportationBarrierMonitor output[1]",
+              "transitDependentRisk": "HomeTransportationBarrierMonitor output[2]",
+              "transportationAdequate": "HomeTransportationBarrierMonitor output[3]"
+            }
+          },
+          {
+            "role": "social_context",
+            "sourceMachine": "HomeSocialIsolationMonitor.json",
+            "machineInputRegion": {
+              "offset": 2011,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 2035,
+              "length": 4
+            },
+            "composedInputElements": [
+              7,
+              8,
+              9
+            ],
+            "mapping": {
+              "severeIsolation": "HomeSocialIsolationMonitor output[0]",
+              "isolationRisk": "HomeSocialIsolationMonitor output[2]",
+              "sociallyConnected": "HomeSocialIsolationMonitor output[3]"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "CSX053_homelessness-outreach-unsheltered-health-referral.json",
+            "inputRegion": {
+              "offset": 3827,
+              "length": 4
+            }
+          },
+          {
+            "machine": "HSPH132_care-coordination-resource-router.json",
+            "inputRegion": {
+              "offset": 3827,
+              "length": 4
+            }
+          },
+          {
+            "machine": "HSPH135_care-coordination-referral-optimizer.json",
+            "inputRegion": {
+              "offset": 3827,
+              "length": 4
+            }
+          },
+          {
+            "machine": "HSPH138_care-coordination-governance-escalator.json",
+            "inputRegion": {
+              "offset": 3827,
+              "length": 4
+            }
+          },
+          {
+            "machine": "LBL046_stress-resilience-and-psychotherapy-therapy-homework-completion.json",
+            "inputRegion": {
+              "offset": 3827,
+              "length": 4
+            }
+          }
+        ],
+        "peContract": {
+          "compositionOwner": "perception-engine",
+          "startupConfigured": true,
+          "dispatchMode": "asynchronous-no-wait",
+          "sourcePayloadPolicy": "normalized-status-only",
+          "rawPayloadPolicy": "remain-in-source-ledger-or-upstream-system"
+        }
+      },
+      "outputSpace": "4D binary at [3827:3831]: [1,0,0,0]=URGENT_COORDINATED_RESPONSE, [0,1,0,0]=COORDINATE_TRANSPORT_AND_CARE, [0,0,1,0]=HUMAN_REVIEW, [0,0,0,1]=STABLE_FOLLOW_UP",
+      "tags": [
+        "bridge",
+        "care-coordination",
+        "cross-domain-interconnect",
+        "health-personal",
+        "health-personal-published-bus",
+        "machine-interconnect",
+        "patient-safety",
+        "patient-safety-transport",
+        "published-bus-health-personal-patient-safety-transport",
+        "startup-loadable",
+        "transportation-access"
+      ],
+      "sequenceCount": 4,
+      "inputSemantics": [
+        "fall red tier bit",
+        "fall amber-high tier bit",
+        "fall high-confidence bit",
+        "transport critical access failure bit",
+        "transport appointment barrier bit",
+        "transport transit dependent risk bit",
+        "transport adequate bit",
+        "social severe isolation bit",
+        "social isolation risk bit",
+        "socially connected bit"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "manual-corpus-interconnect",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "patient-safety-transport",
+          "health-personal-published-bus",
+          "published-bus-health-personal-patient-safety-transport"
+        ],
+        "family": "health-personal-interconnect",
+        "machineCode": "patient-safety-transport-interconnect",
+        "capabilityTags": [
+          "bridge",
+          "machine-interconnect"
+        ],
+        "workflowTags": [
+          "care-coordination",
+          "fall-detection",
+          "patient-safety",
+          "transportation-access"
+        ],
+        "integrationTags": [
+          "cross-domain-interconnect",
+          "machine-interconnect",
+          "published-bus-health-personal-patient-safety-transport"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "bridge",
+          "care-coordination",
+          "ces-sequences",
+          "ces-sequences-4",
+          "cross-domain-interconnect",
+          "fall-detection",
+          "health-personal",
+          "health-personal-interconnect",
+          "health-personal-published-bus",
+          "input-sequences",
+          "input-sequences-1",
+          "machine-interconnect",
+          "patient-safety",
+          "patient-safety-transport",
+          "patient-safety-transport-interconnect",
+          "published-bus-health-personal-patient-safety-transport",
+          "startup-loadable",
+          "transportation-access"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/patient-safety/patient-safety-transport-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "care-coordination-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for fall detection and medical transportation access. RE evaluates only vector state; PE owns source provenance and completion ingestion."
+      },
+      "triggerConfig": {
+        "processId": "PATIENT_SAFETY_TRANSPORT_INTERCONNECT",
+        "processName": "Patient Safety Transport Interconnect",
+        "rules": [
+          {
+            "sequenceId": "patient-safety-transport-urgent-dispatch",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Confirmed fall with failed transportation access requires urgent coordinated response."
+          },
+          {
+            "sequenceId": "patient-safety-transport-coordinate-services",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Fall risk plus fragile transportation/social context requires coordinated transport and care services."
+          },
+          {
+            "sequenceId": "patient-safety-transport-human-review",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Uncertain fall or appointment barrier requires human review before dispatch."
+          },
+          {
+            "sequenceId": "patient-safety-transport-stable-follow-up",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "No active fall signal and transportation/social follow-up path is stable."
+          }
+        ]
+      },
+      "machineClass": "bridge"
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4310,
+        "length": 10
+      },
+      "output": {
+        "offset": 3827,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "patient-safety-transport-urgent-dispatch",
+        "name": "Confirmed fall with transportation failure -> urgent coordinated response",
+        "metadata": {
+          "description": "FallDetection reports RED/high-confidence while transportation access has failed. Publish urgent care-coordination response.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "pst-urgent-fall-transport-failure",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "pst-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Publish urgent coordinated response to care coordination bus [3827:3831]."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "patient-safety-transport-coordinate-services",
+        "name": "Confirmed fall with transit dependency and isolation risk -> coordinate transport and care",
+        "metadata": {
+          "description": "FallDetection reports RED/high-confidence while transport is fragile and social isolation risk is active.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "pst-coordinate-services",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "pst-coordinate-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Coordinate medical transportation, follow-up care, and community support."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "patient-safety-transport-human-review",
+        "name": "Amber fall or appointment barrier -> human review",
+        "metadata": {
+          "description": "FallDetection reports AMBER-high/high-confidence or transport appointment barrier without confirmed critical failure.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "pst-human-review",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "pst-review-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route for human review before dispatch."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "patient-safety-transport-stable-follow-up",
+        "name": "Stable transportation and social path -> stable follow-up",
+        "metadata": {
+          "description": "No fall signal and transportation/social path are stable.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "pst-stable-follow-up",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "pst-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Continue stable monitoring and follow-up."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Confirmed fall with transportation failure fan-out",
+        "pattern": "PE composed bus input: fall RED/high confidence + critical transport failure + currently socially connected.",
+        "description": "Applies the compact PE-composed input lane at [4310:4320] to activate the published patient-safety transport bus and emit urgent coordinated response to [3827:3831].",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "fall-detection-transportation-services-fanout",
+          "sourceRegionInputs": {
+            "FallDetection[1941:1943]": [
+              4,
+              3
+            ],
+            "HomeTransportationBarrierMonitor[2015:2019]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "HomeSocialIsolationMonitor[2035:2039]": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4310,
+            "length": 10
+          },
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 3827,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH132_care-coordination-resource-router",
+            "HSPH135_care-coordination-referral-optimizer",
+            "HSPH138_care-coordination-governance-escalator",
+            "CSX053_homelessness-outreach-unsheltered-health-referral",
+            "LBL046_stress-resilience-and-psychotherapy-therapy-homework-completion"
+          ]
+        }
+      }
+    ]
+  }
+}
