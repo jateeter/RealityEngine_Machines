@@ -125,9 +125,61 @@
       },
       "machineClass": "signal-monitor",
       "inputSemantics": [
-        "Daily Activity Monitor input 1",
-        "Daily Activity Monitor input 2"
-      ]
+        "below_baseline_today_bit",
+        "sedentary_streak_active_bit"
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.hydration-risk-response.activity-tolerance",
+          "type": "published-domain-bus-producer",
+          "role": "activity_tolerance",
+          "sourceMachine": "Daily Activity Monitor",
+          "sourceOutputRegion": {
+            "offset": 1953,
+            "length": 2
+          },
+          "targetInputElements": [
+            2,
+            3
+          ],
+          "normalizedElements": [
+            "below baseline today bit from DailyActivityMonitor [1953]",
+            "sedentary streak active bit from DailyActivityMonitor [1954]"
+          ],
+          "purpose": "Publish activity tolerance context for dehydration risk triage.",
+          "privacyBoundary": "PE composes normalized activity status bits only; raw step counts, room traces, and wearable telemetry remain outside the universal reality vector.",
+          "busId": "health-personal.hydration-risk-response",
+          "busTag": "published-bus-health-personal-hydration-risk-response",
+          "targetMachine": "Hydration Risk Response Interconnect",
+          "targetMachineFile": "HydrationRiskResponseInterconnect.json",
+          "busInputRegion": {
+            "offset": 4336,
+            "length": 10
+          },
+          "busOutputRegion": {
+            "offset": 4346,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait"
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-daily-activity-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1951,
+          "length": 2
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "below_baseline_today_bit",
+          "sedentary_streak_active_bit"
+        ],
+        "peContract": "OpenClaw maps activity observations to native machine input bits; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
