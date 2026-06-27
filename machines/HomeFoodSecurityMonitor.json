@@ -142,11 +142,69 @@
       },
       "machineClass": "signal-monitor",
       "inputSemantics": [
-        "Home Food Security Monitor input 1",
-        "Home Food Security Monitor input 2",
-        "Home Food Security Monitor input 3",
-        "Home Food Security Monitor input 4"
-      ]
+        "meal_frequency_norm",
+        "food_quality_norm",
+        "pantry_days_norm",
+        "food_assistance_norm"
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.hydration-risk-response.nutrition-access",
+          "type": "published-domain-bus-producer",
+          "role": "nutrition_access",
+          "sourceMachine": "Home Food Security Monitor",
+          "sourceOutputRegion": {
+            "offset": 1995,
+            "length": 4
+          },
+          "targetInputElements": [
+            6,
+            7,
+            8,
+            9
+          ],
+          "normalizedElements": [
+            "food crisis bit from HomeFoodSecurityMonitor [1995]",
+            "food insecure bit from HomeFoodSecurityMonitor [1996]",
+            "assistance needed bit from HomeFoodSecurityMonitor [1997]",
+            "food secure bit from HomeFoodSecurityMonitor [1998]"
+          ],
+          "purpose": "Publish food and fluid access context for hydration response routing.",
+          "privacyBoundary": "PE composes normalized food-security status bits only; raw benefits, pantry, shopping, and case records remain outside the universal reality vector.",
+          "busId": "health-personal.hydration-risk-response",
+          "busTag": "published-bus-health-personal-hydration-risk-response",
+          "targetMachine": "Hydration Risk Response Interconnect",
+          "targetMachineFile": "HydrationRiskResponseInterconnect.json",
+          "busInputRegion": {
+            "offset": 4336,
+            "length": 10
+          },
+          "busOutputRegion": {
+            "offset": 4346,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait"
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-home-food-security-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1963,
+          "length": 4
+        },
+        "normalization": "machine-native-scalar",
+        "semantics": [
+          "meal_frequency_norm",
+          "food_quality_norm",
+          "pantry_days_norm",
+          "food_assistance_norm"
+        ],
+        "peContract": "OpenClaw maps food and fluid access observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {

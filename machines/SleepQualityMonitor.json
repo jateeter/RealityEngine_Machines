@@ -127,9 +127,61 @@
       },
       "machineClass": "signal-monitor",
       "inputSemantics": [
-        "Sleep Quality Monitor input 1",
-        "Sleep Quality Monitor input 2"
-      ]
+        "adequate_sleep_duration_bit",
+        "fragmented_sleep_bit"
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.hydration-risk-response.sleep-recovery",
+          "type": "published-domain-bus-producer",
+          "role": "sleep_recovery",
+          "sourceMachine": "Sleep Quality Monitor",
+          "sourceOutputRegion": {
+            "offset": 1945,
+            "length": 2
+          },
+          "targetInputElements": [
+            4,
+            5
+          ],
+          "normalizedElements": [
+            "short or poor sleep bit from SleepQualityMonitor [1945]",
+            "disturbed or fragmented sleep bit from SleepQualityMonitor [1946]"
+          ],
+          "purpose": "Publish sleep recovery context for dehydration risk triage.",
+          "privacyBoundary": "PE composes normalized sleep status bits only; raw bed-sensor traces and sleep diary details remain outside the universal reality vector.",
+          "busId": "health-personal.hydration-risk-response",
+          "busTag": "published-bus-health-personal-hydration-risk-response",
+          "targetMachine": "Hydration Risk Response Interconnect",
+          "targetMachineFile": "HydrationRiskResponseInterconnect.json",
+          "busInputRegion": {
+            "offset": 4336,
+            "length": 10
+          },
+          "busOutputRegion": {
+            "offset": 4346,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait"
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-sleep-quality-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1943,
+          "length": 2
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "adequate_sleep_duration_bit",
+          "fragmented_sleep_bit"
+        ],
+        "peContract": "OpenClaw maps sleep observations to native machine input bits; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
