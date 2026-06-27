@@ -1,0 +1,884 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Chronic Pain Mental Health Access Interconnect",
+    "description": "Published personal-health bridge bus that composes chronic disease burden, chronic pain burden, and mental-health access status into a compact fan-out lane for behavioral health integration, opioid safety review, and managed monitoring. PE owns source composition and writes the compact input lane; RE evaluates this machine as ordinary vector state.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Published Chronic Pain Mental Health Access Bus",
+      "author": "Reality Engine",
+      "domainLevelTag": "published-bus-health-personal-chronic-pain-mental-health-access",
+      "publishedDomainBus": {
+        "id": "health-personal.chronic-pain-mental-health-access",
+        "tag": "published-bus-health-personal-chronic-pain-mental-health-access",
+        "domain": "health-personal",
+        "name": "Personal Health Chronic Pain Mental Health Access Bus",
+        "description": "Domain-level published bus for chronic pain, chronic disease, opioid-risk, and mental-health access interconnection.",
+        "inputRegion": {
+          "offset": 4320,
+          "length": 12
+        },
+        "outputRegion": {
+          "offset": 4332,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "disease_burden",
+            "sourceMachine": "HomeChronicDiseaseMonitor.json",
+            "machineInputRegion": {
+              "offset": 1987,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 2019,
+              "length": 4
+            },
+            "composedInputElements": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "mapping": {
+              "diseaseExacerbation": "HomeChronicDiseaseMonitor output[0]",
+              "poorControl": "HomeChronicDiseaseMonitor output[1]",
+              "borderlineControl": "HomeChronicDiseaseMonitor output[2]",
+              "diseaseControlled": "HomeChronicDiseaseMonitor output[3]"
+            }
+          },
+          {
+            "role": "pain_burden",
+            "sourceMachine": "HomeChronicPainMonitor.json",
+            "machineInputRegion": {
+              "offset": 1991,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 2023,
+              "length": 4
+            },
+            "composedInputElements": [
+              4,
+              5,
+              6,
+              7
+            ],
+            "mapping": {
+              "painCrisis": "HomeChronicPainMonitor output[0]",
+              "opioidRiskElevated": "HomeChronicPainMonitor output[1]",
+              "functionalImpairment": "HomeChronicPainMonitor output[2]",
+              "painManaged": "HomeChronicPainMonitor output[3]"
+            }
+          },
+          {
+            "role": "mental_health_access",
+            "sourceMachine": "HomeMentalHealthAccessMonitor.json",
+            "machineInputRegion": {
+              "offset": 2019,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 2039,
+              "length": 4
+            },
+            "composedInputElements": [
+              8,
+              9,
+              10,
+              11
+            ],
+            "mapping": {
+              "mentalHealthCrisis": "HomeMentalHealthAccessMonitor output[0]",
+              "referralNeeded": "HomeMentalHealthAccessMonitor output[1]",
+              "comorbidityRisk": "HomeMentalHealthAccessMonitor output[2]",
+              "accessAdequate": "HomeMentalHealthAccessMonitor output[3]"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "HSPH141_behavioral-health-integration-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4332,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_behavioral_health_response",
+              "integrated_behavioral_health_referral",
+              "opioid_safety_review"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "behavioral health early warning signal"
+          },
+          {
+            "machine": "HSPH142_behavioral-health-integration-resource-router.json",
+            "inputRegion": {
+              "offset": 4332,
+              "length": 4
+            },
+            "lanes": [
+              "integrated_behavioral_health_referral",
+              "managed_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "behavioral health resource routing"
+          },
+          {
+            "machine": "HSPH147_behavioral-health-integration-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4332,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_behavioral_health_response",
+              "integrated_behavioral_health_referral",
+              "opioid_safety_review"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "behavioral health agent dispatch"
+          },
+          {
+            "machine": "HSPH148_behavioral-health-integration-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4332,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_behavioral_health_response"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "behavioral health governance escalation"
+          },
+          {
+            "machine": "CSX021_behavioral-health-and-crisis-988-warm-handoff-router.json",
+            "inputRegion": {
+              "offset": 4332,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_behavioral_health_response"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "988 warm handoff"
+          },
+          {
+            "machine": "CSX024_behavioral-health-and-crisis-mental-health-shelter-referral.json",
+            "inputRegion": {
+              "offset": 4332,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_behavioral_health_response",
+              "integrated_behavioral_health_referral"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "mental-health shelter referral when crisis or access gap requires placement support"
+          },
+          {
+            "machine": "CSX029_behavioral-health-and-crisis-behavioral-health-data-sharing.json",
+            "inputRegion": {
+              "offset": 4332,
+              "length": 4
+            },
+            "lanes": [
+              "integrated_behavioral_health_referral",
+              "opioid_safety_review"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "consented behavioral-health data sharing"
+          },
+          {
+            "machine": "LBL035_movement-and-physical-health-mobility-pain-constraint.json",
+            "inputRegion": {
+              "offset": 4332,
+              "length": 4
+            },
+            "lanes": [
+              "integrated_behavioral_health_referral",
+              "opioid_safety_review",
+              "managed_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "life-balance mobility pain constraint follow-up"
+          }
+        ],
+        "peContract": {
+          "compositionOwner": "perception-engine",
+          "startupConfigured": true,
+          "dispatchMode": "asynchronous-no-wait",
+          "sourcePayloadPolicy": "normalized-status-only",
+          "rawPayloadPolicy": "remain-in-source-ledger-or-upstream-system"
+        },
+        "fanOutPolicy": {
+          "owner": "perception-engine",
+          "mode": "lane-scoped",
+          "dispatchMode": "asynchronous-no-wait",
+          "defaultAction": "do-not-dispatch-unmatched-consumer",
+          "notes": "PE selects consumers from outputMatchesAny after RE emits the bus output. The same compact output lane is not broadcast indiscriminately to every candidate."
+        },
+        "localAIResolver": {
+          "resolverId": "localai.health-personal.chronic-pain-mental-health-access.resolver",
+          "provider": "ollama-localai",
+          "dispatchMode": "accepted-no-wait",
+          "inputRegion": {
+            "offset": 4332,
+            "length": 4
+          },
+          "writeBack": {
+            "type": "pe-sensor",
+            "provider": "localai",
+            "sensorId": "localai.health-personal.chronic-pain-mental-health-access.resolver.completion",
+            "name": "localAIStack chronic pain mental health access resolver completion",
+            "region": {
+              "offset": 4332,
+              "length": 4
+            },
+            "semantics": [
+              "urgent behavioral health response resolved or acknowledged",
+              "integrated behavioral health referral resolved or acknowledged",
+              "opioid safety review resolved or acknowledged",
+              "managed monitoring resolved or acknowledged"
+            ],
+            "ttlMs": 300000,
+            "normalization": "machine-native-binary",
+            "ingest": {
+              "endpoint": "/api/integrations/completions",
+              "method": "POST",
+              "triggerPush": false,
+              "compactPush": true
+            },
+            "sourceMapping": {
+              "id": "localai-chronic-pain-mental-health-access-resolver-completion",
+              "sensorId": "localai.health-personal.chronic-pain-mental-health-access.resolver.completion",
+              "name": "localAIStack chronic pain mental health access resolver completion",
+              "region": {
+                "offset": 4332,
+                "length": 4
+              },
+              "ttlMs": 300000
+            }
+          },
+          "contractSurface": "publishedDomainBus.localAIResolver",
+          "notes": "Resolver metadata is consumed by PE startup configuration. It intentionally does not create metadata.agentBinding because this bridge machine is not an agent-dispatcher and RE should see only ordinary vector state."
+        }
+      },
+      "outputSpace": "4D binary at [4332:4336]: [1,0,0,0]=URGENT_BEHAVIORAL_HEALTH_RESPONSE, [0,1,0,0]=INTEGRATED_BEHAVIORAL_HEALTH_REFERRAL, [0,0,1,0]=OPIOID_SAFETY_REVIEW, [0,0,0,1]=MANAGED_MONITORING",
+      "tags": [
+        "behavioral-health",
+        "bridge",
+        "chronic-disease",
+        "chronic-pain-management",
+        "cross-domain-interconnect",
+        "health-personal",
+        "health-personal-published-bus",
+        "machine-interconnect",
+        "mental-health-access",
+        "opioid-risk",
+        "published-bus-health-personal-chronic-pain-mental-health-access",
+        "startup-loadable"
+      ],
+      "sequenceCount": 4,
+      "inputSemantics": [
+        "disease exacerbation bit",
+        "disease poor control bit",
+        "disease borderline control bit",
+        "disease controlled bit",
+        "pain crisis bit",
+        "opioid risk elevated bit",
+        "functional impairment bit",
+        "pain managed bit",
+        "mental health crisis bit",
+        "mental health referral needed bit",
+        "comorbidity risk bit",
+        "mental health access adequate bit"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "manual-corpus-interconnect",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "chronic-pain-management",
+          "mental-health-access",
+          "health-personal-published-bus",
+          "published-bus-health-personal-chronic-pain-mental-health-access"
+        ],
+        "family": "health-personal-interconnect",
+        "machineCode": "chronic-pain-mental-health-access-interconnect",
+        "capabilityTags": [
+          "bridge",
+          "machine-interconnect",
+          "opioid-risk"
+        ],
+        "workflowTags": [
+          "behavioral-health",
+          "chronic-disease",
+          "chronic-pain-management",
+          "mental-health-access"
+        ],
+        "integrationTags": [
+          "cross-domain-interconnect",
+          "machine-interconnect",
+          "published-bus-health-personal-chronic-pain-mental-health-access"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-1",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "behavioral-health",
+          "bridge",
+          "ces-sequences",
+          "ces-sequences-4",
+          "chronic-disease",
+          "chronic-pain-management",
+          "cross-domain-interconnect",
+          "health-personal",
+          "health-personal-interconnect",
+          "health-personal-published-bus",
+          "input-sequences",
+          "input-sequences-1",
+          "machine-interconnect",
+          "mental-health-access",
+          "opioid-risk",
+          "published-bus-health-personal-chronic-pain-mental-health-access",
+          "startup-loadable",
+          "chronic-pain-mental-health-access-interconnect"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/chronic-pain-mental-health-access-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "behavioral-health-integration-on-call@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for chronic pain, chronic disease, and mental-health access. RE evaluates only vector state; PE owns source provenance and completion ingestion."
+      },
+      "triggerConfig": {
+        "processId": "CHRONIC_PAIN_MENTAL_HEALTH_ACCESS_INTERCONNECT",
+        "processName": "Chronic Pain Mental Health Access Interconnect",
+        "rules": [
+          {
+            "sequenceId": "chronic-pain-mh-urgent-behavioral-health-response",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Chronic disease crisis plus pain crisis and mental-health crisis requires urgent behavioral-health response."
+          },
+          {
+            "sequenceId": "chronic-pain-mh-integrated-referral",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Chronic illness burden and pain impairment require integrated behavioral-health referral."
+          },
+          {
+            "sequenceId": "chronic-pain-mh-opioid-safety-review",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Opioid-risk signal requires medication safety review and behavioral-health context check."
+          },
+          {
+            "sequenceId": "chronic-pain-mh-managed-monitoring",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Chronic disease, pain, and mental-health access are stable enough for managed monitoring."
+          }
+        ]
+      },
+      "machineClass": "bridge"
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4320,
+        "length": 12
+      },
+      "output": {
+        "offset": 4332,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "chronic-pain-mh-urgent-behavioral-health-response",
+        "name": "Disease crisis + pain crisis + mental-health crisis -> urgent behavioral health response",
+        "metadata": {
+          "description": "All three domains report crisis-level status. Publish urgent behavioral-health response.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "cpmh-urgent-response",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "cpmh-urgent-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route urgent behavioral-health response and physician review."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chronic-pain-mh-integrated-referral",
+        "name": "Disease crisis + functional impairment + referral-needed -> integrated behavioral health referral",
+        "metadata": {
+          "description": "Chronic illness burden and chronic pain impairment require integrated behavioral-health referral.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "cpmh-integrated-referral",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "cpmh-referral-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Publish integrated behavioral-health referral need."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chronic-pain-mh-opioid-safety-review",
+        "name": "Opioid risk + comorbidity risk -> opioid safety review",
+        "metadata": {
+          "description": "Opioid risk is elevated while mental-health comorbidity risk is active. Publish medication safety review need.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "cpmh-opioid-safety-review",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "cpmh-opioid-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route opioid safety review with behavioral-health context."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chronic-pain-mh-managed-monitoring",
+        "name": "Disease controlled + pain managed + access adequate -> managed monitoring",
+        "metadata": {
+          "description": "Disease, pain, and mental-health access are stable. Publish managed monitoring.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "cpmh-managed-monitoring",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "cpmh-managed-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Continue managed monitoring and routine follow-up."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Chronic disease and pain crisis with mental-health fan-out",
+        "pattern": "PE composed bus input: disease crisis + pain crisis + mental-health crisis.",
+        "description": "Applies the compact PE-composed input lane at [4320:4332] to activate the published chronic-pain mental-health access bus and emit urgent behavioral-health response to [4332:4336].",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "chronic-pain-mental-health-access-fanout",
+          "sourceRegionInputs": {
+            "HomeChronicDiseaseMonitor[2019:2023]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "HomeChronicPainMonitor[2023:2027]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "HomeMentalHealthAccessMonitor[2039:2043]": [
+              1,
+              0,
+              0,
+              0
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4320,
+            "length": 12
+          },
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4332,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH141_behavioral-health-integration-signal-monitor",
+            "HSPH147_behavioral-health-integration-agent-dispatcher",
+            "HSPH148_behavioral-health-integration-governance-escalator",
+            "CSX021_behavioral-health-and-crisis-988-warm-handoff-router",
+            "CSX024_behavioral-health-and-crisis-mental-health-shelter-referral"
+          ],
+          "fanOutPolicy": "lane-scoped urgent_behavioral_health_response only"
+        }
+      }
+    ]
+  }
+}

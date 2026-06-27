@@ -150,19 +150,77 @@
               0,
               1
             ],
-            "ragStatusCode": "AMBER",
-            "processStatus": "warning",
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
             "description": "PAIN_MANAGED: chronic pain adequately controlled with maintained function at [2023:2027]"
           }
         ]
       },
       "machineClass": "risk-forecaster",
       "inputSemantics": [
-        "Home Chronic Pain Monitor input 1",
-        "Home Chronic Pain Monitor input 2",
-        "Home Chronic Pain Monitor input 3",
-        "Home Chronic Pain Monitor input 4"
-      ]
+        "pain_scale_norm",
+        "functional_impairment_norm",
+        "opioid_risk_norm",
+        "physical_activity_norm"
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.chronic-pain-mental-health-access.pain-burden",
+          "type": "published-domain-bus-producer",
+          "role": "pain_burden",
+          "sourceMachine": "Home Chronic Pain Monitor",
+          "sourceOutputRegion": {
+            "offset": 2023,
+            "length": 4
+          },
+          "targetInputElements": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "normalizedElements": [
+            "pain crisis bit from HomeChronicPainMonitor [2023]",
+            "opioid risk elevated bit from HomeChronicPainMonitor [2024]",
+            "functional impairment bit from HomeChronicPainMonitor [2025]",
+            "pain managed bit from HomeChronicPainMonitor [2026]"
+          ],
+          "purpose": "Publish chronic pain burden into the personal-health chronic-pain mental-health access bus.",
+          "busId": "health-personal.chronic-pain-mental-health-access",
+          "busTag": "published-bus-health-personal-chronic-pain-mental-health-access",
+          "targetMachine": "Chronic Pain Mental Health Access Interconnect",
+          "peCompositionRequired": true,
+          "privacyBoundary": "PE composes normalized status bits only; pain diaries, PDMP details, and clinician notes remain outside the universal reality vector.",
+          "targetMachineFile": "HomeChronicPainMentalHealthAccessInterconnect.json",
+          "busInputRegion": {
+            "offset": 4320,
+            "length": 12
+          },
+          "busOutputRegion": {
+            "offset": 4332,
+            "length": 4
+          },
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait"
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-home-chronic-pain-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1991,
+          "length": 4
+        },
+        "normalization": "machine-native-scalar",
+        "semantics": [
+          "pain_scale_norm",
+          "functional_impairment_norm",
+          "opioid_risk_norm",
+          "physical_activity_norm"
+        ],
+        "peContract": "OpenClaw maps pain observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
