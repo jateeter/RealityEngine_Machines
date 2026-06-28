@@ -126,7 +126,67 @@
       "inputSemantics": [
         "Medication Adherence Monitor input 1",
         "Medication Adherence Monitor input 2"
-      ]
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.daily-patient-care-response.medication-adherence",
+          "type": "published-domain-bus-producer",
+          "role": "medication_adherence",
+          "sourceMachine": "Medication Adherence Monitor",
+          "sourceOutputRegion": {
+            "offset": 3811,
+            "length": 2
+          },
+          "targetInputElements": [
+            12,
+            13
+          ],
+          "normalizedElements": [
+            "medication delayed bit from MedicationAdherenceMonitor output[0]",
+            "medication missed bit from MedicationAdherenceMonitor output[1]"
+          ],
+          "purpose": "Publish medication adherence status into the personal-health daily patient care response bus.",
+          "busId": "health-personal.daily-patient-care-response",
+          "busTag": "published-bus-health-personal-daily-patient-care-response",
+          "targetMachine": "Daily Patient Care Response Interconnect",
+          "targetMachineFile": "DailyPatientCareResponseInterconnect.json",
+          "targetInputRegion": {
+            "offset": 4480,
+            "length": 18
+          },
+          "busInputRegion": {
+            "offset": 4480,
+            "length": 18
+          },
+          "publishedOutputRegion": {
+            "offset": 4498,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 4498,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-medication-adherence-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1939,
+          "length": 2
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "dose_pending_or_delayed_bit",
+          "dose_missed_past_grace_bit"
+        ],
+        "peContract": "OpenClaw maps MAR, dispenser, or caregiver medication observations to native MedicationAdherenceMonitor input bits; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {

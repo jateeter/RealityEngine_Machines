@@ -286,43 +286,45 @@
       ],
       "interconnections": [
         {
-          "id": "health-personal.care-transition-response.facility-accessibility-safety",
+          "id": "health-personal.daily-patient-care-response.facilities-observation",
           "type": "published-domain-bus-producer",
-          "role": "facility_accessibility_safety",
+          "role": "facilities_observation",
           "sourceMachine": "FacilitiesMaintenance",
           "sourceOutputRegion": {
             "offset": 3925,
             "length": 6
           },
           "targetInputElements": [
-            14,
-            15,
-            16
+            7,
+            8,
+            9,
+            10
           ],
           "normalizedElements": [
-            "facilities safety alert bit from FacilitiesMaintenance output[3]",
-            "facilities wellness concern bit from FacilitiesMaintenance output[4]",
-            "facilities inaccessibility alert bit from FacilitiesMaintenance output[5]"
+            "hygiene alert bit from FacilitiesMaintenance output[2]",
+            "safety alert bit from FacilitiesMaintenance output[3]",
+            "wellness concern bit from FacilitiesMaintenance output[4]",
+            "inaccessibility alert bit from FacilitiesMaintenance output[5]"
           ],
-          "purpose": "Publish facility safety, wellness, and accessibility constraints into the personal-health care transition response bus.",
-          "busId": "health-personal.care-transition-response",
-          "busTag": "published-bus-health-personal-care-transition-response",
-          "targetMachine": "Care Transition Response Interconnect",
-          "targetMachineFile": "CareTransitionResponseInterconnect.json",
+          "purpose": "Publish facilities hygiene, safety, wellness, and access observations into the personal-health daily patient care response bus.",
+          "busId": "health-personal.daily-patient-care-response",
+          "busTag": "published-bus-health-personal-daily-patient-care-response",
+          "targetMachine": "Daily Patient Care Response Interconnect",
+          "targetMachineFile": "DailyPatientCareResponseInterconnect.json",
           "targetInputRegion": {
-            "offset": 4436,
+            "offset": 4480,
             "length": 18
           },
           "busInputRegion": {
-            "offset": 4436,
+            "offset": 4480,
             "length": 18
           },
           "publishedOutputRegion": {
-            "offset": 4454,
+            "offset": 4498,
             "length": 4
           },
           "busOutputRegion": {
-            "offset": 4454,
+            "offset": 4498,
             "length": 4
           },
           "peCompositionRequired": true,
@@ -341,16 +343,16 @@
         },
         "normalization": "machine-native-binary",
         "semantics": [
-          "daily_routine_complete_bit",
-          "weekly_deep_clean_complete_bit",
-          "hygiene_concern_bit",
-          "safety_concern_bit",
-          "wellness_concern_bit",
-          "resident_inaccessible_bit",
-          "reserved_6",
-          "reserved_7"
+          "visit_active_bit",
+          "unit_accessible_bit",
+          "hygiene_normal_bit",
+          "space_safe_bit",
+          "nutrition_normal_bit",
+          "patient_observed_normal_bit",
+          "deep_clean_done_bit",
+          "concern_or_alert_active_bit"
         ],
-        "peContract": "OpenClaw maps facility observations and access checks to native FacilitiesMaintenance input bits; PE writes the vector source and does not wait inside a PE cycle."
+        "peContract": "OpenClaw maps facility visit observations to native FacilitiesMaintenance input bits; PE writes the vector source and does not wait inside a PE cycle."
       }
     },
     "arbiterRule": "PASSTHROUGH",
