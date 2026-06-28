@@ -180,14 +180,70 @@
           },
           "peCompositionRequired": true,
           "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
+        },
+        {
+          "id": "health-personal.chronic-disease-response.transport-access-status",
+          "type": "published-domain-bus-producer",
+          "role": "transport_access_status",
+          "sourceMachine": "Home Transportation Barrier Monitor",
+          "sourceOutputRegion": {
+            "offset": 2015,
+            "length": 4
+          },
+          "targetInputElements": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "normalizedElements": [
+            "critical access failure bit from HomeTransportationBarrierMonitor [2015]",
+            "appointment barrier bit from HomeTransportationBarrierMonitor [2016]",
+            "transit dependent risk bit from HomeTransportationBarrierMonitor [2017]",
+            "transportation adequate bit from HomeTransportationBarrierMonitor [2018]"
+          ],
+          "purpose": "Publish appointment and care-access transportation context into the personal-health chronic disease response bus.",
+          "privacyBoundary": "PE composes normalized transportation status bits only; raw trip, ride, and appointment records remain outside the universal reality vector.",
+          "busId": "health-personal.chronic-disease-response",
+          "busTag": "published-bus-health-personal-chronic-disease-response",
+          "targetMachine": "Home Chronic Disease Response Interconnect",
+          "targetMachineFile": "HomeChronicDiseaseResponseInterconnect.json",
+          "busInputRegion": {
+            "offset": 4368,
+            "length": 18
+          },
+          "busOutputRegion": {
+            "offset": 4386,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait"
         }
       ],
       "inputSemantics": [
-        "Home Transportation Barrier Monitor input 1",
-        "Home Transportation Barrier Monitor input 2",
-        "Home Transportation Barrier Monitor input 3",
-        "Home Transportation Barrier Monitor input 4"
-      ]
+        "appointment_transport_confirmed_norm",
+        "vehicle_or_transit_reliability_norm",
+        "ride_support_availability_norm",
+        "mobility_access_norm"
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-home-transportation-barrier-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1983,
+          "length": 4
+        },
+        "normalization": "machine-native-scalar",
+        "semantics": [
+          "appointment_transport_confirmed_norm",
+          "vehicle_or_transit_reliability_norm",
+          "ride_support_availability_norm",
+          "mobility_access_norm"
+        ],
+        "peContract": "OpenClaw maps transportation and appointment-access observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
