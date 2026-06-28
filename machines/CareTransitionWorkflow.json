@@ -391,7 +391,79 @@
         "CareTransitionWorkflow input 6",
         "CareTransitionWorkflow input 7",
         "CareTransitionWorkflow input 8"
-      ]
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.care-transition-response.transition-outcome",
+          "type": "published-domain-bus-producer",
+          "role": "transition_outcome",
+          "sourceMachine": "CareTransitionWorkflow",
+          "sourceOutputRegion": {
+            "offset": 3947,
+            "length": 8
+          },
+          "targetInputElements": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "normalizedElements": [
+            "hospital transfer bit from CareTransitionWorkflow output[0]",
+            "rehab transfer bit from CareTransitionWorkflow output[1]",
+            "assisted living transfer bit from CareTransitionWorkflow output[2]",
+            "transfer blocked bit from CareTransitionWorkflow output[3]",
+            "emergency escalation bit from CareTransitionWorkflow output[4]"
+          ],
+          "purpose": "Publish care transition terminal outcomes into the personal-health care transition response bus.",
+          "busId": "health-personal.care-transition-response",
+          "busTag": "published-bus-health-personal-care-transition-response",
+          "targetMachine": "Care Transition Response Interconnect",
+          "targetMachineFile": "CareTransitionResponseInterconnect.json",
+          "targetInputRegion": {
+            "offset": 4436,
+            "length": 18
+          },
+          "busInputRegion": {
+            "offset": 4436,
+            "length": 18
+          },
+          "publishedOutputRegion": {
+            "offset": 4454,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 4454,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-care-transition-workflow-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 3939,
+          "length": 8
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "clinical_criterion_met_bit",
+          "administrative_authorization_obtained_or_waived_bit",
+          "receiving_facility_ready_bit",
+          "family_or_proxy_notified_bit",
+          "care_documents_ready_bit",
+          "transport_arranged_bit",
+          "transition_barrier_active_bit",
+          "emergency_mode_active_bit"
+        ],
+        "peContract": "OpenClaw maps transition observations, case-management events, facility readiness, and emergency status to native CareTransitionWorkflow input bits; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "matchAlgorithm": "gte",

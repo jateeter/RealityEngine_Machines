@@ -1,0 +1,1297 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Care Transition Response Interconnect",
+    "description": "Published personal-health bridge bus that composes care transition outcomes, wellness transition routing, patient wellness acuity, daily-care safety, facilities accessibility, and fall criticality into a compact transition-response lane. PE owns source composition and writes the compact input lane; RE evaluates this machine as ordinary vector state.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Published Care Transition Response Bus",
+      "author": "Reality Engine",
+      "domainLevelTag": "published-bus-health-personal-care-transition-response",
+      "publishedDomainBus": {
+        "id": "health-personal.care-transition-response",
+        "tag": "published-bus-health-personal-care-transition-response",
+        "domain": "health-personal",
+        "name": "Personal Health Care Transition Response Bus",
+        "description": "Domain-level published bus for care-transition emergency response, barrier resolution, post-acute placement review, and stable transition monitoring.",
+        "inputRegion": {
+          "offset": 4436,
+          "length": 18
+        },
+        "outputRegion": {
+          "offset": 4454,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "transition_outcome",
+            "sourceMachine": "CareTransitionWorkflow.json",
+            "machineInputRegion": {
+              "offset": 3939,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 3947,
+              "length": 8
+            },
+            "composedInputElements": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "mapping": {
+              "hospitalTransfer": "CareTransitionWorkflow output[0]",
+              "rehabTransfer": "CareTransitionWorkflow output[1]",
+              "assistedLivingTransfer": "CareTransitionWorkflow output[2]",
+              "transferBlocked": "CareTransitionWorkflow output[3]",
+              "emergencyEscalation": "CareTransitionWorkflow output[4]"
+            }
+          },
+          {
+            "role": "wellness_transition_routing",
+            "sourceMachine": "WellnessAnalytics.json",
+            "machineInputRegion": {
+              "offset": 3931,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 3939,
+              "length": 8
+            },
+            "composedInputElements": [
+              5,
+              6,
+              7,
+              8
+            ],
+            "mapping": {
+              "transitionReview": "WellnessAnalytics output[2]",
+              "transitionEscalation": "WellnessAnalytics output[3]",
+              "transitionUrgent": "WellnessAnalytics output[4]",
+              "wellnessImproving": "WellnessAnalytics output[5]"
+            }
+          },
+          {
+            "role": "patient_wellness_acuity",
+            "sourceMachine": "PatientWellness.json",
+            "machineInputRegion": {
+              "offset": 1955,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 3931,
+              "length": 8
+            },
+            "composedInputElements": [
+              9,
+              10
+            ],
+            "mapping": {
+              "wellnessAlert": "PatientWellness output[2]",
+              "wellnessCritical": "PatientWellness output[3]"
+            }
+          },
+          {
+            "role": "daily_care_safety",
+            "sourceMachine": "DailyPatientCare.json",
+            "machineInputRegion": {
+              "offset": 3923,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 1955,
+              "length": 8
+            },
+            "composedInputElements": [
+              11,
+              12,
+              13
+            ],
+            "mapping": {
+              "fallConfirmed": "DailyPatientCare output[2]",
+              "unresponsiveFall": "DailyPatientCare output[3]",
+              "medicationMissed": "DailyPatientCare output[5]"
+            }
+          },
+          {
+            "role": "facility_accessibility_safety",
+            "sourceMachine": "FacilitiesMaintenance.json",
+            "machineInputRegion": {
+              "offset": 1931,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 3925,
+              "length": 6
+            },
+            "composedInputElements": [
+              14,
+              15,
+              16
+            ],
+            "mapping": {
+              "safetyAlert": "FacilitiesMaintenance output[3]",
+              "wellnessConcern": "FacilitiesMaintenance output[4]",
+              "inaccessibilityAlert": "FacilitiesMaintenance output[5]"
+            }
+          },
+          {
+            "role": "fall_criticality",
+            "sourceMachine": "FallDetection.json",
+            "machineInputRegion": {
+              "offset": 3813,
+              "length": 2
+            },
+            "machineOutputRegion": {
+              "offset": 1941,
+              "length": 2
+            },
+            "composedInputElements": [
+              17
+            ],
+            "mapping": {
+              "fallRedHighConfidence": "derived from FallDetection output[0] == 4 and output[1] >= 3"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "HSPH131_care-coordination-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4454,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_transfer_response",
+              "transition_barrier_resolution",
+              "post_acute_placement_review"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "monitor care-transition signals for urgent response, blocked discharge, and post-acute placement review"
+          },
+          {
+            "machine": "HSPH132_care-coordination-resource-router.json",
+            "inputRegion": {
+              "offset": 4454,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_transfer_response",
+              "transition_barrier_resolution",
+              "post_acute_placement_review"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route clinical, transport, placement, and family-support resources"
+          },
+          {
+            "machine": "HSPH135_care-coordination-referral-optimizer.json",
+            "inputRegion": {
+              "offset": 4454,
+              "length": 4
+            },
+            "lanes": [
+              "transition_barrier_resolution",
+              "post_acute_placement_review"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "optimize post-acute, rehabilitation, assisted-living, and alternate placement referrals"
+          },
+          {
+            "machine": "HSPH137_care-coordination-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4454,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_transfer_response",
+              "transition_barrier_resolution"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "dispatch care coordination agents for urgent transfer or blocked transition resolution"
+          },
+          {
+            "machine": "HSPH138_care-coordination-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4454,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_transfer_response"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "govern emergency transfer escalation and urgent safety review"
+          },
+          {
+            "machine": "CSX009_health-and-human-services-intake-crisis-benefit-intake.json",
+            "inputRegion": {
+              "offset": 4454,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_transfer_response",
+              "transition_barrier_resolution"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "open crisis benefit intake when transfer failure or emergency creates social-service need"
+          },
+          {
+            "machine": "CSX004_health-and-human-services-intake-disability-accommodation-router.json",
+            "inputRegion": {
+              "offset": 4454,
+              "length": 4
+            },
+            "lanes": [
+              "transition_barrier_resolution",
+              "post_acute_placement_review"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route disability accommodation needs that affect post-acute placement or discharge readiness"
+          },
+          {
+            "machine": "CSX010_health-and-human-services-intake-human-services-intake-executive.json",
+            "inputRegion": {
+              "offset": 4454,
+              "length": 4
+            },
+            "lanes": [
+              "transition_barrier_resolution",
+              "post_acute_placement_review",
+              "stable_transition_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "coordinate human-services intake for transition support and stable follow-up"
+          },
+          {
+            "machine": "LBL005_whole-person-intake-and-goals-risk-safety-review.json",
+            "inputRegion": {
+              "offset": 4454,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_transfer_response",
+              "transition_barrier_resolution"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "review whole-person risk and safety constraints around urgent transfer and blocked discharge"
+          },
+          {
+            "machine": "LBL007_whole-person-intake-and-goals-functional-impairment-map.json",
+            "inputRegion": {
+              "offset": 4454,
+              "length": 4
+            },
+            "lanes": [
+              "post_acute_placement_review",
+              "stable_transition_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "map functional impairment and support needs for post-acute placement and stable monitoring"
+          },
+          {
+            "machine": "LBL004_whole-person-intake-and-goals-care-preference-alignment.json",
+            "inputRegion": {
+              "offset": 4454,
+              "length": 4
+            },
+            "lanes": [
+              "post_acute_placement_review",
+              "stable_transition_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "align care preferences, family expectations, and next living arrangement planning"
+          },
+          {
+            "machine": "LBL059_medication-and-psychiatric-care-care-visit-preparation.json",
+            "inputRegion": {
+              "offset": 4454,
+              "length": 4
+            },
+            "lanes": [
+              "transition_barrier_resolution",
+              "post_acute_placement_review"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "prepare medication and visit context when missed medication or care documentation affects transition readiness"
+          }
+        ],
+        "fanOutPolicy": {
+          "owner": "perception-engine",
+          "mode": "lane-scoped",
+          "dispatchMode": "asynchronous-no-wait",
+          "defaultAction": "do-not-dispatch-unmatched-consumer",
+          "notes": "PE selects consumers from outputMatchesAny after RE emits the bus output. Urgent transfer, barrier resolution, post-acute review, and stable monitoring intentionally fan out to different consumers."
+        },
+        "peContract": {
+          "compositionOwner": "perception-engine",
+          "startupConfigured": true,
+          "dispatchMode": "asynchronous-no-wait",
+          "sourcePayloadPolicy": "normalized-status-only",
+          "rawPayloadPolicy": "remain-in-source-ledger-or-upstream-system"
+        },
+        "localAIResolver": {
+          "resolverId": "localai.health-personal.care-transition-response.resolver",
+          "provider": "ollama-localai",
+          "dispatchMode": "accepted-no-wait",
+          "inputRegion": {
+            "offset": 4454,
+            "length": 4
+          },
+          "writeBack": {
+            "type": "pe-sensor",
+            "provider": "localai",
+            "sensorId": "localai.health-personal.care-transition-response.resolver.completion",
+            "name": "localAIStack care transition response resolver completion",
+            "region": {
+              "offset": 4454,
+              "length": 4
+            },
+            "semantics": [
+              "urgent transfer response resolved or acknowledged",
+              "transition barrier resolution resolved or acknowledged",
+              "post acute placement review resolved or acknowledged",
+              "stable transition monitoring resolved or acknowledged"
+            ],
+            "ttlMs": 300000,
+            "normalization": "machine-native-binary",
+            "ingest": {
+              "endpoint": "/api/integrations/completions",
+              "method": "POST",
+              "triggerPush": false,
+              "compactPush": true
+            },
+            "sourceMapping": {
+              "id": "localai-care-transition-response-resolver-completion",
+              "sensorId": "localai.health-personal.care-transition-response.resolver.completion",
+              "name": "localAIStack care transition response resolver completion",
+              "region": {
+                "offset": 4454,
+                "length": 4
+              },
+              "ttlMs": 300000
+            }
+          },
+          "contractSurface": "publishedDomainBus.localAIResolver",
+          "notes": "Resolver metadata is consumed by PE startup configuration. It intentionally does not create metadata.agentBinding because this bridge machine is not an agent-dispatcher and RE should see only ordinary vector state."
+        }
+      },
+      "outputSpace": "4D binary at [4454:4458]: [1,0,0,0]=URGENT_TRANSFER_RESPONSE, [0,1,0,0]=TRANSITION_BARRIER_RESOLUTION, [0,0,1,0]=POST_ACUTE_PLACEMENT_REVIEW, [0,0,0,1]=STABLE_TRANSITION_MONITORING",
+      "tags": [
+        "assisted-living",
+        "bridge",
+        "care-transition",
+        "care-transition-workflow",
+        "cross-domain-interconnect",
+        "discharge-planning",
+        "elder-care",
+        "emergency-transfer",
+        "health-personal",
+        "health-personal-published-bus",
+        "healthcare-operations",
+        "machine-interconnect",
+        "post-acute-care",
+        "published-bus-health-personal-care-transition-response",
+        "rehab",
+        "startup-loadable",
+        "wellness"
+      ],
+      "sequenceCount": 4,
+      "inputSemantics": [
+        "care transition hospital transfer bit",
+        "care transition rehab transfer bit",
+        "care transition assisted living transfer bit",
+        "care transition transfer blocked bit",
+        "care transition emergency escalation bit",
+        "wellness transition review bit",
+        "wellness transition escalation bit",
+        "wellness transition urgent bit",
+        "wellness improving bit",
+        "patient wellness alert bit",
+        "patient wellness critical bit",
+        "daily care fall confirmed bit",
+        "daily care unresponsive fall bit",
+        "daily care medication missed bit",
+        "facilities safety alert bit",
+        "facilities wellness concern bit",
+        "facilities inaccessibility alert bit",
+        "fall red high confidence bit"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "manual-corpus-interconnect",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "care-transition",
+          "health-personal-published-bus",
+          "published-bus-health-personal-care-transition-response"
+        ],
+        "family": "health-personal-interconnect",
+        "machineCode": "care-transition-response-interconnect",
+        "capabilityTags": [
+          "bridge",
+          "machine-interconnect",
+          "care-transition"
+        ],
+        "workflowTags": [
+          "assisted-living",
+          "care-transition-workflow",
+          "discharge-planning",
+          "elder-care",
+          "emergency-transfer",
+          "post-acute-care",
+          "rehab",
+          "wellness"
+        ],
+        "integrationTags": [
+          "cross-domain-interconnect",
+          "machine-interconnect",
+          "published-bus-health-personal-care-transition-response"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "assisted-living",
+          "bridge",
+          "care-transition",
+          "care-transition-response-interconnect",
+          "care-transition-workflow",
+          "ces-sequences",
+          "ces-sequences-4",
+          "cross-domain-interconnect",
+          "discharge-planning",
+          "elder-care",
+          "emergency-transfer",
+          "health-personal",
+          "health-personal-interconnect",
+          "health-personal-published-bus",
+          "healthcare-operations",
+          "input-sequences",
+          "input-sequences-2",
+          "machine-interconnect",
+          "post-acute-care",
+          "published-bus-health-personal-care-transition-response",
+          "rehab",
+          "startup-loadable",
+          "wellness"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/care-transition-response-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "care-coordination-team-primary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for care transition response. RE evaluates only vector state; PE owns source provenance, asynchronous dispatch, and completion ingestion."
+      },
+      "triggerConfig": {
+        "processId": "CARE_TRANSITION_RESPONSE_INTERCONNECT",
+        "processName": "Care Transition Response Interconnect",
+        "rules": [
+          {
+            "sequenceId": "care-transition-response-urgent-transfer",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Emergency transfer or escalation with acute wellness, daily-care, facility, or fall risk requires urgent transition response."
+          },
+          {
+            "sequenceId": "care-transition-response-barrier-resolution",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Blocked transition with payer, medication, facility, wellness, or access barrier requires resolution workflow."
+          },
+          {
+            "sequenceId": "care-transition-response-post-acute-review",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Planned post-acute transition with wellness or facility concern requires placement and support review."
+          },
+          {
+            "sequenceId": "care-transition-response-stable-monitoring",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Transition path is stable and remains under monitoring."
+          }
+        ]
+      },
+      "machineClass": "bridge"
+    },
+    "perceptualMapping": {
+      "input": {
+        "offset": 4436,
+        "length": 18
+      },
+      "output": {
+        "offset": 4454,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "matchAlgorithm": "equals",
+    "arbiterRule": "PASSTHROUGH",
+    "sequences": [
+      {
+        "id": "care-transition-response-urgent-transfer",
+        "name": "Emergency transfer + acute wellness/fall/facility risk -> urgent transfer response",
+        "metadata": {
+          "description": "Care transition is already in hospital transfer or emergency escalation state while wellness, daily-care, facility, or fall signals indicate acute risk.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "care-transition-response-urgent-transfer-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "care-transition-response-urgent-transfer-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route urgent transfer response, emergency care coordination, governance escalation, and safety review."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "care-transition-response-barrier-resolution",
+        "name": "Blocked transfer + authorization/access/facility barriers -> transition barrier resolution",
+        "metadata": {
+          "description": "Care transition is blocked while wellness routing, medication, and accessibility signals indicate a resolvable barrier.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "care-transition-response-barrier-resolution-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "care-transition-response-barrier-resolution-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route payer, facility, transportation, documentation, medication, and human-services barrier resolution."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "care-transition-response-post-acute-review",
+        "name": "Rehab transfer + wellness review + facility concern -> post-acute placement review",
+        "metadata": {
+          "description": "Planned post-acute transfer is active with reviewable wellness and facility context but below urgent threshold.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "care-transition-response-post-acute-review-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "care-transition-response-post-acute-review-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route post-acute placement review, referral optimization, functional support mapping, and care preference alignment."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "care-transition-response-stable-monitoring",
+        "name": "Assisted-living transfer + improving wellness + no active barriers -> stable transition monitoring",
+        "metadata": {
+          "description": "Transition to assisted living is complete or stable while wellness is improving and no active barrier or acute risk bits are present.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "care-transition-response-stable-monitoring-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "care-transition-response-stable-monitoring-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Route stable transition monitoring, human-services follow-up, and whole-person care preference alignment."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Care transition urgent transfer fan-out",
+        "pattern": "PE composed bus input: emergency transition + urgent wellness + unresponsive fall + facility safety + fall red high confidence.",
+        "description": "Applies the compact PE-composed input lane at [4436:4454] to activate urgent transfer response and emit [1,0,0,0] to [4454:4458].",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "care-transition-response-urgent-transfer-fanout",
+          "sourceRegionInputs": {
+            "CareTransitionWorkflow[3947:3955]": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "WellnessAnalytics[3939:3947]": [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "PatientWellness[3931:3939]": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            "DailyPatientCare[1955:1963]": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            "FacilitiesMaintenance[3925:3931]": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "FallDetection[1941:1943]": [
+              4,
+              3
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4436,
+            "length": 18
+          },
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4454,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH137_care-coordination-agent-dispatcher",
+            "HSPH138_care-coordination-governance-escalator",
+            "CSX009_health-and-human-services-intake-crisis-benefit-intake",
+            "LBL005_whole-person-intake-and-goals-risk-safety-review"
+          ],
+          "fanOutPolicy": "lane-scoped urgent_transfer_response only"
+        }
+      },
+      {
+        "name": "Care transition barrier resolution fan-out",
+        "pattern": "PE composed bus input: blocked transfer + transition review/escalation + medication miss + inaccessibility.",
+        "description": "Applies the compact PE-composed input lane at [4436:4454] to activate transition barrier resolution and emit [0,1,0,0] to [4454:4458].",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "care-transition-response-barrier-resolution-fanout",
+          "sourceRegionInputs": {
+            "CareTransitionWorkflow[3947:3955]": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            "WellnessAnalytics[3939:3947]": [
+              0,
+              0,
+              1,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            "PatientWellness[3931:3939]": [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "DailyPatientCare[1955:1963]": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "FacilitiesMaintenance[3925:3931]": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ],
+            "FallDetection[1941:1943]": [
+              0,
+              3
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4436,
+            "length": 18
+          },
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4454,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH135_care-coordination-referral-optimizer",
+            "HSPH137_care-coordination-agent-dispatcher",
+            "CSX004_health-and-human-services-intake-disability-accommodation-router",
+            "CSX009_health-and-human-services-intake-crisis-benefit-intake",
+            "CSX010_health-and-human-services-intake-human-services-intake-executive",
+            "LBL005_whole-person-intake-and-goals-risk-safety-review",
+            "LBL059_medication-and-psychiatric-care-care-visit-preparation"
+          ],
+          "fanOutPolicy": "lane-scoped transition_barrier_resolution only"
+        }
+      }
+    ]
+  }
+}

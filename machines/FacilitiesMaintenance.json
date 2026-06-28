@@ -283,7 +283,75 @@
         "FacilitiesMaintenance input 6",
         "FacilitiesMaintenance input 7",
         "FacilitiesMaintenance input 8"
-      ]
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.care-transition-response.facility-accessibility-safety",
+          "type": "published-domain-bus-producer",
+          "role": "facility_accessibility_safety",
+          "sourceMachine": "FacilitiesMaintenance",
+          "sourceOutputRegion": {
+            "offset": 3925,
+            "length": 6
+          },
+          "targetInputElements": [
+            14,
+            15,
+            16
+          ],
+          "normalizedElements": [
+            "facilities safety alert bit from FacilitiesMaintenance output[3]",
+            "facilities wellness concern bit from FacilitiesMaintenance output[4]",
+            "facilities inaccessibility alert bit from FacilitiesMaintenance output[5]"
+          ],
+          "purpose": "Publish facility safety, wellness, and accessibility constraints into the personal-health care transition response bus.",
+          "busId": "health-personal.care-transition-response",
+          "busTag": "published-bus-health-personal-care-transition-response",
+          "targetMachine": "Care Transition Response Interconnect",
+          "targetMachineFile": "CareTransitionResponseInterconnect.json",
+          "targetInputRegion": {
+            "offset": 4436,
+            "length": 18
+          },
+          "busInputRegion": {
+            "offset": 4436,
+            "length": 18
+          },
+          "publishedOutputRegion": {
+            "offset": 4454,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 4454,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-facilities-maintenance-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1931,
+          "length": 8
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "daily_routine_complete_bit",
+          "weekly_deep_clean_complete_bit",
+          "hygiene_concern_bit",
+          "safety_concern_bit",
+          "wellness_concern_bit",
+          "resident_inaccessible_bit",
+          "reserved_6",
+          "reserved_7"
+        ],
+        "peContract": "OpenClaw maps facility observations and access checks to native FacilitiesMaintenance input bits; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "matchAlgorithm": "gte",
