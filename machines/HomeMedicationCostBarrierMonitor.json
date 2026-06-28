@@ -148,10 +148,68 @@
       },
       "machineClass": "signal-monitor",
       "inputSemantics": [
-        "Home Medication Cost Barrier Monitor input 1",
-        "Home Medication Cost Barrier Monitor input 2",
-        "Home Medication Cost Barrier Monitor input 3",
-        "Home Medication Cost Barrier Monitor input 4"
+        "medication_affordability_norm",
+        "refill_continuity_norm",
+        "dose_rationing_norm",
+        "benefit_access_norm"
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-home-medication-cost-barrier-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1979,
+          "length": 4
+        },
+        "normalization": "machine-native-scalar",
+        "semantics": [
+          "medication_affordability_norm",
+          "refill_continuity_norm",
+          "dose_rationing_norm",
+          "benefit_access_norm"
+        ],
+        "peContract": "OpenClaw maps medication affordability and refill observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle."
+      },
+      "interconnections": [
+        {
+          "id": "health-personal.chronic-disease-response.medication-adherence-status",
+          "type": "published-domain-bus-producer",
+          "role": "medication_adherence_status",
+          "sourceMachine": "Home Medication Cost Barrier Monitor",
+          "sourceOutputRegion": {
+            "offset": 2011,
+            "length": 4
+          },
+          "targetInputElements": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "normalizedElements": [
+            "adherence crisis bit from HomeMedicationCostBarrierMonitor [2011]",
+            "cost barrier active bit from HomeMedicationCostBarrierMonitor [2012]",
+            "partial adherence bit from HomeMedicationCostBarrierMonitor [2013]",
+            "medication managed bit from HomeMedicationCostBarrierMonitor [2014]"
+          ],
+          "purpose": "Publish medication access and adherence context into the personal-health chronic disease response bus.",
+          "privacyBoundary": "PE composes normalized medication status bits only; raw pharmacy, benefits, and adherence records remain outside the universal reality vector.",
+          "busId": "health-personal.chronic-disease-response",
+          "busTag": "published-bus-health-personal-chronic-disease-response",
+          "targetMachine": "Home Chronic Disease Response Interconnect",
+          "targetMachineFile": "HomeChronicDiseaseResponseInterconnect.json",
+          "busInputRegion": {
+            "offset": 4368,
+            "length": 18
+          },
+          "busOutputRegion": {
+            "offset": 4386,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait"
+        }
       ]
     },
     "arbiterRule": "PASSTHROUGH",

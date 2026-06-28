@@ -303,7 +303,77 @@
         "WellnessAnalytics input 6",
         "WellnessAnalytics input 7",
         "WellnessAnalytics input 8"
-      ]
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.care-transition-response.wellness-transition-routing",
+          "type": "published-domain-bus-producer",
+          "role": "wellness_transition_routing",
+          "sourceMachine": "WellnessAnalytics",
+          "sourceOutputRegion": {
+            "offset": 3939,
+            "length": 8
+          },
+          "targetInputElements": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "normalizedElements": [
+            "transition review bit from WellnessAnalytics output[2]",
+            "transition escalation bit from WellnessAnalytics output[3]",
+            "transition urgent bit from WellnessAnalytics output[4]",
+            "wellness improving bit from WellnessAnalytics output[5]"
+          ],
+          "purpose": "Publish wellness-based transition routing status into the personal-health care transition response bus.",
+          "busId": "health-personal.care-transition-response",
+          "busTag": "published-bus-health-personal-care-transition-response",
+          "targetMachine": "Care Transition Response Interconnect",
+          "targetMachineFile": "CareTransitionResponseInterconnect.json",
+          "targetInputRegion": {
+            "offset": 4436,
+            "length": 18
+          },
+          "busInputRegion": {
+            "offset": 4436,
+            "length": 18
+          },
+          "publishedOutputRegion": {
+            "offset": 4454,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 4454,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-wellness-analytics-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 3931,
+          "length": 8
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "wellness_optimal_bit",
+          "wellness_good_bit",
+          "wellness_alert_bit",
+          "wellness_critical_bit",
+          "reserved_4",
+          "reserved_5",
+          "reserved_6",
+          "reserved_7"
+        ],
+        "peContract": "OpenClaw maps wellness observations to the native WellnessAnalytics input vector only when bypassing deterministic PatientWellness output; PE writes the source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "matchAlgorithm": "gte",

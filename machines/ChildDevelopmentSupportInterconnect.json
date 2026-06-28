@@ -1,0 +1,1271 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Child Development Support Interconnect",
+    "description": "Published personal-health bridge bus that composes child development, pediatric nutrition, caregiver burden, food security, home environment safety, and household social context into a compact developmental support lane. PE owns source composition and writes the compact input lane; RE evaluates this machine as ordinary vector state.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Published Child Development Support Bus",
+      "author": "Reality Engine",
+      "domainLevelTag": "published-bus-health-personal-child-development-support",
+      "publishedDomainBus": {
+        "id": "health-personal.child-development-support",
+        "tag": "published-bus-health-personal-child-development-support",
+        "domain": "health-personal",
+        "name": "Personal Health Child Development Support Bus",
+        "description": "Domain-level published bus for child developmental referral, family stabilization support, developmental monitoring review, and stable development support.",
+        "inputRegion": {
+          "offset": 4458,
+          "length": 18
+        },
+        "outputRegion": {
+          "offset": 4476,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "child_development_status",
+            "sourceMachine": "ChildDevelopmentMonitor.json",
+            "machineInputRegion": {
+              "offset": 1975,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 2007,
+              "length": 4
+            },
+            "composedInputElements": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "mapping": {
+              "referralNeeded": "ChildDevelopmentMonitor output[0]",
+              "socialDevelopmentalConcern": "ChildDevelopmentMonitor output[1]",
+              "learningConcern": "ChildDevelopmentMonitor output[2]",
+              "developmentOk": "ChildDevelopmentMonitor output[3]"
+            }
+          },
+          {
+            "role": "pediatric_nutrition_status",
+            "sourceMachine": "PediatricNutritionMonitor.json",
+            "machineInputRegion": {
+              "offset": 1971,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 2003,
+              "length": 4
+            },
+            "composedInputElements": [
+              4,
+              5,
+              6,
+              7
+            ],
+            "mapping": {
+              "growthAlert": "PediatricNutritionMonitor output[0]",
+              "nutritionDeficit": "PediatricNutritionMonitor output[1]",
+              "micronutrientConcern": "PediatricNutritionMonitor output[2]",
+              "nutritionOk": "PediatricNutritionMonitor output[3]"
+            }
+          },
+          {
+            "role": "caregiver_burden_status",
+            "sourceMachine": "HomeCaregiverBurdenMonitor.json",
+            "machineInputRegion": {
+              "offset": 2003,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 2031,
+              "length": 4
+            },
+            "composedInputElements": [
+              8,
+              9,
+              10,
+              11
+            ],
+            "mapping": {
+              "caregiverBurnout": "HomeCaregiverBurdenMonitor output[0]",
+              "highBurden": "HomeCaregiverBurdenMonitor output[1]",
+              "moderateBurden": "HomeCaregiverBurdenMonitor output[2]",
+              "caregiverCoping": "HomeCaregiverBurdenMonitor output[3]"
+            }
+          },
+          {
+            "role": "food_access_context",
+            "sourceMachine": "HomeFoodSecurityMonitor.json",
+            "machineInputRegion": {
+              "offset": 1963,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 1995,
+              "length": 4
+            },
+            "composedInputElements": [
+              12,
+              13
+            ],
+            "mapping": {
+              "foodCrisis": "HomeFoodSecurityMonitor output[0]",
+              "foodInsecureOrAssistanceNeeded": "derived from HomeFoodSecurityMonitor output[1] or output[2]"
+            }
+          },
+          {
+            "role": "home_environment_safety",
+            "sourceMachine": "HomeEnvironmentSafetyMonitor.json",
+            "machineInputRegion": {
+              "offset": 1967,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 1999,
+              "length": 4
+            },
+            "composedInputElements": [
+              14,
+              15
+            ],
+            "mapping": {
+              "unsafeHousing": "HomeEnvironmentSafetyMonitor output[0]",
+              "utilityFailureOrHealthHazard": "derived from HomeEnvironmentSafetyMonitor output[1] or output[2]"
+            }
+          },
+          {
+            "role": "household_social_context",
+            "sourceMachine": "HomeSocialIsolationMonitor.json",
+            "machineInputRegion": {
+              "offset": 2011,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 2035,
+              "length": 4
+            },
+            "composedInputElements": [
+              16,
+              17
+            ],
+            "mapping": {
+              "severeIsolationOrIsolationRisk": "derived from HomeSocialIsolationMonitor output[0] or output[2]",
+              "sociallyConnected": "HomeSocialIsolationMonitor output[3]"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "HSPH151_maternal-child-family-health-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4476,
+              "length": 4
+            },
+            "lanes": [
+              "early_intervention_referral",
+              "family_stabilization_support",
+              "developmental_monitoring_review"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "maternal-child-family signal monitoring for developmental risk and family support needs"
+          },
+          {
+            "machine": "HSPH152_maternal-child-family-health-resource-router.json",
+            "inputRegion": {
+              "offset": 4476,
+              "length": 4
+            },
+            "lanes": [
+              "early_intervention_referral",
+              "family_stabilization_support",
+              "developmental_monitoring_review"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route EI, nutrition, home visiting, family stabilization, and developmental monitoring resources"
+          },
+          {
+            "machine": "HSPH155_maternal-child-family-health-referral-optimizer.json",
+            "inputRegion": {
+              "offset": 4476,
+              "length": 4
+            },
+            "lanes": [
+              "early_intervention_referral",
+              "developmental_monitoring_review"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "optimize early intervention, speech therapy, occupational therapy, and pediatric follow-up referrals"
+          },
+          {
+            "machine": "HSPH157_maternal-child-family-health-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4476,
+              "length": 4
+            },
+            "lanes": [
+              "early_intervention_referral",
+              "family_stabilization_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "dispatch governed maternal-child health agents for high-need child development and family support workflows"
+          },
+          {
+            "machine": "HSPH158_maternal-child-family-health-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4476,
+              "length": 4
+            },
+            "lanes": [
+              "early_intervention_referral"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "govern urgent developmental referral and safety-risk escalation"
+          },
+          {
+            "machine": "HSPH159_maternal-child-family-health-learning-loop.json",
+            "inputRegion": {
+              "offset": 4476,
+              "length": 4
+            },
+            "lanes": [
+              "developmental_monitoring_review",
+              "stable_development_support"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "feed monitoring outcomes into maternal-child-family learning loop"
+          },
+          {
+            "machine": "CSX005_health-and-human-services-intake-family-stabilization-intake.json",
+            "inputRegion": {
+              "offset": 4476,
+              "length": 4
+            },
+            "lanes": [
+              "family_stabilization_support"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "open family stabilization intake when caregiver burden, food insecurity, housing instability, or isolation contributes to developmental risk"
+          },
+          {
+            "machine": "CSX010_health-and-human-services-intake-human-services-intake-executive.json",
+            "inputRegion": {
+              "offset": 4476,
+              "length": 4
+            },
+            "lanes": [
+              "early_intervention_referral",
+              "family_stabilization_support",
+              "stable_development_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "coordinate human-services intake and follow-up around pediatric development support"
+          },
+          {
+            "machine": "CSX016_benefits-and-eligibility-rental-assistance-triage.json",
+            "inputRegion": {
+              "offset": 4476,
+              "length": 4
+            },
+            "lanes": [
+              "family_stabilization_support"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "route housing instability and rental assistance when environment risk affects child development"
+          },
+          {
+            "machine": "CSX017_benefits-and-eligibility-document-readiness-monitor.json",
+            "inputRegion": {
+              "offset": 4476,
+              "length": 4
+            },
+            "lanes": [
+              "early_intervention_referral",
+              "family_stabilization_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "track document readiness for early intervention, benefits, housing, food, and family stabilization referrals"
+          },
+          {
+            "machine": "LBL007_whole-person-intake-and-goals-functional-impairment-map.json",
+            "inputRegion": {
+              "offset": 4476,
+              "length": 4
+            },
+            "lanes": [
+              "early_intervention_referral",
+              "developmental_monitoring_review"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "map functional development and support needs for the child and household"
+          },
+          {
+            "machine": "LBL062_adolescent-family-and-school-family-routine-alignment.json",
+            "inputRegion": {
+              "offset": 4476,
+              "length": 4
+            },
+            "lanes": [
+              "family_stabilization_support",
+              "stable_development_support"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "align family routines, school readiness, and home supports after developmental or caregiver stress signals"
+          },
+          {
+            "machine": "LBL067_adolescent-family-and-school-school-accommodation-tracker.json",
+            "inputRegion": {
+              "offset": 4476,
+              "length": 4
+            },
+            "lanes": [
+              "early_intervention_referral",
+              "developmental_monitoring_review"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "track school or early-learning accommodation needs when development support requires educational coordination"
+          }
+        ],
+        "fanOutPolicy": {
+          "owner": "perception-engine",
+          "mode": "lane-scoped",
+          "dispatchMode": "asynchronous-no-wait",
+          "defaultAction": "do-not-dispatch-unmatched-consumer",
+          "notes": "PE selects consumers from outputMatchesAny after RE emits the bus output. Early-intervention, family-stabilization, monitoring-review, and stable-support lanes intentionally fan out to different consumers."
+        },
+        "peContract": {
+          "compositionOwner": "perception-engine",
+          "startupConfigured": true,
+          "dispatchMode": "asynchronous-no-wait",
+          "sourcePayloadPolicy": "normalized-status-only",
+          "rawPayloadPolicy": "remain-in-source-ledger-or-upstream-system"
+        },
+        "localAIResolver": {
+          "resolverId": "localai.health-personal.child-development-support.resolver",
+          "provider": "ollama-localai",
+          "dispatchMode": "accepted-no-wait",
+          "inputRegion": {
+            "offset": 4476,
+            "length": 4
+          },
+          "writeBack": {
+            "type": "pe-sensor",
+            "provider": "localai",
+            "sensorId": "localai.health-personal.child-development-support.resolver.completion",
+            "name": "localAIStack child development support resolver completion",
+            "region": {
+              "offset": 4476,
+              "length": 4
+            },
+            "semantics": [
+              "early intervention referral resolved or acknowledged",
+              "family stabilization support resolved or acknowledged",
+              "developmental monitoring review resolved or acknowledged",
+              "stable development support resolved or acknowledged"
+            ],
+            "ttlMs": 300000,
+            "normalization": "machine-native-binary",
+            "ingest": {
+              "endpoint": "/api/integrations/completions",
+              "method": "POST",
+              "triggerPush": false,
+              "compactPush": true
+            },
+            "sourceMapping": {
+              "id": "localai-child-development-support-resolver-completion",
+              "sensorId": "localai.health-personal.child-development-support.resolver.completion",
+              "name": "localAIStack child development support resolver completion",
+              "region": {
+                "offset": 4476,
+                "length": 4
+              },
+              "ttlMs": 300000
+            }
+          },
+          "contractSurface": "publishedDomainBus.localAIResolver",
+          "notes": "Resolver metadata is consumed by PE startup configuration. It intentionally does not create metadata.agentBinding because this bridge machine is not an agent-dispatcher and RE should see only ordinary vector state."
+        }
+      },
+      "outputSpace": "4D binary at [4476:4480]: [1,0,0,0]=EARLY_INTERVENTION_REFERRAL, [0,1,0,0]=FAMILY_STABILIZATION_SUPPORT, [0,0,1,0]=DEVELOPMENTAL_MONITORING_REVIEW, [0,0,0,1]=STABLE_DEVELOPMENT_SUPPORT",
+      "tags": [
+        "bridge",
+        "child-development",
+        "child-development-monitor",
+        "cross-domain-interconnect",
+        "early-intervention",
+        "family-stabilization",
+        "health-personal",
+        "health-personal-published-bus",
+        "home-health",
+        "machine-interconnect",
+        "maternal-child-family-health",
+        "pediatric-nutrition",
+        "published-bus-health-personal-child-development-support",
+        "startup-loadable"
+      ],
+      "sequenceCount": 4,
+      "inputSemantics": [
+        "child development referral needed bit",
+        "child social developmental concern bit",
+        "child learning concern bit",
+        "child development ok bit",
+        "pediatric growth alert bit",
+        "pediatric nutrition deficit bit",
+        "pediatric micronutrient concern bit",
+        "pediatric nutrition ok bit",
+        "caregiver burnout bit",
+        "caregiver high burden bit",
+        "caregiver moderate burden bit",
+        "caregiver coping bit",
+        "household food crisis bit",
+        "household food insecure or assistance needed bit",
+        "unsafe housing bit",
+        "utility failure or health hazard bit",
+        "household severe isolation or isolation risk bit",
+        "household socially connected bit"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "manual-corpus-interconnect",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "child-development",
+          "health-personal-published-bus",
+          "published-bus-health-personal-child-development-support"
+        ],
+        "family": "health-personal-interconnect",
+        "machineCode": "child-development-support-interconnect",
+        "capabilityTags": [
+          "bridge",
+          "machine-interconnect",
+          "early-intervention"
+        ],
+        "workflowTags": [
+          "child-development-monitor",
+          "pediatric-nutrition",
+          "caregiver-burden",
+          "family-stabilization",
+          "maternal-child-family-health"
+        ],
+        "integrationTags": [
+          "cross-domain-interconnect",
+          "machine-interconnect",
+          "published-bus-health-personal-child-development-support"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "bridge",
+          "caregiver-burden",
+          "ces-sequences",
+          "ces-sequences-4",
+          "child-development",
+          "child-development-monitor",
+          "child-development-support-interconnect",
+          "cross-domain-interconnect",
+          "early-intervention",
+          "family-stabilization",
+          "health-personal",
+          "health-personal-interconnect",
+          "health-personal-published-bus",
+          "home-health",
+          "input-sequences",
+          "input-sequences-2",
+          "machine-interconnect",
+          "maternal-child-family-health",
+          "pediatric-nutrition",
+          "published-bus-health-personal-child-development-support",
+          "startup-loadable"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/child-development-support-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "maternal-child-family-health-team-primary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for child development support. RE evaluates only vector state; PE owns source provenance, asynchronous dispatch, and completion ingestion."
+      },
+      "triggerConfig": {
+        "processId": "CHILD_DEVELOPMENT_SUPPORT_INTERCONNECT",
+        "processName": "Child Development Support Interconnect",
+        "rules": [
+          {
+            "sequenceId": "child-development-support-early-intervention-referral",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Developmental referral with nutrition, caregiver, food, or housing risk requires early intervention referral and maternal-child health routing."
+          },
+          {
+            "sequenceId": "child-development-support-family-stabilization",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Developmental social concern with caregiver and household instability requires family stabilization support."
+          },
+          {
+            "sequenceId": "child-development-support-monitoring-review",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Learning or developmental concern with moderate contextual risk requires monitoring review and referral optimization."
+          },
+          {
+            "sequenceId": "child-development-support-stable",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Development, nutrition, caregiver, and household context support stable developmental monitoring."
+          }
+        ]
+      },
+      "machineClass": "bridge"
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4458,
+        "length": 18
+      },
+      "output": {
+        "offset": 4476,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "child-development-support-early-intervention-referral",
+        "name": "Development referral + nutrition or caregiver crisis -> early intervention referral",
+        "metadata": {
+          "description": "ChildDevelopmentMonitor indicates referral needed while nutrition, caregiver, food, or housing context raises risk to the early-intervention window.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "child-development-support-early-intervention-referral-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "child-development-support-early-intervention-referral-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route early intervention referral, maternal-child health resource routing, governance escalation, and functional support mapping."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "child-development-support-family-stabilization",
+        "name": "Social developmental concern + caregiver burden + household instability -> family stabilization support",
+        "metadata": {
+          "description": "Child social-developmental concern is present with caregiver burden and household food, utility, or isolation stressors.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "child-development-support-family-stabilization-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "child-development-support-family-stabilization-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route family stabilization, human-services intake, benefits readiness, and maternal-child family support."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "child-development-support-monitoring-review",
+        "name": "Learning concern + micronutrient or moderate burden -> developmental monitoring review",
+        "metadata": {
+          "description": "Learning concern is active with moderate nutrition, caregiver, or food-access context but below urgent referral threshold.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "child-development-support-monitoring-review-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "child-development-support-monitoring-review-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route developmental monitoring review, referral optimization, school accommodation tracking, and learning-loop feedback."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "child-development-support-stable",
+        "name": "Development OK + nutrition OK + caregiver coping + connected household -> stable development support",
+        "metadata": {
+          "description": "Development, nutrition, caregiver capacity, food, housing, and social context support stable developmental monitoring.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "child-development-support-stable-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "child-development-support-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Route stable support monitoring and family routine alignment without urgent dispatch."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Child development early intervention fan-out",
+        "pattern": "PE composed bus input: referral needed + growth/nutrition risk + caregiver burnout + food/housing risk.",
+        "description": "Applies the compact PE-composed input lane at [4458:4476] to activate early intervention referral and emit [1,0,0,0] to [4476:4480].",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "child-development-support-early-intervention-fanout",
+          "sourceRegionInputs": {
+            "ChildDevelopmentMonitor[2007:2011]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "PediatricNutritionMonitor[2003:2007]": [
+              1,
+              1,
+              0,
+              0
+            ],
+            "HomeCaregiverBurdenMonitor[2031:2035]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "HomeFoodSecurityMonitor[1995:1999]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "HomeEnvironmentSafetyMonitor[1999:2003]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "HomeSocialIsolationMonitor[2035:2039]": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4458,
+            "length": 18
+          },
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4476,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH151_maternal-child-family-health-signal-monitor",
+            "HSPH152_maternal-child-family-health-resource-router",
+            "HSPH155_maternal-child-family-health-referral-optimizer",
+            "HSPH157_maternal-child-family-health-agent-dispatcher",
+            "HSPH158_maternal-child-family-health-governance-escalator",
+            "CSX010_health-and-human-services-intake-human-services-intake-executive",
+            "CSX017_benefits-and-eligibility-document-readiness-monitor",
+            "LBL007_whole-person-intake-and-goals-functional-impairment-map",
+            "LBL067_adolescent-family-and-school-school-accommodation-tracker"
+          ],
+          "fanOutPolicy": "lane-scoped early_intervention_referral only"
+        }
+      },
+      {
+        "name": "Child development family stabilization fan-out",
+        "pattern": "PE composed bus input: social developmental concern + high caregiver burden + household food/utility/social stress.",
+        "description": "Applies the compact PE-composed input lane at [4458:4476] to activate family stabilization support and emit [0,1,0,0] to [4476:4480].",
+        "vectors": [
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "child-development-support-family-stabilization-fanout",
+          "sourceRegionInputs": {
+            "ChildDevelopmentMonitor[2007:2011]": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "PediatricNutritionMonitor[2003:2007]": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "HomeCaregiverBurdenMonitor[2031:2035]": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "HomeFoodSecurityMonitor[1995:1999]": [
+              0,
+              1,
+              1,
+              0
+            ],
+            "HomeEnvironmentSafetyMonitor[1999:2003]": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "HomeSocialIsolationMonitor[2035:2039]": [
+              0,
+              0,
+              1,
+              0
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4458,
+            "length": 18
+          },
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4476,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH151_maternal-child-family-health-signal-monitor",
+            "HSPH152_maternal-child-family-health-resource-router",
+            "HSPH157_maternal-child-family-health-agent-dispatcher",
+            "CSX005_health-and-human-services-intake-family-stabilization-intake",
+            "CSX010_health-and-human-services-intake-human-services-intake-executive",
+            "CSX016_benefits-and-eligibility-rental-assistance-triage",
+            "CSX017_benefits-and-eligibility-document-readiness-monitor",
+            "LBL062_adolescent-family-and-school-family-routine-alignment"
+          ],
+          "fanOutPolicy": "lane-scoped family_stabilization_support only"
+        }
+      }
+    ]
+  }
+}

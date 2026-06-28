@@ -25,7 +25,7 @@
         "social-determinants",
         "startup-loadable"
       ],
-      "sequenceCount": 3,
+      "sequenceCount": 4,
       "populationFocus": "Low- and medium-income households; families with children; adults on fixed incomes",
       "sensorNormalization": {
         "meal_frequency_norm": "0.0=zero adequate meals/day, 0.5=2\u20133 adequate meals/day (sufficient), 1.0=4+ meals/day",
@@ -127,6 +127,18 @@
             "description": "ASSISTANCE_NEEDED: household qualifies for food assistance but not enrolled at [1995:1999]"
           },
           {
+            "sequenceId": "home-food-insecure",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "FOOD_INSECURE: household food access unstable and trending toward assistance need at [1995:1999]"
+          },
+          {
             "sequenceId": "home-food-secure",
             "outputMatches": [
               0,
@@ -134,8 +146,8 @@
               0,
               1
             ],
-            "ragStatusCode": "AMBER",
-            "processStatus": "warning",
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
             "description": "FOOD_SECURE: household food access adequate at [1995:1999]"
           }
         ]
@@ -186,6 +198,49 @@
           "peCompositionRequired": true,
           "compositionOwner": "perception-engine",
           "dispatchMode": "asynchronous-no-wait"
+        },
+        {
+          "id": "health-personal.child-development-support.food-access-context",
+          "type": "published-domain-bus-producer",
+          "role": "food_access_context",
+          "sourceMachine": "Home Food Security Monitor",
+          "sourceOutputRegion": {
+            "offset": 1995,
+            "length": 4
+          },
+          "targetInputElements": [
+            12,
+            13
+          ],
+          "normalizedElements": [
+            "food crisis bit from HomeFoodSecurityMonitor output[0]",
+            "food insecure or assistance needed bit derived from HomeFoodSecurityMonitor output[1] or output[2]"
+          ],
+          "purpose": "Publish household food access context into the personal-health child development support bus.",
+          "busId": "health-personal.child-development-support",
+          "busTag": "published-bus-health-personal-child-development-support",
+          "targetMachine": "Child Development Support Interconnect",
+          "targetMachineFile": "ChildDevelopmentSupportInterconnect.json",
+          "targetInputRegion": {
+            "offset": 4458,
+            "length": 18
+          },
+          "busInputRegion": {
+            "offset": 4458,
+            "length": 18
+          },
+          "publishedOutputRegion": {
+            "offset": 4476,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 4476,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
         }
       ],
       "openClawProjection": {
@@ -203,7 +258,7 @@
           "pantry_days_norm",
           "food_assistance_norm"
         ],
-        "peContract": "OpenClaw maps food and fluid access observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle."
+        "peContract": "OpenClaw maps food access observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle."
       }
     },
     "arbiterRule": "PASSTHROUGH",
@@ -414,6 +469,59 @@
                 "metadata": {
                   "description": "ASSISTANCE_NEEDED: household qualifies for food assistance but not enrolled at [1995:1999]",
                   "action": "Benefits navigator outreach; screen for SNAP/WIC eligibility; food bank connection"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "home-food-insecure",
+        "name": "Food Insecure: STRAINED+ -> FOOD_INSECURE signal",
+        "metadata": {
+          "description": "Fires FOOD_INSECURE when meal frequency, food quality, and pantry depth have fallen below stable range, but the household is not yet in acute crisis and may not yet require emergency referral.",
+          "pattern": "STRAINED+",
+          "output": "[0,1,0,0] (FOOD_INSECURE)"
+        },
+        "vectors": [
+          {
+            "id": "hf-food-insecure-state",
+            "elements": [
+              {
+                "value": 0.38,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.35,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.3,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "FOOD_INSECURE_STATE",
+              "description": "STRAINED+ household food pattern: reduced meals, lower food quality, pantry below three-day supply, assistance not yet fully active.",
+              "upstream_state": "HomeFoodSecurity=FOOD_INSECURE"
+            },
+            "outputVectors": [
+              {
+                "id": "hf-food-insecure-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "description": "FOOD_INSECURE: household food access unstable at [1995:1999]",
+                  "action": "Offer benefits screening, food pantry connection, and meal-stability follow-up before crisis escalation."
                 }
               }
             ]

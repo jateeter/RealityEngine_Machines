@@ -10,7 +10,7 @@
       "outputSpace": "4D binary at [1999:2003]: [1,0,0,0]=UNSAFE_HOUSING, [0,1,0,0]=UTILITY_FAILURE, [0,0,1,0]=HEALTH_HAZARD_RISK, [0,0,0,1]=ENVIRONMENT_SAFE",
       "tags": [
         "ces-sequences",
-        "ces-sequences-3",
+        "ces-sequences-4",
         "health-personal",
         "home-environment-safety-monitor",
         "home-health",
@@ -26,7 +26,7 @@
         "startup-loadable",
         "utility"
       ],
-      "sequenceCount": 3,
+      "sequenceCount": 4,
       "populationFocus": "Renters in aging housing stock; low-income families; households in utility shutoff risk zones",
       "sensorNormalization": {
         "temp_stability_norm": "0.0=habitability crisis (chronic <55\u00b0F winter or >95\u00b0F summer), 0.5=livable but uncomfortable, 1.0=stable comfortable range",
@@ -60,14 +60,14 @@
         "integrationTags": [],
         "validationTags": [
           "ces-sequences",
-          "ces-sequences-3",
+          "ces-sequences-4",
           "input-sequences",
           "input-sequences-1",
           "startup-loadable"
         ],
         "allTags": [
           "ces-sequences",
-          "ces-sequences-3",
+          "ces-sequences-4",
           "health-personal",
           "home-environment-safety-monitor",
           "home-health",
@@ -130,6 +130,18 @@
             "description": "UTILITY_FAILURE: utility shutoff imminent or active at [1999:2003]"
           },
           {
+            "sequenceId": "home-env-health-hazard-risk",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "HEALTH_HAZARD_RISK: mold, lead, particulates, heat/cold exposure, or structural hazard risk requires follow-up at [1999:2003]"
+          },
+          {
             "sequenceId": "home-env-safe",
             "outputMatches": [
               0,
@@ -149,7 +161,69 @@
         "Home Environment Safety Monitor input 2",
         "Home Environment Safety Monitor input 3",
         "Home Environment Safety Monitor input 4"
-      ]
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.child-development-support.home-environment-safety",
+          "type": "published-domain-bus-producer",
+          "role": "home_environment_safety",
+          "sourceMachine": "Home Environment Safety Monitor",
+          "sourceOutputRegion": {
+            "offset": 1999,
+            "length": 4
+          },
+          "targetInputElements": [
+            14,
+            15
+          ],
+          "normalizedElements": [
+            "unsafe housing bit from HomeEnvironmentSafetyMonitor output[0]",
+            "utility failure or health hazard bit derived from HomeEnvironmentSafetyMonitor output[1] or output[2]"
+          ],
+          "purpose": "Publish home environment safety context into the personal-health child development support bus.",
+          "busId": "health-personal.child-development-support",
+          "busTag": "published-bus-health-personal-child-development-support",
+          "targetMachine": "Child Development Support Interconnect",
+          "targetMachineFile": "ChildDevelopmentSupportInterconnect.json",
+          "targetInputRegion": {
+            "offset": 4458,
+            "length": 18
+          },
+          "busInputRegion": {
+            "offset": 4458,
+            "length": 18
+          },
+          "publishedOutputRegion": {
+            "offset": 4476,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 4476,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-home-environment-safety-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1967,
+          "length": 4
+        },
+        "normalization": "machine-native-scalar",
+        "semantics": [
+          "housing_condition_norm",
+          "utility_stability_norm",
+          "environmental_health_hazard_norm",
+          "environment_safe_norm"
+        ],
+        "peContract": "OpenClaw maps home environment observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
@@ -386,6 +460,59 @@
                 "metadata": {
                   "description": "UTILITY_FAILURE: utility shutoff imminent or active at [1999:2003]",
                   "action": "LIHEAP/utility assistance referral; emergency fund application; health impacts assessment for vulnerable residents"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "home-env-health-hazard-risk",
+        "name": "Health Hazard Risk: HAZARD_PRESENT+ -> HEALTH_HAZARD_RISK signal",
+        "metadata": {
+          "description": "Fires HEALTH_HAZARD_RISK when air quality, structural, temperature, or utility conditions are degraded enough to affect health but not yet in acute unsafe-housing or utility-failure crisis.",
+          "pattern": "HAZARD_PRESENT+",
+          "output": "[0,0,1,0] (HEALTH_HAZARD_RISK)"
+        },
+        "vectors": [
+          {
+            "id": "henv-health-hazard-risk",
+            "elements": [
+              {
+                "value": 0.45,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.28,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.32,
+                "threshold": 0.5
+              },
+              {
+                "value": 0.55,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "HEALTH_HAZARD_RISK_STATE",
+              "description": "HAZARD_PRESENT+ home environment: indoor air or structural risk is active, temperature and utilities may still be partly stable, and conditions warrant health follow-up before crisis escalation.",
+              "upstream_state": "HomeEnvironmentSafety=HEALTH_HAZARD_RISK"
+            },
+            "outputVectors": [
+              {
+                "id": "henv-health-hazard-risk-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "description": "HEALTH_HAZARD_RISK: home environment hazard risk active at [1999:2003]",
+                  "action": "Route air-quality, code-enforcement, utility protection, and health follow-up before unsafe-housing escalation."
                 }
               }
             ]

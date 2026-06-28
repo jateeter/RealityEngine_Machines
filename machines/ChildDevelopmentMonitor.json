@@ -146,7 +146,73 @@
         "Child Development Monitor input 2",
         "Child Development Monitor input 3",
         "Child Development Monitor input 4"
-      ]
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.child-development-support.child-development-status",
+          "type": "published-domain-bus-producer",
+          "role": "child_development_status",
+          "sourceMachine": "Child Development Monitor",
+          "sourceOutputRegion": {
+            "offset": 2007,
+            "length": 4
+          },
+          "targetInputElements": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "normalizedElements": [
+            "referral needed bit from ChildDevelopmentMonitor output[0]",
+            "social developmental concern bit from ChildDevelopmentMonitor output[1]",
+            "learning concern bit from ChildDevelopmentMonitor output[2]",
+            "development ok bit from ChildDevelopmentMonitor output[3]"
+          ],
+          "purpose": "Publish child developmental status into the personal-health child development support bus.",
+          "busId": "health-personal.child-development-support",
+          "busTag": "published-bus-health-personal-child-development-support",
+          "targetMachine": "Child Development Support Interconnect",
+          "targetMachineFile": "ChildDevelopmentSupportInterconnect.json",
+          "targetInputRegion": {
+            "offset": 4458,
+            "length": 18
+          },
+          "busInputRegion": {
+            "offset": 4458,
+            "length": 18
+          },
+          "publishedOutputRegion": {
+            "offset": 4476,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 4476,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-child-development-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1975,
+          "length": 4
+        },
+        "normalization": "machine-native-scalar",
+        "semantics": [
+          "milestone_progress_norm",
+          "social_emotional_engagement_norm",
+          "language_acquisition_norm",
+          "learning_readiness_norm"
+        ],
+        "peContract": "OpenClaw maps child development observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
