@@ -15,3 +15,4 @@ if [ "${STRICT_DOMAIN_CONTRACT:-0}" != "0" ]; then
 fi
 
 python3 "$SCRIPT_DIR/audit-corpus.py" "${ARGS[@]}" "$@"
+python3 "$SCRIPT_DIR/inventory-semantic-buses.py" --check --summary-only

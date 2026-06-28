@@ -187,14 +187,14 @@ def validate_domain_contracts(
         if not isinstance(expected_count, int) or expected_count < 0:
             errors.append(f"domain manifest {domain!r}.currentMachineCount must be a non-negative integer")
         elif domain_counts.get(domain, 0) != expected_count:
-            warnings.append(
+            errors.append(
                 f"domain manifest {domain!r}.currentMachineCount={expected_count} "
                 f"but corpus has {domain_counts.get(domain, 0)}"
             )
 
     for domain in sorted(set(domain_counts) - set(manifest)):
         if domain != "missing":
-            warnings.append(f"corpus domain {domain!r} is not listed in domain-manifest.json")
+            errors.append(f"corpus domain {domain!r} is not listed in domain-manifest.json")
 
     return errors, warnings
 
@@ -511,6 +511,10 @@ def audit_machine(
     facts["bits"] = bits
     facts["agent"] = metadata.get("dispatchableAgent")
     facts["hasAgentBinding"] = isinstance(metadata.get("agentBinding"), dict)
+    facts["maxEnd"] = max(
+        (region[0] + region[1] for region in (input_region, output_region) if region),
+        default=0,
+    )
 
     if domain == "missing":
         errors.append("metadata.tagging.primaryDomain, metadata.category, or metadata.domain is required")
@@ -591,6 +595,7 @@ def main() -> int:
     bits: Counter[str] = Counter()
     agents: Counter[str] = Counter()
     agent_binding_count = 0
+    corpus_max_end = 0
 
     for path in files:
         errors, warnings, facts = audit_machine(path, registry, agent_ready_classes, reserved_ranges)
@@ -607,11 +612,30 @@ def main() -> int:
             agents[str(facts["agent"])] += 1
         if facts.get("hasAgentBinding"):
             agent_binding_count += 1
+        corpus_max_end = max(corpus_max_end, int(facts.get("maxEnd") or 0))
+
+    range_errors: list[str] = []
+    for reserved in reserved_ranges:
+        if not reserved.get("writeBack"):
+            continue
+        offset = reserved.get("offset")
+        length = reserved.get("length")
+        if not isinstance(offset, int) or not isinstance(length, int) or length <= 0:
+            range_errors.append(
+                f"reserved range {reserved.get('id', '?')} must declare non-negative integer offset and positive integer length"
+            )
+        elif offset <= corpus_max_end:
+            range_errors.append(
+                f"write-back reserved range {reserved.get('id', '?')} starts at {offset}, "
+                f"but corpus max end is {corpus_max_end}; reserved write-back bands must sit above machine mappings"
+            )
+    if range_errors:
+        errors_by_file["domains/domain-registry.json"] = range_errors
 
     contract_errors, contract_warnings = validate_domain_contracts(registry, manifest, domains)
     contract_errors.extend(validate_agent_ready_classes(registry_root))
     if contract_errors:
-        errors_by_file["domains/domain-manifest.json"] = contract_errors
+        errors_by_file.setdefault("domains/domain-manifest.json", []).extend(contract_errors)
     if contract_warnings:
         warnings_by_file["domains/domain-manifest.json"] = contract_warnings
 

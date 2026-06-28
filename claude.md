@@ -28,6 +28,7 @@ This repo is the canonical machine corpus and schema/test contract source for al
 ```bash
 npm run validate
 npm run validate:strict
+npm run semantic-buses:inventory
 npm run test:contracts
 npm run test:smoke
 npm run test:integration
@@ -39,6 +40,8 @@ npm run test:e2e
 - Multi-engine tests should use `RE_REGISTRY_URL` when available.
 - Single-engine tests should use explicit `RE_BASE_URL` and `PE_BASE_URL`.
 - Machine ID, schema, trigger, and PE source expectations are cross-repo contracts.
+- `domains/domain-manifest.json` is the authoritative domain inventory; recursive corpus counts must match `currentMachineCount`, and unmanifested domains are validation failures.
+- `domains/semantic-bus-registry.json` is the authoritative semantic-bus inventory; refresh it with `npm run semantic-buses:write` when semantic published buses change.
 - Do not treat stale generated expectations as truth when live registry endpoints disagree.
 
 ## LSP Support

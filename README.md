@@ -26,6 +26,22 @@ Run the compatibility validator:
 npm run validate
 ```
 
+`domains/domain-manifest.json` is the authoritative domain inventory. Every
+loadable machine must resolve to a manifest domain, and every
+`currentMachineCount` must match the recursive `machines/**/*.json` count for
+that domain; normal validation fails on manifest drift.
+
+Inventory or refresh the semantic bus registry:
+
+```bash
+npm run semantic-buses:inventory
+npm run semantic-buses:write
+```
+
+`semantic-buses:inventory` validates the semantic published buses and checks the
+checked-in registry. Mechanical range and core aggregation buses are set aside
+from the semantic bus contract.
+
 Run the local architecture contract tests:
 
 ```bash
