@@ -265,7 +265,83 @@
         "DailyPatientCare input 6",
         "DailyPatientCare input 7",
         "DailyPatientCare input 8"
-      ]
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.daily-patient-care-response.daily-care-status",
+          "type": "published-domain-bus-producer",
+          "role": "daily_care_status",
+          "sourceMachine": "DailyPatientCare",
+          "sourceOutputRegion": {
+            "offset": 1955,
+            "length": 8
+          },
+          "targetInputElements": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "normalizedElements": [
+            "morning complete bit from DailyPatientCare output[0]",
+            "evening complete bit from DailyPatientCare output[1]",
+            "fall confirmed bit from DailyPatientCare output[2]",
+            "unresponsive fall bit from DailyPatientCare output[3]",
+            "bathroom alert bit from DailyPatientCare output[4]",
+            "medication missed bit from DailyPatientCare output[5]",
+            "wandering alert bit from DailyPatientCare output[6]"
+          ],
+          "purpose": "Publish daily care completion and anomaly status into the personal-health daily patient care response bus.",
+          "busId": "health-personal.daily-patient-care-response",
+          "busTag": "published-bus-health-personal-daily-patient-care-response",
+          "targetMachine": "Daily Patient Care Response Interconnect",
+          "targetMachineFile": "DailyPatientCareResponseInterconnect.json",
+          "targetInputRegion": {
+            "offset": 4480,
+            "length": 18
+          },
+          "busInputRegion": {
+            "offset": 4480,
+            "length": 18
+          },
+          "publishedOutputRegion": {
+            "offset": 4498,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 4498,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-daily-patient-care-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 3923,
+          "length": 8
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "ambulatory_or_moving_bit",
+          "bathroom_use_bit",
+          "meal_context_bit",
+          "medication_confirmed_bit",
+          "evening_meal_context_bit",
+          "alert_active_bit",
+          "fall_event_bit",
+          "night_monitoring_bit"
+        ],
+        "peContract": "OpenClaw maps daily care observations to native DailyPatientCare input bits; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "matchAlgorithm": "gte",

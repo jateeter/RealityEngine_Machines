@@ -1,0 +1,1243 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Daily Patient Care Response Interconnect",
+    "description": "Published personal-health bridge bus that composes daily patient care, facilities observations, fall criticality, medication adherence, hydration status, and patient wellness acuity into a compact daily-care response lane. PE owns source composition and writes the compact input lane; RE evaluates this machine as ordinary vector state.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Published Daily Patient Care Response Bus",
+      "author": "Reality Engine",
+      "domainLevelTag": "published-bus-health-personal-daily-patient-care-response",
+      "publishedDomainBus": {
+        "id": "health-personal.daily-patient-care-response",
+        "tag": "published-bus-health-personal-daily-patient-care-response",
+        "domain": "health-personal",
+        "name": "Personal Health Daily Patient Care Response Bus",
+        "description": "Domain-level published bus for urgent safety response, care routine recovery, medication/hydration review, and stable daily-care monitoring.",
+        "inputRegion": {
+          "offset": 4480,
+          "length": 18
+        },
+        "outputRegion": {
+          "offset": 4498,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "daily_care_status",
+            "sourceMachine": "DailyPatientCare.json",
+            "machineInputRegion": {
+              "offset": 3923,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 1955,
+              "length": 8
+            },
+            "composedInputElements": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "mapping": {
+              "morningComplete": "DailyPatientCare output[0]",
+              "eveningComplete": "DailyPatientCare output[1]",
+              "fallConfirmed": "DailyPatientCare output[2]",
+              "unresponsiveFall": "DailyPatientCare output[3]",
+              "bathroomAlert": "DailyPatientCare output[4]",
+              "medicationMissed": "DailyPatientCare output[5]",
+              "wanderingAlert": "DailyPatientCare output[6]"
+            }
+          },
+          {
+            "role": "facilities_observation",
+            "sourceMachine": "FacilitiesMaintenance.json",
+            "machineInputRegion": {
+              "offset": 1931,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 3925,
+              "length": 6
+            },
+            "composedInputElements": [
+              7,
+              8,
+              9,
+              10
+            ],
+            "mapping": {
+              "hygieneAlert": "FacilitiesMaintenance output[2]",
+              "safetyAlert": "FacilitiesMaintenance output[3]",
+              "wellnessConcern": "FacilitiesMaintenance output[4]",
+              "inaccessibilityAlert": "FacilitiesMaintenance output[5]"
+            }
+          },
+          {
+            "role": "fall_criticality",
+            "sourceMachine": "FallDetection.json",
+            "machineInputRegion": {
+              "offset": 3813,
+              "length": 2
+            },
+            "machineOutputRegion": {
+              "offset": 1941,
+              "length": 2
+            },
+            "composedInputElements": [
+              11
+            ],
+            "mapping": {
+              "fallRedHighConfidence": "derived from FallDetection output[0] == 4 and output[1] >= 3"
+            }
+          },
+          {
+            "role": "medication_adherence",
+            "sourceMachine": "MedicationAdherenceMonitor.json",
+            "machineInputRegion": {
+              "offset": 1939,
+              "length": 2
+            },
+            "machineOutputRegion": {
+              "offset": 3811,
+              "length": 2
+            },
+            "composedInputElements": [
+              12,
+              13
+            ],
+            "mapping": {
+              "doseDelayed": "MedicationAdherenceMonitor output[0]",
+              "doseMissed": "MedicationAdherenceMonitor output[1]"
+            }
+          },
+          {
+            "role": "hydration_status",
+            "sourceMachine": "HydrationMonitor.json",
+            "machineInputRegion": {
+              "offset": 1947,
+              "length": 2
+            },
+            "machineOutputRegion": {
+              "offset": 1949,
+              "length": 2
+            },
+            "composedInputElements": [
+              14,
+              15
+            ],
+            "mapping": {
+              "hydrationLow": "HydrationMonitor output[0]",
+              "hydrationCritical": "HydrationMonitor output[1]"
+            }
+          },
+          {
+            "role": "patient_wellness_acuity",
+            "sourceMachine": "PatientWellness.json",
+            "machineInputRegion": {
+              "offset": 1955,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 3931,
+              "length": 8
+            },
+            "composedInputElements": [
+              16,
+              17
+            ],
+            "mapping": {
+              "wellnessAlert": "PatientWellness output[2]",
+              "wellnessCritical": "PatientWellness output[3]"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "HSPH131_care-coordination-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4498,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_safety_response",
+              "care_routine_recovery",
+              "medication_hydration_review"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "monitor daily-care safety, routine, and medication/hydration signals"
+          },
+          {
+            "machine": "HSPH132_care-coordination-resource-router.json",
+            "inputRegion": {
+              "offset": 4498,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_safety_response",
+              "care_routine_recovery",
+              "medication_hydration_review"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route daily care response resources"
+          },
+          {
+            "machine": "HSPH135_care-coordination-referral-optimizer.json",
+            "inputRegion": {
+              "offset": 4498,
+              "length": 4
+            },
+            "lanes": [
+              "care_routine_recovery",
+              "medication_hydration_review"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "optimize nursing, medication, hydration, and therapy follow-up referrals"
+          },
+          {
+            "machine": "HSPH137_care-coordination-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4498,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_safety_response",
+              "care_routine_recovery"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "dispatch care-coordination agents for urgent or routine-recovery workflows"
+          },
+          {
+            "machine": "HSPH138_care-coordination-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4498,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_safety_response"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "govern urgent fall, inaccessibility, or critical wellness response"
+          },
+          {
+            "machine": "LBL005_whole-person-intake-and-goals-risk-safety-review.json",
+            "inputRegion": {
+              "offset": 4498,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_safety_response",
+              "care_routine_recovery"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "review risk and safety when falls, wandering, hygiene, or wellness alerts are active"
+          },
+          {
+            "machine": "LBL031_movement-and-physical-health-movement-baseline.json",
+            "inputRegion": {
+              "offset": 4498,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_safety_response",
+              "care_routine_recovery",
+              "stable_daily_care"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "adjust movement baseline after fall, bathroom, wandering, or stable routine observations"
+          },
+          {
+            "machine": "LBL030_sleep-and-circadian-rhythm-sleep-executive-stabilizer.json",
+            "inputRegion": {
+              "offset": 4498,
+              "length": 4
+            },
+            "lanes": [
+              "care_routine_recovery",
+              "stable_daily_care"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "stabilize evening routine and wandering-related sleep disruption"
+          },
+          {
+            "machine": "LBL051_medication-and-psychiatric-care-medication-response-tracker.json",
+            "inputRegion": {
+              "offset": 4498,
+              "length": 4
+            },
+            "lanes": [
+              "medication_hydration_review"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "track missed or delayed medication response"
+          },
+          {
+            "machine": "LBL059_medication-and-psychiatric-care-care-visit-preparation.json",
+            "inputRegion": {
+              "offset": 4498,
+              "length": 4
+            },
+            "lanes": [
+              "care_routine_recovery",
+              "medication_hydration_review"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "prepare care visit context for medication, bathroom, hygiene, or hydration concerns"
+          },
+          {
+            "machine": "LBL076_testing-personalization-and-monitoring-wearable-sleep-activity-intake.json",
+            "inputRegion": {
+              "offset": 4498,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_safety_response",
+              "care_routine_recovery",
+              "medication_hydration_review",
+              "stable_daily_care"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "close wearable and daily-care monitoring feedback loop"
+          }
+        ],
+        "fanOutPolicy": {
+          "owner": "perception-engine",
+          "mode": "lane-scoped",
+          "dispatchMode": "asynchronous-no-wait",
+          "defaultAction": "do-not-dispatch-unmatched-consumer",
+          "notes": "PE selects consumers from outputMatchesAny after RE emits the bus output. Safety, routine-recovery, medication/hydration, and stable monitoring lanes intentionally fan out to different consumers."
+        },
+        "peContract": {
+          "compositionOwner": "perception-engine",
+          "startupConfigured": true,
+          "dispatchMode": "asynchronous-no-wait",
+          "sourcePayloadPolicy": "normalized-status-only",
+          "rawPayloadPolicy": "remain-in-source-ledger-or-upstream-system"
+        },
+        "localAIResolver": {
+          "resolverId": "localai.health-personal.daily-patient-care-response.resolver",
+          "provider": "ollama-localai",
+          "dispatchMode": "accepted-no-wait",
+          "inputRegion": {
+            "offset": 4498,
+            "length": 4
+          },
+          "writeBack": {
+            "type": "pe-sensor",
+            "provider": "localai",
+            "sensorId": "localai.health-personal.daily-patient-care-response.resolver.completion",
+            "name": "localAIStack daily patient care response resolver completion",
+            "region": {
+              "offset": 4498,
+              "length": 4
+            },
+            "semantics": [
+              "urgent safety response resolved or acknowledged",
+              "care routine recovery resolved or acknowledged",
+              "medication hydration review resolved or acknowledged",
+              "stable daily care resolved or acknowledged"
+            ],
+            "ttlMs": 300000,
+            "normalization": "machine-native-binary",
+            "ingest": {
+              "endpoint": "/api/integrations/completions",
+              "method": "POST",
+              "triggerPush": false,
+              "compactPush": true
+            },
+            "sourceMapping": {
+              "id": "localai-daily-patient-care-response-resolver-completion",
+              "sensorId": "localai.health-personal.daily-patient-care-response.resolver.completion",
+              "name": "localAIStack daily patient care response resolver completion",
+              "region": {
+                "offset": 4498,
+                "length": 4
+              },
+              "ttlMs": 300000
+            }
+          },
+          "contractSurface": "publishedDomainBus.localAIResolver",
+          "notes": "Resolver metadata is consumed by PE startup configuration. It intentionally does not create metadata.agentBinding because this bridge machine is not an agent-dispatcher and RE should see only ordinary vector state."
+        }
+      },
+      "outputSpace": "4D binary at [4498:4502]: [1,0,0,0]=URGENT_SAFETY_RESPONSE, [0,1,0,0]=CARE_ROUTINE_RECOVERY, [0,0,1,0]=MEDICATION_HYDRATION_REVIEW, [0,0,0,1]=STABLE_DAILY_CARE",
+      "tags": [
+        "bridge",
+        "care-routine",
+        "daily-patient-care",
+        "elder-care",
+        "fall-response",
+        "health-personal",
+        "health-personal-published-bus",
+        "hydration",
+        "machine-interconnect",
+        "medication",
+        "published-bus-health-personal-daily-patient-care-response",
+        "startup-loadable",
+        "wellness"
+      ],
+      "sequenceCount": 4,
+      "inputSemantics": [
+        "daily care morning complete bit",
+        "daily care evening complete bit",
+        "daily care fall confirmed bit",
+        "daily care unresponsive fall bit",
+        "daily care bathroom alert bit",
+        "daily care medication missed bit",
+        "daily care wandering alert bit",
+        "facilities hygiene alert bit",
+        "facilities safety alert bit",
+        "facilities wellness concern bit",
+        "facilities inaccessibility alert bit",
+        "fall red high confidence bit",
+        "medication adherence delayed bit",
+        "medication adherence missed bit",
+        "hydration low bit",
+        "hydration critical bit",
+        "patient wellness alert bit",
+        "patient wellness critical bit"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "manual-corpus-interconnect",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "daily-patient-care",
+          "health-personal-published-bus",
+          "published-bus-health-personal-daily-patient-care-response"
+        ],
+        "family": "health-personal-interconnect",
+        "machineCode": "daily-patient-care-response-interconnect",
+        "capabilityTags": [
+          "bridge",
+          "machine-interconnect",
+          "care-routine"
+        ],
+        "workflowTags": [
+          "daily-patient-care",
+          "elder-care",
+          "fall-response",
+          "hydration",
+          "medication",
+          "wellness"
+        ],
+        "integrationTags": [
+          "cross-domain-interconnect",
+          "machine-interconnect",
+          "published-bus-health-personal-daily-patient-care-response"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "bridge",
+          "care-routine",
+          "ces-sequences",
+          "ces-sequences-4",
+          "cross-domain-interconnect",
+          "daily-patient-care",
+          "daily-patient-care-response-interconnect",
+          "elder-care",
+          "fall-response",
+          "health-personal",
+          "health-personal-interconnect",
+          "health-personal-published-bus",
+          "hydration",
+          "input-sequences",
+          "input-sequences-2",
+          "machine-interconnect",
+          "medication",
+          "published-bus-health-personal-daily-patient-care-response",
+          "startup-loadable",
+          "wellness"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/daily-patient-care-response-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "care-coordination-team-primary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for daily patient care response. RE evaluates only vector state; PE owns source provenance, asynchronous dispatch, and completion ingestion."
+      },
+      "triggerConfig": {
+        "processId": "DAILY_PATIENT_CARE_RESPONSE_INTERCONNECT",
+        "processName": "Daily Patient Care Response Interconnect",
+        "rules": [
+          {
+            "sequenceId": "daily-patient-care-urgent-safety-response",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Unresponsive fall, safety alert, inaccessibility, fall criticality, or critical wellness requires urgent safety response."
+          },
+          {
+            "sequenceId": "daily-patient-care-routine-recovery",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Bathroom, wandering, hygiene, wellness, or hydration routine disruption requires care routine recovery."
+          },
+          {
+            "sequenceId": "daily-patient-care-medication-hydration-review",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Medication miss or adherence issue with hydration/wellness context requires medication hydration review."
+          },
+          {
+            "sequenceId": "daily-patient-care-stable",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Daily routines are complete with no active alert bits; continue stable monitoring."
+          }
+        ]
+      },
+      "machineClass": "bridge"
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4480,
+        "length": 18
+      },
+      "output": {
+        "offset": 4498,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "daily-patient-care-urgent-safety-response",
+        "name": "Unresponsive fall + safety/inaccessibility/fall criticality -> urgent safety response",
+        "metadata": {
+          "description": "DailyPatientCare reports an unresponsive fall while facilities or fall-detection context indicates immediate safety risk.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "daily-patient-care-urgent-safety-response-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "daily-patient-care-urgent-safety-response-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route urgent staff response, care coordination, governance escalation, movement safety review, and wearable monitoring."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "daily-patient-care-routine-recovery",
+        "name": "Bathroom/wandering/hygiene/wellness alerts -> care routine recovery",
+        "metadata": {
+          "description": "Daily routine is disrupted by bathroom non-use, wandering, hygiene concern, wellness concern, or hydration stress below urgent threshold.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "daily-patient-care-routine-recovery-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "daily-patient-care-routine-recovery-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route care routine recovery, nursing review, movement/sleep stabilization, and care visit preparation."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "daily-patient-care-medication-hydration-review",
+        "name": "Medication miss + adherence miss + hydration risk -> medication hydration review",
+        "metadata": {
+          "description": "DailyPatientCare and MedicationAdherenceMonitor agree medication was delayed or missed while hydration and wellness context require follow-up.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "daily-patient-care-medication-hydration-review-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "daily-patient-care-medication-hydration-review-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route medication response tracking, hydration review, care visit preparation, and care coordination resource routing."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "daily-patient-care-stable",
+        "name": "Morning and evening complete + no active alerts -> stable daily care",
+        "metadata": {
+          "description": "Morning and evening care routines are complete and no active safety, medication, hydration, or wellness alert bits are present.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "daily-patient-care-stable-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "daily-patient-care-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Route stable daily-care monitoring without urgent dispatch."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Daily patient care urgent safety fan-out",
+        "pattern": "PE composed bus input: unresponsive fall + facility safety/inaccessibility + fall criticality + critical wellness.",
+        "description": "Applies the compact PE-composed input lane at [4480:4498] to activate urgent safety response and emit [1,0,0,0] to [4498:4502].",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "daily-patient-care-urgent-safety-fanout",
+          "sourceRegionInputs": {
+            "DailyPatientCare[1955:1963]": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            "FacilitiesMaintenance[3925:3931]": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              1
+            ],
+            "FallDetection[1941:1943]": [
+              4,
+              3
+            ],
+            "MedicationAdherenceMonitor[3811:3813]": [
+              0,
+              0
+            ],
+            "HydrationMonitor[1949:1951]": [
+              0,
+              0
+            ],
+            "PatientWellness[3931:3939]": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4480,
+            "length": 18
+          },
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4498,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH137_care-coordination-agent-dispatcher",
+            "HSPH138_care-coordination-governance-escalator",
+            "LBL005_whole-person-intake-and-goals-risk-safety-review",
+            "LBL031_movement-and-physical-health-movement-baseline",
+            "LBL076_testing-personalization-and-monitoring-wearable-sleep-activity-intake"
+          ],
+          "fanOutPolicy": "lane-scoped urgent_safety_response only"
+        }
+      },
+      {
+        "name": "Daily patient care medication hydration fan-out",
+        "pattern": "PE composed bus input: daily medication missed + adherence missed + hydration critical + wellness alert.",
+        "description": "Applies the compact PE-composed input lane at [4480:4498] to activate medication hydration review and emit [0,0,1,0] to [4498:4502].",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "daily-patient-care-medication-hydration-fanout",
+          "sourceRegionInputs": {
+            "DailyPatientCare[1955:1963]": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "FacilitiesMaintenance[3925:3931]": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "FallDetection[1941:1943]": [
+              0,
+              3
+            ],
+            "MedicationAdherenceMonitor[3811:3813]": [
+              1,
+              1
+            ],
+            "HydrationMonitor[1949:1951]": [
+              1,
+              1
+            ],
+            "PatientWellness[3931:3939]": [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4480,
+            "length": 18
+          },
+          "expectedOutputVector": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4498,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH135_care-coordination-referral-optimizer",
+            "LBL051_medication-and-psychiatric-care-medication-response-tracker",
+            "LBL059_medication-and-psychiatric-care-care-visit-preparation",
+            "LBL076_testing-personalization-and-monitoring-wearable-sleep-activity-intake"
+          ],
+          "fanOutPolicy": "lane-scoped medication_hydration_review only"
+        }
+      }
+    ]
+  }
+}

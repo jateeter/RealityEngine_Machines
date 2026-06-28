@@ -283,7 +283,77 @@
         "FacilitiesMaintenance input 6",
         "FacilitiesMaintenance input 7",
         "FacilitiesMaintenance input 8"
-      ]
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.daily-patient-care-response.facilities-observation",
+          "type": "published-domain-bus-producer",
+          "role": "facilities_observation",
+          "sourceMachine": "FacilitiesMaintenance",
+          "sourceOutputRegion": {
+            "offset": 3925,
+            "length": 6
+          },
+          "targetInputElements": [
+            7,
+            8,
+            9,
+            10
+          ],
+          "normalizedElements": [
+            "hygiene alert bit from FacilitiesMaintenance output[2]",
+            "safety alert bit from FacilitiesMaintenance output[3]",
+            "wellness concern bit from FacilitiesMaintenance output[4]",
+            "inaccessibility alert bit from FacilitiesMaintenance output[5]"
+          ],
+          "purpose": "Publish facilities hygiene, safety, wellness, and access observations into the personal-health daily patient care response bus.",
+          "busId": "health-personal.daily-patient-care-response",
+          "busTag": "published-bus-health-personal-daily-patient-care-response",
+          "targetMachine": "Daily Patient Care Response Interconnect",
+          "targetMachineFile": "DailyPatientCareResponseInterconnect.json",
+          "targetInputRegion": {
+            "offset": 4480,
+            "length": 18
+          },
+          "busInputRegion": {
+            "offset": 4480,
+            "length": 18
+          },
+          "publishedOutputRegion": {
+            "offset": 4498,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 4498,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-facilities-maintenance-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1931,
+          "length": 8
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "visit_active_bit",
+          "unit_accessible_bit",
+          "hygiene_normal_bit",
+          "space_safe_bit",
+          "nutrition_normal_bit",
+          "patient_observed_normal_bit",
+          "deep_clean_done_bit",
+          "concern_or_alert_active_bit"
+        ],
+        "peContract": "OpenClaw maps facility visit observations to native FacilitiesMaintenance input bits; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "matchAlgorithm": "gte",
