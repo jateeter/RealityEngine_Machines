@@ -1,0 +1,772 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Intake Wellness Routing Interconnect",
+    "description": "Published personal-health bridge bus that composes intake decisions, wellness routing, transition outcomes, patient wellness, and facilities welfare checks into a compact intake routing lane.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Intake Wellness Routing Bus",
+      "author": "Reality Engine",
+      "domainLevelTag": "published-bus-health-personal-intake-wellness-routing",
+      "publishedDomainBus": {
+        "id": "health-personal.intake-wellness-routing",
+        "tag": "published-bus-health-personal-intake-wellness-routing",
+        "domain": "health-personal",
+        "name": "Personal Health Intake Wellness Routing Bus",
+        "description": "Urgent intake/transition, placement readiness, barrier resolution, and stable routed care.",
+        "inputRegion": {
+          "offset": 4582,
+          "length": 16
+        },
+        "outputRegion": {
+          "offset": 4598,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "new_patient_inflow",
+            "sourceMachine": "NewPatientInflow.json",
+            "machineOutputRegion": {
+              "offset": 3915,
+              "length": 8
+            },
+            "composedInputElements": [
+              0,
+              1
+            ],
+            "mapping": {
+              "accepted": "accepted",
+              "provisional reject": "provisional reject"
+            }
+          },
+          {
+            "role": "wellness_analytics",
+            "sourceMachine": "WellnessAnalytics.json",
+            "machineOutputRegion": {
+              "offset": 3939,
+              "length": 8
+            },
+            "composedInputElements": [
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "mapping": {
+              "inflow evaluation": "inflow evaluation",
+              "inflow urgent": "inflow urgent",
+              "transition review": "transition review",
+              "transition escalation": "transition escalation",
+              "transition urgent": "transition urgent",
+              "wellness improving": "wellness improving"
+            }
+          },
+          {
+            "role": "care_transition",
+            "sourceMachine": "CareTransitionWorkflow.json",
+            "machineOutputRegion": {
+              "offset": 3947,
+              "length": 8
+            },
+            "composedInputElements": [
+              8,
+              9,
+              10,
+              11,
+              12
+            ],
+            "mapping": {
+              "hospital transfer": "hospital transfer",
+              "rehab transfer": "rehab transfer",
+              "ALF transfer": "ALF transfer",
+              "transfer blocked": "transfer blocked",
+              "emergency escalation": "emergency escalation"
+            }
+          },
+          {
+            "role": "patient_wellness",
+            "sourceMachine": "PatientWellness.json",
+            "machineOutputRegion": {
+              "offset": 3931,
+              "length": 8
+            },
+            "composedInputElements": [
+              13,
+              14
+            ],
+            "mapping": {
+              "wellness alert": "wellness alert",
+              "wellness critical": "wellness critical"
+            }
+          },
+          {
+            "role": "facilities_response",
+            "sourceMachine": "FacilitiesMaintenanceResponseInterconnect.json",
+            "machineOutputRegion": {
+              "offset": 4520,
+              "length": 4
+            },
+            "composedInputElements": [
+              15
+            ],
+            "mapping": {
+              "immediate welfare check": "immediate welfare check"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "HSPH131_care-coordination-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4598,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_intake_transition",
+              "placement_readiness",
+              "barrier_resolution"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "monitor cross-machine personal-health response signals"
+          },
+          {
+            "machine": "HSPH132_care-coordination-resource-router.json",
+            "inputRegion": {
+              "offset": 4598,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_intake_transition",
+              "placement_readiness",
+              "barrier_resolution"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route response resources"
+          },
+          {
+            "machine": "HSPH137_care-coordination-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4598,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_intake_transition",
+              "placement_readiness"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "dispatch PE-side care coordination agents"
+          },
+          {
+            "machine": "HSPH138_care-coordination-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4598,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_intake_transition"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "escalate urgent governance path"
+          }
+        ],
+        "localAIResolver": {
+          "resolverId": "localai.health-personal.intake-wellness-routing.resolver",
+          "provider": "localAIStack/Ollama",
+          "dispatchMode": "accepted-no-wait",
+          "input": {
+            "source": "published bus output",
+            "region": {
+              "offset": 4598,
+              "length": 4
+            }
+          },
+          "completionWriteBack": {
+            "owner": "perception-engine",
+            "mode": "configured-source-mapping",
+            "region": {
+              "offset": 4598,
+              "length": 4
+            }
+          },
+          "contract": "Resolver may enrich dispatch payloads or select lane-scoped handoff templates. PE accepts completion as a source update and never waits inside a PE cycle."
+        }
+      },
+      "machineClass": "bridge",
+      "severity": "life-safety",
+      "tags": [
+        "health-personal",
+        "published-domain-bus",
+        "machine-interconnect",
+        "openclaw",
+        "localai",
+        "startup-loadable"
+      ],
+      "inputSemantics": [
+        "new patient accepted bit",
+        "new patient provisional reject bit",
+        "wellness inflow evaluation bit",
+        "wellness inflow urgent bit",
+        "wellness transition review bit",
+        "wellness transition escalation bit",
+        "wellness transition urgent bit",
+        "wellness improving bit",
+        "hospital transfer bit",
+        "rehab transfer bit",
+        "alf transfer bit",
+        "transfer blocked bit",
+        "emergency escalation bit",
+        "patient wellness alert bit",
+        "patient wellness critical bit",
+        "facilities immediate welfare check bit"
+      ],
+      "outputSemantics": [
+        "urgent intake transition bit",
+        "placement readiness bit",
+        "barrier resolution bit",
+        "stable routed care bit"
+      ],
+      "eventSpace": "16D PE-composed intake wellness routing input space",
+      "outputSpace": "4D binary at [4598:4602]: [1,0,0,0]=URGENT_INTAKE_TRANSITION, [0,1,0,0]=PLACEMENT_READINESS, [0,0,1,0]=BARRIER_RESOLUTION, [0,0,0,1]=STABLE_ROUTED_CARE",
+      "sequenceCount": 4,
+      "testCaseCount": 2,
+      "triggerConfig": {
+        "processId": "INTAKEWELLNESSROUTINGINTERCONNECT",
+        "processName": "Intake Wellness Routing Interconnect",
+        "rules": [
+          {
+            "sequenceId": "intake-wellness-urgent-routing",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "URGENT_INTAKE_TRANSITION at [4598:4602]"
+          },
+          {
+            "sequenceId": "intake-wellness-placement-readiness",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "PLACEMENT_READINESS at [4598:4602]"
+          },
+          {
+            "sequenceId": "intake-wellness-barrier-resolution",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "BARRIER_RESOLUTION at [4598:4602]"
+          },
+          {
+            "sequenceId": "intake-wellness-stable",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "STABLE_ROUTED_CARE at [4598:4602]"
+          }
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/intake-wellness-routing-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "care-coordination-primary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for intake wellness routing. RE evaluates only vector state; PE owns source provenance and completion ingestion."
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4582,
+        "length": 16
+      },
+      "output": {
+        "offset": 4598,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "intake-wellness-urgent-routing",
+        "name": "Urgent intake transition routing",
+        "metadata": {
+          "description": "Urgent intake transition routing",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "intake-wellness-urgent-routing-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "intake-wellness-urgent-routing-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "URGENT_INTAKE_TRANSITION"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "intake-wellness-placement-readiness",
+        "name": "Placement readiness",
+        "metadata": {
+          "description": "Placement readiness",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "intake-wellness-placement-readiness-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "intake-wellness-placement-readiness-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "PLACEMENT_READINESS"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "intake-wellness-barrier-resolution",
+        "name": "Barrier resolution",
+        "metadata": {
+          "description": "Barrier resolution",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "intake-wellness-barrier-resolution-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "intake-wellness-barrier-resolution-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "BARRIER_RESOLUTION"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "intake-wellness-stable",
+        "name": "Stable routed care",
+        "metadata": {
+          "description": "Stable routed care",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "intake-wellness-stable-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "intake-wellness-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "STABLE_ROUTED_CARE"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Urgent intake transition fan-out",
+        "pattern": "urgent wellness and transition outputs plus welfare check",
+        "description": "Activates urgent intake transition.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "intake-urgent-transition",
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4598,
+            "length": 4
+          },
+          "fanOutPolicy": "lane-scoped urgent_intake_transition"
+        }
+      },
+      {
+        "name": "Placement readiness fan-out",
+        "pattern": "accepted intake plus placement transfer readiness",
+        "description": "Activates placement readiness.",
+        "vectors": [
+          [
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "intake-placement-readiness",
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4598,
+            "length": 4
+          },
+          "fanOutPolicy": "lane-scoped placement_readiness"
+        }
+      }
+    ]
+  }
+}

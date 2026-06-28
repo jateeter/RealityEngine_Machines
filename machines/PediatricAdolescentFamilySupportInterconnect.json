@@ -1,0 +1,818 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Pediatric Adolescent Family Support Interconnect",
+    "description": "Published personal-health bridge bus that composes pediatric nutrition, child development, adolescent mental health, caregiver burden, food access, and environment safety into a compact family support lane.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Pediatric Adolescent Family Support Bus",
+      "author": "Reality Engine",
+      "domainLevelTag": "published-bus-health-personal-pediatric-adolescent-family-support",
+      "publishedDomainBus": {
+        "id": "health-personal.pediatric-adolescent-family-support",
+        "tag": "published-bus-health-personal-pediatric-adolescent-family-support",
+        "domain": "health-personal",
+        "name": "Personal Health Pediatric Adolescent Family Support Bus",
+        "description": "Urgent family support, nutrition/development referral, adolescent behavioral support, and stable family support.",
+        "inputRegion": {
+          "offset": 4560,
+          "length": 18
+        },
+        "outputRegion": {
+          "offset": 4578,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "pediatric_nutrition",
+            "sourceMachine": "PediatricNutritionMonitor.json",
+            "machineOutputRegion": {
+              "offset": 2003,
+              "length": 4
+            },
+            "composedInputElements": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "mapping": {
+              "growth alert": "growth alert",
+              "nutrition deficit": "nutrition deficit",
+              "micronutrient concern": "micronutrient concern",
+              "nutrition ok": "nutrition ok"
+            }
+          },
+          {
+            "role": "child_development",
+            "sourceMachine": "ChildDevelopmentMonitor.json",
+            "machineOutputRegion": {
+              "offset": 2007,
+              "length": 4
+            },
+            "composedInputElements": [
+              4,
+              5,
+              6,
+              7
+            ],
+            "mapping": {
+              "referral needed": "referral needed",
+              "social developmental concern": "social developmental concern",
+              "learning concern": "learning concern",
+              "development ok": "development ok"
+            }
+          },
+          {
+            "role": "adolescent_mental_health",
+            "sourceMachine": "AdolescentMentalHealthMonitor.json",
+            "machineOutputRegion": {
+              "offset": 2027,
+              "length": 4
+            },
+            "composedInputElements": [
+              8,
+              9,
+              10,
+              11
+            ],
+            "mapping": {
+              "crisis risk": "crisis risk",
+              "behavioral concern": "behavioral concern",
+              "elevated stress": "elevated stress",
+              "mental health ok": "mental health ok"
+            }
+          },
+          {
+            "role": "caregiver_burden",
+            "sourceMachine": "HomeCaregiverBurdenMonitor.json",
+            "machineOutputRegion": {
+              "offset": 2031,
+              "length": 4
+            },
+            "composedInputElements": [
+              12,
+              13,
+              14
+            ],
+            "mapping": {
+              "caregiver burnout": "caregiver burnout",
+              "high burden": "high burden",
+              "moderate burden": "moderate burden"
+            }
+          },
+          {
+            "role": "food_access",
+            "sourceMachine": "HomeFoodSecurityMonitor.json",
+            "machineOutputRegion": {
+              "offset": 1995,
+              "length": 4
+            },
+            "composedInputElements": [
+              15
+            ],
+            "mapping": {
+              "food crisis or insecure derived bit": "food crisis or insecure derived bit"
+            }
+          },
+          {
+            "role": "environment_safety",
+            "sourceMachine": "HomeEnvironmentSafetyMonitor.json",
+            "machineOutputRegion": {
+              "offset": 1999,
+              "length": 4
+            },
+            "composedInputElements": [
+              16,
+              17
+            ],
+            "mapping": {
+              "unsafe environment derived bit": "unsafe environment derived bit",
+              "environment safe bit": "environment safe bit"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "HSPH131_care-coordination-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4578,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_family_support",
+              "nutrition_development_referral",
+              "adolescent_behavioral_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "monitor cross-machine personal-health response signals"
+          },
+          {
+            "machine": "HSPH132_care-coordination-resource-router.json",
+            "inputRegion": {
+              "offset": 4578,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_family_support",
+              "nutrition_development_referral",
+              "adolescent_behavioral_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route response resources"
+          },
+          {
+            "machine": "HSPH137_care-coordination-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4578,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_family_support",
+              "nutrition_development_referral"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "dispatch PE-side care coordination agents"
+          },
+          {
+            "machine": "HSPH138_care-coordination-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4578,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_family_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "escalate urgent governance path"
+          }
+        ],
+        "localAIResolver": {
+          "resolverId": "localai.health-personal.pediatric-adolescent-family-support.resolver",
+          "provider": "localAIStack/Ollama",
+          "dispatchMode": "accepted-no-wait",
+          "input": {
+            "source": "published bus output",
+            "region": {
+              "offset": 4578,
+              "length": 4
+            }
+          },
+          "completionWriteBack": {
+            "owner": "perception-engine",
+            "mode": "configured-source-mapping",
+            "region": {
+              "offset": 4578,
+              "length": 4
+            }
+          },
+          "contract": "Resolver may enrich dispatch payloads or select lane-scoped handoff templates. PE accepts completion as a source update and never waits inside a PE cycle."
+        }
+      },
+      "machineClass": "bridge",
+      "severity": "life-safety",
+      "tags": [
+        "health-personal",
+        "published-domain-bus",
+        "machine-interconnect",
+        "openclaw",
+        "localai",
+        "startup-loadable"
+      ],
+      "inputSemantics": [
+        "pediatric growth alert bit",
+        "pediatric nutrition deficit bit",
+        "pediatric micronutrient concern bit",
+        "pediatric nutrition ok bit",
+        "child referral needed bit",
+        "child social developmental concern bit",
+        "child learning concern bit",
+        "child development ok bit",
+        "adolescent crisis risk bit",
+        "adolescent behavioral concern bit",
+        "adolescent elevated stress bit",
+        "adolescent mental health ok bit",
+        "caregiver burnout bit",
+        "caregiver high burden bit",
+        "caregiver moderate burden bit",
+        "food crisis or insecure bit",
+        "unsafe environment bit",
+        "environment safe bit"
+      ],
+      "outputSemantics": [
+        "urgent family support bit",
+        "nutrition development referral bit",
+        "adolescent behavioral support bit",
+        "stable family support bit"
+      ],
+      "eventSpace": "18D PE-composed pediatric adolescent family support input space",
+      "outputSpace": "4D binary at [4578:4582]: [1,0,0,0]=URGENT_FAMILY_SUPPORT, [0,1,0,0]=NUTRITION_DEVELOPMENT_REFERRAL, [0,0,1,0]=ADOLESCENT_BEHAVIORAL_SUPPORT, [0,0,0,1]=STABLE_FAMILY_SUPPORT",
+      "sequenceCount": 4,
+      "testCaseCount": 2,
+      "triggerConfig": {
+        "processId": "PEDIATRICADOLESCENTFAMILYSUPPORTINTERCONNECT",
+        "processName": "Pediatric Adolescent Family Support Interconnect",
+        "rules": [
+          {
+            "sequenceId": "pediatric-family-urgent-support",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "URGENT_FAMILY_SUPPORT at [4578:4582]"
+          },
+          {
+            "sequenceId": "pediatric-family-nutrition-development",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "NUTRITION_DEVELOPMENT_REFERRAL at [4578:4582]"
+          },
+          {
+            "sequenceId": "pediatric-family-behavioral-support",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "ADOLESCENT_BEHAVIORAL_SUPPORT at [4578:4582]"
+          },
+          {
+            "sequenceId": "pediatric-family-stable",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "STABLE_FAMILY_SUPPORT at [4578:4582]"
+          }
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/pediatric-adolescent-family-support-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "care-coordination-primary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for pediatric adolescent family support. RE evaluates only vector state; PE owns source provenance and completion ingestion."
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4560,
+        "length": 18
+      },
+      "output": {
+        "offset": 4578,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "pediatric-family-urgent-support",
+        "name": "Urgent pediatric family support",
+        "metadata": {
+          "description": "Urgent pediatric family support",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "pediatric-family-urgent-support-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "pediatric-family-urgent-support-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "URGENT_FAMILY_SUPPORT"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "pediatric-family-nutrition-development",
+        "name": "Nutrition development referral",
+        "metadata": {
+          "description": "Nutrition development referral",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "pediatric-family-nutrition-development-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "pediatric-family-nutrition-development-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "NUTRITION_DEVELOPMENT_REFERRAL"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "pediatric-family-behavioral-support",
+        "name": "Adolescent behavioral support",
+        "metadata": {
+          "description": "Adolescent behavioral support",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "pediatric-family-behavioral-support-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "pediatric-family-behavioral-support-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "ADOLESCENT_BEHAVIORAL_SUPPORT"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "pediatric-family-stable",
+        "name": "Stable family support",
+        "metadata": {
+          "description": "Stable family support",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "pediatric-family-stable-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "pediatric-family-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "STABLE_FAMILY_SUPPORT"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Pediatric urgent family support fan-out",
+        "pattern": "nutrition/development/adolescent/caregiver compounded risk",
+        "description": "Activates urgent family support.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "pediatric-family-urgent",
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4578,
+            "length": 4
+          },
+          "fanOutPolicy": "lane-scoped urgent_family_support"
+        }
+      },
+      {
+        "name": "Pediatric nutrition development fan-out",
+        "pattern": "growth/nutrition/development concern",
+        "description": "Activates nutrition development referral.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "pediatric-nutrition-development",
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4578,
+            "length": 4
+          },
+          "fanOutPolicy": "lane-scoped nutrition_development_referral"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,726 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Social Isolation Access Interconnect",
+    "description": "Published personal-health bridge bus that composes social isolation, medication access, transportation access, and mental health access into a compact social access response lane.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Social Isolation Access Bus",
+      "author": "Reality Engine",
+      "domainLevelTag": "published-bus-health-personal-social-isolation-access",
+      "publishedDomainBus": {
+        "id": "health-personal.social-isolation-access",
+        "tag": "published-bus-health-personal-social-isolation-access",
+        "domain": "health-personal",
+        "name": "Personal Health Social Isolation Access Bus",
+        "description": "Self-neglect outreach, access barrier navigation, social rhythm support, and stable connected access.",
+        "inputRegion": {
+          "offset": 4602,
+          "length": 14
+        },
+        "outputRegion": {
+          "offset": 4616,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "social_isolation",
+            "sourceMachine": "HomeSocialIsolationMonitor.json",
+            "machineOutputRegion": {
+              "offset": 2035,
+              "length": 4
+            },
+            "composedInputElements": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "mapping": {
+              "severe isolation": "severe isolation",
+              "social withdrawal": "social withdrawal",
+              "isolation risk": "isolation risk",
+              "socially connected": "socially connected"
+            }
+          },
+          {
+            "role": "medication_cost",
+            "sourceMachine": "HomeMedicationCostBarrierMonitor.json",
+            "machineOutputRegion": {
+              "offset": 2011,
+              "length": 4
+            },
+            "composedInputElements": [
+              4,
+              5,
+              6,
+              7
+            ],
+            "mapping": {
+              "adherence crisis": "adherence crisis",
+              "cost barrier": "cost barrier",
+              "partial adherence": "partial adherence",
+              "managed": "managed"
+            }
+          },
+          {
+            "role": "transport_access",
+            "sourceMachine": "HomeTransportationBarrierMonitor.json",
+            "machineOutputRegion": {
+              "offset": 2015,
+              "length": 4
+            },
+            "composedInputElements": [
+              8,
+              9,
+              10,
+              11
+            ],
+            "mapping": {
+              "critical access failure": "critical access failure",
+              "appointment barrier": "appointment barrier",
+              "transit dependent risk": "transit dependent risk",
+              "transport adequate": "transport adequate"
+            }
+          },
+          {
+            "role": "mental_health_access",
+            "sourceMachine": "HomeMentalHealthAccessMonitor.json",
+            "machineOutputRegion": {
+              "offset": 2039,
+              "length": 4
+            },
+            "composedInputElements": [
+              12,
+              13
+            ],
+            "mapping": {
+              "mental health crisis": "mental health crisis",
+              "mental health referral needed": "mental health referral needed"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "HSPH131_care-coordination-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4616,
+              "length": 4
+            },
+            "lanes": [
+              "self_neglect_outreach",
+              "access_barrier_navigation",
+              "social_rhythm_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "monitor cross-machine personal-health response signals"
+          },
+          {
+            "machine": "HSPH132_care-coordination-resource-router.json",
+            "inputRegion": {
+              "offset": 4616,
+              "length": 4
+            },
+            "lanes": [
+              "self_neglect_outreach",
+              "access_barrier_navigation",
+              "social_rhythm_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route response resources"
+          },
+          {
+            "machine": "HSPH137_care-coordination-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4616,
+              "length": 4
+            },
+            "lanes": [
+              "self_neglect_outreach",
+              "access_barrier_navigation"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "dispatch PE-side care coordination agents"
+          },
+          {
+            "machine": "HSPH138_care-coordination-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4616,
+              "length": 4
+            },
+            "lanes": [
+              "self_neglect_outreach"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "escalate urgent governance path"
+          }
+        ],
+        "localAIResolver": {
+          "resolverId": "localai.health-personal.social-isolation-access.resolver",
+          "provider": "localAIStack/Ollama",
+          "dispatchMode": "accepted-no-wait",
+          "input": {
+            "source": "published bus output",
+            "region": {
+              "offset": 4616,
+              "length": 4
+            }
+          },
+          "completionWriteBack": {
+            "owner": "perception-engine",
+            "mode": "configured-source-mapping",
+            "region": {
+              "offset": 4616,
+              "length": 4
+            }
+          },
+          "contract": "Resolver may enrich dispatch payloads or select lane-scoped handoff templates. PE accepts completion as a source update and never waits inside a PE cycle."
+        }
+      },
+      "machineClass": "bridge",
+      "severity": "life-safety",
+      "tags": [
+        "health-personal",
+        "published-domain-bus",
+        "machine-interconnect",
+        "openclaw",
+        "localai",
+        "startup-loadable"
+      ],
+      "inputSemantics": [
+        "severe isolation bit",
+        "social withdrawal bit",
+        "isolation risk bit",
+        "socially connected bit",
+        "medication adherence crisis bit",
+        "cost barrier active bit",
+        "partial medication adherence bit",
+        "medication managed bit",
+        "transport critical access failure bit",
+        "transport appointment barrier bit",
+        "transport dependent risk bit",
+        "transport adequate bit",
+        "mental health crisis bit",
+        "mental health referral needed bit"
+      ],
+      "outputSemantics": [
+        "self neglect outreach bit",
+        "access barrier navigation bit",
+        "social rhythm support bit",
+        "stable connected access bit"
+      ],
+      "eventSpace": "14D PE-composed social isolation access input space",
+      "outputSpace": "4D binary at [4616:4620]: [1,0,0,0]=SELF_NEGLECT_OUTREACH, [0,1,0,0]=ACCESS_BARRIER_NAVIGATION, [0,0,1,0]=SOCIAL_RHYTHM_SUPPORT, [0,0,0,1]=STABLE_CONNECTED_ACCESS",
+      "sequenceCount": 4,
+      "testCaseCount": 2,
+      "triggerConfig": {
+        "processId": "SOCIALISOLATIONACCESSINTERCONNECT",
+        "processName": "Social Isolation Access Interconnect",
+        "rules": [
+          {
+            "sequenceId": "social-access-self-neglect-outreach",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "SELF_NEGLECT_OUTREACH at [4616:4620]"
+          },
+          {
+            "sequenceId": "social-access-barrier-navigation",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "ACCESS_BARRIER_NAVIGATION at [4616:4620]"
+          },
+          {
+            "sequenceId": "social-access-rhythm-support",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "SOCIAL_RHYTHM_SUPPORT at [4616:4620]"
+          },
+          {
+            "sequenceId": "social-access-stable",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "STABLE_CONNECTED_ACCESS at [4616:4620]"
+          }
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/social-isolation-access-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "care-coordination-primary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for social isolation access. RE evaluates only vector state; PE owns source provenance and completion ingestion."
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4602,
+        "length": 14
+      },
+      "output": {
+        "offset": 4616,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "social-access-self-neglect-outreach",
+        "name": "Self-neglect outreach",
+        "metadata": {
+          "description": "Self-neglect outreach",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "social-access-self-neglect-outreach-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "social-access-self-neglect-outreach-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "SELF_NEGLECT_OUTREACH"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "social-access-barrier-navigation",
+        "name": "Access barrier navigation",
+        "metadata": {
+          "description": "Access barrier navigation",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "social-access-barrier-navigation-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "social-access-barrier-navigation-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "ACCESS_BARRIER_NAVIGATION"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "social-access-rhythm-support",
+        "name": "Social rhythm support",
+        "metadata": {
+          "description": "Social rhythm support",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "social-access-rhythm-support-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "social-access-rhythm-support-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "SOCIAL_RHYTHM_SUPPORT"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "social-access-stable",
+        "name": "Stable connected access",
+        "metadata": {
+          "description": "Stable connected access",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "social-access-stable-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "social-access-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "STABLE_CONNECTED_ACCESS"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Self-neglect outreach fan-out",
+        "pattern": "severe isolation plus medication/transport/MH crisis",
+        "description": "Activates self-neglect outreach.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "social-self-neglect",
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4616,
+            "length": 4
+          },
+          "fanOutPolicy": "lane-scoped self_neglect_outreach"
+        }
+      },
+      {
+        "name": "Access barrier navigation fan-out",
+        "pattern": "isolation risk plus cost/transport/MH referral barriers",
+        "description": "Activates access barrier navigation.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "social-access-navigation",
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4616,
+            "length": 4
+          },
+          "fanOutPolicy": "lane-scoped access_barrier_navigation"
+        }
+      }
+    ]
+  }
+}

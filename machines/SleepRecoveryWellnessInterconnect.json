@@ -1,0 +1,762 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Sleep Recovery Wellness Interconnect",
+    "description": "Published personal-health bridge bus that composes sleep quality, activity, hydration, wellness, isolation, daily care, and wellness recovery into a compact sleep recovery lane.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Sleep Recovery Wellness Bus",
+      "author": "Reality Engine",
+      "domainLevelTag": "published-bus-health-personal-sleep-recovery-wellness",
+      "publishedDomainBus": {
+        "id": "health-personal.sleep-recovery-wellness",
+        "tag": "published-bus-health-personal-sleep-recovery-wellness",
+        "domain": "health-personal",
+        "name": "Personal Health Sleep Recovery Wellness Bus",
+        "description": "Sleep clinical review, recovery routine stabilization, monitoring adjustment, and stable sleep wellness.",
+        "inputRegion": {
+          "offset": 4542,
+          "length": 14
+        },
+        "outputRegion": {
+          "offset": 4556,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "sleep_quality",
+            "sourceMachine": "SleepQualityMonitor.json",
+            "machineOutputRegion": {
+              "offset": 1945,
+              "length": 2
+            },
+            "composedInputElements": [
+              0,
+              1
+            ],
+            "mapping": {
+              "sleep poor bit from output[0]": "sleep poor bit from output[0]",
+              "sleep disturbed bit from output[1]": "sleep disturbed bit from output[1]"
+            }
+          },
+          {
+            "role": "activity_tolerance",
+            "sourceMachine": "DailyActivityMonitor.json",
+            "machineOutputRegion": {
+              "offset": 1953,
+              "length": 2
+            },
+            "composedInputElements": [
+              2,
+              3
+            ],
+            "mapping": {
+              "below baseline bit": "below baseline bit",
+              "prolonged inactivity bit": "prolonged inactivity bit"
+            }
+          },
+          {
+            "role": "hydration_status",
+            "sourceMachine": "HydrationMonitor.json",
+            "machineOutputRegion": {
+              "offset": 1949,
+              "length": 2
+            },
+            "composedInputElements": [
+              4,
+              5
+            ],
+            "mapping": {
+              "hydration low": "hydration low",
+              "hydration critical": "hydration critical"
+            }
+          },
+          {
+            "role": "patient_wellness",
+            "sourceMachine": "PatientWellness.json",
+            "machineOutputRegion": {
+              "offset": 3931,
+              "length": 8
+            },
+            "composedInputElements": [
+              6,
+              7
+            ],
+            "mapping": {
+              "wellness alert": "wellness alert",
+              "wellness critical": "wellness critical"
+            }
+          },
+          {
+            "role": "social_context",
+            "sourceMachine": "HomeSocialIsolationMonitor.json",
+            "machineOutputRegion": {
+              "offset": 2035,
+              "length": 4
+            },
+            "composedInputElements": [
+              8,
+              9,
+              10
+            ],
+            "mapping": {
+              "social withdrawal": "social withdrawal",
+              "isolation risk": "isolation risk",
+              "severe isolation": "severe isolation"
+            }
+          },
+          {
+            "role": "daily_care",
+            "sourceMachine": "DailyPatientCare.json",
+            "machineOutputRegion": {
+              "offset": 1955,
+              "length": 8
+            },
+            "composedInputElements": [
+              11,
+              12
+            ],
+            "mapping": {
+              "wandering alert": "wandering alert",
+              "routine complete derived from morning+evening complete": "routine complete derived from morning+evening complete"
+            }
+          },
+          {
+            "role": "wellness_recovery",
+            "sourceMachine": "WellnessAnalytics.json",
+            "machineOutputRegion": {
+              "offset": 3939,
+              "length": 8
+            },
+            "composedInputElements": [
+              13
+            ],
+            "mapping": {
+              "wellness improving": "wellness improving"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "HSPH131_care-coordination-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4556,
+              "length": 4
+            },
+            "lanes": [
+              "sleep_clinical_review",
+              "recovery_routine_stabilization",
+              "monitoring_adjustment"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "monitor cross-machine personal-health response signals"
+          },
+          {
+            "machine": "HSPH132_care-coordination-resource-router.json",
+            "inputRegion": {
+              "offset": 4556,
+              "length": 4
+            },
+            "lanes": [
+              "sleep_clinical_review",
+              "recovery_routine_stabilization",
+              "monitoring_adjustment"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route response resources"
+          },
+          {
+            "machine": "HSPH137_care-coordination-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4556,
+              "length": 4
+            },
+            "lanes": [
+              "sleep_clinical_review",
+              "recovery_routine_stabilization"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "dispatch PE-side care coordination agents"
+          },
+          {
+            "machine": "HSPH138_care-coordination-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4556,
+              "length": 4
+            },
+            "lanes": [
+              "sleep_clinical_review"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "escalate urgent governance path"
+          }
+        ],
+        "localAIResolver": {
+          "resolverId": "localai.health-personal.sleep-recovery-wellness.resolver",
+          "provider": "localAIStack/Ollama",
+          "dispatchMode": "accepted-no-wait",
+          "input": {
+            "source": "published bus output",
+            "region": {
+              "offset": 4556,
+              "length": 4
+            }
+          },
+          "completionWriteBack": {
+            "owner": "perception-engine",
+            "mode": "configured-source-mapping",
+            "region": {
+              "offset": 4556,
+              "length": 4
+            }
+          },
+          "contract": "Resolver may enrich dispatch payloads or select lane-scoped handoff templates. PE accepts completion as a source update and never waits inside a PE cycle."
+        }
+      },
+      "machineClass": "bridge",
+      "severity": "life-safety",
+      "tags": [
+        "health-personal",
+        "published-domain-bus",
+        "machine-interconnect",
+        "openclaw",
+        "localai",
+        "startup-loadable"
+      ],
+      "inputSemantics": [
+        "sleep poor bit",
+        "sleep disturbed bit",
+        "activity below baseline bit",
+        "activity prolonged inactivity bit",
+        "hydration low bit",
+        "hydration critical bit",
+        "patient wellness alert bit",
+        "patient wellness critical bit",
+        "social withdrawal bit",
+        "isolation risk bit",
+        "severe isolation bit",
+        "daily care wandering alert bit",
+        "daily routine complete bit",
+        "wellness improving bit"
+      ],
+      "outputSemantics": [
+        "sleep clinical review bit",
+        "recovery routine stabilization bit",
+        "monitoring adjustment bit",
+        "stable sleep wellness bit"
+      ],
+      "eventSpace": "14D PE-composed sleep recovery wellness input space",
+      "outputSpace": "4D binary at [4556:4560]: [1,0,0,0]=SLEEP_CLINICAL_REVIEW, [0,1,0,0]=RECOVERY_ROUTINE_STABILIZATION, [0,0,1,0]=MONITORING_ADJUSTMENT, [0,0,0,1]=STABLE_SLEEP_WELLNESS",
+      "sequenceCount": 4,
+      "testCaseCount": 2,
+      "triggerConfig": {
+        "processId": "SLEEPRECOVERYWELLNESSINTERCONNECT",
+        "processName": "Sleep Recovery Wellness Interconnect",
+        "rules": [
+          {
+            "sequenceId": "sleep-recovery-clinical-review",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "SLEEP_CLINICAL_REVIEW at [4556:4560]"
+          },
+          {
+            "sequenceId": "sleep-recovery-routine-stabilization",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "RECOVERY_ROUTINE_STABILIZATION at [4556:4560]"
+          },
+          {
+            "sequenceId": "sleep-recovery-monitoring-adjustment",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "MONITORING_ADJUSTMENT at [4556:4560]"
+          },
+          {
+            "sequenceId": "sleep-recovery-stable",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "STABLE_SLEEP_WELLNESS at [4556:4560]"
+          }
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/sleep-recovery-wellness-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "care-coordination-primary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for sleep recovery wellness. RE evaluates only vector state; PE owns source provenance and completion ingestion."
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4542,
+        "length": 14
+      },
+      "output": {
+        "offset": 4556,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "sleep-recovery-clinical-review",
+        "name": "Sleep clinical review",
+        "metadata": {
+          "description": "Sleep clinical review",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "sleep-recovery-clinical-review-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "sleep-recovery-clinical-review-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "SLEEP_CLINICAL_REVIEW"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sleep-recovery-routine-stabilization",
+        "name": "Routine stabilization",
+        "metadata": {
+          "description": "Routine stabilization",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "sleep-recovery-routine-stabilization-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "sleep-recovery-routine-stabilization-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "RECOVERY_ROUTINE_STABILIZATION"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sleep-recovery-monitoring-adjustment",
+        "name": "Monitoring adjustment",
+        "metadata": {
+          "description": "Monitoring adjustment",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "sleep-recovery-monitoring-adjustment-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "sleep-recovery-monitoring-adjustment-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "MONITORING_ADJUSTMENT"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sleep-recovery-stable",
+        "name": "Stable sleep wellness",
+        "metadata": {
+          "description": "Stable sleep wellness",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "sleep-recovery-stable-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "sleep-recovery-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "STABLE_SLEEP_WELLNESS"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Sleep clinical review fan-out",
+        "pattern": "poor sleep plus activity/hydration/wellness/social risk",
+        "description": "Activates sleep clinical review.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "sleep-clinical-review",
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4556,
+            "length": 4
+          },
+          "fanOutPolicy": "lane-scoped sleep_clinical_review"
+        }
+      },
+      {
+        "name": "Sleep stabilization fan-out",
+        "pattern": "disturbed sleep plus recovery routine risks",
+        "description": "Activates recovery stabilization.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "sleep-routine-stabilization",
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4556,
+            "length": 4
+          },
+          "fanOutPolicy": "lane-scoped recovery_routine_stabilization"
+        }
+      }
+    ]
+  }
+}
