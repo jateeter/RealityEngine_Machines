@@ -256,6 +256,70 @@
           "requiresRunbook": false,
           "blockedWhenRag": []
         }
+      },
+      "interconnections": [
+        {
+          "id": "agriculture.agx-051-060.yuma-aqua-maintenance-forecaster",
+          "type": "published-domain-bus-producer",
+          "role": "yuma_aqua_maintenance_forecaster",
+          "sourceMachine": "Agriculture Yuma Aqua Maintenance Forecaster",
+          "sourceOutputRegion": {
+            "offset": 256,
+            "length": 4
+          },
+          "targetInputElements": [
+            0,
+            1,
+            2
+          ],
+          "normalizedElements": [
+            "Agriculture Yuma Aqua Maintenance Forecaster active output[0] bit",
+            "Agriculture Yuma Aqua Maintenance Forecaster active output[1] bit",
+            "Agriculture Yuma Aqua Maintenance Forecaster active output[2] bit"
+          ],
+          "purpose": "Publish Agriculture Yuma Aqua Maintenance Forecaster active response lanes into agriculture.agx-051-060.",
+          "busId": "agriculture.agx-051-060",
+          "busTag": "published-bus-agriculture-agx-051-060",
+          "targetMachine": "Agriculture AGX-051-060 Interconnect",
+          "targetMachineFile": "AgricultureAgx051060Interconnect.json",
+          "targetInputRegion": {
+            "offset": 13201,
+            "length": 15
+          },
+          "busInputRegion": {
+            "offset": 13201,
+            "length": 15
+          },
+          "publishedOutputRegion": {
+            "offset": 13216,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 13216,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized domain status bits only; raw regulated records, operator notes, telemetry payloads, documents, and provider-specific source payloads remain outside the universal reality vector."
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-agriculture-yuma-aqua-maintenance-forecaster-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 40,
+          "length": 4
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "water_ph_in_band",
+          "water_ec_in_band",
+          "water_orp_in_band",
+          "water_turbidity_in_band"
+        ],
+        "peContract": "OpenClaw maps domain observations to this machine's native input lane; PE writes the vector source and does not wait inside a PE cycle."
       }
     },
     "arbiterRule": "PASSTHROUGH",
