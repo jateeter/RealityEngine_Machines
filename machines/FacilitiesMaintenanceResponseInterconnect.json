@@ -1,0 +1,1120 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Facilities Maintenance Response Interconnect",
+    "description": "Published personal-health bridge bus that composes facilities maintenance observations, environment safety, food access, transportation access, social isolation, daily care anomalies, and wellness escalation into a compact facilities response lane. PE owns source composition and writes the compact input lane; RE evaluates this machine as ordinary vector state.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Published Facilities Maintenance Response Bus",
+      "author": "Reality Engine",
+      "domainLevelTag": "published-bus-health-personal-facilities-maintenance-response",
+      "publishedDomainBus": {
+        "id": "health-personal.facilities-maintenance-response",
+        "tag": "published-bus-health-personal-facilities-maintenance-response",
+        "domain": "health-personal",
+        "name": "Personal Health Facilities Maintenance Response Bus",
+        "description": "Domain-level published bus for welfare checks, environment remediation, service access stabilization, and routine maintenance completion.",
+        "inputRegion": {
+          "offset": 4502,
+          "length": 18
+        },
+        "outputRegion": {
+          "offset": 4520,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "facilities_observation",
+            "sourceMachine": "FacilitiesMaintenance.json",
+            "machineInputRegion": {
+              "offset": 1931,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 3925,
+              "length": 6
+            },
+            "composedInputElements": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "mapping": {
+              "dailyComplete": "FacilitiesMaintenance output[0]",
+              "weeklyComplete": "FacilitiesMaintenance output[1]",
+              "hygieneAlert": "FacilitiesMaintenance output[2]",
+              "safetyAlert": "FacilitiesMaintenance output[3]",
+              "wellnessConcern": "FacilitiesMaintenance output[4]",
+              "inaccessibilityAlert": "FacilitiesMaintenance output[5]"
+            }
+          },
+          {
+            "role": "environment_safety",
+            "sourceMachine": "HomeEnvironmentSafetyMonitor.json",
+            "machineInputRegion": {
+              "offset": 1967,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 1999,
+              "length": 4
+            },
+            "composedInputElements": [
+              6,
+              7,
+              8
+            ],
+            "mapping": {
+              "unsafeHousing": "HomeEnvironmentSafetyMonitor output[0]",
+              "utilityFailure": "HomeEnvironmentSafetyMonitor output[1]",
+              "healthHazardRisk": "HomeEnvironmentSafetyMonitor output[2]"
+            }
+          },
+          {
+            "role": "food_access",
+            "sourceMachine": "HomeFoodSecurityMonitor.json",
+            "machineInputRegion": {
+              "offset": 1963,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 1995,
+              "length": 4
+            },
+            "composedInputElements": [
+              9,
+              10,
+              11
+            ],
+            "mapping": {
+              "foodCrisis": "HomeFoodSecurityMonitor output[0]",
+              "foodInsecure": "HomeFoodSecurityMonitor output[1]",
+              "assistanceNeeded": "HomeFoodSecurityMonitor output[2]"
+            }
+          },
+          {
+            "role": "transport_access",
+            "sourceMachine": "HomeTransportationBarrierMonitor.json",
+            "machineInputRegion": {
+              "offset": 1983,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 2015,
+              "length": 4
+            },
+            "composedInputElements": [
+              12,
+              13
+            ],
+            "mapping": {
+              "criticalAccessFailure": "HomeTransportationBarrierMonitor output[0]",
+              "appointmentBarrier": "HomeTransportationBarrierMonitor output[1]"
+            }
+          },
+          {
+            "role": "social_isolation",
+            "sourceMachine": "HomeSocialIsolationMonitor.json",
+            "machineInputRegion": {
+              "offset": 2011,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 2035,
+              "length": 4
+            },
+            "composedInputElements": [
+              14
+            ],
+            "mapping": {
+              "severeIsolation": "HomeSocialIsolationMonitor output[0]"
+            }
+          },
+          {
+            "role": "daily_care_anomaly",
+            "sourceMachine": "DailyPatientCare.json",
+            "machineInputRegion": {
+              "offset": 3923,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 1955,
+              "length": 8
+            },
+            "composedInputElements": [
+              15,
+              16
+            ],
+            "mapping": {
+              "unresponsiveFall": "DailyPatientCare output[3]",
+              "bathroomAlert": "DailyPatientCare output[4]"
+            }
+          },
+          {
+            "role": "wellness_escalation",
+            "sourceMachine": "WellnessAnalytics.json",
+            "machineInputRegion": {
+              "offset": 3931,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 3939,
+              "length": 8
+            },
+            "composedInputElements": [
+              17
+            ],
+            "mapping": {
+              "transitionUrgentOrEscalated": "derived from WellnessAnalytics output[3] == 1 or output[4] == 1"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "HSPH131_care-coordination-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4520,
+              "length": 4
+            },
+            "lanes": [
+              "immediate_welfare_check",
+              "environment_remediation_response",
+              "service_access_stabilization"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "monitor facilities-driven safety, environment, and access signals"
+          },
+          {
+            "machine": "HSPH132_care-coordination-resource-router.json",
+            "inputRegion": {
+              "offset": 4520,
+              "length": 4
+            },
+            "lanes": [
+              "immediate_welfare_check",
+              "environment_remediation_response",
+              "service_access_stabilization"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route facilities response resources"
+          },
+          {
+            "machine": "HSPH135_care-coordination-referral-optimizer.json",
+            "inputRegion": {
+              "offset": 4520,
+              "length": 4
+            },
+            "lanes": [
+              "environment_remediation_response",
+              "service_access_stabilization"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "optimize housing, nutrition, transport, and care-preparation referrals"
+          },
+          {
+            "machine": "HSPH137_care-coordination-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4520,
+              "length": 4
+            },
+            "lanes": [
+              "immediate_welfare_check",
+              "service_access_stabilization"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "dispatch care coordination agent for urgent welfare or access instability"
+          },
+          {
+            "machine": "HSPH138_care-coordination-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4520,
+              "length": 4
+            },
+            "lanes": [
+              "immediate_welfare_check"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "escalate urgent welfare-check governance"
+          },
+          {
+            "machine": "LBL005_whole-person-intake-and-goals-risk-safety-review.json",
+            "inputRegion": {
+              "offset": 4520,
+              "length": 4
+            },
+            "lanes": [
+              "immediate_welfare_check",
+              "environment_remediation_response"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "review whole-person safety risk after facilities observation"
+          },
+          {
+            "machine": "LBL059_medication-and-psychiatric-care-care-visit-preparation.json",
+            "inputRegion": {
+              "offset": 4520,
+              "length": 4
+            },
+            "lanes": [
+              "environment_remediation_response",
+              "service_access_stabilization"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "prepare care visit around housing, food, access, and wellness barriers"
+          },
+          {
+            "machine": "LBL076_testing-personalization-and-monitoring-wearable-sleep-activity-intake.json",
+            "inputRegion": {
+              "offset": 4520,
+              "length": 4
+            },
+            "lanes": [
+              "immediate_welfare_check",
+              "service_access_stabilization"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "increase monitoring cadence when facilities observations indicate risk"
+          },
+          {
+            "machine": "CSX015_benefits-and-eligibility-utility-assistance-queue.json",
+            "inputRegion": {
+              "offset": 4520,
+              "length": 4
+            },
+            "lanes": [
+              "environment_remediation_response"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "route utility failure assistance"
+          },
+          {
+            "machine": "CSX016_benefits-and-eligibility-rental-assistance-triage.json",
+            "inputRegion": {
+              "offset": 4520,
+              "length": 4
+            },
+            "lanes": [
+              "environment_remediation_response"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "route unsafe housing and rental assistance triage"
+          },
+          {
+            "machine": "CSX057_homelessness-outreach-meal-outreach-routing.json",
+            "inputRegion": {
+              "offset": 4520,
+              "length": 4
+            },
+            "lanes": [
+              "service_access_stabilization"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route food and meal outreach support"
+          },
+          {
+            "machine": "CSX071_city-service-operations-311-service-request-router.json",
+            "inputRegion": {
+              "offset": 4520,
+              "length": 4
+            },
+            "lanes": [
+              "environment_remediation_response"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "route work-order and city service request intake"
+          },
+          {
+            "machine": "CSX072_city-service-operations-sanitation-hazard-dispatch.json",
+            "inputRegion": {
+              "offset": 4520,
+              "length": 4
+            },
+            "lanes": [
+              "environment_remediation_response"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "route sanitation or hazard remediation dispatch"
+          },
+          {
+            "machine": "CSX074_city-service-operations-sidewalk-accessibility-work-order.json",
+            "inputRegion": {
+              "offset": 4520,
+              "length": 4
+            },
+            "lanes": [
+              "service_access_stabilization"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route access-barrier work orders affecting medical visits"
+          }
+        ],
+        "localAIResolver": {
+          "resolverId": "localai.health-personal.facilities-maintenance-response.resolver",
+          "provider": "localAIStack/Ollama",
+          "dispatchMode": "accepted-no-wait",
+          "input": {
+            "source": "published bus output",
+            "region": {
+              "offset": 4520,
+              "length": 4
+            }
+          },
+          "completionWriteBack": {
+            "owner": "perception-engine",
+            "mode": "configured-source-mapping",
+            "region": {
+              "offset": 4520,
+              "length": 4
+            }
+          },
+          "contract": "Resolver may enrich dispatch payloads, summarize work-order context, or select lane-scoped handoff templates. PE accepts completion as a source update and never waits inside a PE cycle."
+        }
+      },
+      "machineClass": "bridge",
+      "severity": "life-safety",
+      "tags": [
+        "health-personal",
+        "published-domain-bus",
+        "facilities-maintenance",
+        "environment-safety",
+        "service-access",
+        "openclaw",
+        "localai",
+        "startup-loadable",
+        "machine-interconnect"
+      ],
+      "inputSemantics": [
+        "facilities daily complete bit",
+        "facilities weekly complete bit",
+        "facilities hygiene alert bit",
+        "facilities safety alert bit",
+        "facilities wellness concern bit",
+        "facilities inaccessibility alert bit",
+        "environment unsafe housing bit",
+        "environment utility failure bit",
+        "environment health hazard risk bit",
+        "food crisis bit",
+        "food insecure bit",
+        "food assistance needed bit",
+        "transport critical access failure bit",
+        "transport appointment barrier bit",
+        "severe social isolation bit",
+        "daily care unresponsive fall bit",
+        "daily care bathroom alert bit",
+        "wellness transition urgent or escalated bit"
+      ],
+      "outputSemantics": [
+        "immediate welfare check bit",
+        "environment remediation response bit",
+        "service access stabilization bit",
+        "routine maintenance complete bit"
+      ],
+      "eventSpace": "18D PE-composed facilities response input space",
+      "outputSpace": "4D binary at [4520:4524]: [1,0,0,0]=IMMEDIATE_WELFARE_CHECK, [0,1,0,0]=ENVIRONMENT_REMEDIATION_RESPONSE, [0,0,1,0]=SERVICE_ACCESS_STABILIZATION, [0,0,0,1]=ROUTINE_MAINTENANCE_COMPLETE",
+      "sequenceCount": 4,
+      "testCaseCount": 4,
+      "triggerConfig": {
+        "processId": "FACILITIESMAINTENANCERESPONSEINTERCONNECT",
+        "processName": "Facilities Maintenance Response Interconnect",
+        "rules": [
+          {
+            "sequenceId": "facilities-maintenance-immediate-welfare-check",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "IMMEDIATE_WELFARE_CHECK: facilities, access, social, daily-care, or wellness signals require urgent welfare check at [4520:4524]"
+          },
+          {
+            "sequenceId": "facilities-maintenance-environment-remediation",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "ENVIRONMENT_REMEDIATION_RESPONSE: facilities and home-environment signals require remediation, utility, or housing support at [4520:4524]"
+          },
+          {
+            "sequenceId": "facilities-maintenance-service-access-stabilization",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "SERVICE_ACCESS_STABILIZATION: facilities concern co-occurs with food, transport, or social access barriers at [4520:4524]"
+          },
+          {
+            "sequenceId": "facilities-maintenance-routine-complete",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "ROUTINE_MAINTENANCE_COMPLETE: daily and weekly maintenance signals complete without composed response risk at [4520:4524]"
+          }
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/facilities-maintenance-response-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "facilities-response-team-primary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for welfare checks, environment remediation, service access stabilization, and routine maintenance completion. RE evaluates only vector state; PE owns source provenance and completion ingestion."
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4502,
+        "length": 18
+      },
+      "output": {
+        "offset": 4520,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "facilities-maintenance-immediate-welfare-check",
+        "name": "Inaccessibility + safety/wellness/access crisis -> immediate welfare check",
+        "metadata": {
+          "description": "Inaccessibility + safety/wellness/access crisis -> immediate welfare check",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "facilities-maintenance-immediate-welfare-check-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "facilities-maintenance-immediate-welfare-check-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route welfare check, care coordination, emergency escalation, transport support, and governance review."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "facilities-maintenance-environment-remediation",
+        "name": "Hygiene or safety alert + environmental hazards -> environment remediation response",
+        "metadata": {
+          "description": "Hygiene or safety alert + environmental hazards -> environment remediation response",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "facilities-maintenance-environment-remediation-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "facilities-maintenance-environment-remediation-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route maintenance remediation, housing utility support, safety review, and care visit preparation."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "facilities-maintenance-service-access-stabilization",
+        "name": "Hygiene/wellness concern + food/transport/social barriers -> service access stabilization",
+        "metadata": {
+          "description": "Hygiene/wellness concern + food/transport/social barriers -> service access stabilization",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "facilities-maintenance-service-access-stabilization-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "facilities-maintenance-service-access-stabilization-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route nutrition assistance, transportation support, social connection review, and care coordination."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "facilities-maintenance-routine-complete",
+        "name": "Daily and weekly facilities complete with no composed risk -> routine maintenance complete",
+        "metadata": {
+          "description": "Daily and weekly facilities complete with no composed risk -> routine maintenance complete",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "facilities-maintenance-routine-complete-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "facilities-maintenance-routine-complete-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Record routine maintenance completion and keep monitoring at baseline cadence."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Facilities maintenance immediate welfare fan-out",
+        "pattern": "PE composed bus input: inaccessibility + safety/wellness concern + transport/social/daily-care/wellness escalation.",
+        "description": "Applies the compact PE-composed input lane at [4502:4520] to activate immediate welfare check and emit [1,0,0,0] to [4520:4524].",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            1,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "facilities-maintenance-immediate-welfare-fanout",
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4520,
+            "length": 4
+          },
+          "fanOutPolicy": "lane-scoped immediate_welfare_check only"
+        }
+      },
+      {
+        "name": "Facilities maintenance environment remediation fan-out",
+        "pattern": "PE composed bus input: facilities hygiene/safety findings + environment unsafe housing/utility/health hazard + daily bathroom alert.",
+        "description": "Applies the compact PE-composed input lane at [4502:4520] to activate environment remediation response and emit [0,1,0,0] to [4520:4524].",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "facilities-maintenance-environment-remediation-fanout",
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4520,
+            "length": 4
+          },
+          "fanOutPolicy": "lane-scoped environment_remediation_response only"
+        }
+      },
+      {
+        "name": "Facilities maintenance service access stabilization fan-out",
+        "pattern": "PE composed bus input: facilities concern + food crisis/insecurity + transport appointment barrier + severe social isolation.",
+        "description": "Applies the compact PE-composed input lane at [4502:4520] to activate service access stabilization and emit [0,0,1,0] to [4520:4524].",
+        "vectors": [
+          [
+            0,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            1,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "facilities-maintenance-service-access-fanout",
+          "expectedOutputVector": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4520,
+            "length": 4
+          },
+          "fanOutPolicy": "lane-scoped service_access_stabilization only"
+        }
+      }
+    ]
+  }
+}
