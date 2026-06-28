@@ -1,0 +1,1844 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Home Caregiver Support Response Interconnect",
+    "description": "Published personal-health bridge bus that composes caregiver burden, pediatric nutrition, child development, household food access, and social support context into a compact fan-out lane for respite crisis response, family resource support, child development/nutrition follow-up, and stable monitoring. PE owns source composition and writes the compact input lane; RE evaluates this machine as ordinary vector state.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Published Caregiver Support Response Bus",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [4410:4414]: [1,0,0,0]=CAREGIVER_RESPITE_CRISIS, [0,1,0,0]=FAMILY_RESOURCE_SUPPORT, [0,0,1,0]=CHILD_DEVELOPMENT_NUTRITION_FOLLOWUP, [0,0,0,1]=CAREGIVER_STABLE_MONITORING",
+      "domainLevelTag": "published-bus-health-personal-caregiver-support-response",
+      "publishedDomainBus": {
+        "id": "health-personal.caregiver-support-response",
+        "tag": "published-bus-health-personal-caregiver-support-response",
+        "domain": "health-personal",
+        "name": "Personal Health Caregiver Support Response Bus",
+        "description": "Domain-level published bus for caregiver burden, pediatric nutrition, child development, food access, and social support interconnection.",
+        "inputRegion": {
+          "offset": 4390,
+          "length": 20
+        },
+        "outputRegion": {
+          "offset": 4410,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "caregiver_burden_status",
+            "sourceMachine": "HomeCaregiverBurdenMonitor.json",
+            "machineInputRegion": {
+              "offset": 2003,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 2031,
+              "length": 4
+            },
+            "composedInputElements": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "mapping": {
+              "caregiverBurnout": "HomeCaregiverBurdenMonitor output[0]",
+              "highBurden": "HomeCaregiverBurdenMonitor output[1]",
+              "moderateBurden": "HomeCaregiverBurdenMonitor output[2]",
+              "caregiverCoping": "HomeCaregiverBurdenMonitor output[3]"
+            }
+          },
+          {
+            "role": "pediatric_nutrition_status",
+            "sourceMachine": "PediatricNutritionMonitor.json",
+            "machineInputRegion": {
+              "offset": 1971,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 2003,
+              "length": 4
+            },
+            "composedInputElements": [
+              4,
+              5,
+              6,
+              7
+            ],
+            "mapping": {
+              "growthAlert": "PediatricNutritionMonitor output[0]",
+              "nutritionDeficit": "PediatricNutritionMonitor output[1]",
+              "micronutrientConcern": "PediatricNutritionMonitor output[2]",
+              "nutritionOk": "PediatricNutritionMonitor output[3]"
+            }
+          },
+          {
+            "role": "child_development_status",
+            "sourceMachine": "ChildDevelopmentMonitor.json",
+            "machineInputRegion": {
+              "offset": 1975,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 2007,
+              "length": 4
+            },
+            "composedInputElements": [
+              8,
+              9,
+              10,
+              11
+            ],
+            "mapping": {
+              "referralNeeded": "ChildDevelopmentMonitor output[0]",
+              "socialDevelopmentalConcern": "ChildDevelopmentMonitor output[1]",
+              "learningConcern": "ChildDevelopmentMonitor output[2]",
+              "developmentOk": "ChildDevelopmentMonitor output[3]"
+            }
+          },
+          {
+            "role": "food_access_status",
+            "sourceMachine": "HomeFoodSecurityMonitor.json",
+            "machineInputRegion": {
+              "offset": 1963,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 1995,
+              "length": 4
+            },
+            "composedInputElements": [
+              12,
+              13,
+              14,
+              15
+            ],
+            "mapping": {
+              "foodCrisis": "HomeFoodSecurityMonitor output[0]",
+              "foodInsecure": "HomeFoodSecurityMonitor output[1]",
+              "assistanceNeeded": "HomeFoodSecurityMonitor output[2]",
+              "foodSecure": "HomeFoodSecurityMonitor output[3]"
+            }
+          },
+          {
+            "role": "social_support_status",
+            "sourceMachine": "HomeSocialIsolationMonitor.json",
+            "machineInputRegion": {
+              "offset": 2011,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 2035,
+              "length": 4
+            },
+            "composedInputElements": [
+              16,
+              17,
+              18,
+              19
+            ],
+            "mapping": {
+              "severeIsolation": "HomeSocialIsolationMonitor output[0]",
+              "socialWithdrawal": "HomeSocialIsolationMonitor output[1]",
+              "isolationRisk": "HomeSocialIsolationMonitor output[2]",
+              "sociallyConnected": "HomeSocialIsolationMonitor output[3]"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "HSPH131_care-coordination-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "caregiver_respite_crisis",
+              "family_resource_support",
+              "child_development_nutrition_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "care coordination signal monitoring"
+          },
+          {
+            "machine": "HSPH132_care-coordination-resource-router.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "caregiver_respite_crisis",
+              "family_resource_support",
+              "child_development_nutrition_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route care coordination resources"
+          },
+          {
+            "machine": "HSPH135_care-coordination-referral-optimizer.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "family_resource_support",
+              "child_development_nutrition_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "optimize care and community referrals"
+          },
+          {
+            "machine": "HSPH137_care-coordination-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "caregiver_respite_crisis",
+              "family_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "dispatch care coordination agent for caregiver support"
+          },
+          {
+            "machine": "HSPH138_care-coordination-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "caregiver_respite_crisis"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "govern urgent caregiver support escalation"
+          },
+          {
+            "machine": "HSPH151_maternal-child-family-health-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "caregiver_respite_crisis",
+              "family_resource_support",
+              "child_development_nutrition_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "maternal-child family health signal monitoring"
+          },
+          {
+            "machine": "HSPH152_maternal-child-family-health-resource-router.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "caregiver_respite_crisis",
+              "family_resource_support",
+              "child_development_nutrition_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route family health resources"
+          },
+          {
+            "machine": "HSPH153_maternal-child-family-health-equity-guardrail.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "family_resource_support",
+              "child_development_nutrition_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "guardrail inequitable family support and access burden"
+          },
+          {
+            "machine": "HSPH154_maternal-child-family-health-capacity-balancer.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "family_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "balance family support capacity"
+          },
+          {
+            "machine": "HSPH155_maternal-child-family-health-referral-optimizer.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "family_resource_support",
+              "child_development_nutrition_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "optimize family health referrals"
+          },
+          {
+            "machine": "HSPH156_maternal-child-family-health-measure-tracker.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "child_development_nutrition_followup",
+              "caregiver_stable_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "track family health measures"
+          },
+          {
+            "machine": "HSPH157_maternal-child-family-health-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "caregiver_respite_crisis",
+              "family_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "dispatch family health agent"
+          },
+          {
+            "machine": "HSPH158_maternal-child-family-health-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "caregiver_respite_crisis"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "govern urgent family support escalation"
+          },
+          {
+            "machine": "HSPH159_maternal-child-family-health-learning-loop.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "child_development_nutrition_followup",
+              "caregiver_stable_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "adapt family support plan"
+          },
+          {
+            "machine": "CSX005_health-and-human-services-intake-family-stabilization-intake.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "caregiver_respite_crisis",
+              "family_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "family stabilization intake"
+          },
+          {
+            "machine": "CSX006_health-and-human-services-intake-aging-services-intake.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "caregiver_respite_crisis",
+              "family_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "caregiver and respite service intake"
+          },
+          {
+            "machine": "CSX009_health-and-human-services-intake-crisis-benefit-intake.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "caregiver_respite_crisis"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "crisis benefit intake"
+          },
+          {
+            "machine": "CSX012_benefits-and-eligibility-snap-eligibility-monitor.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "family_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "SNAP eligibility support when household food burden affects caregiving"
+          },
+          {
+            "machine": "CSX014_benefits-and-eligibility-wic-referral-coordinator.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "family_resource_support",
+              "child_development_nutrition_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "WIC referral for child nutrition and family support"
+          },
+          {
+            "machine": "CSX017_benefits-and-eligibility-document-readiness-monitor.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "family_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "benefits documentation readiness"
+          },
+          {
+            "machine": "CSX019_benefits-and-eligibility-enrollment-completion-monitor.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "family_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "benefits enrollment completion monitoring"
+          },
+          {
+            "machine": "LBL011_nutrition-and-metabolic-health-meal-pattern-stability.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "family_resource_support",
+              "child_development_nutrition_followup",
+              "caregiver_stable_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "meal pattern stability support"
+          },
+          {
+            "machine": "LBL017_nutrition-and-metabolic-health-micronutrient-risk-screen.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "child_development_nutrition_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "micronutrient risk screening"
+          },
+          {
+            "machine": "LBL018_nutrition-and-metabolic-health-family-food-environment.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "family_resource_support",
+              "child_development_nutrition_followup",
+              "caregiver_stable_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "family food environment support"
+          },
+          {
+            "machine": "LBL019_nutrition-and-metabolic-health-nutrition-plan-adherence.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "child_development_nutrition_followup",
+              "caregiver_stable_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "nutrition plan adherence support"
+          },
+          {
+            "machine": "LBL062_adolescent-family-and-school-family-routine-alignment.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "family_resource_support",
+              "child_development_nutrition_followup",
+              "caregiver_stable_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "family routine alignment"
+          },
+          {
+            "machine": "LBL066_adolescent-family-and-school-parent-coaching-plan.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "caregiver_respite_crisis",
+              "family_resource_support",
+              "child_development_nutrition_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "parent coaching support"
+          },
+          {
+            "machine": "LBL067_adolescent-family-and-school-school-accommodation-tracker.json",
+            "inputRegion": {
+              "offset": 4410,
+              "length": 4
+            },
+            "lanes": [
+              "child_development_nutrition_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "school accommodation tracking"
+          }
+        ],
+        "peContract": {
+          "compositionOwner": "perception-engine",
+          "startupConfigured": true,
+          "dispatchMode": "asynchronous-no-wait",
+          "sourcePayloadPolicy": "normalized-status-only",
+          "rawPayloadPolicy": "remain-in-source-ledger-or-upstream-system"
+        },
+        "fanOutPolicy": {
+          "owner": "perception-engine",
+          "mode": "lane-scoped",
+          "dispatchMode": "asynchronous-no-wait",
+          "defaultAction": "do-not-dispatch-unmatched-consumer",
+          "notes": "PE selects consumers from outputMatchesAny after RE emits the bus output. Respite crisis, family resource support, child development/nutrition follow-up, and stable monitoring intentionally fan out to different consumers."
+        },
+        "localAIResolver": {
+          "resolverId": "localai.health-personal.caregiver-support-response.resolver",
+          "provider": "ollama-localai",
+          "dispatchMode": "accepted-no-wait",
+          "inputRegion": {
+            "offset": 4410,
+            "length": 4
+          },
+          "writeBack": {
+            "type": "pe-sensor",
+            "provider": "localai",
+            "sensorId": "localai.health-personal.caregiver-support-response.resolver.completion",
+            "name": "localAIStack caregiver support response resolver completion",
+            "region": {
+              "offset": 4410,
+              "length": 4
+            },
+            "semantics": [
+              "caregiver respite crisis resolved or acknowledged",
+              "family resource support resolved or acknowledged",
+              "child development nutrition follow-up resolved or acknowledged",
+              "caregiver stable monitoring resolved or acknowledged"
+            ],
+            "ttlMs": 300000,
+            "normalization": "machine-native-binary",
+            "ingest": {
+              "endpoint": "/api/integrations/completions",
+              "method": "POST",
+              "triggerPush": false,
+              "compactPush": true
+            },
+            "sourceMapping": {
+              "id": "localai-caregiver-support-response-resolver-completion",
+              "sensorId": "localai.health-personal.caregiver-support-response.resolver.completion",
+              "name": "localAIStack caregiver support response resolver completion",
+              "region": {
+                "offset": 4410,
+                "length": 4
+              },
+              "ttlMs": 300000
+            }
+          },
+          "contractSurface": "publishedDomainBus.localAIResolver",
+          "notes": "Resolver metadata is consumed by PE startup configuration. It intentionally does not create metadata.agentBinding because this bridge machine is not an agent-dispatcher and RE should see only ordinary vector state."
+        }
+      },
+      "tags": [
+        "health-personal",
+        "home-health",
+        "caregiver-support",
+        "caregiver-burden",
+        "published-domain-bus",
+        "published-bus-health-personal-caregiver-support-response",
+        "interconnect",
+        "startup-loadable",
+        "ces-sequences",
+        "ces-sequences-4",
+        "input-sequences",
+        "input-sequences-4"
+      ],
+      "sequenceCount": 4,
+      "machineClass": "bridge",
+      "inputSemantics": [
+        "caregiver burnout bit",
+        "high caregiver burden bit",
+        "moderate caregiver burden bit",
+        "caregiver coping bit",
+        "pediatric growth alert bit",
+        "pediatric nutrition deficit bit",
+        "pediatric micronutrient concern bit",
+        "pediatric nutrition ok bit",
+        "child referral needed bit",
+        "child social developmental concern bit",
+        "child learning concern bit",
+        "child development ok bit",
+        "food crisis bit",
+        "food insecure bit",
+        "food assistance needed bit",
+        "food secure bit",
+        "severe isolation bit",
+        "social withdrawal bit",
+        "isolation risk bit",
+        "socially connected bit"
+      ],
+      "triggerConfig": {
+        "processId": "HOMECAREGIVERSUPPORTRESPONSEINTERCONNECT",
+        "processName": "Home Caregiver Support Response Interconnect",
+        "rules": [
+          {
+            "sequenceId": "caregiver-support-respite-crisis",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "CAREGIVER_RESPITE_CRISIS: caregiver burnout with child and household co-risk at [4410:4414]"
+          },
+          {
+            "sequenceId": "caregiver-support-family-resource-support",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "FAMILY_RESOURCE_SUPPORT: high caregiver burden with resource or social-support barriers at [4410:4414]"
+          },
+          {
+            "sequenceId": "caregiver-support-child-followup",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "CHILD_DEVELOPMENT_NUTRITION_FOLLOWUP: child nutrition/development concerns with caregiver strain at [4410:4414]"
+          },
+          {
+            "sequenceId": "caregiver-support-stable-monitoring",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "CAREGIVER_STABLE_MONITORING: caregiver, child, and household lanes stable at [4410:4414]"
+          }
+        ]
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "manual-corpus-interconnect-authoring",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "home-health",
+          "caregiver-support"
+        ],
+        "family": "home-caregiver-support-response-interconnect",
+        "machineCode": "home-caregiver-support-response-interconnect",
+        "capabilityTags": [
+          "published-domain-bus",
+          "interconnect"
+        ],
+        "workflowTags": [
+          "caregiver-support-response",
+          "maternal-child-family-health",
+          "care-coordination",
+          "benefits-access"
+        ],
+        "integrationTags": [
+          "published-bus-health-personal-caregiver-support-response"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-4",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "health-personal",
+          "home-health",
+          "caregiver-support",
+          "caregiver-burden",
+          "published-domain-bus",
+          "published-bus-health-personal-caregiver-support-response",
+          "interconnect",
+          "startup-loadable",
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-4"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/home-caregiver-support-response-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "patient-safety-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for caregiver support response. RE evaluates only vector state; PE owns source provenance and completion ingestion."
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "exact",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4390,
+        "length": 20
+      },
+      "output": {
+        "offset": 4410,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "caregiver-support-respite-crisis",
+        "name": "Caregiver burnout + child risk + food/social isolation -> respite crisis response",
+        "metadata": {
+          "description": "Caregiver burnout coincides with pediatric health/development risk, food crisis, and severe isolation.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "csr-respite-crisis",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csr-respite-crisis-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route urgent respite, care coordination, family stabilization, and maternal-child governance support."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "caregiver-support-family-resource-support",
+        "name": "High burden + household resource barriers -> family resource support",
+        "metadata": {
+          "description": "Caregiver burden is high and appears driven by food assistance need, social withdrawal, and child-support access gaps.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "csr-family-resource-support",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csr-family-resource-support-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route benefits, WIC/SNAP, family stabilization, parent coaching, and care-resource support."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "caregiver-support-child-followup",
+        "name": "Moderate burden + child nutrition/development concerns -> child follow-up",
+        "metadata": {
+          "description": "Caregiver burden is moderate with child micronutrient or learning concerns and manageable household context.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "csr-child-followup",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csr-child-followup-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route pediatric nutrition, developmental follow-up, school accommodation, and family-health resource support."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "caregiver-support-stable-monitoring",
+        "name": "Caregiver coping + child and household supports stable -> stable monitoring",
+        "metadata": {
+          "description": "Caregiver, child nutrition, child development, food access, and social support lanes are stable.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "csr-stable-monitoring",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "csr-stable-monitoring-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Continue lightweight family-health and Life Balance monitoring."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Caregiver burnout + child risk + food/social isolation -> respite crisis response",
+        "pattern": "PE composed bus input: Caregiver burnout coincides with pediatric health/development risk, food crisis, and severe isolation.",
+        "description": "Applies the compact PE-composed input lane at [4390:4410] to activate the published caregiver support response bus and emit caregiver_respite_crisis to [4410:4414].",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "caregiver-support-respite-crisis",
+          "sourceRegionInputs": {
+            "HomeCaregiverBurdenMonitor[2031:2035]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "PediatricNutritionMonitor[2003:2007]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ChildDevelopmentMonitor[2007:2011]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "HomeFoodSecurityMonitor[1995:1999]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "HomeSocialIsolationMonitor[2035:2039]": [
+              1,
+              0,
+              0,
+              0
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4390,
+            "length": 20
+          },
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4410,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH137_care-coordination-agent-dispatcher",
+            "HSPH138_care-coordination-governance-escalator",
+            "HSPH151_maternal-child-family-health-signal-monitor",
+            "HSPH152_maternal-child-family-health-resource-router",
+            "HSPH157_maternal-child-family-health-agent-dispatcher",
+            "HSPH158_maternal-child-family-health-governance-escalator",
+            "CSX005_health-and-human-services-intake-family-stabilization-intake",
+            "CSX006_health-and-human-services-intake-aging-services-intake",
+            "CSX009_health-and-human-services-intake-crisis-benefit-intake",
+            "LBL066_adolescent-family-and-school-parent-coaching-plan"
+          ],
+          "fanOutPolicy": "lane-scoped caregiver_respite_crisis only"
+        }
+      },
+      {
+        "name": "High burden + household resource barriers -> family resource support",
+        "pattern": "PE composed bus input: Caregiver burden is high and appears driven by food assistance need, social withdrawal, and child-support access gaps.",
+        "description": "Applies the compact PE-composed input lane at [4390:4410] to activate the published caregiver support response bus and emit family_resource_support to [4410:4414].",
+        "vectors": [
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "caregiver-support-family-resource-support",
+          "sourceRegionInputs": {
+            "HomeCaregiverBurdenMonitor[2031:2035]": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "PediatricNutritionMonitor[2003:2007]": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ChildDevelopmentMonitor[2007:2011]": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "HomeFoodSecurityMonitor[1995:1999]": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "HomeSocialIsolationMonitor[2035:2039]": [
+              0,
+              1,
+              0,
+              0
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4390,
+            "length": 20
+          },
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4410,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH135_care-coordination-referral-optimizer",
+            "HSPH137_care-coordination-agent-dispatcher",
+            "HSPH151_maternal-child-family-health-signal-monitor",
+            "HSPH152_maternal-child-family-health-resource-router",
+            "HSPH153_maternal-child-family-health-equity-guardrail",
+            "HSPH154_maternal-child-family-health-capacity-balancer",
+            "HSPH155_maternal-child-family-health-referral-optimizer",
+            "HSPH157_maternal-child-family-health-agent-dispatcher",
+            "CSX005_health-and-human-services-intake-family-stabilization-intake",
+            "CSX006_health-and-human-services-intake-aging-services-intake",
+            "CSX012_benefits-and-eligibility-snap-eligibility-monitor",
+            "CSX014_benefits-and-eligibility-wic-referral-coordinator",
+            "CSX017_benefits-and-eligibility-document-readiness-monitor",
+            "CSX019_benefits-and-eligibility-enrollment-completion-monitor",
+            "LBL011_nutrition-and-metabolic-health-meal-pattern-stability",
+            "LBL018_nutrition-and-metabolic-health-family-food-environment",
+            "LBL062_adolescent-family-and-school-family-routine-alignment",
+            "LBL066_adolescent-family-and-school-parent-coaching-plan"
+          ],
+          "fanOutPolicy": "lane-scoped family_resource_support only"
+        }
+      },
+      {
+        "name": "Moderate burden + child nutrition/development concerns -> child follow-up",
+        "pattern": "PE composed bus input: Caregiver burden is moderate with child micronutrient or learning concerns and manageable household context.",
+        "description": "Applies the compact PE-composed input lane at [4390:4410] to activate the published caregiver support response bus and emit child_development_nutrition_followup to [4410:4414].",
+        "vectors": [
+          [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "caregiver-support-child-followup",
+          "sourceRegionInputs": {
+            "HomeCaregiverBurdenMonitor[2031:2035]": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "PediatricNutritionMonitor[2003:2007]": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ChildDevelopmentMonitor[2007:2011]": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "HomeFoodSecurityMonitor[1995:1999]": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "HomeSocialIsolationMonitor[2035:2039]": [
+              0,
+              0,
+              1,
+              0
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4390,
+            "length": 20
+          },
+          "expectedOutputVector": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4410,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH135_care-coordination-referral-optimizer",
+            "HSPH151_maternal-child-family-health-signal-monitor",
+            "HSPH152_maternal-child-family-health-resource-router",
+            "HSPH153_maternal-child-family-health-equity-guardrail",
+            "HSPH155_maternal-child-family-health-referral-optimizer",
+            "HSPH156_maternal-child-family-health-measure-tracker",
+            "HSPH159_maternal-child-family-health-learning-loop",
+            "CSX014_benefits-and-eligibility-wic-referral-coordinator",
+            "LBL011_nutrition-and-metabolic-health-meal-pattern-stability",
+            "LBL017_nutrition-and-metabolic-health-micronutrient-risk-screen",
+            "LBL018_nutrition-and-metabolic-health-family-food-environment",
+            "LBL019_nutrition-and-metabolic-health-nutrition-plan-adherence",
+            "LBL062_adolescent-family-and-school-family-routine-alignment",
+            "LBL066_adolescent-family-and-school-parent-coaching-plan",
+            "LBL067_adolescent-family-and-school-school-accommodation-tracker"
+          ],
+          "fanOutPolicy": "lane-scoped child_development_nutrition_followup only"
+        }
+      },
+      {
+        "name": "Caregiver coping + child and household supports stable -> stable monitoring",
+        "pattern": "PE composed bus input: Caregiver, child nutrition, child development, food access, and social support lanes are stable.",
+        "description": "Applies the compact PE-composed input lane at [4390:4410] to activate the published caregiver support response bus and emit caregiver_stable_monitoring to [4410:4414].",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "caregiver-support-stable-monitoring",
+          "sourceRegionInputs": {
+            "HomeCaregiverBurdenMonitor[2031:2035]": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "PediatricNutritionMonitor[2003:2007]": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ChildDevelopmentMonitor[2007:2011]": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "HomeFoodSecurityMonitor[1995:1999]": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "HomeSocialIsolationMonitor[2035:2039]": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4390,
+            "length": 20
+          },
+          "expectedOutputVector": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "expectedOutputRegion": {
+            "offset": 4410,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH156_maternal-child-family-health-measure-tracker",
+            "HSPH159_maternal-child-family-health-learning-loop",
+            "LBL011_nutrition-and-metabolic-health-meal-pattern-stability",
+            "LBL018_nutrition-and-metabolic-health-family-food-environment",
+            "LBL019_nutrition-and-metabolic-health-nutrition-plan-adherence",
+            "LBL062_adolescent-family-and-school-family-routine-alignment"
+          ],
+          "fanOutPolicy": "lane-scoped caregiver_stable_monitoring only"
+        }
+      }
+    ]
+  }
+}
