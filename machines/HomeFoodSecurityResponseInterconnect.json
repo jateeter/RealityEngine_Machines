@@ -1,0 +1,1187 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Home Food Security Response Interconnect",
+    "description": "Published personal-health bridge bus that composes food-security status, pediatric nutrition status, adolescent behavioral-health status, and hydration status into a compact food-security response lane. PE owns source composition and writes the compact input lane; RE evaluates this machine as ordinary vector state.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Published Food Security Response Bus",
+      "author": "Reality Engine",
+      "domainLevelTag": "published-bus-health-personal-food-security-response",
+      "publishedDomainBus": {
+        "id": "health-personal.food-security-response",
+        "tag": "published-bus-health-personal-food-security-response",
+        "domain": "health-personal",
+        "name": "Personal Health Food Security Response Bus",
+        "description": "Domain-level published bus for food crisis response, benefits support, pediatric nutrition review, behavioral-health support, hydration linkage, and stable monitoring.",
+        "inputRegion": {
+          "offset": 4350,
+          "length": 14
+        },
+        "outputRegion": {
+          "offset": 4364,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "food_security_status",
+            "sourceMachine": "HomeFoodSecurityMonitor.json",
+            "machineInputRegion": {
+              "offset": 1963,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 1995,
+              "length": 4
+            },
+            "composedInputElements": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "mapping": {
+              "foodCrisis": "HomeFoodSecurityMonitor output[0]",
+              "foodInsecure": "HomeFoodSecurityMonitor output[1]",
+              "assistanceNeeded": "HomeFoodSecurityMonitor output[2]",
+              "foodSecure": "HomeFoodSecurityMonitor output[3]"
+            }
+          },
+          {
+            "role": "pediatric_nutrition_status",
+            "sourceMachine": "PediatricNutritionMonitor.json",
+            "machineInputRegion": {
+              "offset": 1971,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 2003,
+              "length": 4
+            },
+            "composedInputElements": [
+              4,
+              5,
+              6,
+              7
+            ],
+            "mapping": {
+              "growthAlert": "PediatricNutritionMonitor output[0]",
+              "nutritionDeficit": "PediatricNutritionMonitor output[1]",
+              "micronutrientConcern": "PediatricNutritionMonitor output[2]",
+              "nutritionOk": "PediatricNutritionMonitor output[3]"
+            }
+          },
+          {
+            "role": "adolescent_behavioral_health_status",
+            "sourceMachine": "AdolescentMentalHealthMonitor.json",
+            "machineInputRegion": {
+              "offset": 1995,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 2027,
+              "length": 4
+            },
+            "composedInputElements": [
+              8,
+              9,
+              10,
+              11
+            ],
+            "mapping": {
+              "crisisRisk": "AdolescentMentalHealthMonitor output[0]",
+              "behavioralConcern": "AdolescentMentalHealthMonitor output[1]",
+              "elevatedStress": "AdolescentMentalHealthMonitor output[2]",
+              "mentalHealthOk": "AdolescentMentalHealthMonitor output[3]"
+            }
+          },
+          {
+            "role": "hydration_status",
+            "sourceMachine": "HydrationMonitor.json",
+            "machineInputRegion": {
+              "offset": 1947,
+              "length": 2
+            },
+            "machineOutputRegion": {
+              "offset": 1949,
+              "length": 2
+            },
+            "composedInputElements": [
+              12,
+              13
+            ],
+            "mapping": {
+              "belowHalfTarget": "HydrationMonitor output[0]",
+              "belowQuarterTarget": "HydrationMonitor output[1]"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "CSX009_health-and-human-services-intake-crisis-benefit-intake.json",
+            "inputRegion": {
+              "offset": 4364,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_food_response",
+              "benefits_food_access"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "crisis benefits intake and urgent food resource enrollment"
+          },
+          {
+            "machine": "CSX012_benefits-and-eligibility-snap-eligibility-monitor.json",
+            "inputRegion": {
+              "offset": 4364,
+              "length": 4
+            },
+            "lanes": [
+              "benefits_food_access"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "SNAP eligibility and enrollment monitoring"
+          },
+          {
+            "machine": "CSX014_benefits-and-eligibility-wic-referral-coordinator.json",
+            "inputRegion": {
+              "offset": 4364,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_food_response",
+              "benefits_food_access",
+              "nutrition_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "WIC referral when family, pregnancy, infant, or child nutrition support is relevant"
+          },
+          {
+            "machine": "CSX057_homelessness-outreach-meal-outreach-routing.json",
+            "inputRegion": {
+              "offset": 4364,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_food_response",
+              "benefits_food_access"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "meal outreach routing for immediate food access"
+          },
+          {
+            "machine": "HSPH131_care-coordination-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4364,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_food_response",
+              "benefits_food_access",
+              "nutrition_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "care coordination signal monitoring"
+          },
+          {
+            "machine": "HSPH132_care-coordination-resource-router.json",
+            "inputRegion": {
+              "offset": 4364,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_food_response",
+              "benefits_food_access",
+              "nutrition_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route care coordination resources"
+          },
+          {
+            "machine": "HSPH137_care-coordination-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4364,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_food_response",
+              "nutrition_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "dispatch care coordination agent for high-risk food insecurity"
+          },
+          {
+            "machine": "HSPH138_care-coordination-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4364,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_food_response"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "govern urgent food crisis escalation"
+          },
+          {
+            "machine": "HSPH151_maternal-child-family-health-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4364,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_food_response",
+              "nutrition_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "maternal-child family health signal monitoring"
+          },
+          {
+            "machine": "HSPH152_maternal-child-family-health-resource-router.json",
+            "inputRegion": {
+              "offset": 4364,
+              "length": 4
+            },
+            "lanes": [
+              "benefits_food_access",
+              "nutrition_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route family nutrition and child-health resources"
+          },
+          {
+            "machine": "LBL011_nutrition-and-metabolic-health-meal-pattern-stability.json",
+            "inputRegion": {
+              "offset": 4364,
+              "length": 4
+            },
+            "lanes": [
+              "benefits_food_access",
+              "nutrition_behavioral_followup",
+              "food_secure_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "meal pattern stability support"
+          },
+          {
+            "machine": "LBL015_nutrition-and-metabolic-health-hydration-electrolyte-monitor.json",
+            "inputRegion": {
+              "offset": 4364,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_food_response",
+              "nutrition_behavioral_followup",
+              "food_secure_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "hydration and electrolyte follow-up when food insecurity affects fluid intake"
+          },
+          {
+            "machine": "LBL017_nutrition-and-metabolic-health-micronutrient-risk-screen.json",
+            "inputRegion": {
+              "offset": 4364,
+              "length": 4
+            },
+            "lanes": [
+              "nutrition_behavioral_followup",
+              "food_secure_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "micronutrient risk screening"
+          },
+          {
+            "machine": "LBL061_adolescent-family-and-school-school-function-monitor.json",
+            "inputRegion": {
+              "offset": 4364,
+              "length": 4
+            },
+            "lanes": [
+              "nutrition_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "adolescent school-function follow-up when food insecurity affects behavioral health"
+          },
+          {
+            "machine": "CSX005_health-and-human-services-intake-family-stabilization-intake.json",
+            "inputRegion": {
+              "offset": 4364,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_food_response",
+              "benefits_food_access"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "family stabilization intake for household food crisis"
+          }
+        ],
+        "fanOutPolicy": {
+          "owner": "perception-engine",
+          "mode": "lane-scoped",
+          "dispatchMode": "asynchronous-no-wait",
+          "defaultAction": "do-not-dispatch-unmatched-consumer",
+          "notes": "PE selects consumers from outputMatchesAny after RE emits the bus output. Emergency food crisis, benefits/access support, nutrition/behavioral follow-up, and stable monitoring intentionally fan out to different consumers."
+        },
+        "peContract": {
+          "compositionOwner": "perception-engine",
+          "startupConfigured": true,
+          "dispatchMode": "asynchronous-no-wait",
+          "sourcePayloadPolicy": "normalized-status-only",
+          "rawPayloadPolicy": "remain-in-source-ledger-or-upstream-system"
+        },
+        "localAIResolver": {
+          "resolverId": "localai.health-personal.food-security-response.resolver",
+          "provider": "ollama-localai",
+          "dispatchMode": "accepted-no-wait",
+          "inputRegion": {
+            "offset": 4364,
+            "length": 4
+          },
+          "writeBack": {
+            "type": "pe-sensor",
+            "provider": "localai",
+            "sensorId": "localai.health-personal.food-security-response.resolver.completion",
+            "name": "localAIStack food security response resolver completion",
+            "region": {
+              "offset": 4364,
+              "length": 4
+            },
+            "semantics": [
+              "urgent food response resolved or acknowledged",
+              "benefits food access resolved or acknowledged",
+              "nutrition behavioral follow-up resolved or acknowledged",
+              "food secure monitoring resolved or acknowledged"
+            ],
+            "ttlMs": 300000,
+            "normalization": "machine-native-binary",
+            "ingest": {
+              "endpoint": "/api/integrations/completions",
+              "method": "POST",
+              "triggerPush": false,
+              "compactPush": true
+            },
+            "sourceMapping": {
+              "id": "localai-food-security-response-resolver-completion",
+              "sensorId": "localai.health-personal.food-security-response.resolver.completion",
+              "name": "localAIStack food security response resolver completion",
+              "region": {
+                "offset": 4364,
+                "length": 4
+              },
+              "ttlMs": 300000
+            }
+          },
+          "contractSurface": "publishedDomainBus.localAIResolver",
+          "notes": "Resolver metadata is consumed by PE startup configuration. It intentionally does not create metadata.agentBinding because this bridge machine is not an agent-dispatcher and RE should see only ordinary vector state."
+        }
+      },
+      "outputSpace": "4D binary at [4364:4368]: [1,0,0,0]=URGENT_FOOD_RESPONSE, [0,1,0,0]=BENEFITS_FOOD_ACCESS, [0,0,1,0]=NUTRITION_BEHAVIORAL_FOLLOWUP, [0,0,0,1]=FOOD_SECURE_MONITORING",
+      "tags": [
+        "benefits-eligibility",
+        "bridge",
+        "cross-domain-interconnect",
+        "family-stabilization",
+        "food-insecurity",
+        "food-security",
+        "health-personal",
+        "health-personal-published-bus",
+        "hydration",
+        "machine-interconnect",
+        "nutrition",
+        "pediatric",
+        "published-bus-health-personal-food-security-response",
+        "social-determinants",
+        "startup-loadable",
+        "wellness"
+      ],
+      "sequenceCount": 4,
+      "inputSemantics": [
+        "food crisis bit",
+        "food insecure bit",
+        "assistance needed bit",
+        "food secure bit",
+        "growth alert bit",
+        "nutrition deficit bit",
+        "micronutrient concern bit",
+        "nutrition ok bit",
+        "adolescent crisis risk bit",
+        "adolescent behavioral concern bit",
+        "adolescent elevated stress bit",
+        "adolescent mental health ok bit",
+        "below half hydration target bit",
+        "below quarter hydration target bit"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "manual-corpus-interconnect",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "food-security",
+          "health-personal-published-bus",
+          "published-bus-health-personal-food-security-response"
+        ],
+        "family": "health-personal-interconnect",
+        "machineCode": "home-food-security-response-interconnect",
+        "capabilityTags": [
+          "bridge",
+          "machine-interconnect",
+          "benefits-eligibility"
+        ],
+        "workflowTags": [
+          "family-stabilization",
+          "food-insecurity",
+          "food-security",
+          "hydration",
+          "nutrition",
+          "pediatric",
+          "social-determinants"
+        ],
+        "integrationTags": [
+          "cross-domain-interconnect",
+          "machine-interconnect",
+          "published-bus-health-personal-food-security-response"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "benefits-eligibility",
+          "bridge",
+          "ces-sequences",
+          "ces-sequences-4",
+          "cross-domain-interconnect",
+          "family-stabilization",
+          "food-insecurity",
+          "food-security",
+          "health-personal",
+          "health-personal-interconnect",
+          "health-personal-published-bus",
+          "hydration",
+          "input-sequences",
+          "input-sequences-2",
+          "machine-interconnect",
+          "nutrition",
+          "pediatric",
+          "published-bus-health-personal-food-security-response",
+          "social-determinants",
+          "startup-loadable",
+          "wellness",
+          "home-food-security-response-interconnect"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/home-food-security-response-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "community-benefits-on-call@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for food-security response, benefits support, nutrition/behavioral follow-up, and stable monitoring. RE evaluates only vector state; PE owns source provenance and completion ingestion."
+      },
+      "triggerConfig": {
+        "processId": "HOME_FOOD_SECURITY_RESPONSE_INTERCONNECT",
+        "processName": "Home Food Security Response Interconnect",
+        "rules": [
+          {
+            "sequenceId": "food-security-urgent-response",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Food crisis with child nutrition, adolescent behavioral-health, or hydration risk requires urgent food response."
+          },
+          {
+            "sequenceId": "food-security-benefits-access",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Food insecurity or assistance-needed signal requires benefits and food-access support."
+          },
+          {
+            "sequenceId": "food-security-nutrition-behavioral-followup",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Food insecurity is interacting with pediatric nutrition, adolescent behavioral health, or hydration needs."
+          },
+          {
+            "sequenceId": "food-security-stable-monitoring",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Food security, nutrition, adolescent health, and hydration context support stable monitoring."
+          }
+        ]
+      },
+      "machineClass": "bridge"
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4350,
+        "length": 14
+      },
+      "output": {
+        "offset": 4364,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "food-security-urgent-response",
+        "name": "Food crisis + child/adolescent/hydration risk -> urgent food response",
+        "metadata": {
+          "description": "Food crisis is active and compounded by child nutrition, adolescent behavioral-health, or hydration risk. Publish urgent food response.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "food-security-urgent-response-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "food-security-urgent-response-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route immediate food assistance, family stabilization, care coordination, and clinical nutrition review."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "food-security-benefits-access",
+        "name": "Food insecure or assistance needed -> benefits food access",
+        "metadata": {
+          "description": "Food access is unstable or assistance enrollment is needed, without acute child/adolescent crisis. Publish benefits food access support.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "food-security-benefits-access-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "food-security-benefits-access-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route SNAP/WIC/food pantry and benefits navigation support."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "food-security-nutrition-behavioral-followup",
+        "name": "Food insecurity + nutrition or behavioral signal -> nutrition behavioral follow-up",
+        "metadata": {
+          "description": "Food insecurity is interacting with pediatric nutrition, adolescent stress, or hydration concerns. Publish nutrition and behavioral-health follow-up.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "food-security-nutrition-behavioral-followup-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "food-security-nutrition-behavioral-followup-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route pediatric nutrition, micronutrient, adolescent school/family, and hydration follow-up."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "food-security-stable-monitoring",
+        "name": "Food secure + nutrition ok + mental health ok + hydrated -> stable monitoring",
+        "metadata": {
+          "description": "All source domains are stable. Publish food secure monitoring.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "food-security-stable-monitoring-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "food-security-stable-monitoring-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Continue stable food-security monitoring and routine wellness support."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Food security urgent response fan-out",
+        "pattern": "PE composed bus input: food crisis + growth alert + adolescent crisis risk + critical hydration.",
+        "description": "Applies the compact PE-composed input lane at [4350:4364] to activate urgent food response and emit [1,0,0,0] to [4364:4368].",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "food-security-urgent-response-fanout",
+          "sourceRegionInputs": {
+            "HomeFoodSecurityMonitor[1995:1999]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "PediatricNutritionMonitor[2003:2007]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "AdolescentMentalHealthMonitor[2027:2031]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "HydrationMonitor[1949:1951]": [
+              1,
+              1
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4350,
+            "length": 14
+          },
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4364,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "CSX009_health-and-human-services-intake-crisis-benefit-intake",
+            "CSX014_benefits-and-eligibility-wic-referral-coordinator",
+            "CSX057_homelessness-outreach-meal-outreach-routing",
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH137_care-coordination-agent-dispatcher",
+            "HSPH138_care-coordination-governance-escalator",
+            "HSPH151_maternal-child-family-health-signal-monitor",
+            "CSX005_health-and-human-services-intake-family-stabilization-intake"
+          ],
+          "fanOutPolicy": "lane-scoped urgent_food_response only"
+        }
+      },
+      {
+        "name": "Food security benefits access fan-out",
+        "pattern": "PE composed bus input: assistance needed + nutrition ok + mental health ok + hydrated.",
+        "description": "Applies benefits/access food-security inputs to route support without urgent clinical escalation.",
+        "vectors": [
+          [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "food-security-benefits-access-fanout",
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4364,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "CSX009_health-and-human-services-intake-crisis-benefit-intake",
+            "CSX012_benefits-and-eligibility-snap-eligibility-monitor",
+            "CSX014_benefits-and-eligibility-wic-referral-coordinator",
+            "CSX057_homelessness-outreach-meal-outreach-routing",
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH152_maternal-child-family-health-resource-router",
+            "LBL011_nutrition-and-metabolic-health-meal-pattern-stability",
+            "CSX005_health-and-human-services-intake-family-stabilization-intake"
+          ],
+          "fanOutPolicy": "lane-scoped benefits_food_access only"
+        }
+      }
+    ]
+  }
+}
