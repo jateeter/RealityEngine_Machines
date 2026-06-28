@@ -147,7 +147,71 @@
         "Ag Zone Temperature Controller input 2",
         "Ag Zone Temperature Controller input 3",
         "Ag Zone Temperature Controller input 4"
-      ]
+      ],
+      "interconnections": [
+        {
+          "id": "agriculture.agriculture-core.ag-zone-temperature-controller",
+          "type": "published-domain-bus-producer",
+          "role": "ag_zone_temperature_controller",
+          "sourceMachine": "Ag Zone Temperature Controller",
+          "sourceOutputRegion": {
+            "offset": 20,
+            "length": 4
+          },
+          "targetInputElements": [
+            24,
+            25,
+            26
+          ],
+          "normalizedElements": [
+            "Ag Zone Temperature Controller active output[0] bit",
+            "Ag Zone Temperature Controller active output[1] bit",
+            "Ag Zone Temperature Controller active output[2] bit"
+          ],
+          "purpose": "Publish Ag Zone Temperature Controller active response lanes into agriculture.agriculture-core.",
+          "busId": "agriculture.agriculture-core",
+          "busTag": "published-bus-agriculture-agriculture-core",
+          "targetMachine": "Agriculture Core Interconnect",
+          "targetMachineFile": "AgricultureCoreInterconnect.json",
+          "targetInputRegion": {
+            "offset": 13000,
+            "length": 27
+          },
+          "busInputRegion": {
+            "offset": 13000,
+            "length": 27
+          },
+          "publishedOutputRegion": {
+            "offset": 13027,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 13027,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized domain status bits only; raw regulated records, operator notes, telemetry payloads, documents, and provider-specific source payloads remain outside the universal reality vector."
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-ag-zone-temperature-controller-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 0,
+          "length": 4
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "ag_zone_temperature_controller_input_1",
+          "ag_zone_temperature_controller_input_2",
+          "ag_zone_temperature_controller_input_3",
+          "ag_zone_temperature_controller_input_4"
+        ],
+        "peContract": "OpenClaw maps domain observations to this machine's native input lane; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
