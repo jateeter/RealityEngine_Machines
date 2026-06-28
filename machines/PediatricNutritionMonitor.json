@@ -143,31 +143,15 @@
       },
       "machineClass": "signal-monitor",
       "inputSemantics": [
-        "pediatric_growth_percentile_norm",
-        "pediatric_caloric_adequacy_norm",
-        "pediatric_micronutrient_status_norm",
-        "pediatric_dietary_diversity_norm"
+        "growth_percentile_norm",
+        "caloric_adequacy_norm",
+        "micronutrient_score_norm",
+        "dietary_diversity_norm"
       ],
-      "openClawProjection": {
-        "projectionId": "openclaw-pediatric-nutrition-native-input-projection",
-        "owner": "openclaw-input-analyst",
-        "dispatchMode": "accepted-no-wait",
-        "writeBackRegion": {
-          "offset": 1971,
-          "length": 4
-        },
-        "normalization": "machine-native-scalar",
-        "semantics": [
-          "pediatric_growth_percentile_norm",
-          "pediatric_caloric_adequacy_norm",
-          "pediatric_micronutrient_status_norm",
-          "pediatric_dietary_diversity_norm"
-        ],
-        "peContract": "OpenClaw maps pediatric nutrition observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle."
-      },
       "interconnections": [
         {
-          "id": "health-personal.caregiver-support-response.pediatric-nutrition-status",
+          "id": "health-personal.food-security-response.pediatric-nutrition-status",
+          "type": "published-domain-bus-producer",
           "role": "pediatric_nutrition_status",
           "sourceMachine": "Pediatric Nutrition Monitor",
           "sourceOutputRegion": {
@@ -186,26 +170,42 @@
             "micronutrient concern bit from PediatricNutritionMonitor [2005]",
             "nutrition ok bit from PediatricNutritionMonitor [2006]"
           ],
-          "purpose": "Publish pediatric nutrition status into the personal-health caregiver support response bus.",
-          "type": "published-domain-bus-producer",
-          "privacyBoundary": "PE composes normalized status bits only; raw PHI, source observations, case notes, and family records remain outside the universal reality vector.",
-          "busId": "health-personal.caregiver-support-response",
-          "busTag": "published-bus-health-personal-caregiver-support-response",
-          "targetMachine": "Home Caregiver Support Response Interconnect",
-          "targetMachineFile": "HomeCaregiverSupportResponseInterconnect.json",
+          "purpose": "Publish pediatric nutrition status into the personal-health food security response bus.",
+          "privacyBoundary": "PE composes normalized pediatric nutrition bits only; raw growth charts, lab values, WIC records, and clinical notes remain outside the universal reality vector.",
+          "busId": "health-personal.food-security-response",
+          "busTag": "published-bus-health-personal-food-security-response",
+          "targetMachine": "Home Food Security Response Interconnect",
+          "targetMachineFile": "HomeFoodSecurityResponseInterconnect.json",
           "busInputRegion": {
-            "offset": 4390,
-            "length": 20
+            "offset": 4350,
+            "length": 14
           },
           "busOutputRegion": {
-            "offset": 4410,
+            "offset": 4364,
             "length": 4
           },
           "peCompositionRequired": true,
           "compositionOwner": "perception-engine",
           "dispatchMode": "asynchronous-no-wait"
         }
-      ]
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-pediatric-nutrition-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1971,
+          "length": 4
+        },
+        "normalization": "machine-native-scalar",
+        "semantics": [
+          "growth_percentile_norm",
+          "caloric_adequacy_norm",
+          "micronutrient_score_norm",
+          "dietary_diversity_norm"
+        ],
+        "peContract": "OpenClaw maps pediatric nutrition observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {

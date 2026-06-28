@@ -150,15 +150,77 @@
       },
       "machineClass": "risk-forecaster",
       "inputSemantics": [
-        "Adolescent Mental Health Monitor input 1",
-        "Adolescent Mental Health Monitor input 2",
-        "Adolescent Mental Health Monitor input 3",
-        "Adolescent Mental Health Monitor input 4",
-        "Adolescent Mental Health Monitor input 5",
-        "Adolescent Mental Health Monitor input 6",
-        "Adolescent Mental Health Monitor input 7",
-        "Adolescent Mental Health Monitor input 8"
-      ]
+        "food-crisis-bit",
+        "food-insecure-bit",
+        "food-assistance-needed-bit",
+        "food-secure-bit",
+        "unsafe-housing-bit",
+        "housing-instability-bit",
+        "health-hazard-risk-bit",
+        "environment-safe-bit"
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.food-security-response.adolescent-behavioral-health-status",
+          "type": "published-domain-bus-producer",
+          "role": "adolescent_behavioral_health_status",
+          "sourceMachine": "Adolescent Mental Health Monitor",
+          "sourceOutputRegion": {
+            "offset": 2027,
+            "length": 4
+          },
+          "targetInputElements": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "normalizedElements": [
+            "crisis risk bit from AdolescentMentalHealthMonitor [2027]",
+            "behavioral concern bit from AdolescentMentalHealthMonitor [2028]",
+            "elevated stress bit from AdolescentMentalHealthMonitor [2029]",
+            "mental health ok bit from AdolescentMentalHealthMonitor [2030]"
+          ],
+          "purpose": "Publish adolescent behavioral-health status into the personal-health food security response bus.",
+          "privacyBoundary": "PE composes normalized adolescent behavioral-health bits only; raw school, family, behavioral health, and case notes remain outside the universal reality vector.",
+          "busId": "health-personal.food-security-response",
+          "busTag": "published-bus-health-personal-food-security-response",
+          "targetMachine": "Home Food Security Response Interconnect",
+          "targetMachineFile": "HomeFoodSecurityResponseInterconnect.json",
+          "busInputRegion": {
+            "offset": 4350,
+            "length": 14
+          },
+          "busOutputRegion": {
+            "offset": 4364,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait"
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-adolescent-mental-health-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1995,
+          "length": 8
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "food-crisis-bit",
+          "food-insecure-bit",
+          "food-assistance-needed-bit",
+          "food-secure-bit",
+          "unsafe-housing-bit",
+          "housing-instability-bit",
+          "health-hazard-risk-bit",
+          "environment-safe-bit"
+        ],
+        "peContract": "Normal path is deterministic PE composition from food security and home environment outputs. OpenClaw may populate the same native bit lane only for external adolescent adversity observations that bypass upstream machines."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
