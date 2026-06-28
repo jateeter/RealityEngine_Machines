@@ -150,14 +150,76 @@
       },
       "machineClass": "risk-forecaster",
       "inputSemantics": [
-        "Adolescent Mental Health Monitor input 1",
-        "Adolescent Mental Health Monitor input 2",
-        "Adolescent Mental Health Monitor input 3",
-        "Adolescent Mental Health Monitor input 4",
-        "Adolescent Mental Health Monitor input 5",
-        "Adolescent Mental Health Monitor input 6",
-        "Adolescent Mental Health Monitor input 7",
-        "Adolescent Mental Health Monitor input 8"
+        "food-crisis-bit",
+        "food-insecure-bit",
+        "food-assistance-needed-bit",
+        "food-secure-bit",
+        "unsafe-housing-bit",
+        "utility-failure-bit",
+        "health-hazard-risk-bit",
+        "environment-safe-bit"
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-adolescent-mental-health-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1995,
+          "length": 8
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "food-crisis-bit",
+          "food-insecure-bit",
+          "food-assistance-needed-bit",
+          "food-secure-bit",
+          "unsafe-housing-bit",
+          "utility-failure-bit",
+          "health-hazard-risk-bit",
+          "environment-safe-bit"
+        ],
+        "peContract": "Normal path is deterministic PE composition from food security and home environment safety outputs. OpenClaw may populate the same native bit lane only for external adolescent adversity observations that bypass upstream machines."
+      },
+      "interconnections": [
+        {
+          "type": "published-domain-bus-producer",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI, housing observations, case notes, and source payloads remain outside the universal reality vector.",
+          "busId": "health-personal.environment-safety-response",
+          "busTag": "published-bus-health-personal-environment-safety-response",
+          "targetMachine": "Home Environment Safety Response Interconnect",
+          "targetMachineFile": "HomeEnvironmentSafetyResponseInterconnect.json",
+          "busInputRegion": {
+            "offset": 4414,
+            "length": 18
+          },
+          "busOutputRegion": {
+            "offset": 4432,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "id": "health-personal.environment-safety-response.adolescent-behavioral-health-status",
+          "role": "adolescent_behavioral_health_status",
+          "sourceMachine": "Adolescent Mental Health Monitor",
+          "sourceOutputRegion": {
+            "offset": 2027,
+            "length": 4
+          },
+          "targetInputElements": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "normalizedElements": [
+            "crisis risk bit from AdolescentMentalHealthMonitor [2027]",
+            "behavioral concern bit from AdolescentMentalHealthMonitor [2028]",
+            "elevated stress bit from AdolescentMentalHealthMonitor [2029]",
+            "mental health ok bit from AdolescentMentalHealthMonitor [2030]"
+          ],
+          "purpose": "Publish adolescent behavioral-health context into the personal-health environment safety response bus."
+        }
       ]
     },
     "arbiterRule": "PASSTHROUGH",
