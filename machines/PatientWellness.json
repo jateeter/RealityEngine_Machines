@@ -258,7 +258,73 @@
         "PatientWellness input 6",
         "PatientWellness input 7",
         "PatientWellness input 8"
-      ]
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.care-transition-response.patient-wellness-acuity",
+          "type": "published-domain-bus-producer",
+          "role": "patient_wellness_acuity",
+          "sourceMachine": "PatientWellness",
+          "sourceOutputRegion": {
+            "offset": 3931,
+            "length": 8
+          },
+          "targetInputElements": [
+            9,
+            10
+          ],
+          "normalizedElements": [
+            "patient wellness alert bit from PatientWellness output[2]",
+            "patient wellness critical bit from PatientWellness output[3]"
+          ],
+          "purpose": "Publish patient wellness acuity into the personal-health care transition response bus.",
+          "busId": "health-personal.care-transition-response",
+          "busTag": "published-bus-health-personal-care-transition-response",
+          "targetMachine": "Care Transition Response Interconnect",
+          "targetMachineFile": "CareTransitionResponseInterconnect.json",
+          "targetInputRegion": {
+            "offset": 4436,
+            "length": 18
+          },
+          "busInputRegion": {
+            "offset": 4436,
+            "length": 18
+          },
+          "publishedOutputRegion": {
+            "offset": 4454,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 4454,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-patient-wellness-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1955,
+          "length": 8
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "morning_complete_bit",
+          "evening_complete_bit",
+          "fall_confirmed_bit",
+          "unresponsive_fall_bit",
+          "bathroom_alert_bit",
+          "medication_missed_bit",
+          "wandering_alert_bit",
+          "reserved_7"
+        ],
+        "peContract": "OpenClaw maps daily patient-care observations to the native PatientWellness input vector only when bypassing deterministic DailyPatientCare output; PE writes the source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "matchAlgorithm": "gte",

@@ -221,41 +221,62 @@
           "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
         },
         {
+          "id": "health-personal.care-transition-response.fall-criticality",
           "type": "published-domain-bus-producer",
-          "privacyBoundary": "PE composes normalized status bits only; raw PHI, housing observations, case notes, and source payloads remain outside the universal reality vector.",
-          "busId": "health-personal.environment-safety-response",
-          "busTag": "published-bus-health-personal-environment-safety-response",
-          "targetMachine": "Home Environment Safety Response Interconnect",
-          "targetMachineFile": "HomeEnvironmentSafetyResponseInterconnect.json",
-          "busInputRegion": {
-            "offset": 4414,
-            "length": 18
-          },
-          "busOutputRegion": {
-            "offset": 4432,
-            "length": 4
-          },
-          "peCompositionRequired": true,
-          "compositionOwner": "perception-engine",
-          "dispatchMode": "asynchronous-no-wait",
-          "id": "health-personal.environment-safety-response.fall-safety-status",
-          "role": "fall_safety_status",
+          "role": "fall_criticality",
           "sourceMachine": "Fall Detection",
           "sourceOutputRegion": {
             "offset": 1941,
             "length": 2
           },
           "targetInputElements": [
-            16,
             17
           ],
           "normalizedElements": [
-            "fall unsafe tier bit derived from FallDetection output[0] >= 3",
-            "fall high-confidence bit derived from FallDetection output[1] >= 3"
+            "fall red high-confidence bit derived from FallDetection output[0] == 4 and output[1] >= 3"
           ],
-          "purpose": "Publish fall and home hazard co-risk into the personal-health environment safety response bus."
+          "purpose": "Publish fall criticality into the personal-health care transition response bus.",
+          "busId": "health-personal.care-transition-response",
+          "busTag": "published-bus-health-personal-care-transition-response",
+          "targetMachine": "Care Transition Response Interconnect",
+          "targetMachineFile": "CareTransitionResponseInterconnect.json",
+          "targetInputRegion": {
+            "offset": 4436,
+            "length": 18
+          },
+          "busInputRegion": {
+            "offset": 4436,
+            "length": 18
+          },
+          "publishedOutputRegion": {
+            "offset": 4454,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 4454,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
         }
-      ]
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-fall-detection-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 3813,
+          "length": 2
+        },
+        "normalization": "machine-native-ordinal",
+        "semantics": [
+          "motion_progression_ordinal",
+          "stillness_progression_ordinal"
+        ],
+        "peContract": "OpenClaw maps fall observations to native motion/stillness ordinals; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "matchAlgorithm": "equals",
