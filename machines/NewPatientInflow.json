@@ -208,7 +208,73 @@
         "NewPatientInflow input 6",
         "NewPatientInflow input 7",
         "NewPatientInflow input 8"
-      ]
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.intake-wellness-routing.new-patient-inflow",
+          "type": "published-domain-bus-producer",
+          "role": "new_patient_inflow",
+          "sourceMachine": "NewPatientInflow",
+          "sourceOutputRegion": {
+            "offset": 3915,
+            "length": 8
+          },
+          "targetInputElements": [
+            0,
+            1
+          ],
+          "normalizedElements": [
+            "accepted",
+            "provisional reject"
+          ],
+          "purpose": "Publish new patient inflow into health-personal.intake-wellness-routing.",
+          "busId": "health-personal.intake-wellness-routing",
+          "busTag": "published-bus-health-personal-intake-wellness-routing",
+          "targetMachine": "Intake Wellness Routing Interconnect",
+          "targetMachineFile": "IntakeWellnessRoutingInterconnect.json",
+          "targetInputRegion": {
+            "offset": 4582,
+            "length": 16
+          },
+          "busInputRegion": {
+            "offset": 4582,
+            "length": 16
+          },
+          "publishedOutputRegion": {
+            "offset": 4598,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 4598,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector."
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-new-patient-inflow-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 3907,
+          "length": 8
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "clinical_eligibility_bit",
+          "financial_readiness_bit",
+          "vacancy_available_bit",
+          "care_scope_fit_bit",
+          "assessment_complete_bit",
+          "documents_complete_bit",
+          "family_consent_bit",
+          "reserved_7"
+        ],
+        "peContract": "OpenClaw maps intake packet observations to native NewPatientInflow input bits; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "matchAlgorithm": "gte",

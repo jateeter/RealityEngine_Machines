@@ -1,0 +1,762 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Medication Access Adherence Interconnect",
+    "description": "Published personal-health bridge bus that composes medication adherence, medication cost, daily care, transport, isolation, wellness routing, and hydration into a compact medication access response lane.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Medication Access Adherence Bus",
+      "author": "Reality Engine",
+      "domainLevelTag": "published-bus-health-personal-medication-access-adherence",
+      "publishedDomainBus": {
+        "id": "health-personal.medication-access-adherence",
+        "tag": "published-bus-health-personal-medication-access-adherence",
+        "domain": "health-personal",
+        "name": "Personal Health Medication Access Adherence Bus",
+        "description": "Medication recovery, affordability navigation, caregiver reminders, and stable routines.",
+        "inputRegion": {
+          "offset": 4524,
+          "length": 14
+        },
+        "outputRegion": {
+          "offset": 4538,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "medication_adherence",
+            "sourceMachine": "MedicationAdherenceMonitor.json",
+            "machineOutputRegion": {
+              "offset": 3811,
+              "length": 2
+            },
+            "composedInputElements": [
+              0,
+              1
+            ],
+            "mapping": {
+              "delayed bit": "delayed bit",
+              "missed bit": "missed bit"
+            }
+          },
+          {
+            "role": "medication_cost",
+            "sourceMachine": "HomeMedicationCostBarrierMonitor.json",
+            "machineOutputRegion": {
+              "offset": 2011,
+              "length": 4
+            },
+            "composedInputElements": [
+              2,
+              3,
+              4,
+              5
+            ],
+            "mapping": {
+              "adherence crisis": "adherence crisis",
+              "cost barrier": "cost barrier",
+              "partial adherence": "partial adherence",
+              "managed": "managed"
+            }
+          },
+          {
+            "role": "daily_care_medication",
+            "sourceMachine": "DailyPatientCare.json",
+            "machineOutputRegion": {
+              "offset": 1955,
+              "length": 8
+            },
+            "composedInputElements": [
+              6
+            ],
+            "mapping": {
+              "daily care medication missed bit": "daily care medication missed bit"
+            }
+          },
+          {
+            "role": "transport_access",
+            "sourceMachine": "HomeTransportationBarrierMonitor.json",
+            "machineOutputRegion": {
+              "offset": 2015,
+              "length": 4
+            },
+            "composedInputElements": [
+              7,
+              8
+            ],
+            "mapping": {
+              "critical access failure": "critical access failure",
+              "appointment barrier": "appointment barrier"
+            }
+          },
+          {
+            "role": "social_isolation",
+            "sourceMachine": "HomeSocialIsolationMonitor.json",
+            "machineOutputRegion": {
+              "offset": 2035,
+              "length": 4
+            },
+            "composedInputElements": [
+              9,
+              10
+            ],
+            "mapping": {
+              "severe isolation": "severe isolation",
+              "isolation risk": "isolation risk"
+            }
+          },
+          {
+            "role": "wellness_routing",
+            "sourceMachine": "WellnessAnalytics.json",
+            "machineOutputRegion": {
+              "offset": 3939,
+              "length": 8
+            },
+            "composedInputElements": [
+              11,
+              12
+            ],
+            "mapping": {
+              "inflow urgent": "inflow urgent",
+              "transition urgent or escalated": "transition urgent or escalated"
+            }
+          },
+          {
+            "role": "hydration_status",
+            "sourceMachine": "HydrationMonitor.json",
+            "machineOutputRegion": {
+              "offset": 1949,
+              "length": 2
+            },
+            "composedInputElements": [
+              13
+            ],
+            "mapping": {
+              "hydration critical": "hydration critical"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "HSPH131_care-coordination-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4538,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_medication_recovery",
+              "affordability_navigation",
+              "caregiver_reminder_loop"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "monitor cross-machine personal-health response signals"
+          },
+          {
+            "machine": "HSPH132_care-coordination-resource-router.json",
+            "inputRegion": {
+              "offset": 4538,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_medication_recovery",
+              "affordability_navigation",
+              "caregiver_reminder_loop"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route response resources"
+          },
+          {
+            "machine": "HSPH137_care-coordination-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4538,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_medication_recovery",
+              "affordability_navigation"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "dispatch PE-side care coordination agents"
+          },
+          {
+            "machine": "HSPH138_care-coordination-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4538,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_medication_recovery"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "escalate urgent governance path"
+          }
+        ],
+        "localAIResolver": {
+          "resolverId": "localai.health-personal.medication-access-adherence.resolver",
+          "provider": "localAIStack/Ollama",
+          "dispatchMode": "accepted-no-wait",
+          "input": {
+            "source": "published bus output",
+            "region": {
+              "offset": 4538,
+              "length": 4
+            }
+          },
+          "completionWriteBack": {
+            "owner": "perception-engine",
+            "mode": "configured-source-mapping",
+            "region": {
+              "offset": 4538,
+              "length": 4
+            }
+          },
+          "contract": "Resolver may enrich dispatch payloads or select lane-scoped handoff templates. PE accepts completion as a source update and never waits inside a PE cycle."
+        }
+      },
+      "machineClass": "bridge",
+      "severity": "life-safety",
+      "tags": [
+        "health-personal",
+        "published-domain-bus",
+        "machine-interconnect",
+        "openclaw",
+        "localai",
+        "startup-loadable"
+      ],
+      "inputSemantics": [
+        "medication delayed bit",
+        "medication missed bit",
+        "cost adherence crisis bit",
+        "cost barrier active bit",
+        "partial adherence bit",
+        "medication managed bit",
+        "daily care medication missed bit",
+        "transport critical access failure bit",
+        "transport appointment barrier bit",
+        "severe social isolation bit",
+        "isolation risk bit",
+        "wellness inflow urgent bit",
+        "wellness transition urgent or escalated bit",
+        "hydration critical bit"
+      ],
+      "outputSemantics": [
+        "urgent medication recovery bit",
+        "affordability navigation bit",
+        "caregiver reminder loop bit",
+        "stable medication routine bit"
+      ],
+      "eventSpace": "14D PE-composed medication access adherence input space",
+      "outputSpace": "4D binary at [4538:4542]: [1,0,0,0]=URGENT_MEDICATION_RECOVERY, [0,1,0,0]=AFFORDABILITY_NAVIGATION, [0,0,1,0]=CAREGIVER_REMINDER_LOOP, [0,0,0,1]=STABLE_MEDICATION_ROUTINE",
+      "sequenceCount": 4,
+      "testCaseCount": 2,
+      "triggerConfig": {
+        "processId": "MEDICATIONACCESSADHERENCEINTERCONNECT",
+        "processName": "Medication Access Adherence Interconnect",
+        "rules": [
+          {
+            "sequenceId": "medication-access-urgent-recovery",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "URGENT_MEDICATION_RECOVERY at [4538:4542]"
+          },
+          {
+            "sequenceId": "medication-access-affordability-navigation",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "AFFORDABILITY_NAVIGATION at [4538:4542]"
+          },
+          {
+            "sequenceId": "medication-access-caregiver-reminder",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "CAREGIVER_REMINDER_LOOP at [4538:4542]"
+          },
+          {
+            "sequenceId": "medication-access-stable",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "STABLE_MEDICATION_ROUTINE at [4538:4542]"
+          }
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/medication-access-adherence-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "care-coordination-primary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for medication access adherence. RE evaluates only vector state; PE owns source provenance and completion ingestion."
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4524,
+        "length": 14
+      },
+      "output": {
+        "offset": 4538,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "medication-access-urgent-recovery",
+        "name": "Urgent medication recovery",
+        "metadata": {
+          "description": "Urgent medication recovery",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "medication-access-urgent-recovery-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "medication-access-urgent-recovery-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "URGENT_MEDICATION_RECOVERY"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "medication-access-affordability-navigation",
+        "name": "Affordability navigation",
+        "metadata": {
+          "description": "Affordability navigation",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "medication-access-affordability-navigation-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "medication-access-affordability-navigation-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "AFFORDABILITY_NAVIGATION"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "medication-access-caregiver-reminder",
+        "name": "Caregiver reminder",
+        "metadata": {
+          "description": "Caregiver reminder",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "medication-access-caregiver-reminder-state",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "medication-access-caregiver-reminder-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "CAREGIVER_REMINDER_LOOP"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "medication-access-stable",
+        "name": "Stable medication routine",
+        "metadata": {
+          "description": "Stable medication routine",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "medication-access-stable-state",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "medication-access-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "STABLE_MEDICATION_ROUTINE"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Medication urgent recovery fan-out",
+        "pattern": "missed medication plus cost/access/isolation risk",
+        "description": "Activates urgent recovery lane.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "medication-access-urgent-recovery",
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4538,
+            "length": 4
+          },
+          "fanOutPolicy": "lane-scoped urgent_medication_recovery"
+        }
+      },
+      {
+        "name": "Medication affordability fan-out",
+        "pattern": "cost barrier plus partial adherence and access friction",
+        "description": "Activates affordability navigation lane.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "medication-access-affordability",
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4538,
+            "length": 4
+          },
+          "fanOutPolicy": "lane-scoped affordability_navigation"
+        }
+      }
+    ]
+  }
+}
