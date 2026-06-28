@@ -1,0 +1,1935 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Home Environment Safety Response Interconnect",
+    "description": "Published personal-health bridge bus that composes home environment safety, food access, adolescent behavioral health, social isolation, and fall-safety context into a compact fan-out lane for urgent housing safety response, utility/housing resource support, health-hazard behavioral follow-up, and stable monitoring. PE owns source composition and writes the compact input lane; RE evaluates this machine as ordinary vector state.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Published Environment Safety Response Bus",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [4432:4436]: [1,0,0,0]=URGENT_HOUSING_SAFETY_RESPONSE, [0,1,0,0]=UTILITY_HOUSING_RESOURCE_SUPPORT, [0,0,1,0]=HEALTH_HAZARD_BEHAVIORAL_FOLLOWUP, [0,0,0,1]=ENVIRONMENT_STABLE_MONITORING",
+      "domainLevelTag": "published-bus-health-personal-environment-safety-response",
+      "publishedDomainBus": {
+        "id": "health-personal.environment-safety-response",
+        "tag": "published-bus-health-personal-environment-safety-response",
+        "domain": "health-personal",
+        "name": "Personal Health Environment Safety Response Bus",
+        "description": "Domain-level published bus for home environment safety, food access, adolescent behavioral health, social support, and fall-safety interconnection.",
+        "inputRegion": {
+          "offset": 4414,
+          "length": 18
+        },
+        "outputRegion": {
+          "offset": 4432,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "environment_status",
+            "sourceMachine": "HomeEnvironmentSafetyMonitor.json",
+            "machineInputRegion": {
+              "offset": 1967,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 1999,
+              "length": 4
+            },
+            "composedInputElements": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "mapping": {
+              "unsafeHousing": "HomeEnvironmentSafetyMonitor output[0]",
+              "utilityFailure": "HomeEnvironmentSafetyMonitor output[1]",
+              "healthHazardRisk": "HomeEnvironmentSafetyMonitor output[2]",
+              "environmentSafe": "HomeEnvironmentSafetyMonitor output[3]"
+            }
+          },
+          {
+            "role": "food_access_status",
+            "sourceMachine": "HomeFoodSecurityMonitor.json",
+            "machineInputRegion": {
+              "offset": 1963,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 1995,
+              "length": 4
+            },
+            "composedInputElements": [
+              4,
+              5,
+              6,
+              7
+            ],
+            "mapping": {
+              "foodCrisis": "HomeFoodSecurityMonitor output[0]",
+              "foodInsecure": "HomeFoodSecurityMonitor output[1]",
+              "assistanceNeeded": "HomeFoodSecurityMonitor output[2]",
+              "foodSecure": "HomeFoodSecurityMonitor output[3]"
+            }
+          },
+          {
+            "role": "adolescent_behavioral_health_status",
+            "sourceMachine": "AdolescentMentalHealthMonitor.json",
+            "machineInputRegion": {
+              "offset": 1995,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 2027,
+              "length": 4
+            },
+            "composedInputElements": [
+              8,
+              9,
+              10,
+              11
+            ],
+            "mapping": {
+              "crisisRisk": "AdolescentMentalHealthMonitor output[0]",
+              "behavioralConcern": "AdolescentMentalHealthMonitor output[1]",
+              "elevatedStress": "AdolescentMentalHealthMonitor output[2]",
+              "mentalHealthOk": "AdolescentMentalHealthMonitor output[3]"
+            }
+          },
+          {
+            "role": "social_support_status",
+            "sourceMachine": "HomeSocialIsolationMonitor.json",
+            "machineInputRegion": {
+              "offset": 2011,
+              "length": 8
+            },
+            "machineOutputRegion": {
+              "offset": 2035,
+              "length": 4
+            },
+            "composedInputElements": [
+              12,
+              13,
+              14,
+              15
+            ],
+            "mapping": {
+              "severeIsolation": "HomeSocialIsolationMonitor output[0]",
+              "socialWithdrawal": "HomeSocialIsolationMonitor output[1]",
+              "isolationRisk": "HomeSocialIsolationMonitor output[2]",
+              "sociallyConnected": "HomeSocialIsolationMonitor output[3]"
+            }
+          },
+          {
+            "role": "fall_safety_status",
+            "sourceMachine": "FallDetection.json",
+            "machineInputRegion": {
+              "offset": 3813,
+              "length": 2
+            },
+            "machineOutputRegion": {
+              "offset": 1941,
+              "length": 2
+            },
+            "composedInputElements": [
+              16,
+              17
+            ],
+            "mapping": {
+              "fallUnsafeTier": "PE-derived from FallDetection output[0] >= 3",
+              "fallHighConfidence": "PE-derived from FallDetection output[1] >= 3"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "HSPH131_care-coordination-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "utility_housing_resource_support",
+              "health_hazard_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "care coordination signal monitoring"
+          },
+          {
+            "machine": "HSPH132_care-coordination-resource-router.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "utility_housing_resource_support",
+              "health_hazard_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route care coordination resources"
+          },
+          {
+            "machine": "HSPH135_care-coordination-referral-optimizer.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "utility_housing_resource_support",
+              "health_hazard_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "optimize care and housing-support referrals"
+          },
+          {
+            "machine": "HSPH137_care-coordination-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "utility_housing_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "dispatch care coordination agent for housing safety support"
+          },
+          {
+            "machine": "HSPH138_care-coordination-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "govern urgent housing safety escalation"
+          },
+          {
+            "machine": "HSPH141_behavioral-health-integration-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "health_hazard_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "behavioral health signal monitoring under housing adversity"
+          },
+          {
+            "machine": "HSPH142_behavioral-health-integration-resource-router.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "health_hazard_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route behavioral health resources"
+          },
+          {
+            "machine": "HSPH147_behavioral-health-integration-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "health_hazard_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "dispatch behavioral health integration agent"
+          },
+          {
+            "machine": "HSPH148_behavioral-health-integration-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "govern urgent behavioral-health housing crisis"
+          },
+          {
+            "machine": "HSPH151_maternal-child-family-health-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "utility_housing_resource_support",
+              "health_hazard_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "maternal-child family health signal monitoring"
+          },
+          {
+            "machine": "HSPH152_maternal-child-family-health-resource-router.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "utility_housing_resource_support",
+              "health_hazard_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route family health resources"
+          },
+          {
+            "machine": "HSPH153_maternal-child-family-health-equity-guardrail.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "utility_housing_resource_support",
+              "health_hazard_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "guardrail inequitable housing and family-support burden"
+          },
+          {
+            "machine": "HSPH157_maternal-child-family-health-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "utility_housing_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "dispatch family health agent"
+          },
+          {
+            "machine": "HSPH158_maternal-child-family-health-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "govern urgent family housing safety escalation"
+          },
+          {
+            "machine": "HSPH159_maternal-child-family-health-learning-loop.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "health_hazard_behavioral_followup",
+              "environment_stable_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "adapt family health support plan"
+          },
+          {
+            "machine": "CSX001_health-and-human-services-intake-resident-intake-triage.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "utility_housing_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "resident intake triage for housing safety"
+          },
+          {
+            "machine": "CSX002_health-and-human-services-intake-case-routing-coordinator.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "utility_housing_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "case routing for housing and utility supports"
+          },
+          {
+            "machine": "CSX005_health-and-human-services-intake-family-stabilization-intake.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "utility_housing_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "family stabilization intake"
+          },
+          {
+            "machine": "CSX009_health-and-human-services-intake-crisis-benefit-intake.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "crisis benefit intake"
+          },
+          {
+            "machine": "CSX015_benefits-and-eligibility-utility-assistance-queue.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "utility_housing_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "utility assistance queue"
+          },
+          {
+            "machine": "CSX016_benefits-and-eligibility-rental-assistance-triage.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "utility_housing_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "rental assistance and habitability triage"
+          },
+          {
+            "machine": "CSX017_benefits-and-eligibility-document-readiness-monitor.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "utility_housing_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "benefits documentation readiness"
+          },
+          {
+            "machine": "CSX019_benefits-and-eligibility-enrollment-completion-monitor.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "utility_housing_resource_support"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "benefits enrollment completion monitoring"
+          },
+          {
+            "machine": "BSX023_air-quality-voc-particulate-monitoring.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "health_hazard_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "air quality particulate and VOC monitoring"
+          },
+          {
+            "machine": "BSX025_air-quality-humidity-mold-risk.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "health_hazard_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "humidity and mold risk follow-up"
+          },
+          {
+            "machine": "BSX028_air-quality-air-quality-incident-response.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "health_hazard_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "air quality incident response"
+          },
+          {
+            "machine": "BSX038_water-quality-water-quality-incident-response.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "health_hazard_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "water quality incident response"
+          },
+          {
+            "machine": "BSX039_water-quality-hydration-access-monitor.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "utility_housing_resource_support",
+              "health_hazard_behavioral_followup",
+              "environment_stable_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "hydration and water access monitoring"
+          },
+          {
+            "machine": "BSX029_air-quality-iaq-evidence-archive.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "environment_stable_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "indoor air quality evidence archive"
+          },
+          {
+            "machine": "BSX037_water-quality-water-record-retention.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "environment_stable_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "water quality record retention"
+          },
+          {
+            "machine": "LBL061_adolescent-family-and-school-school-function-monitor.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "health_hazard_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "school function follow-up"
+          },
+          {
+            "machine": "LBL062_adolescent-family-and-school-family-routine-alignment.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "utility_housing_resource_support",
+              "health_hazard_behavioral_followup",
+              "environment_stable_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "family routine alignment"
+          },
+          {
+            "machine": "LBL066_adolescent-family-and-school-parent-coaching-plan.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "utility_housing_resource_support",
+              "health_hazard_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "parent coaching under housing adversity"
+          },
+          {
+            "machine": "LBL069_adolescent-family-and-school-adolescent-safety-signal.json",
+            "inputRegion": {
+              "offset": 4432,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_housing_safety_response",
+              "health_hazard_behavioral_followup"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "adolescent safety signal monitoring"
+          }
+        ],
+        "peContract": {
+          "compositionOwner": "perception-engine",
+          "startupConfigured": true,
+          "dispatchMode": "asynchronous-no-wait",
+          "sourcePayloadPolicy": "normalized-status-only",
+          "rawPayloadPolicy": "remain-in-source-ledger-or-upstream-system"
+        },
+        "fanOutPolicy": {
+          "owner": "perception-engine",
+          "mode": "lane-scoped",
+          "dispatchMode": "asynchronous-no-wait",
+          "defaultAction": "do-not-dispatch-unmatched-consumer",
+          "notes": "PE selects consumers from outputMatchesAny after RE emits the bus output. Urgent housing safety response, utility/housing resource support, health-hazard behavioral follow-up, and stable monitoring intentionally fan out to different consumers."
+        },
+        "localAIResolver": {
+          "resolverId": "localai.health-personal.environment-safety-response.resolver",
+          "provider": "ollama-localai",
+          "dispatchMode": "accepted-no-wait",
+          "inputRegion": {
+            "offset": 4432,
+            "length": 4
+          },
+          "writeBack": {
+            "type": "pe-sensor",
+            "provider": "localai",
+            "sensorId": "localai.health-personal.environment-safety-response.resolver.completion",
+            "name": "localAIStack environment safety response resolver completion",
+            "region": {
+              "offset": 4432,
+              "length": 4
+            },
+            "semantics": [
+              "urgent housing safety response resolved or acknowledged",
+              "utility housing resource support resolved or acknowledged",
+              "health hazard behavioral follow-up resolved or acknowledged",
+              "environment stable monitoring resolved or acknowledged"
+            ],
+            "ttlMs": 300000,
+            "normalization": "machine-native-binary",
+            "ingest": {
+              "endpoint": "/api/integrations/completions",
+              "method": "POST",
+              "triggerPush": false,
+              "compactPush": true
+            },
+            "sourceMapping": {
+              "id": "localai-environment-safety-response-resolver-completion",
+              "sensorId": "localai.health-personal.environment-safety-response.resolver.completion",
+              "name": "localAIStack environment safety response resolver completion",
+              "region": {
+                "offset": 4432,
+                "length": 4
+              },
+              "ttlMs": 300000
+            }
+          },
+          "contractSurface": "publishedDomainBus.localAIResolver",
+          "notes": "Resolver metadata is consumed by PE startup configuration. It intentionally does not create metadata.agentBinding because this bridge machine is not an agent-dispatcher and RE should see only ordinary vector state."
+        }
+      },
+      "tags": [
+        "health-personal",
+        "home-health",
+        "housing-safety",
+        "environment-safety",
+        "published-domain-bus",
+        "published-bus-health-personal-environment-safety-response",
+        "interconnect",
+        "startup-loadable",
+        "ces-sequences",
+        "ces-sequences-4",
+        "input-sequences",
+        "input-sequences-4"
+      ],
+      "sequenceCount": 4,
+      "machineClass": "bridge",
+      "inputSemantics": [
+        "unsafe housing bit",
+        "utility failure bit",
+        "health hazard risk bit",
+        "environment safe bit",
+        "food crisis bit",
+        "food insecure bit",
+        "food assistance needed bit",
+        "food secure bit",
+        "adolescent crisis risk bit",
+        "adolescent behavioral concern bit",
+        "adolescent elevated stress bit",
+        "adolescent mental health ok bit",
+        "severe isolation bit",
+        "social withdrawal bit",
+        "isolation risk bit",
+        "socially connected bit",
+        "fall unsafe tier bit",
+        "fall high confidence bit"
+      ],
+      "triggerConfig": {
+        "processId": "HOMEENVIRONMENTSAFETYRESPONSEINTERCONNECT",
+        "processName": "Home Environment Safety Response Interconnect",
+        "rules": [
+          {
+            "sequenceId": "environment-safety-urgent-housing-response",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "URGENT_HOUSING_SAFETY_RESPONSE: unsafe housing with household, behavioral, social, or fall co-risk at [4432:4436]"
+          },
+          {
+            "sequenceId": "environment-safety-utility-resource-support",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "UTILITY_HOUSING_RESOURCE_SUPPORT: utility or housing resource support needed at [4432:4436]"
+          },
+          {
+            "sequenceId": "environment-safety-health-hazard-followup",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "HEALTH_HAZARD_BEHAVIORAL_FOLLOWUP: housing health hazard with behavioral, social, or fall follow-up need at [4432:4436]"
+          },
+          {
+            "sequenceId": "environment-safety-stable-monitoring",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "ENVIRONMENT_STABLE_MONITORING: environment and support lanes stable at [4432:4436]"
+          }
+        ]
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "manual-corpus-interconnect-authoring",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "home-health",
+          "housing-safety"
+        ],
+        "family": "home-environment-safety-response-interconnect",
+        "machineCode": "home-environment-safety-response-interconnect",
+        "capabilityTags": [
+          "published-domain-bus",
+          "interconnect"
+        ],
+        "workflowTags": [
+          "environment-safety-response",
+          "housing-safety",
+          "care-coordination",
+          "benefits-access",
+          "behavioral-health"
+        ],
+        "integrationTags": [
+          "published-bus-health-personal-environment-safety-response"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-4",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "health-personal",
+          "home-health",
+          "housing-safety",
+          "environment-safety",
+          "published-domain-bus",
+          "published-bus-health-personal-environment-safety-response",
+          "interconnect",
+          "startup-loadable",
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-4"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/home-environment-safety-response-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "patient-safety-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for environment safety response. RE evaluates only vector state; PE owns source provenance and completion ingestion."
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "exact",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4414,
+        "length": 18
+      },
+      "output": {
+        "offset": 4432,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "environment-safety-urgent-housing-response",
+        "name": "Unsafe housing + behavioral/fall co-risk -> urgent housing safety response",
+        "metadata": {
+          "description": "Unsafe housing coincides with food crisis, adolescent crisis, severe isolation, and fall co-risk.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "esr-urgent-housing-response",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "esr-urgent-housing-response-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route urgent housing safety response, care coordination, family stabilization, utility/rental assistance, and built-space incident follow-up."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "environment-safety-utility-resource-support",
+        "name": "Utility failure + resource barriers -> utility housing resource support",
+        "metadata": {
+          "description": "Utility failure is active with food assistance need and social withdrawal, but not yet an unsafe-housing crisis.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "esr-utility-resource-support",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "esr-utility-resource-support-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route LIHEAP/utility assistance, rental support, case routing, and family resource support."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "environment-safety-health-hazard-followup",
+        "name": "Health hazard + adolescent stress -> health hazard behavioral follow-up",
+        "metadata": {
+          "description": "Housing health hazard risk is active with food insecurity, adolescent elevated stress, isolation risk, or fall vulnerability.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "esr-health-hazard-followup",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "esr-health-hazard-followup-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route air/water quality, adolescent behavioral, maternal-child, and care-coordination follow-up before crisis escalation."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "environment-safety-stable-monitoring",
+        "name": "Safe environment + stable household supports -> environment stable monitoring",
+        "metadata": {
+          "description": "Environment, food access, adolescent health, social support, and fall-safety lanes are stable.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "esr-stable-monitoring",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "esr-stable-monitoring-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Continue lightweight built-space, family routine, and water-access monitoring."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Unsafe housing + behavioral/fall co-risk -> urgent housing safety response",
+        "pattern": "PE composed bus input: Unsafe housing coincides with food crisis, adolescent crisis, severe isolation, and fall co-risk.",
+        "description": "Applies the compact PE-composed input lane at [4414:4432] to activate the published environment safety response bus and emit urgent_housing_safety_response to [4432:4436].",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "environment-safety-urgent-housing-response",
+          "sourceRegionInputs": {
+            "HomeEnvironmentSafetyMonitor[1999:2003]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "HomeFoodSecurityMonitor[1995:1999]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "AdolescentMentalHealthMonitor[2027:2031]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "HomeSocialIsolationMonitor[2035:2039]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "FallDetection[1941:1943]": [
+              1,
+              1
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4414,
+            "length": 18
+          },
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4432,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH137_care-coordination-agent-dispatcher",
+            "HSPH138_care-coordination-governance-escalator",
+            "HSPH141_behavioral-health-integration-signal-monitor",
+            "HSPH147_behavioral-health-integration-agent-dispatcher",
+            "HSPH148_behavioral-health-integration-governance-escalator",
+            "HSPH151_maternal-child-family-health-signal-monitor",
+            "HSPH152_maternal-child-family-health-resource-router",
+            "HSPH157_maternal-child-family-health-agent-dispatcher",
+            "HSPH158_maternal-child-family-health-governance-escalator",
+            "CSX001_health-and-human-services-intake-resident-intake-triage",
+            "CSX002_health-and-human-services-intake-case-routing-coordinator",
+            "CSX005_health-and-human-services-intake-family-stabilization-intake",
+            "CSX009_health-and-human-services-intake-crisis-benefit-intake",
+            "CSX015_benefits-and-eligibility-utility-assistance-queue",
+            "CSX016_benefits-and-eligibility-rental-assistance-triage",
+            "BSX025_air-quality-humidity-mold-risk",
+            "BSX028_air-quality-air-quality-incident-response",
+            "BSX038_water-quality-water-quality-incident-response",
+            "LBL069_adolescent-family-and-school-adolescent-safety-signal"
+          ],
+          "fanOutPolicy": "lane-scoped urgent_housing_safety_response only"
+        }
+      },
+      {
+        "name": "Utility failure + resource barriers -> utility housing resource support",
+        "pattern": "PE composed bus input: Utility failure is active with food assistance need and social withdrawal, but not yet an unsafe-housing crisis.",
+        "description": "Applies the compact PE-composed input lane at [4414:4432] to activate the published environment safety response bus and emit utility_housing_resource_support to [4432:4436].",
+        "vectors": [
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "environment-safety-utility-resource-support",
+          "sourceRegionInputs": {
+            "HomeEnvironmentSafetyMonitor[1999:2003]": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "HomeFoodSecurityMonitor[1995:1999]": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "AdolescentMentalHealthMonitor[2027:2031]": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "HomeSocialIsolationMonitor[2035:2039]": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "FallDetection[1941:1943]": [
+              0,
+              0
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4414,
+            "length": 18
+          },
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4432,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH135_care-coordination-referral-optimizer",
+            "HSPH137_care-coordination-agent-dispatcher",
+            "HSPH151_maternal-child-family-health-signal-monitor",
+            "HSPH152_maternal-child-family-health-resource-router",
+            "HSPH153_maternal-child-family-health-equity-guardrail",
+            "HSPH157_maternal-child-family-health-agent-dispatcher",
+            "CSX001_health-and-human-services-intake-resident-intake-triage",
+            "CSX002_health-and-human-services-intake-case-routing-coordinator",
+            "CSX005_health-and-human-services-intake-family-stabilization-intake",
+            "CSX015_benefits-and-eligibility-utility-assistance-queue",
+            "CSX016_benefits-and-eligibility-rental-assistance-triage",
+            "CSX017_benefits-and-eligibility-document-readiness-monitor",
+            "CSX019_benefits-and-eligibility-enrollment-completion-monitor",
+            "BSX039_water-quality-hydration-access-monitor",
+            "LBL062_adolescent-family-and-school-family-routine-alignment",
+            "LBL066_adolescent-family-and-school-parent-coaching-plan"
+          ],
+          "fanOutPolicy": "lane-scoped utility_housing_resource_support only"
+        }
+      },
+      {
+        "name": "Health hazard + adolescent stress -> health hazard behavioral follow-up",
+        "pattern": "PE composed bus input: Housing health hazard risk is active with food insecurity, adolescent elevated stress, isolation risk, or fall vulnerability.",
+        "description": "Applies the compact PE-composed input lane at [4414:4432] to activate the published environment safety response bus and emit health_hazard_behavioral_followup to [4432:4436].",
+        "vectors": [
+          [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "environment-safety-health-hazard-followup",
+          "sourceRegionInputs": {
+            "HomeEnvironmentSafetyMonitor[1999:2003]": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "HomeFoodSecurityMonitor[1995:1999]": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "AdolescentMentalHealthMonitor[2027:2031]": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "HomeSocialIsolationMonitor[2035:2039]": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "FallDetection[1941:1943]": [
+              1,
+              0
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4414,
+            "length": 18
+          },
+          "expectedOutputVector": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4432,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH135_care-coordination-referral-optimizer",
+            "HSPH141_behavioral-health-integration-signal-monitor",
+            "HSPH142_behavioral-health-integration-resource-router",
+            "HSPH147_behavioral-health-integration-agent-dispatcher",
+            "HSPH151_maternal-child-family-health-signal-monitor",
+            "HSPH152_maternal-child-family-health-resource-router",
+            "HSPH153_maternal-child-family-health-equity-guardrail",
+            "HSPH159_maternal-child-family-health-learning-loop",
+            "BSX023_air-quality-voc-particulate-monitoring",
+            "BSX025_air-quality-humidity-mold-risk",
+            "BSX028_air-quality-air-quality-incident-response",
+            "BSX038_water-quality-water-quality-incident-response",
+            "BSX039_water-quality-hydration-access-monitor",
+            "LBL061_adolescent-family-and-school-school-function-monitor",
+            "LBL062_adolescent-family-and-school-family-routine-alignment",
+            "LBL066_adolescent-family-and-school-parent-coaching-plan",
+            "LBL069_adolescent-family-and-school-adolescent-safety-signal"
+          ],
+          "fanOutPolicy": "lane-scoped health_hazard_behavioral_followup only"
+        }
+      },
+      {
+        "name": "Safe environment + stable household supports -> environment stable monitoring",
+        "pattern": "PE composed bus input: Environment, food access, adolescent health, social support, and fall-safety lanes are stable.",
+        "description": "Applies the compact PE-composed input lane at [4414:4432] to activate the published environment safety response bus and emit environment_stable_monitoring to [4432:4436].",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "environment-safety-stable-monitoring",
+          "sourceRegionInputs": {
+            "HomeEnvironmentSafetyMonitor[1999:2003]": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "HomeFoodSecurityMonitor[1995:1999]": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "AdolescentMentalHealthMonitor[2027:2031]": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "HomeSocialIsolationMonitor[2035:2039]": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "FallDetection[1941:1943]": [
+              0,
+              0
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4414,
+            "length": 18
+          },
+          "expectedOutputVector": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "expectedOutputRegion": {
+            "offset": 4432,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH159_maternal-child-family-health-learning-loop",
+            "BSX039_water-quality-hydration-access-monitor",
+            "BSX029_air-quality-iaq-evidence-archive",
+            "BSX037_water-quality-water-record-retention",
+            "LBL062_adolescent-family-and-school-family-routine-alignment"
+          ],
+          "fanOutPolicy": "lane-scoped environment_stable_monitoring only"
+        }
+      }
+    ]
+  }
+}

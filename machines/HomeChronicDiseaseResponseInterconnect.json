@@ -1,0 +1,1782 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Home Chronic Disease Response Interconnect",
+    "description": "Published personal-health bridge bus that composes chronic disease control, medication access, transportation access, food security, and activity tolerance into a compact fan-out lane for urgent disease response, access/adherence support, preventive intensification, and stable monitoring. PE owns source composition and writes the compact input lane; RE evaluates this machine as ordinary vector state.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "Personal Health - Published Chronic Disease Response Bus",
+      "author": "Reality Engine",
+      "outputSpace": "4D binary at [4386:4390]: [1,0,0,0]=URGENT_DISEASE_RESPONSE, [0,1,0,0]=ACCESS_ADHERENCE_SUPPORT, [0,0,1,0]=PREVENTIVE_INTENSIFICATION, [0,0,0,1]=STABLE_CHRONIC_DISEASE_MONITORING",
+      "domainLevelTag": "published-bus-health-personal-chronic-disease-response",
+      "publishedDomainBus": {
+        "id": "health-personal.chronic-disease-response",
+        "tag": "published-bus-health-personal-chronic-disease-response",
+        "domain": "health-personal",
+        "name": "Personal Health Chronic Disease Response Bus",
+        "description": "Domain-level published bus for chronic disease control, adherence/access barriers, food security, and activity tolerance interconnection.",
+        "inputRegion": {
+          "offset": 4368,
+          "length": 18
+        },
+        "outputRegion": {
+          "offset": 4386,
+          "length": 4
+        },
+        "inputComposition": [
+          {
+            "role": "disease_control_status",
+            "sourceMachine": "HomeChronicDiseaseMonitor.json",
+            "machineInputRegion": {
+              "offset": 1987,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 2019,
+              "length": 4
+            },
+            "composedInputElements": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "mapping": {
+              "diseaseExacerbation": "HomeChronicDiseaseMonitor output[0]",
+              "poorControl": "HomeChronicDiseaseMonitor output[1]",
+              "borderlineControl": "HomeChronicDiseaseMonitor output[2]",
+              "diseaseControlled": "HomeChronicDiseaseMonitor output[3]"
+            }
+          },
+          {
+            "role": "medication_adherence_status",
+            "sourceMachine": "HomeMedicationCostBarrierMonitor.json",
+            "machineInputRegion": {
+              "offset": 1979,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 2011,
+              "length": 4
+            },
+            "composedInputElements": [
+              4,
+              5,
+              6,
+              7
+            ],
+            "mapping": {
+              "adherenceCrisis": "HomeMedicationCostBarrierMonitor output[0]",
+              "costBarrierActive": "HomeMedicationCostBarrierMonitor output[1]",
+              "partialAdherence": "HomeMedicationCostBarrierMonitor output[2]",
+              "medicationManaged": "HomeMedicationCostBarrierMonitor output[3]"
+            }
+          },
+          {
+            "role": "transport_access_status",
+            "sourceMachine": "HomeTransportationBarrierMonitor.json",
+            "machineInputRegion": {
+              "offset": 1983,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 2015,
+              "length": 4
+            },
+            "composedInputElements": [
+              8,
+              9,
+              10,
+              11
+            ],
+            "mapping": {
+              "criticalAccessFailure": "HomeTransportationBarrierMonitor output[0]",
+              "appointmentBarrier": "HomeTransportationBarrierMonitor output[1]",
+              "transitDependentRisk": "HomeTransportationBarrierMonitor output[2]",
+              "transportationAdequate": "HomeTransportationBarrierMonitor output[3]"
+            }
+          },
+          {
+            "role": "food_access_status",
+            "sourceMachine": "HomeFoodSecurityMonitor.json",
+            "machineInputRegion": {
+              "offset": 1963,
+              "length": 4
+            },
+            "machineOutputRegion": {
+              "offset": 1995,
+              "length": 4
+            },
+            "composedInputElements": [
+              12,
+              13,
+              14,
+              15
+            ],
+            "mapping": {
+              "foodCrisis": "HomeFoodSecurityMonitor output[0]",
+              "foodInsecure": "HomeFoodSecurityMonitor output[1]",
+              "assistanceNeeded": "HomeFoodSecurityMonitor output[2]",
+              "foodSecure": "HomeFoodSecurityMonitor output[3]"
+            }
+          },
+          {
+            "role": "activity_tolerance_status",
+            "sourceMachine": "DailyActivityMonitor.json",
+            "machineInputRegion": {
+              "offset": 1951,
+              "length": 2
+            },
+            "machineOutputRegion": {
+              "offset": 1953,
+              "length": 2
+            },
+            "composedInputElements": [
+              16,
+              17
+            ],
+            "mapping": {
+              "belowBaselineToday": "DailyActivityMonitor output[0]",
+              "sedentaryStreakActive": "DailyActivityMonitor output[1]"
+            }
+          }
+        ],
+        "downstreamConsumers": [
+          {
+            "machine": "HSPH131_care-coordination-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_disease_response",
+              "access_adherence_support",
+              "preventive_intensification"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "care coordination signal monitoring"
+          },
+          {
+            "machine": "HSPH132_care-coordination-resource-router.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_disease_response",
+              "access_adherence_support",
+              "preventive_intensification"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route care coordination resources"
+          },
+          {
+            "machine": "HSPH135_care-coordination-referral-optimizer.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "access_adherence_support",
+              "preventive_intensification"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "optimize chronic care and support referrals"
+          },
+          {
+            "machine": "HSPH137_care-coordination-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_disease_response",
+              "access_adherence_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "dispatch care coordination agent for high-risk chronic disease support"
+          },
+          {
+            "machine": "HSPH138_care-coordination-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_disease_response"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "govern urgent disease-response escalation"
+          },
+          {
+            "machine": "HSPH161_chronic-disease-prevention-signal-monitor.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_disease_response",
+              "preventive_intensification"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "chronic disease prevention signal monitoring"
+          },
+          {
+            "machine": "HSPH162_chronic-disease-prevention-resource-router.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "access_adherence_support",
+              "preventive_intensification"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "route chronic disease prevention resources"
+          },
+          {
+            "machine": "HSPH163_chronic-disease-prevention-equity-guardrail.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "access_adherence_support",
+              "preventive_intensification"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "guardrail inequitable access and social-driver burden"
+          },
+          {
+            "machine": "HSPH164_chronic-disease-prevention-capacity-balancer.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "preventive_intensification"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "balance prevention program capacity"
+          },
+          {
+            "machine": "HSPH165_chronic-disease-prevention-referral-optimizer.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "access_adherence_support",
+              "preventive_intensification"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "optimize chronic disease warm handoffs"
+          },
+          {
+            "machine": "HSPH166_chronic-disease-prevention-measure-tracker.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "preventive_intensification",
+              "stable_chronic_disease_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "track chronic disease measures and readiness"
+          },
+          {
+            "machine": "HSPH167_chronic-disease-prevention-agent-dispatcher.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_disease_response",
+              "access_adherence_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "dispatch chronic disease prevention agent"
+          },
+          {
+            "machine": "HSPH168_chronic-disease-prevention-governance-escalator.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_disease_response"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "govern unresolved chronic disease escalation"
+          },
+          {
+            "machine": "HSPH169_chronic-disease-prevention-learning-loop.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "preventive_intensification",
+              "stable_chronic_disease_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "adapt chronic disease prevention plan"
+          },
+          {
+            "machine": "HSPH170_chronic-disease-prevention-outcome-stabilizer.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "preventive_intensification",
+              "stable_chronic_disease_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "stabilize chronic disease prevention outcomes"
+          },
+          {
+            "machine": "CSX009_health-and-human-services-intake-crisis-benefit-intake.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_disease_response"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "purpose": "crisis benefits intake during acute chronic disease deterioration"
+          },
+          {
+            "machine": "CSX011_benefits-and-eligibility-medicaid-renewal-watch.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_disease_response",
+              "access_adherence_support"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "Medicaid renewal and coverage continuity watch"
+          },
+          {
+            "machine": "CSX012_benefits-and-eligibility-snap-eligibility-monitor.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "access_adherence_support"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "SNAP eligibility support when food access affects chronic disease control"
+          },
+          {
+            "machine": "CSX017_benefits-and-eligibility-document-readiness-monitor.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "access_adherence_support"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "benefits documentation readiness"
+          },
+          {
+            "machine": "CSX019_benefits-and-eligibility-enrollment-completion-monitor.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "access_adherence_support"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ],
+            "purpose": "benefits enrollment completion monitoring"
+          },
+          {
+            "machine": "LBL011_nutrition-and-metabolic-health-meal-pattern-stability.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "access_adherence_support",
+              "preventive_intensification",
+              "stable_chronic_disease_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "meal pattern stability support"
+          },
+          {
+            "machine": "LBL012_nutrition-and-metabolic-health-carbohydrate-tolerance-watch.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "preventive_intensification",
+              "stable_chronic_disease_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "carbohydrate tolerance and metabolic monitoring"
+          },
+          {
+            "machine": "LBL015_nutrition-and-metabolic-health-hydration-electrolyte-monitor.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_disease_response",
+              "preventive_intensification"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "hydration and electrolyte follow-up"
+          },
+          {
+            "machine": "LBL016_nutrition-and-metabolic-health-weight-metabolic-trend.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "urgent_disease_response",
+              "preventive_intensification",
+              "stable_chronic_disease_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "weight and metabolic trend support"
+          },
+          {
+            "machine": "LBL019_nutrition-and-metabolic-health-nutrition-plan-adherence.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "access_adherence_support",
+              "preventive_intensification",
+              "stable_chronic_disease_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "nutrition plan adherence support"
+          },
+          {
+            "machine": "LBL031_movement-and-physical-health-movement-baseline.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "preventive_intensification",
+              "stable_chronic_disease_monitoring"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "purpose": "movement baseline support"
+          },
+          {
+            "machine": "LBL035_movement-and-physical-health-mobility-pain-constraint.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "preventive_intensification"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "mobility constraint follow-up"
+          },
+          {
+            "machine": "LBL037_movement-and-physical-health-medication-movement-effects.json",
+            "inputRegion": {
+              "offset": 4386,
+              "length": 4
+            },
+            "lanes": [
+              "access_adherence_support",
+              "preventive_intensification"
+            ],
+            "outputMatchesAny": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "purpose": "medication and movement effect follow-up"
+          }
+        ],
+        "peContract": {
+          "compositionOwner": "perception-engine",
+          "startupConfigured": true,
+          "dispatchMode": "asynchronous-no-wait",
+          "sourcePayloadPolicy": "normalized-status-only",
+          "rawPayloadPolicy": "remain-in-source-ledger-or-upstream-system"
+        },
+        "fanOutPolicy": {
+          "owner": "perception-engine",
+          "mode": "lane-scoped",
+          "dispatchMode": "asynchronous-no-wait",
+          "defaultAction": "do-not-dispatch-unmatched-consumer",
+          "notes": "PE selects consumers from outputMatchesAny after RE emits the bus output. Urgent disease response, access/adherence support, preventive intensification, and stable monitoring intentionally fan out to different consumers."
+        },
+        "localAIResolver": {
+          "resolverId": "localai.health-personal.chronic-disease-response.resolver",
+          "provider": "ollama-localai",
+          "dispatchMode": "accepted-no-wait",
+          "inputRegion": {
+            "offset": 4386,
+            "length": 4
+          },
+          "writeBack": {
+            "type": "pe-sensor",
+            "provider": "localai",
+            "sensorId": "localai.health-personal.chronic-disease-response.resolver.completion",
+            "name": "localAIStack chronic disease response resolver completion",
+            "region": {
+              "offset": 4386,
+              "length": 4
+            },
+            "semantics": [
+              "urgent disease response resolved or acknowledged",
+              "access adherence support resolved or acknowledged",
+              "preventive intensification resolved or acknowledged",
+              "stable chronic disease monitoring resolved or acknowledged"
+            ],
+            "ttlMs": 300000,
+            "normalization": "machine-native-binary",
+            "ingest": {
+              "endpoint": "/api/integrations/completions",
+              "method": "POST",
+              "triggerPush": false,
+              "compactPush": true
+            },
+            "sourceMapping": {
+              "id": "localai-chronic-disease-response-resolver-completion",
+              "sensorId": "localai.health-personal.chronic-disease-response.resolver.completion",
+              "name": "localAIStack chronic disease response resolver completion",
+              "region": {
+                "offset": 4386,
+                "length": 4
+              },
+              "ttlMs": 300000
+            }
+          },
+          "contractSurface": "publishedDomainBus.localAIResolver",
+          "notes": "Resolver metadata is consumed by PE startup configuration. It intentionally does not create metadata.agentBinding because this bridge machine is not an agent-dispatcher and RE should see only ordinary vector state."
+        }
+      },
+      "tags": [
+        "health-personal",
+        "home-health",
+        "chronic-disease",
+        "chronic-disease-response",
+        "published-domain-bus",
+        "published-bus-health-personal-chronic-disease-response",
+        "interconnect",
+        "startup-loadable",
+        "ces-sequences",
+        "ces-sequences-4",
+        "input-sequences",
+        "input-sequences-4"
+      ],
+      "sequenceCount": 4,
+      "machineClass": "bridge",
+      "inputSemantics": [
+        "disease exacerbation bit",
+        "poor chronic disease control bit",
+        "borderline chronic disease control bit",
+        "disease controlled bit",
+        "medication adherence crisis bit",
+        "medication cost barrier active bit",
+        "partial medication adherence bit",
+        "medication managed bit",
+        "critical transportation access failure bit",
+        "appointment transportation barrier bit",
+        "transit dependent risk bit",
+        "transportation adequate bit",
+        "food crisis bit",
+        "food insecure bit",
+        "food assistance needed bit",
+        "food secure bit",
+        "below baseline activity bit",
+        "sedentary streak active bit"
+      ],
+      "triggerConfig": {
+        "processId": "HOMECHRONICDISEASERESPONSEINTERCONNECT",
+        "processName": "Home Chronic Disease Response Interconnect",
+        "rules": [
+          {
+            "sequenceId": "chronic-disease-urgent-response",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "URGENT_DISEASE_RESPONSE: acute chronic disease deterioration with access/adherence co-risk at [4386:4390]"
+          },
+          {
+            "sequenceId": "chronic-disease-access-adherence-support",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "ACCESS_ADHERENCE_SUPPORT: poor control driven by medication, transportation, or food-access barriers at [4386:4390]"
+          },
+          {
+            "sequenceId": "chronic-disease-preventive-intensification",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "PREVENTIVE_INTENSIFICATION: borderline disease control with early risk signals at [4386:4390]"
+          },
+          {
+            "sequenceId": "chronic-disease-stable-monitoring",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "STABLE_CHRONIC_DISEASE_MONITORING: disease and support lanes stable at [4386:4390]"
+          }
+        ]
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "manual-corpus-interconnect-authoring",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "home-health",
+          "chronic-disease"
+        ],
+        "family": "home-chronic-disease-response-interconnect",
+        "machineCode": "home-chronic-disease-response-interconnect",
+        "capabilityTags": [
+          "published-domain-bus",
+          "interconnect"
+        ],
+        "workflowTags": [
+          "chronic-disease-response",
+          "care-coordination",
+          "benefits-access",
+          "prevention"
+        ],
+        "integrationTags": [
+          "published-bus-health-personal-chronic-disease-response"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-4",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "health-personal",
+          "home-health",
+          "chronic-disease",
+          "chronic-disease-response",
+          "published-domain-bus",
+          "published-bus-health-personal-chronic-disease-response",
+          "interconnect",
+          "startup-loadable",
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "input-sequences-4"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/home-chronic-disease-response-interconnect",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "patient-safety-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "Published PE-composed bridge bus for chronic disease response. RE evaluates only vector state; PE owns source provenance and completion ingestion."
+      }
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "exact",
+    "perceptualMapping": {
+      "input": {
+        "offset": 4368,
+        "length": 18
+      },
+      "output": {
+        "offset": 4386,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "chronic-disease-urgent-response",
+        "name": "Disease exacerbation + adherence/access collapse -> urgent disease response",
+        "metadata": {
+          "description": "Acute disease deterioration aligns with medication, transportation, nutrition, and activity-risk context.",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "cdr-urgent-response",
+            "elements": [
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "cdr-urgent-response-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route urgent chronic disease response, care coordination, benefits continuity, and clinical escalation review."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chronic-disease-access-adherence-support",
+        "name": "Poor control + medication/transport/food access barriers -> access adherence support",
+        "metadata": {
+          "description": "Poor chronic disease control appears driven by medication cost, appointment access, and food support gaps.",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "cdr-access-adherence-support",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "cdr-access-adherence-support-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route medication access, transportation, benefits, and care-resource support."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chronic-disease-preventive-intensification",
+        "name": "Borderline control + early access/activity risk -> preventive intensification",
+        "metadata": {
+          "description": "Disease control is near-miss rather than crisis; PE should route to prevention, nutrition, activity, and measure tracking.",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "cdr-preventive-intensification",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "cdr-preventive-intensification-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "Route preventive intensification and chronic disease program follow-up before acute escalation."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chronic-disease-stable-monitoring",
+        "name": "Controlled disease + managed supports -> stable chronic disease monitoring",
+        "metadata": {
+          "description": "Disease control and support lanes are stable; PE should route only lightweight monitoring consumers.",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "cdr-stable-monitoring",
+            "elements": [
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 0
+              },
+              {
+                "value": 0
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "cdr-stable-monitoring-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "Continue lightweight monitoring and outcome stabilization."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Disease exacerbation + adherence/access collapse -> urgent disease response",
+        "pattern": "PE composed bus input: Acute disease deterioration aligns with medication, transportation, nutrition, and activity-risk context.",
+        "description": "Applies the compact PE-composed input lane at [4368:4386] to activate the published chronic disease response bus and emit urgent_disease_response to [4386:4390].",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "chronic-disease-urgent-response",
+          "sourceRegionInputs": {
+            "HomeChronicDiseaseMonitor[2019:2023]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "HomeMedicationCostBarrierMonitor[2011:2015]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "HomeTransportationBarrierMonitor[2015:2019]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "HomeFoodSecurityMonitor[1995:1999]": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "DailyActivityMonitor[1953:1955]": [
+              1,
+              1
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4368,
+            "length": 18
+          },
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4386,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH137_care-coordination-agent-dispatcher",
+            "HSPH138_care-coordination-governance-escalator",
+            "HSPH161_chronic-disease-prevention-signal-monitor",
+            "HSPH167_chronic-disease-prevention-agent-dispatcher",
+            "HSPH168_chronic-disease-prevention-governance-escalator",
+            "CSX009_health-and-human-services-intake-crisis-benefit-intake",
+            "CSX011_benefits-and-eligibility-medicaid-renewal-watch",
+            "LBL015_nutrition-and-metabolic-health-hydration-electrolyte-monitor",
+            "LBL016_nutrition-and-metabolic-health-weight-metabolic-trend"
+          ],
+          "fanOutPolicy": "lane-scoped urgent_disease_response only"
+        }
+      },
+      {
+        "name": "Poor control + medication/transport/food access barriers -> access adherence support",
+        "pattern": "PE composed bus input: Poor chronic disease control appears driven by medication cost, appointment access, and food support gaps.",
+        "description": "Applies the compact PE-composed input lane at [4368:4386] to activate the published chronic disease response bus and emit access_adherence_support to [4386:4390].",
+        "vectors": [
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "chronic-disease-access-adherence-support",
+          "sourceRegionInputs": {
+            "HomeChronicDiseaseMonitor[2019:2023]": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "HomeMedicationCostBarrierMonitor[2011:2015]": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "HomeTransportationBarrierMonitor[2015:2019]": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "HomeFoodSecurityMonitor[1995:1999]": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "DailyActivityMonitor[1953:1955]": [
+              1,
+              0
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4368,
+            "length": 18
+          },
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4386,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH135_care-coordination-referral-optimizer",
+            "HSPH137_care-coordination-agent-dispatcher",
+            "HSPH162_chronic-disease-prevention-resource-router",
+            "HSPH163_chronic-disease-prevention-equity-guardrail",
+            "HSPH165_chronic-disease-prevention-referral-optimizer",
+            "HSPH167_chronic-disease-prevention-agent-dispatcher",
+            "CSX011_benefits-and-eligibility-medicaid-renewal-watch",
+            "CSX012_benefits-and-eligibility-snap-eligibility-monitor",
+            "CSX017_benefits-and-eligibility-document-readiness-monitor",
+            "CSX019_benefits-and-eligibility-enrollment-completion-monitor",
+            "LBL011_nutrition-and-metabolic-health-meal-pattern-stability",
+            "LBL019_nutrition-and-metabolic-health-nutrition-plan-adherence",
+            "LBL037_movement-and-physical-health-medication-movement-effects"
+          ],
+          "fanOutPolicy": "lane-scoped access_adherence_support only"
+        }
+      },
+      {
+        "name": "Borderline control + early access/activity risk -> preventive intensification",
+        "pattern": "PE composed bus input: Disease control is near-miss rather than crisis; PE should route to prevention, nutrition, activity, and measure tracking.",
+        "description": "Applies the compact PE-composed input lane at [4368:4386] to activate the published chronic disease response bus and emit preventive_intensification to [4386:4390].",
+        "vectors": [
+          [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "chronic-disease-preventive-intensification",
+          "sourceRegionInputs": {
+            "HomeChronicDiseaseMonitor[2019:2023]": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "HomeMedicationCostBarrierMonitor[2011:2015]": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "HomeTransportationBarrierMonitor[2015:2019]": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "HomeFoodSecurityMonitor[1995:1999]": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "DailyActivityMonitor[1953:1955]": [
+              1,
+              0
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4368,
+            "length": 18
+          },
+          "expectedOutputVector": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 4386,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH131_care-coordination-signal-monitor",
+            "HSPH132_care-coordination-resource-router",
+            "HSPH135_care-coordination-referral-optimizer",
+            "HSPH161_chronic-disease-prevention-signal-monitor",
+            "HSPH162_chronic-disease-prevention-resource-router",
+            "HSPH163_chronic-disease-prevention-equity-guardrail",
+            "HSPH164_chronic-disease-prevention-capacity-balancer",
+            "HSPH165_chronic-disease-prevention-referral-optimizer",
+            "HSPH166_chronic-disease-prevention-measure-tracker",
+            "HSPH169_chronic-disease-prevention-learning-loop",
+            "HSPH170_chronic-disease-prevention-outcome-stabilizer",
+            "LBL011_nutrition-and-metabolic-health-meal-pattern-stability",
+            "LBL012_nutrition-and-metabolic-health-carbohydrate-tolerance-watch",
+            "LBL015_nutrition-and-metabolic-health-hydration-electrolyte-monitor",
+            "LBL016_nutrition-and-metabolic-health-weight-metabolic-trend",
+            "LBL019_nutrition-and-metabolic-health-nutrition-plan-adherence",
+            "LBL031_movement-and-physical-health-movement-baseline",
+            "LBL035_movement-and-physical-health-mobility-pain-constraint",
+            "LBL037_movement-and-physical-health-medication-movement-effects"
+          ],
+          "fanOutPolicy": "lane-scoped preventive_intensification only"
+        }
+      },
+      {
+        "name": "Controlled disease + managed supports -> stable chronic disease monitoring",
+        "pattern": "PE composed bus input: Disease control and support lanes are stable; PE should route only lightweight monitoring consumers.",
+        "description": "Applies the compact PE-composed input lane at [4368:4386] to activate the published chronic disease response bus and emit stable_chronic_disease_monitoring to [4386:4390].",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "chronic-disease-stable-monitoring",
+          "sourceRegionInputs": {
+            "HomeChronicDiseaseMonitor[2019:2023]": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "HomeMedicationCostBarrierMonitor[2011:2015]": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "HomeTransportationBarrierMonitor[2015:2019]": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "HomeFoodSecurityMonitor[1995:1999]": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "DailyActivityMonitor[1953:1955]": [
+              0,
+              0
+            ]
+          },
+          "composedInputRegion": {
+            "offset": 4368,
+            "length": 18
+          },
+          "expectedOutputVector": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "expectedOutputRegion": {
+            "offset": 4386,
+            "length": 4
+          },
+          "expectedDownstreamConsumers": [
+            "HSPH166_chronic-disease-prevention-measure-tracker",
+            "HSPH169_chronic-disease-prevention-learning-loop",
+            "HSPH170_chronic-disease-prevention-outcome-stabilizer",
+            "LBL011_nutrition-and-metabolic-health-meal-pattern-stability",
+            "LBL012_nutrition-and-metabolic-health-carbohydrate-tolerance-watch",
+            "LBL016_nutrition-and-metabolic-health-weight-metabolic-trend",
+            "LBL019_nutrition-and-metabolic-health-nutrition-plan-adherence",
+            "LBL031_movement-and-physical-health-movement-baseline"
+          ],
+          "fanOutPolicy": "lane-scoped stable_chronic_disease_monitoring only"
+        }
+      }
+    ]
+  }
+}

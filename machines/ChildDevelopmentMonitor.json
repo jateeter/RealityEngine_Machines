@@ -142,10 +142,68 @@
       },
       "machineClass": "risk-forecaster",
       "inputSemantics": [
-        "Child Development Monitor input 1",
-        "Child Development Monitor input 2",
-        "Child Development Monitor input 3",
-        "Child Development Monitor input 4"
+        "developmental_milestone_progress_norm",
+        "social_emotional_engagement_norm",
+        "language_acquisition_norm",
+        "learning_readiness_norm"
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-child-development-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1975,
+          "length": 4
+        },
+        "normalization": "machine-native-scalar",
+        "semantics": [
+          "developmental_milestone_progress_norm",
+          "social_emotional_engagement_norm",
+          "language_acquisition_norm",
+          "learning_readiness_norm"
+        ],
+        "peContract": "OpenClaw maps child development observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle."
+      },
+      "interconnections": [
+        {
+          "id": "health-personal.caregiver-support-response.child-development-status",
+          "role": "child_development_status",
+          "sourceMachine": "Child Development Monitor",
+          "sourceOutputRegion": {
+            "offset": 2007,
+            "length": 4
+          },
+          "targetInputElements": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "normalizedElements": [
+            "referral needed bit from ChildDevelopmentMonitor [2007]",
+            "social developmental concern bit from ChildDevelopmentMonitor [2008]",
+            "learning concern bit from ChildDevelopmentMonitor [2009]",
+            "development ok bit from ChildDevelopmentMonitor [2010]"
+          ],
+          "purpose": "Publish child development status into the personal-health caregiver support response bus.",
+          "type": "published-domain-bus-producer",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI, source observations, case notes, and family records remain outside the universal reality vector.",
+          "busId": "health-personal.caregiver-support-response",
+          "busTag": "published-bus-health-personal-caregiver-support-response",
+          "targetMachine": "Home Caregiver Support Response Interconnect",
+          "targetMachineFile": "HomeCaregiverSupportResponseInterconnect.json",
+          "busInputRegion": {
+            "offset": 4390,
+            "length": 20
+          },
+          "busOutputRegion": {
+            "offset": 4410,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait"
+        }
       ]
     },
     "arbiterRule": "PASSTHROUGH",
