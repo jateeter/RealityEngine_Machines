@@ -151,14 +151,63 @@
       },
       "machineClass": "risk-forecaster",
       "inputSemantics": [
-        "pediatric-growth-alert-bit",
-        "pediatric-nutrition-deficit-bit",
-        "pediatric-micronutrient-concern-bit",
-        "pediatric-nutrition-ok-bit",
-        "child-referral-needed-bit",
-        "child-social-developmental-concern-bit",
-        "child-learning-concern-bit",
-        "child-development-ok-bit"
+        "Home Caregiver Burden Monitor input 1",
+        "Home Caregiver Burden Monitor input 2",
+        "Home Caregiver Burden Monitor input 3",
+        "Home Caregiver Burden Monitor input 4",
+        "Home Caregiver Burden Monitor input 5",
+        "Home Caregiver Burden Monitor input 6",
+        "Home Caregiver Burden Monitor input 7",
+        "Home Caregiver Burden Monitor input 8"
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.child-development-support.caregiver-burden-status",
+          "type": "published-domain-bus-producer",
+          "role": "caregiver_burden_status",
+          "sourceMachine": "Home Caregiver Burden Monitor",
+          "sourceOutputRegion": {
+            "offset": 2031,
+            "length": 4
+          },
+          "targetInputElements": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "normalizedElements": [
+            "caregiver burnout bit from HomeCaregiverBurdenMonitor output[0]",
+            "high burden bit from HomeCaregiverBurdenMonitor output[1]",
+            "moderate burden bit from HomeCaregiverBurdenMonitor output[2]",
+            "caregiver coping bit from HomeCaregiverBurdenMonitor output[3]"
+          ],
+          "purpose": "Publish caregiver capacity context into the personal-health child development support bus.",
+          "busId": "health-personal.child-development-support",
+          "busTag": "published-bus-health-personal-child-development-support",
+          "targetMachine": "Child Development Support Interconnect",
+          "targetMachineFile": "ChildDevelopmentSupportInterconnect.json",
+          "targetInputRegion": {
+            "offset": 4458,
+            "length": 18
+          },
+          "busInputRegion": {
+            "offset": 4458,
+            "length": 18
+          },
+          "publishedOutputRegion": {
+            "offset": 4476,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 4476,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
+        }
       ],
       "openClawProjection": {
         "projectionId": "openclaw-home-caregiver-burden-native-input-projection",
@@ -170,58 +219,17 @@
         },
         "normalization": "machine-native-binary",
         "semantics": [
-          "pediatric-growth-alert-bit",
-          "pediatric-nutrition-deficit-bit",
-          "pediatric-micronutrient-concern-bit",
-          "pediatric-nutrition-ok-bit",
-          "child-referral-needed-bit",
-          "child-social-developmental-concern-bit",
-          "child-learning-concern-bit",
-          "child-development-ok-bit"
+          "growth_alert_bit",
+          "nutrition_deficit_bit",
+          "micronutrient_concern_bit",
+          "nutrition_ok_bit",
+          "development_referral_needed_bit",
+          "social_developmental_concern_bit",
+          "learning_concern_bit",
+          "development_ok_bit"
         ],
-        "peContract": "Normal path is deterministic PE composition from pediatric nutrition and child development outputs. OpenClaw may populate the same native lane only for external caregiver burden observations that bypass upstream machines."
-      },
-      "interconnections": [
-        {
-          "id": "health-personal.caregiver-support-response.caregiver-burden-status",
-          "role": "caregiver_burden_status",
-          "sourceMachine": "Home Caregiver Burden Monitor",
-          "sourceOutputRegion": {
-            "offset": 2031,
-            "length": 4
-          },
-          "targetInputElements": [
-            0,
-            1,
-            2,
-            3
-          ],
-          "normalizedElements": [
-            "caregiver burnout bit from HomeCaregiverBurdenMonitor [2031]",
-            "high burden bit from HomeCaregiverBurdenMonitor [2032]",
-            "moderate burden bit from HomeCaregiverBurdenMonitor [2033]",
-            "caregiver coping bit from HomeCaregiverBurdenMonitor [2034]"
-          ],
-          "purpose": "Publish caregiver burden status into the personal-health caregiver support response bus.",
-          "type": "published-domain-bus-producer",
-          "privacyBoundary": "PE composes normalized status bits only; raw PHI, source observations, case notes, and family records remain outside the universal reality vector.",
-          "busId": "health-personal.caregiver-support-response",
-          "busTag": "published-bus-health-personal-caregiver-support-response",
-          "targetMachine": "Home Caregiver Support Response Interconnect",
-          "targetMachineFile": "HomeCaregiverSupportResponseInterconnect.json",
-          "busInputRegion": {
-            "offset": 4390,
-            "length": 20
-          },
-          "busOutputRegion": {
-            "offset": 4410,
-            "length": 4
-          },
-          "peCompositionRequired": true,
-          "compositionOwner": "perception-engine",
-          "dispatchMode": "asynchronous-no-wait"
-        }
-      ]
+        "peContract": "Normal path is deterministic PE composition from pediatric nutrition and child development outputs. OpenClaw may populate the same native lane only for external caregiver-burden observations that bypass those upstream machines."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
