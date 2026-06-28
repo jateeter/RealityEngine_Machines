@@ -143,10 +143,68 @@
       },
       "machineClass": "signal-monitor",
       "inputSemantics": [
-        "Pediatric Nutrition Monitor input 1",
-        "Pediatric Nutrition Monitor input 2",
-        "Pediatric Nutrition Monitor input 3",
-        "Pediatric Nutrition Monitor input 4"
+        "pediatric_growth_percentile_norm",
+        "pediatric_caloric_adequacy_norm",
+        "pediatric_micronutrient_status_norm",
+        "pediatric_dietary_diversity_norm"
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-pediatric-nutrition-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1971,
+          "length": 4
+        },
+        "normalization": "machine-native-scalar",
+        "semantics": [
+          "pediatric_growth_percentile_norm",
+          "pediatric_caloric_adequacy_norm",
+          "pediatric_micronutrient_status_norm",
+          "pediatric_dietary_diversity_norm"
+        ],
+        "peContract": "OpenClaw maps pediatric nutrition observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle."
+      },
+      "interconnections": [
+        {
+          "id": "health-personal.caregiver-support-response.pediatric-nutrition-status",
+          "role": "pediatric_nutrition_status",
+          "sourceMachine": "Pediatric Nutrition Monitor",
+          "sourceOutputRegion": {
+            "offset": 2003,
+            "length": 4
+          },
+          "targetInputElements": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "normalizedElements": [
+            "growth alert bit from PediatricNutritionMonitor [2003]",
+            "nutrition deficit bit from PediatricNutritionMonitor [2004]",
+            "micronutrient concern bit from PediatricNutritionMonitor [2005]",
+            "nutrition ok bit from PediatricNutritionMonitor [2006]"
+          ],
+          "purpose": "Publish pediatric nutrition status into the personal-health caregiver support response bus.",
+          "type": "published-domain-bus-producer",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI, source observations, case notes, and family records remain outside the universal reality vector.",
+          "busId": "health-personal.caregiver-support-response",
+          "busTag": "published-bus-health-personal-caregiver-support-response",
+          "targetMachine": "Home Caregiver Support Response Interconnect",
+          "targetMachineFile": "HomeCaregiverSupportResponseInterconnect.json",
+          "busInputRegion": {
+            "offset": 4390,
+            "length": 20
+          },
+          "busOutputRegion": {
+            "offset": 4410,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait"
+        }
       ]
     },
     "arbiterRule": "PASSTHROUGH",
