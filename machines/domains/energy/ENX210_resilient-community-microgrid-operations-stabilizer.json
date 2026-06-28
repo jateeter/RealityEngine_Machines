@@ -1,0 +1,664 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Energy Resilient Community Microgrid Operations Stabilizer",
+    "description": "Monitors post-dispatch recovery evidence for critical services, islanded operation, storage, generation, feeder switching, logistics, protocols, and cyber safety.",
+    "metadata": {
+      "category": "energy",
+      "businessSector": "energy",
+      "domain": "New Energy - Resilient Community Microgrid",
+      "author": "Reality Engine",
+      "operationalFocus": "Resilient Community Microgrid Operations Stabilizer",
+      "assetClass": "Community Microgrid Service Layer",
+      "assetKind": "service-orchestration",
+      "inputSpace": "10D binary at [16717:16727]",
+      "outputSpace": "4D binary at [16727:16731]: [1,0,0,0]=RECOVERY_REGRESSION, [0,1,0,0]=STABILIZATION_ACTION_REQUIRED, [0,0,1,0]=COMPLETION_EVIDENCE_PENDING, [0,0,0,1]=OPERATIONS_STABLE",
+      "inputSemantics": [
+        "critical load recovery confirmed",
+        "islanded or reconnected posture confirmed",
+        "storage reserve recovered",
+        "generation commitment recovered",
+        "feeder path stable after action",
+        "service continuity recovered",
+        "supply chain action accepted",
+        "Smart Grid protocol path stable",
+        "cyber safety gate clear",
+        "operator closeout complete"
+      ],
+      "sensorNormalization": {
+        "critical_load_recovery_confirmed_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "islanded_or_reconnected_posture_confirmed_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "storage_reserve_recovered_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "generation_commitment_recovered_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "feeder_path_stable_after_action_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "service_continuity_recovered_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "supply_chain_action_accepted_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "smart_grid_protocol_path_stable_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "cyber_safety_gate_clear_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "operator_closeout_complete_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization"
+      },
+      "sequenceCount": 4,
+      "tags": [
+        "energy",
+        "community-microgrid",
+        "resilient-community-infrastructure",
+        "smart-grid",
+        "openclaw",
+        "localai",
+        "ollama",
+        "startup-loadable",
+        "enx210",
+        "resilient-community-microgrid-operations-stabilizer"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "codex-energy-microgrid-service-layer",
+        "primaryDomain": "energy",
+        "domainTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure"
+        ],
+        "family": "resilient-community-microgrid",
+        "machineCode": "enx210",
+        "capabilityTags": [
+          "smart-grid",
+          "microgrid-operations",
+          "resilient-community-microgrid-operations-stabilizer"
+        ],
+        "workflowTags": [
+          "openclaw-projection",
+          "pe-source-mapping",
+          "async-resolver-ready"
+        ],
+        "integrationTags": [
+          "openclaw",
+          "localai",
+          "ollama",
+          "smart-grid-protocols"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure",
+          "smart-grid",
+          "openclaw",
+          "localai",
+          "ollama",
+          "startup-loadable",
+          "enx210",
+          "resilient-community-microgrid-operations-stabilizer"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "community-microgrid-operations",
+        "runbook": "https://runbooks.example.org/energy/enx210-resilient-community-microgrid-operations-stabilizer",
+        "escalationPolicy": "pagerduty:community-microgrid-operations",
+        "contact": {
+          "primary": "community-microgrid-ops-primary@example.org",
+          "secondary": "community-microgrid-ops-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": 3600,
+          "warning": 900,
+          "error": 300
+        },
+        "notes": "Service-layer resilient community microgrid machine. PE owns protocol adapters, OpenClaw/Ollama handoffs, field completions, and source provenance; RE evaluates only normalized vector state."
+      },
+      "triggerConfig": {
+        "processId": "ENX210_RESILIENT_COMMUNITY_MICROGRID_OPERATIONS_STABILIZER",
+        "processName": "Energy Resilient Community Microgrid Operations Stabilizer",
+        "rules": [
+          {
+            "sequenceId": "enx210-recovery-regression",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Resilient Community Microgrid Operations Stabilizer: RECOVERY_REGRESSION"
+          },
+          {
+            "sequenceId": "enx210-stabilization-action-required",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Resilient Community Microgrid Operations Stabilizer: STABILIZATION_ACTION_REQUIRED"
+          },
+          {
+            "sequenceId": "enx210-completion-evidence-pending",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Resilient Community Microgrid Operations Stabilizer: COMPLETION_EVIDENCE_PENDING"
+          },
+          {
+            "sequenceId": "enx210-operations-stable",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Resilient Community Microgrid Operations Stabilizer: OPERATIONS_STABLE"
+          }
+        ]
+      },
+      "machineClass": "outcome-stabilizer",
+      "openClawProjection": {
+        "projectionId": "openclaw-energy-resilient-community-microgrid-operations-stabilizer-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 16717,
+          "length": 10
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "critical_load_recovery_confirmed",
+          "islanded_or_reconnected_posture_confirmed",
+          "storage_reserve_recovered",
+          "generation_commitment_recovered",
+          "feeder_path_stable_after_action",
+          "service_continuity_recovered",
+          "supply_chain_action_accepted",
+          "smart_grid_protocol_path_stable",
+          "cyber_safety_gate_clear",
+          "operator_closeout_complete"
+        ],
+        "peContract": "OpenClaw maps resilient community microgrid observations to this machine's native input lane; PE writes the vector source and does not wait inside a PE cycle."
+      },
+      "interconnections": [
+        {
+          "id": "energy.resilient-community-microgrid-command-center.resilient-community-microgrid-operations-stabilizer",
+          "type": "published-domain-bus-producer",
+          "role": "resilient_community_microgrid_operations_stabilizer",
+          "sourceMachine": "Energy Resilient Community Microgrid Operations Stabilizer",
+          "sourceOutputRegion": {
+            "offset": 16727,
+            "length": 4
+          },
+          "targetInputElements": [
+            9
+          ],
+          "normalizedElements": [
+            "Energy Resilient Community Microgrid Operations Stabilizer active output[0] bit"
+          ],
+          "purpose": "Publish Energy Resilient Community Microgrid Operations Stabilizer urgent/review response lane into energy.resilient-community-microgrid-command-center.",
+          "busId": "energy.resilient-community-microgrid-command-center",
+          "busTag": "published-bus-energy-resilient-community-microgrid-command-center",
+          "targetMachine": "Energy Resilient Community Microgrid Command Center",
+          "targetMachineFile": "EnergyResilientCommunityMicrogridCommandCenterInterconnect.json",
+          "targetInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "busInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "publishedOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized community microgrid status bits only; raw utility telemetry, protocol frames, operator notes, logistics records, and provider payloads remain outside the universal reality vector."
+        }
+      ]
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 16717,
+        "length": 10
+      },
+      "output": {
+        "offset": 16727,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "enx210-recovery-regression",
+        "name": "Resilient Community Microgrid Operations Stabilizer: RECOVERY_REGRESSION",
+        "metadata": {
+          "description": "Resilient Community Microgrid Operations Stabilizer: RECOVERY_REGRESSION",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx210-recovery-regression-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx210-recovery-regression-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "RECOVERY_REGRESSION for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx210-stabilization-action-required",
+        "name": "Resilient Community Microgrid Operations Stabilizer: STABILIZATION_ACTION_REQUIRED",
+        "metadata": {
+          "description": "Resilient Community Microgrid Operations Stabilizer: STABILIZATION_ACTION_REQUIRED",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx210-stabilization-action-required-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx210-stabilization-action-required-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "STABILIZATION_ACTION_REQUIRED for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx210-completion-evidence-pending",
+        "name": "Resilient Community Microgrid Operations Stabilizer: COMPLETION_EVIDENCE_PENDING",
+        "metadata": {
+          "description": "Resilient Community Microgrid Operations Stabilizer: COMPLETION_EVIDENCE_PENDING",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx210-completion-evidence-pending-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx210-completion-evidence-pending-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "COMPLETION_EVIDENCE_PENDING for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx210-operations-stable",
+        "name": "Resilient Community Microgrid Operations Stabilizer: OPERATIONS_STABLE",
+        "metadata": {
+          "description": "Resilient Community Microgrid Operations Stabilizer: OPERATIONS_STABLE",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "enx210-operations-stable-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx210-operations-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "OPERATIONS_STABLE for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Resilient Community Microgrid Operations Stabilizer: RECOVERY_REGRESSION",
+        "pattern": "RECOVERY_REGRESSION",
+        "description": "Activates RECOVERY_REGRESSION.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "recovery-regression",
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16727,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Resilient Community Microgrid Operations Stabilizer: STABILIZATION_ACTION_REQUIRED",
+        "pattern": "STABILIZATION_ACTION_REQUIRED",
+        "description": "Activates STABILIZATION_ACTION_REQUIRED.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "stabilization-action-required",
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16727,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Resilient Community Microgrid Operations Stabilizer: COMPLETION_EVIDENCE_PENDING",
+        "pattern": "COMPLETION_EVIDENCE_PENDING",
+        "description": "Activates COMPLETION_EVIDENCE_PENDING.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "completion-evidence-pending",
+          "expectedOutputVector": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16727,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Resilient Community Microgrid Operations Stabilizer: OPERATIONS_STABLE",
+        "pattern": "OPERATIONS_STABLE",
+        "description": "Activates OPERATIONS_STABLE.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "operations-stable",
+          "expectedOutputVector": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "expectedOutputRegion": {
+            "offset": 16727,
+            "length": 4
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,664 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Energy Supply Chain Logistics Coordinator",
+    "description": "Manages spare parts, fuel or alternate energy supplies, field crews, mobile battery assets, mutual aid vendors, lead time, and work-order backlog.",
+    "metadata": {
+      "category": "energy",
+      "businessSector": "energy",
+      "domain": "New Energy - Resilient Community Microgrid",
+      "author": "Reality Engine",
+      "operationalFocus": "Energy Supply Chain Logistics Coordinator",
+      "assetClass": "Community Microgrid Service Layer",
+      "assetKind": "service-orchestration",
+      "inputSpace": "10D binary at [16677:16687]",
+      "outputSpace": "4D binary at [16687:16691]: [1,0,0,0]=LOGISTICS_BLOCKING_RESILIENCE, [0,1,0,0]=EXPEDITE_SUPPLY_CHAIN, [0,0,1,0]=SCHEDULE_FIELD_CREW, [0,0,0,1]=LOGISTICS_STABLE",
+      "inputSemantics": [
+        "spare inverter parts below threshold",
+        "battery service parts below threshold",
+        "generator fuel or alternate energy supply constrained",
+        "field crew unavailable",
+        "EV or mobile battery asset unavailable",
+        "food heating or cooking fuel support constrained",
+        "communications repair part constrained",
+        "mutual aid vendor capacity available",
+        "procurement lead time exceeds resilience window",
+        "work order backlog active"
+      ],
+      "sensorNormalization": {
+        "spare_inverter_parts_below_threshold_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "battery_service_parts_below_threshold_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "generator_fuel_or_alternate_energy_supply_constrained_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "field_crew_unavailable_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "ev_or_mobile_battery_asset_unavailable_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "food_heating_or_cooking_fuel_support_constrained_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "communications_repair_part_constrained_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "mutual_aid_vendor_capacity_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "procurement_lead_time_exceeds_resilience_window_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "work_order_backlog_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization"
+      },
+      "sequenceCount": 4,
+      "tags": [
+        "energy",
+        "community-microgrid",
+        "resilient-community-infrastructure",
+        "smart-grid",
+        "openclaw",
+        "localai",
+        "ollama",
+        "startup-loadable",
+        "enx207",
+        "energy-supply-chain-logistics-coordinator"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "codex-energy-microgrid-service-layer",
+        "primaryDomain": "energy",
+        "domainTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure"
+        ],
+        "family": "resilient-community-microgrid",
+        "machineCode": "enx207",
+        "capabilityTags": [
+          "smart-grid",
+          "microgrid-operations",
+          "energy-supply-chain-logistics-coordinator"
+        ],
+        "workflowTags": [
+          "openclaw-projection",
+          "pe-source-mapping",
+          "async-resolver-ready"
+        ],
+        "integrationTags": [
+          "openclaw",
+          "localai",
+          "ollama",
+          "smart-grid-protocols"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure",
+          "smart-grid",
+          "openclaw",
+          "localai",
+          "ollama",
+          "startup-loadable",
+          "enx207",
+          "energy-supply-chain-logistics-coordinator"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "community-microgrid-operations",
+        "runbook": "https://runbooks.example.org/energy/enx207-energy-supply-chain-logistics-coordinator",
+        "escalationPolicy": "pagerduty:community-microgrid-operations",
+        "contact": {
+          "primary": "community-microgrid-ops-primary@example.org",
+          "secondary": "community-microgrid-ops-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": 3600,
+          "warning": 900,
+          "error": 300
+        },
+        "notes": "Service-layer resilient community microgrid machine. PE owns protocol adapters, OpenClaw/Ollama handoffs, field completions, and source provenance; RE evaluates only normalized vector state."
+      },
+      "triggerConfig": {
+        "processId": "ENX207_ENERGY_SUPPLY_CHAIN_LOGISTICS_COORDINATOR",
+        "processName": "Energy Supply Chain Logistics Coordinator",
+        "rules": [
+          {
+            "sequenceId": "enx207-logistics-blocking-resilience",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Supply Chain Logistics Coordinator: LOGISTICS_BLOCKING_RESILIENCE"
+          },
+          {
+            "sequenceId": "enx207-expedite-supply-chain",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Supply Chain Logistics Coordinator: EXPEDITE_SUPPLY_CHAIN"
+          },
+          {
+            "sequenceId": "enx207-schedule-field-crew",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Supply Chain Logistics Coordinator: SCHEDULE_FIELD_CREW"
+          },
+          {
+            "sequenceId": "enx207-logistics-stable",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Supply Chain Logistics Coordinator: LOGISTICS_STABLE"
+          }
+        ]
+      },
+      "machineClass": "optimizer",
+      "openClawProjection": {
+        "projectionId": "openclaw-energy-supply-chain-logistics-coordinator-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 16677,
+          "length": 10
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "spare_inverter_parts_below_threshold",
+          "battery_service_parts_below_threshold",
+          "generator_fuel_or_alternate_energy_supply_constrained",
+          "field_crew_unavailable",
+          "ev_or_mobile_battery_asset_unavailable",
+          "food_heating_or_cooking_fuel_support_constrained",
+          "communications_repair_part_constrained",
+          "mutual_aid_vendor_capacity_available",
+          "procurement_lead_time_exceeds_resilience_window",
+          "work_order_backlog_active"
+        ],
+        "peContract": "OpenClaw maps resilient community microgrid observations to this machine's native input lane; PE writes the vector source and does not wait inside a PE cycle."
+      },
+      "interconnections": [
+        {
+          "id": "energy.resilient-community-microgrid-command-center.supply-chain-logistics-coordinator",
+          "type": "published-domain-bus-producer",
+          "role": "supply_chain_logistics_coordinator",
+          "sourceMachine": "Energy Supply Chain Logistics Coordinator",
+          "sourceOutputRegion": {
+            "offset": 16687,
+            "length": 4
+          },
+          "targetInputElements": [
+            6
+          ],
+          "normalizedElements": [
+            "Energy Supply Chain Logistics Coordinator active output[0] bit"
+          ],
+          "purpose": "Publish Energy Supply Chain Logistics Coordinator urgent/review response lane into energy.resilient-community-microgrid-command-center.",
+          "busId": "energy.resilient-community-microgrid-command-center",
+          "busTag": "published-bus-energy-resilient-community-microgrid-command-center",
+          "targetMachine": "Energy Resilient Community Microgrid Command Center",
+          "targetMachineFile": "EnergyResilientCommunityMicrogridCommandCenterInterconnect.json",
+          "targetInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "busInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "publishedOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized community microgrid status bits only; raw utility telemetry, protocol frames, operator notes, logistics records, and provider payloads remain outside the universal reality vector."
+        }
+      ]
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 16677,
+        "length": 10
+      },
+      "output": {
+        "offset": 16687,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "enx207-logistics-blocking-resilience",
+        "name": "Supply Chain Logistics Coordinator: LOGISTICS_BLOCKING_RESILIENCE",
+        "metadata": {
+          "description": "Supply Chain Logistics Coordinator: LOGISTICS_BLOCKING_RESILIENCE",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx207-logistics-blocking-resilience-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx207-logistics-blocking-resilience-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "LOGISTICS_BLOCKING_RESILIENCE for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx207-expedite-supply-chain",
+        "name": "Supply Chain Logistics Coordinator: EXPEDITE_SUPPLY_CHAIN",
+        "metadata": {
+          "description": "Supply Chain Logistics Coordinator: EXPEDITE_SUPPLY_CHAIN",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx207-expedite-supply-chain-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx207-expedite-supply-chain-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "EXPEDITE_SUPPLY_CHAIN for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx207-schedule-field-crew",
+        "name": "Supply Chain Logistics Coordinator: SCHEDULE_FIELD_CREW",
+        "metadata": {
+          "description": "Supply Chain Logistics Coordinator: SCHEDULE_FIELD_CREW",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx207-schedule-field-crew-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx207-schedule-field-crew-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "SCHEDULE_FIELD_CREW for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx207-logistics-stable",
+        "name": "Supply Chain Logistics Coordinator: LOGISTICS_STABLE",
+        "metadata": {
+          "description": "Supply Chain Logistics Coordinator: LOGISTICS_STABLE",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "enx207-logistics-stable-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx207-logistics-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "LOGISTICS_STABLE for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Supply Chain Logistics Coordinator: LOGISTICS_BLOCKING_RESILIENCE",
+        "pattern": "LOGISTICS_BLOCKING_RESILIENCE",
+        "description": "Activates LOGISTICS_BLOCKING_RESILIENCE.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "logistics-blocking-resilience",
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16687,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Supply Chain Logistics Coordinator: EXPEDITE_SUPPLY_CHAIN",
+        "pattern": "EXPEDITE_SUPPLY_CHAIN",
+        "description": "Activates EXPEDITE_SUPPLY_CHAIN.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "expedite-supply-chain",
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16687,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Supply Chain Logistics Coordinator: SCHEDULE_FIELD_CREW",
+        "pattern": "SCHEDULE_FIELD_CREW",
+        "description": "Activates SCHEDULE_FIELD_CREW.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "schedule-field-crew",
+          "expectedOutputVector": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16687,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Supply Chain Logistics Coordinator: LOGISTICS_STABLE",
+        "pattern": "LOGISTICS_STABLE",
+        "description": "Activates LOGISTICS_STABLE.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "logistics-stable",
+          "expectedOutputVector": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "expectedOutputRegion": {
+            "offset": 16687,
+            "length": 4
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,618 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Energy Feeder And Transmission Path Manager",
+    "description": "Monitors feeder sectionalizer availability, path capacity, protection posture, fault isolation, switching, and communication health.",
+    "metadata": {
+      "category": "energy",
+      "businessSector": "energy",
+      "domain": "New Energy - Resilient Community Microgrid",
+      "author": "Reality Engine",
+      "operationalFocus": "Feeder And Transmission Path Manager",
+      "assetClass": "Community Microgrid Service Layer",
+      "assetKind": "service-orchestration",
+      "inputSpace": "8D binary at [16652:16660]",
+      "outputSpace": "4D binary at [16660:16664]: [1,0,0,0]=ISOLATE_FAULT, [0,1,0,0]=SWITCH_FEEDER_PATH, [0,0,1,0]=ROUTE_CAPACITY_LIMITED, [0,0,0,1]=PATH_STABLE",
+      "inputSemantics": [
+        "feeder sectionalizer available",
+        "feeder power quality within band",
+        "route capacity sufficient",
+        "fault isolation active",
+        "switching operation pending",
+        "protection coordination valid",
+        "communications to field device healthy",
+        "alternate path available"
+      ],
+      "sensorNormalization": {
+        "feeder_sectionalizer_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "feeder_power_quality_within_band_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "route_capacity_sufficient_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "fault_isolation_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "switching_operation_pending_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "protection_coordination_valid_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "communications_to_field_device_healthy_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "alternate_path_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization"
+      },
+      "sequenceCount": 4,
+      "tags": [
+        "energy",
+        "community-microgrid",
+        "resilient-community-infrastructure",
+        "smart-grid",
+        "openclaw",
+        "localai",
+        "ollama",
+        "startup-loadable",
+        "enx205",
+        "feeder-and-transmission-path-manager"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "codex-energy-microgrid-service-layer",
+        "primaryDomain": "energy",
+        "domainTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure"
+        ],
+        "family": "resilient-community-microgrid",
+        "machineCode": "enx205",
+        "capabilityTags": [
+          "smart-grid",
+          "microgrid-operations",
+          "feeder-and-transmission-path-manager"
+        ],
+        "workflowTags": [
+          "openclaw-projection",
+          "pe-source-mapping",
+          "async-resolver-ready"
+        ],
+        "integrationTags": [
+          "openclaw",
+          "localai",
+          "ollama",
+          "smart-grid-protocols"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure",
+          "smart-grid",
+          "openclaw",
+          "localai",
+          "ollama",
+          "startup-loadable",
+          "enx205",
+          "feeder-and-transmission-path-manager"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "community-microgrid-operations",
+        "runbook": "https://runbooks.example.org/energy/enx205-feeder-and-transmission-path-manager",
+        "escalationPolicy": "pagerduty:community-microgrid-operations",
+        "contact": {
+          "primary": "community-microgrid-ops-primary@example.org",
+          "secondary": "community-microgrid-ops-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": 3600,
+          "warning": 900,
+          "error": 300
+        },
+        "notes": "Service-layer resilient community microgrid machine. PE owns protocol adapters, OpenClaw/Ollama handoffs, field completions, and source provenance; RE evaluates only normalized vector state."
+      },
+      "triggerConfig": {
+        "processId": "ENX205_FEEDER_AND_TRANSMISSION_PATH_MANAGER",
+        "processName": "Energy Feeder And Transmission Path Manager",
+        "rules": [
+          {
+            "sequenceId": "enx205-isolate-fault",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Feeder And Transmission Path Manager: ISOLATE_FAULT"
+          },
+          {
+            "sequenceId": "enx205-switch-feeder-path",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Feeder And Transmission Path Manager: SWITCH_FEEDER_PATH"
+          },
+          {
+            "sequenceId": "enx205-route-capacity-limited",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Feeder And Transmission Path Manager: ROUTE_CAPACITY_LIMITED"
+          },
+          {
+            "sequenceId": "enx205-path-stable",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Feeder And Transmission Path Manager: PATH_STABLE"
+          }
+        ]
+      },
+      "machineClass": "signal-monitor",
+      "openClawProjection": {
+        "projectionId": "openclaw-energy-feeder-and-transmission-path-manager-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 16652,
+          "length": 8
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "feeder_sectionalizer_available",
+          "feeder_power_quality_within_band",
+          "route_capacity_sufficient",
+          "fault_isolation_active",
+          "switching_operation_pending",
+          "protection_coordination_valid",
+          "communications_to_field_device_healthy",
+          "alternate_path_available"
+        ],
+        "peContract": "OpenClaw maps resilient community microgrid observations to this machine's native input lane; PE writes the vector source and does not wait inside a PE cycle."
+      },
+      "interconnections": [
+        {
+          "id": "energy.resilient-community-microgrid-command-center.feeder-and-transmission-path-manager",
+          "type": "published-domain-bus-producer",
+          "role": "feeder_and_transmission_path_manager",
+          "sourceMachine": "Energy Feeder And Transmission Path Manager",
+          "sourceOutputRegion": {
+            "offset": 16660,
+            "length": 4
+          },
+          "targetInputElements": [
+            4
+          ],
+          "normalizedElements": [
+            "Energy Feeder And Transmission Path Manager active output[0] bit"
+          ],
+          "purpose": "Publish Energy Feeder And Transmission Path Manager urgent/review response lane into energy.resilient-community-microgrid-command-center.",
+          "busId": "energy.resilient-community-microgrid-command-center",
+          "busTag": "published-bus-energy-resilient-community-microgrid-command-center",
+          "targetMachine": "Energy Resilient Community Microgrid Command Center",
+          "targetMachineFile": "EnergyResilientCommunityMicrogridCommandCenterInterconnect.json",
+          "targetInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "busInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "publishedOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized community microgrid status bits only; raw utility telemetry, protocol frames, operator notes, logistics records, and provider payloads remain outside the universal reality vector."
+        }
+      ]
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 16652,
+        "length": 8
+      },
+      "output": {
+        "offset": 16660,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "enx205-isolate-fault",
+        "name": "Feeder And Transmission Path Manager: ISOLATE_FAULT",
+        "metadata": {
+          "description": "Feeder And Transmission Path Manager: ISOLATE_FAULT",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx205-isolate-fault-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx205-isolate-fault-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "ISOLATE_FAULT for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx205-switch-feeder-path",
+        "name": "Feeder And Transmission Path Manager: SWITCH_FEEDER_PATH",
+        "metadata": {
+          "description": "Feeder And Transmission Path Manager: SWITCH_FEEDER_PATH",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx205-switch-feeder-path-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx205-switch-feeder-path-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "SWITCH_FEEDER_PATH for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx205-route-capacity-limited",
+        "name": "Feeder And Transmission Path Manager: ROUTE_CAPACITY_LIMITED",
+        "metadata": {
+          "description": "Feeder And Transmission Path Manager: ROUTE_CAPACITY_LIMITED",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx205-route-capacity-limited-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx205-route-capacity-limited-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "ROUTE_CAPACITY_LIMITED for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx205-path-stable",
+        "name": "Feeder And Transmission Path Manager: PATH_STABLE",
+        "metadata": {
+          "description": "Feeder And Transmission Path Manager: PATH_STABLE",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "enx205-path-stable-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx205-path-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "PATH_STABLE for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Feeder And Transmission Path Manager: ISOLATE_FAULT",
+        "pattern": "ISOLATE_FAULT",
+        "description": "Activates ISOLATE_FAULT.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "isolate-fault",
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16660,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Feeder And Transmission Path Manager: SWITCH_FEEDER_PATH",
+        "pattern": "SWITCH_FEEDER_PATH",
+        "description": "Activates SWITCH_FEEDER_PATH.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0,
+            1,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "switch-feeder-path",
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16660,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Feeder And Transmission Path Manager: ROUTE_CAPACITY_LIMITED",
+        "pattern": "ROUTE_CAPACITY_LIMITED",
+        "description": "Activates ROUTE_CAPACITY_LIMITED.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            0,
+            0,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "route-capacity-limited",
+          "expectedOutputVector": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16660,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Feeder And Transmission Path Manager: PATH_STABLE",
+        "pattern": "PATH_STABLE",
+        "description": "Activates PATH_STABLE.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "path-stable",
+          "expectedOutputVector": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "expectedOutputRegion": {
+            "offset": 16660,
+            "length": 4
+          }
+        }
+      }
+    ]
+  }
+}

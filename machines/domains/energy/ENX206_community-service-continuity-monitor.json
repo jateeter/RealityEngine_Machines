@@ -1,0 +1,641 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Energy Community Service Continuity Monitor",
+    "description": "Converts energy posture into continuity state for schools, transportation, AI data centers, communications, lighting, heating, cooking, shelters, and recovery.",
+    "metadata": {
+      "category": "energy",
+      "businessSector": "energy",
+      "domain": "New Energy - Resilient Community Microgrid",
+      "author": "Reality Engine",
+      "operationalFocus": "Community Service Continuity Monitor",
+      "assetClass": "Community Microgrid Service Layer",
+      "assetKind": "service-orchestration",
+      "inputSpace": "9D binary at [16664:16673]",
+      "outputSpace": "4D binary at [16673:16677]: [1,0,0,0]=CRITICAL_SERVICE_INTERRUPTION, [0,1,0,0]=SERVICE_DEGRADATION, [0,0,1,0]=RECOVERY_IN_PROGRESS, [0,0,0,1]=SERVICES_STABLE",
+      "inputSemantics": [
+        "schools below continuity threshold",
+        "transportation below continuity threshold",
+        "AI data center below continuity threshold",
+        "communications below continuity threshold",
+        "lighting below continuity threshold",
+        "heating below continuity threshold",
+        "cooking or food service below continuity threshold",
+        "shelter or community service below continuity threshold",
+        "service recovery action active"
+      ],
+      "sensorNormalization": {
+        "schools_below_continuity_threshold_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "transportation_below_continuity_threshold_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "ai_data_center_below_continuity_threshold_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "communications_below_continuity_threshold_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "lighting_below_continuity_threshold_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "heating_below_continuity_threshold_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "cooking_or_food_service_below_continuity_threshold_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "shelter_or_community_service_below_continuity_threshold_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "service_recovery_action_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization"
+      },
+      "sequenceCount": 4,
+      "tags": [
+        "energy",
+        "community-microgrid",
+        "resilient-community-infrastructure",
+        "smart-grid",
+        "openclaw",
+        "localai",
+        "ollama",
+        "startup-loadable",
+        "enx206",
+        "community-service-continuity-monitor"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "codex-energy-microgrid-service-layer",
+        "primaryDomain": "energy",
+        "domainTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure"
+        ],
+        "family": "resilient-community-microgrid",
+        "machineCode": "enx206",
+        "capabilityTags": [
+          "smart-grid",
+          "microgrid-operations",
+          "community-service-continuity-monitor"
+        ],
+        "workflowTags": [
+          "openclaw-projection",
+          "pe-source-mapping",
+          "async-resolver-ready"
+        ],
+        "integrationTags": [
+          "openclaw",
+          "localai",
+          "ollama",
+          "smart-grid-protocols"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure",
+          "smart-grid",
+          "openclaw",
+          "localai",
+          "ollama",
+          "startup-loadable",
+          "enx206",
+          "community-service-continuity-monitor"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "community-microgrid-operations",
+        "runbook": "https://runbooks.example.org/energy/enx206-community-service-continuity-monitor",
+        "escalationPolicy": "pagerduty:community-microgrid-operations",
+        "contact": {
+          "primary": "community-microgrid-ops-primary@example.org",
+          "secondary": "community-microgrid-ops-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": 3600,
+          "warning": 900,
+          "error": 300
+        },
+        "notes": "Service-layer resilient community microgrid machine. PE owns protocol adapters, OpenClaw/Ollama handoffs, field completions, and source provenance; RE evaluates only normalized vector state."
+      },
+      "triggerConfig": {
+        "processId": "ENX206_COMMUNITY_SERVICE_CONTINUITY_MONITOR",
+        "processName": "Energy Community Service Continuity Monitor",
+        "rules": [
+          {
+            "sequenceId": "enx206-critical-service-interruption",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Community Service Continuity Monitor: CRITICAL_SERVICE_INTERRUPTION"
+          },
+          {
+            "sequenceId": "enx206-service-degradation",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Community Service Continuity Monitor: SERVICE_DEGRADATION"
+          },
+          {
+            "sequenceId": "enx206-recovery-in-progress",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Community Service Continuity Monitor: RECOVERY_IN_PROGRESS"
+          },
+          {
+            "sequenceId": "enx206-services-stable",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Community Service Continuity Monitor: SERVICES_STABLE"
+          }
+        ]
+      },
+      "machineClass": "signal-monitor",
+      "openClawProjection": {
+        "projectionId": "openclaw-energy-community-service-continuity-monitor-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 16664,
+          "length": 9
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "schools_below_continuity_threshold",
+          "transportation_below_continuity_threshold",
+          "ai_data_center_below_continuity_threshold",
+          "communications_below_continuity_threshold",
+          "lighting_below_continuity_threshold",
+          "heating_below_continuity_threshold",
+          "cooking_or_food_service_below_continuity_threshold",
+          "shelter_or_community_service_below_continuity_threshold",
+          "service_recovery_action_active"
+        ],
+        "peContract": "OpenClaw maps resilient community microgrid observations to this machine's native input lane; PE writes the vector source and does not wait inside a PE cycle."
+      },
+      "interconnections": [
+        {
+          "id": "energy.resilient-community-microgrid-command-center.community-service-continuity-monitor",
+          "type": "published-domain-bus-producer",
+          "role": "community_service_continuity_monitor",
+          "sourceMachine": "Energy Community Service Continuity Monitor",
+          "sourceOutputRegion": {
+            "offset": 16673,
+            "length": 4
+          },
+          "targetInputElements": [
+            5
+          ],
+          "normalizedElements": [
+            "Energy Community Service Continuity Monitor active output[0] bit"
+          ],
+          "purpose": "Publish Energy Community Service Continuity Monitor urgent/review response lane into energy.resilient-community-microgrid-command-center.",
+          "busId": "energy.resilient-community-microgrid-command-center",
+          "busTag": "published-bus-energy-resilient-community-microgrid-command-center",
+          "targetMachine": "Energy Resilient Community Microgrid Command Center",
+          "targetMachineFile": "EnergyResilientCommunityMicrogridCommandCenterInterconnect.json",
+          "targetInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "busInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "publishedOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized community microgrid status bits only; raw utility telemetry, protocol frames, operator notes, logistics records, and provider payloads remain outside the universal reality vector."
+        }
+      ]
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 16664,
+        "length": 9
+      },
+      "output": {
+        "offset": 16673,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "enx206-critical-service-interruption",
+        "name": "Community Service Continuity Monitor: CRITICAL_SERVICE_INTERRUPTION",
+        "metadata": {
+          "description": "Community Service Continuity Monitor: CRITICAL_SERVICE_INTERRUPTION",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx206-critical-service-interruption-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx206-critical-service-interruption-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "CRITICAL_SERVICE_INTERRUPTION for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx206-service-degradation",
+        "name": "Community Service Continuity Monitor: SERVICE_DEGRADATION",
+        "metadata": {
+          "description": "Community Service Continuity Monitor: SERVICE_DEGRADATION",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx206-service-degradation-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx206-service-degradation-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "SERVICE_DEGRADATION for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx206-recovery-in-progress",
+        "name": "Community Service Continuity Monitor: RECOVERY_IN_PROGRESS",
+        "metadata": {
+          "description": "Community Service Continuity Monitor: RECOVERY_IN_PROGRESS",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx206-recovery-in-progress-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx206-recovery-in-progress-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "RECOVERY_IN_PROGRESS for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx206-services-stable",
+        "name": "Community Service Continuity Monitor: SERVICES_STABLE",
+        "metadata": {
+          "description": "Community Service Continuity Monitor: SERVICES_STABLE",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "enx206-services-stable-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx206-services-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "SERVICES_STABLE for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Community Service Continuity Monitor: CRITICAL_SERVICE_INTERRUPTION",
+        "pattern": "CRITICAL_SERVICE_INTERRUPTION",
+        "description": "Activates CRITICAL_SERVICE_INTERRUPTION.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "critical-service-interruption",
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16673,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Community Service Continuity Monitor: SERVICE_DEGRADATION",
+        "pattern": "SERVICE_DEGRADATION",
+        "description": "Activates SERVICE_DEGRADATION.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "service-degradation",
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16673,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Community Service Continuity Monitor: RECOVERY_IN_PROGRESS",
+        "pattern": "RECOVERY_IN_PROGRESS",
+        "description": "Activates RECOVERY_IN_PROGRESS.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "recovery-in-progress",
+          "expectedOutputVector": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16673,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Community Service Continuity Monitor: SERVICES_STABLE",
+        "pattern": "SERVICES_STABLE",
+        "description": "Activates SERVICES_STABLE.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "services-stable",
+          "expectedOutputVector": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "expectedOutputRegion": {
+            "offset": 16673,
+            "length": 4
+          }
+        }
+      }
+    ]
+  }
+}

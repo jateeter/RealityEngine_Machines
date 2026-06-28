@@ -1,0 +1,618 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Energy Islanding Readiness Coordinator",
+    "description": "Determines whether the microgrid should island, prepare to island, reconnect, or remain grid-connected stable.",
+    "metadata": {
+      "category": "energy",
+      "businessSector": "energy",
+      "domain": "New Energy - Resilient Community Microgrid",
+      "author": "Reality Engine",
+      "operationalFocus": "Islanding Readiness Coordinator",
+      "assetClass": "Community Microgrid Service Layer",
+      "assetKind": "service-orchestration",
+      "inputSpace": "8D binary at [16614:16622]",
+      "outputSpace": "4D binary at [16622:16626]: [1,0,0,0]=ISLAND_NOW, [0,1,0,0]=PREPARE_ISLANDING, [0,0,1,0]=RECONNECT_READY, [0,0,0,1]=GRID_CONNECTED_STABLE",
+      "inputSemantics": [
+        "PCC instability or utility outage indicated",
+        "feeder sectionalizer route available",
+        "inverter grid forming capability available",
+        "storage reserve above island threshold",
+        "black start sequence available",
+        "frequency and voltage stability acceptable",
+        "protection settings synchronized",
+        "resynchronization window available"
+      ],
+      "sensorNormalization": {
+        "pcc_instability_or_utility_outage_indicated_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "feeder_sectionalizer_route_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "inverter_grid_forming_capability_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "storage_reserve_above_island_threshold_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "black_start_sequence_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "frequency_and_voltage_stability_acceptable_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "protection_settings_synchronized_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "resynchronization_window_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization"
+      },
+      "sequenceCount": 4,
+      "tags": [
+        "energy",
+        "community-microgrid",
+        "resilient-community-infrastructure",
+        "smart-grid",
+        "openclaw",
+        "localai",
+        "ollama",
+        "startup-loadable",
+        "enx202",
+        "islanding-readiness-coordinator"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "codex-energy-microgrid-service-layer",
+        "primaryDomain": "energy",
+        "domainTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure"
+        ],
+        "family": "resilient-community-microgrid",
+        "machineCode": "enx202",
+        "capabilityTags": [
+          "smart-grid",
+          "microgrid-operations",
+          "islanding-readiness-coordinator"
+        ],
+        "workflowTags": [
+          "openclaw-projection",
+          "pe-source-mapping",
+          "async-resolver-ready"
+        ],
+        "integrationTags": [
+          "openclaw",
+          "localai",
+          "ollama",
+          "smart-grid-protocols"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure",
+          "smart-grid",
+          "openclaw",
+          "localai",
+          "ollama",
+          "startup-loadable",
+          "enx202",
+          "islanding-readiness-coordinator"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "community-microgrid-operations",
+        "runbook": "https://runbooks.example.org/energy/enx202-islanding-readiness-coordinator",
+        "escalationPolicy": "pagerduty:community-microgrid-operations",
+        "contact": {
+          "primary": "community-microgrid-ops-primary@example.org",
+          "secondary": "community-microgrid-ops-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": 3600,
+          "warning": 900,
+          "error": 300
+        },
+        "notes": "Service-layer resilient community microgrid machine. PE owns protocol adapters, OpenClaw/Ollama handoffs, field completions, and source provenance; RE evaluates only normalized vector state."
+      },
+      "triggerConfig": {
+        "processId": "ENX202_ISLANDING_READINESS_COORDINATOR",
+        "processName": "Energy Islanding Readiness Coordinator",
+        "rules": [
+          {
+            "sequenceId": "enx202-island-now",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Islanding Readiness Coordinator: ISLAND_NOW"
+          },
+          {
+            "sequenceId": "enx202-prepare-islanding",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Islanding Readiness Coordinator: PREPARE_ISLANDING"
+          },
+          {
+            "sequenceId": "enx202-reconnect-ready",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Islanding Readiness Coordinator: RECONNECT_READY"
+          },
+          {
+            "sequenceId": "enx202-grid-connected-stable",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Islanding Readiness Coordinator: GRID_CONNECTED_STABLE"
+          }
+        ]
+      },
+      "machineClass": "safety-compliance-checker",
+      "openClawProjection": {
+        "projectionId": "openclaw-energy-islanding-readiness-coordinator-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 16614,
+          "length": 8
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "pcc_instability_or_utility_outage_indicated",
+          "feeder_sectionalizer_route_available",
+          "inverter_grid_forming_capability_available",
+          "storage_reserve_above_island_threshold",
+          "black_start_sequence_available",
+          "frequency_and_voltage_stability_acceptable",
+          "protection_settings_synchronized",
+          "resynchronization_window_available"
+        ],
+        "peContract": "OpenClaw maps resilient community microgrid observations to this machine's native input lane; PE writes the vector source and does not wait inside a PE cycle."
+      },
+      "interconnections": [
+        {
+          "id": "energy.resilient-community-microgrid-command-center.islanding-readiness-coordinator",
+          "type": "published-domain-bus-producer",
+          "role": "islanding_readiness_coordinator",
+          "sourceMachine": "Energy Islanding Readiness Coordinator",
+          "sourceOutputRegion": {
+            "offset": 16622,
+            "length": 4
+          },
+          "targetInputElements": [
+            1
+          ],
+          "normalizedElements": [
+            "Energy Islanding Readiness Coordinator active output[0] bit"
+          ],
+          "purpose": "Publish Energy Islanding Readiness Coordinator urgent/review response lane into energy.resilient-community-microgrid-command-center.",
+          "busId": "energy.resilient-community-microgrid-command-center",
+          "busTag": "published-bus-energy-resilient-community-microgrid-command-center",
+          "targetMachine": "Energy Resilient Community Microgrid Command Center",
+          "targetMachineFile": "EnergyResilientCommunityMicrogridCommandCenterInterconnect.json",
+          "targetInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "busInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "publishedOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized community microgrid status bits only; raw utility telemetry, protocol frames, operator notes, logistics records, and provider payloads remain outside the universal reality vector."
+        }
+      ]
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 16614,
+        "length": 8
+      },
+      "output": {
+        "offset": 16622,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "enx202-island-now",
+        "name": "Islanding Readiness Coordinator: ISLAND_NOW",
+        "metadata": {
+          "description": "Islanding Readiness Coordinator: ISLAND_NOW",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx202-island-now-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx202-island-now-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "ISLAND_NOW for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx202-prepare-islanding",
+        "name": "Islanding Readiness Coordinator: PREPARE_ISLANDING",
+        "metadata": {
+          "description": "Islanding Readiness Coordinator: PREPARE_ISLANDING",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx202-prepare-islanding-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx202-prepare-islanding-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "PREPARE_ISLANDING for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx202-reconnect-ready",
+        "name": "Islanding Readiness Coordinator: RECONNECT_READY",
+        "metadata": {
+          "description": "Islanding Readiness Coordinator: RECONNECT_READY",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx202-reconnect-ready-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx202-reconnect-ready-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "RECONNECT_READY for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx202-grid-connected-stable",
+        "name": "Islanding Readiness Coordinator: GRID_CONNECTED_STABLE",
+        "metadata": {
+          "description": "Islanding Readiness Coordinator: GRID_CONNECTED_STABLE",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "enx202-grid-connected-stable-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx202-grid-connected-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "GRID_CONNECTED_STABLE for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Islanding Readiness Coordinator: ISLAND_NOW",
+        "pattern": "ISLAND_NOW",
+        "description": "Activates ISLAND_NOW.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "island-now",
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16622,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Islanding Readiness Coordinator: PREPARE_ISLANDING",
+        "pattern": "PREPARE_ISLANDING",
+        "description": "Activates PREPARE_ISLANDING.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1,
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "prepare-islanding",
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16622,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Islanding Readiness Coordinator: RECONNECT_READY",
+        "pattern": "RECONNECT_READY",
+        "description": "Activates RECONNECT_READY.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            1,
+            0,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "reconnect-ready",
+          "expectedOutputVector": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16622,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Islanding Readiness Coordinator: GRID_CONNECTED_STABLE",
+        "pattern": "GRID_CONNECTED_STABLE",
+        "description": "Activates GRID_CONNECTED_STABLE.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            1,
+            0,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "grid-connected-stable",
+          "expectedOutputVector": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "expectedOutputRegion": {
+            "offset": 16622,
+            "length": 4
+          }
+        }
+      }
+    ]
+  }
+}

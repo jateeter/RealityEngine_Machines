@@ -1,0 +1,664 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Energy Distributed Generation Commitment Planner",
+    "description": "Combines solar, inverter, weather, backup generation, maintenance restriction, and power quality signals into a generation commitment posture.",
+    "metadata": {
+      "category": "energy",
+      "businessSector": "energy",
+      "domain": "New Energy - Resilient Community Microgrid",
+      "author": "Reality Engine",
+      "operationalFocus": "Distributed Generation Commitment Planner",
+      "assetClass": "Community Microgrid Service Layer",
+      "assetKind": "service-orchestration",
+      "inputSpace": "10D binary at [16638:16648]",
+      "outputSpace": "4D binary at [16648:16652]: [1,0,0,0]=GENERATION_CONSTRAINED, [0,1,0,0]=COMMIT_LOCAL_GENERATION, [0,0,1,0]=USE_BACKUP_GENERATION, [0,0,0,1]=GENERATION_STABLE",
+      "inputSemantics": [
+        "rooftop solar available",
+        "carport solar available",
+        "school campus solar available",
+        "community center solar available",
+        "ground mount solar available",
+        "inverter bank healthy",
+        "irradiance forecast favorable",
+        "backup generation available",
+        "generation maintenance restriction active",
+        "power quality limit active"
+      ],
+      "sensorNormalization": {
+        "rooftop_solar_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "carport_solar_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "school_campus_solar_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "community_center_solar_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "ground_mount_solar_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "inverter_bank_healthy_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "irradiance_forecast_favorable_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "backup_generation_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "generation_maintenance_restriction_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "power_quality_limit_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization"
+      },
+      "sequenceCount": 4,
+      "tags": [
+        "energy",
+        "community-microgrid",
+        "resilient-community-infrastructure",
+        "smart-grid",
+        "openclaw",
+        "localai",
+        "ollama",
+        "startup-loadable",
+        "enx204",
+        "distributed-generation-commitment-planner"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "codex-energy-microgrid-service-layer",
+        "primaryDomain": "energy",
+        "domainTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure"
+        ],
+        "family": "resilient-community-microgrid",
+        "machineCode": "enx204",
+        "capabilityTags": [
+          "smart-grid",
+          "microgrid-operations",
+          "distributed-generation-commitment-planner"
+        ],
+        "workflowTags": [
+          "openclaw-projection",
+          "pe-source-mapping",
+          "async-resolver-ready"
+        ],
+        "integrationTags": [
+          "openclaw",
+          "localai",
+          "ollama",
+          "smart-grid-protocols"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure",
+          "smart-grid",
+          "openclaw",
+          "localai",
+          "ollama",
+          "startup-loadable",
+          "enx204",
+          "distributed-generation-commitment-planner"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "community-microgrid-operations",
+        "runbook": "https://runbooks.example.org/energy/enx204-distributed-generation-commitment-planner",
+        "escalationPolicy": "pagerduty:community-microgrid-operations",
+        "contact": {
+          "primary": "community-microgrid-ops-primary@example.org",
+          "secondary": "community-microgrid-ops-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": 3600,
+          "warning": 900,
+          "error": 300
+        },
+        "notes": "Service-layer resilient community microgrid machine. PE owns protocol adapters, OpenClaw/Ollama handoffs, field completions, and source provenance; RE evaluates only normalized vector state."
+      },
+      "triggerConfig": {
+        "processId": "ENX204_DISTRIBUTED_GENERATION_COMMITMENT_PLANNER",
+        "processName": "Energy Distributed Generation Commitment Planner",
+        "rules": [
+          {
+            "sequenceId": "enx204-generation-constrained",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Distributed Generation Commitment Planner: GENERATION_CONSTRAINED"
+          },
+          {
+            "sequenceId": "enx204-commit-local-generation",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Distributed Generation Commitment Planner: COMMIT_LOCAL_GENERATION"
+          },
+          {
+            "sequenceId": "enx204-use-backup-generation",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Distributed Generation Commitment Planner: USE_BACKUP_GENERATION"
+          },
+          {
+            "sequenceId": "enx204-generation-stable",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Distributed Generation Commitment Planner: GENERATION_STABLE"
+          }
+        ]
+      },
+      "machineClass": "risk-forecaster",
+      "openClawProjection": {
+        "projectionId": "openclaw-energy-distributed-generation-commitment-planner-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 16638,
+          "length": 10
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "rooftop_solar_available",
+          "carport_solar_available",
+          "school_campus_solar_available",
+          "community_center_solar_available",
+          "ground_mount_solar_available",
+          "inverter_bank_healthy",
+          "irradiance_forecast_favorable",
+          "backup_generation_available",
+          "generation_maintenance_restriction_active",
+          "power_quality_limit_active"
+        ],
+        "peContract": "OpenClaw maps resilient community microgrid observations to this machine's native input lane; PE writes the vector source and does not wait inside a PE cycle."
+      },
+      "interconnections": [
+        {
+          "id": "energy.resilient-community-microgrid-command-center.distributed-generation-commitment-planner",
+          "type": "published-domain-bus-producer",
+          "role": "distributed_generation_commitment_planner",
+          "sourceMachine": "Energy Distributed Generation Commitment Planner",
+          "sourceOutputRegion": {
+            "offset": 16648,
+            "length": 4
+          },
+          "targetInputElements": [
+            3
+          ],
+          "normalizedElements": [
+            "Energy Distributed Generation Commitment Planner active output[0] bit"
+          ],
+          "purpose": "Publish Energy Distributed Generation Commitment Planner urgent/review response lane into energy.resilient-community-microgrid-command-center.",
+          "busId": "energy.resilient-community-microgrid-command-center",
+          "busTag": "published-bus-energy-resilient-community-microgrid-command-center",
+          "targetMachine": "Energy Resilient Community Microgrid Command Center",
+          "targetMachineFile": "EnergyResilientCommunityMicrogridCommandCenterInterconnect.json",
+          "targetInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "busInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "publishedOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized community microgrid status bits only; raw utility telemetry, protocol frames, operator notes, logistics records, and provider payloads remain outside the universal reality vector."
+        }
+      ]
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 16638,
+        "length": 10
+      },
+      "output": {
+        "offset": 16648,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "enx204-generation-constrained",
+        "name": "Distributed Generation Commitment Planner: GENERATION_CONSTRAINED",
+        "metadata": {
+          "description": "Distributed Generation Commitment Planner: GENERATION_CONSTRAINED",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx204-generation-constrained-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx204-generation-constrained-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "GENERATION_CONSTRAINED for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx204-commit-local-generation",
+        "name": "Distributed Generation Commitment Planner: COMMIT_LOCAL_GENERATION",
+        "metadata": {
+          "description": "Distributed Generation Commitment Planner: COMMIT_LOCAL_GENERATION",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx204-commit-local-generation-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx204-commit-local-generation-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "COMMIT_LOCAL_GENERATION for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx204-use-backup-generation",
+        "name": "Distributed Generation Commitment Planner: USE_BACKUP_GENERATION",
+        "metadata": {
+          "description": "Distributed Generation Commitment Planner: USE_BACKUP_GENERATION",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx204-use-backup-generation-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx204-use-backup-generation-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "USE_BACKUP_GENERATION for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx204-generation-stable",
+        "name": "Distributed Generation Commitment Planner: GENERATION_STABLE",
+        "metadata": {
+          "description": "Distributed Generation Commitment Planner: GENERATION_STABLE",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "enx204-generation-stable-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx204-generation-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "GENERATION_STABLE for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Distributed Generation Commitment Planner: GENERATION_CONSTRAINED",
+        "pattern": "GENERATION_CONSTRAINED",
+        "description": "Activates GENERATION_CONSTRAINED.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "generation-constrained",
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16648,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Distributed Generation Commitment Planner: COMMIT_LOCAL_GENERATION",
+        "pattern": "COMMIT_LOCAL_GENERATION",
+        "description": "Activates COMMIT_LOCAL_GENERATION.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "commit-local-generation",
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16648,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Distributed Generation Commitment Planner: USE_BACKUP_GENERATION",
+        "pattern": "USE_BACKUP_GENERATION",
+        "description": "Activates USE_BACKUP_GENERATION.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "use-backup-generation",
+          "expectedOutputVector": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16648,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Distributed Generation Commitment Planner: GENERATION_STABLE",
+        "pattern": "GENERATION_STABLE",
+        "description": "Activates GENERATION_STABLE.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "generation-stable",
+          "expectedOutputVector": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "expectedOutputRegion": {
+            "offset": 16648,
+            "length": 4
+          }
+        }
+      }
+    ]
+  }
+}

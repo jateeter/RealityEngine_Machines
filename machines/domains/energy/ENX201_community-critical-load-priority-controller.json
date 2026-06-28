@@ -1,0 +1,664 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Energy Community Critical Load Priority Controller",
+    "description": "Classifies served loads and protects schools, transportation, AI data centers, communications, lighting, heating, cooking, shelters, and human-safety overrides.",
+    "metadata": {
+      "category": "energy",
+      "businessSector": "energy",
+      "domain": "New Energy - Resilient Community Microgrid",
+      "author": "Reality Engine",
+      "operationalFocus": "Community Critical Load Priority Controller",
+      "assetClass": "Community Microgrid Service Layer",
+      "assetKind": "service-orchestration",
+      "inputSpace": "10D binary at [16600:16610]",
+      "outputSpace": "4D binary at [16610:16614]: [1,0,0,0]=LOAD_SHED_BLOCKED_HUMAN_SAFETY, [0,1,0,0]=PRIORITIZE_CRITICAL_SERVICES, [0,0,1,0]=FLEXIBLE_LOAD_AVAILABLE, [0,0,0,1]=LOAD_PRIORITY_STABLE",
+      "inputSemantics": [
+        "school critical load demand active",
+        "transportation charging or dispatch load active",
+        "AI data center compute load active",
+        "communications continuity load active",
+        "public lighting safety load active",
+        "heating demand active",
+        "cooking or food resilience demand active",
+        "medical or community shelter load active",
+        "curtailment tolerance available",
+        "human safety override active"
+      ],
+      "sensorNormalization": {
+        "school_critical_load_demand_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "transportation_charging_or_dispatch_load_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "ai_data_center_compute_load_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "communications_continuity_load_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "public_lighting_safety_load_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "heating_demand_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "cooking_or_food_resilience_demand_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "medical_or_community_shelter_load_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "curtailment_tolerance_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "human_safety_override_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization"
+      },
+      "sequenceCount": 4,
+      "tags": [
+        "energy",
+        "community-microgrid",
+        "resilient-community-infrastructure",
+        "smart-grid",
+        "openclaw",
+        "localai",
+        "ollama",
+        "startup-loadable",
+        "enx201",
+        "community-critical-load-priority-controller"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "codex-energy-microgrid-service-layer",
+        "primaryDomain": "energy",
+        "domainTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure"
+        ],
+        "family": "resilient-community-microgrid",
+        "machineCode": "enx201",
+        "capabilityTags": [
+          "smart-grid",
+          "microgrid-operations",
+          "community-critical-load-priority-controller"
+        ],
+        "workflowTags": [
+          "openclaw-projection",
+          "pe-source-mapping",
+          "async-resolver-ready"
+        ],
+        "integrationTags": [
+          "openclaw",
+          "localai",
+          "ollama",
+          "smart-grid-protocols"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure",
+          "smart-grid",
+          "openclaw",
+          "localai",
+          "ollama",
+          "startup-loadable",
+          "enx201",
+          "community-critical-load-priority-controller"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "community-microgrid-operations",
+        "runbook": "https://runbooks.example.org/energy/enx201-community-critical-load-priority-controller",
+        "escalationPolicy": "pagerduty:community-microgrid-operations",
+        "contact": {
+          "primary": "community-microgrid-ops-primary@example.org",
+          "secondary": "community-microgrid-ops-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": 3600,
+          "warning": 900,
+          "error": 300
+        },
+        "notes": "Service-layer resilient community microgrid machine. PE owns protocol adapters, OpenClaw/Ollama handoffs, field completions, and source provenance; RE evaluates only normalized vector state."
+      },
+      "triggerConfig": {
+        "processId": "ENX201_COMMUNITY_CRITICAL_LOAD_PRIORITY_CONTROLLER",
+        "processName": "Energy Community Critical Load Priority Controller",
+        "rules": [
+          {
+            "sequenceId": "enx201-load-shed-blocked-human-safety",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Community Critical Load Priority Controller: LOAD_SHED_BLOCKED_HUMAN_SAFETY"
+          },
+          {
+            "sequenceId": "enx201-prioritize-critical-services",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Community Critical Load Priority Controller: PRIORITIZE_CRITICAL_SERVICES"
+          },
+          {
+            "sequenceId": "enx201-flexible-load-available",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Community Critical Load Priority Controller: FLEXIBLE_LOAD_AVAILABLE"
+          },
+          {
+            "sequenceId": "enx201-load-priority-stable",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Community Critical Load Priority Controller: LOAD_PRIORITY_STABLE"
+          }
+        ]
+      },
+      "machineClass": "optimizer",
+      "openClawProjection": {
+        "projectionId": "openclaw-energy-community-critical-load-priority-controller-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 16600,
+          "length": 10
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "school_critical_load_demand_active",
+          "transportation_charging_or_dispatch_load_active",
+          "ai_data_center_compute_load_active",
+          "communications_continuity_load_active",
+          "public_lighting_safety_load_active",
+          "heating_demand_active",
+          "cooking_or_food_resilience_demand_active",
+          "medical_or_community_shelter_load_active",
+          "curtailment_tolerance_available",
+          "human_safety_override_active"
+        ],
+        "peContract": "OpenClaw maps resilient community microgrid observations to this machine's native input lane; PE writes the vector source and does not wait inside a PE cycle."
+      },
+      "interconnections": [
+        {
+          "id": "energy.resilient-community-microgrid-command-center.community-critical-load-priority-controller",
+          "type": "published-domain-bus-producer",
+          "role": "community_critical_load_priority_controller",
+          "sourceMachine": "Energy Community Critical Load Priority Controller",
+          "sourceOutputRegion": {
+            "offset": 16610,
+            "length": 4
+          },
+          "targetInputElements": [
+            0
+          ],
+          "normalizedElements": [
+            "Energy Community Critical Load Priority Controller active output[0] bit"
+          ],
+          "purpose": "Publish Energy Community Critical Load Priority Controller urgent/review response lane into energy.resilient-community-microgrid-command-center.",
+          "busId": "energy.resilient-community-microgrid-command-center",
+          "busTag": "published-bus-energy-resilient-community-microgrid-command-center",
+          "targetMachine": "Energy Resilient Community Microgrid Command Center",
+          "targetMachineFile": "EnergyResilientCommunityMicrogridCommandCenterInterconnect.json",
+          "targetInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "busInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "publishedOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized community microgrid status bits only; raw utility telemetry, protocol frames, operator notes, logistics records, and provider payloads remain outside the universal reality vector."
+        }
+      ]
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 16600,
+        "length": 10
+      },
+      "output": {
+        "offset": 16610,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "enx201-load-shed-blocked-human-safety",
+        "name": "Community Critical Load Priority Controller: LOAD_SHED_BLOCKED_HUMAN_SAFETY",
+        "metadata": {
+          "description": "Community Critical Load Priority Controller: LOAD_SHED_BLOCKED_HUMAN_SAFETY",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx201-load-shed-blocked-human-safety-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx201-load-shed-blocked-human-safety-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "LOAD_SHED_BLOCKED_HUMAN_SAFETY for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx201-prioritize-critical-services",
+        "name": "Community Critical Load Priority Controller: PRIORITIZE_CRITICAL_SERVICES",
+        "metadata": {
+          "description": "Community Critical Load Priority Controller: PRIORITIZE_CRITICAL_SERVICES",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx201-prioritize-critical-services-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx201-prioritize-critical-services-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "PRIORITIZE_CRITICAL_SERVICES for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx201-flexible-load-available",
+        "name": "Community Critical Load Priority Controller: FLEXIBLE_LOAD_AVAILABLE",
+        "metadata": {
+          "description": "Community Critical Load Priority Controller: FLEXIBLE_LOAD_AVAILABLE",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx201-flexible-load-available-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx201-flexible-load-available-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "FLEXIBLE_LOAD_AVAILABLE for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx201-load-priority-stable",
+        "name": "Community Critical Load Priority Controller: LOAD_PRIORITY_STABLE",
+        "metadata": {
+          "description": "Community Critical Load Priority Controller: LOAD_PRIORITY_STABLE",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "enx201-load-priority-stable-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx201-load-priority-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "LOAD_PRIORITY_STABLE for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Community Critical Load Priority Controller: LOAD_SHED_BLOCKED_HUMAN_SAFETY",
+        "pattern": "LOAD_SHED_BLOCKED_HUMAN_SAFETY",
+        "description": "Activates LOAD_SHED_BLOCKED_HUMAN_SAFETY.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "load-shed-blocked-human-safety",
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16610,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Community Critical Load Priority Controller: PRIORITIZE_CRITICAL_SERVICES",
+        "pattern": "PRIORITIZE_CRITICAL_SERVICES",
+        "description": "Activates PRIORITIZE_CRITICAL_SERVICES.",
+        "vectors": [
+          [
+            1,
+            1,
+            0,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "prioritize-critical-services",
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16610,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Community Critical Load Priority Controller: FLEXIBLE_LOAD_AVAILABLE",
+        "pattern": "FLEXIBLE_LOAD_AVAILABLE",
+        "description": "Activates FLEXIBLE_LOAD_AVAILABLE.",
+        "vectors": [
+          [
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "flexible-load-available",
+          "expectedOutputVector": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16610,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Community Critical Load Priority Controller: LOAD_PRIORITY_STABLE",
+        "pattern": "LOAD_PRIORITY_STABLE",
+        "description": "Activates LOAD_PRIORITY_STABLE.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "load-priority-stable",
+          "expectedOutputVector": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "expectedOutputRegion": {
+            "offset": 16610,
+            "length": 4
+          }
+        }
+      }
+    ]
+  }
+}

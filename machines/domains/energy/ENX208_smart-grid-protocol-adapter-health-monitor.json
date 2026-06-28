@@ -1,0 +1,664 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Energy Smart Grid Protocol Adapter Health Monitor",
+    "description": "Represents Smart Grid interconnection readiness across IEEE 2030.5, IEEE 1547, OpenADR, IEC 61850, DNP3, Modbus or OPC UA, OCPP, MQTT, identity, and command latency.",
+    "metadata": {
+      "category": "energy",
+      "businessSector": "energy",
+      "domain": "New Energy - Resilient Community Microgrid",
+      "author": "Reality Engine",
+      "operationalFocus": "Smart Grid Protocol Adapter Health Monitor",
+      "assetClass": "Community Microgrid Service Layer",
+      "assetKind": "service-orchestration",
+      "inputSpace": "10D binary at [16691:16701]",
+      "outputSpace": "4D binary at [16701:16705]: [1,0,0,0]=PROTOCOL_CONTROL_UNAVAILABLE, [0,1,0,0]=DEGRADED_PROTOCOL_PATH, [0,0,1,0]=FALLBACK_PROTOCOL_ACTIVE, [0,0,0,1]=PROTOCOLS_STABLE",
+      "inputSemantics": [
+        "IEEE 2030.5 DER control available",
+        "IEEE 1547 telemetry and control available",
+        "OpenADR signal available",
+        "IEC 61850 feeder or substation state available",
+        "DNP3 SCADA point state available",
+        "Modbus or OPC UA device bridge available",
+        "OCPP EV charging control available",
+        "MQTT grid event mirror available",
+        "protocol authentication certificate valid",
+        "command acknowledgement latency acceptable"
+      ],
+      "sensorNormalization": {
+        "ieee_2030_5_der_control_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "ieee_1547_telemetry_and_control_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "openadr_signal_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "iec_61850_feeder_or_substation_state_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "dnp3_scada_point_state_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "modbus_or_opc_ua_device_bridge_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "ocpp_ev_charging_control_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "mqtt_grid_event_mirror_available_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "protocol_authentication_certificate_valid_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "command_acknowledgement_latency_acceptable_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization"
+      },
+      "sequenceCount": 4,
+      "tags": [
+        "energy",
+        "community-microgrid",
+        "resilient-community-infrastructure",
+        "smart-grid",
+        "openclaw",
+        "localai",
+        "ollama",
+        "startup-loadable",
+        "enx208",
+        "smart-grid-protocol-adapter-health-monitor"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "codex-energy-microgrid-service-layer",
+        "primaryDomain": "energy",
+        "domainTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure"
+        ],
+        "family": "resilient-community-microgrid",
+        "machineCode": "enx208",
+        "capabilityTags": [
+          "smart-grid",
+          "microgrid-operations",
+          "smart-grid-protocol-adapter-health-monitor"
+        ],
+        "workflowTags": [
+          "openclaw-projection",
+          "pe-source-mapping",
+          "async-resolver-ready"
+        ],
+        "integrationTags": [
+          "openclaw",
+          "localai",
+          "ollama",
+          "smart-grid-protocols"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure",
+          "smart-grid",
+          "openclaw",
+          "localai",
+          "ollama",
+          "startup-loadable",
+          "enx208",
+          "smart-grid-protocol-adapter-health-monitor"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "community-microgrid-operations",
+        "runbook": "https://runbooks.example.org/energy/enx208-smart-grid-protocol-adapter-health-monitor",
+        "escalationPolicy": "pagerduty:community-microgrid-operations",
+        "contact": {
+          "primary": "community-microgrid-ops-primary@example.org",
+          "secondary": "community-microgrid-ops-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": 3600,
+          "warning": 900,
+          "error": 300
+        },
+        "notes": "Service-layer resilient community microgrid machine. PE owns protocol adapters, OpenClaw/Ollama handoffs, field completions, and source provenance; RE evaluates only normalized vector state."
+      },
+      "triggerConfig": {
+        "processId": "ENX208_SMART_GRID_PROTOCOL_ADAPTER_HEALTH_MONITOR",
+        "processName": "Energy Smart Grid Protocol Adapter Health Monitor",
+        "rules": [
+          {
+            "sequenceId": "enx208-protocol-control-unavailable",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Smart Grid Protocol Adapter Health Monitor: PROTOCOL_CONTROL_UNAVAILABLE"
+          },
+          {
+            "sequenceId": "enx208-degraded-protocol-path",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Smart Grid Protocol Adapter Health Monitor: DEGRADED_PROTOCOL_PATH"
+          },
+          {
+            "sequenceId": "enx208-fallback-protocol-active",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Smart Grid Protocol Adapter Health Monitor: FALLBACK_PROTOCOL_ACTIVE"
+          },
+          {
+            "sequenceId": "enx208-protocols-stable",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Smart Grid Protocol Adapter Health Monitor: PROTOCOLS_STABLE"
+          }
+        ]
+      },
+      "machineClass": "signal-monitor",
+      "openClawProjection": {
+        "projectionId": "openclaw-energy-smart-grid-protocol-adapter-health-monitor-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 16691,
+          "length": 10
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "ieee_2030_5_der_control_available",
+          "ieee_1547_telemetry_and_control_available",
+          "openadr_signal_available",
+          "iec_61850_feeder_or_substation_state_available",
+          "dnp3_scada_point_state_available",
+          "modbus_or_opc_ua_device_bridge_available",
+          "ocpp_ev_charging_control_available",
+          "mqtt_grid_event_mirror_available",
+          "protocol_authentication_certificate_valid",
+          "command_acknowledgement_latency_acceptable"
+        ],
+        "peContract": "OpenClaw maps resilient community microgrid observations to this machine's native input lane; PE writes the vector source and does not wait inside a PE cycle."
+      },
+      "interconnections": [
+        {
+          "id": "energy.resilient-community-microgrid-command-center.smart-grid-protocol-adapter-health-monitor",
+          "type": "published-domain-bus-producer",
+          "role": "smart_grid_protocol_adapter_health_monitor",
+          "sourceMachine": "Energy Smart Grid Protocol Adapter Health Monitor",
+          "sourceOutputRegion": {
+            "offset": 16701,
+            "length": 4
+          },
+          "targetInputElements": [
+            7
+          ],
+          "normalizedElements": [
+            "Energy Smart Grid Protocol Adapter Health Monitor active output[0] bit"
+          ],
+          "purpose": "Publish Energy Smart Grid Protocol Adapter Health Monitor urgent/review response lane into energy.resilient-community-microgrid-command-center.",
+          "busId": "energy.resilient-community-microgrid-command-center",
+          "busTag": "published-bus-energy-resilient-community-microgrid-command-center",
+          "targetMachine": "Energy Resilient Community Microgrid Command Center",
+          "targetMachineFile": "EnergyResilientCommunityMicrogridCommandCenterInterconnect.json",
+          "targetInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "busInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "publishedOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized community microgrid status bits only; raw utility telemetry, protocol frames, operator notes, logistics records, and provider payloads remain outside the universal reality vector."
+        }
+      ]
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 16691,
+        "length": 10
+      },
+      "output": {
+        "offset": 16701,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "enx208-protocol-control-unavailable",
+        "name": "Smart Grid Protocol Adapter Health Monitor: PROTOCOL_CONTROL_UNAVAILABLE",
+        "metadata": {
+          "description": "Smart Grid Protocol Adapter Health Monitor: PROTOCOL_CONTROL_UNAVAILABLE",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx208-protocol-control-unavailable-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx208-protocol-control-unavailable-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "PROTOCOL_CONTROL_UNAVAILABLE for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx208-degraded-protocol-path",
+        "name": "Smart Grid Protocol Adapter Health Monitor: DEGRADED_PROTOCOL_PATH",
+        "metadata": {
+          "description": "Smart Grid Protocol Adapter Health Monitor: DEGRADED_PROTOCOL_PATH",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx208-degraded-protocol-path-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx208-degraded-protocol-path-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "DEGRADED_PROTOCOL_PATH for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx208-fallback-protocol-active",
+        "name": "Smart Grid Protocol Adapter Health Monitor: FALLBACK_PROTOCOL_ACTIVE",
+        "metadata": {
+          "description": "Smart Grid Protocol Adapter Health Monitor: FALLBACK_PROTOCOL_ACTIVE",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx208-fallback-protocol-active-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx208-fallback-protocol-active-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "FALLBACK_PROTOCOL_ACTIVE for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx208-protocols-stable",
+        "name": "Smart Grid Protocol Adapter Health Monitor: PROTOCOLS_STABLE",
+        "metadata": {
+          "description": "Smart Grid Protocol Adapter Health Monitor: PROTOCOLS_STABLE",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "enx208-protocols-stable-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx208-protocols-stable-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "PROTOCOLS_STABLE for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Smart Grid Protocol Adapter Health Monitor: PROTOCOL_CONTROL_UNAVAILABLE",
+        "pattern": "PROTOCOL_CONTROL_UNAVAILABLE",
+        "description": "Activates PROTOCOL_CONTROL_UNAVAILABLE.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "protocol-control-unavailable",
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16701,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Smart Grid Protocol Adapter Health Monitor: DEGRADED_PROTOCOL_PATH",
+        "pattern": "DEGRADED_PROTOCOL_PATH",
+        "description": "Activates DEGRADED_PROTOCOL_PATH.",
+        "vectors": [
+          [
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "degraded-protocol-path",
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16701,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Smart Grid Protocol Adapter Health Monitor: FALLBACK_PROTOCOL_ACTIVE",
+        "pattern": "FALLBACK_PROTOCOL_ACTIVE",
+        "description": "Activates FALLBACK_PROTOCOL_ACTIVE.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "fallback-protocol-active",
+          "expectedOutputVector": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16701,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Smart Grid Protocol Adapter Health Monitor: PROTOCOLS_STABLE",
+        "pattern": "PROTOCOLS_STABLE",
+        "description": "Activates PROTOCOLS_STABLE.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        ],
+        "metadata": {
+          "scenario": "protocols-stable",
+          "expectedOutputVector": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "expectedOutputRegion": {
+            "offset": 16701,
+            "length": 4
+          }
+        }
+      }
+    ]
+  }
+}

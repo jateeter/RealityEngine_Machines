@@ -1,0 +1,618 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "Energy Microgrid Cyber Safety Gate",
+    "description": "Gates actuation when protocol identity, command replay, approved envelopes, SCADA or DERMS integrity, operator approval, rollback, firmware/configuration, or emergency override state is unsafe.",
+    "metadata": {
+      "category": "energy",
+      "businessSector": "energy",
+      "domain": "New Energy - Resilient Community Microgrid",
+      "author": "Reality Engine",
+      "operationalFocus": "Microgrid Cyber Safety Gate",
+      "assetClass": "Community Microgrid Service Layer",
+      "assetKind": "service-orchestration",
+      "inputSpace": "8D binary at [16705:16713]",
+      "outputSpace": "4D binary at [16713:16717]: [1,0,0,0]=BLOCK_ACTUATION, [0,1,0,0]=REQUIRE_HUMAN_APPROVAL, [0,0,1,0]=ALLOW_LIMITED_COMMANDS, [0,0,0,1]=CYBER_SAFE",
+      "inputSemantics": [
+        "protocol identity invalid",
+        "command replay risk active",
+        "DER command outside approved envelope",
+        "SCADA or DERMS anomaly active",
+        "operator approval missing",
+        "rollback path unavailable",
+        "firmware or configuration drift active",
+        "emergency override active"
+      ],
+      "sensorNormalization": {
+        "protocol_identity_invalid_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "command_replay_risk_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "der_command_outside_approved_envelope_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "scada_or_derms_anomaly_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "operator_approval_missing_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "rollback_path_unavailable_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "firmware_or_configuration_drift_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization",
+        "emergency_override_active_norm": "0.0=false/inactive, 1.0=true/active after PE source normalization"
+      },
+      "sequenceCount": 4,
+      "tags": [
+        "energy",
+        "community-microgrid",
+        "resilient-community-infrastructure",
+        "smart-grid",
+        "openclaw",
+        "localai",
+        "ollama",
+        "startup-loadable",
+        "enx209",
+        "microgrid-cyber-safety-gate"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "codex-energy-microgrid-service-layer",
+        "primaryDomain": "energy",
+        "domainTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure"
+        ],
+        "family": "resilient-community-microgrid",
+        "machineCode": "enx209",
+        "capabilityTags": [
+          "smart-grid",
+          "microgrid-operations",
+          "microgrid-cyber-safety-gate"
+        ],
+        "workflowTags": [
+          "openclaw-projection",
+          "pe-source-mapping",
+          "async-resolver-ready"
+        ],
+        "integrationTags": [
+          "openclaw",
+          "localai",
+          "ollama",
+          "smart-grid-protocols"
+        ],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-4",
+          "input-sequences",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "energy",
+          "community-microgrid",
+          "resilient-community-infrastructure",
+          "smart-grid",
+          "openclaw",
+          "localai",
+          "ollama",
+          "startup-loadable",
+          "enx209",
+          "microgrid-cyber-safety-gate"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "community-microgrid-operations",
+        "runbook": "https://runbooks.example.org/energy/enx209-microgrid-cyber-safety-gate",
+        "escalationPolicy": "pagerduty:community-microgrid-operations",
+        "contact": {
+          "primary": "community-microgrid-ops-primary@example.org",
+          "secondary": "community-microgrid-ops-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": 3600,
+          "warning": 900,
+          "error": 300
+        },
+        "notes": "Service-layer resilient community microgrid machine. PE owns protocol adapters, OpenClaw/Ollama handoffs, field completions, and source provenance; RE evaluates only normalized vector state."
+      },
+      "triggerConfig": {
+        "processId": "ENX209_MICROGRID_CYBER_SAFETY_GATE",
+        "processName": "Energy Microgrid Cyber Safety Gate",
+        "rules": [
+          {
+            "sequenceId": "enx209-block-actuation",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Microgrid Cyber Safety Gate: BLOCK_ACTUATION"
+          },
+          {
+            "sequenceId": "enx209-require-human-approval",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Microgrid Cyber Safety Gate: REQUIRE_HUMAN_APPROVAL"
+          },
+          {
+            "sequenceId": "enx209-allow-limited-commands",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Microgrid Cyber Safety Gate: ALLOW_LIMITED_COMMANDS"
+          },
+          {
+            "sequenceId": "enx209-cyber-safe",
+            "outputMatches": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "Microgrid Cyber Safety Gate: CYBER_SAFE"
+          }
+        ]
+      },
+      "machineClass": "safety-compliance-checker",
+      "openClawProjection": {
+        "projectionId": "openclaw-energy-microgrid-cyber-safety-gate-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 16705,
+          "length": 8
+        },
+        "normalization": "machine-native-binary",
+        "semantics": [
+          "protocol_identity_invalid",
+          "command_replay_risk_active",
+          "der_command_outside_approved_envelope",
+          "scada_or_derms_anomaly_active",
+          "operator_approval_missing",
+          "rollback_path_unavailable",
+          "firmware_or_configuration_drift_active",
+          "emergency_override_active"
+        ],
+        "peContract": "OpenClaw maps resilient community microgrid observations to this machine's native input lane; PE writes the vector source and does not wait inside a PE cycle."
+      },
+      "interconnections": [
+        {
+          "id": "energy.resilient-community-microgrid-command-center.microgrid-cyber-safety-gate",
+          "type": "published-domain-bus-producer",
+          "role": "microgrid_cyber_safety_gate",
+          "sourceMachine": "Energy Microgrid Cyber Safety Gate",
+          "sourceOutputRegion": {
+            "offset": 16713,
+            "length": 4
+          },
+          "targetInputElements": [
+            8
+          ],
+          "normalizedElements": [
+            "Energy Microgrid Cyber Safety Gate active output[0] bit"
+          ],
+          "purpose": "Publish Energy Microgrid Cyber Safety Gate urgent/review response lane into energy.resilient-community-microgrid-command-center.",
+          "busId": "energy.resilient-community-microgrid-command-center",
+          "busTag": "published-bus-energy-resilient-community-microgrid-command-center",
+          "targetMachine": "Energy Resilient Community Microgrid Command Center",
+          "targetMachineFile": "EnergyResilientCommunityMicrogridCommandCenterInterconnect.json",
+          "targetInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "busInputRegion": {
+            "offset": 16800,
+            "length": 10
+          },
+          "publishedOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 16810,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized community microgrid status bits only; raw utility telemetry, protocol frames, operator notes, logistics records, and provider payloads remain outside the universal reality vector."
+        }
+      ]
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "perceptualMapping": {
+      "input": {
+        "offset": 16705,
+        "length": 8
+      },
+      "output": {
+        "offset": 16713,
+        "length": 4
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "enx209-block-actuation",
+        "name": "Microgrid Cyber Safety Gate: BLOCK_ACTUATION",
+        "metadata": {
+          "description": "Microgrid Cyber Safety Gate: BLOCK_ACTUATION",
+          "output": "[1,0,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx209-block-actuation-state",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx209-block-actuation-output",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "BLOCK_ACTUATION for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx209-require-human-approval",
+        "name": "Microgrid Cyber Safety Gate: REQUIRE_HUMAN_APPROVAL",
+        "metadata": {
+          "description": "Microgrid Cyber Safety Gate: REQUIRE_HUMAN_APPROVAL",
+          "output": "[0,1,0,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx209-require-human-approval-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx209-require-human-approval-output",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "action": "REQUIRE_HUMAN_APPROVAL for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx209-allow-limited-commands",
+        "name": "Microgrid Cyber Safety Gate: ALLOW_LIMITED_COMMANDS",
+        "metadata": {
+          "description": "Microgrid Cyber Safety Gate: ALLOW_LIMITED_COMMANDS",
+          "output": "[0,0,1,0]"
+        },
+        "vectors": [
+          {
+            "id": "enx209-allow-limited-commands-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx209-allow-limited-commands-output",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "action": "ALLOW_LIMITED_COMMANDS for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enx209-cyber-safe",
+        "name": "Microgrid Cyber Safety Gate: CYBER_SAFE",
+        "metadata": {
+          "description": "Microgrid Cyber Safety Gate: CYBER_SAFE",
+          "output": "[0,0,0,1]"
+        },
+        "vectors": [
+          {
+            "id": "enx209-cyber-safe-state",
+            "elements": [
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              }
+            ],
+            "isInitial": true,
+            "outputVectors": [
+              {
+                "id": "enx209-cyber-safe-output",
+                "vector": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "metadata": {
+                  "action": "CYBER_SAFE for resilient community microgrid operations."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "Microgrid Cyber Safety Gate: BLOCK_ACTUATION",
+        "pattern": "BLOCK_ACTUATION",
+        "description": "Activates BLOCK_ACTUATION.",
+        "vectors": [
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "block-actuation",
+          "expectedOutputVector": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16713,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Microgrid Cyber Safety Gate: REQUIRE_HUMAN_APPROVAL",
+        "pattern": "REQUIRE_HUMAN_APPROVAL",
+        "description": "Activates REQUIRE_HUMAN_APPROVAL.",
+        "vectors": [
+          [
+            0,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "require-human-approval",
+          "expectedOutputVector": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16713,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Microgrid Cyber Safety Gate: ALLOW_LIMITED_COMMANDS",
+        "pattern": "ALLOW_LIMITED_COMMANDS",
+        "description": "Activates ALLOW_LIMITED_COMMANDS.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "allow-limited-commands",
+          "expectedOutputVector": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "expectedOutputRegion": {
+            "offset": 16713,
+            "length": 4
+          }
+        }
+      },
+      {
+        "name": "Microgrid Cyber Safety Gate: CYBER_SAFE",
+        "pattern": "CYBER_SAFE",
+        "description": "Activates CYBER_SAFE.",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "metadata": {
+          "scenario": "cyber-safe",
+          "expectedOutputVector": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "expectedOutputRegion": {
+            "offset": 16713,
+            "length": 4
+          }
+        }
+      }
+    ]
+  }
+}
