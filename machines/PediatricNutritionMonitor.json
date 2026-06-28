@@ -147,7 +147,73 @@
         "Pediatric Nutrition Monitor input 2",
         "Pediatric Nutrition Monitor input 3",
         "Pediatric Nutrition Monitor input 4"
-      ]
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.child-development-support.pediatric-nutrition-status",
+          "type": "published-domain-bus-producer",
+          "role": "pediatric_nutrition_status",
+          "sourceMachine": "Pediatric Nutrition Monitor",
+          "sourceOutputRegion": {
+            "offset": 2003,
+            "length": 4
+          },
+          "targetInputElements": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "normalizedElements": [
+            "growth alert bit from PediatricNutritionMonitor output[0]",
+            "nutrition deficit bit from PediatricNutritionMonitor output[1]",
+            "micronutrient concern bit from PediatricNutritionMonitor output[2]",
+            "nutrition ok bit from PediatricNutritionMonitor output[3]"
+          ],
+          "purpose": "Publish pediatric nutrition context into the personal-health child development support bus.",
+          "busId": "health-personal.child-development-support",
+          "busTag": "published-bus-health-personal-child-development-support",
+          "targetMachine": "Child Development Support Interconnect",
+          "targetMachineFile": "ChildDevelopmentSupportInterconnect.json",
+          "targetInputRegion": {
+            "offset": 4458,
+            "length": 18
+          },
+          "busInputRegion": {
+            "offset": 4458,
+            "length": 18
+          },
+          "publishedOutputRegion": {
+            "offset": 4476,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 4476,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-pediatric-nutrition-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1971,
+          "length": 4
+        },
+        "normalization": "machine-native-scalar",
+        "semantics": [
+          "growth_trajectory_norm",
+          "caloric_adequacy_norm",
+          "micronutrient_status_norm",
+          "dietary_diversity_norm"
+        ],
+        "peContract": "OpenClaw maps pediatric nutrition observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {

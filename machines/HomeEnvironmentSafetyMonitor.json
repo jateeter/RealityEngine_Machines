@@ -149,7 +149,69 @@
         "Home Environment Safety Monitor input 2",
         "Home Environment Safety Monitor input 3",
         "Home Environment Safety Monitor input 4"
-      ]
+      ],
+      "interconnections": [
+        {
+          "id": "health-personal.child-development-support.home-environment-safety",
+          "type": "published-domain-bus-producer",
+          "role": "home_environment_safety",
+          "sourceMachine": "Home Environment Safety Monitor",
+          "sourceOutputRegion": {
+            "offset": 1999,
+            "length": 4
+          },
+          "targetInputElements": [
+            14,
+            15
+          ],
+          "normalizedElements": [
+            "unsafe housing bit from HomeEnvironmentSafetyMonitor output[0]",
+            "utility failure or health hazard bit derived from HomeEnvironmentSafetyMonitor output[1] or output[2]"
+          ],
+          "purpose": "Publish home environment safety context into the personal-health child development support bus.",
+          "busId": "health-personal.child-development-support",
+          "busTag": "published-bus-health-personal-child-development-support",
+          "targetMachine": "Child Development Support Interconnect",
+          "targetMachineFile": "ChildDevelopmentSupportInterconnect.json",
+          "targetInputRegion": {
+            "offset": 4458,
+            "length": 18
+          },
+          "busInputRegion": {
+            "offset": 4458,
+            "length": 18
+          },
+          "publishedOutputRegion": {
+            "offset": 4476,
+            "length": 4
+          },
+          "busOutputRegion": {
+            "offset": 4476,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector."
+        }
+      ],
+      "openClawProjection": {
+        "projectionId": "openclaw-home-environment-safety-native-input-projection",
+        "owner": "openclaw-input-analyst",
+        "dispatchMode": "accepted-no-wait",
+        "writeBackRegion": {
+          "offset": 1967,
+          "length": 4
+        },
+        "normalization": "machine-native-scalar",
+        "semantics": [
+          "housing_condition_norm",
+          "utility_stability_norm",
+          "environmental_health_hazard_norm",
+          "environment_safe_norm"
+        ],
+        "peContract": "OpenClaw maps home environment observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle."
+      }
     },
     "arbiterRule": "PASSTHROUGH",
     "perceptualMapping": {
