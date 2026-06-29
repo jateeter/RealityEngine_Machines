@@ -541,6 +541,16 @@ def audit_machine(
             errors.append(f"triggerConfig.rules[{idx}].outputMatches must be an array")
         if rule.get("ragStatusCode") not in {"GREEN", "AMBER", "RED"}:
             errors.append(f"triggerConfig.rules[{idx}].ragStatusCode must be GREEN, AMBER, or RED")
+        ps = rule.get("processStatus")
+        if ps in {"warning", "error"}:
+            gov_sla = as_object(as_object(metadata.get("governance", {})).get("sla", {}))
+            sla_val = gov_sla.get(ps)
+            if not isinstance(sla_val, (int, float)) or sla_val <= 0:
+                errors.append(
+                    f"triggerConfig.rules[{idx}].processStatus={ps!r} is a paging tier"
+                    f" but governance.sla.{ps} is not a positive number"
+                    f" — envelope would page without a contract"
+                )
 
     input_semantics = metadata.get("inputSemantics")
     if input_semantics is not None:
