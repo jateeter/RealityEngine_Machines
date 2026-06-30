@@ -37,7 +37,10 @@
         "security",
         "security-monitoring",
         "soc",
-        "startup-loadable"
+        "startup-loadable",
+        "agent-dispatcher",
+        "ai-trigger",
+        "dispatchable-agent"
       ],
       "rationale": "Auth anomalies, exfiltration detection, and network isolation are data-center security concerns.",
       "inputDimensions": [
@@ -140,7 +143,10 @@
           "security",
           "security-monitoring",
           "soc",
-          "startup-loadable"
+          "startup-loadable",
+          "agent-dispatcher",
+          "ai-trigger",
+          "dispatchable-agent"
         ]
       },
       "governance": {
@@ -290,9 +296,18 @@
             "processStatus": "warning",
             "description": "Action: Immediate isolation \u2014 privilege escalation confirmed, contain before lateral movement"
           }
-        ]
+        ],
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "triggers/graphql_trigger_template.py",
+        "dispatch": {
+          "target": "localAIStack",
+          "transport": "graphql",
+          "mutation": "updateProcessState",
+          "envelopeSchema": "schemas/ai-trigger-envelope.schema.json",
+          "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+        }
       },
-      "machineClass": "signal-monitor",
+      "machineClass": "agent-dispatcher",
       "inputSemantics": [
         "AI Security Monitor input 1",
         "AI Security Monitor input 2",
@@ -362,6 +377,75 @@
           "ai_security_monitor_input_4"
         ],
         "peContract": "OpenClaw maps domain observations to this machine's native input lane; PE writes the vector source and does not wait inside a PE cycle."
+      },
+      "function": "Agent Dispatcher",
+      "aiTrigger": "ai-security-agent-dispatcher-threat-signal",
+      "dispatchableAgent": "ai_security_agent",
+      "agentActions": [
+        "Dispatch ai_security_agent to assess suspicious AI infrastructure authentication, network, and privilege signals.",
+        "Recommend containment, credential review, and SOC escalation steps for elevated AI workload threats.",
+        "Record the advisory security assessment back through the PE completion source mapping."
+      ],
+      "agentBinding": {
+        "agent": "ai_security_agent",
+        "mode": "advise",
+        "trigger": "ai-security-agent-dispatcher-threat-signal",
+        "allowedActions": [
+          "Dispatch ai_security_agent to assess suspicious AI infrastructure authentication, network, and privilege signals.",
+          "Recommend containment, credential review, and SOC escalation steps for elevated AI workload threats.",
+          "Record the advisory security assessment back through the PE completion source mapping."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "localai",
+          "sensorId": "localai.aisecurity.monitor.ai.security.agent.completion",
+          "name": "localAIStack aisecurity-monitor ai.security.agent completion",
+          "region": {
+            "offset": 268,
+            "length": 4
+          },
+          "semantics": [
+            "AI Security Monitor input 1",
+            "AI Security Monitor input 2",
+            "AI Security Monitor input 3",
+            "AI Security Monitor input 4"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "localai-aisecurity-monitor-completion",
+            "sensorId": "localai.aisecurity.monitor.ai.security.agent.completion",
+            "name": "localAIStack aisecurity-monitor ai.security.agent completion",
+            "region": {
+              "offset": 268,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": false,
+          "blockedWhenRag": []
+        }
       }
     },
     "sequences": [
