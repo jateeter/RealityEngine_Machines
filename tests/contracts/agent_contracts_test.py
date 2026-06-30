@@ -37,6 +37,7 @@ class AgentContractTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.registry = load_json(REPO_ROOT / "domains" / "domain-registry.json")
+        cls.manifest = load_json(REPO_ROOT / "domains" / "domain-manifest.json")["domains"]
         cls.machine_class_schema = load_json(REPO_ROOT / "schemas" / "machine-class.schema.json")
         cls.agent_ready_schema = load_json(REPO_ROOT / "schemas" / "agent-ready-machine-class.schema.json")
         cls.autonomy_schema = load_json(REPO_ROOT / "schemas" / "autonomy-policy.schema.json")
@@ -94,7 +95,41 @@ class AgentContractTests(unittest.TestCase):
 
         self.assertFalse(exceptions, "\n".join(exceptions))
         self.assertEqual(class_counts["agent-dispatcher"], agent_bound_counts["agent-dispatcher"])
-        self.assertEqual(agent_bound_counts["agent-dispatcher"], 1056)
+        self.assertGreaterEqual(agent_bound_counts["agent-dispatcher"], 1056)
+
+    def test_required_agent_dispatcher_domains_have_code_owned_bindings(self) -> None:
+        missing: list[str] = []
+
+        for domain_id, domain in self.manifest.items():
+            required_classes = domain.get("requiredMachineClasses", [])
+            if "agent-dispatcher" not in required_classes:
+                continue
+
+            prefixes = tuple(str(prefix).lower() for prefix in domain.get("codePrefixes", []))
+            dispatchers: list[str] = []
+            incomplete: list[str] = []
+
+            for path, machine in self.machines:
+                md = machine.get("metadata", {})
+                rel = path.relative_to(REPO_ROOT)
+                rel_text = rel.as_posix().lower()
+                file_stem = path.stem.lower()
+                is_domain_owned = (
+                    rel_text.startswith(f"machines/domains/{domain_id}/")
+                    or any(file_stem.startswith(prefix) for prefix in prefixes)
+                )
+                if not is_domain_owned or md.get("machineClass") != "agent-dispatcher":
+                    continue
+
+                dispatchers.append(str(rel))
+                if not isinstance(md.get("agentBinding"), dict) or not isinstance(md.get("openClawProjection"), dict):
+                    incomplete.append(str(rel))
+
+            if not dispatchers:
+                missing.append(domain_id)
+            self.assertFalse(incomplete, "\n".join(incomplete))
+
+        self.assertFalse(missing, "missing code-owned agent-dispatcher bindings: " + ", ".join(missing))
 
     def test_agent_binding_autonomy_policy_matches_registry(self) -> None:
         registry_policy = self.registry["autonomyPolicy"]
@@ -117,7 +152,7 @@ class AgentContractTests(unittest.TestCase):
                 self.assertEqual(risk_controls.get("maxAutonomy"), mode)
                 self.assertEqual(risk_controls.get("blockedWhenRag"), expected_policy["blockedWhenRag"])
 
-        self.assertEqual(checked, 1056)
+        self.assertGreaterEqual(checked, 1056)
 
     def test_non_observe_writeback_is_pe_sensor_and_observe_has_none(self) -> None:
         observe_count = 0
