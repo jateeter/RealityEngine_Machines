@@ -16,3 +16,12 @@ fi
 
 python3 "$SCRIPT_DIR/audit-corpus.py" "${ARGS[@]}" "$@"
 python3 "$SCRIPT_DIR/inventory-semantic-buses.py" --check --summary-only
+
+# JSON-Schema enforcement (machines + registries + trigger files vs schemas/).
+# Requires devDependencies (ajv); skip with a clear notice if not installed so
+# the Python audit still runs in minimal environments.
+if [ -d "$REPO_ROOT/node_modules/ajv" ]; then
+  node "$SCRIPT_DIR/validate-schemas.mjs"
+else
+  echo "validate-schemas: SKIPPED (run 'npm install' to enable ajv JSON-Schema enforcement)"
+fi

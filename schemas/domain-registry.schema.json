@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.example.org/schemas/domain-registry.schema.json",
+  "title": "RealityEngine Domain Registry",
+  "description": "Architecture registry (domains/domain-registry.json): autonomy modes/policy, machine-class catalog, agent-ready-class contracts, perceptual-space range policy, and per-domain acceptance rules. Compatibility-safe: constrains the contract surface while leaving room for growth.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "purpose",
+    "autonomyModes",
+    "autonomyPolicy",
+    "machineClasses",
+    "agentReadyMachineClasses",
+    "rangePolicy",
+    "domains"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "purpose": { "type": "string", "minLength": 1 },
+    "autonomyModes": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
+    "autonomyPolicy": {
+      "type": "object",
+      "additionalProperties": { "type": "object" }
+    },
+    "machineClasses": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
+    "agentReadyMachineClasses": {
+      "type": "object",
+      "propertyNames": { "$ref": "machine-class.schema.json" },
+      "additionalProperties": { "$ref": "agent-ready-machine-class.schema.json" }
+    },
+    "rangePolicy": { "$ref": "#/$defs/rangePolicy" },
+    "domains": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/domainRule" }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "rangePolicy": {
+      "type": "object",
+      "required": ["default", "allowedOverlapKinds", "requirements"],
+      "properties": {
+        "default": { "type": "string", "enum": ["exclusive", "overlay", "bridge", "deprecated"] },
+        "allowedOverlapKinds": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["exclusive", "overlay", "bridge", "deprecated"] }
+        },
+        "requirements": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "reservedRanges": { "type": "array", "items": { "$ref": "#/$defs/reservedRange" } }
+      },
+      "additionalProperties": true
+    },
+    "reservedRange": {
+      "type": "object",
+      "required": ["id", "offset", "length", "ownership"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "offset": { "type": "integer", "minimum": 0 },
+        "length": { "type": "integer", "minimum": 1 },
+        "ownership": { "type": "string", "enum": ["exclusive", "overlay", "bridge", "deprecated"] },
+        "provider": { "type": "string", "minLength": 1 },
+        "owner": { "type": "string", "minLength": 1 },
+        "writeBack": { "type": "boolean" },
+        "sensorIdPattern": { "type": "string", "minLength": 1 },
+        "purpose": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "domainRule": {
+      "type": "object",
+      "required": ["codePrefixes", "defaultAutonomy", "requiredMachineClasses"],
+      "properties": {
+        "codePrefixes": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "defaultAutonomy": {
+          "type": "string",
+          "enum": ["observe", "advise", "supervised-act", "automated-act"]
+        },
+        "requiredMachineClasses": {
+          "type": "array",
+          "items": { "$ref": "machine-class.schema.json" }
+        },
+        "defaultAgentFamilies": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      },
+      "additionalProperties": true
+    }
+  }
+}

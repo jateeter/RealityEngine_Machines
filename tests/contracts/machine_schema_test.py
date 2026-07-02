@@ -32,7 +32,7 @@ class MachineSchemaTests(unittest.TestCase):
 
     def test_schema_declares_core_cross_engine_contract(self) -> None:
         self.assertEqual(self.schema["$schema"], "https://json-schema.org/draft/2020-12/schema")
-        self.assertEqual(self.schema["$id"], "https://realityengine.example.org/schemas/machine-1.0.0.json")
+        self.assertEqual(self.schema["$id"], "https://realityengine.example.org/schemas/machine.schema.json")
         self.assertEqual(self.schema["required"], ["version", "machine"])
 
         machine_def = self.schema["$defs"]["machine"]
@@ -45,11 +45,49 @@ class MachineSchemaTests(unittest.TestCase):
 
     def test_schema_uses_standard_machine_class_catalog(self) -> None:
         machine_class_ref = self.schema["$defs"]["metadata"]["properties"]["machineClass"]["$ref"]
-        self.assertEqual(machine_class_ref, "machine-class-1.0.0.json")
+        self.assertEqual(machine_class_ref, "machine-class.schema.json")
         self.assertEqual(
             set(load_json(MACHINE_CLASS_SCHEMA)["enum"]),
             self.machine_classes,
         )
+
+    def test_schema_ref_graph_is_filename_consistent_and_resolvable(self) -> None:
+        """Every schema $id is filename-based and every external $ref resolves to a
+        file that exists, so a standard $id/URI validator can load the whole graph
+        (regression for the mixed $id/-1.0.0 ref convention)."""
+        schema_dir = REPO_ROOT / "schemas"
+        files = {p.name for p in schema_dir.glob("*.schema.json")}
+        base = "https://realityengine.example.org/schemas/"
+
+        def external_refs(node):
+            if isinstance(node, dict):
+                for k, v in node.items():
+                    if k == "$ref" and isinstance(v, str) and not v.startswith("#"):
+                        yield v.split("#", 1)[0]
+                    else:
+                        yield from external_refs(v)
+            elif isinstance(node, list):
+                for item in node:
+                    yield from external_refs(item)
+
+        for name in files:
+            doc = load_json(schema_dir / name)
+            self.assertEqual(doc.get("$id"), base + name, f"{name}: $id must be filename-based")
+            for ref in external_refs(doc):
+                self.assertIn(ref, files, f"{name}: $ref '{ref}' does not resolve to a schema file")
+
+    def test_required_contract_schemas_present(self) -> None:
+        """Authoritative corpus artifacts each have a schema."""
+        schema_dir = REPO_ROOT / "schemas"
+        for required in (
+            "machine.schema.json",
+            "domain-manifest.schema.json",
+            "domain-registry.schema.json",
+            "semantic-bus-registry.schema.json",
+            "ai-trigger-envelope.schema.json",
+            "trigger-scenario.schema.json",
+        ):
+            self.assertTrue((schema_dir / required).exists(), f"missing schema: {required}")
 
     def test_schema_models_published_domain_bus_extension(self) -> None:
         metadata_properties = self.schema["$defs"]["metadata"]["properties"]

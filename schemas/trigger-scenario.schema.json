@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.example.org/schemas/trigger-scenario.schema.json",
+  "title": "RealityEngine Trigger Scenario",
+  "description": "Multi-envelope trigger scenario (triggers/*.scenario_*.json): an ordered chain of RE→localAIStack dispatch envelopes with a narrative flow and invariants. Distinct from a single ai-trigger-envelope.",
+  "type": "object",
+  "required": ["scenario", "envelopes", "flow"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "$comment": { "type": "string" },
+    "correlationId": { "type": "string", "minLength": 1 },
+    "scenario": { "type": "string", "minLength": 1 },
+    "envelopes": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Each item is either an inline envelope, a $ref to one, or a labeled cascade step referencing an envelope.",
+      "items": {
+        "type": "object",
+        "minProperties": 1,
+        "additionalProperties": true
+      }
+    },
+    "flow": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["step", "where", "what"],
+        "properties": {
+          "step": { "type": ["integer", "string"] },
+          "where": { "type": "string", "minLength": 1 },
+          "what": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": true
+      }
+    },
+    "invariants": {
+      "type": "array",
+      "items": { "type": ["string", "object"] }
+    }
+  },
+  "additionalProperties": true
+}
