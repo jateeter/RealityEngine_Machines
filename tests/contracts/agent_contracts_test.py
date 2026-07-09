@@ -16,8 +16,8 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MACHINES_ROOT = REPO_ROOT / "machines"
-SAMPLE_AGENT_MACHINE = MACHINES_ROOT / "AGX001_aquaculture-water-quality-stability.json"
-SAMPLE_OBSERVE_MACHINE = MACHINES_ROOT / "AGX016_aquaculture-energy-backup-readiness.json"
+SAMPLE_AGENT_MACHINE = next(MACHINES_ROOT.rglob("AGX001_aquaculture-water-quality-stability.json"))
+SAMPLE_OBSERVE_MACHINE = next(MACHINES_ROOT.rglob("AGX016_aquaculture-energy-backup-readiness.json"))
 
 
 def load_json(path: Path) -> dict[str, Any]:
