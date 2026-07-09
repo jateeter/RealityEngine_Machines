@@ -40,6 +40,7 @@ npm run test:e2e
 - Multi-engine tests should use `RE_REGISTRY_URL` when available.
 - Single-engine tests should use explicit `RE_BASE_URL` and `PE_BASE_URL`.
 - Machine ID, schema, trigger, and PE source expectations are cross-repo contracts.
+- On-disk machine addressing is path-aware: every engine's `GET /api/machines/json/list` enumerates the corpus recursively and reports `relFile` (path relative to the machines root); `GET /api/machines/json/:name` accepts a basename and falls back to a recursive search, so corpus filenames must stay globally unique (`tests/integration/machine-json-listing.spec.ts` enforces both).
 - `domains/domain-manifest.json` is the authoritative domain inventory; recursive corpus counts must match `currentMachineCount`, and unmanifested domains are validation failures.
 - `domains/semantic-bus-registry.json` is the authoritative semantic-bus inventory; refresh it with `npm run semantic-buses:write` when semantic published buses change.
 - Do not treat stale generated expectations as truth when live registry endpoints disagree.
