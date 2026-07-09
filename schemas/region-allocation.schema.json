@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.example.org/schemas/region-allocation.schema.json",
+  "title": "Universal-vector region allocation registry",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "purpose",
+    "vectorBudget",
+    "reservedBands",
+    "serviceLanes",
+    "domains",
+    "interDomainBuses",
+    "externalWritebackSummary",
+    "sharedOutputLanes"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "region": {
+      "type": "object",
+      "required": ["offset", "length"],
+      "properties": {
+        "offset": { "type": "integer", "minimum": 0 },
+        "length": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "span": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0 },
+      "minItems": 2,
+      "maxItems": 2
+    }
+  },
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "purpose": { "type": "string", "minLength": 1 },
+    "vectorBudget": {
+      "type": "object",
+      "required": ["maxCellExclusive"],
+      "properties": {
+        "maxCellExclusive": { "type": "integer", "minimum": 0 },
+        "note": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "reservedBands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "offset", "length"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "offset": { "type": "integer", "minimum": 0 },
+          "length": { "type": "integer", "minimum": 1 },
+          "provider": { "type": ["string", "null"] },
+          "ownership": { "type": ["string", "null"] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "serviceLanes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "offset", "length", "provider", "corpusReaders", "corpusWriters"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "offset": { "type": "integer", "minimum": 0 },
+          "length": { "type": "integer", "minimum": 1 },
+          "provider": { "type": "string", "minLength": 1 },
+          "corpusReaders": { "type": "array", "items": { "type": "string" } },
+          "corpusWriters": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": false
+      }
+    },
+    "domains": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["machineCount"],
+        "properties": {
+          "machineCount": { "type": "integer", "minimum": 0 },
+          "inputSpan": { "anyOf": [{ "$ref": "#/$defs/span" }, { "type": "null" }] },
+          "outputSpan": { "anyOf": [{ "$ref": "#/$defs/span" }, { "type": "null" }] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "interDomainBuses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "domain", "sourceDomains", "crossDomain", "inputRegion", "outputRegion", "consumerCount"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "domain": { "type": "string", "minLength": 1 },
+          "sourceDomains": { "type": "array", "items": { "type": "string" } },
+          "crossDomain": { "type": "boolean" },
+          "inputRegion": { "$ref": "#/$defs/region" },
+          "outputRegion": { "$ref": "#/$defs/region" },
+          "consumerCount": { "type": "integer", "minimum": 0 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "externalWritebackSummary": {
+      "type": "object",
+      "required": ["count", "allMatchMachineInput", "byDomain"],
+      "properties": {
+        "count": { "type": "integer", "minimum": 0 },
+        "allMatchMachineInput": { "type": "boolean" },
+        "byDomain": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } }
+      },
+      "additionalProperties": false
+    },
+    "sharedOutputLanes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["cells", "owners", "domains", "crossDomain"],
+        "properties": {
+          "cells": { "$ref": "#/$defs/region" },
+          "owners": { "type": "array", "minItems": 2, "items": { "type": "string" } },
+          "domains": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+          "crossDomain": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}
