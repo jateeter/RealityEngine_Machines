@@ -96,6 +96,32 @@ test.describe('Machine JSON Listing Parity', () => {
       expect(body.success, `${engine.id} load response must report success`).toBeTruthy();
     }
   });
+
+  test('nested energy machine resolves to the same identity on every engine', async ({ request }) => {
+    const engines = await fetchEngines(request);
+    test.skip(engines.length < 2, 'Need at least 2 engines for cross-engine identity parity');
+
+    const corpusRelFiles = await collectCorpusRelFiles(MACHINES_ROOT);
+    const nested = corpusRelFiles.find(f => f.startsWith('domains/energy/'));
+    test.skip(!nested, 'No energy domain corpus files present');
+
+    const basename = nested!.split('/').pop()!.replace(/\.json$/, '');
+    const identities: Array<{ engine: string; id: string; name: string }> = [];
+    for (const engine of engines) {
+      const resp = await request.get(`${engine.re_url}/api/machines/json/${basename}`, { ignoreHTTPSErrors: true });
+      expect(resp.ok(), `${engine.id} (${engine.runtime}) must load ${basename}`).toBeTruthy();
+      const body = await resp.json();
+      identities.push({
+        engine: `${engine.id}/${engine.runtime}`,
+        id: String(body.machine?.id ?? ''),
+        name: String(body.machine?.name ?? ''),
+      });
+    }
+    const ids = new Set(identities.map(i => i.id));
+    const names = new Set(identities.map(i => i.name));
+    expect(ids.size, `machine id must be identical across engines: ${JSON.stringify(identities)}`).toBe(1);
+    expect(names.size, `machine name must be identical across engines: ${JSON.stringify(identities)}`).toBe(1);
+  });
 });
 
 // Offline contract — load-by-basename is only sound while corpus filenames
