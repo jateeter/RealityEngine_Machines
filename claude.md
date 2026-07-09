@@ -10,10 +10,10 @@ This repo is the canonical machine corpus and schema/test contract source for al
 
 ## Codebase Map
 
-- `machines/`: canonical machine definitions.
-- `machines/core/`: core shared machines.
-- `machines/domains/`: domain-specific machine groups.
-- `domains/`: domain organization/support files.
+- `machines/`: canonical machine definitions — fully domain-organized, no files at the root (`tests/contracts/domain_organization_test.py` enforces this).
+- `machines/core/`: reserved for cross-domain shared machines (currently empty).
+- `machines/domains/<domain>/`: one directory per accepted manifest domain; a machine's `tagging.primaryDomain`/`metadata.category` must match its directory.
+- `domains/`: domain organization/support files, including the generated `corpus-index.json` catalog (`npm run corpus-index:write` after corpus changes).
 - `schemas/`: JSON schemas for machine and contract validation.
 - `triggers/`: trigger definitions consumed by runtime and PE workflows.
 - `tests/contracts/`: schema/contract validation.
