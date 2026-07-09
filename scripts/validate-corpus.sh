@@ -16,6 +16,7 @@ fi
 
 python3 "$SCRIPT_DIR/audit-corpus.py" "${ARGS[@]}" "$@"
 python3 "$SCRIPT_DIR/inventory-semantic-buses.py" --check --summary-only
+python3 "$SCRIPT_DIR/build-corpus-index.py" --check
 
 # JSON-Schema enforcement (machines + registries + trigger files vs schemas/).
 # Requires devDependencies (ajv); skip with a clear notice if not installed so

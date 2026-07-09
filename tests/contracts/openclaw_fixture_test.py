@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-FIXTURE = REPO_ROOT / "machines" / "OpenClawCompletionE2E.json"
+FIXTURE = next((REPO_ROOT / "machines").rglob("OpenClawCompletionE2E.json"))
 
 
 class OpenClawFixtureTests(unittest.TestCase):

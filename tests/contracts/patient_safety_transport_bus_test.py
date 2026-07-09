@@ -10,12 +10,12 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MACHINES = REPO_ROOT / "machines"
-FIXTURE = MACHINES / "PatientSafetyTransportInterconnect.json"
+FIXTURE = next(MACHINES.rglob("PatientSafetyTransportInterconnect.json"))
 BUS_TAG = "published-bus-health-personal-patient-safety-transport"
 
 
 def load_machine(name: str) -> dict:
-    with (MACHINES / name).open() as handle:
+    with next(MACHINES.rglob(name)).open() as handle:
         return json.load(handle)["machine"]
 
 
