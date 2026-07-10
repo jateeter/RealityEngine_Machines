@@ -29,7 +29,7 @@ class PatientSafetyTransportBusTests(unittest.TestCase):
         self.assertEqual(self.machine["metadata"]["domainLevelTag"], BUS_TAG)
         self.assertIn(BUS_TAG, self.machine["metadata"]["tags"])
         self.assertEqual(self.machine["perceptualMapping"]["input"], {"offset": 4310, "length": 10})
-        self.assertEqual(self.machine["perceptualMapping"]["output"], {"offset": 3827, "length": 4})
+        self.assertEqual(self.machine["perceptualMapping"]["output"], {"offset": 7378, "length": 4})
         self.assertEqual(self.machine["metadata"]["machineClass"], "bridge")
 
     def test_bus_input_composes_existing_machine_mappings(self) -> None:
@@ -58,7 +58,7 @@ class PatientSafetyTransportBusTests(unittest.TestCase):
                 match = next(item for item in interconnections if item.get("id") == interconnection_id)
                 self.assertEqual(match["busTag"], BUS_TAG)
                 self.assertEqual(match["targetMachine"], "Patient Safety Transport Interconnect")
-                self.assertEqual(match["publishedOutputRegion"], {"offset": 3827, "length": 4})
+                self.assertEqual(match["publishedOutputRegion"], {"offset": 7378, "length": 4})
 
     def test_authored_sequence_activates_urgent_fanout(self) -> None:
         authored = {item["name"]: item for item in self.machine["inputSequences"]}
