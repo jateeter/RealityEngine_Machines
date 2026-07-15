@@ -1,0 +1,357 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "name": "HealthKit Vitals Monitor",
+    "description": "Classifies blood-pressure family readings delivered by the iOS HealthKit bridge (localHealthkitBridge) into NOMINAL, HYPERTENSIVE, or CRISIS. Reads the canonical bridge region [4320:4324] (systolic/200, diastolic/120, pulse/200, confidence per docs/INGEST_CONTRACT.md) and emits a vitals-status word for downstream health-personal interconnects.",
+    "metadata": {
+      "category": "health-personal",
+      "domain": "wellness",
+      "author": "Reality Engine",
+      "created": "2026-07-14T00:00:00Z",
+      "workflow": "healthkit-bridge-vitals",
+      "eventSpace": "4D continuous: [systolic_norm, diastolic_norm, pulse_norm, confidence]",
+      "outputSpace": "4D binary: {[1,0,0,0]=NOMINAL, [0,1,0,0]=HYPERTENSIVE, [0,0,1,0]=CRISIS}",
+      "tags": [
+        "anomaly-detection",
+        "ces-sequences",
+        "ces-sequences-3",
+        "health-personal",
+        "healthkit",
+        "healthkit-vitals-monitor",
+        "in-home-monitoring",
+        "input-sequences",
+        "input-sequences-2",
+        "startup-loadable",
+        "vitals",
+        "wellness"
+      ],
+      "sequenceCount": 3,
+      "machineClass": "signal-monitor",
+      "inputSemantics": [
+        "systolic_bp_normalized_0_200mmhg",
+        "diastolic_bp_normalized_0_120mmhg",
+        "pulse_normalized_0_200bpm",
+        "reading_confidence"
+      ],
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "patient-safety-on-call",
+        "runbook": "https://runbooks.example.org/health-personal/healthkitvitalsmonitor",
+        "escalationPolicy": "pagerduty:patient-safety",
+        "contact": {
+          "primary": "patient-safety-on-call-primary@example.org",
+          "secondary": "patient-safety-on-call-secondary@example.org"
+        },
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": 600,
+          "error": 60
+        },
+        "notes": "HealthKit bridge vitals lane. Review routing when a dedicated team owns the bridge integrations."
+      },
+      "triggerConfig": {
+        "endpoint": "http://localhost:4000/graphql",
+        "template": "examples/triggers/graphql_trigger_template.py",
+        "processId": "HEALTHKIT-VITALS",
+        "processName": "HealthKit Vitals Monitor",
+        "rules": [
+          {
+            "sequenceId": "hk-vitals-nominal",
+            "outputMatches": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "ok",
+            "description": "Confident nominal BP reading from the bridge"
+          },
+          {
+            "sequenceId": "hk-vitals-hypertensive",
+            "outputMatches": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "Stage-2 hypertensive reading — surface in daily summary"
+          },
+          {
+            "sequenceId": "hk-vitals-crisis",
+            "outputMatches": [
+              0,
+              0,
+              1,
+              0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "Hypertensive crisis — recommend immediate clinical contact"
+          }
+        ]
+      },
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "scripts/manage_machine_tags.mjs",
+        "primaryDomain": "health-personal",
+        "domainTags": [
+          "health-personal",
+          "wellness"
+        ],
+        "family": "healthkit-vitals-monitor",
+        "machineCode": "healthkit-vitals-monitor",
+        "capabilityTags": [
+          "in-home-monitoring"
+        ],
+        "workflowTags": [
+          "anomaly-detection",
+          "healthkit",
+          "vitals"
+        ],
+        "integrationTags": [],
+        "validationTags": [
+          "ces-sequences",
+          "ces-sequences-3",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable"
+        ],
+        "allTags": [
+          "anomaly-detection",
+          "ces-sequences",
+          "ces-sequences-3",
+          "health-personal",
+          "healthkit",
+          "healthkit-vitals-monitor",
+          "in-home-monitoring",
+          "input-sequences",
+          "input-sequences-2",
+          "startup-loadable",
+          "vitals",
+          "wellness"
+        ]
+      }
+    },
+    "inputSequences": [
+      {
+        "name": "Nominal reading",
+        "pattern": "[0.6,0.65,0.32,1]",
+        "description": "Seeded bridge nominal: 120/78 mmHg, pulse 64, full confidence — NOMINAL",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.6,
+            0.65,
+            0.32,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "name": "Hypertensive reading",
+        "pattern": "[0.75,0.8,0.4,1]",
+        "description": "150/96 mmHg — HYPERTENSIVE (also satisfies NOMINAL floor; arbiter passes both)",
+        "vectors": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.75,
+            0.8,
+            0.4,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "sequences": [
+      {
+        "id": "hk-vitals-nominal",
+        "name": "Vitals reading present → NOMINAL",
+        "metadata": {
+          "description": "A plausible confident BP reading arrived from the bridge: systolic ≥ 100 mmHg (0.5), diastolic ≥ 60 mmHg (0.5), pulse ≥ 20 bpm (0.1), confidence ≥ 0.9."
+        },
+        "vectors": [
+          {
+            "id": "hk-vitals-ev-nominal",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.1
+              },
+              {
+                "value": 1,
+                "threshold": 0.9
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "nominal",
+              "state": "NOMINAL"
+            },
+            "outputVectors": [
+              {
+                "id": "hk-vitals-out-nominal",
+                "vector": [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "ragStatusCode": "GREEN",
+                  "state": "NOMINAL"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hk-vitals-hypertensive",
+        "name": "Elevated BP → HYPERTENSIVE",
+        "metadata": {
+          "description": "Stage-2 elevated reading: systolic ≥ 140 mmHg (0.7) and diastolic ≥ 90 mmHg (0.75) with confidence ≥ 0.9."
+        },
+        "vectors": [
+          {
+            "id": "hk-vitals-ev-hypertensive",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.7
+              },
+              {
+                "value": 1,
+                "threshold": 0.75
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.9
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "hypertensive",
+              "state": "HYPERTENSIVE"
+            },
+            "outputVectors": [
+              {
+                "id": "hk-vitals-out-hypertensive",
+                "vector": [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                "metadata": {
+                  "ragStatusCode": "AMBER",
+                  "state": "HYPERTENSIVE"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hk-vitals-crisis",
+        "name": "Hypertensive crisis → CRISIS",
+        "metadata": {
+          "description": "Crisis-level reading: systolic ≥ 180 mmHg (0.9) and diastolic ≥ 110 mmHg (0.917) with confidence ≥ 0.9 — recommend immediate clinical contact."
+        },
+        "vectors": [
+          {
+            "id": "hk-vitals-ev-crisis",
+            "elements": [
+              {
+                "value": 1,
+                "threshold": 0.9
+              },
+              {
+                "value": 1,
+                "threshold": 0.917
+              },
+              {
+                "value": 0,
+                "threshold": 0.5
+              },
+              {
+                "value": 1,
+                "threshold": 0.9
+              }
+            ],
+            "isInitial": true,
+            "metadata": {
+              "name": "crisis",
+              "state": "CRISIS"
+            },
+            "outputVectors": [
+              {
+                "id": "hk-vitals-out-crisis",
+                "vector": [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "metadata": {
+                  "ragStatusCode": "RED",
+                  "state": "CRISIS"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "perceptualMapping": {
+      "input": {
+        "offset": 4320,
+        "length": 4
+      },
+      "output": {
+        "offset": 4304,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "matchAlgorithm": "gte",
+    "arbiterRule": "PASSTHROUGH"
+  }
+}

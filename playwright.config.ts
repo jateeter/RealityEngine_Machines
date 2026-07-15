@@ -38,6 +38,7 @@ export default defineConfig({
     VIZ_FRONTEND_URL:   process.env.VIZ_FRONTEND_URL    ?? '',
     LAS_BASE_URL:       process.env.LAS_BASE_URL        ?? '',
     QD_BASE_URL:        process.env.QD_BASE_URL         ?? '',
+    HEALTHKIT_BRIDGE_TOKEN: process.env.HEALTHKIT_BRIDGE_TOKEN ?? '',
     SKIP_GLOBAL_SETUP:  process.env.SKIP_GLOBAL_SETUP   ?? '',
   },
 
