@@ -15,6 +15,7 @@ This repo is the canonical machine corpus and schema/test contract source for al
 - `machines/domains/<domain>/`: one directory per accepted manifest domain; a machine's `tagging.primaryDomain`/`metadata.category` must match its directory.
 - `domains/`: domain organization/support files, including the generated `corpus-index.json` catalog (`npm run corpus-index:write` after corpus changes).
 - `schemas/`: JSON schemas for machine and contract validation.
+- `semantics/`: OWL semantic representation of machine behavior — `ontology/re-core.ttl` (TBox + action vocabulary) and generated `abox/<domain>/` Turtle files (`scripts/generate-owl.py`); see `docs/SEMANTIC_OWL_ROADMAP.md`.
 - `triggers/`: trigger definitions consumed by runtime and PE workflows.
 - `tests/contracts/`: schema/contract validation.
 - `tests/smoke/`: lightweight corpus/runtime checks.
