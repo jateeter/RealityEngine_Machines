@@ -1,0 +1,410 @@
+@prefix re:      <https://realityengine.example.org/ontology/re-core#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prov:    <http://www.w3.org/ns/prov#> .
+
+<https://realityengine.example.org/ontology/re-core>
+    a owl:Ontology ;
+    dcterms:title "RealityEngine Core Semantics Ontology" ;
+    dcterms:description "OWL vocabulary for the semantic representation of RealityEngine machine behavior: machines, critical event sequences, sequence steps, determinations, prescribed actions, trigger rules, governance, interconnections, and the audit records produced by the PE->RE->PE cycle. Machine ABox files under semantics/abox/ are generated from the canonical machine JSON corpus by scripts/generate-owl.py and must stay byte-deterministic." ;
+    owl:versionInfo "0.1.0" .
+
+#################################################################
+# Classes: structural corpus concepts
+#################################################################
+
+re:Machine a owl:Class ;
+    rdfs:label "Machine" ;
+    rdfs:comment "A canonical RealityEngine machine: a named behavioral contract loaded by RE engines, with a perceptual mapping into the universal reality vector and a set of critical event sequences." .
+
+re:CriticalEventSequence a owl:Class ;
+    rdfs:label "Critical Event Sequence" ;
+    rdfs:comment "A multi-step validated pattern (CES) within a machine. A candidate event must traverse the sequence's steps in order before the terminal determination is emitted." .
+
+re:LifeSafetySequence a owl:Class ;
+    rdfs:subClassOf re:CriticalEventSequence ;
+    rdfs:label "Life-Safety Sequence" ;
+    rdfs:comment "A critical event sequence whose terminal determination can page emergency response. Verification tooling treats these with the strictest parity requirements." .
+
+re:SequenceStep a owl:Class ;
+    rdfs:label "Sequence Step" ;
+    rdfs:comment "One state vector within a critical event sequence: the input-element levels that must match at a given tick for the sequence to advance." .
+
+re:ElementValue a owl:Class ;
+    rdfs:label "Element Value" ;
+    rdfs:comment "The required level of a single input element (by index) within a sequence step." .
+
+re:Determination a owl:Class ;
+    rdfs:label "Determination" ;
+    rdfs:comment "An output vector emitted when a sequence step completes: the machine's judgement (tier, confidence, RAG status) plus the action it prescribes." .
+
+re:Action a owl:Class ;
+    rdfs:label "Action" ;
+    rdfs:comment "An action prescribed by a determination. Subclasses stratify actions by consequence so audit rules can be written against the class, not the string." .
+
+re:LoggingAction a owl:Class ;
+    rdfs:subClassOf re:Action ;
+    rdfs:label "Logging Action" ;
+    rdfs:comment "Record-only action: no human is notified." .
+
+re:NotificationAction a owl:Class ;
+    rdfs:subClassOf re:Action ;
+    rdfs:label "Notification Action" ;
+    rdfs:comment "A human is informed on a non-emergency channel (caregiver watch, check-in)." .
+
+re:EscalationAction a owl:Class ;
+    rdfs:subClassOf re:Action ;
+    rdfs:label "Escalation Action" ;
+    rdfs:comment "Emergency-path action: pages an on-call responder or dispatches emergency response." .
+
+re:RagStatus a owl:Class ;
+    rdfs:label "RAG Status" ;
+    rdfs:comment "Red/Amber/Green status attached to determinations and trigger rules." .
+
+re:TriggerRule a owl:Class ;
+    rdfs:label "Trigger Rule" ;
+    rdfs:comment "A rule from the machine's triggerConfig that maps a sequence's terminal output to a process status and RAG code for downstream trigger dispatch." .
+
+re:GovernancePolicy a owl:Class ;
+    rdfs:label "Governance Policy" ;
+    rdfs:comment "Ownership, runbook, escalation, and SLA metadata governing a machine or an individual trigger rule." .
+
+re:Interconnection a owl:Class ;
+    rdfs:label "Interconnection" ;
+    rdfs:comment "A published-bus relationship in which one machine's output region feeds another machine's input region, usually composed by the Perception Engine." .
+
+re:PerceptualMapping a owl:Class ;
+    rdfs:label "Perceptual Mapping" ;
+    rdfs:comment "The machine's input and output regions within the universal reality vector." .
+
+#################################################################
+# Classes: PE->RE->PE audit records (aligned with PROV-O)
+#################################################################
+
+re:PerceptionEvent a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Perception Event" ;
+    rdfs:comment "A PE write into a machine's input region at a tick. Emitted by the Perception Engine when a source updates the universal reality vector." .
+
+re:SequenceObservation a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Sequence Observation" ;
+    rdfs:comment "An RE observation that a critical event sequence advanced to (or completed at) a given step during a tick." .
+
+re:DispatchRecord a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Dispatch Record" ;
+    rdfs:comment "A ledger entry recording that a determination's prescribed action was dispatched (trigger fired, bus published, or agent invoked)." .
+
+#################################################################
+# Object properties
+#################################################################
+
+re:hasSequence a owl:ObjectProperty ;
+    rdfs:domain re:Machine ; rdfs:range re:CriticalEventSequence ;
+    rdfs:label "has sequence" .
+
+re:hasStep a owl:ObjectProperty ;
+    rdfs:domain re:CriticalEventSequence ; rdfs:range re:SequenceStep ;
+    rdfs:label "has step" .
+
+re:hasInitialStep a owl:ObjectProperty ;
+    rdfs:subPropertyOf re:hasStep ;
+    rdfs:label "has initial step" .
+
+re:hasNextStep a owl:ObjectProperty ;
+    rdfs:domain re:SequenceStep ; rdfs:range re:SequenceStep ;
+    rdfs:label "has next step" ;
+    rdfs:comment "Direct tick-to-tick succession between steps. Each hop is Hamming-distance 1 in well-formed corpora." .
+
+re:leadsTo a owl:ObjectProperty , owl:TransitiveProperty ;
+    rdfs:label "leads to" ;
+    rdfs:comment "Transitive closure of hasNextStep; lets a reasoner ask whether a step can reach a terminal determination." .
+
+re:hasNextStep rdfs:subPropertyOf re:leadsTo .
+
+re:hasElementValue a owl:ObjectProperty ;
+    rdfs:domain re:SequenceStep ; rdfs:range re:ElementValue ;
+    rdfs:label "has element value" .
+
+re:emitsDetermination a owl:ObjectProperty ;
+    rdfs:domain re:SequenceStep ; rdfs:range re:Determination ;
+    rdfs:label "emits determination" .
+
+re:prescribesAction a owl:ObjectProperty ;
+    rdfs:domain re:Determination ; rdfs:range re:Action ;
+    rdfs:label "prescribes action" .
+
+re:hasRagStatus a owl:ObjectProperty ;
+    rdfs:range re:RagStatus ;
+    rdfs:label "has RAG status" .
+
+re:hasTriggerRule a owl:ObjectProperty ;
+    rdfs:domain re:Machine ; rdfs:range re:TriggerRule ;
+    rdfs:label "has trigger rule" .
+
+re:appliesToSequence a owl:ObjectProperty ;
+    rdfs:domain re:TriggerRule ; rdfs:range re:CriticalEventSequence ;
+    rdfs:label "applies to sequence" .
+
+re:hasGovernance a owl:ObjectProperty ;
+    rdfs:range re:GovernancePolicy ;
+    rdfs:label "has governance" .
+
+re:hasInterconnection a owl:ObjectProperty ;
+    rdfs:domain re:Machine ; rdfs:range re:Interconnection ;
+    rdfs:label "has interconnection" .
+
+re:sourceMachine a owl:ObjectProperty ;
+    rdfs:domain re:Interconnection ; rdfs:range re:Machine ;
+    rdfs:label "source machine" .
+
+re:hasPerceptualMapping a owl:ObjectProperty ;
+    rdfs:domain re:Machine ; rdfs:range re:PerceptualMapping ;
+    rdfs:label "has perceptual mapping" .
+
+re:observedSequence a owl:ObjectProperty ;
+    rdfs:domain re:SequenceObservation ; rdfs:range re:CriticalEventSequence ;
+    rdfs:label "observed sequence" .
+
+re:observedStep a owl:ObjectProperty ;
+    rdfs:domain re:SequenceObservation ; rdfs:range re:SequenceStep ;
+    rdfs:label "observed step" .
+
+re:recordsDetermination a owl:ObjectProperty ;
+    rdfs:domain re:DispatchRecord ; rdfs:range re:Determination ;
+    rdfs:label "records determination" .
+
+re:targetsMachine a owl:ObjectProperty ;
+    rdfs:domain re:PerceptionEvent ; rdfs:range re:Machine ;
+    rdfs:label "targets machine" .
+
+#################################################################
+# Data properties
+#################################################################
+
+re:machineClass a owl:DatatypeProperty ;
+    rdfs:domain re:Machine ; rdfs:range xsd:string ;
+    rdfs:label "machine class" .
+
+re:domainName a owl:DatatypeProperty ;
+    rdfs:domain re:Machine ; rdfs:range xsd:string ;
+    rdfs:label "domain name" .
+
+re:severity a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "severity" .
+
+re:arbiterRule a owl:DatatypeProperty ;
+    rdfs:domain re:Machine ; rdfs:range xsd:string ;
+    rdfs:label "arbiter rule" .
+
+re:matchAlgorithm a owl:DatatypeProperty ;
+    rdfs:domain re:Machine ; rdfs:range xsd:string ;
+    rdfs:label "match algorithm" .
+
+re:sourceFile a owl:DatatypeProperty ;
+    rdfs:domain re:Machine ; rdfs:range xsd:string ;
+    rdfs:label "source file" ;
+    rdfs:comment "Repo-relative path of the canonical machine JSON this ABox was generated from." .
+
+re:sequenceId a owl:DatatypeProperty ;
+    rdfs:domain re:CriticalEventSequence ; rdfs:range xsd:string ;
+    rdfs:label "sequence id" .
+
+re:stepIndex a owl:DatatypeProperty ;
+    rdfs:domain re:SequenceStep ; rdfs:range xsd:integer ;
+    rdfs:label "step index" .
+
+re:isInitialStep a owl:DatatypeProperty ;
+    rdfs:domain re:SequenceStep ; rdfs:range xsd:boolean ;
+    rdfs:label "is initial step" .
+
+re:lifeSafety a owl:DatatypeProperty ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "life safety" .
+
+re:stateName a owl:DatatypeProperty ;
+    rdfs:domain re:SequenceStep ; rdfs:range xsd:string ;
+    rdfs:label "state name" .
+
+re:elementIndex a owl:DatatypeProperty ;
+    rdfs:domain re:ElementValue ; rdfs:range xsd:integer ;
+    rdfs:label "element index" .
+
+re:elementLevel a owl:DatatypeProperty ;
+    rdfs:domain re:ElementValue ; rdfs:range xsd:decimal ;
+    rdfs:label "element level" .
+
+re:elementThreshold a owl:DatatypeProperty ;
+    rdfs:domain re:ElementValue ; rdfs:range xsd:decimal ;
+    rdfs:label "element threshold" .
+
+re:outputTier a owl:DatatypeProperty ;
+    rdfs:domain re:Determination ; rdfs:range xsd:integer ;
+    rdfs:label "output tier" .
+
+re:outputConfidence a owl:DatatypeProperty ;
+    rdfs:domain re:Determination ; rdfs:range xsd:integer ;
+    rdfs:label "output confidence" .
+
+re:tierLabel a owl:DatatypeProperty ;
+    rdfs:domain re:Determination ; rdfs:range xsd:string ;
+    rdfs:label "tier label" .
+
+re:confidenceLabel a owl:DatatypeProperty ;
+    rdfs:domain re:Determination ; rdfs:range xsd:string ;
+    rdfs:label "confidence label" .
+
+re:actionCode a owl:DatatypeProperty ;
+    rdfs:domain re:Action ; rdfs:range xsd:string ;
+    rdfs:label "action code" ;
+    rdfs:comment "The literal action string used in machine JSON output metadata." .
+
+re:processStatus a owl:DatatypeProperty ;
+    rdfs:domain re:TriggerRule ; rdfs:range xsd:string ;
+    rdfs:label "process status" .
+
+re:matchesOutputTier a owl:DatatypeProperty ;
+    rdfs:domain re:TriggerRule ; rdfs:range xsd:integer ;
+    rdfs:label "matches output tier" .
+
+re:matchesOutputConfidence a owl:DatatypeProperty ;
+    rdfs:domain re:TriggerRule ; rdfs:range xsd:integer ;
+    rdfs:label "matches output confidence" .
+
+re:slaSeconds a owl:DatatypeProperty ;
+    rdfs:range xsd:integer ;
+    rdfs:label "SLA seconds" .
+
+re:ownerTeam a owl:DatatypeProperty ;
+    rdfs:domain re:GovernancePolicy ; rdfs:range xsd:string ;
+    rdfs:label "owner team" .
+
+re:runbook a owl:DatatypeProperty ;
+    rdfs:domain re:GovernancePolicy ; rdfs:range xsd:anyURI ;
+    rdfs:label "runbook" .
+
+re:escalationPolicy a owl:DatatypeProperty ;
+    rdfs:domain re:GovernancePolicy ; rdfs:range xsd:string ;
+    rdfs:label "escalation policy" .
+
+re:interconnectionId a owl:DatatypeProperty ;
+    rdfs:domain re:Interconnection ; rdfs:range xsd:string ;
+    rdfs:label "interconnection id" .
+
+re:interconnectionType a owl:DatatypeProperty ;
+    rdfs:domain re:Interconnection ; rdfs:range xsd:string ;
+    rdfs:label "interconnection type" .
+
+re:busId a owl:DatatypeProperty ;
+    rdfs:domain re:Interconnection ; rdfs:range xsd:string ;
+    rdfs:label "bus id" .
+
+re:targetMachineName a owl:DatatypeProperty ;
+    rdfs:domain re:Interconnection ; rdfs:range xsd:string ;
+    rdfs:label "target machine name" .
+
+re:privacyBoundary a owl:DatatypeProperty ;
+    rdfs:domain re:Interconnection ; rdfs:range xsd:string ;
+    rdfs:label "privacy boundary" .
+
+re:inputOffset a owl:DatatypeProperty ;
+    rdfs:domain re:PerceptualMapping ; rdfs:range xsd:integer ;
+    rdfs:label "input offset" .
+
+re:inputLength a owl:DatatypeProperty ;
+    rdfs:domain re:PerceptualMapping ; rdfs:range xsd:integer ;
+    rdfs:label "input length" .
+
+re:outputOffset a owl:DatatypeProperty ;
+    rdfs:domain re:PerceptualMapping ; rdfs:range xsd:integer ;
+    rdfs:label "output offset" .
+
+re:outputLength a owl:DatatypeProperty ;
+    rdfs:domain re:PerceptualMapping ; rdfs:range xsd:integer ;
+    rdfs:label "output length" .
+
+re:bitsPerElement a owl:DatatypeProperty ;
+    rdfs:domain re:PerceptualMapping ; rdfs:range xsd:integer ;
+    rdfs:label "bits per element" .
+
+re:atTick a owl:DatatypeProperty ;
+    rdfs:range xsd:integer ;
+    rdfs:label "at tick" .
+
+#################################################################
+# Canonical individuals: RAG statuses
+#################################################################
+
+re:GREEN a owl:NamedIndividual , re:RagStatus ; rdfs:label "GREEN" .
+re:AMBER a owl:NamedIndividual , re:RagStatus ; rdfs:label "AMBER" .
+re:RED   a owl:NamedIndividual , re:RagStatus ; rdfs:label "RED" .
+
+#################################################################
+# Canonical individuals: shared action vocabulary
+#
+# scripts/generate-owl.py maps output metadata `action` strings to these
+# individuals via re:actionCode. New action strings found in the corpus must
+# be added here (with the correct consequence class) before generation.
+#################################################################
+
+re:LogOnly a owl:NamedIndividual , re:LoggingAction ;
+    re:actionCode "log-only" ; rdfs:label "Log Only" .
+
+re:LogActivity a owl:NamedIndividual , re:LoggingAction ;
+    re:actionCode "log-activity" ; rdfs:label "Log Activity" .
+
+re:CaregiverWatch a owl:NamedIndividual , re:NotificationAction ;
+    re:actionCode "caregiver-watch" ; rdfs:label "Caregiver Watch" .
+
+re:CaregiverCheckIn a owl:NamedIndividual , re:NotificationAction ;
+    re:actionCode "caregiver-check-in" ; rdfs:label "Caregiver Check-In" .
+
+re:EmergencyDispatch a owl:NamedIndividual , re:EscalationAction ;
+    re:actionCode "emergency-dispatch" ; rdfs:label "Emergency Dispatch" .
+
+#################################################################
+# Audit axioms
+#
+# These give a reasoner (or the structural validator) machine-checkable
+# safety invariants over generated ABoxes.
+#################################################################
+
+# Any determination that prescribes an escalation action is an
+# EscalationDetermination, and every EscalationDetermination must carry RED.
+re:EscalationDetermination a owl:Class ;
+    rdfs:subClassOf re:Determination ;
+    owl:equivalentClass [
+        a owl:Restriction ;
+        owl:onProperty re:prescribesAction ;
+        owl:someValuesFrom re:EscalationAction
+    ] ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty re:hasRagStatus ;
+        owl:hasValue re:RED
+    ] ;
+    rdfs:label "Escalation Determination" ;
+    rdfs:comment "Audit invariant: an emergency-path action may only be prescribed by a RED determination." .
+
+# A life-safety sequence is one containing a life-safety flagged step.
+re:LifeSafetySequence owl:equivalentClass [
+    a owl:Restriction ;
+    owl:onProperty re:hasStep ;
+    owl:someValuesFrom [
+        a owl:Restriction ;
+        owl:onProperty re:lifeSafety ;
+        owl:hasValue true
+    ]
+] .
+
+# Every critical event sequence must have an initial step.
+re:CriticalEventSequence rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty re:hasInitialStep ;
+    owl:minCardinality "1"^^xsd:nonNegativeInteger
+] .
