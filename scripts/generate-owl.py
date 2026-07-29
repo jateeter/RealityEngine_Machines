@@ -353,6 +353,10 @@ class MachineProjector:
             statements.append(
                 f"re:prescribesAction {self.action_term(metadata['action'])}"
             )
+        if metadata.get("actionNarrative"):
+            statements.append(
+                f're:actionNarrative "{escape(metadata["actionNarrative"])}"'
+            )
         if metadata.get("lifeSafety"):
             statements.append("re:lifeSafety true")
         if metadata.get("rationale"):

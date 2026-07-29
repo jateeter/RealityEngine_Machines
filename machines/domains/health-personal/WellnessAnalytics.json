@@ -731,8 +731,9 @@
                   "severity": "MEDIUM",
                   "downstreamMachine": "NewPatientInflow",
                   "downstreamSequence": "npi-acceptance",
-                  "action": "Initiate NewPatientInflow evaluation. Schedule intake appointment. Inform family of evaluation recommendation. Begin prescreening checklist. Patient retains full autonomy \u2014 evaluation is a recommendation, not a mandate.",
-                  "typicalTimeline": "Schedule intake appointment within 10-14 days. Patient continues in community living during evaluation process."
+                  "action": "route-referral",
+                  "typicalTimeline": "Schedule intake appointment within 10-14 days. Patient continues in community living during evaluation process.",
+                  "actionNarrative": "Initiate NewPatientInflow evaluation. Schedule intake appointment. Inform family of evaluation recommendation. Begin prescreening checklist. Patient retains full autonomy \u2014 evaluation is a recommendation, not a mandate."
                 }
               }
             ]
@@ -859,8 +860,9 @@
                   "severity": "HIGH",
                   "downstreamMachine": "NewPatientInflow",
                   "downstreamSequence": "npi-acceptance with 48-72 hour expedited evaluation",
-                  "action": "Initiate urgent NewPatientInflow evaluation. Notify family immediately. Physician or NP assessment within 24 hours to assess for concurrent clinical emergency. If life-threatening condition present: activate CareTransitionWorkflow Scenario 1 first, then INFLOW_URGENT upon stabilization.",
-                  "typicalTimeline": "Expedited intake: 48-72 hours. If patient is cognitively impaired, healthcare proxy engagement is the first priority."
+                  "action": "urgent-intervention",
+                  "typicalTimeline": "Expedited intake: 48-72 hours. If patient is cognitively impaired, healthcare proxy engagement is the first priority.",
+                  "actionNarrative": "Initiate urgent NewPatientInflow evaluation. Notify family immediately. Physician or NP assessment within 24 hours to assess for concurrent clinical emergency. If life-threatening condition present: activate CareTransitionWorkflow Scenario 1 first, then INFLOW_URGENT upon stabilization."
                 }
               }
             ]
@@ -1032,8 +1034,9 @@
                   "decision": "TRANSITION_REVIEW",
                   "severity": "MEDIUM",
                   "downstreamMachine": "CareTransitionWorkflow",
-                  "action": "Convene interdisciplinary team meeting within 5 days. Assess whether current facility level of care can address identified wellness deficits with care plan modification, or whether a higher level of care (SNF, memory care, hospital) is clinically indicated. Initiate CareTransitionWorkflow planned transition sequences if care level change is warranted.",
-                  "careConferenceMandatory": true
+                  "action": "schedule-care-review",
+                  "careConferenceMandatory": true,
+                  "actionNarrative": "Convene interdisciplinary team meeting within 5 days. Assess whether current facility level of care can address identified wellness deficits with care plan modification, or whether a higher level of care (SNF, memory care, hospital) is clinically indicated. Initiate CareTransitionWorkflow planned transition sequences if care level change is warranted."
                 }
               }
             ]
@@ -1160,8 +1163,9 @@
                   "severity": "HIGH",
                   "downstreamMachine": "CareTransitionWorkflow",
                   "downstreamSequence": "transition-emergency-escalation",
-                  "action": "Notify attending physician immediately. Activate CareTransitionWorkflow Sequence 5 (emergency escalation). Assess for reversible CRITICAL causes (UTI, dehydration, medication toxicity, acute depression) before activating hospital transfer \u2014 if reversible cause identified and treatable in facility, physician may elect to treat in place and re-assess. Family notification mandatory within 24 hours.",
-                  "physicalNotificationRequired": true
+                  "action": "urgent-intervention",
+                  "physicalNotificationRequired": true,
+                  "actionNarrative": "Notify attending physician immediately. Activate CareTransitionWorkflow Sequence 5 (emergency escalation). Assess for reversible CRITICAL causes (UTI, dehydration, medication toxicity, acute depression) before activating hospital transfer \u2014 if reversible cause identified and treatable in facility, physician may elect to treat in place and re-assess. Family notification mandatory within 24 hours."
                 }
               }
             ]
@@ -1334,8 +1338,9 @@
                   "decision": "TRANSITION_URGENT",
                   "severity": "HIGH",
                   "downstreamMachine": "CareTransitionWorkflow",
-                  "action": "Physician or NP assessment within 24 hours. Investigate cause of rapid decline: new diagnosis, medication change, acute illness, environmental disruption, significant loss event. If clinical cause identified and reversible in current setting: treat in place and re-assess at next cycle. If cause requires higher level of care: activate CareTransitionWorkflow planned or emergency transition. Do not wait for Sequence 3 two-cycle confirmation \u2014 TRANSITION_URGENT is the velocity-triggered parallel path.",
-                  "urgencyOverride": "TRANSITION_URGENT overrides the two-cycle waiting period of TRANSITION_REVIEW. Both may fire within the same monitoring period if the rapid decline is sustained."
+                  "action": "urgent-intervention",
+                  "urgencyOverride": "TRANSITION_URGENT overrides the two-cycle waiting period of TRANSITION_REVIEW. Both may fire within the same monitoring period if the rapid decline is sustained.",
+                  "actionNarrative": "Physician or NP assessment within 24 hours. Investigate cause of rapid decline: new diagnosis, medication change, acute illness, environmental disruption, significant loss event. If clinical cause identified and reversible in current setting: treat in place and re-assess at next cycle. If cause requires higher level of care: activate CareTransitionWorkflow planned or emergency transition. Do not wait for Sequence 3 two-cycle confirmation \u2014 TRANSITION_URGENT is the velocity-triggered parallel path."
                 }
               }
             ]
@@ -1461,8 +1466,9 @@
                   "decision": "WELLNESS_IMPROVING",
                   "severity": "INFO",
                   "downstreamMachine": "none",
-                  "action": "Notify care team of wellness improvement. Do NOT cancel any pending TRANSITION_REVIEW meetings \u2014 confirm recovery holds at next assessment cycle before closing the ALERT episode. Document which interventions correlated with the improvement. Maintain increased monitoring frequency for 2 more cycles. If recovery is confirmed at next cycle, de-escalate to standard bi-weekly monitoring.",
-                  "twoConfirmationCycles": true
+                  "action": "notify-care-team",
+                  "twoConfirmationCycles": true,
+                  "actionNarrative": "Notify care team of wellness improvement. Do NOT cancel any pending TRANSITION_REVIEW meetings \u2014 confirm recovery holds at next assessment cycle before closing the ALERT episode. Document which interventions correlated with the improvement. Maintain increased monitoring frequency for 2 more cycles. If recovery is confirmed at next cycle, de-escalate to standard bi-weekly monitoring."
                 }
               }
             ]

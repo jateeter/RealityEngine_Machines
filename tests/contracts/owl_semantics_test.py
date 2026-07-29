@@ -76,21 +76,53 @@ class OwlSemanticsTests(unittest.TestCase):
     def test_abox_is_deterministic_regeneration_of_machine_json(self) -> None:
         result = subprocess.run(
             [sys.executable, str(GENERATOR),
-             "--machine", str(FALL_JSON), "--check", "--strict-actions"],
+             "--domain", "health-personal", "--check", "--strict-actions"],
             capture_output=True, text=True,
         )
         self.assertEqual(
             result.returncode, 0,
-            f"checked-in ABox drifted from generator output:\n{result.stderr}",
+            f"checked-in ABoxes drifted from generator output:\n{result.stderr}",
+        )
+
+    def test_domain_has_one_abox_per_machine(self) -> None:
+        machines = sorted(FALL_JSON.parent.glob("*.json"))
+        aboxes = sorted(FALL_ABOX.parent.glob("*.ttl"))
+        self.assertEqual(
+            [p.stem for p in machines], [p.stem for p in aboxes],
+            "every health-personal machine must have a checked-in ABox",
         )
 
     def test_abox_uses_only_declared_core_vocabulary(self) -> None:
         declared = declared_terms(self.ontology_text)
-        undeclared = used_terms(self.abox_text) - declared
-        self.assertEqual(
-            undeclared, set(),
-            f"ABox references re: terms missing from re-core.ttl: {sorted(undeclared)}",
-        )
+        for abox in sorted(FALL_ABOX.parent.glob("*.ttl")):
+            undeclared = used_terms(abox.read_text()) - declared
+            self.assertEqual(
+                undeclared, set(),
+                f"{abox.name} references re: terms missing from re-core.ttl: "
+                f"{sorted(undeclared)}",
+            )
+
+    def test_domain_actions_are_controlled_codes(self) -> None:
+        """Every health-personal output action must be a code declared in the
+        core ontology; normalized prose must be preserved as actionNarrative."""
+        codes = set(re.findall(r're:actionCode "([^"]+)"', self.ontology_text))
+        for machine_path in sorted(FALL_JSON.parent.glob("*.json")):
+            with machine_path.open() as handle:
+                machine = json.load(handle)["machine"]
+            for sequence in machine.get("sequences", []):
+                for vector in sequence.get("vectors", []):
+                    for output in vector.get("outputVectors", []):
+                        metadata = output.get("metadata", {})
+                        action = metadata.get("action")
+                        if action is None:
+                            continue
+                        self.assertIn(
+                            action, codes,
+                            f"{machine_path.name}:{output.get('id')} action "
+                            f"'{action[:60]}' is not a controlled code",
+                        )
+                        if metadata.get("actionNarrative"):
+                            self.assertNotIn(metadata["actionNarrative"], codes)
 
     def test_every_sequence_is_represented(self) -> None:
         for sequence in self.machine["sequences"]:
