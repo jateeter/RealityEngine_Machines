@@ -23,7 +23,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-transition-acute-emergency , m:seq-transition-hospital-to-rehab , m:seq-transition-rehab-to-alf , m:seq-transition-blocked , m:seq-transition-emergency-escalation ;
     re:hasTriggerRule m:rule-transition-acute-emergency , m:rule-transition-hospital-to-rehab , m:rule-transition-rehab-to-alf , m:rule-transition-blocked , m:rule-transition-emergency-escalation ;
-    re:hasInterconnection m:ix-health-personal_care-transition-response_transition-outcome , m:ix-health-personal_intake-wellness-routing_care-transition , m:ix-health_infrastructure-support_consumer_care_transition_context .
+    re:hasInterconnection m:ix-health-personal_care-transition-response_transition-outcome , m:ix-health-personal_intake-wellness-routing_care-transition , m:ix-health_infrastructure-support_consumer_care_transition_context ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -1366,6 +1367,13 @@ m:ix-health-personal_care-transition-response_transition-outcome
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.care-transition-response" ;
     re:targetMachineName "Care Transition Response Interconnect" ;
+    re:sourceOutputOffset 3947 ;
+    re:sourceOutputLength 8 ;
+    re:targetInputOffset 4436 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4454 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish care transition terminal outcomes into the personal-health care transition response bus." .
 
@@ -1376,6 +1384,13 @@ m:ix-health-personal_intake-wellness-routing_care-transition
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.intake-wellness-routing" ;
     re:targetMachineName "Intake Wellness Routing Interconnect" ;
+    re:sourceOutputOffset 3947 ;
+    re:sourceOutputLength 8 ;
+    re:targetInputOffset 4582 ;
+    re:targetInputLength 16 ;
+    re:publishedOutputOffset 4598 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish care transition into health-personal.intake-wellness-routing." .
 
@@ -1386,5 +1401,21 @@ m:ix-health_infrastructure-support_consumer_care_transition_context
     re:interconnectionType "published-domain-bus-consumer" ;
     re:busId "health.infrastructure-support" ;
     re:targetMachineName "CareTransitionWorkflow" ;
+    re:sourceOutputOffset 16916 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 3939 ;
+    re:targetInputLength 8 ;
+    re:publishedOutputOffset 16916 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "Consumer receives support-state classification only; raw transportation, built-space, community-service, and resident records remain outside RE." ;
     rdfs:comment "Use transportation, housing, and local navigation state to refine transition-readiness." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-care-transition-workflow-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 3939 ;
+    re:targetInputLength 8 ;
+    rdfs:comment "OpenClaw maps transition observations, case-management events, facility readiness, and emergency status to native CareTransitionWorkflow input bits; PE writes the vector source and does not wait inside a PE cycle." .

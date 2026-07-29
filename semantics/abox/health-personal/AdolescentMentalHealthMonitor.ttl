@@ -22,7 +22,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-adolescent-mh-crisis , m:seq-adolescent-mh-behavioral-concern , m:seq-adolescent-mh-ok ;
     re:hasTriggerRule m:rule-adolescent-mh-crisis , m:rule-adolescent-mh-behavioral-concern , m:rule-adolescent-mh-ok ;
-    re:hasInterconnection m:ix-health-personal_environment-safety-response_adolescent-behavioral-health-status , m:ix-health-personal_pediatric-adolescent-family-support_adolescent-mental-health .
+    re:hasInterconnection m:ix-health-personal_environment-safety-response_adolescent-behavioral-health-status , m:ix-health-personal_pediatric-adolescent-family-support_adolescent-mental-health ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -392,6 +393,9 @@ m:ix-health-personal_environment-safety-response_adolescent-behavioral-health-st
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.environment-safety-response" ;
     re:targetMachineName "Home Environment Safety Response Interconnect" ;
+    re:sourceOutputOffset 2027 ;
+    re:sourceOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized status bits only; raw PHI, housing observations, case notes, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish adolescent behavioral-health context into the personal-health environment safety response bus." .
 
@@ -402,5 +406,21 @@ m:ix-health-personal_pediatric-adolescent-family-support_adolescent-mental-healt
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.pediatric-adolescent-family-support" ;
     re:targetMachineName "Pediatric Adolescent Family Support Interconnect" ;
+    re:sourceOutputOffset 2027 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 4560 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4578 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish adolescent mental health into health-personal.pediatric-adolescent-family-support." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-adolescent-mental-health-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 1995 ;
+    re:targetInputLength 8 ;
+    rdfs:comment "Normal path is deterministic PE composition from food security and home environment safety outputs. OpenClaw may populate the same native bit lane only for external adolescent adversity observations that bypass upstream machines." .

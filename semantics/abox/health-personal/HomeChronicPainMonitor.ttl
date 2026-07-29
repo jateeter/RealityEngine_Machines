@@ -22,7 +22,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-chronic-pain-crisis , m:seq-chronic-pain-opioid-risk , m:seq-chronic-pain-functional-impairment , m:seq-chronic-pain-managed-ok ;
     re:hasTriggerRule m:rule-chronic-pain-crisis , m:rule-chronic-pain-opioid-risk , m:rule-chronic-pain-functional-impairment , m:rule-chronic-pain-managed-ok ;
-    re:hasInterconnection m:ix-health-personal_chronic-pain-mental-health-access_pain-burden .
+    re:hasInterconnection m:ix-health-personal_chronic-pain-mental-health-access_pain-burden ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -358,5 +359,17 @@ m:ix-health-personal_chronic-pain-mental-health-access_pain-burden
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.chronic-pain-mental-health-access" ;
     re:targetMachineName "Chronic Pain Mental Health Access Interconnect" ;
+    re:sourceOutputOffset 2023 ;
+    re:sourceOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized status bits only; pain diaries, PDMP details, and clinician notes remain outside the universal reality vector." ;
     rdfs:comment "Publish chronic pain burden into the personal-health chronic-pain mental-health access bus." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-home-chronic-pain-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 1991 ;
+    re:targetInputLength 4 ;
+    rdfs:comment "OpenClaw maps pain observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle." .

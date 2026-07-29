@@ -22,7 +22,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-wa-sustained-alert-community , m:seq-wa-critical-community , m:seq-wa-sustained-alert-facility , m:seq-wa-critical-facility , m:seq-wa-rapid-decline , m:seq-wa-wellness-improving ;
     re:hasTriggerRule m:rule-wa-sustained-alert-community , m:rule-wa-critical-community , m:rule-wa-sustained-alert-facility , m:rule-wa-critical-facility , m:rule-wa-rapid-decline , m:rule-wa-wellness-improving ;
-    re:hasInterconnection m:ix-health-personal_care-transition-response_wellness-transition-routing , m:ix-health-personal_facilities-maintenance-response_wellness-escalation , m:ix-health-personal_medication-access-adherence_wellness-routing , m:ix-health-personal_sleep-recovery-wellness_wellness-recovery , m:ix-health-personal_intake-wellness-routing_wellness-analytics .
+    re:hasInterconnection m:ix-health-personal_care-transition-response_wellness-transition-routing , m:ix-health-personal_facilities-maintenance-response_wellness-escalation , m:ix-health-personal_medication-access-adherence_wellness-routing , m:ix-health-personal_sleep-recovery-wellness_wellness-recovery , m:ix-health-personal_intake-wellness-routing_wellness-analytics ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -1014,6 +1015,13 @@ m:ix-health-personal_care-transition-response_wellness-transition-routing
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.care-transition-response" ;
     re:targetMachineName "Care Transition Response Interconnect" ;
+    re:sourceOutputOffset 3939 ;
+    re:sourceOutputLength 8 ;
+    re:targetInputOffset 4436 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4454 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish wellness-based transition routing status into the personal-health care transition response bus." .
 
@@ -1024,6 +1032,13 @@ m:ix-health-personal_facilities-maintenance-response_wellness-escalation
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.facilities-maintenance-response" ;
     re:targetMachineName "Facilities Maintenance Response Interconnect" ;
+    re:sourceOutputOffset 3939 ;
+    re:sourceOutputLength 8 ;
+    re:targetInputOffset 4502 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4520 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized facilities, environment, access, and wellness status bits only; raw PHI, staff notes, work orders, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish higher-order wellness escalation context for facilities welfare-check routing." .
 
@@ -1034,6 +1049,13 @@ m:ix-health-personal_medication-access-adherence_wellness-routing
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.medication-access-adherence" ;
     re:targetMachineName "Medication Access Adherence Interconnect" ;
+    re:sourceOutputOffset 3939 ;
+    re:sourceOutputLength 8 ;
+    re:targetInputOffset 4524 ;
+    re:targetInputLength 14 ;
+    re:publishedOutputOffset 4538 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish wellness routing into health-personal.medication-access-adherence." .
 
@@ -1044,6 +1066,13 @@ m:ix-health-personal_sleep-recovery-wellness_wellness-recovery
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.sleep-recovery-wellness" ;
     re:targetMachineName "Sleep Recovery Wellness Interconnect" ;
+    re:sourceOutputOffset 3939 ;
+    re:sourceOutputLength 8 ;
+    re:targetInputOffset 4542 ;
+    re:targetInputLength 14 ;
+    re:publishedOutputOffset 4556 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish wellness recovery into health-personal.sleep-recovery-wellness." .
 
@@ -1054,5 +1083,21 @@ m:ix-health-personal_intake-wellness-routing_wellness-analytics
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.intake-wellness-routing" ;
     re:targetMachineName "Intake Wellness Routing Interconnect" ;
+    re:sourceOutputOffset 3939 ;
+    re:sourceOutputLength 8 ;
+    re:targetInputOffset 4582 ;
+    re:targetInputLength 16 ;
+    re:publishedOutputOffset 4598 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish wellness analytics into health-personal.intake-wellness-routing." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-wellness-analytics-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 3931 ;
+    re:targetInputLength 8 ;
+    rdfs:comment "OpenClaw maps wellness observations to the native WellnessAnalytics input vector only when bypassing deterministic PatientWellness output; PE writes the source and does not wait inside a PE cycle." .

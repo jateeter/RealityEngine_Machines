@@ -23,7 +23,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-fall-nominal , m:seq-fall-stumble-recovered , m:seq-fall-sustained-instability , m:seq-fall-impact-recovered , m:seq-fall-confirmed , m:seq-fall-slow-collapse , m:seq-fall-intentional-lying ;
     re:hasTriggerRule m:rule-fall-nominal , m:rule-fall-stumble-recovered , m:rule-fall-sustained-instability , m:rule-fall-impact-recovered , m:rule-fall-confirmed , m:rule-fall-slow-collapse , m:rule-fall-intentional-lying ;
-    re:hasInterconnection m:ix-health-personal_patient-safety-transport_fall-outcome , m:ix-health-personal_daily-patient-care-response_fall-criticality .
+    re:hasInterconnection m:ix-health-personal_patient-safety-transport_fall-outcome , m:ix-health-personal_daily-patient-care-response_fall-criticality ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -644,6 +645,12 @@ m:ix-health-personal_patient-safety-transport_fall-outcome
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.patient-safety-transport" ;
     re:targetMachineName "Patient Safety Transport Interconnect" ;
+    re:sourceOutputOffset 1941 ;
+    re:sourceOutputLength 2 ;
+    re:targetInputOffset 4310 ;
+    re:targetInputLength 10 ;
+    re:publishedOutputOffset 7378 ;
+    re:publishedOutputLength 4 ;
     re:privacyBoundary "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish fall severity and confidence into the personal-health patient-safety transport bus." .
 
@@ -654,5 +661,21 @@ m:ix-health-personal_daily-patient-care-response_fall-criticality
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.daily-patient-care-response" ;
     re:targetMachineName "Daily Patient Care Response Interconnect" ;
+    re:sourceOutputOffset 1941 ;
+    re:sourceOutputLength 2 ;
+    re:targetInputOffset 4480 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4498 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish fall criticality into the personal-health daily patient care response bus." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-fall-detection-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 3813 ;
+    re:targetInputLength 2 ;
+    rdfs:comment "OpenClaw maps fall observations to native motion/stillness ordinals; PE writes the vector source and does not wait inside a PE cycle." .

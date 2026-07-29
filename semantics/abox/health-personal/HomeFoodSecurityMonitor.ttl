@@ -22,7 +22,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-home-food-crisis-escalation , m:seq-home-food-assistance-needed , m:seq-home-food-insecure , m:seq-home-food-secure ;
     re:hasTriggerRule m:rule-home-food-crisis-escalation , m:rule-home-food-assistance-needed , m:rule-home-food-insecure , m:rule-home-food-secure ;
-    re:hasInterconnection m:ix-health-personal_hydration-risk-response_nutrition-access , m:ix-health-personal_child-development-support_food-access-context , m:ix-health-personal_facilities-maintenance-response_food-access , m:ix-health-personal_pediatric-adolescent-family-support_food-access , m:ix-health_infrastructure-support_consumer_home_food_security_context .
+    re:hasInterconnection m:ix-health-personal_hydration-risk-response_nutrition-access , m:ix-health-personal_child-development-support_food-access-context , m:ix-health-personal_facilities-maintenance-response_food-access , m:ix-health-personal_pediatric-adolescent-family-support_food-access , m:ix-health_infrastructure-support_consumer_home_food_security_context ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -358,6 +359,9 @@ m:ix-health-personal_hydration-risk-response_nutrition-access
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.hydration-risk-response" ;
     re:targetMachineName "Hydration Risk Response Interconnect" ;
+    re:sourceOutputOffset 1995 ;
+    re:sourceOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized food-security status bits only; raw benefits, pantry, shopping, and case records remain outside the universal reality vector." ;
     rdfs:comment "Publish food and fluid access context for hydration response routing." .
 
@@ -368,6 +372,13 @@ m:ix-health-personal_child-development-support_food-access-context
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.child-development-support" ;
     re:targetMachineName "Child Development Support Interconnect" ;
+    re:sourceOutputOffset 1995 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 4458 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4476 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish household food access context into the personal-health child development support bus." .
 
@@ -378,6 +389,13 @@ m:ix-health-personal_facilities-maintenance-response_food-access
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.facilities-maintenance-response" ;
     re:targetMachineName "Facilities Maintenance Response Interconnect" ;
+    re:sourceOutputOffset 1995 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 4502 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4520 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized facilities, environment, access, and wellness status bits only; raw PHI, staff notes, work orders, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish food and nutrition access context observed around facilities visits into the facilities response bus." .
 
@@ -388,6 +406,13 @@ m:ix-health-personal_pediatric-adolescent-family-support_food-access
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.pediatric-adolescent-family-support" ;
     re:targetMachineName "Pediatric Adolescent Family Support Interconnect" ;
+    re:sourceOutputOffset 1995 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 4560 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4578 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish food access into health-personal.pediatric-adolescent-family-support." .
 
@@ -398,5 +423,21 @@ m:ix-health_infrastructure-support_consumer_home_food_security_context
     re:interconnectionType "published-domain-bus-consumer" ;
     re:busId "health.infrastructure-support" ;
     re:targetMachineName "Home Food Security Monitor" ;
+    re:sourceOutputOffset 16916 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 1963 ;
+    re:targetInputLength 4 ;
+    re:publishedOutputOffset 16916 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "Consumer receives support-state classification only; raw transportation, built-space, community-service, and resident records remain outside RE." ;
     rdfs:comment "Use community service capacity to refine food-security support state." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-home-food-security-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 1963 ;
+    re:targetInputLength 4 ;
+    rdfs:comment "OpenClaw maps food access observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle." .

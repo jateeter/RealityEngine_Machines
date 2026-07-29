@@ -22,7 +22,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-med-cost-adherence-crisis , m:seq-med-cost-barrier-active , m:seq-med-managed ;
     re:hasTriggerRule m:rule-med-cost-adherence-crisis , m:rule-med-cost-barrier-active , m:rule-med-managed ;
-    re:hasInterconnection m:ix-health-personal_chronic-disease-response_medication-adherence-status , m:ix-health-personal_medication-access-adherence_medication-cost , m:ix-health-personal_social-isolation-access_medication-cost .
+    re:hasInterconnection m:ix-health-personal_chronic-disease-response_medication-adherence-status , m:ix-health-personal_medication-access-adherence_medication-cost , m:ix-health-personal_social-isolation-access_medication-cost ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -272,6 +273,9 @@ m:ix-health-personal_chronic-disease-response_medication-adherence-status
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.chronic-disease-response" ;
     re:targetMachineName "Home Chronic Disease Response Interconnect" ;
+    re:sourceOutputOffset 2011 ;
+    re:sourceOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized medication status bits only; raw pharmacy, benefits, and adherence records remain outside the universal reality vector." ;
     rdfs:comment "Publish medication access and adherence context into the personal-health chronic disease response bus." .
 
@@ -282,6 +286,13 @@ m:ix-health-personal_medication-access-adherence_medication-cost
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.medication-access-adherence" ;
     re:targetMachineName "Medication Access Adherence Interconnect" ;
+    re:sourceOutputOffset 2011 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 4524 ;
+    re:targetInputLength 14 ;
+    re:publishedOutputOffset 4538 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish medication cost into health-personal.medication-access-adherence." .
 
@@ -292,5 +303,21 @@ m:ix-health-personal_social-isolation-access_medication-cost
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.social-isolation-access" ;
     re:targetMachineName "Social Isolation Access Interconnect" ;
+    re:sourceOutputOffset 2011 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 4602 ;
+    re:targetInputLength 14 ;
+    re:publishedOutputOffset 4616 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish medication cost into health-personal.social-isolation-access." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-home-medication-cost-barrier-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 1979 ;
+    re:targetInputLength 4 ;
+    rdfs:comment "OpenClaw maps medication affordability and refill observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle." .

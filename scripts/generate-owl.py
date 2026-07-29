@@ -20,6 +20,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re as regex
 import sys
@@ -30,6 +31,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 MACHINES_ROOT = REPO_ROOT / "machines"
 ONTOLOGY_PATH = REPO_ROOT / "semantics" / "ontology" / "re-core.ttl"
 ABOX_ROOT = REPO_ROOT / "semantics" / "abox"
+MANIFEST_PATH = REPO_ROOT / "semantics" / "abox-manifest.json"
 
 MACHINE_BASE = "https://realityengine.example.org/machines"
 
@@ -131,6 +133,7 @@ class MachineProjector:
         self.emit_sequences()
         self.emit_trigger_rules()
         self.emit_interconnections()
+        self.emit_openclaw_projection()
         self.emit_local_actions()
         return "\n".join(self.lines).rstrip() + "\n"
 
@@ -209,6 +212,8 @@ class MachineProjector:
         )
         if ix_refs:
             statements.append(f"re:hasInterconnection {ix_refs}")
+        if metadata.get("openClawProjection"):
+            statements.append("re:hasOpenClawProjection m:openclaw-projection")
         self.block("m:machine", statements)
 
     def emit_perceptual_mapping(self) -> None:
@@ -434,6 +439,22 @@ class MachineProjector:
                 statements.append(
                     f're:targetMachineName "{escape(interconnection["targetMachine"])}"'
                 )
+            for key, prop in (("sourceOutputRegion", "SourceOutput"),
+                              ("targetInputRegion", "TargetInput"),
+                              ("publishedOutputRegion", "PublishedOutput")):
+                region = interconnection.get(key) or {}
+                if "offset" in region:
+                    statements.append(
+                        f"re:{prop[0].lower()}{prop[1:]}Offset {number(region['offset'])}"
+                    )
+                if "length" in region:
+                    statements.append(
+                        f"re:{prop[0].lower()}{prop[1:]}Length {number(region['length'])}"
+                    )
+            if interconnection.get("dispatchMode"):
+                statements.append(
+                    f're:dispatchMode "{escape(interconnection["dispatchMode"])}"'
+                )
             if interconnection.get("privacyBoundary"):
                 statements.append(
                     f're:privacyBoundary "{escape(interconnection["privacyBoundary"])}"'
@@ -441,6 +462,29 @@ class MachineProjector:
             if interconnection.get("purpose"):
                 statements.append(f'rdfs:comment "{escape(interconnection["purpose"])}"')
             self.block(term, statements)
+
+    def emit_openclaw_projection(self) -> None:
+        projection = self.machine.get("metadata", {}).get("openClawProjection")
+        if not projection:
+            return
+        statements = ["a owl:NamedIndividual , re:OpenClawProjection",
+                      "re:sourceMachine m:machine"]
+        if projection.get("projectionId"):
+            statements.append(
+                f're:projectionId "{escape(projection["projectionId"])}"'
+            )
+        if projection.get("dispatchMode"):
+            statements.append(
+                f're:dispatchMode "{escape(projection["dispatchMode"])}"'
+            )
+        region = projection.get("writeBackRegion") or {}
+        if "offset" in region:
+            statements.append(f"re:targetInputOffset {number(region['offset'])}")
+        if "length" in region:
+            statements.append(f"re:targetInputLength {number(region['length'])}")
+        if projection.get("peContract"):
+            statements.append(f'rdfs:comment "{escape(projection["peContract"])}"')
+        self.block("m:openclaw-projection", statements)
 
     def emit_local_actions(self) -> None:
         for code in sorted(self.local_actions):
@@ -482,7 +526,17 @@ def main() -> int:
         "--strict-actions", action="store_true",
         help="fail on action codes missing from the core vocabulary",
     )
+    parser.add_argument(
+        "--manifest-write", action="store_true",
+        help="write semantics/abox-manifest.json (name, IRI, sha256 per machine)",
+    )
+    parser.add_argument(
+        "--manifest-check", action="store_true",
+        help="fail if the checked-in manifest differs from regeneration",
+    )
     args = parser.parse_args()
+    if args.manifest_write or args.manifest_check:
+        args.all = True
     if not (args.machine or args.domain or args.all):
         parser.error("choose --machine, --domain, or --all")
 
@@ -492,6 +546,7 @@ def main() -> int:
 
     drift: list[str] = []
     warnings: list[str] = []
+    manifest: dict[str, dict[str, str]] = {}
     generated = 0
     for machine_path in collect_machines(args):
         with machine_path.open() as handle:
@@ -502,6 +557,17 @@ def main() -> int:
         content = projector.project()
         warnings.extend(projector.warnings)
         generated += 1
+        if args.manifest_write or args.manifest_check:
+            key = f"{projector.domain}/{sanitize(machine_path.stem)}"
+            manifest[key] = {
+                "name": doc["machine"]["name"],
+                "iri": f"{projector.base}machine",
+                "sourceFile": str(
+                    machine_path.resolve().relative_to(REPO_ROOT.resolve())
+                ),
+                "sha256": hashlib.sha256(content.encode()).hexdigest(),
+            }
+            continue
         out = target_path(machine_path)
         if args.check:
             if not out.exists():
@@ -516,6 +582,28 @@ def main() -> int:
 
     for warning in warnings:
         print(f"WARN {warning}", file=sys.stderr)
+    if args.manifest_write or args.manifest_check:
+        document = {
+            "version": "1.0.0",
+            "generator": "scripts/generate-owl.py",
+            "ontology": "semantics/ontology/re-core.ttl",
+            "machines": dict(sorted(manifest.items())),
+        }
+        rendered = json.dumps(document, indent=2) + "\n"
+        if args.manifest_write:
+            MANIFEST_PATH.write_text(rendered)
+            print(f"generate-owl: wrote manifest for {len(manifest)} machine(s)")
+            return 0
+        if not MANIFEST_PATH.exists():
+            print("DRIFT missing semantics/abox-manifest.json", file=sys.stderr)
+            return 1
+        if MANIFEST_PATH.read_text() != rendered:
+            print("DRIFT stale semantics/abox-manifest.json — run "
+                  "'python3 scripts/generate-owl.py --manifest-write'",
+                  file=sys.stderr)
+            return 1
+        print(f"generate-owl: manifest OK ({len(manifest)} machines)")
+        return 0
     if args.check and drift:
         for line in drift:
             print(f"DRIFT {line}", file=sys.stderr)

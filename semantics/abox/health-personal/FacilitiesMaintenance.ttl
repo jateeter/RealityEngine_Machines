@@ -23,7 +23,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-maint-daily-routine , m:seq-maint-weekly-deep-clean , m:seq-maint-hygiene-concern , m:seq-maint-safety-concern , m:seq-maint-wellness-concern , m:seq-maint-inaccessible ;
     re:hasTriggerRule m:rule-maint-daily-routine , m:rule-maint-weekly-deep-clean , m:rule-maint-hygiene-concern , m:rule-maint-safety-concern , m:rule-maint-wellness-concern , m:rule-maint-inaccessible ;
-    re:hasInterconnection m:ix-health-personal_daily-patient-care-response_facilities-observation , m:ix-health-personal_facilities-maintenance-response_facilities-observation .
+    re:hasInterconnection m:ix-health-personal_daily-patient-care-response_facilities-observation , m:ix-health-personal_facilities-maintenance-response_facilities-observation ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -1675,6 +1676,13 @@ m:ix-health-personal_daily-patient-care-response_facilities-observation
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.daily-patient-care-response" ;
     re:targetMachineName "Daily Patient Care Response Interconnect" ;
+    re:sourceOutputOffset 3925 ;
+    re:sourceOutputLength 6 ;
+    re:targetInputOffset 4480 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4498 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish facilities hygiene, safety, wellness, and access observations into the personal-health daily patient care response bus." .
 
@@ -1685,5 +1693,21 @@ m:ix-health-personal_facilities-maintenance-response_facilities-observation
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.facilities-maintenance-response" ;
     re:targetMachineName "Facilities Maintenance Response Interconnect" ;
+    re:sourceOutputOffset 3925 ;
+    re:sourceOutputLength 6 ;
+    re:targetInputOffset 4502 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4520 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized facilities, environment, access, and wellness status bits only; raw PHI, staff notes, work orders, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish maintenance completion, hygiene, safety, wellness, and access observations into the facilities response bus." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-facilities-maintenance-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 1931 ;
+    re:targetInputLength 8 ;
+    rdfs:comment "OpenClaw maps facility visit observations to native FacilitiesMaintenance input bits; PE writes the vector source and does not wait inside a PE cycle." .

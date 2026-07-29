@@ -22,7 +22,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-npi-acceptance , m:seq-npi-medical-rejection , m:seq-npi-financial-rejection , m:seq-npi-vacancy-rejection ;
     re:hasTriggerRule m:rule-npi-acceptance , m:rule-npi-medical-rejection , m:rule-npi-financial-rejection , m:rule-npi-vacancy-rejection ;
-    re:hasInterconnection m:ix-health-personal_intake-wellness-routing_new-patient-inflow .
+    re:hasInterconnection m:ix-health-personal_intake-wellness-routing_new-patient-inflow ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -1123,5 +1124,21 @@ m:ix-health-personal_intake-wellness-routing_new-patient-inflow
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.intake-wellness-routing" ;
     re:targetMachineName "Intake Wellness Routing Interconnect" ;
+    re:sourceOutputOffset 7370 ;
+    re:sourceOutputLength 8 ;
+    re:targetInputOffset 4582 ;
+    re:targetInputLength 16 ;
+    re:publishedOutputOffset 4598 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish new patient inflow into health-personal.intake-wellness-routing." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-new-patient-inflow-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 3907 ;
+    re:targetInputLength 8 ;
+    rdfs:comment "OpenClaw maps intake packet observations to native NewPatientInflow input bits; PE writes the vector source and does not wait inside a PE cycle." .

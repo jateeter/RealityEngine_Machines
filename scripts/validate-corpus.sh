@@ -19,9 +19,12 @@ python3 "$SCRIPT_DIR/inventory-semantic-buses.py" --check --summary-only
 python3 "$SCRIPT_DIR/build-corpus-index.py" --check
 python3 "$SCRIPT_DIR/build-region-allocation.py" --check
 
-# OWL semantic drift gate for domains with checked-in ABoxes (see
-# docs/SEMANTIC_OWL_ROADMAP.md; corpus-wide gate arrives with milestone M3).
+# OWL semantic gates (docs/SEMANTIC_OWL_ROADMAP.md): checked-in ABox drift
+# for exemplar domains, corpus-wide manifest drift, and — when ROBOT is
+# installed (CI) — reasoner consistency.
 python3 "$SCRIPT_DIR/generate-owl.py" --domain health-personal --check --strict-actions
+python3 "$SCRIPT_DIR/generate-owl.py" --manifest-check --strict-actions
+bash "$SCRIPT_DIR/reason-owl.sh"
 
 # JSON-Schema enforcement (machines + registries + trigger files vs schemas/).
 # Requires devDependencies (ajv); skip with a clear notice if not installed so
