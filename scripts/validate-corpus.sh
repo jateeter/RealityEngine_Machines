@@ -19,6 +19,10 @@ python3 "$SCRIPT_DIR/inventory-semantic-buses.py" --check --summary-only
 python3 "$SCRIPT_DIR/build-corpus-index.py" --check
 python3 "$SCRIPT_DIR/build-region-allocation.py" --check
 
+# OWL semantic drift gate for domains with checked-in ABoxes (see
+# docs/SEMANTIC_OWL_ROADMAP.md; corpus-wide gate arrives with milestone M3).
+python3 "$SCRIPT_DIR/generate-owl.py" --domain health-personal --check --strict-actions
+
 # JSON-Schema enforcement (machines + registries + trigger files vs schemas/).
 # Requires devDependencies (ajv); skip with a clear notice if not installed so
 # the Python audit still runs in minimal environments.

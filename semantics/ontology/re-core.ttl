@@ -60,6 +60,11 @@ re:EscalationAction a owl:Class ;
     rdfs:label "Escalation Action" ;
     rdfs:comment "Emergency-path action: pages an on-call responder or dispatches emergency response." .
 
+re:AutomationAction a owl:Class ;
+    rdfs:subClassOf re:Action ;
+    rdfs:label "Automation Action" ;
+    rdfs:comment "Machine-to-machine action with no direct human recipient: bus publication, agent workflow invocation." .
+
 re:RagStatus a owl:Class ;
     rdfs:label "RAG Status" ;
     rdfs:comment "Red/Amber/Green status attached to determinations and trigger rules." .
@@ -264,6 +269,11 @@ re:actionCode a owl:DatatypeProperty ;
     rdfs:label "action code" ;
     rdfs:comment "The literal action string used in machine JSON output metadata." .
 
+re:actionNarrative a owl:DatatypeProperty ;
+    rdfs:domain re:Determination ; rdfs:range xsd:string ;
+    rdfs:label "action narrative" ;
+    rdfs:comment "The original free-text action prose preserved when the machine JSON action was normalized to a controlled code (see scripts/backfill-action-codes.py)." .
+
 re:processStatus a owl:DatatypeProperty ;
     rdfs:domain re:TriggerRule ; rdfs:range xsd:string ;
     rdfs:label "process status" .
@@ -364,8 +374,29 @@ re:CaregiverWatch a owl:NamedIndividual , re:NotificationAction ;
 re:CaregiverCheckIn a owl:NamedIndividual , re:NotificationAction ;
     re:actionCode "caregiver-check-in" ; rdfs:label "Caregiver Check-In" .
 
+re:ContinueMonitoring a owl:NamedIndividual , re:LoggingAction ;
+    re:actionCode "continue-monitoring" ; rdfs:label "Continue Monitoring" .
+
+re:NotifyCareTeam a owl:NamedIndividual , re:NotificationAction ;
+    re:actionCode "notify-care-team" ; rdfs:label "Notify Care Team" .
+
+re:RouteReferral a owl:NamedIndividual , re:NotificationAction ;
+    re:actionCode "route-referral" ; rdfs:label "Route Referral / Support Services" .
+
+re:ScheduleCareReview a owl:NamedIndividual , re:NotificationAction ;
+    re:actionCode "schedule-care-review" ; rdfs:label "Schedule Care Review" .
+
+re:HumanReviewGate a owl:NamedIndividual , re:NotificationAction ;
+    re:actionCode "human-review-gate" ; rdfs:label "Human Review Gate" .
+
+re:UrgentIntervention a owl:NamedIndividual , re:EscalationAction ;
+    re:actionCode "urgent-intervention" ; rdfs:label "Urgent Intervention" .
+
 re:EmergencyDispatch a owl:NamedIndividual , re:EscalationAction ;
     re:actionCode "emergency-dispatch" ; rdfs:label "Emergency Dispatch" .
+
+re:PublishBus a owl:NamedIndividual , re:AutomationAction ;
+    re:actionCode "publish-bus" ; rdfs:label "Publish to Semantic Bus" .
 
 #################################################################
 # Audit axioms
