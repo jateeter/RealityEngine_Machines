@@ -22,7 +22,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-caregiver-burnout-escalation , m:seq-caregiver-high-burden , m:seq-caregiver-coping-ok ;
     re:hasTriggerRule m:rule-caregiver-burnout-escalation , m:rule-caregiver-high-burden , m:rule-caregiver-coping-ok ;
-    re:hasInterconnection m:ix-health-personal_child-development-support_caregiver-burden-status , m:ix-health-personal_pediatric-adolescent-family-support_caregiver-burden , m:ix-health_infrastructure-support_consumer_home_caregiver_burden_context .
+    re:hasInterconnection m:ix-health-personal_child-development-support_caregiver-burden-status , m:ix-health-personal_pediatric-adolescent-family-support_caregiver-burden , m:ix-health_infrastructure-support_consumer_home_caregiver_burden_context ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -392,6 +393,13 @@ m:ix-health-personal_child-development-support_caregiver-burden-status
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.child-development-support" ;
     re:targetMachineName "Child Development Support Interconnect" ;
+    re:sourceOutputOffset 2031 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 4458 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4476 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish caregiver capacity context into the personal-health child development support bus." .
 
@@ -402,6 +410,13 @@ m:ix-health-personal_pediatric-adolescent-family-support_caregiver-burden
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.pediatric-adolescent-family-support" ;
     re:targetMachineName "Pediatric Adolescent Family Support Interconnect" ;
+    re:sourceOutputOffset 2031 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 4560 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4578 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish caregiver burden into health-personal.pediatric-adolescent-family-support." .
 
@@ -412,5 +427,21 @@ m:ix-health_infrastructure-support_consumer_home_caregiver_burden_context
     re:interconnectionType "published-domain-bus-consumer" ;
     re:busId "health.infrastructure-support" ;
     re:targetMachineName "Home Caregiver Burden Monitor" ;
+    re:sourceOutputOffset 16916 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 2003 ;
+    re:targetInputLength 8 ;
+    re:publishedOutputOffset 16916 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "Consumer receives support-state classification only; raw transportation, built-space, community-service, and resident records remain outside RE." ;
     rdfs:comment "Use support access and navigation hubs to refine caregiver burden." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-home-caregiver-burden-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 2003 ;
+    re:targetInputLength 8 ;
+    rdfs:comment "Normal path is deterministic PE composition from pediatric nutrition and child development outputs. OpenClaw may populate the same native lane only for external caregiver-burden observations that bypass those upstream machines." .

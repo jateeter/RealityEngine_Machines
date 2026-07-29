@@ -22,7 +22,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-hydration-adequate , m:seq-hydration-low , m:seq-hydration-critical ;
     re:hasTriggerRule m:rule-hydration-adequate , m:rule-hydration-low , m:rule-hydration-critical ;
-    re:hasInterconnection m:ix-health-personal_daily-activity-wellness_hydration-status , m:ix-health-personal_daily-patient-care-response_hydration-status , m:ix-health-personal_medication-access-adherence_hydration-status , m:ix-health-personal_sleep-recovery-wellness_hydration-status .
+    re:hasInterconnection m:ix-health-personal_daily-activity-wellness_hydration-status , m:ix-health-personal_daily-patient-care-response_hydration-status , m:ix-health-personal_medication-access-adherence_hydration-status , m:ix-health-personal_sleep-recovery-wellness_hydration-status ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -171,6 +172,9 @@ m:ix-health-personal_daily-activity-wellness_hydration-status
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.daily-activity-wellness" ;
     re:targetMachineName "Daily Activity Wellness Interconnect" ;
+    re:sourceOutputOffset 1949 ;
+    re:sourceOutputLength 2 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized hydration status bits only; raw smart-cup, fridge, faucet, and bathroom event streams remain outside the universal reality vector." ;
     rdfs:comment "Publish hydration risk into the personal-health daily activity wellness bus." .
 
@@ -181,6 +185,13 @@ m:ix-health-personal_daily-patient-care-response_hydration-status
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.daily-patient-care-response" ;
     re:targetMachineName "Daily Patient Care Response Interconnect" ;
+    re:sourceOutputOffset 1949 ;
+    re:sourceOutputLength 2 ;
+    re:targetInputOffset 4480 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4498 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish hydration status into the personal-health daily patient care response bus." .
 
@@ -191,6 +202,13 @@ m:ix-health-personal_medication-access-adherence_hydration-status
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.medication-access-adherence" ;
     re:targetMachineName "Medication Access Adherence Interconnect" ;
+    re:sourceOutputOffset 1949 ;
+    re:sourceOutputLength 2 ;
+    re:targetInputOffset 4524 ;
+    re:targetInputLength 14 ;
+    re:publishedOutputOffset 4538 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish hydration status into health-personal.medication-access-adherence." .
 
@@ -201,5 +219,21 @@ m:ix-health-personal_sleep-recovery-wellness_hydration-status
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.sleep-recovery-wellness" ;
     re:targetMachineName "Sleep Recovery Wellness Interconnect" ;
+    re:sourceOutputOffset 1949 ;
+    re:sourceOutputLength 2 ;
+    re:targetInputOffset 4542 ;
+    re:targetInputLength 14 ;
+    re:publishedOutputOffset 4556 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish hydration status into health-personal.sleep-recovery-wellness." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-hydration-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 1947 ;
+    re:targetInputLength 2 ;
+    rdfs:comment "OpenClaw maps hydration observations to native machine input bits; PE writes the vector source and does not wait inside a PE cycle." .

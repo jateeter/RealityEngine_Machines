@@ -68,7 +68,7 @@ corpus-wide.** This is the largest single work item below (M2).
 
 Fall Detection TBox + ABox + generator + contract tests, as above.
 
-### M1 — Domain rollout: health-personal
+### M1 — Domain rollout: health-personal (done — PR #37)
 
 - Generate and check in ABoxes for every `machines/domains/health-personal/`
   machine (`generate-owl.py --domain health-personal --write`).
@@ -78,7 +78,7 @@ Fall Detection TBox + ABox + generator + contract tests, as above.
   domains that have checked-in ABoxes (incremental gate, mirroring the
   STRICT_DOMAIN_CONTRACT pattern).
 
-### M2 — Action vocabulary normalization (corpus-wide)
+### M2 — Action vocabulary normalization (corpus-wide) (done — PR #38)
 
 - Inventory all distinct `action` strings (`generate-owl.py --all` warning
   stream is the inventory tool).
@@ -89,7 +89,16 @@ Fall Detection TBox + ABox + generator + contract tests, as above.
   `actionNarrative` metadata field so nothing is lost.
 - Gate: `generate-owl.py --all --strict-actions` passes.
 
-### M3 — Corpus-wide generation + validation gates
+### M3 — Corpus-wide generation + validation gates (done)
+
+Implementation note: instead of committing ~1,300 generated TTL files, the
+corpus-wide gate is `semantics/abox-manifest.json` — per-machine name, IRI,
+and sha256 of the generated ABox, checked by
+`generate-owl.py --manifest-check` inside `npm run validate`. Exemplar ABoxes
+stay checked in per rolled-out domain (health-personal). The manifest is also
+the lookup engines use for `semanticsIri`/`semanticsHash` (M4).
+
+Original plan:
 
 - Check in ABoxes for all domains; add `owl:check` to `npm run validate`.
 - Add external-toolchain validation in CI (optional, non-blocking at first):

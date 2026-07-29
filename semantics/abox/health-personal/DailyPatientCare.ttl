@@ -23,7 +23,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-daily-morning-routine , m:seq-daily-evening-routine , m:seq-daily-fall-response , m:seq-daily-fall-unresponsive , m:seq-daily-bathroom-nonuse , m:seq-daily-medication-miss , m:seq-daily-night-wandering ;
     re:hasTriggerRule m:rule-daily-morning-routine , m:rule-daily-evening-routine , m:rule-daily-fall-response , m:rule-daily-fall-unresponsive , m:rule-daily-bathroom-nonuse , m:rule-daily-medication-miss , m:rule-daily-night-wandering ;
-    re:hasInterconnection m:ix-health-personal_daily-patient-care-response_daily-care-status , m:ix-health-personal_facilities-maintenance-response_daily-care-anomaly , m:ix-health-personal_medication-access-adherence_daily-care-medication , m:ix-health-personal_sleep-recovery-wellness_daily-care , m:ix-health_infrastructure-support_consumer_daily_patient_care_context .
+    re:hasInterconnection m:ix-health-personal_daily-patient-care-response_daily-care-status , m:ix-health-personal_facilities-maintenance-response_daily-care-anomaly , m:ix-health-personal_medication-access-adherence_daily-care-medication , m:ix-health-personal_sleep-recovery-wellness_daily-care , m:ix-health_infrastructure-support_consumer_daily_patient_care_context ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -1410,6 +1411,13 @@ m:ix-health-personal_daily-patient-care-response_daily-care-status
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.daily-patient-care-response" ;
     re:targetMachineName "Daily Patient Care Response Interconnect" ;
+    re:sourceOutputOffset 1955 ;
+    re:sourceOutputLength 8 ;
+    re:targetInputOffset 4480 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4498 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish daily care completion and anomaly status into the personal-health daily patient care response bus." .
 
@@ -1420,6 +1428,13 @@ m:ix-health-personal_facilities-maintenance-response_daily-care-anomaly
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.facilities-maintenance-response" ;
     re:targetMachineName "Facilities Maintenance Response Interconnect" ;
+    re:sourceOutputOffset 1955 ;
+    re:sourceOutputLength 8 ;
+    re:targetInputOffset 4502 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4520 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized facilities, environment, access, and wellness status bits only; raw PHI, staff notes, work orders, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish daily-care anomalies that can confirm facilities hygiene, inaccessibility, or safety findings." .
 
@@ -1430,6 +1445,13 @@ m:ix-health-personal_medication-access-adherence_daily-care-medication
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.medication-access-adherence" ;
     re:targetMachineName "Medication Access Adherence Interconnect" ;
+    re:sourceOutputOffset 1955 ;
+    re:sourceOutputLength 8 ;
+    re:targetInputOffset 4524 ;
+    re:targetInputLength 14 ;
+    re:publishedOutputOffset 4538 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish daily care medication into health-personal.medication-access-adherence." .
 
@@ -1440,6 +1462,13 @@ m:ix-health-personal_sleep-recovery-wellness_daily-care
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.sleep-recovery-wellness" ;
     re:targetMachineName "Sleep Recovery Wellness Interconnect" ;
+    re:sourceOutputOffset 1955 ;
+    re:sourceOutputLength 8 ;
+    re:targetInputOffset 4542 ;
+    re:targetInputLength 14 ;
+    re:publishedOutputOffset 4556 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish daily care into health-personal.sleep-recovery-wellness." .
 
@@ -1450,5 +1479,21 @@ m:ix-health_infrastructure-support_consumer_daily_patient_care_context
     re:interconnectionType "published-domain-bus-consumer" ;
     re:busId "health.infrastructure-support" ;
     re:targetMachineName "DailyPatientCare" ;
+    re:sourceOutputOffset 16916 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 3923 ;
+    re:targetInputLength 8 ;
+    re:publishedOutputOffset 16916 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "Consumer receives support-state classification only; raw transportation, built-space, community-service, and resident records remain outside RE." ;
     rdfs:comment "Use infrastructure-support state to refine daily-care execution risk." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-daily-patient-care-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 3923 ;
+    re:targetInputLength 8 ;
+    rdfs:comment "OpenClaw maps daily care observations to native DailyPatientCare input bits; PE writes the vector source and does not wait inside a PE cycle." .

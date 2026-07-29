@@ -22,7 +22,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-transport-critical-failure , m:seq-transport-transit-dependent-risk , m:seq-transport-adequate ;
     re:hasTriggerRule m:rule-transport-critical-failure , m:rule-transport-transit-dependent-risk , m:rule-transport-adequate ;
-    re:hasInterconnection m:ix-health-personal_patient-safety-transport_transport-access , m:ix-health-personal_chronic-disease-response_transport-access-status , m:ix-health-personal_facilities-maintenance-response_transport-access , m:ix-health-personal_medication-access-adherence_transport-access , m:ix-health-personal_social-isolation-access_transport-access , m:ix-health_infrastructure-support_consumer_home_transportation_barrier_context .
+    re:hasInterconnection m:ix-health-personal_patient-safety-transport_transport-access , m:ix-health-personal_chronic-disease-response_transport-access-status , m:ix-health-personal_facilities-maintenance-response_transport-access , m:ix-health-personal_medication-access-adherence_transport-access , m:ix-health-personal_social-isolation-access_transport-access , m:ix-health_infrastructure-support_consumer_home_transportation_barrier_context ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -272,6 +273,12 @@ m:ix-health-personal_patient-safety-transport_transport-access
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.patient-safety-transport" ;
     re:targetMachineName "Patient Safety Transport Interconnect" ;
+    re:sourceOutputOffset 2015 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 4310 ;
+    re:targetInputLength 10 ;
+    re:publishedOutputOffset 7378 ;
+    re:publishedOutputLength 4 ;
     re:privacyBoundary "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish medical transportation availability into the personal-health patient-safety transport bus." .
 
@@ -282,6 +289,9 @@ m:ix-health-personal_chronic-disease-response_transport-access-status
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.chronic-disease-response" ;
     re:targetMachineName "Home Chronic Disease Response Interconnect" ;
+    re:sourceOutputOffset 2015 ;
+    re:sourceOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized transportation status bits only; raw trip, ride, and appointment records remain outside the universal reality vector." ;
     rdfs:comment "Publish appointment and care-access transportation context into the personal-health chronic disease response bus." .
 
@@ -292,6 +302,13 @@ m:ix-health-personal_facilities-maintenance-response_transport-access
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.facilities-maintenance-response" ;
     re:targetMachineName "Facilities Maintenance Response Interconnect" ;
+    re:sourceOutputOffset 2015 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 4502 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4520 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized facilities, environment, access, and wellness status bits only; raw PHI, staff notes, work orders, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish transportation access barriers that may block facilities, care, or remediation follow-up." .
 
@@ -302,6 +319,13 @@ m:ix-health-personal_medication-access-adherence_transport-access
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.medication-access-adherence" ;
     re:targetMachineName "Medication Access Adherence Interconnect" ;
+    re:sourceOutputOffset 2015 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 4524 ;
+    re:targetInputLength 14 ;
+    re:publishedOutputOffset 4538 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish transport access into health-personal.medication-access-adherence." .
 
@@ -312,6 +336,13 @@ m:ix-health-personal_social-isolation-access_transport-access
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.social-isolation-access" ;
     re:targetMachineName "Social Isolation Access Interconnect" ;
+    re:sourceOutputOffset 2015 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 4602 ;
+    re:targetInputLength 14 ;
+    re:publishedOutputOffset 4616 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish transport access into health-personal.social-isolation-access." .
 
@@ -322,5 +353,21 @@ m:ix-health_infrastructure-support_consumer_home_transportation_barrier_context
     re:interconnectionType "published-domain-bus-consumer" ;
     re:busId "health.infrastructure-support" ;
     re:targetMachineName "Home Transportation Barrier Monitor" ;
+    re:sourceOutputOffset 16916 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 1983 ;
+    re:targetInputLength 4 ;
+    re:publishedOutputOffset 16916 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "Consumer receives support-state classification only; raw transportation, built-space, community-service, and resident records remain outside RE." ;
     rdfs:comment "Use regional transportation access state to refine the resident transportation barrier source." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-home-transportation-barrier-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 1983 ;
+    re:targetInputLength 4 ;
+    rdfs:comment "OpenClaw maps transportation and appointment-access observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle." .

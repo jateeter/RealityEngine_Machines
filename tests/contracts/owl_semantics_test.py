@@ -183,6 +183,50 @@ class OwlSemanticsTests(unittest.TestCase):
             )
             self.assertIn(f"re:hasRagStatus re:{rule['ragStatusCode']}", block)
 
+    def test_manifest_matches_regeneration_and_covers_corpus(self) -> None:
+        """semantics/abox-manifest.json is the corpus-wide semantic identity
+        (name, IRI, sha256 of the generated ABox) that engines expose as
+        semanticsIri/semanticsHash; it must stay in sync with the corpus."""
+        result = subprocess.run(
+            [sys.executable, str(GENERATOR), "--manifest-check", "--strict-actions"],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        manifest = json.loads(
+            (REPO_ROOT / "semantics" / "abox-manifest.json").read_text()
+        )
+        machines = manifest["machines"]
+        corpus = [p for p in (REPO_ROOT / "machines").rglob("*.json")]
+        self.assertEqual(len(machines), len(corpus))
+        entry = machines["health-personal/FallDetection"]
+        self.assertEqual(entry["name"], "Fall Detection")
+        self.assertTrue(entry["iri"].endswith("/health-personal/FallDetection#machine"))
+        self.assertRegex(entry["sha256"], r"^[0-9a-f]{64}$")
+        names = [e["name"] for e in machines.values()]
+        self.assertEqual(len(names), len(set(names)), "machine names must be unique")
+
+    def test_interconnection_regions_are_projected(self) -> None:
+        interconnections = self.machine["metadata"]["interconnections"]
+        self.assertGreaterEqual(len(interconnections), 2)
+        for interconnection in interconnections:
+            term = "m:ix-" + re.sub(r"[^A-Za-z0-9_-]", "_", interconnection["id"])
+            block = self.abox_text.split(f"{term}\n", 1)[1].split("\n\n", 1)[0]
+            region = interconnection["sourceOutputRegion"]
+            self.assertIn(f"re:sourceOutputOffset {region['offset']}", block)
+            self.assertIn(f"re:sourceOutputLength {region['length']}", block)
+            self.assertIn(
+                f're:busId "{interconnection["busId"]}"', block,
+            )
+
+    def test_openclaw_projection_is_projected(self) -> None:
+        projection = self.machine["metadata"]["openClawProjection"]
+        block = self.abox_text.split("m:openclaw-projection\n", 1)[1].split("\n\n", 1)[0]
+        self.assertIn(f're:projectionId "{projection["projectionId"]}"', block)
+        self.assertIn(
+            f"re:targetInputOffset {projection['writeBackRegion']['offset']}", block,
+        )
+        self.assertIn("re:hasOpenClawProjection m:openclaw-projection", self.abox_text)
+
     def test_generator_covers_health_personal_domain(self) -> None:
         """The generator must at minimum process every health-personal machine
         without error; corpus-wide ABox check-in is tracked in the roadmap."""

@@ -22,7 +22,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-mh-access-crisis , m:seq-mh-referral-needed , m:seq-mh-comorbidity-risk , m:seq-mh-access-adequate ;
     re:hasTriggerRule m:rule-mh-access-crisis , m:rule-mh-referral-needed , m:rule-mh-comorbidity-risk , m:rule-mh-access-adequate ;
-    re:hasInterconnection m:ix-health-personal_chronic-pain-mental-health-access_mental-health-access , m:ix-health-personal_social-isolation-access_mental-health-access .
+    re:hasInterconnection m:ix-health-personal_chronic-pain-mental-health-access_mental-health-access , m:ix-health-personal_social-isolation-access_mental-health-access ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -471,6 +472,9 @@ m:ix-health-personal_chronic-pain-mental-health-access_mental-health-access
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.chronic-pain-mental-health-access" ;
     re:targetMachineName "Chronic Pain Mental Health Access Interconnect" ;
+    re:sourceOutputOffset 2039 ;
+    re:sourceOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized status bits only; PHQ-9, crisis notes, and behavioral health records remain outside the universal reality vector." ;
     rdfs:comment "Publish chronic illness mental-health access status into the personal-health chronic-pain mental-health access bus." .
 
@@ -481,5 +485,21 @@ m:ix-health-personal_social-isolation-access_mental-health-access
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.social-isolation-access" ;
     re:targetMachineName "Social Isolation Access Interconnect" ;
+    re:sourceOutputOffset 2039 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 4602 ;
+    re:targetInputLength 14 ;
+    re:publishedOutputOffset 4616 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish mental health access into health-personal.social-isolation-access." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-home-mental-health-access-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 2019 ;
+    re:targetInputLength 8 ;
+    rdfs:comment "Normal path is deterministic PE composition from chronic disease and chronic pain outputs. OpenClaw may populate the same native bit lane only for external mental-health access observations that bypass those upstream machines." .

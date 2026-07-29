@@ -22,7 +22,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-chronic-disease-exacerbation , m:seq-chronic-disease-poor-control , m:seq-chronic-disease-borderline , m:seq-chronic-disease-controlled-ok ;
     re:hasTriggerRule m:rule-chronic-disease-exacerbation , m:rule-chronic-disease-poor-control , m:rule-chronic-disease-borderline , m:rule-chronic-disease-controlled-ok ;
-    re:hasInterconnection m:ix-health-personal_chronic-pain-mental-health-access_disease-burden , m:ix-health-personal_chronic-disease-response_disease-control-status , m:ix-health_infrastructure-support_consumer_home_chronic_disease_context .
+    re:hasInterconnection m:ix-health-personal_chronic-pain-mental-health-access_disease-burden , m:ix-health-personal_chronic-disease-response_disease-control-status , m:ix-health_infrastructure-support_consumer_home_chronic_disease_context ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -358,6 +359,9 @@ m:ix-health-personal_chronic-pain-mental-health-access_disease-burden
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.chronic-pain-mental-health-access" ;
     re:targetMachineName "Chronic Pain Mental Health Access Interconnect" ;
+    re:sourceOutputOffset 2019 ;
+    re:sourceOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized status bits only; raw clinical observations remain outside the universal reality vector." ;
     rdfs:comment "Publish chronic disease burden into the personal-health chronic-pain mental-health access bus." .
 
@@ -368,6 +372,9 @@ m:ix-health-personal_chronic-disease-response_disease-control-status
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.chronic-disease-response" ;
     re:targetMachineName "Home Chronic Disease Response Interconnect" ;
+    re:sourceOutputOffset 2019 ;
+    re:sourceOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized chronic disease status bits only; raw biomarker, symptom, and care-plan records remain outside the universal reality vector." ;
     rdfs:comment "Publish chronic disease control status into the personal-health chronic disease response bus." .
 
@@ -378,5 +385,21 @@ m:ix-health_infrastructure-support_consumer_home_chronic_disease_context
     re:interconnectionType "published-domain-bus-consumer" ;
     re:busId "health.infrastructure-support" ;
     re:targetMachineName "Home Chronic Disease Monitor" ;
+    re:sourceOutputOffset 16916 ;
+    re:sourceOutputLength 4 ;
+    re:targetInputOffset 1987 ;
+    re:targetInputLength 4 ;
+    re:publishedOutputOffset 16916 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "Consumer receives support-state classification only; raw transportation, built-space, community-service, and resident records remain outside RE." ;
     rdfs:comment "Use environment, utilities, and prevention supports to refine chronic-disease risk." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-home-chronic-disease-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 1987 ;
+    re:targetInputLength 4 ;
+    rdfs:comment "OpenClaw may produce machine-native input values for PE ingestion; RE remains authoritative for CES sequence evaluation." .

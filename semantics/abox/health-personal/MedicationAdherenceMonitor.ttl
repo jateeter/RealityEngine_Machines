@@ -22,7 +22,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-med-taken-on-time , m:seq-med-delayed , m:seq-med-missed ;
     re:hasTriggerRule m:rule-med-taken-on-time , m:rule-med-delayed , m:rule-med-missed ;
-    re:hasInterconnection m:ix-health-personal_daily-patient-care-response_medication-adherence , m:ix-health-personal_medication-access-adherence_medication-adherence .
+    re:hasInterconnection m:ix-health-personal_daily-patient-care-response_medication-adherence , m:ix-health-personal_medication-access-adherence_medication-adherence ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -171,6 +172,13 @@ m:ix-health-personal_daily-patient-care-response_medication-adherence
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.daily-patient-care-response" ;
     re:targetMachineName "Daily Patient Care Response Interconnect" ;
+    re:sourceOutputOffset 3811 ;
+    re:sourceOutputLength 2 ;
+    re:targetInputOffset 4480 ;
+    re:targetInputLength 18 ;
+    re:publishedOutputOffset 4498 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized status bits only; raw PHI and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish medication adherence status into the personal-health daily patient care response bus." .
 
@@ -181,5 +189,21 @@ m:ix-health-personal_medication-access-adherence_medication-adherence
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.medication-access-adherence" ;
     re:targetMachineName "Medication Access Adherence Interconnect" ;
+    re:sourceOutputOffset 3811 ;
+    re:sourceOutputLength 2 ;
+    re:targetInputOffset 4524 ;
+    re:targetInputLength 14 ;
+    re:publishedOutputOffset 4538 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish medication adherence into health-personal.medication-access-adherence." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-medication-adherence-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 1939 ;
+    re:targetInputLength 2 ;
+    rdfs:comment "OpenClaw maps MAR, dispenser, or caregiver medication observations to native MedicationAdherenceMonitor input bits; PE writes the vector source and does not wait inside a PE cycle." .

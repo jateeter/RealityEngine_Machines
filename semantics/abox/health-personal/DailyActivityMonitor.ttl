@@ -22,7 +22,8 @@ m:machine
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-activity-active , m:seq-activity-sedentary , m:seq-activity-prolonged ;
     re:hasTriggerRule m:rule-activity-active , m:rule-activity-sedentary , m:rule-activity-prolonged ;
-    re:hasInterconnection m:ix-health-personal_daily-activity-wellness_activity-burden , m:ix-health-personal_chronic-disease-response_activity-tolerance-status , m:ix-health-personal_sleep-recovery-wellness_activity-tolerance .
+    re:hasInterconnection m:ix-health-personal_daily-activity-wellness_activity-burden , m:ix-health-personal_chronic-disease-response_activity-tolerance-status , m:ix-health-personal_sleep-recovery-wellness_activity-tolerance ;
+    re:hasOpenClawProjection m:openclaw-projection .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -171,6 +172,9 @@ m:ix-health-personal_daily-activity-wellness_activity-burden
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.daily-activity-wellness" ;
     re:targetMachineName "Daily Activity Wellness Interconnect" ;
+    re:sourceOutputOffset 1953 ;
+    re:sourceOutputLength 2 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized activity status bits only; raw step counts, room traces, and wearable telemetry remain outside the universal reality vector." ;
     rdfs:comment "Publish in-home activity decline into the personal-health daily activity wellness bus." .
 
@@ -181,6 +185,9 @@ m:ix-health-personal_chronic-disease-response_activity-tolerance-status
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.chronic-disease-response" ;
     re:targetMachineName "Home Chronic Disease Response Interconnect" ;
+    re:sourceOutputOffset 1953 ;
+    re:sourceOutputLength 2 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized activity status bits only; raw wearable and in-home movement traces remain outside the universal reality vector." ;
     rdfs:comment "Publish activity tolerance and sedentary-streak context into the personal-health chronic disease response bus." .
 
@@ -191,5 +198,21 @@ m:ix-health-personal_sleep-recovery-wellness_activity-tolerance
     re:interconnectionType "published-domain-bus-producer" ;
     re:busId "health-personal.sleep-recovery-wellness" ;
     re:targetMachineName "Sleep Recovery Wellness Interconnect" ;
+    re:sourceOutputOffset 1953 ;
+    re:sourceOutputLength 2 ;
+    re:targetInputOffset 4542 ;
+    re:targetInputLength 14 ;
+    re:publishedOutputOffset 4556 ;
+    re:publishedOutputLength 4 ;
+    re:dispatchMode "asynchronous-no-wait" ;
     re:privacyBoundary "PE composes normalized health-personal status bits only; raw PHI, staff notes, device telemetry, claims, records, and source payloads remain outside the universal reality vector." ;
     rdfs:comment "Publish activity tolerance into health-personal.sleep-recovery-wellness." .
+
+m:openclaw-projection
+    a owl:NamedIndividual , re:OpenClawProjection ;
+    re:sourceMachine m:machine ;
+    re:projectionId "openclaw-daily-activity-native-input-projection" ;
+    re:dispatchMode "accepted-no-wait" ;
+    re:targetInputOffset 1951 ;
+    re:targetInputLength 2 ;
+    rdfs:comment "OpenClaw maps activity observations to native machine input bits; PE writes the vector source and does not wait inside a PE cycle." .
