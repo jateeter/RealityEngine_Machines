@@ -56,18 +56,21 @@ function canonicalSamples() {
   return [
     {
       type: 'HKCorrelationTypeIdentifierBloodPressure',
+      sourceMappingId: 'healthkit:HKCorrelationTypeIdentifierBloodPressure',
       unit: 'mm[Hg]',
       values: [0.72, 0.48, 0.24, 0.99],
       metadata: { standard: 'SpeziHealthKit', fhirCode: '85354-9' },
     },
     {
       type: 'HKWorkoutTypeIdentifierWorkout',
+      sourceMappingId: 'healthkit:HKWorkoutTypeIdentifierWorkout',
       unit: 'normalized',
       values: [0.65, 0.58, 0.42, 0.97],
       metadata: { standard: 'SpeziHealthKit', fhirCode: '55411-3' },
     },
     {
       type: 'HKCategoryTypeIdentifierSleepAnalysis',
+      sourceMappingId: 'healthkit:HKCategoryTypeIdentifierSleepAnalysis',
       unit: 'normalized',
       values: [0.82, 0.12, 0.18, 0.96],
       metadata: { standard: 'SpeziHealthKit', fhirCode: '93832-4' },
