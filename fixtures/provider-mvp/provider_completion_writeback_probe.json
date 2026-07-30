@@ -1,0 +1,44 @@
+{
+  "fixtureVersion": "1.0",
+  "machine": {
+    "id": "mvp-provider-completion-writeback-probe",
+    "name": "MVP Provider Completion Writeback Probe",
+    "metadata": {
+      "domain": "provider-mvp",
+      "machineClass": "agent-dispatcher",
+      "aiTrigger": "mvp.provider.completion",
+      "agentBinding": {
+        "mode": "advise",
+        "providers": [
+          "openai",
+          "ollama",
+          "mcp"
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "provider-mvp",
+          "sensorIdTemplate": "mvp.provider.{provider}.{agent}.completion",
+          "sourceMappingId": "mvp-provider-completion-risk",
+          "region": {
+            "offset": 4400,
+            "length": 4
+          },
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "expectedJsonPointers": [
+            "/completed",
+            "/failed",
+            "/confidence",
+            "/actionClass"
+          ]
+        }
+      }
+    }
+  }
+}
