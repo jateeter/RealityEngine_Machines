@@ -122,7 +122,11 @@ Original plan:
 - Parity tests compare `semanticsHash` across engines: semantic equivalence
   becomes a first-class verification class alongside byte equivalence.
 
-### M5 — Semantic audit records (PE→RE→PE cycle) — future work
+### M5 — Semantic audit records (PE→RE→PE cycle) — in progress
+
+Record shapes and the shared `GET /api/audit/semantics` surface are
+specified in `docs/SEMANTIC_AUDIT_CONTRACT.md`; per-runtime implementations
+are tracked in the engine repos' Phase 2 issues.
 
 Recognition of the semantic representations inside the live workflow:
 
