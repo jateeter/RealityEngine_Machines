@@ -74,3 +74,37 @@ as duplicates under `tests/e2e/specs/` and had already begun to drift
 truth, do **not** re-add copies of those specs here — edit them in
 RealityEngine_CI. The unified runner `RealityEngine_CI/scripts/run-all-tests.sh`
 executes both repos' suites.
+
+### Where each suite is verified
+
+This repo has no workflows of its own by design: verification is owned by
+RealityEngine_CI's universe orchestration, since every contract here is
+cross-runtime and only means something against running engines.
+
+| Suite | Needs a live stack | Verified by |
+|---|---|---|
+| `npm run validate` | no | CI `corpus-gates` job |
+| `npm run test:contracts` | no | CI `corpus-gates` job |
+| `tests/e2e/engine-switcher.spec.ts` | yes | CI `e2e-tests` job |
+| `tests/integration/corpus-integrity`, `openclaw-health` | yes | CI `e2e-tests` job |
+| `tests/integration/healthkit-ingest-contract`, `machine-json-listing`, `pe-source-lane-compliance` | yes, plus a registry | CI `multi-engine-tests` job |
+| `tests/integration/multi-instance` | yes, plus a registry | CI `multi-engine-tests` job |
+| `tests/integration/rag-round-trip`, `pe-sensor-registration` | yes, plus localAI | operator-run — hosted jobs start with `--no-local-ai` |
+
+The three cross-runtime contract specs run in `multi-engine-tests` rather than
+`e2e-tests` because that is the job that exports `RE_REGISTRY_URL`. They are
+skip-safe, so that step also fails when *every* one of them skips — a green run
+that enforced nothing is the failure mode being guarded against.
+
+`machine-json-listing` compares `json/list` against `MACHINES_CORPUS_DIR` — the
+corpus the universe actually booted — rather than this repo's full tree, so it
+is correct under both `--machine-corpus=standard-deployment` and a full-corpus
+universe.
+
+### OWL reasoning
+
+`npm run validate` ends with `reason-owl: SKIPPED (ROBOT not installed)`. That
+is expected: ROBOT's default report profile currently yields ~3,400 ERROR-level
+`missing_label` violations on this corpus — OBO publishing conventions, not
+logical inconsistency — and `report` fails before `robot reason` runs at all.
+Enabling it needs a tailored profile first; see #46.
