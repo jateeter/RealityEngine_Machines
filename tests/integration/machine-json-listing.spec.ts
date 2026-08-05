@@ -15,7 +15,26 @@ import { fileURLToPath } from 'url';
 
 const REGISTRY_URL = process.env.RE_REGISTRY_URL ?? '';
 const RE_URL = process.env.RE_BASE_URL ?? '';
-const MACHINES_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..', 'machines');
+
+const REPO_MACHINES_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..', 'machines');
+
+/**
+ * The corpus the running universe actually booted.
+ *
+ * `startUniverse.sh --machine-corpus=standard-deployment` materializes a 12-file
+ * subset into MACHINE_CORPUS_WORK_DIR and points every engine at it. Comparing
+ * `json/list` against this repo's full tree would then report ~1,300 files as
+ * missing — a failure that says nothing about path-aware addressing, which is
+ * what this suite exists to guard.
+ *
+ * Set MACHINES_CORPUS_DIR to the active corpus root (the directory containing
+ * `machines/`, stamped as MACHINE_CORPUS_ACTIVE_DIR in
+ * RealityEngine_CI/.universe-engine-selection). Defaults to the repo corpus,
+ * which is correct for a full-corpus universe.
+ */
+const MACHINES_ROOT = process.env.MACHINES_CORPUS_DIR
+  ? join(process.env.MACHINES_CORPUS_DIR, 'machines')
+  : REPO_MACHINES_ROOT;
 
 interface EngineInstance {
   id: string;
@@ -126,9 +145,13 @@ test.describe('Machine JSON Listing Parity', () => {
 
 // Offline contract — load-by-basename is only sound while corpus filenames
 // stay globally unique, so this runs even without live engines.
+//
+// Uniqueness is a property of the whole repo corpus, not of whatever subset a
+// given universe booted, so this deliberately uses REPO_MACHINES_ROOT: a
+// collision must be caught even when the running universe loaded neither file.
 test.describe('Corpus Filename Uniqueness', () => {
   test('corpus filenames are unique across all directories', async () => {
-    const corpusRelFiles = await collectCorpusRelFiles(MACHINES_ROOT);
+    const corpusRelFiles = await collectCorpusRelFiles(REPO_MACHINES_ROOT);
     const seen = new Map<string, string>();
     const collisions: string[] = [];
     for (const rel of corpusRelFiles) {
