@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
 import { readdir } from 'fs/promises';
 import { join, dirname, relative } from 'path';
 import { fileURLToPath } from 'url';
@@ -43,7 +44,7 @@ interface EngineInstance {
   status: string;
 }
 
-async function fetchEngines(request: Parameters<Parameters<typeof test>[1]>[0]['request']): Promise<EngineInstance[]> {
+async function fetchEngines(request: APIRequestContext): Promise<EngineInstance[]> {
   if (REGISTRY_URL) {
     try {
       const resp = await request.get(REGISTRY_URL);
