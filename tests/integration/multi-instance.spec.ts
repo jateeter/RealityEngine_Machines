@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
 
 /**
  * Multi-instance integration tests.
@@ -22,7 +23,7 @@ interface EngineInstance {
   status: string;
 }
 
-async function fetchRegistry(request: Parameters<Parameters<typeof test>[1]>[0]['request']): Promise<EngineInstance[]> {
+async function fetchRegistry(request: APIRequestContext): Promise<EngineInstance[]> {
   if (!REGISTRY_URL) return [];
   try {
     const resp = await request.get(REGISTRY_URL);

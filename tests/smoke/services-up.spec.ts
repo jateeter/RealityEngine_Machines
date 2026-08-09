@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
 
 /**
  * Smoke tests — lightweight HTTP-only checks, no browser.
@@ -17,7 +18,7 @@ const REGISTRY_URL = process.env.RE_REGISTRY_URL ?? '';
 
 interface EngineInstance { id: string; re_url: string; pe_url: string; }
 
-async function getInstances(request: Parameters<Parameters<typeof test>[1]>[0]['request']): Promise<EngineInstance[]> {
+async function getInstances(request: APIRequestContext): Promise<EngineInstance[]> {
   if (!REGISTRY_URL) return [];
   try {
     const resp = await request.get(REGISTRY_URL);

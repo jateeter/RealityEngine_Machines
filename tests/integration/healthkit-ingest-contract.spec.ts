@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
 
 /**
  * Integration: HealthKit ingest contract parity.
@@ -37,7 +38,11 @@ interface EngineInstance {
   status: string;
 }
 
-async function fetchEngines(request: Parameters<Parameters<typeof test>[1]>[0]['request']): Promise<EngineInstance[]> {
+// APIRequestContext is what Playwright actually passes. The previous
+// Parameters<Parameters<typeof test>[1]>[0]['request'] resolved against the
+// test(title, details, body) overload, so it landed on TestDetails and the
+// parameter silently became never — every use of it unchecked.
+async function fetchEngines(request: APIRequestContext): Promise<EngineInstance[]> {
   if (REGISTRY_URL) {
     try {
       const resp = await request.get(REGISTRY_URL);
