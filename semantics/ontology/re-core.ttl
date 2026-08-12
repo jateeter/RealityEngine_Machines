@@ -9,8 +9,8 @@
 <https://realityengine.example.org/ontology/re-core>
     a owl:Ontology ;
     dcterms:title "RealityEngine Core Semantics Ontology" ;
-    dcterms:description "OWL vocabulary for the semantic representation of RealityEngine machine behavior: machines, critical event sequences, sequence steps, determinations, prescribed actions, trigger rules, governance, interconnections, and the audit records produced by the PE->RE->PE cycle. Machine ABox files under semantics/abox/ are generated from the canonical machine JSON corpus by scripts/generate-owl.py and must stay byte-deterministic." ;
-    owl:versionInfo "0.1.0" .
+    dcterms:description "OWL vocabulary for the semantic representation of RealityEngine machine behavior: machines, critical event sequences, sequence steps, determinations, prescribed actions, trigger rules, governance, interconnections, the agent corpus bound to those machines, and the audit records produced by the PE->RE->PE cycle. Machine ABox files under semantics/abox/ are generated from the canonical machine JSON corpus by scripts/generate-owl.py and must stay byte-deterministic." ;
+    owl:versionInfo "0.2.0" .
 
 #################################################################
 # Classes: structural corpus concepts
@@ -88,6 +88,53 @@ re:PerceptualMapping a owl:Class ;
 re:OpenClawProjection a owl:Class ;
     rdfs:label "OpenClaw Projection" ;
     rdfs:comment "An OpenClaw agent projection that writes machine-native ordinals into the machine's input region via the Perception Engine." .
+
+#################################################################
+# Classes: the agent corpus
+#
+# The corpus binds external reasoning agents to machines along two axes that
+# were, until this vocabulary existed, only representable as file layout:
+#
+#   assessment axis — one input-analyst per machine, writing normalized
+#                     ordinals into that machine's OWN input region
+#                     (re:OpenClawProjection / re:AgentBinding).
+#   completion axis — a role-level agent family whose response lands in the
+#                     reserved completion band and is ingested by PE
+#                     (re:CompletionMapping).
+#
+# Both axes name the elements of the region they write. re:SemanticAxis makes
+# those names first-class so that disagreement between the machine corpus and
+# the generated agent corpus is an inconsistency a reasoner can find, rather
+# than a difference nothing compares.
+#################################################################
+
+re:Agent a owl:Class ;
+    rdfs:label "Agent" ;
+    rdfs:comment "An external reasoning agent that can be dispatched on a machine's behalf. Identified by re:agentId; grouped by re:AgentFamily." .
+
+re:AgentFamily a owl:Class ;
+    rdfs:label "Agent Family" ;
+    rdfs:comment "A role-level grouping of agents (for example a care coordinator or a data-centre operations role). Declared per domain by the domain registry's defaultAgentFamilies and realized by the agents actually bound to machines in that domain." .
+
+re:AgentBinding a owl:Class ;
+    rdfs:label "Agent Binding" ;
+    rdfs:comment "The binding of one agent to one machine: its autonomy mode, the trigger it answers, the actions it is permitted, and the region its response is written back to." .
+
+re:AutonomyMode a owl:Class ;
+    rdfs:label "Autonomy Mode" ;
+    rdfs:comment "How far a binding may act without a human: observe, advise, supervised-act, or automated-act. Mirrors the enum in schemas/agent-binding.schema.json." .
+
+re:SemanticAxis a owl:Class ;
+    rdfs:label "Semantic Axis" ;
+    rdfs:comment "The named meaning of one element position within a write-back region — what the value at that index represents. An axis belongs to exactly one region position of one machine." .
+
+re:CompletionMapping a owl:Class ;
+    rdfs:label "Completion Mapping" ;
+    rdfs:comment "A PE source mapping that ingests an agent's completion into the reserved completion band, distinct from the machine's own input region." .
+
+re:ResponseMapping a owl:Class ;
+    rdfs:label "Response Mapping" ;
+    rdfs:comment "The extraction contract turning an agent's textual or structured response into element values for the write-back region." .
 
 #################################################################
 # Classes: PE->RE->PE audit records (aligned with PROV-O)
@@ -387,6 +434,160 @@ re:atTick a owl:DatatypeProperty ;
     rdfs:label "at tick" .
 
 #################################################################
+# Object properties: the agent corpus
+#################################################################
+
+re:hasAgentBinding a owl:ObjectProperty ;
+    rdfs:domain re:Machine ;
+    rdfs:range re:AgentBinding ;
+    rdfs:label "has agent binding" .
+
+re:boundAgent a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain re:AgentBinding ;
+    rdfs:range re:Agent ;
+    rdfs:label "bound agent" .
+
+re:inAgentFamily a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain re:Agent ;
+    rdfs:range re:AgentFamily ;
+    rdfs:label "in agent family" .
+
+re:autonomyMode a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain re:AgentBinding ;
+    rdfs:range re:AutonomyMode ;
+    rdfs:label "autonomy mode" .
+
+re:maxAutonomy a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain re:AgentBinding ;
+    rdfs:range re:AutonomyMode ;
+    rdfs:label "maximum autonomy" ;
+    rdfs:comment "The ceiling the binding's risk controls impose. re:autonomyMode may not exceed it." .
+
+re:writesToRegionOf a owl:ObjectProperty ;
+    rdfs:domain re:AgentBinding ;
+    rdfs:range re:Machine ;
+    rdfs:label "writes to region of" ;
+    rdfs:comment "The machine whose region receives the binding's write-back. For the assessment axis this is the bound machine itself." .
+
+re:hasSemanticAxis a owl:ObjectProperty ;
+    rdfs:range re:SemanticAxis ;
+    rdfs:label "has semantic axis" .
+
+re:hasResponseMapping a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain re:AgentBinding ;
+    rdfs:range re:ResponseMapping ;
+    rdfs:label "has response mapping" .
+
+re:hasCompletionMapping a owl:ObjectProperty ;
+    rdfs:domain re:Machine ;
+    rdfs:range re:CompletionMapping ;
+    rdfs:label "has completion mapping" .
+
+re:completionOfAgent a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain re:CompletionMapping ;
+    rdfs:range re:Agent ;
+    rdfs:label "completion of agent" .
+
+re:declaresAgentFamily a owl:ObjectProperty ;
+    rdfs:range re:AgentFamily ;
+    rdfs:label "declares agent family" ;
+    rdfs:comment "A domain declares the families its machines may bind. A family declared but never bound is an unrealized declaration." .
+
+#################################################################
+# Datatype properties: the agent corpus
+#################################################################
+
+re:agentId a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain re:Agent ;
+    rdfs:range xsd:string ;
+    rdfs:label "agent id" .
+
+re:agentFamilyName a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain re:AgentFamily ;
+    rdfs:range xsd:string ;
+    rdfs:label "agent family name" .
+
+re:agentRole a owl:DatatypeProperty ;
+    rdfs:domain re:Agent ;
+    rdfs:range xsd:string ;
+    rdfs:label "agent role" .
+
+re:agentTrigger a owl:DatatypeProperty ;
+    rdfs:domain re:AgentBinding ;
+    rdfs:range xsd:string ;
+    rdfs:label "agent trigger" .
+
+re:allowedAction a owl:DatatypeProperty ;
+    rdfs:domain re:AgentBinding ;
+    rdfs:range xsd:string ;
+    rdfs:label "allowed action" .
+
+re:requiresHumanApproval a owl:DatatypeProperty ;
+    rdfs:domain re:AgentBinding ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "requires human approval" .
+
+re:axisIndex a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain re:SemanticAxis ;
+    rdfs:range xsd:integer ;
+    rdfs:label "axis index" ;
+    rdfs:comment "Element offset within the write-back region, zero-based." .
+
+re:axisName a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain re:SemanticAxis ;
+    rdfs:range xsd:string ;
+    rdfs:label "axis name" ;
+    rdfs:comment "Functional: one position of one region carries exactly one meaning. Two sources asserting different names for the same axis is an inconsistency, not a variant spelling." .
+
+re:axisNameSource a owl:DatatypeProperty ;
+    rdfs:domain re:SemanticAxis ;
+    rdfs:range xsd:string ;
+    rdfs:label "axis name source" ;
+    rdfs:comment "Where the name came from: sensor-normalization, input-semantics, or openclaw-projection. Records provenance so a disagreement can be adjudicated rather than merely detected." .
+
+re:sensorId a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain re:CompletionMapping ;
+    rdfs:range xsd:string ;
+    rdfs:label "sensor id" .
+
+re:completionOffset a owl:DatatypeProperty ;
+    rdfs:domain re:CompletionMapping ;
+    rdfs:range xsd:integer ;
+    rdfs:label "completion offset" .
+
+re:completionLength a owl:DatatypeProperty ;
+    rdfs:domain re:CompletionMapping ;
+    rdfs:range xsd:integer ;
+    rdfs:label "completion length" .
+
+#################################################################
+# Canonical individuals: autonomy modes
+#
+# Ordered by increasing consequence. The enum is the one in
+# schemas/agent-binding.schema.json; keep the two in step.
+#################################################################
+
+re:Observe a owl:NamedIndividual , re:AutonomyMode ;
+    rdfs:label "observe" ;
+    rdfs:comment "Reads only. Writes no value into the reality vector." .
+
+re:Advise a owl:NamedIndividual , re:AutonomyMode ;
+    rdfs:label "advise" ;
+    rdfs:comment "Writes an assessment for RE to evaluate. RE remains authoritative for the determination." .
+
+re:SupervisedAct a owl:NamedIndividual , re:AutonomyMode ;
+    rdfs:label "supervised-act" ;
+    rdfs:comment "May act once a human approves." .
+
+re:AutomatedAct a owl:NamedIndividual , re:AutonomyMode ;
+    rdfs:label "automated-act" ;
+    rdfs:comment "May act without human approval." .
+
+re:Observe owl:differentFrom re:Advise , re:SupervisedAct , re:AutomatedAct .
+re:Advise  owl:differentFrom re:SupervisedAct , re:AutomatedAct .
+re:SupervisedAct owl:differentFrom re:AutomatedAct .
+
+#################################################################
 # Canonical individuals: RAG statuses
 #################################################################
 
@@ -493,4 +694,65 @@ re:CriticalEventSequence rdfs:subClassOf [
     a owl:Restriction ;
     owl:onProperty re:hasInitialStep ;
     owl:minCardinality "1"^^xsd:nonNegativeInteger
+] .
+
+#################################################################
+# Audit axioms: the agent corpus
+#################################################################
+
+re:hasFamilyMember a owl:ObjectProperty ;
+    owl:inverseOf re:inAgentFamily ;
+    rdfs:domain re:AgentFamily ;
+    rdfs:range re:Agent ;
+    rdfs:label "has family member" .
+
+# A family a domain declares but no agent belongs to. Declaring a role the
+# corpus never fills is not an error, but it is a claim of coverage that is
+# not met, and it should be visible as such rather than inferred from absence.
+re:UnrealizedAgentFamily a owl:Class ;
+    owl:equivalentClass [
+        a owl:Class ;
+        owl:intersectionOf (
+            re:AgentFamily
+            [ a owl:Restriction ;
+              owl:onProperty re:hasFamilyMember ;
+              owl:maxCardinality "0"^^xsd:nonNegativeInteger ]
+        )
+    ] ;
+    rdfs:label "Unrealized Agent Family" ;
+    rdfs:comment "An agent family declared by a domain that no agent belongs to." .
+
+# An observing binding contributes nothing to the reality vector. If it carries
+# a semantic axis, something is writing under an autonomy mode that forbids it.
+re:ObserveBinding a owl:Class ;
+    rdfs:subClassOf re:AgentBinding ;
+    owl:equivalentClass [
+        a owl:Restriction ;
+        owl:onProperty re:autonomyMode ;
+        owl:hasValue re:Observe
+    ] ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty re:hasSemanticAxis ;
+        owl:maxCardinality "0"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:label "Observe Binding" ;
+    rdfs:comment "Audit invariant: an observe-mode binding writes no element of the reality vector." .
+
+# Every binding names an agent and writes into a known machine's region.
+re:AgentBinding rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty re:boundAgent ;
+        owl:cardinality "1"^^xsd:nonNegativeInteger
+    ] , [
+        a owl:Restriction ;
+        owl:onProperty re:writesToRegionOf ;
+        owl:minCardinality "1"^^xsd:nonNegativeInteger
+    ] .
+
+# A completion mapping is a write, so it may not belong to an observing agent.
+re:CompletionMapping rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty re:completionOfAgent ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger
 ] .
