@@ -70,30 +70,60 @@ arbitrate over nothing. See jateeter/localOpenClawStack#18.
 The arbiter is one stage with three phases, placed between the final Reality
 Events of instant `k` and the InputSpace Reality Event of instant `k+1`:
 
+The InputSpace is not a single vector but a **queue** of Input Reality Event
+Vectors (IREQ), fed by the PE simulation stream, by the UI, and by synthetic
+queue generation. Arbitration finalizes by merging into the **head** of that
+queue.
+
 ```
-IS(k) ──▶ snapshot ──▶ every machine compares its input EV to active CES events
-                            │
-                            ▼
-                     final Reality Events emitted
-                            │
-              L1 ── machine arbiter ── N CES outputs → 1 machine vector
-                            │
-                     GATHER  (cell → [contribution])      ← nothing written yet
-                            │
-              L2 ── universal arbiter ── contributions → 1 value per cell
-                            │
-                     COMMIT  (exactly one write per cell)
-                            ▼
-                          IS(k+1)
+IREQ:  [ head ][ +1 ][ +2 ] ...        ← PE simulation stream / UI / synthetic generation
+          ▲
+          │  MERGE INTO HEAD  (exactly one resolved value per cell)
+          │
+   L2 ── universal arbiter ── contributions → 1 value per cell
+          ▲
+        GATHER  (cell → [contribution])          ← nothing written yet
+          ▲
+   L1 ── machine arbiter ── N CES outputs → 1 machine vector
+          ▲
+   final Reality Events emitted
+          ▲
+   every machine compares its input EV to active CES events
+          ▲
+        IS(k)  ── dequeued from IREQ head
 ```
 
-This position is forced. It is the only point where every final Reality Event of
-the instant is known *and* the next InputSpace Reality Event has not yet been
-formed. Resolving earlier cannot see all contributors; resolving later mutates a
-committed event.
+This position is forced. It is the only point where every contribution for the
+instant is known *and* the head of the queue has not yet been consumed as
+`IS(k+1)`. Resolving earlier cannot see all contributors; resolving later mutates
+an event already dequeued.
 
-**No runtime may write into the perceptual array during phase 2.** Gather
-produces contributions; only commit writes.
+**No runtime may write into the perceptual array during gather.** Gather produces
+contributions; only the head-merge writes.
+
+### 2.1 Nothing bypasses the arbiter
+
+**Every path that affects an Input Reality Event Vector goes through
+arbitration.** There is no privileged writer and no direct-write escape hatch.
+That includes:
+
+| path | contributor, not a bypass |
+|---|---|
+| machine final Reality Events | yes |
+| PE sources — ACP, MCP, MQTT, localAI, sensor | yes |
+| PE simulation stream | yes |
+| UI-injected values | yes |
+| synthetic IREQ generation | yes |
+
+Head-merge content already present in the queue entry is itself a contributor set
+and is arbitrated with the rest — a queue entry does not get to *be* the next
+input event by virtue of arriving first. An operator forcing a value is expressed
+as a **declared ranking in the arbitration registry**, never as a write that
+skips the stage. If a value can reach `IS` without producing an
+`ArbitrationRecord`, that path is a defect.
+
+The practical test is negative: instrument the perceptual array so any write not
+originating from the head-merge fails the build.
 
 ## 3. Contribution
 
@@ -102,6 +132,7 @@ shape; only `provider` and the origin fields differ.
 
 ```
 Provider   := "machine" | "acp" | "mcp" | "mqtt" | "localai" | "sensor"
+            | "stream" | "ui" | "synthetic"
 Determinism := "deterministic" | "measured" | "generated"
 
 Contribution := {
@@ -121,8 +152,14 @@ Contribution := {
 | class | meaning | default providers |
 |---|---|---|
 | `deterministic` | reproducible from the corpus and `IS(k)` alone | `machine` |
-| `measured` | exogenous but not generated — a reading, reproducible under replay | `sensor`, `mqtt` |
+| `measured` | exogenous but not generated — a reading or a specified injection, reproducible under replay | `sensor`, `mqtt`, `stream`, `ui`, `synthetic` |
 | `generated` | produced by a non-deterministic process; not reproducible | `acp`, `mcp`, `localai` |
+
+Queue-supplied content (`stream`, `ui`, `synthetic`) is `measured`: it is
+exogenous to the corpus but specified and replayable. It therefore ranks below a
+machine determination under `PRECEDENCE`. An operator who needs an injection to
+win a cell raises that cell's ranking in the registry — deliberately, with a
+rationale — rather than relying on arrival order.
 
 A provider's default class may be overridden per source, but a `generated`
 contribution may never be reclassified upward.
@@ -364,6 +401,15 @@ implementation whose output depends on partitioning has violated 4.1.
    rejection record; the cell resolves from its remaining contributors.
 5c. A well-formed response asserting the wrong quantity fails the semantic gate
    and produces no contribution.
+5d. **No write reaches an Input Reality Event Vector without a corresponding
+   `ArbitrationRecord`.** Tested negatively: instrument the perceptual array so
+   any write not originating from the head-merge fails the build. UI injection,
+   synthetic queue generation and the PE simulation stream are each exercised to
+   confirm they arbitrate rather than bypass.
+5e. Arbitration merges into the **head** of the IREQ, and the head is not
+   consumed as `IS(k+1)` until the merge completes. A queue entry with
+   pre-existing content is arbitrated with the instant's contributions, not
+   overwritten by them and not preferred over them.
 6. An undeclared contended cell fails corpus validation, counting machine and
    non-machine writers alike.
 7. `MEAN` without canonical ordering is rejected at load.
