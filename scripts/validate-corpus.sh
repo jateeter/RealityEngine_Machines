@@ -19,6 +19,13 @@ python3 "$SCRIPT_DIR/inventory-semantic-buses.py" --check --summary-only
 python3 "$SCRIPT_DIR/build-corpus-index.py" --check
 python3 "$SCRIPT_DIR/build-region-allocation.py" --check
 
+# Arbitration gate (docs/ARBITER_CONTRACT.md §5): a universal-vector position
+# written by more than one contributor — machine final Reality Events and PE
+# sources alike — must declare how it resolves. An undeclared contended cell
+# would fall through to merge order, which is stable and therefore reproduces a
+# wrong resolution as if it were correct.
+python3 "$SCRIPT_DIR/build-arbitration-registry.py" --check
+
 # OWL semantic gates (docs/SEMANTIC_OWL_ROADMAP.md): checked-in ABox drift
 # for exemplar domains, corpus-wide manifest drift, and — when ROBOT is
 # installed (CI) — reasoner consistency.

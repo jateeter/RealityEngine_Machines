@@ -255,6 +255,48 @@ commutative monoids, so the composite is one.
 A contribution from a sequence typed `re:LifeSafetySequence` is promoted to
 severity `3` and dominates unconditionally.
 
+#### 4.3.1 Obtaining the severity — the trigger-rule join
+
+`ragStatusCode` is **not** carried on the output vector. Only 24 of 5,128 output
+vectors have it in `metadata`; it lives in `metadata.triggerConfig.rules`, keyed
+by sequence and output value, on all 1,328 machines. A runtime that reads it off
+the output vector will find it absent essentially always.
+
+A machine contribution's severity is therefore obtained by joining, at merge
+time:
+
+```
+severity(contribution) :=
+    rules := machine.metadata.triggerConfig.rules
+    hits  := { r ∈ rules | r.sequenceId == contribution.cesId
+                         ∧ r.outputMatches == contribution.outputVector }
+    → max(hit.ragStatusCode for hit in hits)
+```
+
+**The join is total over the corpus.** Measured across all 5,128 output vectors:
+0 have no matching rule, 5,110 match exactly one, 18 match more than one. Of the
+18, 16 are duplicate rules carrying the same value.
+
+`max` over the severity order handles the remainder and keeps the join a
+commutative monoid, so §4.1 survives. It is also the safe direction: treating an
+emergency as routine is the worse error. Exactly one machine currently needs it —
+`AIHardwareResilience` / `aihr-hw-degradation` / `[0,0,0,0,0,1]` maps to both
+`GREEN` ("schedule maintenance window") and `RED` ("emergency hardware
+replacement — pull from production"). That is a corpus defect rather than a
+modelling nuance and is tracked separately; the join must not depend on its being
+fixed.
+
+**Non-machine contributions** supply `ragStatusCode` from their own surface when
+they have one. Absent, the contribution sits at `GREEN` — a floor in the ranking,
+not a substituted value, and distinct from the prohibition in §4.3b, which
+governs the *value* and not this metadata. Under `PRECEDENCE` a generated
+contribution ranks below every deterministic one regardless, so its severity only
+discriminates against other contributions in its own class.
+
+Implementing this join is in scope for every runtime. Without it `SEVERITY` and
+every `withinRank: SEVERITY` entry are undefined, which today is 270 of the 2,837
+registry entries.
+
 ### 4.3a `PRECEDENCE` — determinism ranking
 
 The dominant contention case is a deterministic machine output and a generated
@@ -272,6 +314,22 @@ deterministic (3)  >  measured (2)  >  generated (1)
 Resolution is the lexicographic maximum of `(class, value)`. Lexicographic max
 over a totally-ordered pair is commutative, associative and idempotent, so §4.1
 holds and parallel reduction remains safe.
+
+**`withinRank` — the second axis.** A cell is often contended on two axes at
+once, and in this corpus almost every one is: a machine determination contends
+with a generated assessment *across* classes, while several machine
+determinations contend with each other *within* the winning class. Falling back
+to `MAX` among the winners collapses those determinations to one value and
+discards which of them asserted — the outcome `SEVERITY` exists to avoid.
+
+An entry may therefore declare `withinRank`, one of `OR`/`AND`/`MAX`/`MIN`/
+`SEVERITY`, applied among the contributions at the winning rank. Absent, it is
+`MAX`. Since both stages are commutative monoids, so is the composite, and §4.1
+still holds.
+
+Measured over the corpus: **2,833** contended cells, of which **268** carry more
+than one machine writer and so require a `withinRank` rule. `withinRank` is
+meaningful only under `PRECEDENCE`; on any other rule it is an error.
 
 **The ordering is not a status hierarchy and not a preference.** It follows from
 reproducibility. A deterministic contribution is derivable from the corpus and
@@ -562,9 +620,18 @@ Both belong beside the ring in the regression corpus.
 
 ## 10. Open
 
-- `SEVERITY` needs `ragStatusCode` on the contribution. Confirm all four runtimes
-  carry determination metadata that far into the merge; if not, that plumbing is
-  in scope.
+- ~~`SEVERITY` needs `ragStatusCode` on the contribution.~~ **Decided: implement
+  the trigger-rule join as part of the arbiter work.** Specified in §4.3.1 and in
+  scope for every runtime. The 270 registry entries that depend on `SEVERITY`
+  stand as written; fixture §9a will fail until the join exists, which is the
+  correct behaviour for a conformance fixture.
+
+  The plumbing gap it closes, using Scala as the illustration: `OutputVector`
+  carries `metadata`, but the merge discards the wrapper —
+  `pendingOutputs` is `ListBuffer[(Machine, Vector[Double])]`, built by
+  `sr.assertedOutputs.foreach { ao => pendingOutputs += ((machine, ao.vector)) }`.
+  Carrying the contribution rather than the bare vector into the gather phase is
+  a prerequisite of §4.3.1 in every runtime, not only Scala.
 - Whether L1 should become element-wise (`OR`/`MAX`) or keep gate semantics with
   a separate value rule. This document assumes element-wise; the current
   "first representative" behaviour is replaced either way.
