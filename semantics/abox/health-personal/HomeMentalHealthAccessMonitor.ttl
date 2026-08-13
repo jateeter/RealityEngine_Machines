@@ -23,7 +23,8 @@ m:machine
     re:hasSequence m:seq-mh-access-crisis , m:seq-mh-referral-needed , m:seq-mh-comorbidity-risk , m:seq-mh-access-adequate ;
     re:hasTriggerRule m:rule-mh-access-crisis , m:rule-mh-referral-needed , m:rule-mh-comorbidity-risk , m:rule-mh-access-adequate ;
     re:hasInterconnection m:ix-health-personal_chronic-pain-mental-health-access_mental-health-access , m:ix-health-personal_social-isolation-access_mental-health-access ;
-    re:hasOpenClawProjection m:openclaw-projection .
+    re:hasOpenClawProjection m:openclaw-projection ;
+    re:hasAgentBinding m:agent-binding .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -503,3 +504,63 @@ m:openclaw-projection
     re:targetInputOffset 2019 ;
     re:targetInputLength 8 ;
     rdfs:comment "Normal path is deterministic PE composition from chronic disease and chronic pain outputs. OpenClaw may populate the same native bit lane only for external mental-health access observations that bypass those upstream machines." .
+
+m:agent-binding
+    a owl:NamedIndividual , re:AgentBinding ;
+    re:writesToRegionOf m:machine ;
+    re:boundAgent m:agent ;
+    re:autonomyMode re:Advise ;
+    re:hasSemanticAxis m:axis-0 , m:axis-1 , m:axis-2 , m:axis-3 , m:axis-4 , m:axis-5 , m:axis-6 , m:axis-7 .
+
+m:agent
+    a owl:NamedIndividual , re:Agent ;
+    re:agentId "openclaw-input-analyst" ;
+    re:agentRole "openclaw-input-analyst" .
+
+m:axis-0
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 0 ;
+    re:axisName "disease-exacerbation-bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-1
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 1 ;
+    re:axisName "disease-poor-control-bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-2
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 2 ;
+    re:axisName "disease-borderline-control-bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-3
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 3 ;
+    re:axisName "disease-controlled-bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-4
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 4 ;
+    re:axisName "pain-crisis-bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-5
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 5 ;
+    re:axisName "opioid-risk-elevated-bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-6
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 6 ;
+    re:axisName "functional-impairment-bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-7
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 7 ;
+    re:axisName "pain-managed-bit" ;
+    re:axisNameSource "openclaw-projection" .

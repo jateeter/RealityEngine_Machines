@@ -23,7 +23,8 @@ m:machine
     re:hasSequence m:seq-wa-sustained-alert-community , m:seq-wa-critical-community , m:seq-wa-sustained-alert-facility , m:seq-wa-critical-facility , m:seq-wa-rapid-decline , m:seq-wa-wellness-improving ;
     re:hasTriggerRule m:rule-wa-sustained-alert-community , m:rule-wa-critical-community , m:rule-wa-sustained-alert-facility , m:rule-wa-critical-facility , m:rule-wa-rapid-decline , m:rule-wa-wellness-improving ;
     re:hasInterconnection m:ix-health-personal_care-transition-response_wellness-transition-routing , m:ix-health-personal_facilities-maintenance-response_wellness-escalation , m:ix-health-personal_medication-access-adherence_wellness-routing , m:ix-health-personal_sleep-recovery-wellness_wellness-recovery , m:ix-health-personal_intake-wellness-routing_wellness-analytics ;
-    re:hasOpenClawProjection m:openclaw-projection .
+    re:hasOpenClawProjection m:openclaw-projection ;
+    re:hasAgentBinding m:agent-binding .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -1101,3 +1102,63 @@ m:openclaw-projection
     re:targetInputOffset 3931 ;
     re:targetInputLength 8 ;
     rdfs:comment "OpenClaw maps wellness observations to the native WellnessAnalytics input vector only when bypassing deterministic PatientWellness output; PE writes the source and does not wait inside a PE cycle." .
+
+m:agent-binding
+    a owl:NamedIndividual , re:AgentBinding ;
+    re:writesToRegionOf m:machine ;
+    re:boundAgent m:agent ;
+    re:autonomyMode re:Advise ;
+    re:hasSemanticAxis m:axis-0 , m:axis-1 , m:axis-2 , m:axis-3 , m:axis-4 , m:axis-5 , m:axis-6 , m:axis-7 .
+
+m:agent
+    a owl:NamedIndividual , re:Agent ;
+    re:agentId "openclaw-input-analyst" ;
+    re:agentRole "openclaw-input-analyst" .
+
+m:axis-0
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 0 ;
+    re:axisName "wellness_optimal_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-1
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 1 ;
+    re:axisName "wellness_good_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-2
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 2 ;
+    re:axisName "wellness_alert_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-3
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 3 ;
+    re:axisName "wellness_critical_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-4
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 4 ;
+    re:axisName "reserved_4" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-5
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 5 ;
+    re:axisName "reserved_5" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-6
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 6 ;
+    re:axisName "reserved_6" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-7
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 7 ;
+    re:axisName "reserved_7" ;
+    re:axisNameSource "openclaw-projection" .

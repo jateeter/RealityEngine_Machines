@@ -23,7 +23,8 @@ m:machine
     re:hasSequence m:seq-med-taken-on-time , m:seq-med-delayed , m:seq-med-missed ;
     re:hasTriggerRule m:rule-med-taken-on-time , m:rule-med-delayed , m:rule-med-missed ;
     re:hasInterconnection m:ix-health-personal_daily-patient-care-response_medication-adherence , m:ix-health-personal_medication-access-adherence_medication-adherence ;
-    re:hasOpenClawProjection m:openclaw-projection .
+    re:hasOpenClawProjection m:openclaw-projection ;
+    re:hasAgentBinding m:agent-binding .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -207,3 +208,27 @@ m:openclaw-projection
     re:targetInputOffset 1939 ;
     re:targetInputLength 2 ;
     rdfs:comment "OpenClaw maps MAR, dispenser, or caregiver medication observations to native MedicationAdherenceMonitor input bits; PE writes the vector source and does not wait inside a PE cycle." .
+
+m:agent-binding
+    a owl:NamedIndividual , re:AgentBinding ;
+    re:writesToRegionOf m:machine ;
+    re:boundAgent m:agent ;
+    re:autonomyMode re:Advise ;
+    re:hasSemanticAxis m:axis-0 , m:axis-1 .
+
+m:agent
+    a owl:NamedIndividual , re:Agent ;
+    re:agentId "openclaw-input-analyst" ;
+    re:agentRole "openclaw-input-analyst" .
+
+m:axis-0
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 0 ;
+    re:axisName "dose_pending_or_delayed_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-1
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 1 ;
+    re:axisName "dose_missed_past_grace_bit" ;
+    re:axisNameSource "openclaw-projection" .

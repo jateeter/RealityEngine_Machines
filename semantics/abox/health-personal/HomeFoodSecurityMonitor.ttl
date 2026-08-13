@@ -23,7 +23,8 @@ m:machine
     re:hasSequence m:seq-home-food-crisis-escalation , m:seq-home-food-assistance-needed , m:seq-home-food-insecure , m:seq-home-food-secure ;
     re:hasTriggerRule m:rule-home-food-crisis-escalation , m:rule-home-food-assistance-needed , m:rule-home-food-insecure , m:rule-home-food-secure ;
     re:hasInterconnection m:ix-health-personal_hydration-risk-response_nutrition-access , m:ix-health-personal_child-development-support_food-access-context , m:ix-health-personal_facilities-maintenance-response_food-access , m:ix-health-personal_pediatric-adolescent-family-support_food-access , m:ix-health_infrastructure-support_consumer_home_food_security_context ;
-    re:hasOpenClawProjection m:openclaw-projection .
+    re:hasOpenClawProjection m:openclaw-projection ;
+    re:hasAgentBinding m:agent-binding .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -441,3 +442,39 @@ m:openclaw-projection
     re:targetInputOffset 1963 ;
     re:targetInputLength 4 ;
     rdfs:comment "OpenClaw maps food access observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle." .
+
+m:agent-binding
+    a owl:NamedIndividual , re:AgentBinding ;
+    re:writesToRegionOf m:machine ;
+    re:boundAgent m:agent ;
+    re:autonomyMode re:Advise ;
+    re:hasSemanticAxis m:axis-0 , m:axis-1 , m:axis-2 , m:axis-3 .
+
+m:agent
+    a owl:NamedIndividual , re:Agent ;
+    re:agentId "openclaw-input-analyst" ;
+    re:agentRole "openclaw-input-analyst" .
+
+m:axis-0
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 0 ;
+    re:axisName "meal_frequency_norm" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-1
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 1 ;
+    re:axisName "food_quality_norm" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-2
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 2 ;
+    re:axisName "pantry_days_norm" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-3
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 3 ;
+    re:axisName "food_assistance_norm" ;
+    re:axisNameSource "openclaw-projection" .

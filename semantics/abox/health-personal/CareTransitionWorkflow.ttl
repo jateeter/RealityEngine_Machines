@@ -24,7 +24,8 @@ m:machine
     re:hasSequence m:seq-transition-acute-emergency , m:seq-transition-hospital-to-rehab , m:seq-transition-rehab-to-alf , m:seq-transition-blocked , m:seq-transition-emergency-escalation ;
     re:hasTriggerRule m:rule-transition-acute-emergency , m:rule-transition-hospital-to-rehab , m:rule-transition-rehab-to-alf , m:rule-transition-blocked , m:rule-transition-emergency-escalation ;
     re:hasInterconnection m:ix-health-personal_care-transition-response_transition-outcome , m:ix-health-personal_intake-wellness-routing_care-transition , m:ix-health_infrastructure-support_consumer_care_transition_context ;
-    re:hasOpenClawProjection m:openclaw-projection .
+    re:hasOpenClawProjection m:openclaw-projection ;
+    re:hasAgentBinding m:agent-binding .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -1419,3 +1420,63 @@ m:openclaw-projection
     re:targetInputOffset 3939 ;
     re:targetInputLength 8 ;
     rdfs:comment "OpenClaw maps transition observations, case-management events, facility readiness, and emergency status to native CareTransitionWorkflow input bits; PE writes the vector source and does not wait inside a PE cycle." .
+
+m:agent-binding
+    a owl:NamedIndividual , re:AgentBinding ;
+    re:writesToRegionOf m:machine ;
+    re:boundAgent m:agent ;
+    re:autonomyMode re:Advise ;
+    re:hasSemanticAxis m:axis-0 , m:axis-1 , m:axis-2 , m:axis-3 , m:axis-4 , m:axis-5 , m:axis-6 , m:axis-7 .
+
+m:agent
+    a owl:NamedIndividual , re:Agent ;
+    re:agentId "openclaw-input-analyst" ;
+    re:agentRole "openclaw-input-analyst" .
+
+m:axis-0
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 0 ;
+    re:axisName "clinical_criterion_met_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-1
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 1 ;
+    re:axisName "administrative_authorization_obtained_or_waived_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-2
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 2 ;
+    re:axisName "receiving_facility_ready_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-3
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 3 ;
+    re:axisName "family_or_proxy_notified_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-4
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 4 ;
+    re:axisName "care_documents_ready_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-5
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 5 ;
+    re:axisName "transport_arranged_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-6
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 6 ;
+    re:axisName "transition_barrier_active_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-7
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 7 ;
+    re:axisName "emergency_mode_active_bit" ;
+    re:axisNameSource "openclaw-projection" .

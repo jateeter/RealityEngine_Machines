@@ -23,7 +23,8 @@ m:machine
     re:hasSequence m:seq-npi-acceptance , m:seq-npi-medical-rejection , m:seq-npi-financial-rejection , m:seq-npi-vacancy-rejection ;
     re:hasTriggerRule m:rule-npi-acceptance , m:rule-npi-medical-rejection , m:rule-npi-financial-rejection , m:rule-npi-vacancy-rejection ;
     re:hasInterconnection m:ix-health-personal_intake-wellness-routing_new-patient-inflow ;
-    re:hasOpenClawProjection m:openclaw-projection .
+    re:hasOpenClawProjection m:openclaw-projection ;
+    re:hasAgentBinding m:agent-binding .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -1142,3 +1143,63 @@ m:openclaw-projection
     re:targetInputOffset 3907 ;
     re:targetInputLength 8 ;
     rdfs:comment "OpenClaw maps intake packet observations to native NewPatientInflow input bits; PE writes the vector source and does not wait inside a PE cycle." .
+
+m:agent-binding
+    a owl:NamedIndividual , re:AgentBinding ;
+    re:writesToRegionOf m:machine ;
+    re:boundAgent m:agent ;
+    re:autonomyMode re:Advise ;
+    re:hasSemanticAxis m:axis-0 , m:axis-1 , m:axis-2 , m:axis-3 , m:axis-4 , m:axis-5 , m:axis-6 , m:axis-7 .
+
+m:agent
+    a owl:NamedIndividual , re:Agent ;
+    re:agentId "openclaw-input-analyst" ;
+    re:agentRole "openclaw-input-analyst" .
+
+m:axis-0
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 0 ;
+    re:axisName "clinical_eligibility_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-1
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 1 ;
+    re:axisName "financial_readiness_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-2
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 2 ;
+    re:axisName "vacancy_available_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-3
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 3 ;
+    re:axisName "care_scope_fit_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-4
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 4 ;
+    re:axisName "assessment_complete_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-5
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 5 ;
+    re:axisName "documents_complete_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-6
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 6 ;
+    re:axisName "family_consent_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-7
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 7 ;
+    re:axisName "reserved_7" ;
+    re:axisNameSource "openclaw-projection" .

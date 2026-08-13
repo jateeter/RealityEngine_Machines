@@ -23,7 +23,8 @@ m:machine
     re:hasSequence m:seq-transport-critical-failure , m:seq-transport-transit-dependent-risk , m:seq-transport-adequate ;
     re:hasTriggerRule m:rule-transport-critical-failure , m:rule-transport-transit-dependent-risk , m:rule-transport-adequate ;
     re:hasInterconnection m:ix-health-personal_patient-safety-transport_transport-access , m:ix-health-personal_chronic-disease-response_transport-access-status , m:ix-health-personal_facilities-maintenance-response_transport-access , m:ix-health-personal_medication-access-adherence_transport-access , m:ix-health-personal_social-isolation-access_transport-access , m:ix-health_infrastructure-support_consumer_home_transportation_barrier_context ;
-    re:hasOpenClawProjection m:openclaw-projection .
+    re:hasOpenClawProjection m:openclaw-projection ;
+    re:hasAgentBinding m:agent-binding .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -371,3 +372,45 @@ m:openclaw-projection
     re:targetInputOffset 1983 ;
     re:targetInputLength 4 ;
     rdfs:comment "OpenClaw maps transportation and appointment-access observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle." .
+
+m:agent-binding
+    a owl:NamedIndividual , re:AgentBinding ;
+    re:writesToRegionOf m:machine ;
+    re:boundAgent m:agent ;
+    re:autonomyMode re:SupervisedAct ;
+    re:agentTrigger "home-transportation-barrier-agent-dispatcher-risk-signal" ;
+    re:allowedAction "Dispatch caregiver_support_agent to coordinate appointment transportation when care access is blocked or fragile." ;
+    re:allowedAction "Stage ride-support, caregiver outreach, or community-service referral actions for patient transport gaps." ;
+    re:allowedAction "Record the resolved transportation support plan back through the PE completion source mapping." ;
+    re:requiresHumanApproval true ;
+    re:maxAutonomy re:SupervisedAct ;
+    re:hasSemanticAxis m:axis-0 , m:axis-1 , m:axis-2 , m:axis-3 .
+
+m:agent
+    a owl:NamedIndividual , re:Agent ;
+    re:agentId "caregiver_support_agent" ;
+    re:agentRole "openclaw-input-analyst" .
+
+m:axis-0
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 0 ;
+    re:axisName "appointment_transport_confirmed_norm" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-1
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 1 ;
+    re:axisName "vehicle_or_transit_reliability_norm" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-2
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 2 ;
+    re:axisName "ride_support_availability_norm" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-3
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 3 ;
+    re:axisName "mobility_access_norm" ;
+    re:axisNameSource "openclaw-projection" .
