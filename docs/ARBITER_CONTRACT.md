@@ -34,9 +34,22 @@ A position is a bus member because *some output event targets it and some machin
 reads it*. Nothing in that definition says the writer must be a machine. An
 external provider emitting through a PE source is structurally identical to a
 machine emitting a final Reality Event: both are contributions to a position.
-ACP, MCP, MQTT, Ollama, HealthKit and sensors differ only in transport and in the
-validate/transform step that precedes the contribution — downstream of that they
-are indistinguishable, and they arbitrate together.
+
+**These providers do not share a path.** ACP, MCP, MQTT, localAI and sensors each
+have their own PE source, with its own transport and its own transformation from
+that transport's return structure or stream into Event Vector Values. What is
+uniform is their **behaviour at the source boundary**, not their implementation:
+
+- each transforms using the declared semantic content of the target axes (§4.3b)
+- each yields no contribution where an axis cannot be resolved
+- each diverts its failures to the analysis stream
+- each produces contributions that are **indistinguishable downstream** — once a
+  contribution exists, the arbiter cannot tell which transport produced it, and
+  must not care beyond the `determinism` class
+
+So this is a behavioural contract satisfied independently N times, once per source
+type, rather than one implementation reused. That is harder, not easier:
+conformance does not transfer. A passing ACP source is no evidence about MQTT.
 
 This is not hypothetical. Of 4,003 cells targeted by `openClawProjection`
 write-backs across 1,184 machines, **2,794 are already bus members** — a machine
@@ -164,10 +177,21 @@ rationale — rather than relying on arrival order.
 A provider's default class may be overridden per source, but a `generated`
 contribution may never be reclassified upward.
 
-Non-machine contributions enter only after the PE source has validated syntax and
-semantics and transformed the response. A contribution that fails validation is
-never created — it is not a contribution with a null value, and it must not reach
-the arbiter.
+Non-machine contributions enter only through their own PE source's transformation
+(§4.3b). A response the transformation cannot resolve produces no contribution —
+not a contribution with a null value — and must not reach the arbiter.
+
+### 3.1 Conformance is per source type
+
+Each PE source type is a separate implementation of §4.3b. The contract is
+therefore satisfied `runtimes × source types` times, and conformance does not
+transfer between them: ACP passing says nothing about MQTT, and the Scala ACP
+source passing says nothing about the C++ ACP source.
+
+Every source type MUST be exercised independently against the §9b fixture and
+acceptance criteria 5b, 5c, 5c′ and 5c″. A source type that has not been
+exercised is unverified, not assumed-conformant — and because each owns its own
+transformation, a defect in one is invisible from the others.
 
 ## 4. Rules
 
@@ -487,6 +511,9 @@ implementation whose output depends on partitioning has violated 4.1.
    `provider` populated on every entry.
 9. Both minimal fixtures (§9) resolve per their declared rules in all four
    runtimes.
+10. **§9b and criteria 5b–5c″ are run once per source type**, not once per
+   runtime. Source types do not share a transformation (§3.1), so conformance
+   does not transfer between them.
 
 ## 9. Minimal fixtures
 
@@ -520,8 +547,10 @@ Both belong beside the ring in the regression corpus.
   Tracked as jateeter/localOpenClawStack#21. The contract is written to the
   intended behaviour; implementers should expect the corpus to violate it until
   that issue lands.
-- **The PE transformation implementation is unread** in all four runtimes, so
-  whether the gate exists at all beyond the response mapping is unknown.
-- **Whether MQTT, MCP and Ollama truly share the ACP source path** is asserted
-  architecturally and unconfirmed in code. If any of them bypasses the PE source
-  path, it bypasses this arbiter too.
+- **Per-source conformance is unverified across the board.** The source types do
+  not share a path — ACP, MCP, MQTT, localAI and sensors each own their own
+  transformation — so §4.3b must hold independently in every one of them, and
+  none has been read in any runtime. The surface is `runtimes × source types`,
+  and because each owns its transform, a defect in one source is invisible from
+  the others by construction. This is the largest unverified area in the
+  contract.
