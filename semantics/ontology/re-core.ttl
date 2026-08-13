@@ -194,9 +194,10 @@ re:prescribesAction a owl:ObjectProperty ;
     rdfs:domain re:Determination ; rdfs:range re:Action ;
     rdfs:label "prescribes action" .
 
-re:hasRagStatus a owl:ObjectProperty ;
+re:hasRagStatus a owl:ObjectProperty , owl:FunctionalProperty ;
     rdfs:range re:RagStatus ;
-    rdfs:label "has RAG status" .
+    rdfs:label "has RAG status" ;
+    rdfs:comment "Functional: a determination carries exactly one RAG status. Without this the escalation audit axiom below cannot fail — the reasoner infers the RED it requires and, under open-world semantics, an individual holding both GREEN and RED is not a contradiction." .
 
 re:hasTriggerRule a owl:ObjectProperty ;
     rdfs:domain re:Machine ; rdfs:range re:TriggerRule ;
@@ -594,6 +595,11 @@ re:SupervisedAct owl:differentFrom re:AutomatedAct .
 re:GREEN a owl:NamedIndividual , re:RagStatus ; rdfs:label "GREEN" .
 re:AMBER a owl:NamedIndividual , re:RagStatus ; rdfs:label "AMBER" .
 re:RED   a owl:NamedIndividual , re:RagStatus ; rdfs:label "RED" .
+
+# Mutually distinct. OWL does not assume unique names, so without this a
+# reasoner may treat GREEN and RED as the same individual and the escalation
+# audit axiom silently holds for everything.
+[] a owl:AllDifferent ; owl:distinctMembers ( re:GREEN re:AMBER re:RED ) .
 
 #################################################################
 # Canonical individuals: shared action vocabulary
