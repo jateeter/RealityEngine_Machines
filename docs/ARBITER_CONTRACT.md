@@ -236,35 +236,96 @@ A domain may raise a specific cell's ranking in the registry, but doing so
 deliberately imports irreproducibility into that lane and must carry a rationale
 saying so.
 
-### 4.3b Guardrails on generated contributions
+### 4.3b The transformation is the quality gate
 
-Precisely because a `generated` value cannot be reproduced, it may not be trusted
-on arrival. A `generated` contribution MUST pass both gates in the PE source
-before it exists as a contribution:
+As information flows back from OpenClaw or Ollama, **the transformation from the
+return structure or stream into Event Vector Values is the gate.** It is not a
+validation step that precedes a transformation. The transformation is given the
+agent response and uses the **declared semantic content of the target axes** to
+produce the values — and a transformation that cannot produce a value for an axis
+has failed for that position.
 
-**Syntactic.** Arity matches the target region length exactly; every value is a
-number in `[0,1]` after declared normalization; required response fields are
-present; no extra positions. A response of the wrong shape is rejected, never
-truncated or padded.
+There is therefore exactly one question per position: *does the response contain
+content that the declared semantics of this axis resolve to a value?* If yes, a
+contribution exists. If no, it does not.
 
-**Semantic.** Each position carries the meaning the region's declared axis says
-it carries — the response mapping resolves to the declared semantics, the value
-lies within any declared band for that axis, and the emission answers the trigger
-that was dispatched. A well-formed response asserting the wrong quantity is
-rejected.
+This subsumes shape and meaning into one operation rather than two gates:
 
-A contribution failing either gate **is never created.** It is not a contribution
-with a null or zeroed value, and it must not reach the arbiter — a rejected
-generated response leaves the cell to its deterministic contributors, which is
-the correct outcome, not a degraded one.
+- arity, type and range fall out of the target region's declared axes — a
+  response that yields values for the wrong number of axes has not transformed
+- meaning falls out of the axis semantics driving the extraction — a well-formed
+  response that asserts a different quantity does not resolve against the axis it
+  was asked for, and so yields nothing for that position
 
-Every rejection MUST emit an observability record (§6) carrying the gate that
-failed and the offending response. Silent rejection is as damaging as silent
-acceptance: it presents as an agent that never answers.
+**A failed transformation produces no contribution.** Not a null, not a zero, and
+above all not a default. The cell then resolves from its `deterministic`
+contributors, which is the correct outcome rather than a degraded one.
+
+#### A default substitution destroys the gate
+
+If the transformation substitutes a value when extraction fails, it can never
+fail, and the gate does not exist. This is the corpus's present state:
+
+| | |
+|---|--:|
+| agent specs with a `responseMapping` | 1,320 |
+| response fields total | 8,531 |
+| **fields carrying `textFallback.default`** | **8,531 (100%)** |
+| distinct default values | one — `0.5` |
+
+Every field of every agent, without exception, substitutes `0.5` when the JSON
+pointer misses and no phrase matches. An empty, malformed, off-topic or
+hallucinated response therefore produces a perfectly well-formed contribution
+asserting `0.5` on every axis, indistinguishable from a confident assessment.
+
+The chosen value makes it worse. `0.5` is the modal element threshold in the
+corpus — **33,277** elements sit exactly there — so under `gte` the failure value
+lands precisely *on* the decision boundary rather than safely below it. A
+transformation failure does not degrade toward silence; it degrades toward
+assertion.
+
+**Defaults are therefore prohibited on the generated path.** An axis that cannot
+be extracted yields no contribution for that position. Where a genuine neutral
+resting value is meaningful for an axis it must be declared as that axis's
+semantics and justified there, not applied blanket as an extraction fallback.
+
+#### Failure diverts to the analysis stream
+
+A failed transformation is not waste. It carries information the system wants:
+*this agent, asked this trigger, for this machine, on this axis, returned
+something the declared semantics could not resolve.* Discarding it keeps the
+reality vector clean and throws away the only evidence that the binding is wrong.
+
+So failure has two effects, not one:
+
+1. **No contribution** into the Input Reality Event Vector. Unchanged — the
+   vector stays clean.
+2. **Diversion into the analysis stream**, carrying the axis and its declared
+   semantics, the extraction attempted, the response received, the agent and
+   trigger, the target machine and cell, and the instant.
+
+The analysis stream is a **learning feedback path**, not a log. It is what lets
+the system observe which agents, which axes, and which prompts fail to resolve,
+and it is the natural input to refining axis semantics, response mappings, and
+agent bindings. The interconnection graph is part of the learning regime; failed
+transformations are part of the same regime, and they are the higher-signal half
+because a failure localises a specific broken binding.
+
+**The analysis stream never writes the reality vector.** It may inform changes to
+the corpus, to a response mapping, or to a source configuration — all of which
+take effect on a later instant through the ordinary path. Nothing on the analysis
+stream reaches an Input Reality Event Vector except by becoming a contribution
+and going through the arbiter like anything else (§2.1). A learning path that
+short-circuits into the vector would reintroduce exactly the bypass §2.1
+prohibits, and would let irreproducible content in through a side door.
+
+Silent rejection is as damaging as silent acceptance: it presents as an agent
+that never answers, and it starves the learning path.
 
 The 9 machines where `openClawProjection.semantics` and the derived agent
 write-back semantics genuinely disagree (jateeter/localOpenClawStack#17) are
-exactly the population the semantic gate exists to catch.
+exactly the population this gate exists to catch — and cannot catch while every
+field defaults.
 
 ### 4.4 `MEAN` — restricted
 
@@ -397,10 +458,18 @@ implementation whose output depends on partitioning has violated 4.1.
    declared rule, in all four runtimes.
 5a. A `generated` contribution never overrides a `deterministic` one under
    `PRECEDENCE`, at any value.
-5b. A response failing the syntactic gate produces **no contribution** and one
-   rejection record; the cell resolves from its remaining contributors.
-5c. A well-formed response asserting the wrong quantity fails the semantic gate
-   and produces no contribution.
+5b. A response the transformation cannot resolve against a declared axis produces
+   **no contribution** for that position and one rejection record; the cell
+   resolves from its remaining contributors.
+5c. A well-formed response asserting a different quantity than the axis asked for
+   does not transform, and produces no contribution.
+5c'. **No extraction path substitutes a default.** An empty response, a
+   malformed response and an off-topic response are each distinguishable from an
+   assessment, and none of them yields a value.
+5c''. Every failed transformation appears on the **analysis stream** with its
+   axis, declared semantics, attempted extraction and received response — and
+   **nothing on the analysis stream reaches an Input Reality Event Vector**
+   except as a contribution through the arbiter.
 5d. **No write reaches an Input Reality Event Vector without a corresponding
    `ArbitrationRecord`.** Tested negatively: instrument the perceptual array so
    any write not originating from the head-merge fails the build. UI injection,
@@ -445,13 +514,14 @@ Both belong beside the ring in the regression corpus.
 - Whether L1 should become element-wise (`OR`/`MAX`) or keep gate semantics with
   a separate value rule. This document assumes element-wise; the current
   "first representative" behaviour is replaced either way.
-- **The PE guardrail implementation is unverified.** §4.3b requires that a
-  generated contribution failing the syntactic or semantic gate is never created.
-  No runtime's implementation of that step has been read, so whether either gate
-  is actually enforced before contribution is unknown. Given #17 found 1,127
-  semantic disagreements between the corpus and the derived agent write-back
-  semantics — 9 of them substantive — the semantic gate is the one most likely to
-  be absent or nominal.
+- **The transformation gate is defeated corpus-wide today.** All 8,531 response
+  fields across all 1,320 agent specs carry `textFallback.default: 0.5`, so the
+  transformation cannot fail and §4.3b is unenforceable until those are removed.
+  Tracked as jateeter/localOpenClawStack#21. The contract is written to the
+  intended behaviour; implementers should expect the corpus to violate it until
+  that issue lands.
+- **The PE transformation implementation is unread** in all four runtimes, so
+  whether the gate exists at all beyond the response mapping is unknown.
 - **Whether MQTT, MCP and Ollama truly share the ACP source path** is asserted
   architecturally and unconfirmed in code. If any of them bypasses the PE source
   path, it bypasses this arbiter too.
