@@ -255,6 +255,48 @@ commutative monoids, so the composite is one.
 A contribution from a sequence typed `re:LifeSafetySequence` is promoted to
 severity `3` and dominates unconditionally.
 
+#### 4.3.1 Obtaining the severity — the trigger-rule join
+
+`ragStatusCode` is **not** carried on the output vector. Only 24 of 5,128 output
+vectors have it in `metadata`; it lives in `metadata.triggerConfig.rules`, keyed
+by sequence and output value, on all 1,328 machines. A runtime that reads it off
+the output vector will find it absent essentially always.
+
+A machine contribution's severity is therefore obtained by joining, at merge
+time:
+
+```
+severity(contribution) :=
+    rules := machine.metadata.triggerConfig.rules
+    hits  := { r ∈ rules | r.sequenceId == contribution.cesId
+                         ∧ r.outputMatches == contribution.outputVector }
+    → max(hit.ragStatusCode for hit in hits)
+```
+
+**The join is total over the corpus.** Measured across all 5,128 output vectors:
+0 have no matching rule, 5,110 match exactly one, 18 match more than one. Of the
+18, 16 are duplicate rules carrying the same value.
+
+`max` over the severity order handles the remainder and keeps the join a
+commutative monoid, so §4.1 survives. It is also the safe direction: treating an
+emergency as routine is the worse error. Exactly one machine currently needs it —
+`AIHardwareResilience` / `aihr-hw-degradation` / `[0,0,0,0,0,1]` maps to both
+`GREEN` ("schedule maintenance window") and `RED` ("emergency hardware
+replacement — pull from production"). That is a corpus defect rather than a
+modelling nuance and is tracked separately; the join must not depend on its being
+fixed.
+
+**Non-machine contributions** supply `ragStatusCode` from their own surface when
+they have one. Absent, the contribution sits at `GREEN` — a floor in the ranking,
+not a substituted value, and distinct from the prohibition in §4.3b, which
+governs the *value* and not this metadata. Under `PRECEDENCE` a generated
+contribution ranks below every deterministic one regardless, so its severity only
+discriminates against other contributions in its own class.
+
+Implementing this join is in scope for every runtime. Without it `SEVERITY` and
+every `withinRank: SEVERITY` entry are undefined, which today is 270 of the 2,837
+registry entries.
+
 ### 4.3a `PRECEDENCE` — determinism ranking
 
 The dominant contention case is a deterministic machine output and a generated
@@ -578,35 +620,18 @@ Both belong beside the ring in the regression corpus.
 
 ## 10. Open
 
-- **`SEVERITY` is not implementable as specified today — resolved, and it needs a
-  decision.** `ragStatusCode` is *not* carried on the output vector: only **24 of
-  5,128** output vectors have it in `metadata`. It lives in `triggerConfig.rules`,
-  keyed by `sequenceId` + `outputMatches`, on all 1,328 machines. So a
-  contribution's severity must be obtained by **joining the fired sequence and its
-  output values against the machine's trigger rules**, and no runtime does that
-  join at merge time.
+- ~~`SEVERITY` needs `ragStatusCode` on the contribution.~~ **Decided: implement
+  the trigger-rule join as part of the arbiter work.** Specified in §4.3.1 and in
+  scope for every runtime. The 270 registry entries that depend on `SEVERITY`
+  stand as written; fixture §9a will fail until the join exists, which is the
+  correct behaviour for a conformance fixture.
 
-  Scala illustrates the gap in both directions. `OutputVector` does carry
-  `metadata`, and `Machine.scala` reads `meta.get("ragStatusCode")` for the
-  semantic audit log — which is therefore `None` for 5,104 of 5,128 outputs. And
-  the merge discards the wrapper anyway: `pendingOutputs` is
-  `ListBuffer[(Machine, Vector[Double])]`, built by
-  `sr.assertedOutputs.foreach { ao => pendingOutputs += ((machine, ao.vector)) }`,
-  so even a populated `metadata` would not survive to the arbiter.
-
-  Two ways forward, and the choice changes what four runtimes build:
-
-  1. **Implement the trigger-rule join** as part of the arbiter work. Contributions
-     carry `ragStatusCode` resolved from `triggerConfig`, and `SEVERITY` works as
-     written. Adds scope to all four runtime issues.
-  2. **Drop RAG from the default rule set** until the join exists, and re-derive
-     the registry with a severity-free default.
-
-  This is not academic: **270 registry entries** currently depend on `SEVERITY`
-  (2 as `rule`, 268 as `withinRank`). Under option 1 they are correct as written;
-  under option 2 they must be regenerated. Fixture §9a is deliberately built to
-  discriminate — it will fail until the join exists, which is the correct
-  behaviour for a conformance fixture.
+  The plumbing gap it closes, using Scala as the illustration: `OutputVector`
+  carries `metadata`, but the merge discards the wrapper —
+  `pendingOutputs` is `ListBuffer[(Machine, Vector[Double])]`, built by
+  `sr.assertedOutputs.foreach { ao => pendingOutputs += ((machine, ao.vector)) }`.
+  Carrying the contribution rather than the bare vector into the gather phase is
+  a prerequisite of §4.3.1 in every runtime, not only Scala.
 - Whether L1 should become element-wise (`OR`/`MAX`) or keep gate semantics with
   a separate value rule. This document assumes element-wise; the current
   "first representative" behaviour is replaced either way.
