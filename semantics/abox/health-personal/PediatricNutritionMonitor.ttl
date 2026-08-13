@@ -23,7 +23,8 @@ m:machine
     re:hasSequence m:seq-ped-nut-growth-faltering , m:seq-ped-nut-micronutrient , m:seq-ped-nut-ok ;
     re:hasTriggerRule m:rule-ped-nut-growth-faltering , m:rule-ped-nut-micronutrient , m:rule-ped-nut-ok ;
     re:hasInterconnection m:ix-health-personal_child-development-support_pediatric-nutrition-status , m:ix-health-personal_pediatric-adolescent-family-support_pediatric-nutrition ;
-    re:hasOpenClawProjection m:openclaw-projection .
+    re:hasOpenClawProjection m:openclaw-projection ;
+    re:hasAgentBinding m:agent-binding .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -370,3 +371,39 @@ m:openclaw-projection
     re:targetInputOffset 1971 ;
     re:targetInputLength 4 ;
     rdfs:comment "OpenClaw maps pediatric nutrition observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle." .
+
+m:agent-binding
+    a owl:NamedIndividual , re:AgentBinding ;
+    re:writesToRegionOf m:machine ;
+    re:boundAgent m:agent ;
+    re:autonomyMode re:Advise ;
+    re:hasSemanticAxis m:axis-0 , m:axis-1 , m:axis-2 , m:axis-3 .
+
+m:agent
+    a owl:NamedIndividual , re:Agent ;
+    re:agentId "openclaw-input-analyst" ;
+    re:agentRole "openclaw-input-analyst" .
+
+m:axis-0
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 0 ;
+    re:axisName "growth_trajectory_norm" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-1
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 1 ;
+    re:axisName "caloric_adequacy_norm" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-2
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 2 ;
+    re:axisName "micronutrient_status_norm" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-3
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 3 ;
+    re:axisName "dietary_diversity_norm" ;
+    re:axisNameSource "openclaw-projection" .

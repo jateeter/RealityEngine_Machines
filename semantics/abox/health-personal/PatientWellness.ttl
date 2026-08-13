@@ -23,7 +23,8 @@ m:machine
     re:hasSequence m:seq-wellness-level4-optimal , m:seq-wellness-level3-good , m:seq-wellness-level2-alert , m:seq-wellness-level1-critical , m:seq-wellness-level3-good-age-adjusted ;
     re:hasTriggerRule m:rule-wellness-level4-optimal , m:rule-wellness-level3-good , m:rule-wellness-level2-alert , m:rule-wellness-level1-critical , m:rule-wellness-level3-good-age-adjusted ;
     re:hasInterconnection m:ix-health-personal_daily-patient-care-response_patient-wellness-acuity , m:ix-health-personal_sleep-recovery-wellness_patient-wellness , m:ix-health-personal_intake-wellness-routing_patient-wellness ;
-    re:hasOpenClawProjection m:openclaw-projection .
+    re:hasOpenClawProjection m:openclaw-projection ;
+    re:hasAgentBinding m:agent-binding .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -1428,3 +1429,63 @@ m:openclaw-projection
     re:targetInputOffset 1955 ;
     re:targetInputLength 8 ;
     rdfs:comment "Normal path is deterministic PE composition from DailyPatientCare output. OpenClaw may populate the same native lane only for external wellness observations that bypass DailyPatientCare." .
+
+m:agent-binding
+    a owl:NamedIndividual , re:AgentBinding ;
+    re:writesToRegionOf m:machine ;
+    re:boundAgent m:agent ;
+    re:autonomyMode re:Advise ;
+    re:hasSemanticAxis m:axis-0 , m:axis-1 , m:axis-2 , m:axis-3 , m:axis-4 , m:axis-5 , m:axis-6 , m:axis-7 .
+
+m:agent
+    a owl:NamedIndividual , re:Agent ;
+    re:agentId "openclaw-input-analyst" ;
+    re:agentRole "openclaw-input-analyst" .
+
+m:axis-0
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 0 ;
+    re:axisName "morning_complete_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-1
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 1 ;
+    re:axisName "evening_complete_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-2
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 2 ;
+    re:axisName "fall_confirmed_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-3
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 3 ;
+    re:axisName "unresponsive_fall_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-4
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 4 ;
+    re:axisName "bathroom_alert_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-5
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 5 ;
+    re:axisName "medication_missed_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-6
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 6 ;
+    re:axisName "wandering_alert_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-7
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 7 ;
+    re:axisName "reserved_7" ;
+    re:axisNameSource "openclaw-projection" .

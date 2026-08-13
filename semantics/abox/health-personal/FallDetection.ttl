@@ -24,7 +24,8 @@ m:machine
     re:hasSequence m:seq-fall-nominal , m:seq-fall-stumble-recovered , m:seq-fall-sustained-instability , m:seq-fall-impact-recovered , m:seq-fall-confirmed , m:seq-fall-slow-collapse , m:seq-fall-intentional-lying ;
     re:hasTriggerRule m:rule-fall-nominal , m:rule-fall-stumble-recovered , m:rule-fall-sustained-instability , m:rule-fall-impact-recovered , m:rule-fall-confirmed , m:rule-fall-slow-collapse , m:rule-fall-intentional-lying ;
     re:hasInterconnection m:ix-health-personal_patient-safety-transport_fall-outcome , m:ix-health-personal_daily-patient-care-response_fall-criticality ;
-    re:hasOpenClawProjection m:openclaw-projection .
+    re:hasOpenClawProjection m:openclaw-projection ;
+    re:hasAgentBinding m:agent-binding .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -679,3 +680,27 @@ m:openclaw-projection
     re:targetInputOffset 3813 ;
     re:targetInputLength 2 ;
     rdfs:comment "OpenClaw maps fall observations to native motion/stillness ordinals; PE writes the vector source and does not wait inside a PE cycle." .
+
+m:agent-binding
+    a owl:NamedIndividual , re:AgentBinding ;
+    re:writesToRegionOf m:machine ;
+    re:boundAgent m:agent ;
+    re:autonomyMode re:Advise ;
+    re:hasSemanticAxis m:axis-0 , m:axis-1 .
+
+m:agent
+    a owl:NamedIndividual , re:Agent ;
+    re:agentId "openclaw-input-analyst" ;
+    re:agentRole "openclaw-input-analyst" .
+
+m:axis-0
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 0 ;
+    re:axisName "motion_progression_ordinal" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-1
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 1 ;
+    re:axisName "stillness_progression_ordinal" ;
+    re:axisNameSource "openclaw-projection" .

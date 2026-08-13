@@ -23,7 +23,8 @@ m:machine
     re:hasSequence m:seq-activity-active , m:seq-activity-sedentary , m:seq-activity-prolonged ;
     re:hasTriggerRule m:rule-activity-active , m:rule-activity-sedentary , m:rule-activity-prolonged ;
     re:hasInterconnection m:ix-health-personal_daily-activity-wellness_activity-burden , m:ix-health-personal_chronic-disease-response_activity-tolerance-status , m:ix-health-personal_sleep-recovery-wellness_activity-tolerance ;
-    re:hasOpenClawProjection m:openclaw-projection .
+    re:hasOpenClawProjection m:openclaw-projection ;
+    re:hasAgentBinding m:agent-binding .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -216,3 +217,27 @@ m:openclaw-projection
     re:targetInputOffset 1951 ;
     re:targetInputLength 2 ;
     rdfs:comment "OpenClaw maps activity observations to native machine input bits; PE writes the vector source and does not wait inside a PE cycle." .
+
+m:agent-binding
+    a owl:NamedIndividual , re:AgentBinding ;
+    re:writesToRegionOf m:machine ;
+    re:boundAgent m:agent ;
+    re:autonomyMode re:Advise ;
+    re:hasSemanticAxis m:axis-0 , m:axis-1 .
+
+m:agent
+    a owl:NamedIndividual , re:Agent ;
+    re:agentId "openclaw-input-analyst" ;
+    re:agentRole "openclaw-input-analyst" .
+
+m:axis-0
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 0 ;
+    re:axisName "below_baseline_today_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-1
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 1 ;
+    re:axisName "sedentary_streak_active_bit" ;
+    re:axisNameSource "openclaw-projection" .

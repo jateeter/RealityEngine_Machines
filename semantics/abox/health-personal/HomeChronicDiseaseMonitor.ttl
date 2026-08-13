@@ -23,7 +23,8 @@ m:machine
     re:hasSequence m:seq-chronic-disease-exacerbation , m:seq-chronic-disease-poor-control , m:seq-chronic-disease-borderline , m:seq-chronic-disease-controlled-ok ;
     re:hasTriggerRule m:rule-chronic-disease-exacerbation , m:rule-chronic-disease-poor-control , m:rule-chronic-disease-borderline , m:rule-chronic-disease-controlled-ok ;
     re:hasInterconnection m:ix-health-personal_chronic-pain-mental-health-access_disease-burden , m:ix-health-personal_chronic-disease-response_disease-control-status , m:ix-health_infrastructure-support_consumer_home_chronic_disease_context ;
-    re:hasOpenClawProjection m:openclaw-projection .
+    re:hasOpenClawProjection m:openclaw-projection ;
+    re:hasAgentBinding m:agent-binding .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -403,3 +404,39 @@ m:openclaw-projection
     re:targetInputOffset 1987 ;
     re:targetInputLength 4 ;
     rdfs:comment "OpenClaw may produce machine-native input values for PE ingestion; RE remains authoritative for CES sequence evaluation." .
+
+m:agent-binding
+    a owl:NamedIndividual , re:AgentBinding ;
+    re:writesToRegionOf m:machine ;
+    re:boundAgent m:agent ;
+    re:autonomyMode re:Advise ;
+    re:hasSemanticAxis m:axis-0 , m:axis-1 , m:axis-2 , m:axis-3 .
+
+m:agent
+    a owl:NamedIndividual , re:Agent ;
+    re:agentId "openclaw-input-analyst" ;
+    re:agentRole "openclaw-input-analyst" .
+
+m:axis-0
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 0 ;
+    re:axisName "biomarker_control_norm" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-1
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 1 ;
+    re:axisName "symptom_burden_norm" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-2
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 2 ;
+    re:axisName "self_management_norm" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-3
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 3 ;
+    re:axisName "lifestyle_adherence_norm" ;
+    re:axisNameSource "openclaw-projection" .

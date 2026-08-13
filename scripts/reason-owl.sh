@@ -33,12 +33,32 @@ for abox in "$REPO_ROOT/semantics/abox/$DOMAIN"/*.ttl; do
 done
 
 "$ROBOT" merge "${MERGE_INPUTS[@]}" --output "$WORKDIR/merged.owl"
+# Report against this project's profile rather than ROBOT's default. The default
+# encodes OBO Foundry publishing conventions — it raises 3,418 ERRORs on the
+# generated ABoxes, 3,417 of them missing_label — and fails before `reason` ever
+# runs, so the check with real value never executed. See semantics/robot-report-profile.txt
+# and RealityEngine_Machines#46.
 "$ROBOT" report --input "$WORKDIR/merged.owl" \
+  --profile "$REPO_ROOT/semantics/robot-report-profile.txt" \
   --fail-on ERROR --output "$WORKDIR/report.tsv" || {
     echo "reason-owl: ROBOT report found ERROR-level problems:"
     head -40 "$WORKDIR/report.tsv"
     exit 1
   }
+# Two reasoners, deliberately.
+#
+# ELK is fast and covers EL++ classification. It is NOT sufficient on its own
+# here: it does not support functional properties, so it silently passes a
+# corpus that violates this ontology's own headline invariant — an escalation
+# action prescribed by a non-RED determination. Verified: ELK exits 0 on that
+# case, HermiT exits 1.
+#
+# HermiT is the one that makes the audit axioms in re-core.ttl mean anything.
+# On the health-personal corpus it costs ~3s against ELK's ~2s, so completeness
+# is effectively free at this scale. If it ever becomes the bottleneck, keep
+# HermiT and shard the ABoxes rather than dropping back to ELK alone.
 "$ROBOT" reason --reasoner ELK --input "$WORKDIR/merged.owl" \
-  --output "$WORKDIR/reasoned.owl"
-echo "reason-owl: OK ($DOMAIN merged, reported, and reasoned consistently)"
+  --output "$WORKDIR/reasoned-elk.owl"
+"$ROBOT" reason --reasoner HermiT --input "$WORKDIR/merged.owl" \
+  --output "$WORKDIR/reasoned-hermit.owl"
+echo "reason-owl: OK ($DOMAIN merged, reported, and reasoned consistently under ELK and HermiT)"

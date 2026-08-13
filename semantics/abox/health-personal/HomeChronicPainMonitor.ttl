@@ -23,7 +23,8 @@ m:machine
     re:hasSequence m:seq-chronic-pain-crisis , m:seq-chronic-pain-opioid-risk , m:seq-chronic-pain-functional-impairment , m:seq-chronic-pain-managed-ok ;
     re:hasTriggerRule m:rule-chronic-pain-crisis , m:rule-chronic-pain-opioid-risk , m:rule-chronic-pain-functional-impairment , m:rule-chronic-pain-managed-ok ;
     re:hasInterconnection m:ix-health-personal_chronic-pain-mental-health-access_pain-burden ;
-    re:hasOpenClawProjection m:openclaw-projection .
+    re:hasOpenClawProjection m:openclaw-projection ;
+    re:hasAgentBinding m:agent-binding .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -373,3 +374,39 @@ m:openclaw-projection
     re:targetInputOffset 1991 ;
     re:targetInputLength 4 ;
     rdfs:comment "OpenClaw maps pain observations to native machine input axes; PE writes the vector source and does not wait inside a PE cycle." .
+
+m:agent-binding
+    a owl:NamedIndividual , re:AgentBinding ;
+    re:writesToRegionOf m:machine ;
+    re:boundAgent m:agent ;
+    re:autonomyMode re:Advise ;
+    re:hasSemanticAxis m:axis-0 , m:axis-1 , m:axis-2 , m:axis-3 .
+
+m:agent
+    a owl:NamedIndividual , re:Agent ;
+    re:agentId "openclaw-input-analyst" ;
+    re:agentRole "openclaw-input-analyst" .
+
+m:axis-0
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 0 ;
+    re:axisName "pain_scale_norm" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-1
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 1 ;
+    re:axisName "functional_impairment_norm" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-2
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 2 ;
+    re:axisName "opioid_risk_norm" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-3
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 3 ;
+    re:axisName "physical_activity_norm" ;
+    re:axisNameSource "openclaw-projection" .

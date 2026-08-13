@@ -134,6 +134,7 @@ class MachineProjector:
         self.emit_trigger_rules()
         self.emit_interconnections()
         self.emit_openclaw_projection()
+        self.emit_agent_binding()
         self.emit_local_actions()
         return "\n".join(self.lines).rstrip() + "\n"
 
@@ -214,6 +215,8 @@ class MachineProjector:
             statements.append(f"re:hasInterconnection {ix_refs}")
         if metadata.get("openClawProjection"):
             statements.append("re:hasOpenClawProjection m:openclaw-projection")
+        if metadata.get("agentBinding") or metadata.get("openClawProjection"):
+            statements.append("re:hasAgentBinding m:agent-binding")
         self.block("m:machine", statements)
 
     def emit_perceptual_mapping(self) -> None:
@@ -485,6 +488,118 @@ class MachineProjector:
         if projection.get("peContract"):
             statements.append(f'rdfs:comment "{escape(projection["peContract"])}"')
         self.block("m:openclaw-projection", statements)
+
+    def emit_agent_binding(self) -> None:
+        """Emit the agent vocabulary (re-core.ttl 0.2.0).
+
+        The ontology previously modelled the write-back *slot*
+        (re:OpenClawProjection) but not the agent that fills it, so the semantic
+        layer could answer nothing about the agent corpus bound to these
+        machines.
+
+        Two sources in the corpus describe that binding and they do not agree on
+        cardinality: metadata.agentBinding (curated, localAI provider) covers
+        1058 machines, metadata.openClawProjection (OpenClaw input-analyst)
+        covers 1184. Both are emitted when present rather than one being
+        preferred, because which is authoritative is an open question
+        (localOpenClawStack#16) and encoding a guess here would bake it in.
+
+        re:axisName is functional, so the semantic axes below are the mechanism
+        by which a disagreement about what a write-back position *means* becomes
+        a reasoner-detectable inconsistency rather than a difference nothing
+        compares.
+        """
+        metadata = self.machine.get("metadata", {})
+        binding = metadata.get("agentBinding")
+        projection = metadata.get("openClawProjection")
+        if not binding and not projection:
+            return
+
+        statements = ["a owl:NamedIndividual , re:AgentBinding",
+                      "re:writesToRegionOf m:machine"]
+
+        # Agent identity. The curated binding names a provider agent; the
+        # projection names a role. Prefer the explicit agent id when present.
+        agent_id = None
+        if binding and binding.get("agent"):
+            agent_id = binding["agent"]
+        elif projection and projection.get("owner"):
+            agent_id = projection["owner"]
+        if agent_id:
+            statements.append("re:boundAgent m:agent")
+
+        if binding:
+            if binding.get("mode"):
+                statements.append(f"re:autonomyMode {self.autonomy_term(binding['mode'])}")
+            if binding.get("trigger"):
+                statements.append(f're:agentTrigger "{escape(binding["trigger"])}"')
+            for action in binding.get("allowedActions") or []:
+                statements.append(f're:allowedAction "{escape(action)}"')
+            controls = binding.get("riskControls") or {}
+            if "requiresHumanApproval" in controls:
+                flag = "true" if controls["requiresHumanApproval"] else "false"
+                statements.append(f"re:requiresHumanApproval {flag}")
+            if controls.get("maxAutonomy"):
+                statements.append(f"re:maxAutonomy {self.autonomy_term(controls['maxAutonomy'])}")
+        elif projection and projection.get("dispatchMode"):
+            # A projection without a curated binding still asserts an autonomy
+            # posture: it writes an assessment for RE to evaluate.
+            statements.append("re:autonomyMode re:Advise")
+
+        axes = self.semantic_axes()
+        if axes:
+            statements.append(
+                "re:hasSemanticAxis " + " , ".join(term for term, _ in axes)
+            )
+        self.block("m:agent-binding", statements)
+
+        if agent_id:
+            agent_statements = ["a owl:NamedIndividual , re:Agent",
+                                f're:agentId "{escape(agent_id)}"']
+            if projection and projection.get("owner"):
+                agent_statements.append(f're:agentRole "{escape(projection["owner"])}"')
+            self.block("m:agent", agent_statements)
+
+        for term, axis in axes:
+            self.block(term, [
+                "a owl:NamedIndividual , re:SemanticAxis",
+                f"re:axisIndex {number(axis['index'])}",
+                f're:axisName "{escape(axis["name"])}"',
+                f're:axisNameSource "{escape(axis["source"])}"',
+            ])
+
+    @staticmethod
+    def autonomy_term(mode: str) -> str:
+        return {
+            "observe": "re:Observe",
+            "advise": "re:Advise",
+            "supervised-act": "re:SupervisedAct",
+            "automated-act": "re:AutomatedAct",
+        }.get(mode, "re:Advise")
+
+    def semantic_axes(self) -> list[tuple[str, dict[str, Any]]]:
+        """One axis per element of the write-back region.
+
+        Provenance is recorded because the corpus has two disagreeing sources for
+        these names, and a resolution that cannot say where a name came from
+        cannot be adjudicated (localOpenClawStack#17).
+        """
+        metadata = self.machine.get("metadata", {})
+        projection = metadata.get("openClawProjection") or {}
+        names = projection.get("semantics")
+        source = "openclaw-projection"
+        if not names:
+            names = metadata.get("inputSemantics")
+            source = "input-semantics"
+        if not names:
+            return []
+        axes = []
+        for index, name in enumerate(names):
+            axes.append((
+                f"m:axis-{index}",
+                {"index": index, "name": name, "source": source},
+            ))
+        return axes
 
     def emit_local_actions(self) -> None:
         for code in sorted(self.local_actions):

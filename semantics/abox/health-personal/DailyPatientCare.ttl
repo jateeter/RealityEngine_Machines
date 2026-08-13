@@ -24,7 +24,8 @@ m:machine
     re:hasSequence m:seq-daily-morning-routine , m:seq-daily-evening-routine , m:seq-daily-fall-response , m:seq-daily-fall-unresponsive , m:seq-daily-bathroom-nonuse , m:seq-daily-medication-miss , m:seq-daily-night-wandering ;
     re:hasTriggerRule m:rule-daily-morning-routine , m:rule-daily-evening-routine , m:rule-daily-fall-response , m:rule-daily-fall-unresponsive , m:rule-daily-bathroom-nonuse , m:rule-daily-medication-miss , m:rule-daily-night-wandering ;
     re:hasInterconnection m:ix-health-personal_daily-patient-care-response_daily-care-status , m:ix-health-personal_facilities-maintenance-response_daily-care-anomaly , m:ix-health-personal_medication-access-adherence_daily-care-medication , m:ix-health-personal_sleep-recovery-wellness_daily-care , m:ix-health_infrastructure-support_consumer_daily_patient_care_context ;
-    re:hasOpenClawProjection m:openclaw-projection .
+    re:hasOpenClawProjection m:openclaw-projection ;
+    re:hasAgentBinding m:agent-binding .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -1497,3 +1498,63 @@ m:openclaw-projection
     re:targetInputOffset 3923 ;
     re:targetInputLength 8 ;
     rdfs:comment "OpenClaw maps daily care observations to native DailyPatientCare input bits; PE writes the vector source and does not wait inside a PE cycle." .
+
+m:agent-binding
+    a owl:NamedIndividual , re:AgentBinding ;
+    re:writesToRegionOf m:machine ;
+    re:boundAgent m:agent ;
+    re:autonomyMode re:Advise ;
+    re:hasSemanticAxis m:axis-0 , m:axis-1 , m:axis-2 , m:axis-3 , m:axis-4 , m:axis-5 , m:axis-6 , m:axis-7 .
+
+m:agent
+    a owl:NamedIndividual , re:Agent ;
+    re:agentId "openclaw-input-analyst" ;
+    re:agentRole "openclaw-input-analyst" .
+
+m:axis-0
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 0 ;
+    re:axisName "ambulatory_or_moving_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-1
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 1 ;
+    re:axisName "bathroom_use_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-2
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 2 ;
+    re:axisName "meal_context_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-3
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 3 ;
+    re:axisName "medication_confirmed_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-4
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 4 ;
+    re:axisName "evening_meal_context_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-5
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 5 ;
+    re:axisName "alert_active_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-6
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 6 ;
+    re:axisName "fall_event_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-7
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 7 ;
+    re:axisName "night_monitoring_bit" ;
+    re:axisNameSource "openclaw-projection" .

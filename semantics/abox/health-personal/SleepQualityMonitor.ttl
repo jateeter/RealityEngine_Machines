@@ -23,7 +23,8 @@ m:machine
     re:hasSequence m:seq-sleep-restful , m:seq-sleep-disturbed , m:seq-sleep-poor ;
     re:hasTriggerRule m:rule-sleep-restful , m:rule-sleep-disturbed , m:rule-sleep-poor ;
     re:hasInterconnection m:ix-health-personal_daily-activity-wellness_sleep-quality , m:ix-health-personal_sleep-recovery-wellness_sleep-quality ;
-    re:hasOpenClawProjection m:openclaw-projection .
+    re:hasOpenClawProjection m:openclaw-projection ;
+    re:hasAgentBinding m:agent-binding .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -203,3 +204,27 @@ m:openclaw-projection
     re:targetInputOffset 1943 ;
     re:targetInputLength 2 ;
     rdfs:comment "OpenClaw maps sleep observations to native machine input bits; PE writes the vector source and does not wait inside a PE cycle." .
+
+m:agent-binding
+    a owl:NamedIndividual , re:AgentBinding ;
+    re:writesToRegionOf m:machine ;
+    re:boundAgent m:agent ;
+    re:autonomyMode re:Advise ;
+    re:hasSemanticAxis m:axis-0 , m:axis-1 .
+
+m:agent
+    a owl:NamedIndividual , re:Agent ;
+    re:agentId "openclaw-input-analyst" ;
+    re:agentRole "openclaw-input-analyst" .
+
+m:axis-0
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 0 ;
+    re:axisName "adequate_sleep_duration_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-1
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 1 ;
+    re:axisName "fragmented_sleep_bit" ;
+    re:axisNameSource "openclaw-projection" .

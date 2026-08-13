@@ -24,7 +24,8 @@ m:machine
     re:hasSequence m:seq-maint-daily-routine , m:seq-maint-weekly-deep-clean , m:seq-maint-hygiene-concern , m:seq-maint-safety-concern , m:seq-maint-wellness-concern , m:seq-maint-inaccessible ;
     re:hasTriggerRule m:rule-maint-daily-routine , m:rule-maint-weekly-deep-clean , m:rule-maint-hygiene-concern , m:rule-maint-safety-concern , m:rule-maint-wellness-concern , m:rule-maint-inaccessible ;
     re:hasInterconnection m:ix-health-personal_daily-patient-care-response_facilities-observation , m:ix-health-personal_facilities-maintenance-response_facilities-observation ;
-    re:hasOpenClawProjection m:openclaw-projection .
+    re:hasOpenClawProjection m:openclaw-projection ;
+    re:hasAgentBinding m:agent-binding .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -1711,3 +1712,63 @@ m:openclaw-projection
     re:targetInputOffset 1931 ;
     re:targetInputLength 8 ;
     rdfs:comment "OpenClaw maps facility visit observations to native FacilitiesMaintenance input bits; PE writes the vector source and does not wait inside a PE cycle." .
+
+m:agent-binding
+    a owl:NamedIndividual , re:AgentBinding ;
+    re:writesToRegionOf m:machine ;
+    re:boundAgent m:agent ;
+    re:autonomyMode re:Advise ;
+    re:hasSemanticAxis m:axis-0 , m:axis-1 , m:axis-2 , m:axis-3 , m:axis-4 , m:axis-5 , m:axis-6 , m:axis-7 .
+
+m:agent
+    a owl:NamedIndividual , re:Agent ;
+    re:agentId "openclaw-input-analyst" ;
+    re:agentRole "openclaw-input-analyst" .
+
+m:axis-0
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 0 ;
+    re:axisName "visit_active_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-1
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 1 ;
+    re:axisName "unit_accessible_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-2
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 2 ;
+    re:axisName "hygiene_normal_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-3
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 3 ;
+    re:axisName "space_safe_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-4
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 4 ;
+    re:axisName "nutrition_normal_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-5
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 5 ;
+    re:axisName "patient_observed_normal_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-6
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 6 ;
+    re:axisName "deep_clean_done_bit" ;
+    re:axisNameSource "openclaw-projection" .
+
+m:axis-7
+    a owl:NamedIndividual , re:SemanticAxis ;
+    re:axisIndex 7 ;
+    re:axisName "concern_or_alert_active_bit" ;
+    re:axisNameSource "openclaw-projection" .
