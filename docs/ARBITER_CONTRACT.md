@@ -35,10 +35,11 @@ reads it*. Nothing in that definition says the writer must be a machine. An
 external provider emitting through a PE source is structurally identical to a
 machine emitting a final Reality Event: both are contributions to a position.
 
-**These providers do not share a path.** ACP, MCP, MQTT, localAI and sensors each
-have their own PE source, with its own transport and its own transformation from
-that transport's return structure or stream into Event Vector Values. What is
-uniform is their **behaviour at the source boundary**, not their implementation:
+**These providers do not share a path.** ACP, MCP, MQTT, HealthKit, localAI and
+sensors each have their own PE source, with its own transport and its own
+transformation from that transport's return structure or stream into Event Vector
+Values. What is uniform is their **behaviour at the source boundary**, not their
+implementation:
 
 - each transforms using the declared semantic content of the target axes (§4.3b)
 - each yields no contribution where an axis cannot be resolved
@@ -50,6 +51,15 @@ uniform is their **behaviour at the source boundary**, not their implementation:
 So this is a behavioural contract satisfied independently N times, once per source
 type, rather than one implementation reused. That is harder, not easier:
 conformance does not transfer. A passing ACP source is no evidence about MQTT.
+
+**The obligation is on the integration surface, not on a fixed list.** The
+providers named here are the current instances, not the definition. Supporting
+this transformation is a requirement every integration surface must meet, and the
+set is expected to grow — **adding an integration is adding a conformance
+obligation**, discharged before that integration may contribute. A surface that
+cannot express the transformation cannot become a source; it does not get an
+exemption, because an exemption is exactly a path into the reality vector that
+skips the gate (§2.1).
 
 This is not hypothetical. Of 4,003 cells targeted by `openClawProjection`
 write-backs across 1,184 machines, **2,794 are already bus members** — a machine
@@ -144,8 +154,10 @@ A contribution is provider-tagged. Machine outputs and PE sources use the same
 shape; only `provider` and the origin fields differ.
 
 ```
-Provider   := "machine" | "acp" | "mcp" | "mqtt" | "localai" | "sensor"
-            | "stream" | "ui" | "synthetic"
+// Provider is an OPEN registry, not a closed enum. New integration surfaces
+// register here; the listed values are the current instances.
+Provider   := "machine" | "acp" | "mcp" | "mqtt" | "healthkit" | "localai"
+            | "sensor" | "stream" | "ui" | "synthetic" | <registered surface>
 Determinism := "deterministic" | "measured" | "generated"
 
 Contribution := {
@@ -165,8 +177,12 @@ Contribution := {
 | class | meaning | default providers |
 |---|---|---|
 | `deterministic` | reproducible from the corpus and `IS(k)` alone | `machine` |
-| `measured` | exogenous but not generated — a reading or a specified injection, reproducible under replay | `sensor`, `mqtt`, `stream`, `ui`, `synthetic` |
+| `measured` | exogenous but not generated — a reading or a specified injection, reproducible under replay | `sensor`, `mqtt`, `healthkit`, `stream`, `ui`, `synthetic` |
 | `generated` | produced by a non-deterministic process; not reproducible | `acp`, `mcp`, `localai` |
+
+A newly registered surface MUST declare its class. When in doubt it is
+`generated`: misclassifying a generated source as `measured` lets irreproducible
+content outrank a reading, which is the failure §4.3a exists to prevent.
 
 Queue-supplied content (`stream`, `ui`, `synthetic`) is `measured`: it is
 exogenous to the corpus but specified and replayable. It therefore ranks below a
@@ -192,6 +208,14 @@ Every source type MUST be exercised independently against the §9b fixture and
 acceptance criteria 5b, 5c, 5c′ and 5c″. A source type that has not been
 exercised is unverified, not assumed-conformant — and because each owns its own
 transformation, a defect in one is invisible from the others.
+
+**This applies to future integration surfaces on the same terms.** The §9b
+fixture and criteria 5b–5c″ constitute the admission test for a new source: it
+is run against the surface before that surface may contribute, and the surface
+registers its `provider` value and `determinism` class as part of passing. The
+test suite is therefore parameterised over registered surfaces rather than
+enumerating them, so a new integration inherits the obligation automatically
+instead of needing the suite rewritten.
 
 ## 4. Rules
 
@@ -511,9 +535,12 @@ implementation whose output depends on partitioning has violated 4.1.
    `provider` populated on every entry.
 9. Both minimal fixtures (§9) resolve per their declared rules in all four
    runtimes.
-10. **§9b and criteria 5b–5c″ are run once per source type**, not once per
-   runtime. Source types do not share a transformation (§3.1), so conformance
+10. **§9b and criteria 5b–5c″ are run once per registered source type**, not once
+   per runtime. Source types do not share a transformation (§3.1), so conformance
    does not transfer between them.
+11. The conformance suite is **parameterised over the provider registry**, so a
+   newly registered integration surface is exercised without the suite being
+   modified. A surface that has registered but not passed may not contribute.
 
 ## 9. Minimal fixtures
 
