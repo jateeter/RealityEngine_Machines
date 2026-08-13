@@ -273,6 +273,22 @@ Resolution is the lexicographic maximum of `(class, value)`. Lexicographic max
 over a totally-ordered pair is commutative, associative and idempotent, so §4.1
 holds and parallel reduction remains safe.
 
+**`withinRank` — the second axis.** A cell is often contended on two axes at
+once, and in this corpus almost every one is: a machine determination contends
+with a generated assessment *across* classes, while several machine
+determinations contend with each other *within* the winning class. Falling back
+to `MAX` among the winners collapses those determinations to one value and
+discards which of them asserted — the outcome `SEVERITY` exists to avoid.
+
+An entry may therefore declare `withinRank`, one of `OR`/`AND`/`MAX`/`MIN`/
+`SEVERITY`, applied among the contributions at the winning rank. Absent, it is
+`MAX`. Since both stages are commutative monoids, so is the composite, and §4.1
+still holds.
+
+Measured over the corpus: **2,833** contended cells, of which **268** carry more
+than one machine writer and so require a `withinRank` rule. `withinRank` is
+meaningful only under `PRECEDENCE`; on any other rule it is an error.
+
 **The ordering is not a status hierarchy and not a preference.** It follows from
 reproducibility. A deterministic contribution is derivable from the corpus and
 `IS(k)` alone; a generated one is not derivable from anything and cannot be
@@ -562,9 +578,35 @@ Both belong beside the ring in the regression corpus.
 
 ## 10. Open
 
-- `SEVERITY` needs `ragStatusCode` on the contribution. Confirm all four runtimes
-  carry determination metadata that far into the merge; if not, that plumbing is
-  in scope.
+- **`SEVERITY` is not implementable as specified today — resolved, and it needs a
+  decision.** `ragStatusCode` is *not* carried on the output vector: only **24 of
+  5,128** output vectors have it in `metadata`. It lives in `triggerConfig.rules`,
+  keyed by `sequenceId` + `outputMatches`, on all 1,328 machines. So a
+  contribution's severity must be obtained by **joining the fired sequence and its
+  output values against the machine's trigger rules**, and no runtime does that
+  join at merge time.
+
+  Scala illustrates the gap in both directions. `OutputVector` does carry
+  `metadata`, and `Machine.scala` reads `meta.get("ragStatusCode")` for the
+  semantic audit log — which is therefore `None` for 5,104 of 5,128 outputs. And
+  the merge discards the wrapper anyway: `pendingOutputs` is
+  `ListBuffer[(Machine, Vector[Double])]`, built by
+  `sr.assertedOutputs.foreach { ao => pendingOutputs += ((machine, ao.vector)) }`,
+  so even a populated `metadata` would not survive to the arbiter.
+
+  Two ways forward, and the choice changes what four runtimes build:
+
+  1. **Implement the trigger-rule join** as part of the arbiter work. Contributions
+     carry `ragStatusCode` resolved from `triggerConfig`, and `SEVERITY` works as
+     written. Adds scope to all four runtime issues.
+  2. **Drop RAG from the default rule set** until the join exists, and re-derive
+     the registry with a severity-free default.
+
+  This is not academic: **270 registry entries** currently depend on `SEVERITY`
+  (2 as `rule`, 268 as `withinRank`). Under option 1 they are correct as written;
+  under option 2 they must be regenerated. Fixture §9a is deliberately built to
+  discriminate — it will fail until the join exists, which is the correct
+  behaviour for a conformance fixture.
 - Whether L1 should become element-wise (`OR`/`MAX`) or keep gate semantics with
   a separate value rule. This document assumes element-wise; the current
   "first representative" behaviour is replaced either way.
