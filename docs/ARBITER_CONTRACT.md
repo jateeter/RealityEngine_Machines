@@ -28,18 +28,42 @@ internal contradiction: one machine with N asserted outputs enqueues N writes to
 the same region, so the merge applies *last* while its own arbiter declared
 *first* representative.
 
+## 1.1 Contributors are not only machines
+
+A position is a bus member because *some output event targets it and some machine
+reads it*. Nothing in that definition says the writer must be a machine. An
+external provider emitting through a PE source is structurally identical to a
+machine emitting a final Reality Event: both are contributions to a position.
+ACP, MCP, MQTT, Ollama, HealthKit and sensors differ only in transport and in the
+validate/transform step that precedes the contribution — downstream of that they
+are indistinguishable, and they arbitrate together.
+
+This is not hypothetical. Of 4,003 cells targeted by `openClawProjection`
+write-backs across 1,184 machines, **2,794 are already bus members** — a machine
+output writes them too. **898 of 1,184 machines** have an agent write-back landing
+on a position a machine output also writes.
+
 Measured contention in the corpus (1323 machines):
 
 | | positions |
 |---|--:|
 | domain bus (DB) total | 2,802 |
-| single-writer | 2,534 |
-| **contended (>1 writing machine)** | **268** |
+| single-writer among machines | 2,534 |
+| contended, **machines only** | 268 |
+| contended, **including external providers** | **2,833** |
+| — of which machine *and* agent write the same cell | 2,794 |
 
-The 268 are structured, not incidental: repeated blocks of four writers
-(`signal-monitor`, `capacity-balancer`, `agent-dispatcher`, `outcome-stabilizer`)
-converging on three readers (`resource-router`, `referral-optimizer`,
-`governance-escalator`).
+Counting machines alone understates contention by **10.6×**. The 268 are
+structured — repeated blocks of four writers (`signal-monitor`,
+`capacity-balancer`, `agent-dispatcher`, `outcome-stabilizer`) converging on three
+readers (`resource-router`, `referral-optimizer`, `governance-escalator`) — but
+they are the minority case. The dominant case is a deterministic machine output
+and an advisory agent assessment landing on one position in one instant with no
+rule to resolve them.
+
+By contrast the ACP completion band `[17000:22311]` contains **0** bus cells and
+is read by **0** machines, so completions currently contribute to nothing and
+arbitrate over nothing. See jateeter/localOpenClawStack#18.
 
 ## 2. Position
 
@@ -73,15 +97,27 @@ produces contributions; only commit writes.
 
 ## 3. Contribution
 
+A contribution is provider-tagged. Machine outputs and PE sources use the same
+shape; only `provider` and the origin fields differ.
+
 ```
+Provider := "machine" | "acp" | "mcp" | "mqtt" | "localai" | "sensor"
+
 Contribution := {
   cell            : uint32       // absolute InputSpace position
   value           : float64      // clamped [0,1]
-  machineId       : string
-  cesId           : string
-  outputVectorId  : string
+  provider        : Provider
+  originId        : string       // machineId, or the PE sourceId for non-machine providers
+  cesId           : string?      // machine providers only
+  outputVectorId  : string?      // machine providers only
+  ragStatusCode   : string?      // "GREEN"|"AMBER"|"RED", when the provider supplies one
 }
 ```
+
+Non-machine contributions enter only after the PE source has validated syntax and
+semantics and transformed the response. A contribution that fails validation is
+never created — it is not a contribution with a null value, and it must not reach
+the arbiter.
 
 ## 4. Rules
 
@@ -104,6 +140,7 @@ Values are float64 clamped to `[0,1]` (`dense-float64-clamped-0-1`).
 | `MAX` | `max(a,b)` | `0.0` | yes |
 | `MIN` | `min(a,b)` | `1.0` | yes |
 | `SEVERITY` | see 4.3 | lowest severity, `0.0` | yes |
+| `PRECEDENCE` | see 4.3a | lowest rank, `0.0` | yes |
 | `MEAN` | see 4.4 | — | **no** — restricted |
 
 `OR` and `MAX` are the same operation on `[0,1]`; both names are kept because
@@ -119,6 +156,30 @@ commutative monoids, so the composite is one.
 
 A contribution from a sequence typed `re:LifeSafetySequence` is promoted to
 severity `3` and dominates unconditionally.
+
+### 4.3a `PRECEDENCE` — provider ranking
+
+The dominant contention case is a deterministic machine output and an advisory
+agent assessment on one position. `OR`/`MAX` would let an advisory value override
+a determination whenever it happens to be larger, which is a policy decision made
+by accident.
+
+`PRECEDENCE` resolves by provider rank first, then by `MAX` on value among
+contributions at the winning rank. Ranks are declared per cell in the arbitration
+registry; the default ordering is
+
+```
+machine (3)  >  sensor (2)  >  mqtt (2)  >  acp (1)  =  mcp (1)  =  localai (1)
+```
+
+Resolution is the lexicographic maximum of `(rank, value)`. Lexicographic max
+over a totally-ordered pair is commutative, associative and idempotent, so
+§4.1 holds and parallel reduction remains safe.
+
+Rationale for the default: a machine output is a determination the corpus is
+accountable for; an agent assessment is advice. Advice does not silently
+overwrite a determination. Where a domain genuinely wants agent primacy, it must
+say so in the registry rather than inherit it from a merge accident.
 
 ### 4.4 `MEAN` — restricted
 
@@ -151,16 +212,33 @@ centrally in `domains/arbitration-registry.json` (schema:
   "schemaVersion": "1.0.0",
   "entries": [
     { "cell": 1735, "rule": "SEVERITY",
-      "writers": ["HSPH001_...json", "HSPH004_...json"],
+      "writers": [
+        { "provider": "machine", "originId": "HSPH001_...json" },
+        { "provider": "machine", "originId": "HSPH004_...json" }
+      ],
       "readers": ["HSPH002_...json"],
-      "rationale": "four-way convergence; suppressed contributors must stay attributable" }
+      "rationale": "four-way convergence; suppressed contributors must stay attributable" },
+
+    { "cell": 928, "rule": "PRECEDENCE",
+      "providerRanks": { "machine": 3, "acp": 1 },
+      "writers": [
+        { "provider": "machine", "originId": "DocumentSigningWorkflowMonitor.json" },
+        { "provider": "acp", "originId": "acp.openclaw.documentsigningworkflowmonitor.input-analyst.assessment" }
+      ],
+      "readers": ["DocumentSigningWorkflowMonitor.json"],
+      "rationale": "agent assessment is advisory; the machine determination wins" }
   ]
 }
 ```
 
-**Validation: any cell with more than one writing machine MUST have an entry.**
-An undeclared contended cell is a corpus error, not a runtime default. The 2,534
-single-writer positions need no entry.
+**Validation: any cell with more than one writer — counting machine outputs and
+PE sources alike — MUST have an entry.** An undeclared contended cell is a corpus
+error, not a runtime default.
+
+Registry generation must enumerate PE source write-back regions
+(`openClawProjection.writeBackRegion`, MQTT mappings, sensor and localAI source
+regions) alongside machine output regions. Deriving from machine outputs alone
+misses **2,794** of **2,833** contended cells.
 
 ## 6. Observability
 
@@ -170,10 +248,14 @@ must not be invisible. For every contended cell, every instant, the arbiter emit
 ```
 ArbitrationRecord := {
   instant, cell, rule, resolved : float64,
-  contributors : [ {machineId, cesId, outputVectorId, value} ],
-  suppressed   : [ {machineId, cesId, outputVectorId, value} ]
+  contributors : [ {provider, originId, cesId?, outputVectorId?, value} ],
+  suppressed   : [ {provider, originId, cesId?, outputVectorId?, value} ]
 }
 ```
+
+`provider` is mandatory on every entry. A suppressed agent assessment must remain
+attributable — "the agent's answer was discarded" is exactly the operational fact
+the domain bus exists to surface.
 
 `suppressed` is what the resolution discarded. Emitting records for uncontended
 cells is OPTIONAL and SHOULD be off by default.
@@ -217,20 +299,37 @@ implementation whose output depends on partitioning has violated 4.1.
    `IS(k+1)`.
 2. Shuffling machine load order does not change `IS(k+1)` in any runtime.
 3. Varying the parallel partitioning does not change `IS(k+1)`.
-4. An undeclared contended cell fails corpus validation.
-5. `MEAN` without canonical ordering is rejected at load.
-6. Every contended cell emits an `ArbitrationRecord` whose `contributors ∪
-   suppressed` equals the full contribution set for that cell and instant.
-7. The minimal contention fixture (§9) resolves per its declared rule in all four
+4. **Varying the arrival order of PE source contributions does not change
+   `IS(k+1)`.** Non-machine contributions arrive asynchronously, so this is the
+   externally-visible form of §4.1 and the one most likely to be violated.
+5. A cell written by both a machine output and a PE source resolves per its
+   declared rule, in all four runtimes.
+6. An undeclared contended cell fails corpus validation, counting machine and
+   non-machine writers alike.
+7. `MEAN` without canonical ordering is rejected at load.
+8. Every contended cell emits an `ArbitrationRecord` whose `contributors ∪
+   suppressed` equals the full contribution set for that cell and instant, with
+   `provider` populated on every entry.
+9. Both minimal fixtures (§9) resolve per their declared rules in all four
    runtimes.
 
-## 9. Minimal contention fixture
+## 9. Minimal fixtures
 
 The RS ring latch (`RSRingLatchStageA/B`) proves propagation but has no
-contention — every DB position it uses has one writer. The arbiter needs its own
-smallest fixture: **two machines writing one cell, read by a third, with a
-declared rule.** That is the least structure that can distinguish resolution from
-overwrite, and it belongs beside the ring in the regression corpus.
+contention — every DB position it uses has one writer. Two fixtures are needed,
+and they are not interchangeable:
+
+**9a — machine/machine contention.** Two machines writing one cell, read by a
+third, with a declared rule. The least structure that distinguishes resolution
+from overwrite.
+
+**9b — machine/provider contention.** One machine and one PE source writing one
+cell, read by that machine, with `PRECEDENCE` declared. This is the dominant real
+case (2,794 cells) and 9a cannot exercise it: only 9b can prove that an advisory
+contribution does not override a determination, and that an asynchronous arrival
+order does not change the result.
+
+Both belong beside the ring in the regression corpus.
 
 ## 10. Open
 
@@ -240,3 +339,14 @@ overwrite, and it belongs beside the ring in the regression corpus.
 - Whether L1 should become element-wise (`OR`/`MAX`) or keep gate semantics with
   a separate value rule. This document assumes element-wise; the current
   "first representative" behaviour is replaced either way.
+- **The default provider ranking in §4.3a is a policy assertion, not a derived
+  result.** "A determination outranks advice" is defensible but it is a decision
+  about how much authority an agent has over the reality vector, and it should be
+  ratified rather than inherited from this document.
+- **The PE validate/transform step is unverified.** §3 requires that a
+  contribution failing syntactic or semantic validation is never created. No
+  runtime's implementation of that step has been read, so whether the guardrails
+  are actually enforced before contribution is unknown.
+- **Whether MQTT, MCP and Ollama truly share the ACP source path** is asserted
+  architecturally and unconfirmed in code. If any of them bypasses the PE source
+  path, it bypasses this arbiter too.
