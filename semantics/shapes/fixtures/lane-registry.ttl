@@ -1,0 +1,165 @@
+# Conformance fixture: a small lane registry standing in for the projection of
+# domains/region-allocation.json. Offsets and lane ids are real ones from the
+# corpus so the fixture stays recognisable.
+#
+# Loaded by every case in cases.json.
+
+@prefix reg:  <https://realityengine.example.org/ontology/re-guardrails#> .
+@prefix re:   <https://realityengine.example.org/ontology/re-core#> .
+@prefix fx:   <https://realityengine.example.org/fixtures/guardrails#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+#################################################################
+# Life-safety lane: the Fall Detection input region.
+#################################################################
+
+fx:lane-fall-detection-input
+    a reg:IngressLane ;
+    reg:laneId "fall-detection-input" ;
+    reg:laneOffset 3813 ;
+    reg:laneLength 2 ;
+    reg:lifeSafetyLane true ;
+    reg:requiredAutonomy re:Advise ;
+    reg:maxStalenessMs 60000 ;
+    reg:permittedProvider "openclaw" , "healthkit" ;
+    reg:permittedProvenance reg:Measured , reg:Derived ;
+    reg:hasAxis fx:axis-fall-0 , fx:axis-fall-1 .
+
+fx:axis-fall-0
+    a reg:LaneAxis ;
+    re:axisIndex 0 ;
+    re:axisName "motion_progression_ordinal" ;
+    reg:unit "ordinal" ;
+    reg:permittedValue 0 , 1 , 2 , 3 .
+
+fx:axis-fall-1
+    a reg:LaneAxis ;
+    re:axisIndex 1 ;
+    re:axisName "stillness_progression_ordinal" ;
+    reg:unit "ordinal" ;
+    reg:permittedValue 0 , 1 , 2 , 3 .
+
+#################################################################
+# Measured device lane: HealthKit heart rate.
+#################################################################
+
+fx:lane-healthkit-heart-rate
+    a reg:IngressLane ;
+    reg:laneId "healthkit-heart-rate" ;
+    reg:laneOffset 4320 ;
+    reg:laneLength 2 ;
+    reg:maxStalenessMs 300000 ;
+    reg:permittedProvider "healthkit" ;
+    reg:permittedProvenance reg:Measured ;
+    reg:hasAxis fx:axis-hr-0 , fx:axis-hr-1 .
+
+fx:axis-hr-0
+    a reg:LaneAxis ;
+    re:axisIndex 0 ;
+    re:axisName "heart_rate" ;
+    reg:unit "/min" ;
+    reg:minValue 20 ;
+    reg:maxValue 250 ;
+    reg:observableProperty fx:prop-heart-rate .
+
+fx:axis-hr-1
+    a reg:LaneAxis ;
+    re:axisIndex 1 ;
+    re:axisName "heart_rate_confidence" ;
+    reg:unit "dimensionless" ;
+    reg:minValue 0.0 ;
+    reg:maxValue 1.0 .
+
+fx:prop-heart-rate a sosa:ObservableProperty ; rdfs:label "heart rate" .
+
+#################################################################
+# Agent completion lane: model output only.
+#################################################################
+
+fx:lane-agent-completion-risk
+    a reg:IngressLane ;
+    reg:laneId "agent-completion-risk" ;
+    reg:laneOffset 4200 ;
+    reg:laneLength 2 ;
+    reg:maxStalenessMs 600000 ;
+    reg:permittedProvider "localai" , "openai" , "ollama" ;
+    reg:permittedProvenance reg:Inferred ;
+    reg:hasAxis fx:axis-risk-0 , fx:axis-risk-1 .
+
+fx:axis-risk-0
+    a reg:LaneAxis ;
+    re:axisIndex 0 ;
+    re:axisName "risk_flag" ;
+    reg:unit "ordinal" ;
+    reg:permittedValue 0 , 1 .
+
+fx:axis-risk-1
+    a reg:LaneAxis ;
+    re:axisIndex 1 ;
+    re:axisName "risk_confidence" ;
+    reg:unit "dimensionless" ;
+    reg:minValue 0.0 ;
+    reg:maxValue 1.0 .
+
+#################################################################
+# Sources
+#################################################################
+
+fx:source-healthkit-bridge
+    a sosa:Sensor ;
+    reg:providerId "healthkit" ;
+    rdfs:label "HealthKit device bridge" .
+
+fx:source-openclaw-projection
+    a sosa:Sensor ;
+    reg:providerId "openclaw" ;
+    rdfs:label "OpenClaw input analyst projection" .
+
+fx:source-ollama-adapter
+    reg:providerId "ollama" ;
+    rdfs:label "Ollama completion adapter" .
+
+fx:source-unregistered
+    reg:providerId "some-new-vendor" ;
+    rdfs:label "Provider not listed on any lane" .
+
+fx:procedure-risk-model
+    a sosa:Procedure ;
+    rdfs:label "paging-decision risk model" .
+
+fx:feature-patient-01 rdfs:label "patient-01" .
+
+#################################################################
+# Determinations and bindings for the egress cases
+#################################################################
+
+fx:determination-red
+    a re:Determination ;
+    re:outputTier 3 ;
+    re:hasRagStatus re:RED ;
+    re:prescribesAction re:EmergencyDispatch .
+
+fx:determination-amber
+    a re:Determination ;
+    re:outputTier 2 ;
+    re:hasRagStatus re:AMBER ;
+    re:prescribesAction re:CaregiverCheckIn .
+
+fx:binding-supervised
+    a re:AgentBinding ;
+    re:maxAutonomy re:SupervisedAct ;
+    re:requiresHumanApproval true ;
+    re:allowedAction "emergency-dispatch" , "caregiver-check-in" ;
+    reg:blockedWhenRag re:GREEN .
+
+fx:binding-automated
+    a re:AgentBinding ;
+    re:maxAutonomy re:AutomatedAct ;
+    re:requiresHumanApproval false ;
+    re:allowedAction "emergency-dispatch" , "caregiver-check-in" , "publish-bus" .
+
+fx:action-uncontrolled
+    a re:Action ;
+    rdfs:label "An action individual with no re:actionCode" .

@@ -1,0 +1,504 @@
+# Conformance fixtures for semantics/shapes/re-guardrails.shacl.ttl.
+#
+# One named graph per case. Each is validated as:
+#     re-core.ttl + re-guardrails.shacl.ttl + lane-registry.ttl + <this graph>
+# Expected outcomes live in cases.json.
+#
+# Every runtime that implements the guardrail must reproduce these accept and
+# reject decisions exactly. Decision parity is the point: a guardrail four
+# runtimes evaluate differently is worse than none, because the multi-engine
+# registry lets a caller route around the strict one.
+
+@prefix reg:  <https://realityengine.example.org/ontology/re-guardrails#> .
+@prefix re:   <https://realityengine.example.org/ontology/re-core#> .
+@prefix fx:   <https://realityengine.example.org/fixtures/guardrails#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+#################################################################
+# ACCEPT — ingress
+#################################################################
+
+fx:accept-healthkit-measured {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-healthkit-heart-rate ;
+        reg:proposedBy fx:source-healthkit-bridge ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Measured ;
+        reg:atOffset 4320 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000001000"^^xsd:long ;
+        sosa:madeBySensor fx:source-healthkit-bridge ;
+        sosa:hasFeatureOfInterest fx:feature-patient-01 ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 72 ] ,
+                       [ reg:atIndex 1 ; reg:value 0.95 ] .
+}
+
+fx:accept-openclaw-life-safety {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-fall-detection-input ;
+        reg:proposedBy fx:source-openclaw-projection ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Derived ;
+        reg:atOffset 3813 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000000500"^^xsd:long ;
+        reg:underAutonomy re:Advise ;
+        sosa:usedProcedure fx:procedure-risk-model ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 3 ] ,
+                       [ reg:atIndex 1 ; reg:value 2 ] .
+}
+
+fx:accept-ollama-completion {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-agent-completion-risk ;
+        reg:proposedBy fx:source-ollama-adapter ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Inferred ;
+        reg:atOffset 4200 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000002000"^^xsd:long ;
+        reg:envelopeId "env_456" ;
+        reg:correlationId "corr_123" ;
+        sosa:usedProcedure fx:procedure-risk-model ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 1 ] ,
+                       [ reg:atIndex 1 ; reg:value 0.82 ] .
+}
+
+#################################################################
+# REJECT — ingress: region addressing
+#################################################################
+
+fx:reject-offset-mismatch {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-fall-detection-input ;
+        reg:proposedBy fx:source-openclaw-projection ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Derived ;
+        reg:atOffset 1933 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000000500"^^xsd:long ;
+        reg:underAutonomy re:Advise ;
+        sosa:usedProcedure fx:procedure-risk-model ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 3 ] ,
+                       [ reg:atIndex 1 ; reg:value 2 ] .
+}
+
+fx:reject-write-too-long {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-fall-detection-input ;
+        reg:proposedBy fx:source-openclaw-projection ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Derived ;
+        reg:atOffset 3813 ; reg:writeLength 6 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000000500"^^xsd:long ;
+        reg:underAutonomy re:Advise ;
+        sosa:usedProcedure fx:procedure-risk-model ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 3 ] ,
+                       [ reg:atIndex 1 ; reg:value 2 ] .
+}
+
+fx:reject-undeclared-index {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-fall-detection-input ;
+        reg:proposedBy fx:source-openclaw-projection ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Derived ;
+        reg:atOffset 3813 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000000500"^^xsd:long ;
+        reg:underAutonomy re:Advise ;
+        sosa:usedProcedure fx:procedure-risk-model ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 3 ] ,
+                       [ reg:atIndex 7 ; reg:value 2 ] .
+}
+
+#################################################################
+# REJECT — ingress: authority
+#################################################################
+
+fx:reject-provider-not-permitted {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-healthkit-heart-rate ;
+        reg:proposedBy fx:source-unregistered ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Measured ;
+        reg:atOffset 4320 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000001000"^^xsd:long ;
+        sosa:madeBySensor fx:source-unregistered ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 72 ] ,
+                       [ reg:atIndex 1 ; reg:value 0.95 ] .
+}
+
+fx:reject-caller-supplied-lane {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-fall-detection-input ;
+        reg:proposedBy fx:source-openclaw-projection ;
+        reg:laneBinding reg:SuppliedByCaller ;
+        reg:provenanceClass reg:Derived ;
+        reg:atOffset 3813 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000000500"^^xsd:long ;
+        reg:underAutonomy re:Advise ;
+        sosa:usedProcedure fx:procedure-risk-model ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 3 ] ,
+                       [ reg:atIndex 1 ; reg:value 2 ] .
+}
+
+fx:reject-autonomy-below-floor {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-fall-detection-input ;
+        reg:proposedBy fx:source-openclaw-projection ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Derived ;
+        reg:atOffset 3813 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000000500"^^xsd:long ;
+        reg:underAutonomy re:Observe ;
+        sosa:usedProcedure fx:procedure-risk-model ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 3 ] ,
+                       [ reg:atIndex 1 ; reg:value 2 ] .
+}
+
+fx:reject-life-safety-no-autonomy {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-fall-detection-input ;
+        reg:proposedBy fx:source-openclaw-projection ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Derived ;
+        reg:atOffset 3813 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000000500"^^xsd:long ;
+        sosa:usedProcedure fx:procedure-risk-model ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 3 ] ,
+                       [ reg:atIndex 1 ; reg:value 2 ] .
+}
+
+#################################################################
+# REJECT — ingress: meaning of the values
+#################################################################
+
+fx:reject-value-out-of-bounds {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-healthkit-heart-rate ;
+        reg:proposedBy fx:source-healthkit-bridge ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Measured ;
+        reg:atOffset 4320 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000001000"^^xsd:long ;
+        sosa:madeBySensor fx:source-healthkit-bridge ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 720 ] ,
+                       [ reg:atIndex 1 ; reg:value 0.95 ] .
+}
+
+fx:reject-value-not-in-enum {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-fall-detection-input ;
+        reg:proposedBy fx:source-openclaw-projection ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Derived ;
+        reg:atOffset 3813 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000000500"^^xsd:long ;
+        reg:underAutonomy re:Advise ;
+        sosa:usedProcedure fx:procedure-risk-model ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 9 ] ,
+                       [ reg:atIndex 1 ; reg:value 2 ] .
+}
+
+fx:reject-provenance-not-permitted {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-healthkit-heart-rate ;
+        reg:proposedBy fx:source-healthkit-bridge ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Inferred ;
+        reg:atOffset 4320 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000001000"^^xsd:long ;
+        reg:envelopeId "env_1" ;
+        reg:correlationId "corr_1" ;
+        sosa:usedProcedure fx:procedure-risk-model ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 72 ] ,
+                       [ reg:atIndex 1 ; reg:value 0.95 ] .
+}
+
+fx:reject-measured-without-sensor {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-healthkit-heart-rate ;
+        reg:proposedBy fx:source-healthkit-bridge ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Measured ;
+        reg:atOffset 4320 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000001000"^^xsd:long ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 72 ] ,
+                       [ reg:atIndex 1 ; reg:value 0.95 ] .
+}
+
+fx:reject-inferred-without-procedure {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-agent-completion-risk ;
+        reg:proposedBy fx:source-ollama-adapter ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Inferred ;
+        reg:atOffset 4200 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000002000"^^xsd:long ;
+        reg:envelopeId "env_456" ;
+        reg:correlationId "corr_123" ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 1 ] ,
+                       [ reg:atIndex 1 ; reg:value 0.82 ] .
+}
+
+#################################################################
+# REJECT — ingress: freshness and replay
+#################################################################
+
+fx:reject-stale {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-fall-detection-input ;
+        reg:proposedBy fx:source-openclaw-projection ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Derived ;
+        reg:atOffset 3813 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000090000"^^xsd:long ;
+        reg:underAutonomy re:Advise ;
+        sosa:usedProcedure fx:procedure-risk-model ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 3 ] ,
+                       [ reg:atIndex 1 ; reg:value 2 ] .
+}
+
+fx:reject-observed-after-received {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-healthkit-heart-rate ;
+        reg:proposedBy fx:source-healthkit-bridge ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Measured ;
+        reg:atOffset 4320 ; reg:writeLength 2 ;
+        reg:observedAt "1690000005000"^^xsd:long ;
+        reg:receivedAt "1690000001000"^^xsd:long ;
+        sosa:madeBySensor fx:source-healthkit-bridge ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 72 ] ,
+                       [ reg:atIndex 1 ; reg:value 0.95 ] .
+}
+
+#################################################################
+# REJECT — ingress: model-boundary binding
+#################################################################
+
+fx:reject-inferred-without-envelope {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-agent-completion-risk ;
+        reg:proposedBy fx:source-ollama-adapter ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Inferred ;
+        reg:atOffset 4200 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000002000"^^xsd:long ;
+        reg:correlationId "corr_123" ;
+        sosa:usedProcedure fx:procedure-risk-model ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 1 ] ,
+                       [ reg:atIndex 1 ; reg:value 0.82 ] .
+}
+
+fx:reject-unknown-property {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-healthkit-heart-rate ;
+        reg:proposedBy fx:source-healthkit-bridge ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Measured ;
+        reg:atOffset 4320 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000001000"^^xsd:long ;
+        sosa:madeBySensor fx:source-healthkit-bridge ;
+        re:severity "override-everything" ;
+        reg:hasValueAt [ reg:atIndex 0 ; reg:value 72 ] ,
+                       [ reg:atIndex 1 ; reg:value 0.95 ] .
+}
+
+#################################################################
+# ACCEPT — egress
+#################################################################
+
+fx:accept-egress-red-escalation {
+    fx:disp a reg:EgressDispatch ;
+        reg:dispatchesAction re:EmergencyDispatch ;
+        reg:fromDetermination fx:determination-red ;
+        reg:toTarget "pagerduty:patient-safety-tier-1" ;
+        reg:envelopeId "env_001" ;
+        reg:correlationId "corr_001" ;
+        reg:humanApproved true ;
+        reg:underAutonomy re:SupervisedAct ;
+        reg:dispatchStatus reg:Delivered ;
+        reg:governedByBinding fx:binding-supervised .
+}
+
+fx:accept-egress-automated-publish {
+    fx:disp a reg:EgressDispatch ;
+        reg:dispatchesAction re:PublishBus ;
+        reg:fromDetermination fx:determination-amber ;
+        reg:toTarget "semantic-bus:health-personal" ;
+        reg:envelopeId "env_002" ;
+        reg:correlationId "corr_002" ;
+        reg:humanApproved false ;
+        reg:underAutonomy re:AutomatedAct ;
+        reg:dispatchStatus reg:Delivered ;
+        reg:governedByBinding fx:binding-automated .
+}
+
+#################################################################
+# REJECT — egress
+#################################################################
+
+fx:reject-egress-escalation-not-red {
+    fx:disp a reg:EgressDispatch ;
+        reg:dispatchesAction re:EmergencyDispatch ;
+        reg:fromDetermination fx:determination-amber ;
+        reg:toTarget "pagerduty:patient-safety-tier-1" ;
+        reg:envelopeId "env_003" ;
+        reg:correlationId "corr_003" ;
+        reg:humanApproved true ;
+        reg:underAutonomy re:SupervisedAct ;
+        reg:dispatchStatus reg:Pending ;
+        reg:governedByBinding fx:binding-supervised .
+}
+
+fx:reject-egress-uncontrolled-action {
+    fx:disp a reg:EgressDispatch ;
+        reg:dispatchesAction fx:action-uncontrolled ;
+        reg:fromDetermination fx:determination-amber ;
+        reg:toTarget "some-target" ;
+        reg:envelopeId "env_004" ;
+        reg:correlationId "corr_004" ;
+        reg:humanApproved true ;
+        reg:underAutonomy re:AutomatedAct ;
+        reg:dispatchStatus reg:Pending ;
+        reg:governedByBinding fx:binding-automated .
+}
+
+fx:reject-egress-autonomy-exceeds-ceiling {
+    fx:disp a reg:EgressDispatch ;
+        reg:dispatchesAction re:CaregiverCheckIn ;
+        reg:fromDetermination fx:determination-amber ;
+        reg:toTarget "care-team" ;
+        reg:envelopeId "env_005" ;
+        reg:correlationId "corr_005" ;
+        reg:humanApproved true ;
+        reg:underAutonomy re:AutomatedAct ;
+        reg:dispatchStatus reg:Pending ;
+        reg:governedByBinding fx:binding-supervised .
+}
+
+fx:reject-egress-escalation-without-approval {
+    fx:disp a reg:EgressDispatch ;
+        reg:dispatchesAction re:EmergencyDispatch ;
+        reg:fromDetermination fx:determination-red ;
+        reg:toTarget "pagerduty:patient-safety-tier-1" ;
+        reg:envelopeId "env_006" ;
+        reg:correlationId "corr_006" ;
+        reg:humanApproved false ;
+        reg:underAutonomy re:SupervisedAct ;
+        reg:dispatchStatus reg:Pending ;
+        reg:governedByBinding fx:binding-supervised .
+}
+
+fx:reject-egress-observe-mode {
+    fx:disp a reg:EgressDispatch ;
+        reg:dispatchesAction re:CaregiverCheckIn ;
+        reg:fromDetermination fx:determination-amber ;
+        reg:toTarget "care-team" ;
+        reg:envelopeId "env_007" ;
+        reg:correlationId "corr_007" ;
+        reg:humanApproved true ;
+        reg:underAutonomy re:Observe ;
+        reg:dispatchStatus reg:Pending ;
+        reg:governedByBinding fx:binding-supervised .
+}
+
+fx:reject-egress-action-not-allowed {
+    fx:disp a reg:EgressDispatch ;
+        reg:dispatchesAction re:PublishBus ;
+        reg:fromDetermination fx:determination-amber ;
+        reg:toTarget "semantic-bus:health-personal" ;
+        reg:envelopeId "env_008" ;
+        reg:correlationId "corr_008" ;
+        reg:humanApproved true ;
+        reg:underAutonomy re:SupervisedAct ;
+        reg:dispatchStatus reg:Pending ;
+        reg:governedByBinding fx:binding-supervised .
+}
+
+fx:reject-egress-missing-correlation {
+    fx:disp a reg:EgressDispatch ;
+        reg:dispatchesAction re:CaregiverCheckIn ;
+        reg:fromDetermination fx:determination-amber ;
+        reg:toTarget "care-team" ;
+        reg:envelopeId "env_009" ;
+        reg:humanApproved true ;
+        reg:underAutonomy re:SupervisedAct ;
+        reg:dispatchStatus reg:Pending ;
+        reg:governedByBinding fx:binding-supervised .
+}
+
+#################################################################
+# REJECT — the lane registry itself
+#################################################################
+
+fx:reject-lane-axis-count-mismatch {
+    fx:bad-lane a reg:IngressLane ;
+        reg:laneId "bad-axis-count" ;
+        reg:laneOffset 9000 ;
+        reg:laneLength 4 ;
+        reg:permittedProvider "manual" ;
+        reg:hasAxis fx:bad-axis-0 .
+
+    fx:bad-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ;
+        re:axisName "only_axis" ;
+        reg:unit "ordinal" ;
+        reg:permittedValue 0 , 1 .
+}
+
+fx:reject-lane-overlap {
+    fx:overlapping-lane a reg:IngressLane ;
+        reg:laneId "overlaps-fall-detection" ;
+        reg:laneOffset 3814 ;
+        reg:laneLength 2 ;
+        reg:permittedProvider "manual" ;
+        reg:hasAxis fx:ov-axis-0 , fx:ov-axis-1 .
+
+    fx:ov-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "ov_zero" ; reg:unit "ordinal" ; reg:permittedValue 0 , 1 .
+    fx:ov-axis-1 a reg:LaneAxis ;
+        re:axisIndex 1 ; re:axisName "ov_one" ; reg:unit "ordinal" ; reg:permittedValue 0 , 1 .
+}
+
+fx:reject-life-safety-lane-without-floor {
+    fx:unfloored-lane a reg:IngressLane ;
+        reg:laneId "life-safety-no-floor" ;
+        reg:laneOffset 9100 ;
+        reg:laneLength 1 ;
+        reg:lifeSafetyLane true ;
+        reg:permittedProvider "manual" ;
+        reg:hasAxis fx:uf-axis-0 .
+
+    fx:uf-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "uf_zero" ; reg:unit "ordinal" ; reg:permittedValue 0 , 1 .
+}
+
+fx:reject-axis-without-unit {
+    fx:unitless-lane a reg:IngressLane ;
+        reg:laneId "unitless" ;
+        reg:laneOffset 9200 ;
+        reg:laneLength 1 ;
+        reg:permittedProvider "manual" ;
+        reg:hasAxis fx:unitless-axis-0 .
+
+    fx:unitless-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "unitless_zero" ; reg:permittedValue 0 , 1 .
+}

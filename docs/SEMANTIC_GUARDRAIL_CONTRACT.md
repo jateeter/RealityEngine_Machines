@@ -1,0 +1,319 @@
+# Semantic Guardrail Contract (ingress/egress)
+
+Last reviewed: 2026-08-13
+
+Single source of truth for the **admission rules** applied to information
+crossing any RE/PE integration boundary, in either direction. The rules
+themselves live in `semantics/shapes/re-guardrails.shacl.ttl`; this document
+explains what they mean, what they deliberately do not cover, and how the four
+runtimes must implement them.
+
+Companion to `docs/SEMANTIC_AUDIT_CONTRACT.md`, which specifies the records
+emitted *after* a decision. That contract observes; this one decides.
+
+## What this contract owns
+
+| Artifact | Owns |
+| --- | --- |
+| `semantics/shapes/re-guardrails.shacl.ttl` | Every admission rule. Normative. |
+| `semantics/shapes/fixtures/cases.trig` + `cases.json` | Every accept/reject decision the runtimes must reproduce. Normative. |
+| This document | The rules the shapes graph cannot express, and the rollout. |
+
+## What it does not own
+
+Saying "single source of truth" only means something if the boundary is drawn.
+The shapes graph is authoritative for **whether a proposed write or dispatch is
+admissible**. It is not authoritative for:
+
+- **Allocations** — `domains/region-allocation.json` remains the source of
+  truth for which span of the universal vector belongs to whom. The shapes
+  validate a lane graph *projected from* it.
+- **Behavior** — the machine JSON corpus remains the source of truth for what a
+  machine does. `semantics/abox/` is generated from it; never hand-edited.
+- **Vocabulary** — `semantics/ontology/re-core.ttl` remains the source of truth
+  for machines, actions, autonomy modes and RAG statuses. The guardrail layer
+  adds terms in its own `reg:` namespace and annotates re-core individuals with
+  an ordering (`reg:autonomyRank`); it does not redefine them.
+
+Anything that changes an allocation, a behavior or the vocabulary is a change
+to those artifacts, and the guardrails follow.
+
+## Rule 1 — one ingress chokepoint, one egress chokepoint
+
+The strongest property of the existing design is that "all integration
+boundaries" is a false plural. MQTT, localAI, OpenAI, Ollama, ACP/OpenClaw,
+HealthKit, MCP and manual callbacks already converge on one commit path (source
+mapping → `POST /api/signals`), and everything leaving converges on the trigger
+envelope dispatcher and its ledger.
+
+**Normative:** provider adapters translate syntax only. An adapter constructs a
+`reg:IngressAdmission` or a `reg:EgressDispatch` and submits it; the decision is
+taken once, in one place, from this shapes graph. Provider-specific admission
+logic is a contract violation, not an optimization — the moment
+`openai/dispatch` validates differently from `healthkit/ingest` there are eight
+boundaries again and the system's guarantee is the weakest of them.
+
+## Rule 2 — the lane is the type
+
+A `{offset, length}` is an address, not a meaning. The guardrail promotes it to
+a **typed lane** (`reg:IngressLane`) whose axes declare, per position: name,
+unit, admissible range or enumerated domain, and optionally the SOSA
+observable property it reports. The lane additionally declares its permitted
+providers, permitted provenance classes, staleness ceiling, and — for lanes
+feeding a machine with an `re:LifeSafetySequence` — the autonomy floor a source
+must hold to write it.
+
+Admission then answers a question no schema can: *does this source have the
+standing to say this about this region, and is what it says within the declared
+domain?*
+
+The failure class this addresses is well-formed-and-wrong. In a shared vector
+of 4,109 packed positions, `[1,0,0.82,0]` at 3813 and the same payload at 1933
+are both valid JSON, both in range, and mean entirely different things.
+
+## Ingress gates
+
+Evaluated against `reg:IngressAdmission`. The shape is `sh:closed`: an
+admission carrying properties this contract does not declare is refused rather
+than silently narrowed to the fields we happen to read.
+
+| Gate | Rule | Refuses |
+| --- | --- | --- |
+| I1 | Region addressing | Write offset ≠ lane offset; write length past the lane; a value at an index the lane does not declare |
+| I2 | Authority | Provider not on the lane's permitted list; caller-supplied lane binding without `reg:callerAuthority`; source autonomy below the lane's floor; a life-safety lane written without a declared autonomy; any write under `re:Observe` |
+| I3 | Meaning | Value outside declared axis bounds; value outside an enumerated domain; provenance class not permitted on the lane; `reg:Measured` with no `sosa:madeBySensor`; `reg:Derived`/`reg:Inferred` with no `sosa:usedProcedure` |
+| I4 | Freshness | Received later than the lane's staleness ceiling allows; observed after it was received |
+| I5 | Model binding | `reg:Inferred` with no `reg:envelopeId` or no `reg:correlationId` |
+
+### I2 and the completion endpoint
+
+`RealityEngine_CI/docs/INTEGRATION_ARCHITECTURE.md` currently documents that
+direct `sensorId`, `region` or `sourceMapping` fields on
+`POST /api/integrations/completions` override the configured mapping, "for
+manual and test callbacks". That is a caller declaring its own semantic
+authority, and it is the sharpest edge in the current design.
+
+This contract does not remove the capability; it makes it visible and gated.
+An admission states how its lane was determined (`reg:ResolvedFromRegistry` or
+`reg:SuppliedByCaller`), and a caller-supplied binding is refused unless the
+admission also carries `reg:callerAuthority`.
+
+**Normative:** deployed profiles grant `reg:callerAuthority` to no provider
+adapter. Test harnesses may hold it.
+
+### I5 and the model boundaries
+
+OpenAI, Ollama, MCP and ACP are the only ingress whose content can be
+adversarially shaped by upstream text. Three rules, all enforced above:
+
+1. Model output is never authoritative for its own region binding. The
+   `sourceMappingId` is resolved from the dispatch record, never read from the
+   response body.
+2. A completion inherits the envelope and correlation of the dispatch it
+   answers, or it is not a completion — it is unsolicited input.
+3. Model-derived values carry `reg:Inferred`, and a lane may refuse that class.
+   A model value and an instrument value are never indistinguishable once
+   merged.
+
+## Egress gates
+
+Evaluated against `reg:EgressDispatch`, also `sh:closed`.
+
+| Gate | Rule | Refuses |
+| --- | --- | --- |
+| E1 | Escalation invariant | An `re:EscalationAction` dispatched from a determination not carrying `re:RED` |
+| E2 | Closed action vocabulary | An action that is not a canonical individual of `re-core.ttl` (only those carry `re:actionCode`) |
+| E3 | Autonomy | Autonomy above the binding's `re:maxAutonomy`; any dispatch under `re:Observe`; an escalation below automated-act without recorded approval; a binding requiring approval with none recorded; a binding blocked at the determination's RAG status |
+| E4 | Permitted actions | An action code absent from the binding's `re:allowedAction` list |
+
+E1 is the runtime counterpart of the `re:EscalationDetermination` axiom already
+in `re-core.ttl`. There, a non-RED escalation is an inconsistency of the
+*corpus*, caught in CI by `scripts/reason-owl.sh`. Here it refuses the
+*dispatch*. Both are needed: the corpus can be correct and a runtime still
+assemble a bad envelope.
+
+`reg:humanApproved` is required on every dispatch, always asserted and never
+inferred from absence. An adapter that cannot determine whether a human
+approved must say `false`.
+
+## Fail-closed rules
+
+These are behaviors, not data constraints. A shapes graph judges a node; it
+cannot specify what the runtime does next. They are normative anyway.
+
+1. **A refused ingress is a no-write plus a recorded rejection.** Never a
+   partial region write, never a substituted default. A partial write is the
+   worst available outcome: after the merge phase it is indistinguishable from
+   genuine machine output.
+2. **A refused egress is a ledger record with `reg:Blocked`, not a dropped
+   dispatch.** The ledger is an outbox and an audit trail; silence there
+   destroys the evidence chain.
+3. **Rejections carry the same IRI joins as acceptances** — machine IRI, lane
+   id, determination IRI where known. Otherwise audit queries can only see what
+   got through, which is the wrong half.
+4. **A lane that fails the corpus-time shapes admits nothing.** A lane with no
+   usable contract is closed, not open.
+
+## Enforcement staging
+
+`sh:severity` carries the rollout. Each constraint is `sh:Violation`,
+`sh:Warning` or `sh:Info`, per shape, and the runtime maps them:
+
+| Severity | Runtime behavior |
+| --- | --- |
+| `sh:Violation` | Block, per the fail-closed rules |
+| `sh:Warning` | Admit, record the finding, increment the `semantic_*` counter |
+| `sh:Info` | Admit, record only |
+
+This is the same incremental-gate pattern the corpus already uses for
+`STRICT_DOMAIN_CONTRACT` and `generate-owl.py --strict-actions`. With 1,006
+mapped machines, enforcement cannot be flipped corpus-wide on day one — but the
+staging lives in the shapes graph rather than in per-runtime configuration, so
+four runtimes cannot drift into staging it differently.
+
+Observe-phase telemetry is free: `PE_METRICS_CONTRACT.md` already requires the
+`semantic_*` exposition block to be byte-identical across runtimes.
+
+## Runtime architecture
+
+**Ontology and shapes at build time; a decision table at runtime.**
+
+```
+OWL reasoner materializes inferences   (CI: scripts/reason-owl.sh, ROBOT/HermiT)
+        ↓
+SHACL validates the materialized graph (CI: scripts/validate-guardrails.sh)
+        ↓
+shapes compile to a lane decision table (engine load time)
+        ↓
+admission = table lookup + bounds test  (PE push cycle)
+```
+
+No reasoner and no SHACL engine belongs in the hot path. Every constraint in
+the shapes graph is deliberately evaluable against asserted triples only — the
+action individuals, autonomy modes and RAG individuals it joins against are
+asserted directly in `re-core.ttl`, so no inference is required for a decision.
+That is what makes the compile step sound.
+
+## Decision parity
+
+A guardrail that C++, Lisp, Scala and the TypeScript PE implement differently
+is worse than none, because the multi-engine registry lets a caller route
+around the strict one.
+
+`semantics/shapes/fixtures/cases.trig` is the parity suite: 32 named graphs,
+each an admission or dispatch, with the expected decision in `cases.json`.
+Every runtime must reproduce all 32 decisions exactly.
+
+```bash
+./scripts/validate-guardrails.sh
+```
+
+The script skips cleanly (exit 0) when pyshacl is absent, mirroring
+`reason-owl.sh`; CI containers install it to make the gate real. As of this
+review the suite is 32/32 against the reference shapes graph.
+
+This is also the argument for SHACL over the current approach.
+`tests/contracts/owl_semantics_test.py` is 242 lines of Python doing what
+SHACL core constraint components do — vocabulary closure, cardinality,
+controlled-code membership, the RED⇒escalation invariant, trigger/sequence
+parity. Correct, but unshareable: three of the four runtimes cannot execute a
+Python test, so each would reimplement the check and they would drift. A
+shapes graph is data. Any conformant validator executes it identically, and it
+ships in the corpus beside the machines it constrains.
+
+## SOSA/SSN alignment
+
+The integration surfaces are the heavily-used part of this system, so they
+speak a standard observation vocabulary rather than a local one.
+[SSN/SOSA](https://www.w3.org/TR/vocab-ssn/) is a W3C Recommendation (19 Oct
+2017) and simultaneously an OGC implementation standard, which is what the MQTT
+and HealthKit paths interoperate with.
+
+| RealityEngine | SOSA/SSN |
+| --- | --- |
+| `re:PerceptionEvent` (committed write) | `sosa:Observation` — asserted as a subclass |
+| `reg:IngressAdmission` (proposed write) | `sosa:Observation` — the same act, before the decision |
+| PE source | `sosa:Sensor`, via `sosa:madeBySensor` |
+| Model or computation | `sosa:Procedure`, via `sosa:usedProcedure` |
+| `reg:EgressDispatch` | `sosa:Actuation` — asserted as a subclass |
+| Subject of the observation | `sosa:hasFeatureOfInterest` |
+
+The provenance distinction falls out of the alignment structurally rather than
+by convention: `reg:Measured` requires `sosa:madeBySensor`, `reg:Derived` and
+`reg:Inferred` require `sosa:usedProcedure`.
+
+Two deliberate modeling choices, recorded so they are not re-litigated:
+
+- **`reg:LaneAxis` links to `sosa:ObservableProperty`; it does not subclass
+  it.** An axis is a position within a region; an ObservableProperty is a
+  quality of a feature. Subclassing would make the same quality reported at two
+  positions into one thing. `reg:LaneAxis` is instead a subclass of
+  `re:SemanticAxis`, which keeps `re:axisName` functional across both the
+  corpus and the lane registry — two sources naming one position differently
+  stays an inconsistency rather than a spelling variant.
+- **Units are declared on the axis, not taken from SOSA.**
+  `sosa:hasSimpleResult` carries no unit. `reg:unit` holds a UCUM code, or
+  `ordinal`/`dimensionless` for normalized machine-native lanes. UCUM is not a
+  W3C standard; QUDT and OM are the alternatives. This is a real gap in the
+  standards stack and the choice should be made explicitly before the lane
+  registry is populated corpus-wide.
+
+## Why SHACL rather than OWL
+
+Not a replacement — the other half. OWL is open-world and does deduction; SHACL
+is closed-world and does validation. Guardrails are the second question.
+
+The decisive difference for a boundary is the output. A reasoner returns a
+global verdict: the ontology is or is not consistent. It cannot say which node
+broke which constraint. A [SHACL](https://www.w3.org/TR/shacl/) validation
+report (W3C Recommendation, 20 July 2017) is itself an RDF graph, one result
+per violation, each carrying `sh:focusNode`, `sh:resultPath`,
+`sh:sourceConstraintComponent` and `sh:resultMessage`. An admission decision
+needs the per-node result; a global verdict is a smoke alarm for the whole
+building.
+
+SHACL also expresses constraints OWL cannot express as *refusals* rather than
+classifications: `sh:minInclusive`/`sh:maxInclusive` for unit bounds,
+`sh:pattern` for id form, `sh:in` for closed enums, and `sh:closed` for "no
+undeclared properties" — which is the entire no-unexpected-fields guarantee at
+an ingress boundary.
+
+What stays in OWL: the vocabulary, subsumption (`re:LifeSafetySequence` via
+`owl:equivalentClass` is genuine deduction), and CI-time consistency through
+ROBOT/HermiT. Keep all of it.
+
+**Version caution:** this contract targets SHACL Core and SHACL-SPARQL as
+published in the 2017 Recommendation. The SHACL 1.2 family (Core, Node
+Expressions, Rules, Profiling, User Interfaces) is at Working Draft as of
+August 2026. Do not take a dependency on 1.2 features.
+
+## Implementation status
+
+Written and gated:
+
+- `semantics/shapes/re-guardrails.shacl.ttl` — vocabulary, SOSA alignment,
+  corpus-time lane shapes, ingress shapes, egress shapes.
+- `semantics/shapes/fixtures/` — lane registry fixture, 32-case parity suite.
+- `scripts/validate_guardrails.py`, `scripts/validate-guardrails.sh`.
+
+Not yet written — in dependency order:
+
+1. **The lane projector.** `domains/region-allocation.json` declares `id`,
+   `offset`, `length`, `provider`, `corpusReaders` and `corpusWriters`, which
+   is most of a lane. It does not yet declare unit, value domain, permitted
+   provenance, staleness ceiling or autonomy floor. Those fields must be added
+   to `schemas/region-allocation.schema.json` and backfilled, then a projector
+   generates the lane graph the shapes validate. Everything else depends on
+   this.
+2. **Life-safety lane derivation.** `reg:lifeSafetyLane` should be computed
+   from the corpus — a lane feeding the input region of a machine carrying an
+   `re:LifeSafetySequence` — not hand-flagged.
+3. **Per-lane severity configuration**, so the observe→warn→block staging can
+   advance domain by domain.
+4. **The compile step** in each runtime: shapes → decision table at load.
+5. **Porting `owl_semantics_test.py`** to shapes, once (1) proves the pattern.
+6. **Wiring** `validate-guardrails.sh` into `npm run validate` and the
+   `RealityEngine_CI` gate list in `INTEGRATED_SPECIFICATION.md`.
+
+Open question for the corpus owners: UCUM, QUDT or OM for `reg:unit`. The
+shapes accept any string today, which is a placeholder, not a decision.

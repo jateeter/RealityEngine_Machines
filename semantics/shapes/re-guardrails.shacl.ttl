@@ -1,0 +1,1048 @@
+# RealityEngine ingress/egress semantic guardrails — SHACL shapes graph.
+#
+# NORMATIVE. This file is the single source of truth for the admission rules
+# applied at every RE/PE integration boundary. See docs/SEMANTIC_GUARDRAIL_CONTRACT.md.
+#
+# Validation requires the merged graph:
+#     semantics/ontology/re-core.ttl  +  this file  +  the data graph
+# There is deliberately no owl:imports: merging is done by the caller
+# (scripts/validate-guardrails.sh) so that no validator ever dereferences a
+# network IRI as part of a boundary decision.
+#
+# No reasoner is required. Every constraint here is evaluated against asserted
+# triples only — the canonical action individuals, autonomy modes and RAG
+# individuals it joins against are asserted directly in re-core.ttl.
+
+@prefix reg:     <https://realityengine.example.org/ontology/re-guardrails#> .
+@prefix re:      <https://realityengine.example.org/ontology/re-core#> .
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+@prefix sosa:    <http://www.w3.org/ns/sosa/> .
+@prefix ssn:     <http://www.w3.org/ns/ssn/> .
+@prefix prov:    <http://www.w3.org/ns/prov#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://realityengine.example.org/ontology/re-guardrails>
+    a owl:Ontology ;
+    dcterms:title "RealityEngine Ingress/Egress Semantic Guardrails" ;
+    dcterms:description "SHACL shapes governing admission of information across every RE/PE integration boundary: MQTT, localAI, OpenAI, Ollama, ACP/OpenClaw, HealthKit, MCP and manual. Ingress admissions and egress dispatches are validated against typed lanes derived from domains/region-allocation.json and the machine ABoxes. Aligned to SOSA/SSN so that integration surfaces carry standard observation and actuation semantics." ;
+    owl:versionInfo "0.1.0" ;
+    rdfs:comment "Merge with semantics/ontology/re-core.ttl before validating." ;
+
+    # SPARQL prefix declarations for the sh:SPARQLConstraint bodies below.
+    sh:declare [ sh:prefix "reg"  ; sh:namespace "https://realityengine.example.org/ontology/re-guardrails#"^^xsd:anyURI ] ;
+    sh:declare [ sh:prefix "re"   ; sh:namespace "https://realityengine.example.org/ontology/re-core#"^^xsd:anyURI ] ;
+    sh:declare [ sh:prefix "sosa" ; sh:namespace "http://www.w3.org/ns/sosa/"^^xsd:anyURI ] ;
+    sh:declare [ sh:prefix "rdf"  ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ] ;
+    sh:declare [ sh:prefix "rdfs" ; sh:namespace "http://www.w3.org/2000/01/rdf-schema#"^^xsd:anyURI ] ;
+    sh:declare [ sh:prefix "xsd"  ; sh:namespace "http://www.w3.org/2001/XMLSchema#"^^xsd:anyURI ] .
+
+
+#################################################################
+# 1. Guardrail vocabulary
+#
+# Terms live in their own namespace rather than re-core so that the corpus
+# vocabulary-closure test (tests/contracts/owl_semantics_test.py) keeps its
+# meaning: generated ABoxes use only re: terms; boundary graphs use reg:.
+#################################################################
+
+reg:IngressLane a owl:Class ;
+    rdfs:label "Ingress Lane" ;
+    rdfs:comment "A typed, named span of the universal reality vector that external information may be admitted into. Projected from domains/region-allocation.json serviceLanes and reservedBands, plus the input regions of machines that accept external sources. The lane — not the payload — is what carries meaning." .
+
+reg:LaneAxis a owl:Class ;
+    rdfs:subClassOf re:SemanticAxis ;
+    rdfs:label "Lane Axis" ;
+    rdfs:comment "One element position within a lane, carrying its declared meaning, unit and admissible value domain. Subclass of re:SemanticAxis so that re:axisName remains functional across the corpus and the lane registry: two sources naming the same position differently is an inconsistency, not a spelling variant." .
+
+reg:IngressAdmission a owl:Class ;
+    rdfs:subClassOf sosa:Observation ;
+    rdfs:label "Ingress Admission" ;
+    rdfs:comment "A proposed write of external information into a lane, evaluated before commit. This is the single boundary object: every provider adapter (MQTT, localAI, OpenAI, Ollama, ACP, HealthKit, MCP, manual) constructs one and submits it; adapters translate syntax only." .
+
+reg:EgressDispatch a owl:Class ;
+    rdfs:subClassOf sosa:Actuation ;
+    rdfs:label "Egress Dispatch" ;
+    rdfs:comment "A proposed dispatch of a determination's prescribed action to an external target, evaluated before the envelope leaves the Perception Engine." .
+
+reg:ProvenanceClass a owl:Class ;
+    rdfs:label "Provenance Class" ;
+    rdfs:comment "How the admitted value came to exist. Kept distinct so that a model-inferred value and an instrument-measured value are never indistinguishable once merged into the reality vector." .
+
+reg:LaneBinding a owl:Class ;
+    rdfs:label "Lane Binding" ;
+    rdfs:comment "How the admission's target lane was determined: resolved from the registry, or self-declared by the caller." .
+
+reg:DispatchStatus a owl:Class ;
+    rdfs:label "Dispatch Status" ;
+    rdfs:comment "Delivery state of an egress dispatch record. reg:Blocked exists so that a guardrail refusal is recorded rather than dropped." .
+
+# ── Ingress properties ───────────────────────────────────────────────────
+
+reg:laneId a owl:DatatypeProperty ; rdfs:domain reg:IngressLane ; rdfs:range xsd:string ;
+    rdfs:label "lane id" ;
+    rdfs:comment "Matches the serviceLanes/reservedBands id in domains/region-allocation.json." .
+
+reg:laneOffset a owl:DatatypeProperty ; rdfs:domain reg:IngressLane ; rdfs:range xsd:integer ;
+    rdfs:label "lane offset" .
+
+reg:laneLength a owl:DatatypeProperty ; rdfs:domain reg:IngressLane ; rdfs:range xsd:integer ;
+    rdfs:label "lane length" .
+
+reg:hasAxis a owl:ObjectProperty ; rdfs:domain reg:IngressLane ; rdfs:range reg:LaneAxis ;
+    rdfs:label "has axis" .
+
+reg:permittedProvider a owl:DatatypeProperty ; rdfs:domain reg:IngressLane ; rdfs:range xsd:string ;
+    rdfs:label "permitted provider" ;
+    rdfs:comment "Provider ids allowed to write this lane. Absence of a match is a refusal, not a warning: an unlisted provider has no standing to speak about this region." .
+
+reg:permittedProvenance a owl:ObjectProperty ; rdfs:domain reg:IngressLane ; rdfs:range reg:ProvenanceClass ;
+    rdfs:label "permitted provenance" .
+
+reg:requiredAutonomy a owl:ObjectProperty ; rdfs:domain reg:IngressLane ; rdfs:range re:AutonomyMode ;
+    rdfs:label "required autonomy" ;
+    rdfs:comment "Autonomy floor a source must hold to write this lane." .
+
+reg:maxStalenessMs a owl:DatatypeProperty ; rdfs:domain reg:IngressLane ; rdfs:range xsd:integer ;
+    rdfs:label "maximum staleness (ms)" .
+
+reg:lifeSafetyLane a owl:DatatypeProperty ; rdfs:domain reg:IngressLane ; rdfs:range xsd:boolean ;
+    rdfs:label "life-safety lane" ;
+    rdfs:comment "True when the lane feeds the input region of a machine carrying an re:LifeSafetySequence." .
+
+reg:unit a owl:DatatypeProperty ; rdfs:domain reg:LaneAxis ; rdfs:range xsd:string ;
+    rdfs:label "unit" ;
+    rdfs:comment "UCUM code, or 'ordinal'/'dimensionless' for normalized machine-native lanes. SOSA carries no unit on hasSimpleResult, so units are declared here." .
+
+reg:minValue a owl:DatatypeProperty ; rdfs:domain reg:LaneAxis ;
+    rdfs:label "minimum value" .
+
+reg:maxValue a owl:DatatypeProperty ; rdfs:domain reg:LaneAxis ;
+    rdfs:label "maximum value" .
+
+reg:permittedValue a owl:DatatypeProperty ; rdfs:domain reg:LaneAxis ;
+    rdfs:label "permitted value" ;
+    rdfs:comment "Enumerated admissible values. When present, the axis is closed to exactly these." .
+
+reg:observableProperty a owl:ObjectProperty ; rdfs:domain reg:LaneAxis ; rdfs:range sosa:ObservableProperty ;
+    rdfs:label "observable property" ;
+    rdfs:comment "The SOSA quality this axis position reports. Linked rather than subclassed: an axis is a position in a region, an ObservableProperty is a quality of a feature — conflating them would make the same quality at two positions one thing." .
+
+reg:targetLane a owl:ObjectProperty ; rdfs:domain reg:IngressAdmission ; rdfs:range reg:IngressLane ;
+    rdfs:label "target lane" .
+
+reg:proposedBy a owl:ObjectProperty ; rdfs:domain reg:IngressAdmission ;
+    rdfs:label "proposed by" ;
+    rdfs:comment "The PE source proposing the write. Typed sosa:Sensor for measured provenance." .
+
+reg:providerId a owl:DatatypeProperty ; rdfs:range xsd:string ;
+    rdfs:label "provider id" .
+
+reg:atOffset a owl:DatatypeProperty ; rdfs:domain reg:IngressAdmission ; rdfs:range xsd:integer ;
+    rdfs:label "at offset" .
+
+reg:writeLength a owl:DatatypeProperty ; rdfs:domain reg:IngressAdmission ; rdfs:range xsd:integer ;
+    rdfs:label "write length" .
+
+reg:hasValueAt a owl:ObjectProperty ; rdfs:domain reg:IngressAdmission ;
+    rdfs:label "has value at" ;
+    rdfs:comment "One indexed element of the proposed write." .
+
+reg:atIndex a owl:DatatypeProperty ; rdfs:range xsd:integer ;
+    rdfs:label "at index" .
+
+reg:value a owl:DatatypeProperty ;
+    rdfs:label "value" .
+
+reg:provenanceClass a owl:ObjectProperty ; rdfs:domain reg:IngressAdmission ; rdfs:range reg:ProvenanceClass ;
+    rdfs:label "provenance class" .
+
+reg:observedAt a owl:DatatypeProperty ; rdfs:range xsd:long ;
+    rdfs:label "observed at" ;
+    rdfs:comment "Epoch milliseconds at which the value was true of the world. Aligns with sosa:resultTime." .
+
+reg:receivedAt a owl:DatatypeProperty ; rdfs:range xsd:long ;
+    rdfs:label "received at" ;
+    rdfs:comment "Epoch milliseconds at which the PE received the payload." .
+
+reg:laneBinding a owl:ObjectProperty ; rdfs:domain reg:IngressAdmission ; rdfs:range reg:LaneBinding ;
+    rdfs:label "lane binding" .
+
+reg:callerAuthority a owl:DatatypeProperty ; rdfs:domain reg:IngressAdmission ; rdfs:range xsd:string ;
+    rdfs:label "caller authority" ;
+    rdfs:comment "Authority token permitting a caller-supplied lane binding. Deployed profiles grant this to no provider adapter." .
+
+reg:correlationId a owl:DatatypeProperty ; rdfs:range xsd:string ;
+    rdfs:label "correlation id" .
+
+reg:envelopeId a owl:DatatypeProperty ; rdfs:range xsd:string ;
+    rdfs:label "envelope id" .
+
+reg:underAutonomy a owl:ObjectProperty ; rdfs:range re:AutonomyMode ;
+    rdfs:label "under autonomy" .
+
+reg:autonomyRank a owl:DatatypeProperty ; rdfs:domain re:AutonomyMode ; rdfs:range xsd:integer ;
+    rdfs:label "autonomy rank" ;
+    rdfs:comment "Total order over the autonomy modes by increasing consequence. re-core declares the modes mutually distinct but unordered; comparison ('may not exceed the ceiling') needs a rank, so the guardrail layer supplies one. Matches the stage field of schemas/autonomy-policy.schema.json." .
+
+# ── Egress properties ────────────────────────────────────────────────────
+
+reg:dispatchesAction a owl:ObjectProperty ; rdfs:domain reg:EgressDispatch ; rdfs:range re:Action ;
+    rdfs:label "dispatches action" .
+
+reg:fromDetermination a owl:ObjectProperty ; rdfs:domain reg:EgressDispatch ; rdfs:range re:Determination ;
+    rdfs:label "from determination" .
+
+reg:toTarget a owl:DatatypeProperty ; rdfs:domain reg:EgressDispatch ; rdfs:range xsd:string ;
+    rdfs:label "to target" .
+
+reg:governedByBinding a owl:ObjectProperty ; rdfs:domain reg:EgressDispatch ; rdfs:range re:AgentBinding ;
+    rdfs:label "governed by binding" .
+
+reg:humanApproved a owl:DatatypeProperty ; rdfs:domain reg:EgressDispatch ; rdfs:range xsd:boolean ;
+    rdfs:label "human approved" ;
+    rdfs:comment "Always asserted, never inferred from absence. An adapter that cannot say whether a human approved must say false." .
+
+reg:blockedWhenRag a owl:ObjectProperty ; rdfs:domain re:AgentBinding ; rdfs:range re:RagStatus ;
+    rdfs:label "blocked when RAG" ;
+    rdfs:comment "Mirrors blockedWhenRag in schemas/autonomy-policy.schema.json." .
+
+reg:dispatchStatus a owl:ObjectProperty ; rdfs:domain reg:EgressDispatch ; rdfs:range reg:DispatchStatus ;
+    rdfs:label "dispatch status" .
+
+# ── Canonical individuals ────────────────────────────────────────────────
+
+reg:Measured a owl:NamedIndividual , reg:ProvenanceClass ;
+    rdfs:label "measured" ;
+    rdfs:comment "Produced by an instrument or device bridge. Carries sosa:madeBySensor." .
+
+reg:Derived a owl:NamedIndividual , reg:ProvenanceClass ;
+    rdfs:label "derived" ;
+    rdfs:comment "Computed deterministically from measured values by a declared procedure." .
+
+reg:Inferred a owl:NamedIndividual , reg:ProvenanceClass ;
+    rdfs:label "inferred" ;
+    rdfs:comment "Produced by a model or agent. The only provenance class whose content can be shaped by upstream text, and therefore the only one that must inherit the envelope of the dispatch it answers." .
+
+reg:Asserted a owl:NamedIndividual , reg:ProvenanceClass ;
+    rdfs:label "asserted" ;
+    rdfs:comment "Stated by a human operator or a test harness." .
+
+[] a owl:AllDifferent ; owl:distinctMembers ( reg:Measured reg:Derived reg:Inferred reg:Asserted ) .
+
+reg:ResolvedFromRegistry a owl:NamedIndividual , reg:LaneBinding ;
+    rdfs:label "resolved-from-registry" .
+
+reg:SuppliedByCaller a owl:NamedIndividual , reg:LaneBinding ;
+    rdfs:label "supplied-by-caller" ;
+    rdfs:comment "The caller named its own region. This is a claim of semantic authority and is refused unless the admission also carries reg:callerAuthority." .
+
+reg:ResolvedFromRegistry owl:differentFrom reg:SuppliedByCaller .
+
+reg:Pending    a owl:NamedIndividual , reg:DispatchStatus ; rdfs:label "pending" .
+reg:Delivering a owl:NamedIndividual , reg:DispatchStatus ; rdfs:label "delivering" .
+reg:Delivered  a owl:NamedIndividual , reg:DispatchStatus ; rdfs:label "delivered" .
+reg:Failed     a owl:NamedIndividual , reg:DispatchStatus ; rdfs:label "failed" .
+reg:Blocked    a owl:NamedIndividual , reg:DispatchStatus ;
+    rdfs:label "blocked" ;
+    rdfs:comment "Refused by this shapes graph. The ledger entry is still written: a dropped dispatch destroys the evidence chain." .
+
+# Rank annotations on the re-core autonomy individuals. Asserted here, in a
+# separate graph, so re-core stays the vocabulary authority and the guardrail
+# layer owns the ordering it needs.
+re:Observe       reg:autonomyRank 0 .
+re:Advise        reg:autonomyRank 1 .
+re:SupervisedAct reg:autonomyRank 2 .
+re:AutomatedAct  reg:autonomyRank 3 .
+
+
+#################################################################
+# 2. SOSA/SSN alignment
+#
+# The integration surfaces are the heavily-used part of this system, so they
+# speak a standard observation/actuation vocabulary rather than a local one.
+# SOSA is a W3C Recommendation and an OGC implementation standard, which is
+# what MQTT and HealthKit ingest paths interoperate with.
+#################################################################
+
+re:PerceptionEvent rdfs:subClassOf sosa:Observation ;
+    rdfs:comment "A committed PE write is the observation act; reg:IngressAdmission is the same act before the guardrail decision." .
+
+re:DispatchRecord rdfs:subClassOf prov:Entity ;
+    rdfs:comment "The ledger record; reg:EgressDispatch is the actuation it records." .
+
+reg:sensorOf a owl:ObjectProperty ;
+    rdfs:subPropertyOf sosa:madeBySensor ;
+    rdfs:label "sensor of" ;
+    rdfs:comment "Convenience alias so adapters can emit sosa:madeBySensor without importing SSN in full." .
+
+
+#################################################################
+# 3. Corpus-time shapes — the lane registry itself
+#
+# Run in CI against the projected lane graph. A lane that fails these has no
+# usable contract, so nothing may be admitted into it.
+#################################################################
+
+reg:IngressLaneShape
+    a sh:NodeShape ;
+    sh:targetClass reg:IngressLane ;
+    rdfs:label "Ingress lane contract" ;
+
+    sh:property [
+        sh:path reg:laneId ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:pattern "^[a-z0-9][a-z0-9-]*$" ;
+        sh:message "A lane needs exactly one kebab-case id matching its region-allocation entry." ;
+    ] ;
+    sh:property [
+        sh:path reg:laneOffset ;
+        sh:datatype xsd:integer ; sh:minInclusive 0 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A lane needs exactly one non-negative offset." ;
+    ] ;
+    sh:property [
+        sh:path reg:laneLength ;
+        sh:datatype xsd:integer ; sh:minInclusive 1 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A lane needs exactly one length of at least 1." ;
+    ] ;
+    sh:property [
+        sh:path reg:permittedProvider ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:message "A lane with no permitted provider can never be written; declare the providers or retire the lane." ;
+    ] ;
+    sh:property [
+        sh:path reg:hasAxis ;
+        sh:class reg:LaneAxis ;
+        sh:minCount 1 ;
+        sh:message "A lane must name the meaning of its positions." ;
+    ] ;
+    sh:property [
+        sh:path reg:maxStalenessMs ;
+        sh:datatype xsd:integer ; sh:minInclusive 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:lifeSafetyLane ;
+        sh:datatype xsd:boolean ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:requiredAutonomy ;
+        sh:class re:AutonomyMode ;
+        sh:maxCount 1 ;
+    ] ;
+
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Lane declares {?value} axes but its length is different; every position must carry a declared meaning." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:laneLength ?len .
+                { SELECT $this (COUNT(DISTINCT ?axis) AS ?value)
+                  WHERE { $this reg:hasAxis ?axis } GROUP BY $this }
+                FILTER (?value != ?len)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Axis index {?value} is outside the lane's own positions (0 .. length-1)." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:laneLength ?len ;
+                      reg:hasAxis ?axis .
+                ?axis re:axisIndex ?value .
+                FILTER (?value < 0 || ?value >= ?len)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "A life-safety lane must declare the autonomy floor a source needs to write it." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:lifeSafetyLane ?value .
+                FILTER (?value = true)
+                FILTER NOT EXISTS { $this reg:requiredAutonomy ?floor }
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Lane overlaps lane {?value}. Overlapping lanes make a well-formed write ambiguous in meaning." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:laneOffset ?aOff ; reg:laneLength ?aLen ; reg:laneId ?aId .
+                ?other a reg:IngressLane ;
+                       reg:laneOffset ?bOff ; reg:laneLength ?bLen ; reg:laneId ?value .
+                FILTER (?aId != ?value)
+                FILTER (?aOff < (?bOff + ?bLen) && ?bOff < (?aOff + ?aLen))
+            }
+        """ ;
+    ] .
+
+
+reg:LaneAxisShape
+    a sh:NodeShape ;
+    sh:targetClass reg:LaneAxis ;
+    rdfs:label "Lane axis contract" ;
+
+    sh:property [
+        sh:path re:axisIndex ;
+        sh:datatype xsd:integer ; sh:minInclusive 0 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "An axis occupies exactly one position." ;
+    ] ;
+    sh:property [
+        sh:path re:axisName ;
+        sh:datatype xsd:string ; sh:minLength 1 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "An axis must be named; an unnamed position has no meaning to check a value against." ;
+    ] ;
+    sh:property [
+        sh:path reg:unit ;
+        sh:datatype xsd:string ; sh:minLength 1 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "An axis must declare its unit (UCUM code, or 'ordinal'/'dimensionless'). Unit drift is invisible to range checks." ;
+    ] ;
+    sh:property [
+        sh:path reg:observableProperty ;
+        sh:maxCount 1 ;
+    ] ;
+
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Axis minimum {?value} is not below its maximum." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:minValue ?value ; reg:maxValue ?max .
+                FILTER (?value >= ?max)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Axis declares neither bounds nor an enumerated value domain; values on it cannot be judged." ;
+        sh:severity sh:Warning ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this re:axisName ?value .
+                FILTER NOT EXISTS { $this reg:permittedValue ?v }
+                FILTER NOT EXISTS { $this reg:minValue ?mn }
+                FILTER NOT EXISTS { $this reg:maxValue ?mx }
+            }
+        """ ;
+    ] .
+
+
+#################################################################
+# 4. Boundary-time shapes — INGRESS
+#
+# One shape for every provider. MQTT, localAI, OpenAI, Ollama, ACP/OpenClaw,
+# HealthKit, MCP and manual callbacks all construct a reg:IngressAdmission and
+# are judged identically. Provider-specific admission logic is a contract
+# violation, not an optimization: it reintroduces the boundaries this
+# collapses.
+#################################################################
+
+reg:IngressAdmissionShape
+    a sh:NodeShape ;
+    sh:targetClass reg:IngressAdmission ;
+    rdfs:label "Ingress admission" ;
+
+    # Closed: an admission carrying properties this contract does not know
+    # about is refused rather than silently narrowed to the fields we read.
+    sh:closed true ;
+    sh:ignoredProperties ( rdf:type rdfs:label rdfs:comment ) ;
+
+    sh:property [
+        sh:path reg:targetLane ;
+        sh:class reg:IngressLane ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "An admission targets exactly one declared lane." ;
+    ] ;
+    sh:property [
+        sh:path reg:proposedBy ;
+        sh:nodeKind sh:IRI ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "An admission must name the source proposing it." ;
+    ] ;
+    sh:property [
+        sh:path reg:laneBinding ;
+        sh:class reg:LaneBinding ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "An admission must state how its lane was determined." ;
+    ] ;
+    sh:property [
+        sh:path reg:provenanceClass ;
+        sh:class reg:ProvenanceClass ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "An admission must state how its values came to exist." ;
+    ] ;
+    sh:property [
+        sh:path reg:atOffset ;
+        sh:datatype xsd:integer ; sh:minInclusive 0 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:writeLength ;
+        sh:datatype xsd:integer ; sh:minInclusive 1 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:observedAt ;
+        sh:datatype xsd:long ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "An admission must say when its values were true of the world." ;
+    ] ;
+    sh:property [
+        sh:path reg:receivedAt ;
+        sh:datatype xsd:long ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:hasValueAt ;
+        sh:minCount 1 ;
+        sh:node reg:ValueSlotShape ;
+        sh:message "An admission must carry at least one indexed value." ;
+    ] ;
+    sh:property [
+        sh:path reg:correlationId ;
+        sh:datatype xsd:string ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:envelopeId ;
+        sh:datatype xsd:string ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:callerAuthority ;
+        sh:datatype xsd:string ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:underAutonomy ;
+        sh:class re:AutonomyMode ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path sosa:madeBySensor ;
+        sh:nodeKind sh:IRI ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path sosa:usedProcedure ;
+        sh:nodeKind sh:IRI ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path sosa:hasFeatureOfInterest ;
+        sh:nodeKind sh:IRI ; sh:maxCount 1 ;
+    ] ;
+
+    # ── I1. Region addressing ────────────────────────────────────────────
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Write offset {?value} is not the offset of the target lane. A well-formed payload at the wrong offset is the primary semantic failure of a shared vector." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:targetLane ?lane ;
+                      reg:atOffset ?value .
+                ?lane reg:laneOffset ?laneOffset .
+                FILTER (?value != ?laneOffset)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Write length {?value} exceeds the target lane; a write may not run past the region that gives it meaning." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:targetLane ?lane ;
+                      reg:writeLength ?value .
+                ?lane reg:laneLength ?laneLength .
+                FILTER (?value > ?laneLength)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Value supplied at index {?value}, which the target lane does not declare." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:targetLane ?lane ;
+                      reg:hasValueAt ?slot .
+                ?slot reg:atIndex ?value .
+                FILTER NOT EXISTS {
+                    ?lane reg:hasAxis ?axis .
+                    ?axis re:axisIndex ?value .
+                }
+            }
+        """ ;
+    ] ;
+
+    # ── I2. Authority ────────────────────────────────────────────────────
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Provider {?value} is not permitted to write the target lane." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:targetLane ?lane ;
+                      reg:proposedBy ?source .
+                ?source reg:providerId ?value .
+                FILTER NOT EXISTS { ?lane reg:permittedProvider ?value }
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "The caller supplied its own target lane without authority. Self-declared region binding is a claim of semantic authority and is refused in deployed profiles." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:laneBinding ?value .
+                FILTER (?value = reg:SuppliedByCaller)
+                FILTER NOT EXISTS { $this reg:callerAuthority ?auth }
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Source autonomy is below the floor this lane requires." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:targetLane ?lane ;
+                      reg:underAutonomy ?value .
+                ?lane reg:requiredAutonomy ?floor .
+                ?value reg:autonomyRank ?actual .
+                ?floor reg:autonomyRank ?required .
+                FILTER (?actual < ?required)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "A life-safety lane requires the admission to declare the autonomy it writes under." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:targetLane ?lane .
+                ?lane reg:lifeSafetyLane ?value .
+                FILTER (?value = true)
+                FILTER NOT EXISTS { $this reg:underAutonomy ?mode }
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "An observe-mode source may not write any element of the reality vector." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:underAutonomy ?value .
+                FILTER (?value = re:Observe)
+            }
+        """ ;
+    ] ;
+
+    # ── I3. Meaning of the values ────────────────────────────────────────
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Value {?value} falls outside the declared bounds of the axis it is written to." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:targetLane ?lane ;
+                      reg:hasValueAt ?slot .
+                ?slot reg:atIndex ?idx ; reg:value ?value .
+                ?lane reg:hasAxis ?axis .
+                ?axis re:axisIndex ?idx .
+                OPTIONAL { ?axis reg:minValue ?min }
+                OPTIONAL { ?axis reg:maxValue ?max }
+                FILTER ( (BOUND(?min) && ?value < ?min) || (BOUND(?max) && ?value > ?max) )
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Value {?value} is not in the enumerated value domain of the axis it is written to." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:targetLane ?lane ;
+                      reg:hasValueAt ?slot .
+                ?slot reg:atIndex ?idx ; reg:value ?value .
+                ?lane reg:hasAxis ?axis .
+                ?axis re:axisIndex ?idx .
+                FILTER EXISTS { ?axis reg:permittedValue ?anyPermitted }
+                FILTER NOT EXISTS { ?axis reg:permittedValue ?value }
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Provenance class is not permitted on this lane; a model-inferred value may not enter a lane reserved for measurement." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:targetLane ?lane ;
+                      reg:provenanceClass ?value .
+                FILTER EXISTS { ?lane reg:permittedProvenance ?anyAllowed }
+                FILTER NOT EXISTS { ?lane reg:permittedProvenance ?value }
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "A measured admission must name the sensor that made it (sosa:madeBySensor)." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:provenanceClass ?value .
+                FILTER (?value = reg:Measured)
+                FILTER NOT EXISTS { $this sosa:madeBySensor ?sensor }
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "A derived or inferred admission must name the procedure that produced it (sosa:usedProcedure)." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:provenanceClass ?value .
+                FILTER (?value IN (reg:Derived, reg:Inferred))
+                FILTER NOT EXISTS { $this sosa:usedProcedure ?procedure }
+            }
+        """ ;
+    ] ;
+
+    # ── I4. Freshness and replay ─────────────────────────────────────────
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Admission is staler than the lane permits; a late value is a claim about a moment that has passed." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:targetLane ?lane ;
+                      reg:observedAt ?observedAt ;
+                      reg:receivedAt ?value .
+                ?lane reg:maxStalenessMs ?maxStaleness .
+                FILTER ((?value - ?observedAt) > ?maxStaleness)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Admission claims to have been observed after it was received." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:observedAt ?value ; reg:receivedAt ?receivedAt .
+                FILTER (?value > ?receivedAt)
+            }
+        """ ;
+    ] ;
+
+    # ── I5. Model-boundary binding ───────────────────────────────────────
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "An inferred admission must inherit the envelope id of the dispatch it answers. Model output that names no dispatch is unsolicited input, not a completion." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:provenanceClass ?value .
+                FILTER (?value = reg:Inferred)
+                FILTER NOT EXISTS { $this reg:envelopeId ?envelope }
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "An inferred admission must carry the correlation id of the dispatch it answers." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:provenanceClass ?value .
+                FILTER (?value = reg:Inferred)
+                FILTER NOT EXISTS { $this reg:correlationId ?correlation }
+            }
+        """ ;
+    ] .
+
+
+reg:ValueSlotShape
+    a sh:NodeShape ;
+    rdfs:label "Indexed value slot" ;
+    sh:closed true ;
+    sh:ignoredProperties ( rdf:type ) ;
+    sh:property [
+        sh:path reg:atIndex ;
+        sh:datatype xsd:integer ; sh:minInclusive 0 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:value ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:or (
+            [ sh:datatype xsd:decimal ]
+            [ sh:datatype xsd:integer ]
+            [ sh:datatype xsd:double ]
+        ) ;
+        sh:message "A slot carries exactly one numeric value; canonical serialization is xsd:decimal." ;
+    ] .
+
+
+#################################################################
+# 5. Boundary-time shapes — EGRESS
+#################################################################
+
+reg:EgressDispatchShape
+    a sh:NodeShape ;
+    sh:targetClass reg:EgressDispatch ;
+    rdfs:label "Egress dispatch" ;
+
+    sh:closed true ;
+    sh:ignoredProperties ( rdf:type rdfs:label rdfs:comment ) ;
+
+    sh:property [
+        sh:path reg:dispatchesAction ;
+        sh:class re:Action ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A dispatch carries exactly one prescribed action." ;
+    ] ;
+    sh:property [
+        sh:path reg:fromDetermination ;
+        sh:class re:Determination ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A dispatch must name the determination it came from; an action with no determination has no evidence chain." ;
+    ] ;
+    sh:property [
+        sh:path reg:toTarget ;
+        sh:datatype xsd:string ; sh:minLength 1 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:envelopeId ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:correlationId ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:humanApproved ;
+        sh:datatype xsd:boolean ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A dispatch must state the human-approval fact explicitly; absence is not consent." ;
+    ] ;
+    sh:property [
+        sh:path reg:underAutonomy ;
+        sh:class re:AutonomyMode ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:dispatchStatus ;
+        sh:class reg:DispatchStatus ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:governedByBinding ;
+        sh:class re:AgentBinding ;
+        sh:maxCount 1 ;
+    ] ;
+
+    # ── E1. The escalation invariant ─────────────────────────────────────
+    # The runtime counterpart of re:EscalationDetermination in re-core.ttl.
+    # There the axiom makes a non-RED escalation an inconsistency of the
+    # corpus; here it refuses the dispatch.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Escalation action dispatched from a determination that does not carry RED." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:dispatchesAction ?value ;
+                      reg:fromDetermination ?determination .
+                ?value a re:EscalationAction .
+                FILTER NOT EXISTS { ?determination re:hasRagStatus re:RED }
+            }
+        """ ;
+    ] ;
+
+    # ── E2. Closed action vocabulary ─────────────────────────────────────
+    # Only the canonical individuals in re-core.ttl carry re:actionCode, so
+    # this closes the vocabulary without restating it.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Dispatched action is not a canonical action individual of re-core.ttl. New actions are added to the ontology before they can be dispatched." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:dispatchesAction ?value .
+                FILTER NOT EXISTS { ?value re:actionCode ?code }
+            }
+        """ ;
+    ] ;
+
+    # ── E3. Autonomy ─────────────────────────────────────────────────────
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Dispatch autonomy exceeds the ceiling its binding imposes." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:underAutonomy ?value ;
+                      reg:governedByBinding ?binding .
+                ?binding re:maxAutonomy ?ceiling .
+                ?value reg:autonomyRank ?actual .
+                ?ceiling reg:autonomyRank ?permitted .
+                FILTER (?actual > ?permitted)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "An observe-mode dispatch is a contradiction: observe writes nothing and acts on nothing." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:underAutonomy ?value .
+                FILTER (?value = re:Observe)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "An escalation action below automated-act autonomy requires recorded human approval." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:dispatchesAction ?action ;
+                      reg:underAutonomy ?mode ;
+                      reg:humanApproved ?value .
+                ?action a re:EscalationAction .
+                ?mode reg:autonomyRank ?rank .
+                FILTER (?rank < 3)
+                FILTER (?value = false)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "The binding requires human approval and none is recorded." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:governedByBinding ?binding ;
+                      reg:humanApproved ?value .
+                ?binding re:requiresHumanApproval true .
+                FILTER (?value = false)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "The binding is blocked at RAG status {?value}." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:governedByBinding ?binding ;
+                      reg:fromDetermination ?determination .
+                ?determination re:hasRagStatus ?value .
+                ?binding reg:blockedWhenRag ?value .
+            }
+        """ ;
+    ] ;
+
+    # ── E4. Permitted-action list ────────────────────────────────────────
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Action code {?value} is not in the binding's allowed-action list." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:governedByBinding ?binding ;
+                      reg:dispatchesAction ?action .
+                ?action re:actionCode ?value .
+                FILTER EXISTS { ?binding re:allowedAction ?anyAllowed }
+                FILTER NOT EXISTS { ?binding re:allowedAction ?value }
+            }
+        """ ;
+    ] .
