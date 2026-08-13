@@ -101,18 +101,31 @@ A contribution is provider-tagged. Machine outputs and PE sources use the same
 shape; only `provider` and the origin fields differ.
 
 ```
-Provider := "machine" | "acp" | "mcp" | "mqtt" | "localai" | "sensor"
+Provider   := "machine" | "acp" | "mcp" | "mqtt" | "localai" | "sensor"
+Determinism := "deterministic" | "measured" | "generated"
 
 Contribution := {
   cell            : uint32       // absolute InputSpace position
   value           : float64      // clamped [0,1]
   provider        : Provider
+  determinism     : Determinism
   originId        : string       // machineId, or the PE sourceId for non-machine providers
   cesId           : string?      // machine providers only
   outputVectorId  : string?      // machine providers only
   ragStatusCode   : string?      // "GREEN"|"AMBER"|"RED", when the provider supplies one
 }
 ```
+
+`determinism` is the load-bearing classification; `provider` is transport.
+
+| class | meaning | default providers |
+|---|---|---|
+| `deterministic` | reproducible from the corpus and `IS(k)` alone | `machine` |
+| `measured` | exogenous but not generated — a reading, reproducible under replay | `sensor`, `mqtt` |
+| `generated` | produced by a non-deterministic process; not reproducible | `acp`, `mcp`, `localai` |
+
+A provider's default class may be overridden per source, but a `generated`
+contribution may never be reclassified upward.
 
 Non-machine contributions enter only after the PE source has validated syntax and
 semantics and transformed the response. A contribution that fails validation is
@@ -157,29 +170,64 @@ commutative monoids, so the composite is one.
 A contribution from a sequence typed `re:LifeSafetySequence` is promoted to
 severity `3` and dominates unconditionally.
 
-### 4.3a `PRECEDENCE` — provider ranking
+### 4.3a `PRECEDENCE` — determinism ranking
 
-The dominant contention case is a deterministic machine output and an advisory
-agent assessment on one position. `OR`/`MAX` would let an advisory value override
-a determination whenever it happens to be larger, which is a policy decision made
-by accident.
+The dominant contention case is a deterministic machine output and a generated
+agent assessment on one position. `OR`/`MAX` would let the generated value
+override the determination whenever it happened to be larger — a non-deterministic
+process silently overwriting a deterministic one, decided by magnitude.
 
-`PRECEDENCE` resolves by provider rank first, then by `MAX` on value among
-contributions at the winning rank. Ranks are declared per cell in the arbitration
-registry; the default ordering is
+`PRECEDENCE` resolves by **determinism class** first, then by `MAX` on value
+among contributions at the winning class:
 
 ```
-machine (3)  >  sensor (2)  >  mqtt (2)  >  acp (1)  =  mcp (1)  =  localai (1)
+deterministic (3)  >  measured (2)  >  generated (1)
 ```
 
-Resolution is the lexicographic maximum of `(rank, value)`. Lexicographic max
-over a totally-ordered pair is commutative, associative and idempotent, so
-§4.1 holds and parallel reduction remains safe.
+Resolution is the lexicographic maximum of `(class, value)`. Lexicographic max
+over a totally-ordered pair is commutative, associative and idempotent, so §4.1
+holds and parallel reduction remains safe.
 
-Rationale for the default: a machine output is a determination the corpus is
-accountable for; an agent assessment is advice. Advice does not silently
-overwrite a determination. Where a domain genuinely wants agent primacy, it must
-say so in the registry rather than inherit it from a merge accident.
+**The ordering is not a status hierarchy and not a preference.** It follows from
+reproducibility. A deterministic contribution is derivable from the corpus and
+`IS(k)` alone; a generated one is not derivable from anything and cannot be
+reproduced by re-running the instant. Letting the irreproducible term win would
+make `IS(k+1)` irreproducible, and with it every downstream determination — the
+corpus would lose the property that makes it provable at all.
+
+A domain may raise a specific cell's ranking in the registry, but doing so
+deliberately imports irreproducibility into that lane and must carry a rationale
+saying so.
+
+### 4.3b Guardrails on generated contributions
+
+Precisely because a `generated` value cannot be reproduced, it may not be trusted
+on arrival. A `generated` contribution MUST pass both gates in the PE source
+before it exists as a contribution:
+
+**Syntactic.** Arity matches the target region length exactly; every value is a
+number in `[0,1]` after declared normalization; required response fields are
+present; no extra positions. A response of the wrong shape is rejected, never
+truncated or padded.
+
+**Semantic.** Each position carries the meaning the region's declared axis says
+it carries — the response mapping resolves to the declared semantics, the value
+lies within any declared band for that axis, and the emission answers the trigger
+that was dispatched. A well-formed response asserting the wrong quantity is
+rejected.
+
+A contribution failing either gate **is never created.** It is not a contribution
+with a null or zeroed value, and it must not reach the arbiter — a rejected
+generated response leaves the cell to its deterministic contributors, which is
+the correct outcome, not a degraded one.
+
+Every rejection MUST emit an observability record (§6) carrying the gate that
+failed and the offending response. Silent rejection is as damaging as silent
+acceptance: it presents as an agent that never answers.
+
+The 9 machines where `openClawProjection.semantics` and the derived agent
+write-back semantics genuinely disagree (jateeter/localOpenClawStack#17) are
+exactly the population the semantic gate exists to catch.
 
 ### 4.4 `MEAN` — restricted
 
@@ -295,8 +343,14 @@ implementation whose output depends on partitioning has violated 4.1.
 
 ## 8. Acceptance
 
-1. Given one corpus and one `IS(k)`, all four runtimes produce a byte-identical
-   `IS(k+1)`.
+0. **Byte equivalence is only defined over reproducible contributions.** A
+   `generated` contribution is not reproducible by construction, so §8.1 is
+   tested either with generated sources disabled, or by **replaying a recorded
+   contribution set** so every runtime sees identical inputs. Comparing two live
+   agent runs and expecting identical vectors is not a test — it is a
+   misunderstanding of what `generated` means.
+1. Given one corpus, one `IS(k)`, and one replayed contribution set, all four
+   runtimes produce a byte-identical `IS(k+1)`.
 2. Shuffling machine load order does not change `IS(k+1)` in any runtime.
 3. Varying the parallel partitioning does not change `IS(k+1)`.
 4. **Varying the arrival order of PE source contributions does not change
@@ -304,6 +358,12 @@ implementation whose output depends on partitioning has violated 4.1.
    externally-visible form of §4.1 and the one most likely to be violated.
 5. A cell written by both a machine output and a PE source resolves per its
    declared rule, in all four runtimes.
+5a. A `generated` contribution never overrides a `deterministic` one under
+   `PRECEDENCE`, at any value.
+5b. A response failing the syntactic gate produces **no contribution** and one
+   rejection record; the cell resolves from its remaining contributors.
+5c. A well-formed response asserting the wrong quantity fails the semantic gate
+   and produces no contribution.
 6. An undeclared contended cell fails corpus validation, counting machine and
    non-machine writers alike.
 7. `MEAN` without canonical ordering is rejected at load.
@@ -339,14 +399,13 @@ Both belong beside the ring in the regression corpus.
 - Whether L1 should become element-wise (`OR`/`MAX`) or keep gate semantics with
   a separate value rule. This document assumes element-wise; the current
   "first representative" behaviour is replaced either way.
-- **The default provider ranking in §4.3a is a policy assertion, not a derived
-  result.** "A determination outranks advice" is defensible but it is a decision
-  about how much authority an agent has over the reality vector, and it should be
-  ratified rather than inherited from this document.
-- **The PE validate/transform step is unverified.** §3 requires that a
-  contribution failing syntactic or semantic validation is never created. No
-  runtime's implementation of that step has been read, so whether the guardrails
-  are actually enforced before contribution is unknown.
+- **The PE guardrail implementation is unverified.** §4.3b requires that a
+  generated contribution failing the syntactic or semantic gate is never created.
+  No runtime's implementation of that step has been read, so whether either gate
+  is actually enforced before contribution is unknown. Given #17 found 1,127
+  semantic disagreements between the corpus and the derived agent write-back
+  semantics — 9 of them substantive — the semantic gate is the one most likely to
+  be absent or nominal.
 - **Whether MQTT, MCP and Ollama truly share the ACP source path** is asserted
   architecturally and unconfirmed in code. If any of them bypasses the PE source
   path, it bypasses this arbiter too.
