@@ -19,6 +19,9 @@
 @prefix sosa:    <http://www.w3.org/ns/sosa/> .
 @prefix ssn:     <http://www.w3.org/ns/ssn/> .
 @prefix prov:    <http://www.w3.org/ns/prov#> .
+@prefix qudt:    <http://qudt.org/schema/qudt/> .
+@prefix unit:    <http://qudt.org/vocab/unit/> .
+@prefix qkind:   <http://qudt.org/vocab/quantitykind/> .
 @prefix owl:     <http://www.w3.org/2002/07/owl#> .
 @prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
@@ -38,7 +41,10 @@
     sh:declare [ sh:prefix "sosa" ; sh:namespace "http://www.w3.org/ns/sosa/"^^xsd:anyURI ] ;
     sh:declare [ sh:prefix "rdf"  ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ] ;
     sh:declare [ sh:prefix "rdfs" ; sh:namespace "http://www.w3.org/2000/01/rdf-schema#"^^xsd:anyURI ] ;
-    sh:declare [ sh:prefix "xsd"  ; sh:namespace "http://www.w3.org/2001/XMLSchema#"^^xsd:anyURI ] .
+    sh:declare [ sh:prefix "xsd"  ; sh:namespace "http://www.w3.org/2001/XMLSchema#"^^xsd:anyURI ] ;
+    sh:declare [ sh:prefix "qudt" ; sh:namespace "http://qudt.org/schema/qudt/"^^xsd:anyURI ] ;
+    sh:declare [ sh:prefix "unit" ; sh:namespace "http://qudt.org/vocab/unit/"^^xsd:anyURI ] ;
+    sh:declare [ sh:prefix "qkind" ; sh:namespace "http://qudt.org/vocab/quantitykind/"^^xsd:anyURI ] .
 
 
 #################################################################
@@ -113,9 +119,113 @@ reg:lifeSafetyLane a owl:DatatypeProperty ; rdfs:domain reg:IngressLane ; rdfs:r
     rdfs:label "life-safety lane" ;
     rdfs:comment "True when the lane feeds the input region of a machine carrying an re:LifeSafetySequence." .
 
-reg:unit a owl:DatatypeProperty ; rdfs:domain reg:LaneAxis ; rdfs:range xsd:string ;
-    rdfs:label "unit" ;
-    rdfs:comment "UCUM code, or 'ordinal'/'dimensionless' for normalized machine-native lanes. SOSA carries no unit on hasSimpleResult, so units are declared here." .
+# ── Units: UCUM canonical in data, QUDT canonical in semantics ───────────
+#
+# SOSA carries no unit on hasSimpleResult, so the unit contract lives here.
+# The split is deliberate. UCUM codes are what travel on the wire and what a
+# device bridge can emit without an ontology; QUDT is what makes dimension
+# compatibility and conversion *provable*, because qudt:hasQuantityKind,
+# qudt:conversionMultiplier and qudt:conversionOffset are asserted facts a
+# reasoner and these shapes can join against. OM is a bridge only: OM-native
+# contributions are mapped to UCUM at ingest, never made primary.
+
+reg:Unit a owl:Class ;
+    rdfs:label "Unit" ;
+    rdfs:comment "A unit as it arrives on the wire: a system, a code within that system, and optional display text. Mirrors the JSON unit object exactly, so an adapter can serialize it without interpretation." .
+
+reg:unitSystem a owl:DatatypeProperty ; rdfs:domain reg:Unit ; rdfs:range xsd:anyURI ;
+    rdfs:label "unit system" ;
+    rdfs:comment "Code system the unit code belongs to. UCUM is http://unitsofmeasure.org and is the only system admitted without a declared bridge." .
+
+reg:unitCode a owl:DatatypeProperty ; rdfs:domain reg:Unit ; rdfs:range xsd:string ;
+    rdfs:label "unit code" ;
+    rdfs:comment "The code within reg:unitSystem. For UCUM this must already be in canonical UCUM form: these shapes compare codes as strings and cannot parse UCUM, so 'mg/dL' and 'mg.dL-1' are different codes here even though UCUM makes them equal. Canonicalization is a corpus-time job, not a boundary-time one." .
+
+reg:unitDisplay a owl:DatatypeProperty ; rdfs:domain reg:Unit ; rdfs:range xsd:string ;
+    rdfs:label "unit display" ;
+    rdfs:comment "Original human-readable unit text, preserved separately so normalization never destroys what the source actually said." .
+
+reg:canonicalUcum a owl:DatatypeProperty ; rdfs:domain reg:LaneAxis ; rdfs:range xsd:string ;
+    rdfs:label "canonical UCUM code" ;
+    rdfs:comment "The unit the vector position is stored in. Values written to the reality vector are always in this unit." .
+
+reg:expectedUcum a owl:DatatypeProperty ; rdfs:domain reg:LaneAxis ; rdfs:range xsd:string ;
+    rdfs:label "expected UCUM code" ;
+    rdfs:comment "The unit sources are expected to send. Usually equal to canonicalUcum; differs where the field convention and the storage convention differ." .
+
+reg:acceptedUcum a owl:DatatypeProperty ; rdfs:domain reg:LaneAxis ; rdfs:range xsd:string ;
+    rdfs:label "accepted UCUM code" ;
+    rdfs:comment "Every unit an admission may arrive in. Must include canonicalUcum. A unit absent from this list is refused rather than guessed at." .
+
+reg:quantityKind a owl:ObjectProperty ; rdfs:domain reg:LaneAxis ;
+    rdfs:label "quantity kind" ;
+    rdfs:comment "QUDT quantity kind IRI. Two units are dimension-compatible when they share this; that is the check a bare UCUM string cannot support." .
+
+reg:qudtUnitIri a owl:ObjectProperty ; rdfs:domain reg:LaneAxis ;
+    rdfs:label "QUDT unit IRI" ;
+    rdfs:comment "QUDT unit individual for canonicalUcum. Carries the conversion facts: qudt:conversionMultiplier and, for affine units only, qudt:conversionOffset." .
+
+reg:conversionPolicy a owl:ObjectProperty ; rdfs:domain reg:LaneAxis ; rdfs:range reg:ConversionPolicy ;
+    rdfs:label "conversion policy" .
+
+reg:scaleType a owl:ObjectProperty ; rdfs:domain reg:LaneAxis ; rdfs:range reg:ScaleType ;
+    rdfs:label "scale type" ;
+    rdfs:comment "Stevens scale of the position. Not in the original five-point design, added because conversionPolicy is otherwise unguarded: 'linear' applied to an interval scale silently drops the offset, and applied to an ordinal it is a category error. The scale type makes the correct policy derivable rather than a matter of care." .
+
+reg:ConversionPolicy a owl:Class ; rdfs:label "Conversion Policy" .
+reg:ScaleType a owl:Class ; rdfs:label "Scale Type" .
+
+reg:NoConversion a owl:NamedIndividual , reg:ConversionPolicy ;
+    rdfs:label "none" ;
+    rdfs:comment "Only the canonical unit is accepted; nothing is ever converted." .
+
+reg:LinearConversion a owl:NamedIndividual , reg:ConversionPolicy ;
+    rdfs:label "linear" ;
+    rdfs:comment "Multiplicative only: value x multiplier. Valid on ratio scales." .
+
+reg:AffineConversion a owl:NamedIndividual , reg:ConversionPolicy ;
+    rdfs:label "affine" ;
+    rdfs:comment "Multiplier and offset. Required wherever the QUDT unit carries a non-zero qudt:conversionOffset — in practice temperature. Declaring such an axis 'linear' produces plausible, wrong numbers, which is why it is checked rather than trusted." .
+
+reg:ProhibitedConversion a owl:NamedIndividual , reg:ConversionPolicy ;
+    rdfs:label "prohibited" ;
+    rdfs:comment "Conversion is meaningless here. Ordinal and nominal positions take this: rescaling a progression ordinal is a category error, not an arithmetic one." .
+
+[] a owl:AllDifferent ; owl:distinctMembers ( reg:NoConversion reg:LinearConversion reg:AffineConversion reg:ProhibitedConversion ) .
+
+reg:RatioScale a owl:NamedIndividual , reg:ScaleType ;
+    rdfs:label "ratio" ;
+    rdfs:comment "True zero; ratios meaningful. Heart rate, mass, concentration." .
+
+reg:IntervalScale a owl:NamedIndividual , reg:ScaleType ;
+    rdfs:label "interval" ;
+    rdfs:comment "Arbitrary zero; differences meaningful, ratios not. Celsius." .
+
+reg:OrdinalScale a owl:NamedIndividual , reg:ScaleType ;
+    rdfs:label "ordinal" ;
+    rdfs:comment "Ordered categories. The machine-native progression ordinals that most of this corpus writes." .
+
+reg:NominalScale a owl:NamedIndividual , reg:ScaleType ;
+    rdfs:label "nominal" ;
+    rdfs:comment "Unordered categories; flags and codes." .
+
+[] a owl:AllDifferent ; owl:distinctMembers ( reg:RatioScale reg:IntervalScale reg:OrdinalScale reg:NominalScale ) .
+
+reg:UCUM_SYSTEM a owl:NamedIndividual ;
+    rdfs:label "UCUM" ;
+    rdfs:comment "Marker for the canonical wire code system, http://unitsofmeasure.org." .
+
+reg:bridgesToUcum a owl:DatatypeProperty ;
+    rdfs:label "bridges to UCUM" ;
+    rdfs:comment "Declared on a non-UCUM unit to give the UCUM code it maps to. This is the OM escape hatch: OM-native data is admissible only where the bridge is declared, and the bridge is what gets stored." .
+
+reg:observedUnit a owl:ObjectProperty ; rdfs:range reg:Unit ;
+    rdfs:label "observed unit" ;
+    rdfs:comment "The unit the value actually arrived in, per position." .
+
+reg:originalValue a owl:DatatypeProperty ;
+    rdfs:label "original value" ;
+    rdfs:comment "The value as received, before normalization. Always recorded, even when no conversion occurred, so audit records have one shape." .
 
 reg:minValue a owl:DatatypeProperty ; rdfs:domain reg:LaneAxis ;
     rdfs:label "minimum value" .
@@ -419,14 +529,151 @@ reg:LaneAxisShape
         sh:message "An axis must be named; an unnamed position has no meaning to check a value against." ;
     ] ;
     sh:property [
-        sh:path reg:unit ;
+        sh:path reg:canonicalUcum ;
         sh:datatype xsd:string ; sh:minLength 1 ;
         sh:minCount 1 ; sh:maxCount 1 ;
-        sh:message "An axis must declare its unit (UCUM code, or 'ordinal'/'dimensionless'). Unit drift is invisible to range checks." ;
+        sh:message "An axis must declare the canonical UCUM code it is stored in. Unit drift is invisible to range checks." ;
+    ] ;
+    sh:property [
+        sh:path reg:expectedUcum ;
+        sh:datatype xsd:string ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:acceptedUcum ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:message "An axis must list every unit it accepts. An unlisted unit is refused, never guessed at." ;
+    ] ;
+    sh:property [
+        sh:path reg:quantityKind ;
+        sh:nodeKind sh:IRI ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "An axis must name its QUDT quantity kind; dimension compatibility is not decidable from a UCUM string alone." ;
+    ] ;
+    sh:property [
+        sh:path reg:qudtUnitIri ;
+        sh:nodeKind sh:IRI ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:conversionPolicy ;
+        sh:class reg:ConversionPolicy ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "An axis must declare its conversion policy." ;
+    ] ;
+    sh:property [
+        sh:path reg:scaleType ;
+        sh:class reg:ScaleType ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "An axis must declare its scale type; without it the conversion policy cannot be checked for sense." ;
     ] ;
     sh:property [
         sh:path reg:observableProperty ;
         sh:maxCount 1 ;
+    ] ;
+
+    # U1. The canonical unit must itself be accepted.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Canonical UCUM code {?value} is not in the axis's accepted list." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:canonicalUcum ?value .
+                FILTER NOT EXISTS { $this reg:acceptedUcum ?value }
+            }
+        """ ;
+    ] ;
+
+    # U2. A policy of 'none' or 'prohibited' means exactly one accepted unit.
+    # This is what makes the matching ingress gate defence-in-depth rather
+    # than the primary check: a clean corpus cannot reach it.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "The axis forbids conversion but accepts {?value}, which is not its canonical unit; it could never be admitted." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:conversionPolicy ?policy ;
+                      reg:canonicalUcum ?canonical ;
+                      reg:acceptedUcum ?value .
+                FILTER (?policy IN (reg:NoConversion, reg:ProhibitedConversion))
+                FILTER (?value != ?canonical)
+            }
+        """ ;
+    ] ;
+
+    # U3. Ordinal and nominal positions are not convertible quantities.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "An ordinal or nominal axis must prohibit conversion; rescaling a category is a category error, not an arithmetic one." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:scaleType ?value ;
+                      reg:conversionPolicy ?policy .
+                FILTER (?value IN (reg:OrdinalScale, reg:NominalScale))
+                FILTER (?policy != reg:ProhibitedConversion)
+            }
+        """ ;
+    ] ;
+
+    # U4. The affine check, made decidable by QUDT.
+    # qudt:conversionOffset is asserted only where it is non-zero — in
+    # practice DEG_C and DEG_F — so an axis whose QUDT unit carries one and
+    # which declares 'linear' would silently drop the offset.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Axis unit carries a QUDT conversion offset of {?value} but the axis declares a linear conversion; the offset would be silently dropped." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:conversionPolicy reg:LinearConversion ;
+                      reg:qudtUnitIri ?qudtUnit .
+                ?qudtUnit qudt:conversionOffset ?value .
+                FILTER (?value != 0)
+            }
+        """ ;
+    ] ;
+
+    # U5. Interval scales cannot be linear either, offset or not.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "An interval-scale axis declares a linear conversion; differences are meaningful on an interval scale but ratios are not." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:scaleType ?value ;
+                      reg:conversionPolicy reg:LinearConversion .
+                FILTER (?value = reg:IntervalScale)
+            }
+        """ ;
+    ] ;
+
+    # U6. Quantity-kind agreement between the axis and its QUDT unit.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "The axis quantity kind and its QUDT unit's quantity kind disagree; one of the two annotations is wrong." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:quantityKind ?value ;
+                      reg:qudtUnitIri ?qudtUnit .
+                FILTER EXISTS { ?qudtUnit qudt:hasQuantityKind ?anyKind }
+                FILTER NOT EXISTS { ?qudtUnit qudt:hasQuantityKind ?value }
+            }
+        """ ;
     ] ;
 
     sh:sparql [
@@ -767,6 +1014,82 @@ reg:IngressAdmissionShape
         """ ;
     ] ;
 
+    # ── I3b. Units ───────────────────────────────────────────────────────
+    #
+    # The effective UCUM code of an arriving value is its code when the system
+    # is UCUM, and its declared bridge otherwise. Everything below judges that
+    # effective code against the axis contract.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Value arrived in UCUM code {?value}, which the target axis does not accept." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:targetLane ?lane ;
+                      reg:hasValueAt ?slot .
+                ?slot reg:atIndex ?idx ; reg:observedUnit ?unit .
+                ?unit reg:unitCode ?rawCode ; reg:unitSystem ?system .
+                OPTIONAL { ?unit reg:bridgesToUcum ?bridged }
+                BIND(IF(STR(?system) = "http://unitsofmeasure.org", ?rawCode, ?bridged) AS ?value)
+                ?lane reg:hasAxis ?axis .
+                ?axis re:axisIndex ?idx .
+                FILTER BOUND(?value)
+                FILTER NOT EXISTS { ?axis reg:acceptedUcum ?value }
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Value arrived in {?value}, which differs from the axis canonical unit, but the axis forbids conversion." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:targetLane ?lane ;
+                      reg:hasValueAt ?slot .
+                ?slot reg:atIndex ?idx ; reg:observedUnit ?unit .
+                ?unit reg:unitCode ?rawCode ; reg:unitSystem ?system .
+                OPTIONAL { ?unit reg:bridgesToUcum ?bridged }
+                BIND(IF(STR(?system) = "http://unitsofmeasure.org", ?rawCode, ?bridged) AS ?value)
+                ?lane reg:hasAxis ?axis .
+                ?axis re:axisIndex ?idx ;
+                      reg:canonicalUcum ?canonical ;
+                      reg:conversionPolicy ?policy .
+                FILTER BOUND(?value)
+                FILTER (?value != ?canonical)
+                FILTER (?policy IN (reg:NoConversion, reg:ProhibitedConversion))
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Value arrived in the canonical unit but the normalized value {?value} differs from the original; nothing should have been converted." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:targetLane ?lane ;
+                      reg:hasValueAt ?slot .
+                ?slot reg:atIndex ?idx ;
+                      reg:observedUnit ?unit ;
+                      reg:value ?value ;
+                      reg:originalValue ?original .
+                ?unit reg:unitCode ?rawCode ; reg:unitSystem ?system .
+                OPTIONAL { ?unit reg:bridgesToUcum ?bridged }
+                BIND(IF(STR(?system) = "http://unitsofmeasure.org", ?rawCode, ?bridged) AS ?effective)
+                ?lane reg:hasAxis ?axis .
+                ?axis re:axisIndex ?idx ; reg:canonicalUcum ?canonical .
+                FILTER BOUND(?effective)
+                FILTER (?effective = ?canonical)
+                FILTER (?value != ?original)
+            }
+        """ ;
+    ] ;
+
     # ── I4. Freshness and replay ─────────────────────────────────────────
     sh:sparql [
         a sh:SPARQLConstraint ;
@@ -832,6 +1155,7 @@ reg:IngressAdmissionShape
 reg:ValueSlotShape
     a sh:NodeShape ;
     rdfs:label "Indexed value slot" ;
+    rdfs:comment "reg:value is the NORMALIZED value, in the axis's canonical UCUM unit — it is what reaches the reality vector and what every bounds and enum check judges. reg:originalValue and reg:observedUnit preserve what the source actually sent." ;
     sh:closed true ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [
@@ -847,7 +1171,67 @@ reg:ValueSlotShape
             [ sh:datatype xsd:integer ]
             [ sh:datatype xsd:double ]
         ) ;
-        sh:message "A slot carries exactly one numeric value; canonical serialization is xsd:decimal." ;
+        sh:message "A slot carries exactly one normalized numeric value; canonical serialization is xsd:decimal." ;
+    ] ;
+    sh:property [
+        sh:path reg:originalValue ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:or (
+            [ sh:datatype xsd:decimal ]
+            [ sh:datatype xsd:integer ]
+            [ sh:datatype xsd:double ]
+        ) ;
+        sh:message "A slot must record the value as received, even when nothing was converted. A normalized-only record cannot be audited against the source." ;
+    ] ;
+    sh:property [
+        sh:path reg:observedUnit ;
+        sh:node reg:UnitShape ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A slot must record the unit its value arrived in." ;
+    ] .
+
+
+reg:UnitShape
+    a sh:NodeShape ;
+    rdfs:label "Wire unit" ;
+    sh:closed true ;
+    sh:ignoredProperties ( rdf:type rdfs:label rdfs:comment ) ;
+    sh:property [
+        sh:path reg:unitSystem ;
+        sh:datatype xsd:anyURI ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A unit must name its code system. UCUM is http://unitsofmeasure.org." ;
+    ] ;
+    sh:property [
+        sh:path reg:unitCode ;
+        sh:datatype xsd:string ; sh:minLength 1 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A unit must carry a code within its system." ;
+    ] ;
+    sh:property [
+        sh:path reg:unitDisplay ;
+        sh:datatype xsd:string ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:bridgesToUcum ;
+        sh:datatype xsd:string ; sh:maxCount 1 ;
+    ] ;
+
+    # A non-UCUM unit is admissible only where its bridge to UCUM is declared.
+    # This is the OM path: map at ingest, never make OM primary.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Unit is in system {?value}, which is not UCUM, and declares no reg:bridgesToUcum mapping." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:unitSystem ?value .
+                FILTER (STR(?value) != "http://unitsofmeasure.org")
+                FILTER NOT EXISTS { $this reg:bridgesToUcum ?ucum }
+            }
+        """ ;
     ] .
 
 

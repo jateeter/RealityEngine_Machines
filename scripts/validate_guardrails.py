@@ -42,6 +42,7 @@ FIXTURES = REPO_ROOT / "semantics" / "shapes" / "fixtures"
 CASES_TRIG = FIXTURES / "cases.trig"
 CASES_JSON = FIXTURES / "cases.json"
 LANE_REGISTRY = FIXTURES / "lane-registry.ttl"
+QUDT_SUBSET = FIXTURES / "qudt-subset.ttl"
 
 FIXTURE_NS = "https://realityengine.example.org/fixtures/guardrails#"
 
@@ -50,7 +51,7 @@ SHACL = "http://www.w3.org/ns/shacl#"
 
 def load_base() -> Graph:
     base = Graph()
-    for path in (ONTOLOGY, SHAPES, LANE_REGISTRY):
+    for path in (ONTOLOGY, SHAPES, QUDT_SUBSET, LANE_REGISTRY):
         base.parse(path, format="turtle")
     return base
 

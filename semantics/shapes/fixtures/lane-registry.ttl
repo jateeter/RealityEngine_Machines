@@ -2,17 +2,56 @@
 # domains/region-allocation.json. Offsets and lane ids are real ones from the
 # corpus so the fixture stays recognisable.
 #
-# Loaded by every case in cases.json.
+# Unit annotations follow the corpus decision: UCUM canonical in data, QUDT
+# canonical in semantics, OM bridge-only. Loaded by every case in cases.json,
+# together with qudt-subset.ttl.
 
-@prefix reg:  <https://realityengine.example.org/ontology/re-guardrails#> .
-@prefix re:   <https://realityengine.example.org/ontology/re-core#> .
-@prefix fx:   <https://realityengine.example.org/fixtures/guardrails#> .
-@prefix sosa: <http://www.w3.org/ns/sosa/> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix reg:   <https://realityengine.example.org/ontology/re-guardrails#> .
+@prefix re:    <https://realityengine.example.org/ontology/re-core#> .
+@prefix fx:    <https://realityengine.example.org/fixtures/guardrails#> .
+@prefix sosa:  <http://www.w3.org/ns/sosa/> .
+@prefix unit:  <http://qudt.org/vocab/unit/> .
+@prefix qkind: <http://qudt.org/vocab/quantitykind/> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+#################################################################
+# Wire units, shared by the cases.
+#################################################################
+
+fx:u-unity    a reg:Unit ; rdfs:label "unity" ;
+    reg:unitSystem "http://unitsofmeasure.org"^^xsd:anyURI ; reg:unitCode "1" .
+
+fx:u-per-min  a reg:Unit ; rdfs:label "per minute" ;
+    reg:unitSystem "http://unitsofmeasure.org"^^xsd:anyURI ; reg:unitCode "/min" ;
+    reg:unitDisplay "bpm" .
+
+fx:u-cel      a reg:Unit ; rdfs:label "degree Celsius" ;
+    reg:unitSystem "http://unitsofmeasure.org"^^xsd:anyURI ; reg:unitCode "Cel" .
+
+fx:u-kelvin   a reg:Unit ; rdfs:label "kelvin" ;
+    reg:unitSystem "http://unitsofmeasure.org"^^xsd:anyURI ; reg:unitCode "K" .
+
+# A unit the axis does not accept, in the right system.
+fx:u-mg-per-dl a reg:Unit ; rdfs:label "mg/dL" ;
+    reg:unitSystem "http://unitsofmeasure.org"^^xsd:anyURI ; reg:unitCode "mg/dL" .
+
+# OM-native contribution, bridged to UCUM at ingest. Admissible.
+fx:u-om-per-min-bridged a reg:Unit ; rdfs:label "OM reciprocal minute (bridged)" ;
+    reg:unitSystem "http://www.ontology-of-units-of-measure.org/resource/om-2/"^^xsd:anyURI ;
+    reg:unitCode "reciprocalMinute" ;
+    reg:unitDisplay "beats per minute" ;
+    reg:bridgesToUcum "/min" .
+
+# The same contribution with no bridge declared. Refused: OM is a bridge, not
+# a primary system.
+fx:u-om-per-min-unbridged a reg:Unit ; rdfs:label "OM reciprocal minute (unbridged)" ;
+    reg:unitSystem "http://www.ontology-of-units-of-measure.org/resource/om-2/"^^xsd:anyURI ;
+    reg:unitCode "reciprocalMinute" .
 
 #################################################################
 # Life-safety lane: the Fall Detection input region.
+# Machine-native progression ordinals: unity-coded, conversion prohibited.
 #################################################################
 
 fx:lane-fall-detection-input
@@ -31,18 +70,26 @@ fx:axis-fall-0
     a reg:LaneAxis ;
     re:axisIndex 0 ;
     re:axisName "motion_progression_ordinal" ;
-    reg:unit "ordinal" ;
+    reg:canonicalUcum "1" ; reg:acceptedUcum "1" ; reg:expectedUcum "1" ;
+    reg:quantityKind qkind:Dimensionless ;
+    reg:qudtUnitIri unit:UNITLESS ;
+    reg:conversionPolicy reg:ProhibitedConversion ;
+    reg:scaleType reg:OrdinalScale ;
     reg:permittedValue 0 , 1 , 2 , 3 .
 
 fx:axis-fall-1
     a reg:LaneAxis ;
     re:axisIndex 1 ;
     re:axisName "stillness_progression_ordinal" ;
-    reg:unit "ordinal" ;
+    reg:canonicalUcum "1" ; reg:acceptedUcum "1" ; reg:expectedUcum "1" ;
+    reg:quantityKind qkind:Dimensionless ;
+    reg:qudtUnitIri unit:UNITLESS ;
+    reg:conversionPolicy reg:ProhibitedConversion ;
+    reg:scaleType reg:OrdinalScale ;
     reg:permittedValue 0 , 1 , 2 , 3 .
 
 #################################################################
-# Measured device lane: HealthKit heart rate.
+# Measured device lane: HealthKit heart rate. Ratio scale, linear.
 #################################################################
 
 fx:lane-healthkit-heart-rate
@@ -59,7 +106,12 @@ fx:axis-hr-0
     a reg:LaneAxis ;
     re:axisIndex 0 ;
     re:axisName "heart_rate" ;
-    reg:unit "/min" ;
+    reg:canonicalUcum "/min" ; reg:expectedUcum "/min" ;
+    reg:acceptedUcum "/min" ;
+    reg:quantityKind qkind:Frequency ;
+    reg:qudtUnitIri unit:PER-MIN ;
+    reg:conversionPolicy reg:LinearConversion ;
+    reg:scaleType reg:RatioScale ;
     reg:minValue 20 ;
     reg:maxValue 250 ;
     reg:observableProperty fx:prop-heart-rate .
@@ -68,11 +120,42 @@ fx:axis-hr-1
     a reg:LaneAxis ;
     re:axisIndex 1 ;
     re:axisName "heart_rate_confidence" ;
-    reg:unit "dimensionless" ;
+    reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
+    reg:quantityKind qkind:Dimensionless ;
+    reg:qudtUnitIri unit:UNITLESS ;
+    reg:conversionPolicy reg:NoConversion ;
+    reg:scaleType reg:RatioScale ;
     reg:minValue 0.0 ;
     reg:maxValue 1.0 .
 
 fx:prop-heart-rate a sosa:ObservableProperty ; rdfs:label "heart rate" .
+
+#################################################################
+# Environment lane: the affine case. Canonical Celsius, Kelvin accepted.
+#################################################################
+
+fx:lane-home-environment-temperature
+    a reg:IngressLane ;
+    reg:laneId "home-environment-temperature" ;
+    reg:laneOffset 4400 ;
+    reg:laneLength 1 ;
+    reg:maxStalenessMs 900000 ;
+    reg:permittedProvider "healthkit" , "mqtt" ;
+    reg:permittedProvenance reg:Measured ;
+    reg:hasAxis fx:axis-temp-0 .
+
+fx:axis-temp-0
+    a reg:LaneAxis ;
+    re:axisIndex 0 ;
+    re:axisName "ambient_temperature" ;
+    reg:canonicalUcum "Cel" ; reg:expectedUcum "Cel" ;
+    reg:acceptedUcum "Cel" , "K" ;
+    reg:quantityKind qkind:Temperature ;
+    reg:qudtUnitIri unit:DEG_C ;
+    reg:conversionPolicy reg:AffineConversion ;
+    reg:scaleType reg:IntervalScale ;
+    reg:minValue -40 ;
+    reg:maxValue 60 .
 
 #################################################################
 # Agent completion lane: model output only.
@@ -92,14 +175,22 @@ fx:axis-risk-0
     a reg:LaneAxis ;
     re:axisIndex 0 ;
     re:axisName "risk_flag" ;
-    reg:unit "ordinal" ;
+    reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
+    reg:quantityKind qkind:Dimensionless ;
+    reg:qudtUnitIri unit:UNITLESS ;
+    reg:conversionPolicy reg:ProhibitedConversion ;
+    reg:scaleType reg:NominalScale ;
     reg:permittedValue 0 , 1 .
 
 fx:axis-risk-1
     a reg:LaneAxis ;
     re:axisIndex 1 ;
     re:axisName "risk_confidence" ;
-    reg:unit "dimensionless" ;
+    reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
+    reg:quantityKind qkind:Dimensionless ;
+    reg:qudtUnitIri unit:UNITLESS ;
+    reg:conversionPolicy reg:NoConversion ;
+    reg:scaleType reg:RatioScale ;
     reg:minValue 0.0 ;
     reg:maxValue 1.0 .
 

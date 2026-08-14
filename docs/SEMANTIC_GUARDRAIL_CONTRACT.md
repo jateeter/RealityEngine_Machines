@@ -82,8 +82,13 @@ than silently narrowed to the fields we happen to read.
 | I1 | Region addressing | Write offset ≠ lane offset; write length past the lane; a value at an index the lane does not declare |
 | I2 | Authority | Provider not on the lane's permitted list; caller-supplied lane binding without `reg:callerAuthority`; source autonomy below the lane's floor; a life-safety lane written without a declared autonomy; any write under `re:Observe` |
 | I3 | Meaning | Value outside declared axis bounds; value outside an enumerated domain; provenance class not permitted on the lane; `reg:Measured` with no `sosa:madeBySensor`; `reg:Derived`/`reg:Inferred` with no `sosa:usedProcedure` |
+| I3b | Units | Arriving unit not in the axis's `reg:acceptedUcum`; a non-UCUM system with no declared bridge; a converted value on an axis that forbids conversion; a changed value where nothing should have been converted; a slot with no recorded unit |
 | I4 | Freshness | Received later than the lane's staleness ceiling allows; observed after it was received |
 | I5 | Model binding | `reg:Inferred` with no `reg:envelopeId` or no `reg:correlationId` |
+
+Bounds and enumerated domains in I3 are checked against the **normalized**
+value in the axis's canonical unit, never the value as received. Checking a raw
+figure against canonical bounds is the bug this ordering exists to prevent.
 
 ### I2 and the completion endpoint
 
@@ -200,9 +205,10 @@ A guardrail that C++, Lisp, Scala and the TypeScript PE implement differently
 is worse than none, because the multi-engine registry lets a caller route
 around the strict one.
 
-`semantics/shapes/fixtures/cases.trig` is the parity suite: 32 named graphs,
-each an admission or dispatch, with the expected decision in `cases.json`.
-Every runtime must reproduce all 32 decisions exactly.
+`semantics/shapes/fixtures/cases.trig` is the parity suite: 43 named graphs —
+admissions, dispatches and malformed lane contracts — with the expected
+decision in `cases.json`. Every runtime must reproduce all 43 decisions
+exactly.
 
 ```bash
 ./scripts/validate-guardrails.sh
@@ -210,7 +216,7 @@ Every runtime must reproduce all 32 decisions exactly.
 
 The script skips cleanly (exit 0) when pyshacl is absent, mirroring
 `reason-owl.sh`; CI containers install it to make the gate real. As of this
-review the suite is 32/32 against the reference shapes graph.
+review the suite is 43/43 against the reference shapes graph.
 
 This is also the argument for SHACL over the current approach.
 `tests/contracts/owl_semantics_test.py` is 242 lines of Python doing what
@@ -252,11 +258,156 @@ Two deliberate modeling choices, recorded so they are not re-litigated:
   corpus and the lane registry — two sources naming one position differently
   stays an inconsistency rather than a spelling variant.
 - **Units are declared on the axis, not taken from SOSA.**
-  `sosa:hasSimpleResult` carries no unit. `reg:unit` holds a UCUM code, or
-  `ordinal`/`dimensionless` for normalized machine-native lanes. UCUM is not a
-  W3C standard; QUDT and OM are the alternatives. This is a real gap in the
-  standards stack and the choice should be made explicitly before the lane
-  registry is populated corpus-wide.
+  `sosa:hasSimpleResult` carries no unit, so the unit contract lives on
+  `reg:LaneAxis`. See the next section.
+
+## Units and quantity kinds
+
+**Decision: UCUM canonical in data, QUDT canonical in semantics, OM
+bridge-only.**
+
+The split follows what each vocabulary is good for. UCUM codes are what travel
+on the wire and what a device bridge can emit without carrying an ontology.
+QUDT is what makes dimension compatibility and conversion *provable*, because
+`qudt:hasQuantityKind`, `qudt:conversionMultiplier` and
+`qudt:conversionOffset` are asserted facts a reasoner and these shapes can join
+against. OM is a bridge: an OM-native contribution is mapped to UCUM at ingest
+and the UCUM code is what gets stored.
+
+### The wire contract
+
+A unit on the wire is an object, not a string — `reg:Unit`, mirroring the JSON
+exactly so an adapter serializes it without interpreting it:
+
+| Field | |
+| --- | --- |
+| `reg:unitSystem` | `http://unitsofmeasure.org` for UCUM. Any other system requires `reg:bridgesToUcum`. |
+| `reg:unitCode` | The code within that system. |
+| `reg:unitDisplay` | Original human-readable text, preserved so normalization never destroys what the source said. |
+| `reg:bridgesToUcum` | The UCUM code a non-UCUM unit maps to. The OM path. |
+
+### The axis contract
+
+| Annotation | |
+| --- | --- |
+| `reg:canonicalUcum` | The unit the vector position is stored in |
+| `reg:expectedUcum` | What sources are expected to send |
+| `reg:acceptedUcum` | Every admissible arriving unit; must include the canonical one |
+| `reg:quantityKind` | QUDT quantity kind IRI — the dimension check a bare UCUM string cannot support |
+| `reg:qudtUnitIri` | QUDT unit individual, carrying the conversion facts |
+| `reg:conversionPolicy` | `none` \| `linear` \| `affine` \| `prohibited` |
+| `reg:scaleType` | `ratio` \| `interval` \| `ordinal` \| `nominal` |
+
+### `reg:scaleType` is an addition, and why
+
+`conversionPolicy` is otherwise unguarded. `linear` applied to an interval
+scale silently drops the offset; applied to an ordinal it is a category error
+rather than an arithmetic one — and most of this corpus writes machine-native
+progression ordinals, not physical quantities. The Stevens scale makes the
+correct policy derivable instead of a matter of care, and three corpus-time
+rules fall out of it:
+
+- an ordinal or nominal axis must declare `prohibited`
+- an interval axis may not declare `linear`
+- an axis whose QUDT unit carries a non-zero `qudt:conversionOffset` may not
+  declare `linear`
+
+The third is the one worth the whole exercise. QUDT asserts
+`qudt:conversionOffset` only where it is non-zero — in practice `unit:DEG_C`
+(273.15) and `unit:DEG_F`. So "this axis must be affine, not linear" stops
+being a naming convention a reviewer has to notice and becomes a check that
+fails in CI. `semantics/shapes/fixtures/cases.trig` proves it in
+`reject-affine-declared-linear`.
+
+### Normalization is PE's job, before the vector write
+
+The PE normalizes to the axis's canonical unit and writes the normalized
+figure. Every value slot records **both** quantities and the unit received:
+
+```turtle
+[ reg:atIndex   0 ;
+  reg:value     22.0 ;          # normalized, canonical unit (Cel)
+  reg:originalValue 295.15 ;    # as received
+  reg:observedUnit fx:u-kelvin ]
+```
+
+`reg:originalValue` is required even when nothing was converted, so audit
+records have one shape rather than two. Dimension-incompatible input is refused
+by the accepted-unit gate before any conversion is attempted.
+
+### A limitation to design around
+
+**These shapes compare UCUM codes as strings.** SHACL cannot parse UCUM, so
+`mg/dL` and `mg.dL-1` are different codes here even though UCUM makes them
+equal, as are `/min` and `min-1`. Codes must therefore already be in a single
+canonical UCUM form by the time they reach a boundary graph. That is a
+corpus-time and adapter-time job — a UCUM canonicalizer in the projector and in
+the adapter SDK — not something the guardrail can do for you. Without it the
+failure mode is false rejection, which is at least safe and loud.
+
+### The QUDT subset
+
+Do not merge all of QUDT into a validation or reasoning run; it is large and
+the CI reasoner will not stay tractable. Extract a **pinned subset** containing
+only the quantity kinds and units the corpus actually references, generated by
+script from an upstream QUDT release and version-stamped, and merge that.
+
+`semantics/shapes/fixtures/qudt-subset.ttl` is a fixture-scale stand-in,
+hand-written so the unit gates can be exercised. Its header says so. It is
+**not** an extraction and its conversion facts are representative rather than
+verified against a QUDT release; a real extraction is required before the unit
+gates run against the live corpus.
+
+### OM
+
+Bridge only. `reg:bridgesToUcum` on a non-UCUM unit is what makes an OM-native
+contribution admissible, and the bridged UCUM code is what the axis contract is
+evaluated against. An OM unit with no declared bridge is refused —
+`reject-om-unbridged-unit`. OM never becomes primary, so no part of the corpus
+has to understand two unit ontologies.
+
+### The JSON side, not yet landed
+
+The projector work is on hold, so `schemas/region-allocation.schema.json` is
+unchanged — its `serviceLanes` items are `additionalProperties: false` and
+carry no unit fields yet. The intended shape, ready to lift:
+
+```json
+"unit": {
+  "type": "object",
+  "required": ["system", "code"],
+  "additionalProperties": false,
+  "properties": {
+    "system":  { "type": "string", "format": "uri" },
+    "code":    { "type": "string", "minLength": 1 },
+    "display": { "type": "string" },
+    "bridgesToUcum": { "type": "string", "minLength": 1 }
+  }
+},
+"axis": {
+  "type": "object",
+  "required": ["index", "name", "canonicalUcum", "acceptedUcum",
+               "quantityKind", "conversionPolicy", "scaleType"],
+  "additionalProperties": false,
+  "properties": {
+    "index":            { "type": "integer", "minimum": 0 },
+    "name":             { "type": "string", "minLength": 1 },
+    "canonicalUcum":    { "type": "string", "minLength": 1 },
+    "expectedUcum":     { "type": "string", "minLength": 1 },
+    "acceptedUcum":     { "type": "array", "items": { "type": "string" },
+                          "minItems": 1, "uniqueItems": true },
+    "quantityKind":     { "type": "string", "format": "uri" },
+    "qudtUnitIri":      { "type": "string", "format": "uri" },
+    "conversionPolicy": { "enum": ["none", "linear", "affine", "prohibited"] },
+    "scaleType":        { "enum": ["ratio", "interval", "ordinal", "nominal"] }
+  }
+}
+```
+
+Machine metadata takes the same `axis` annotations. `schemas/machine.schema.json`
+is permissive at the top level (`additionalProperties: true`) and declares no
+`metadata` properties, so adding them is non-breaking — but also unvalidated
+until the schema names them.
 
 ## Why SHACL rather than OWL
 
@@ -291,29 +442,31 @@ August 2026. Do not take a dependency on 1.2 features.
 
 Written and gated:
 
-- `semantics/shapes/re-guardrails.shacl.ttl` — vocabulary, SOSA alignment,
-  corpus-time lane shapes, ingress shapes, egress shapes.
-- `semantics/shapes/fixtures/` — lane registry fixture, 32-case parity suite.
+- `semantics/shapes/re-guardrails.shacl.ttl` — vocabulary, SOSA alignment, the
+  UCUM/QUDT unit contract, corpus-time lane shapes, ingress shapes, egress
+  shapes.
+- `semantics/shapes/fixtures/` — lane registry fixture, illustrative QUDT
+  subset, 43-case parity suite.
 - `scripts/validate_guardrails.py`, `scripts/validate-guardrails.sh`.
 
 Not yet written — in dependency order:
 
 1. **The lane projector.** `domains/region-allocation.json` declares `id`,
    `offset`, `length`, `provider`, `corpusReaders` and `corpusWriters`, which
-   is most of a lane. It does not yet declare unit, value domain, permitted
-   provenance, staleness ceiling or autonomy floor. Those fields must be added
-   to `schemas/region-allocation.schema.json` and backfilled, then a projector
-   generates the lane graph the shapes validate. Everything else depends on
-   this.
-2. **Life-safety lane derivation.** `reg:lifeSafetyLane` should be computed
+   is most of a lane. It does not yet declare the unit annotations, value
+   domain, permitted provenance, staleness ceiling or autonomy floor. Those
+   fields must be added to `schemas/region-allocation.schema.json` (the block
+   is drafted above) and backfilled, then a projector generates the lane graph
+   the shapes validate. Everything else depends on this.
+2. **A real QUDT subset extractor**, replacing the fixture stand-in, plus a
+   UCUM canonicalizer in the projector and the adapter SDK so code comparison
+   by string is sound.
+3. **Life-safety lane derivation.** `reg:lifeSafetyLane` should be computed
    from the corpus — a lane feeding the input region of a machine carrying an
    `re:LifeSafetySequence` — not hand-flagged.
-3. **Per-lane severity configuration**, so the observe→warn→block staging can
+4. **Per-lane severity configuration**, so the observe→warn→block staging can
    advance domain by domain.
-4. **The compile step** in each runtime: shapes → decision table at load.
-5. **Porting `owl_semantics_test.py`** to shapes, once (1) proves the pattern.
-6. **Wiring** `validate-guardrails.sh` into `npm run validate` and the
+5. **The compile step** in each runtime: shapes → decision table at load.
+6. **Porting `owl_semantics_test.py`** to shapes, once (1) proves the pattern.
+7. **Wiring** `validate-guardrails.sh` into `npm run validate` and the
    `RealityEngine_CI` gate list in `INTEGRATED_SPECIFICATION.md`.
-
-Open question for the corpus owners: UCUM, QUDT or OM for `reg:unit`. The
-shapes accept any string today, which is a placeholder, not a decision.

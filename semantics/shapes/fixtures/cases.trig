@@ -1,20 +1,26 @@
 # Conformance fixtures for semantics/shapes/re-guardrails.shacl.ttl.
 #
 # One named graph per case. Each is validated as:
-#     re-core.ttl + re-guardrails.shacl.ttl + lane-registry.ttl + <this graph>
+#     re-core.ttl + re-guardrails.shacl.ttl + qudt-subset.ttl
+#   + lane-registry.ttl + <this graph>
 # Expected outcomes live in cases.json.
 #
 # Every runtime that implements the guardrail must reproduce these accept and
 # reject decisions exactly. Decision parity is the point: a guardrail four
 # runtimes evaluate differently is worse than none, because the multi-engine
 # registry lets a caller route around the strict one.
+#
+# reg:value is always the NORMALIZED value in the axis's canonical UCUM unit;
+# reg:originalValue and reg:observedUnit preserve what the source sent.
 
-@prefix reg:  <https://realityengine.example.org/ontology/re-guardrails#> .
-@prefix re:   <https://realityengine.example.org/ontology/re-core#> .
-@prefix fx:   <https://realityengine.example.org/fixtures/guardrails#> .
-@prefix sosa: <http://www.w3.org/ns/sosa/> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix reg:   <https://realityengine.example.org/ontology/re-guardrails#> .
+@prefix re:    <https://realityengine.example.org/ontology/re-core#> .
+@prefix fx:    <https://realityengine.example.org/fixtures/guardrails#> .
+@prefix sosa:  <http://www.w3.org/ns/sosa/> .
+@prefix unit:  <http://qudt.org/vocab/unit/> .
+@prefix qkind: <http://qudt.org/vocab/quantitykind/> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 
 #################################################################
 # ACCEPT — ingress
@@ -31,8 +37,9 @@ fx:accept-healthkit-measured {
         reg:receivedAt "1690000001000"^^xsd:long ;
         sosa:madeBySensor fx:source-healthkit-bridge ;
         sosa:hasFeatureOfInterest fx:feature-patient-01 ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 72 ] ,
-                       [ reg:atIndex 1 ; reg:value 0.95 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 72 ; reg:originalValue 72 ; reg:observedUnit fx:u-per-min ] ,
+            [ reg:atIndex 1 ; reg:value 0.95 ; reg:originalValue 0.95 ; reg:observedUnit fx:u-unity ] .
 }
 
 fx:accept-openclaw-life-safety {
@@ -46,8 +53,9 @@ fx:accept-openclaw-life-safety {
         reg:receivedAt "1690000000500"^^xsd:long ;
         reg:underAutonomy re:Advise ;
         sosa:usedProcedure fx:procedure-risk-model ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 3 ] ,
-                       [ reg:atIndex 1 ; reg:value 2 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 3 ; reg:originalValue 3 ; reg:observedUnit fx:u-unity ] ,
+            [ reg:atIndex 1 ; reg:value 2 ; reg:originalValue 2 ; reg:observedUnit fx:u-unity ] .
 }
 
 fx:accept-ollama-completion {
@@ -62,8 +70,42 @@ fx:accept-ollama-completion {
         reg:envelopeId "env_456" ;
         reg:correlationId "corr_123" ;
         sosa:usedProcedure fx:procedure-risk-model ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 1 ] ,
-                       [ reg:atIndex 1 ; reg:value 0.82 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 1 ; reg:originalValue 1 ; reg:observedUnit fx:u-unity ] ,
+            [ reg:atIndex 1 ; reg:value 0.82 ; reg:originalValue 0.82 ; reg:observedUnit fx:u-unity ] .
+}
+
+# Kelvin in, Celsius stored. The axis is affine, so the offset is applied and
+# both quantities survive into the record.
+fx:accept-affine-conversion {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-home-environment-temperature ;
+        reg:proposedBy fx:source-healthkit-bridge ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Measured ;
+        reg:atOffset 4400 ; reg:writeLength 1 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000001000"^^xsd:long ;
+        sosa:madeBySensor fx:source-healthkit-bridge ;
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 22.0 ; reg:originalValue 295.15 ; reg:observedUnit fx:u-kelvin ] .
+}
+
+# An OM-native contribution, bridged to UCUM at ingest. The bridge is what
+# makes it admissible; OM is never primary.
+fx:accept-om-bridged-unit {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-healthkit-heart-rate ;
+        reg:proposedBy fx:source-healthkit-bridge ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Measured ;
+        reg:atOffset 4320 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000001000"^^xsd:long ;
+        sosa:madeBySensor fx:source-healthkit-bridge ;
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 72 ; reg:originalValue 72 ; reg:observedUnit fx:u-om-per-min-bridged ] ,
+            [ reg:atIndex 1 ; reg:value 0.95 ; reg:originalValue 0.95 ; reg:observedUnit fx:u-unity ] .
 }
 
 #################################################################
@@ -81,8 +123,9 @@ fx:reject-offset-mismatch {
         reg:receivedAt "1690000000500"^^xsd:long ;
         reg:underAutonomy re:Advise ;
         sosa:usedProcedure fx:procedure-risk-model ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 3 ] ,
-                       [ reg:atIndex 1 ; reg:value 2 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 3 ; reg:originalValue 3 ; reg:observedUnit fx:u-unity ] ,
+            [ reg:atIndex 1 ; reg:value 2 ; reg:originalValue 2 ; reg:observedUnit fx:u-unity ] .
 }
 
 fx:reject-write-too-long {
@@ -96,8 +139,9 @@ fx:reject-write-too-long {
         reg:receivedAt "1690000000500"^^xsd:long ;
         reg:underAutonomy re:Advise ;
         sosa:usedProcedure fx:procedure-risk-model ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 3 ] ,
-                       [ reg:atIndex 1 ; reg:value 2 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 3 ; reg:originalValue 3 ; reg:observedUnit fx:u-unity ] ,
+            [ reg:atIndex 1 ; reg:value 2 ; reg:originalValue 2 ; reg:observedUnit fx:u-unity ] .
 }
 
 fx:reject-undeclared-index {
@@ -111,8 +155,9 @@ fx:reject-undeclared-index {
         reg:receivedAt "1690000000500"^^xsd:long ;
         reg:underAutonomy re:Advise ;
         sosa:usedProcedure fx:procedure-risk-model ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 3 ] ,
-                       [ reg:atIndex 7 ; reg:value 2 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 3 ; reg:originalValue 3 ; reg:observedUnit fx:u-unity ] ,
+            [ reg:atIndex 7 ; reg:value 2 ; reg:originalValue 2 ; reg:observedUnit fx:u-unity ] .
 }
 
 #################################################################
@@ -129,8 +174,9 @@ fx:reject-provider-not-permitted {
         reg:observedAt "1690000000000"^^xsd:long ;
         reg:receivedAt "1690000001000"^^xsd:long ;
         sosa:madeBySensor fx:source-unregistered ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 72 ] ,
-                       [ reg:atIndex 1 ; reg:value 0.95 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 72 ; reg:originalValue 72 ; reg:observedUnit fx:u-per-min ] ,
+            [ reg:atIndex 1 ; reg:value 0.95 ; reg:originalValue 0.95 ; reg:observedUnit fx:u-unity ] .
 }
 
 fx:reject-caller-supplied-lane {
@@ -144,8 +190,9 @@ fx:reject-caller-supplied-lane {
         reg:receivedAt "1690000000500"^^xsd:long ;
         reg:underAutonomy re:Advise ;
         sosa:usedProcedure fx:procedure-risk-model ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 3 ] ,
-                       [ reg:atIndex 1 ; reg:value 2 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 3 ; reg:originalValue 3 ; reg:observedUnit fx:u-unity ] ,
+            [ reg:atIndex 1 ; reg:value 2 ; reg:originalValue 2 ; reg:observedUnit fx:u-unity ] .
 }
 
 fx:reject-autonomy-below-floor {
@@ -159,8 +206,9 @@ fx:reject-autonomy-below-floor {
         reg:receivedAt "1690000000500"^^xsd:long ;
         reg:underAutonomy re:Observe ;
         sosa:usedProcedure fx:procedure-risk-model ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 3 ] ,
-                       [ reg:atIndex 1 ; reg:value 2 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 3 ; reg:originalValue 3 ; reg:observedUnit fx:u-unity ] ,
+            [ reg:atIndex 1 ; reg:value 2 ; reg:originalValue 2 ; reg:observedUnit fx:u-unity ] .
 }
 
 fx:reject-life-safety-no-autonomy {
@@ -173,8 +221,9 @@ fx:reject-life-safety-no-autonomy {
         reg:observedAt "1690000000000"^^xsd:long ;
         reg:receivedAt "1690000000500"^^xsd:long ;
         sosa:usedProcedure fx:procedure-risk-model ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 3 ] ,
-                       [ reg:atIndex 1 ; reg:value 2 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 3 ; reg:originalValue 3 ; reg:observedUnit fx:u-unity ] ,
+            [ reg:atIndex 1 ; reg:value 2 ; reg:originalValue 2 ; reg:observedUnit fx:u-unity ] .
 }
 
 #################################################################
@@ -191,8 +240,9 @@ fx:reject-value-out-of-bounds {
         reg:observedAt "1690000000000"^^xsd:long ;
         reg:receivedAt "1690000001000"^^xsd:long ;
         sosa:madeBySensor fx:source-healthkit-bridge ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 720 ] ,
-                       [ reg:atIndex 1 ; reg:value 0.95 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 720 ; reg:originalValue 720 ; reg:observedUnit fx:u-per-min ] ,
+            [ reg:atIndex 1 ; reg:value 0.95 ; reg:originalValue 0.95 ; reg:observedUnit fx:u-unity ] .
 }
 
 fx:reject-value-not-in-enum {
@@ -206,8 +256,9 @@ fx:reject-value-not-in-enum {
         reg:receivedAt "1690000000500"^^xsd:long ;
         reg:underAutonomy re:Advise ;
         sosa:usedProcedure fx:procedure-risk-model ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 9 ] ,
-                       [ reg:atIndex 1 ; reg:value 2 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 9 ; reg:originalValue 9 ; reg:observedUnit fx:u-unity ] ,
+            [ reg:atIndex 1 ; reg:value 2 ; reg:originalValue 2 ; reg:observedUnit fx:u-unity ] .
 }
 
 fx:reject-provenance-not-permitted {
@@ -222,8 +273,9 @@ fx:reject-provenance-not-permitted {
         reg:envelopeId "env_1" ;
         reg:correlationId "corr_1" ;
         sosa:usedProcedure fx:procedure-risk-model ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 72 ] ,
-                       [ reg:atIndex 1 ; reg:value 0.95 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 72 ; reg:originalValue 72 ; reg:observedUnit fx:u-per-min ] ,
+            [ reg:atIndex 1 ; reg:value 0.95 ; reg:originalValue 0.95 ; reg:observedUnit fx:u-unity ] .
 }
 
 fx:reject-measured-without-sensor {
@@ -235,8 +287,9 @@ fx:reject-measured-without-sensor {
         reg:atOffset 4320 ; reg:writeLength 2 ;
         reg:observedAt "1690000000000"^^xsd:long ;
         reg:receivedAt "1690000001000"^^xsd:long ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 72 ] ,
-                       [ reg:atIndex 1 ; reg:value 0.95 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 72 ; reg:originalValue 72 ; reg:observedUnit fx:u-per-min ] ,
+            [ reg:atIndex 1 ; reg:value 0.95 ; reg:originalValue 0.95 ; reg:observedUnit fx:u-unity ] .
 }
 
 fx:reject-inferred-without-procedure {
@@ -250,8 +303,75 @@ fx:reject-inferred-without-procedure {
         reg:receivedAt "1690000002000"^^xsd:long ;
         reg:envelopeId "env_456" ;
         reg:correlationId "corr_123" ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 1 ] ,
-                       [ reg:atIndex 1 ; reg:value 0.82 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 1 ; reg:originalValue 1 ; reg:observedUnit fx:u-unity ] ,
+            [ reg:atIndex 1 ; reg:value 0.82 ; reg:originalValue 0.82 ; reg:observedUnit fx:u-unity ] .
+}
+
+#################################################################
+# REJECT — ingress: units
+#################################################################
+
+fx:reject-unit-not-accepted {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-healthkit-heart-rate ;
+        reg:proposedBy fx:source-healthkit-bridge ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Measured ;
+        reg:atOffset 4320 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000001000"^^xsd:long ;
+        sosa:madeBySensor fx:source-healthkit-bridge ;
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 72 ; reg:originalValue 72 ; reg:observedUnit fx:u-mg-per-dl ] ,
+            [ reg:atIndex 1 ; reg:value 0.95 ; reg:originalValue 0.95 ; reg:observedUnit fx:u-unity ] .
+}
+
+fx:reject-om-unbridged-unit {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-healthkit-heart-rate ;
+        reg:proposedBy fx:source-healthkit-bridge ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Measured ;
+        reg:atOffset 4320 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000001000"^^xsd:long ;
+        sosa:madeBySensor fx:source-healthkit-bridge ;
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 72 ; reg:originalValue 72 ; reg:observedUnit fx:u-om-per-min-unbridged ] ,
+            [ reg:atIndex 1 ; reg:value 0.95 ; reg:originalValue 0.95 ; reg:observedUnit fx:u-unity ] .
+}
+
+# The adapter converted something it had no licence to convert: the value
+# arrived in the canonical unit yet the normalized figure differs.
+fx:reject-unconverted-value-changed {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-healthkit-heart-rate ;
+        reg:proposedBy fx:source-healthkit-bridge ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Measured ;
+        reg:atOffset 4320 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000001000"^^xsd:long ;
+        sosa:madeBySensor fx:source-healthkit-bridge ;
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 120 ; reg:originalValue 72 ; reg:observedUnit fx:u-per-min ] ,
+            [ reg:atIndex 1 ; reg:value 0.95 ; reg:originalValue 0.95 ; reg:observedUnit fx:u-unity ] .
+}
+
+fx:reject-slot-without-unit {
+    fx:adm a reg:IngressAdmission ;
+        reg:targetLane fx:lane-healthkit-heart-rate ;
+        reg:proposedBy fx:source-healthkit-bridge ;
+        reg:laneBinding reg:ResolvedFromRegistry ;
+        reg:provenanceClass reg:Measured ;
+        reg:atOffset 4320 ; reg:writeLength 2 ;
+        reg:observedAt "1690000000000"^^xsd:long ;
+        reg:receivedAt "1690000001000"^^xsd:long ;
+        sosa:madeBySensor fx:source-healthkit-bridge ;
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 72 ; reg:originalValue 72 ] ,
+            [ reg:atIndex 1 ; reg:value 0.95 ; reg:originalValue 0.95 ; reg:observedUnit fx:u-unity ] .
 }
 
 #################################################################
@@ -269,8 +389,9 @@ fx:reject-stale {
         reg:receivedAt "1690000090000"^^xsd:long ;
         reg:underAutonomy re:Advise ;
         sosa:usedProcedure fx:procedure-risk-model ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 3 ] ,
-                       [ reg:atIndex 1 ; reg:value 2 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 3 ; reg:originalValue 3 ; reg:observedUnit fx:u-unity ] ,
+            [ reg:atIndex 1 ; reg:value 2 ; reg:originalValue 2 ; reg:observedUnit fx:u-unity ] .
 }
 
 fx:reject-observed-after-received {
@@ -283,12 +404,13 @@ fx:reject-observed-after-received {
         reg:observedAt "1690000005000"^^xsd:long ;
         reg:receivedAt "1690000001000"^^xsd:long ;
         sosa:madeBySensor fx:source-healthkit-bridge ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 72 ] ,
-                       [ reg:atIndex 1 ; reg:value 0.95 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 72 ; reg:originalValue 72 ; reg:observedUnit fx:u-per-min ] ,
+            [ reg:atIndex 1 ; reg:value 0.95 ; reg:originalValue 0.95 ; reg:observedUnit fx:u-unity ] .
 }
 
 #################################################################
-# REJECT — ingress: model-boundary binding
+# REJECT — ingress: model-boundary binding and closure
 #################################################################
 
 fx:reject-inferred-without-envelope {
@@ -302,8 +424,9 @@ fx:reject-inferred-without-envelope {
         reg:receivedAt "1690000002000"^^xsd:long ;
         reg:correlationId "corr_123" ;
         sosa:usedProcedure fx:procedure-risk-model ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 1 ] ,
-                       [ reg:atIndex 1 ; reg:value 0.82 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 1 ; reg:originalValue 1 ; reg:observedUnit fx:u-unity ] ,
+            [ reg:atIndex 1 ; reg:value 0.82 ; reg:originalValue 0.82 ; reg:observedUnit fx:u-unity ] .
 }
 
 fx:reject-unknown-property {
@@ -317,8 +440,9 @@ fx:reject-unknown-property {
         reg:receivedAt "1690000001000"^^xsd:long ;
         sosa:madeBySensor fx:source-healthkit-bridge ;
         re:severity "override-everything" ;
-        reg:hasValueAt [ reg:atIndex 0 ; reg:value 72 ] ,
-                       [ reg:atIndex 1 ; reg:value 0.95 ] .
+        reg:hasValueAt
+            [ reg:atIndex 0 ; reg:value 72 ; reg:originalValue 72 ; reg:observedUnit fx:u-per-min ] ,
+            [ reg:atIndex 1 ; reg:value 0.95 ; reg:originalValue 0.95 ; reg:observedUnit fx:u-unity ] .
 }
 
 #################################################################
@@ -458,9 +582,11 @@ fx:reject-lane-axis-count-mismatch {
         reg:hasAxis fx:bad-axis-0 .
 
     fx:bad-axis-0 a reg:LaneAxis ;
-        re:axisIndex 0 ;
-        re:axisName "only_axis" ;
-        reg:unit "ordinal" ;
+        re:axisIndex 0 ; re:axisName "only_axis" ;
+        reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
+        reg:quantityKind qkind:Dimensionless ;
+        reg:conversionPolicy reg:ProhibitedConversion ;
+        reg:scaleType reg:OrdinalScale ;
         reg:permittedValue 0 , 1 .
 }
 
@@ -473,9 +599,19 @@ fx:reject-lane-overlap {
         reg:hasAxis fx:ov-axis-0 , fx:ov-axis-1 .
 
     fx:ov-axis-0 a reg:LaneAxis ;
-        re:axisIndex 0 ; re:axisName "ov_zero" ; reg:unit "ordinal" ; reg:permittedValue 0 , 1 .
+        re:axisIndex 0 ; re:axisName "ov_zero" ;
+        reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
+        reg:quantityKind qkind:Dimensionless ;
+        reg:conversionPolicy reg:ProhibitedConversion ;
+        reg:scaleType reg:OrdinalScale ;
+        reg:permittedValue 0 , 1 .
     fx:ov-axis-1 a reg:LaneAxis ;
-        re:axisIndex 1 ; re:axisName "ov_one" ; reg:unit "ordinal" ; reg:permittedValue 0 , 1 .
+        re:axisIndex 1 ; re:axisName "ov_one" ;
+        reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
+        reg:quantityKind qkind:Dimensionless ;
+        reg:conversionPolicy reg:ProhibitedConversion ;
+        reg:scaleType reg:OrdinalScale ;
+        reg:permittedValue 0 , 1 .
 }
 
 fx:reject-life-safety-lane-without-floor {
@@ -488,10 +624,15 @@ fx:reject-life-safety-lane-without-floor {
         reg:hasAxis fx:uf-axis-0 .
 
     fx:uf-axis-0 a reg:LaneAxis ;
-        re:axisIndex 0 ; re:axisName "uf_zero" ; reg:unit "ordinal" ; reg:permittedValue 0 , 1 .
+        re:axisIndex 0 ; re:axisName "uf_zero" ;
+        reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
+        reg:quantityKind qkind:Dimensionless ;
+        reg:conversionPolicy reg:ProhibitedConversion ;
+        reg:scaleType reg:OrdinalScale ;
+        reg:permittedValue 0 , 1 .
 }
 
-fx:reject-axis-without-unit {
+fx:reject-axis-without-canonical-unit {
     fx:unitless-lane a reg:IngressLane ;
         reg:laneId "unitless" ;
         reg:laneOffset 9200 ;
@@ -500,5 +641,103 @@ fx:reject-axis-without-unit {
         reg:hasAxis fx:unitless-axis-0 .
 
     fx:unitless-axis-0 a reg:LaneAxis ;
-        re:axisIndex 0 ; re:axisName "unitless_zero" ; reg:permittedValue 0 , 1 .
+        re:axisIndex 0 ; re:axisName "unitless_zero" ;
+        reg:acceptedUcum "1" ;
+        reg:quantityKind qkind:Dimensionless ;
+        reg:conversionPolicy reg:ProhibitedConversion ;
+        reg:scaleType reg:OrdinalScale ;
+        reg:permittedValue 0 , 1 .
+}
+
+#################################################################
+# REJECT — the lane registry: unit contracts
+#################################################################
+
+# The affine trap, caught by QUDT: unit:DEG_C carries a conversion offset, so
+# a linear policy would silently drop 273.15.
+fx:reject-affine-declared-linear {
+    fx:bad-temp-lane a reg:IngressLane ;
+        reg:laneId "bad-temp" ;
+        reg:laneOffset 9300 ;
+        reg:laneLength 1 ;
+        reg:permittedProvider "mqtt" ;
+        reg:hasAxis fx:bad-temp-axis-0 .
+
+    fx:bad-temp-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "bad_temp" ;
+        reg:canonicalUcum "Cel" ; reg:acceptedUcum "Cel" , "K" ;
+        reg:quantityKind qkind:Temperature ;
+        reg:qudtUnitIri unit:DEG_C ;
+        reg:conversionPolicy reg:LinearConversion ;
+        reg:scaleType reg:RatioScale ;
+        reg:minValue -40 ; reg:maxValue 60 .
+}
+
+fx:reject-ordinal-axis-convertible {
+    fx:bad-ordinal-lane a reg:IngressLane ;
+        reg:laneId "bad-ordinal" ;
+        reg:laneOffset 9400 ;
+        reg:laneLength 1 ;
+        reg:permittedProvider "manual" ;
+        reg:hasAxis fx:bad-ordinal-axis-0 .
+
+    fx:bad-ordinal-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "bad_ordinal" ;
+        reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
+        reg:quantityKind qkind:Dimensionless ;
+        reg:conversionPolicy reg:LinearConversion ;
+        reg:scaleType reg:OrdinalScale ;
+        reg:permittedValue 0 , 1 .
+}
+
+fx:reject-canonical-unit-not-accepted {
+    fx:bad-accept-lane a reg:IngressLane ;
+        reg:laneId "bad-accept" ;
+        reg:laneOffset 9500 ;
+        reg:laneLength 1 ;
+        reg:permittedProvider "manual" ;
+        reg:hasAxis fx:bad-accept-axis-0 .
+
+    fx:bad-accept-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "bad_accept" ;
+        reg:canonicalUcum "/min" ; reg:acceptedUcum "1" ;
+        reg:quantityKind qkind:Frequency ;
+        reg:conversionPolicy reg:LinearConversion ;
+        reg:scaleType reg:RatioScale ;
+        reg:minValue 0 ; reg:maxValue 300 .
+}
+
+fx:reject-quantity-kind-disagreement {
+    fx:bad-kind-lane a reg:IngressLane ;
+        reg:laneId "bad-kind" ;
+        reg:laneOffset 9600 ;
+        reg:laneLength 1 ;
+        reg:permittedProvider "manual" ;
+        reg:hasAxis fx:bad-kind-axis-0 .
+
+    fx:bad-kind-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "bad_kind" ;
+        reg:canonicalUcum "Cel" ; reg:acceptedUcum "Cel" ;
+        reg:quantityKind qkind:Frequency ;
+        reg:qudtUnitIri unit:DEG_C ;
+        reg:conversionPolicy reg:AffineConversion ;
+        reg:scaleType reg:IntervalScale ;
+        reg:minValue -40 ; reg:maxValue 60 .
+}
+
+fx:reject-prohibited-axis-multi-unit {
+    fx:bad-prohibited-lane a reg:IngressLane ;
+        reg:laneId "bad-prohibited" ;
+        reg:laneOffset 9700 ;
+        reg:laneLength 1 ;
+        reg:permittedProvider "manual" ;
+        reg:hasAxis fx:bad-prohibited-axis-0 .
+
+    fx:bad-prohibited-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "bad_prohibited" ;
+        reg:canonicalUcum "1" ; reg:acceptedUcum "1" , "%" ;
+        reg:quantityKind qkind:Dimensionless ;
+        reg:conversionPolicy reg:ProhibitedConversion ;
+        reg:scaleType reg:OrdinalScale ;
+        reg:permittedValue 0 , 1 .
 }
