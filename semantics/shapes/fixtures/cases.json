@@ -1,57 +1,223 @@
 {
   "$comment": "Expected guardrail decisions for semantics/shapes/fixtures/cases.trig. Every RE/PE runtime must reproduce these exactly; see docs/SEMANTIC_GUARDRAIL_CONTRACT.md section 'Decision parity'. 'expect' fragments are matched against the validation result message or its sourceConstraintComponent.",
   "cases": [
-    { "graph": "accept-healthkit-measured",             "conforms": true },
-    { "graph": "accept-openclaw-life-safety",           "conforms": true },
-    { "graph": "accept-ollama-completion",              "conforms": true },
-    { "graph": "accept-affine-conversion",              "conforms": true },
-    { "graph": "accept-om-bridged-unit",                "conforms": true },
-    { "graph": "accept-egress-red-escalation",          "conforms": true },
-    { "graph": "accept-egress-automated-publish",       "conforms": true },
-
-    { "graph": "reject-offset-mismatch",                "conforms": false, "expect": "not the offset of the target lane" },
-    { "graph": "reject-write-too-long",                 "conforms": false, "expect": "exceeds the target lane" },
-    { "graph": "reject-undeclared-index",               "conforms": false, "expect": "which the target lane does not declare" },
-
-    { "graph": "reject-provider-not-permitted",         "conforms": false, "expect": "is not permitted to write the target lane" },
-    { "graph": "reject-caller-supplied-lane",           "conforms": false, "expect": "supplied its own target lane without authority" },
-    { "graph": "reject-autonomy-below-floor",           "conforms": false, "expect": "below the floor this lane requires" },
-    { "graph": "reject-life-safety-no-autonomy",        "conforms": false, "expect": "requires the admission to declare the autonomy" },
-
-    { "graph": "reject-value-out-of-bounds",            "conforms": false, "expect": "outside the declared bounds" },
-    { "graph": "reject-value-not-in-enum",              "conforms": false, "expect": "not in the enumerated value domain" },
-    { "graph": "reject-provenance-not-permitted",       "conforms": false, "expect": "Provenance class is not permitted" },
-    { "graph": "reject-measured-without-sensor",        "conforms": false, "expect": "must name the sensor" },
-    { "graph": "reject-inferred-without-procedure",     "conforms": false, "expect": "must name the procedure" },
-
-    { "graph": "reject-unit-not-accepted",              "conforms": false, "expect": "which the target axis does not accept" },
-    { "graph": "reject-om-unbridged-unit",              "conforms": false, "expect": "which is not UCUM, and declares no" },
-    { "graph": "reject-unconverted-value-changed",      "conforms": false, "expect": "nothing should have been converted" },
-    { "graph": "reject-slot-without-unit",              "conforms": false, "expect": "must record the unit its value arrived in" },
-
-    { "graph": "reject-stale",                          "conforms": false, "expect": "staler than the lane permits" },
-    { "graph": "reject-observed-after-received",        "conforms": false, "expect": "observed after it was received" },
-
-    { "graph": "reject-inferred-without-envelope",      "conforms": false, "expect": "must inherit the envelope id" },
-    { "graph": "reject-unknown-property",               "conforms": false, "expect": "ClosedConstraintComponent" },
-
-    { "graph": "reject-egress-escalation-not-red",      "conforms": false, "expect": "does not carry RED" },
-    { "graph": "reject-egress-uncontrolled-action",     "conforms": false, "expect": "not a canonical action individual" },
-    { "graph": "reject-egress-autonomy-exceeds-ceiling","conforms": false, "expect": "exceeds the ceiling" },
-    { "graph": "reject-egress-escalation-without-approval", "conforms": false, "expect": "requires recorded human approval" },
-    { "graph": "reject-egress-observe-mode",            "conforms": false, "expect": "observe-mode dispatch is a contradiction" },
-    { "graph": "reject-egress-action-not-allowed",      "conforms": false, "expect": "not in the binding's allowed-action list" },
-    { "graph": "reject-egress-missing-correlation",     "conforms": false, "expect": "MinCountConstraintComponent" },
-
-    { "graph": "reject-lane-axis-count-mismatch",       "conforms": false, "expect": "axes but its length is different" },
-    { "graph": "reject-lane-overlap",                   "conforms": false, "expect": "overlaps lane" },
-    { "graph": "reject-life-safety-lane-without-floor", "conforms": false, "expect": "must declare the autonomy floor" },
-    { "graph": "reject-axis-without-canonical-unit",    "conforms": false, "expect": "must declare the canonical UCUM code" },
-
-    { "graph": "reject-affine-declared-linear",         "conforms": false, "expect": "QUDT conversion offset" },
-    { "graph": "reject-ordinal-axis-convertible",       "conforms": false, "expect": "must prohibit conversion" },
-    { "graph": "reject-canonical-unit-not-accepted",    "conforms": false, "expect": "is not in the axis's accepted list" },
-    { "graph": "reject-quantity-kind-disagreement",     "conforms": false, "expect": "quantity kind and its QUDT unit's quantity kind disagree" },
-    { "graph": "reject-prohibited-axis-multi-unit",     "conforms": false, "expect": "forbids conversion but accepts" }
+    {
+      "graph": "accept-healthkit-measured",
+      "conforms": true
+    },
+    {
+      "graph": "accept-openclaw-life-safety",
+      "conforms": true
+    },
+    {
+      "graph": "accept-ollama-completion",
+      "conforms": true
+    },
+    {
+      "graph": "accept-affine-conversion",
+      "conforms": true
+    },
+    {
+      "graph": "accept-om-bridged-unit",
+      "conforms": true
+    },
+    {
+      "graph": "accept-egress-red-escalation",
+      "conforms": true
+    },
+    {
+      "graph": "accept-egress-automated-publish",
+      "conforms": true
+    },
+    {
+      "graph": "reject-offset-mismatch",
+      "conforms": false,
+      "expect": "not the offset of the target lane"
+    },
+    {
+      "graph": "reject-write-too-long",
+      "conforms": false,
+      "expect": "exceeds the target lane"
+    },
+    {
+      "graph": "reject-undeclared-index",
+      "conforms": false,
+      "expect": "which the target lane does not declare"
+    },
+    {
+      "graph": "reject-provider-not-permitted",
+      "conforms": false,
+      "expect": "is not permitted to write the target lane"
+    },
+    {
+      "graph": "reject-caller-supplied-lane",
+      "conforms": false,
+      "expect": "supplied its own target lane without authority"
+    },
+    {
+      "graph": "reject-autonomy-below-floor",
+      "conforms": false,
+      "expect": "below the floor this lane requires"
+    },
+    {
+      "graph": "reject-life-safety-no-autonomy",
+      "conforms": false,
+      "expect": "requires the admission to declare the autonomy"
+    },
+    {
+      "graph": "reject-value-out-of-bounds",
+      "conforms": false,
+      "expect": "outside the declared bounds"
+    },
+    {
+      "graph": "reject-value-not-in-enum",
+      "conforms": false,
+      "expect": "not in the enumerated value domain"
+    },
+    {
+      "graph": "reject-provenance-not-permitted",
+      "conforms": false,
+      "expect": "Provenance class is not permitted"
+    },
+    {
+      "graph": "reject-measured-without-sensor",
+      "conforms": false,
+      "expect": "must name the sensor"
+    },
+    {
+      "graph": "reject-inferred-without-procedure",
+      "conforms": false,
+      "expect": "must name the procedure"
+    },
+    {
+      "graph": "reject-unit-not-accepted",
+      "conforms": false,
+      "expect": "which the target axis does not accept"
+    },
+    {
+      "graph": "reject-om-unbridged-unit",
+      "conforms": false,
+      "expect": "which is not UCUM, and declares no"
+    },
+    {
+      "graph": "reject-unconverted-value-changed",
+      "conforms": false,
+      "expect": "nothing should have been converted"
+    },
+    {
+      "graph": "reject-slot-without-unit",
+      "conforms": false,
+      "expect": "must record the unit its value arrived in"
+    },
+    {
+      "graph": "reject-stale",
+      "conforms": false,
+      "expect": "staler than the lane permits"
+    },
+    {
+      "graph": "reject-observed-after-received",
+      "conforms": false,
+      "expect": "observed after it was received"
+    },
+    {
+      "graph": "reject-inferred-without-envelope",
+      "conforms": false,
+      "expect": "must inherit the envelope id"
+    },
+    {
+      "graph": "reject-unknown-property",
+      "conforms": false,
+      "expect": "ClosedConstraintComponent"
+    },
+    {
+      "graph": "reject-egress-escalation-not-red",
+      "conforms": false,
+      "expect": "does not carry RED"
+    },
+    {
+      "graph": "reject-egress-uncontrolled-action",
+      "conforms": false,
+      "expect": "not a canonical action individual"
+    },
+    {
+      "graph": "reject-egress-autonomy-exceeds-ceiling",
+      "conforms": false,
+      "expect": "exceeds the ceiling"
+    },
+    {
+      "graph": "reject-egress-escalation-without-approval",
+      "conforms": false,
+      "expect": "requires recorded human approval"
+    },
+    {
+      "graph": "reject-egress-observe-mode",
+      "conforms": false,
+      "expect": "observe-mode dispatch is a contradiction"
+    },
+    {
+      "graph": "reject-egress-action-not-allowed",
+      "conforms": false,
+      "expect": "not in the binding's allowed-action list"
+    },
+    {
+      "graph": "reject-egress-missing-correlation",
+      "conforms": false,
+      "expect": "MinCountConstraintComponent"
+    },
+    {
+      "graph": "reject-lane-axis-count-mismatch",
+      "conforms": false,
+      "expect": "axes but its length is different"
+    },
+    {
+      "graph": "reject-lane-overlap",
+      "conforms": false,
+      "expect": "overlaps lane"
+    },
+    {
+      "graph": "reject-life-safety-lane-without-floor",
+      "conforms": false,
+      "expect": "must declare the autonomy floor"
+    },
+    {
+      "graph": "reject-axis-without-canonical-unit",
+      "conforms": false,
+      "expect": "must declare the canonical UCUM code"
+    },
+    {
+      "graph": "reject-affine-declared-linear",
+      "conforms": false,
+      "expect": "QUDT conversion offset"
+    },
+    {
+      "graph": "reject-ordinal-axis-convertible",
+      "conforms": false,
+      "expect": "must prohibit conversion"
+    },
+    {
+      "graph": "reject-canonical-unit-not-accepted",
+      "conforms": false,
+      "expect": "is not in the axis's accepted list"
+    },
+    {
+      "graph": "reject-quantity-kind-disagreement",
+      "conforms": false,
+      "expect": "not one its QUDT unit is declared for"
+    },
+    {
+      "graph": "reject-prohibited-axis-multi-unit",
+      "conforms": false,
+      "expect": "forbids conversion but accepts"
+    },
+    {
+      "graph": "reject-qudt-unit-code-mismatch",
+      "conforms": false,
+      "expect": "does not match the UCUM code of the QUDT unit"
+    },
+    {
+      "graph": "reject-dimension-incompatible-accepted",
+      "conforms": false,
+      "expect": "dimensionally incompatible"
+    }
   ]
 }

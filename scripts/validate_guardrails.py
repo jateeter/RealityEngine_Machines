@@ -9,6 +9,7 @@ The data graph for each case is the merge of:
 
     semantics/ontology/re-core.ttl        the machine/action/autonomy vocabulary
     semantics/shapes/re-guardrails.shacl.ttl   guardrail vocabulary + autonomy ranks
+    semantics/ontology/qudt-subset.ttl    pinned QUDT units and quantity kinds
     semantics/shapes/fixtures/lane-registry.ttl the lane contracts
     <the case's named graph>              the admission or dispatch under test
 
@@ -42,7 +43,7 @@ FIXTURES = REPO_ROOT / "semantics" / "shapes" / "fixtures"
 CASES_TRIG = FIXTURES / "cases.trig"
 CASES_JSON = FIXTURES / "cases.json"
 LANE_REGISTRY = FIXTURES / "lane-registry.ttl"
-QUDT_SUBSET = FIXTURES / "qudt-subset.ttl"
+QUDT_SUBSET = REPO_ROOT / "semantics" / "ontology" / "qudt-subset.ttl"
 
 FIXTURE_NS = "https://realityengine.example.org/fixtures/guardrails#"
 

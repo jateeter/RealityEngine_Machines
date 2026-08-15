@@ -660,9 +660,15 @@ reg:LaneAxisShape
     ] ;
 
     # U6. Quantity-kind agreement between the axis and its QUDT unit.
+    #
+    # The predicate is qudt:unitForQuantityKind, not qudt:hasQuantityKind:
+    # the v3 vocabulary files carry the former and never the latter, so a
+    # constraint written against hasQuantityKind is silently vacuous.
+    # A unit carries many quantity kinds (DEG_C has 9, UNITLESS has 135), so
+    # this asks for membership, not equality.
     sh:sparql [
         a sh:SPARQLConstraint ;
-        sh:message "The axis quantity kind and its QUDT unit's quantity kind disagree; one of the two annotations is wrong." ;
+        sh:message "The axis quantity kind is not one its QUDT unit is declared for; one of the two annotations is wrong." ;
         sh:severity sh:Violation ;
         sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
         sh:select """
@@ -670,8 +676,54 @@ reg:LaneAxisShape
             WHERE {
                 $this reg:quantityKind ?value ;
                       reg:qudtUnitIri ?qudtUnit .
-                FILTER EXISTS { ?qudtUnit qudt:hasQuantityKind ?anyKind }
-                FILTER NOT EXISTS { ?qudtUnit qudt:hasQuantityKind ?value }
+                FILTER EXISTS { ?qudtUnit qudt:unitForQuantityKind ?anyKind }
+                FILTER NOT EXISTS { ?qudtUnit qudt:unitForQuantityKind ?value }
+            }
+        """ ;
+    ] ;
+
+    # U7. The QUDT unit must be the one the canonical UCUM code names.
+    # Catches a qudtUnitIri pointing at the wrong unit — an axis storing Cel
+    # while linked to unit:K would otherwise inherit K's conversion facts and
+    # lose the offset. Skipped where upstream declares no ucumCode, which is
+    # the case for dimensionless units such as unit:UNITLESS.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Axis canonical UCUM code {?value} does not match the UCUM code of the QUDT unit it links to." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:canonicalUcum ?value ;
+                      reg:qudtUnitIri ?qudtUnit .
+                FILTER EXISTS { ?qudtUnit qudt:ucumCode ?anyCode }
+                FILTER NOT EXISTS { ?qudtUnit qudt:ucumCode ?value }
+            }
+        """ ;
+    ] ;
+
+    # U8. Dimension compatibility of every accepted unit.
+    #
+    # Two units are compatible iff they share qudt:hasDimensionVector. This is
+    # a stronger test than comparing quantity kinds, and it is what refuses a
+    # dimension-incompatible input at corpus time rather than at runtime.
+    # Codes with no QUDT unit in the subset (unity, "1") are skipped rather
+    # than assumed incompatible.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Accepted unit {?value} is dimensionally incompatible with the axis canonical unit." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:acceptedUcum ?value ;
+                      reg:qudtUnitIri ?canonicalUnit .
+                ?canonicalUnit qudt:hasDimensionVector ?canonicalDimension .
+                ?acceptedUnit qudt:ucumCode ?value ;
+                              qudt:hasDimensionVector ?acceptedDimension .
+                FILTER (?acceptedDimension != ?canonicalDimension)
             }
         """ ;
     ] ;
