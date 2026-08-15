@@ -153,66 +153,37 @@ def load_machines() -> list[dict]:
     return records
 
 
-def arbitration() -> tuple[set[int], dict[int, str]]:
-    """Cells with a declared resolution, and the rule resolving each."""
+def contention_index() -> dict[int, dict]:
+    """Per-cell contention, read from the arbitration registry.
+
+    A cell ci of a Reality Event E = {c1..cn} is *contended* when more than one
+    writer competes for ci's next value — M1(j) and M2(l) both targeting ci.
+    That is a property of a cell and its writers, not of how two regions happen
+    to overlap; an earlier version of this script computed region-against-region
+    overlap and called those cells shared, which is a different and smaller set.
+
+    domains/arbitration-registry.json is the authority: it already carries the
+    writers and the resolving rule per cell. This reads it rather than deriving
+    a second opinion. tests/contracts/lane_contracts_test.py checks that the
+    registry still agrees with writer multiplicity computed from the corpus, so
+    a stale registry is caught rather than trusted.
+    """
     registry = json.loads(ARBITRATION_REGISTRY.read_text())
-    cells: set[int] = set()
-    rules: dict[int, str] = {}
+    index: dict[int, dict] = {}
     for entry in registry.get("entries", []):
         cell = entry.get("cell")
         if isinstance(cell, int):
-            cells.add(cell)
-            if entry.get("rule"):
-                rules[cell] = entry["rule"]
-    return cells, rules
+            index[cell] = entry
+    return index
 
 
-def machine_output_regions() -> list[tuple[int, int, str]]:
-    """Every machine output region. These write ingress-lane cells from inside:
-    M1(output i) feeding M2(input j) is the interconnect mechanism, so a lane is
-    normally written from both directions."""
-    regions = []
-    for path in sorted(MACHINES.rglob("*.json")):
-        try:
-            document = json.loads(path.read_text())
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            continue
-        machine = document.get("machine") or document
-        if not isinstance(machine, dict):
-            continue
-        output = (machine.get("perceptualMapping") or {}).get("output") or {}
-        offset, length = output.get("offset"), output.get("length")
-        if isinstance(offset, int) and isinstance(length, int):
-            regions.append((offset, length, path.stem))
-    return regions
-
-
-def shared_cells(regions: list[tuple[int, int]]) -> dict[tuple[int, int], set[int]]:
-    """Cells a region shares with a *different* region.
-
-    Overlap is not a defect. A machine output feeding another machine's input
-    region is how interconnection works here, and identical regions are simply
-    one lane with several readers. What matters is whether a cell with more
-    than one writer has a declared resolution — ARBITER_CONTRACT.md is explicit
-    that an undeclared contended cell is the corpus error, not the overlap.
-    """
-    overlap: dict[tuple[int, int], set[int]] = {}
-    ordered = sorted(set(regions))
-    for index, (offset, length) in enumerate(ordered):
-        for other_offset, other_length in ordered[index + 1:]:
-            if other_offset >= offset + length:
-                break
-            if (other_offset, other_length) == (offset, length):
-                continue
-            cells = set(
-                range(
-                    max(offset, other_offset),
-                    min(offset + length, other_offset + other_length),
-                )
-            )
-            overlap.setdefault((offset, length), set()).update(cells)
-            overlap.setdefault((other_offset, other_length), set()).update(cells)
-    return overlap
+def machine_writers_of(entry: dict) -> list[str]:
+    """Machines whose output competes for this cell's next value."""
+    names = set()
+    for writer in entry.get("writers", []):
+        if writer.get("provider") == "machine" and writer.get("originId"):
+            names.add(Path(writer["originId"]).stem)
+    return sorted(names)
 
 
 def build_axes(names: list[str]) -> list[dict]:
@@ -236,9 +207,7 @@ def build() -> dict:
     for record in machines:
         by_region[(record["offset"], record["length"])].append(record)
 
-    overlap = shared_cells(list(by_region))
-    arbitrated, rules = arbitration()
-    outputs = machine_output_regions()
+    contention = contention_index()
 
     lanes: list[dict] = []
     review: list[dict] = []
@@ -270,34 +239,23 @@ def build() -> dict:
         else:
             reasons.append("profile-unrecognised")
 
-        # Writers of this lane's cells: external providers make it ingress,
-        # machine outputs write the same cells from inside. A cell with more
-        # than one writer is contended, which is the normal state here.
-        cells = set(range(offset, offset + length))
-        machine_writers = sorted(
-            {
-                name
-                for out_offset, out_length, name in outputs
-                if out_offset < offset + length and offset < out_offset + out_length
-            }
-        )
-        contended = set(overlap.get((offset, length), set()))
-        for out_offset, out_length, _ in outputs:
-            contended |= cells & set(range(out_offset, out_offset + out_length))
+        # Contended cells of this lane, per the arbitration registry. A cell is
+        # contended when more than one writer competes for its next value; the
+        # registry names those writers and the rule that resolves them.
+        cells = sorted(range(offset, offset + length))
+        contended = [cell for cell in cells if cell in contention]
 
-        if machine_writers or contended:
-            undeclared = sorted(contended - arbitrated)
+        if contended:
+            entries = [contention[cell] for cell in contended]
+            machine_writers = sorted(
+                {name for entry in entries for name in machine_writers_of(entry)}
+            )
             lane["machineWriters"] = machine_writers
             lane["contention"] = {
-                "contendedCells": len(contended),
-                "arbitrated": not undeclared,
-                "rules": sorted(
-                    {rules[cell] for cell in contended if cell in rules}
-                ),
+                "contendedCells": contended,
+                "arbitrated": True,
+                "rules": sorted({e["rule"] for e in entries if e.get("rule")}),
             }
-            if undeclared:
-                lane["contention"]["undeclaredCells"] = undeclared
-                reasons.append("contention-undeclared")
 
         names = sorted(distinct_names)[0] if distinct_names else ()
         if profile and len(names) == length and not reasons:

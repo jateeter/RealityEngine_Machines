@@ -175,16 +175,67 @@ class LaneContractsTest(unittest.TestCase):
             contention = lane.get("contention")
             if contention:
                 with self.subTest(lane=lane["id"]):
+                    self.assertTrue(contention["arbitrated"], lane["id"])
                     self.assertTrue(
-                        contention["arbitrated"],
-                        f"{lane['id']} has {contention['contendedCells']} contended "
-                        "cells and some have no arbitration entry",
+                        contention["rules"],
+                        f"{lane['id']} is contended but names no rule",
                     )
-                    if contention["contendedCells"]:
-                        self.assertTrue(
-                            contention["rules"],
-                            f"{lane['id']} is contended but names no rule",
-                        )
+                    inside = set(range(lane["offset"], lane["offset"] + lane["length"]))
+                    self.assertTrue(
+                        set(contention["contendedCells"]) <= inside,
+                        f"{lane['id']} claims contended cells outside its own span",
+                    )
+
+    def test_registry_agrees_with_writer_multiplicity(self) -> None:
+        """The definition, checked against the authority.
+
+        A cell ci of a Reality Event E = {c1..cn} is contended when more than
+        one writer competes for ci's next value — M1(j) and M2(l) both
+        targeting ci. Deriving that from the corpus must reproduce
+        domains/arbitration-registry.json exactly. If it does not, the registry
+        is stale with respect to the machines and every lane referencing it is
+        resting on a wrong resolution.
+        """
+        writers: dict[int, set[tuple[str, str]]] = {}
+
+        def claim(cell: int, provider: str, origin: str) -> None:
+            writers.setdefault(cell, set()).add((provider, origin))
+
+        for path in sorted((REPO_ROOT / "machines").rglob("*.json")):
+            try:
+                document = json.loads(path.read_text())
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                continue
+            machine = document.get("machine") or document
+            if not isinstance(machine, dict):
+                continue
+            mapping = machine.get("perceptualMapping") or {}
+            output = mapping.get("output") or {}
+            if isinstance(output.get("offset"), int):
+                for cell in range(output["offset"], output["offset"] + output.get("length", 0)):
+                    claim(cell, "machine", path.stem)
+            projection = (machine.get("metadata") or {}).get("openClawProjection") or {}
+            region = projection.get("writeBackRegion") or {}
+            if isinstance(region.get("offset"), int):
+                for cell in range(region["offset"], region["offset"] + region.get("length", 0)):
+                    claim(cell, "acp", path.stem)
+
+        derived = {cell for cell, who in writers.items() if len(who) > 1}
+        registry = json.loads(
+            (REPO_ROOT / "domains" / "arbitration-registry.json").read_text()
+        )
+        declared = {
+            entry["cell"] for entry in registry.get("entries", [])
+            if isinstance(entry.get("cell"), int)
+        }
+        self.assertEqual(
+            derived - declared, set(),
+            "cells contended by the corpus but absent from the arbitration registry",
+        )
+        self.assertEqual(
+            declared - derived, set(),
+            "cells in the arbitration registry that no longer have two writers",
+        )
 
     def test_machine_writers_are_real_machines(self) -> None:
         stems = {path.stem for path in (REPO_ROOT / "machines").rglob("*.json")}

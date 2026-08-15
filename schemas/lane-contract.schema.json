@@ -246,11 +246,17 @@
               "arbitrated",
               "rules"
             ],
-            "description": "Cells of this lane with more than one writer. Contention is the normal state, not a defect; what matters is whether domains/arbitration-registry.json declares a resolution.",
+            "description": "Cells of this lane whose next value is contended by more than one writer, read from domains/arbitration-registry.json, which is the authority on both contention and its resolution. Contention is the normal state of an ingress lane, not a defect.",
             "properties": {
               "contendedCells": {
-                "type": "integer",
-                "minimum": 0
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "uniqueItems": true,
+                "minItems": 1,
+                "description": "The contended cells themselves, not a count, so the sidecar stays checkable against the registry."
               },
               "arbitrated": {
                 "type": "boolean"
@@ -261,13 +267,6 @@
                   "type": "string"
                 },
                 "uniqueItems": true
-              },
-              "undeclaredCells": {
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "minimum": 0
-                }
               }
             }
           },

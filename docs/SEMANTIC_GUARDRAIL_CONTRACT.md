@@ -505,8 +505,19 @@ wrong. An ingress lane has **two classes of writer**:
 
 The second is not an edge case. **703 of 983 lanes have at least one machine
 writer**, 669 machine output regions equal a machine input region exactly, and
-**2,835 of 4,005 lane cells carry more than one writer**. Contention is the
-normal state of an ingress lane, not an exception to it.
+**2,835 of 4,005 lane cells are contended**. Contention is the normal state of
+an ingress lane, not an exception to it.
+
+**Definition.** Given a Reality Event `E = {c1 … cn}`, a cell `ci` is
+*contended* when more than one writer competes for `ci`'s **next value** —
+`M1(j)` and `M2(l)` both targeting `ci`. It is a property of a cell and its
+writers, not of how two regions happen to overlap. Two earlier drafts of this
+contract used "shared cell" for region-against-region overlap, which is a
+different and much smaller set: 20 pairs against the registry's 2,837 cells.
+Deriving the definition above from the corpus reproduces
+`domains/arbitration-registry.json` exactly — 2,837 cells, none extra, none
+missing — and `tests/contracts/lane_contracts_test.py` gates that agreement, so
+a registry gone stale against the machines is caught rather than trusted.
 
 So overlap is not the question and geometry is not the test. The first draft of
 `IngressLaneShape` refused overlapping lanes outright, which would have rejected
