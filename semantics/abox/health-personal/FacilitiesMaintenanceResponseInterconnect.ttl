@@ -22,7 +22,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-facilities-maintenance-immediate-welfare-check , m:seq-facilities-maintenance-environment-remediation , m:seq-facilities-maintenance-service-access-stabilization , m:seq-facilities-maintenance-routine-complete ;
-    re:hasTriggerRule m:rule-facilities-maintenance-immediate-welfare-check , m:rule-facilities-maintenance-environment-remediation , m:rule-facilities-maintenance-service-access-stabilization , m:rule-facilities-maintenance-routine-complete ;
+    re:hasTriggerRule m:rule-facilities-maintenance-immediate-welfare-check-1 , m:rule-facilities-maintenance-environment-remediation-1 , m:rule-facilities-maintenance-service-access-stabilization-1 , m:rule-facilities-maintenance-routine-complete-1 ;
     re:hasInterconnection m:ix-health-personal_intake-wellness-routing_facilities-response .
 
 m:perceptual-mapping
@@ -483,38 +483,38 @@ m:out-facilities-maintenance-routine-complete-output
     re:prescribesAction re:ContinueMonitoring ;
     re:actionNarrative "Record routine maintenance completion and keep monitoring at baseline cadence." .
 
-m:rule-facilities-maintenance-immediate-welfare-check
+m:rule-facilities-maintenance-immediate-welfare-check-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-facilities-maintenance-immediate-welfare-check ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0,0,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "IMMEDIATE_WELFARE_CHECK: facilities, access, social, daily-care, or wellness signals require urgent welfare check at [4520:4524]" .
 
-m:rule-facilities-maintenance-environment-remediation
+m:rule-facilities-maintenance-environment-remediation-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-facilities-maintenance-environment-remediation ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "0,1,0,0" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "ENVIRONMENT_REMEDIATION_RESPONSE: facilities and home-environment signals require remediation, utility, or housing support at [4520:4524]" .
 
-m:rule-facilities-maintenance-service-access-stabilization
+m:rule-facilities-maintenance-service-access-stabilization-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-facilities-maintenance-service-access-stabilization ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,1,0" ;
+    re:matchesOutputPosition 2 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "SERVICE_ACCESS_STABILIZATION: facilities concern co-occurs with food, transport, or social access barriers at [4520:4524]" .
 
-m:rule-facilities-maintenance-routine-complete
+m:rule-facilities-maintenance-routine-complete-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-facilities-maintenance-routine-complete ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,1" ;
+    re:matchesOutputPosition 3 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "ROUTINE_MAINTENANCE_COMPLETE: daily and weekly maintenance signals complete without composed response risk at [4520:4524]" .

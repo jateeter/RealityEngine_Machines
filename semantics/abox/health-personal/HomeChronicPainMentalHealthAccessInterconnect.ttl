@@ -21,7 +21,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-chronic-pain-mh-urgent-behavioral-health-response , m:seq-chronic-pain-mh-integrated-referral , m:seq-chronic-pain-mh-opioid-safety-review , m:seq-chronic-pain-mh-managed-monitoring ;
-    re:hasTriggerRule m:rule-chronic-pain-mh-urgent-behavioral-health-response , m:rule-chronic-pain-mh-integrated-referral , m:rule-chronic-pain-mh-opioid-safety-review , m:rule-chronic-pain-mh-managed-monitoring .
+    re:hasTriggerRule m:rule-chronic-pain-mh-urgent-behavioral-health-response-1 , m:rule-chronic-pain-mh-integrated-referral-1 , m:rule-chronic-pain-mh-opioid-safety-review-1 , m:rule-chronic-pain-mh-managed-monitoring-1 .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -361,38 +361,38 @@ m:out-cpmh-managed-output
     re:prescribesAction re:ContinueMonitoring ;
     re:actionNarrative "Continue managed monitoring and routine follow-up." .
 
-m:rule-chronic-pain-mh-urgent-behavioral-health-response
+m:rule-chronic-pain-mh-urgent-behavioral-health-response-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-chronic-pain-mh-urgent-behavioral-health-response ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0,0,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "Chronic disease crisis plus pain crisis and mental-health crisis requires urgent behavioral-health response." .
 
-m:rule-chronic-pain-mh-integrated-referral
+m:rule-chronic-pain-mh-integrated-referral-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-chronic-pain-mh-integrated-referral ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "0,1,0,0" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Chronic illness burden and pain impairment require integrated behavioral-health referral." .
 
-m:rule-chronic-pain-mh-opioid-safety-review
+m:rule-chronic-pain-mh-opioid-safety-review-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-chronic-pain-mh-opioid-safety-review ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,1,0" ;
+    re:matchesOutputPosition 2 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Opioid-risk signal requires medication safety review and behavioral-health context check." .
 
-m:rule-chronic-pain-mh-managed-monitoring
+m:rule-chronic-pain-mh-managed-monitoring-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-chronic-pain-mh-managed-monitoring ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,1" ;
+    re:matchesOutputPosition 3 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "Chronic disease, pain, and mental-health access are stable enough for managed monitoring." .

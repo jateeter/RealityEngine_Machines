@@ -21,7 +21,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-chronic-disease-exacerbation , m:seq-chronic-disease-poor-control , m:seq-chronic-disease-borderline , m:seq-chronic-disease-controlled-ok ;
-    re:hasTriggerRule m:rule-chronic-disease-exacerbation , m:rule-chronic-disease-poor-control , m:rule-chronic-disease-borderline , m:rule-chronic-disease-controlled-ok ;
+    re:hasTriggerRule m:rule-chronic-disease-exacerbation-1 , m:rule-chronic-disease-poor-control-1 , m:rule-chronic-disease-borderline-1 , m:rule-chronic-disease-controlled-ok-1 ;
     re:hasInterconnection m:ix-health-personal_chronic-pain-mental-health-access_disease-burden , m:ix-health-personal_chronic-disease-response_disease-control-status , m:ix-health_infrastructure-support_consumer_home_chronic_disease_context ;
     re:hasOpenClawProjection m:openclaw-projection ;
     re:hasAgentBinding m:agent-binding .
@@ -317,38 +317,38 @@ m:out-cd-controlled-output
     re:prescribesAction re:ContinueMonitoring ;
     re:actionNarrative "Mental health access monitor registers chronic disease stable" .
 
-m:rule-chronic-disease-exacerbation
+m:rule-chronic-disease-exacerbation-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-chronic-disease-exacerbation ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0,0,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "DISEASE_EXACERBATION: acute disease exacerbation requiring urgent clinical intervention at [2019:2023]" .
 
-m:rule-chronic-disease-poor-control
+m:rule-chronic-disease-poor-control-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-chronic-disease-poor-control ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "0,1,0,0" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "POOR_CONTROL: chronic disease consistently out of target range; complication risk elevated at [2019:2023]" .
 
-m:rule-chronic-disease-borderline
+m:rule-chronic-disease-borderline-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-chronic-disease-borderline ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,1,0" ;
+    re:matchesOutputPosition 2 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "BORDERLINE_CONTROL: chronic disease near but outside target range; preventive intensification warranted at [2019:2023]" .
 
-m:rule-chronic-disease-controlled-ok
+m:rule-chronic-disease-controlled-ok-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-chronic-disease-controlled-ok ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,1" ;
+    re:matchesOutputPosition 3 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "DISEASE_CONTROLLED: chronic disease biomarkers in target range; complication risk managed at [2019:2023]" .

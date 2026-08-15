@@ -22,7 +22,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-daily-morning-routine , m:seq-daily-evening-routine , m:seq-daily-fall-response , m:seq-daily-fall-unresponsive , m:seq-daily-bathroom-nonuse , m:seq-daily-medication-miss , m:seq-daily-night-wandering ;
-    re:hasTriggerRule m:rule-daily-morning-routine , m:rule-daily-evening-routine , m:rule-daily-fall-response , m:rule-daily-fall-unresponsive , m:rule-daily-bathroom-nonuse , m:rule-daily-medication-miss , m:rule-daily-night-wandering ;
+    re:hasTriggerRule m:rule-daily-morning-routine-1 , m:rule-daily-evening-routine-1 , m:rule-daily-fall-response-1 , m:rule-daily-fall-unresponsive-1 , m:rule-daily-bathroom-nonuse-1 , m:rule-daily-medication-miss-1 , m:rule-daily-night-wandering-1 ;
     re:hasInterconnection m:ix-health-personal_daily-patient-care-response_daily-care-status , m:ix-health-personal_facilities-maintenance-response_daily-care-anomaly , m:ix-health-personal_medication-access-adherence_daily-care-medication , m:ix-health-personal_sleep-recovery-wellness_daily-care , m:ix-health_infrastructure-support_consumer_daily_patient_care_context ;
     re:hasOpenClawProjection m:openclaw-projection ;
     re:hasAgentBinding m:agent-binding .
@@ -1342,65 +1342,65 @@ m:out-out-wandering-alert
     re:outputTier 0 ;
     re:outputConfidence 0 .
 
-m:rule-daily-morning-routine
+m:rule-daily-morning-routine-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-daily-morning-routine ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0,0,0,0,0,0,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "Event: MORNING_COMPLETE — patient successfully completed all morning care milestones" .
 
-m:rule-daily-evening-routine
+m:rule-daily-evening-routine-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-daily-evening-routine ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "0,1,0,0,0,0,0,0" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "Event: EVENING_COMPLETE — patient successfully completed all evening care milestones and settled for the night" .
 
-m:rule-daily-fall-response
+m:rule-daily-fall-response-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-daily-fall-response ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,1,0,0,0,0,0" ;
+    re:matchesOutputPosition 2 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Alert: FALL_CONFIRMED — patient fell and activated call system; staff response required immediately" .
 
-m:rule-daily-fall-unresponsive
+m:rule-daily-fall-unresponsive-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-daily-fall-unresponsive ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,1,0,0,0,0" ;
+    re:matchesOutputPosition 3 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "CRITICAL ALERT: UNRESPONSIVE_FALL — patient fell and is not moving; no call system activated; immediate staff wellness check required" .
 
-m:rule-daily-bathroom-nonuse
+m:rule-daily-bathroom-nonuse-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-daily-bathroom-nonuse ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,0,1,0,0,0" ;
+    re:matchesOutputPosition 4 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Alert: BATHROOM_ALERT — patient has not used bathroom within care-plan-specified interval; assess for urinary retention, mobility difficulty, or fall risk" .
 
-m:rule-daily-medication-miss
+m:rule-daily-medication-miss-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-daily-medication-miss ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,0,0,1,0,0" ;
+    re:matchesOutputPosition 5 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Alert: MEDICATION_MISSED — morning medications not administered within window; assess for refusal, availability issue, or documentation gap" .
 
-m:rule-daily-night-wandering
+m:rule-daily-night-wandering-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-daily-night-wandering ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,0,0,0,1,0" ;
+    re:matchesOutputPosition 6 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Alert: WANDERING_ALERT — patient has exited room three times during nocturnal monitoring; assess for dementia-related wandering, pain, anxiety, or environmental cause" .

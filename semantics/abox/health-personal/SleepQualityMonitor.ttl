@@ -21,7 +21,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-sleep-restful , m:seq-sleep-disturbed , m:seq-sleep-poor ;
-    re:hasTriggerRule m:rule-sleep-restful , m:rule-sleep-disturbed , m:rule-sleep-poor ;
+    re:hasTriggerRule m:rule-sleep-restful-1 , m:rule-sleep-disturbed-1 , m:rule-sleep-poor-1 ;
     re:hasInterconnection m:ix-health-personal_daily-activity-wellness_sleep-quality , m:ix-health-personal_sleep-recovery-wellness_sleep-quality ;
     re:hasOpenClawProjection m:openclaw-projection ;
     re:hasAgentBinding m:agent-binding .
@@ -139,29 +139,29 @@ m:out-sleep-out-poor
     re:outputConfidence 1 ;
     re:hasRagStatus re:RED .
 
-m:rule-sleep-restful
+m:rule-sleep-restful-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-sleep-restful ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0" ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "ok" ;
     rdfs:comment "Restful night — no intervention" .
 
-m:rule-sleep-disturbed
+m:rule-sleep-disturbed-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-sleep-disturbed ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "0,1" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Fragmented sleep — surface the trend in the AI's daily summary" .
 
-m:rule-sleep-poor
+m:rule-sleep-poor-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-sleep-poor ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "1,1" ;
+    re:matchesOutputPosition 0 ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "Short + fragmented sleep — recommend clinical follow-up" .

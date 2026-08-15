@@ -21,7 +21,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-hk-vitals-nominal , m:seq-hk-vitals-hypertensive , m:seq-hk-vitals-crisis ;
-    re:hasTriggerRule m:rule-hk-vitals-nominal , m:rule-hk-vitals-hypertensive , m:rule-hk-vitals-crisis .
+    re:hasTriggerRule m:rule-hk-vitals-nominal-1 , m:rule-hk-vitals-hypertensive-1 , m:rule-hk-vitals-crisis-1 .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -172,29 +172,29 @@ m:out-hk-vitals-out-crisis
     re:outputConfidence 0 ;
     re:hasRagStatus re:RED .
 
-m:rule-hk-vitals-nominal
+m:rule-hk-vitals-nominal-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-hk-vitals-nominal ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0,0,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "ok" ;
     rdfs:comment "Confident nominal BP reading from the bridge" .
 
-m:rule-hk-vitals-hypertensive
+m:rule-hk-vitals-hypertensive-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-hk-vitals-hypertensive ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "0,1,0,0" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Stage-2 hypertensive reading — surface in daily summary" .
 
-m:rule-hk-vitals-crisis
+m:rule-hk-vitals-crisis-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-hk-vitals-crisis ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,1,0" ;
+    re:matchesOutputPosition 2 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "Hypertensive crisis — recommend immediate clinical contact" .

@@ -21,7 +21,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-patient-safety-transport-urgent-dispatch , m:seq-patient-safety-transport-coordinate-services , m:seq-patient-safety-transport-human-review , m:seq-patient-safety-transport-stable-follow-up ;
-    re:hasTriggerRule m:rule-patient-safety-transport-urgent-dispatch , m:rule-patient-safety-transport-coordinate-services , m:rule-patient-safety-transport-human-review , m:rule-patient-safety-transport-stable-follow-up .
+    re:hasTriggerRule m:rule-patient-safety-transport-urgent-dispatch-1 , m:rule-patient-safety-transport-coordinate-services-1 , m:rule-patient-safety-transport-human-review-1 , m:rule-patient-safety-transport-stable-follow-up-1 .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -321,38 +321,38 @@ m:out-pst-stable-output
     re:prescribesAction re:ContinueMonitoring ;
     re:actionNarrative "Continue stable monitoring and follow-up." .
 
-m:rule-patient-safety-transport-urgent-dispatch
+m:rule-patient-safety-transport-urgent-dispatch-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-patient-safety-transport-urgent-dispatch ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0,0,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "Confirmed fall with failed transportation access requires urgent coordinated response." .
 
-m:rule-patient-safety-transport-coordinate-services
+m:rule-patient-safety-transport-coordinate-services-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-patient-safety-transport-coordinate-services ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "0,1,0,0" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Fall risk plus fragile transportation/social context requires coordinated transport and care services." .
 
-m:rule-patient-safety-transport-human-review
+m:rule-patient-safety-transport-human-review-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-patient-safety-transport-human-review ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,1,0" ;
+    re:matchesOutputPosition 2 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Uncertain fall or appointment barrier requires human review before dispatch." .
 
-m:rule-patient-safety-transport-stable-follow-up
+m:rule-patient-safety-transport-stable-follow-up-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-patient-safety-transport-stable-follow-up ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,1" ;
+    re:matchesOutputPosition 3 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "No active fall signal and transportation/social follow-up path is stable." .

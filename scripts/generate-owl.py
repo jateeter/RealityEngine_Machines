@@ -66,6 +66,39 @@ def sanitize(local: str) -> str:
     return cleaned or "unnamed"
 
 
+def with_rule_ordinals(rules):
+    """Pair each trigger rule with its 1-based ordinal among the rules sharing
+    its sequenceId, in corpus order.
+
+    Rule IRIs were minted from sequenceId alone, which is not injective: a
+    sequence carrying several rules — one per output pattern it can match —
+    collapsed into a single individual that then asserted GREEN, AMBER and RED
+    on the functional re:hasRagStatus, making the merged graph inconsistent.
+    HermiT rejects it; ELK does not implement functional properties and passed
+    it silently, so the defect survived at 43/1,328 ABox coverage because no
+    health-personal machine has a multi-rule sequence. Nine machines do
+    (ai-services 7, agriculture 1, data-center 1).
+
+    The ordinal, not the output vector, is the disambiguator: nine
+    (sequenceId, outputMatches) pairs repeat within a machine, so the vector is
+    not injective either. Suffixing is unconditional rather than applied only
+    where a sequence has more than one rule — conditional suffixing would make
+    an existing rule's IRI change when a sibling is added, which is worse for
+    identity stability than the one-time rename this costs.
+    """
+    seen = {}
+    out = []
+    for rule in rules:
+        seq = rule.get("sequenceId")
+        seen[seq] = seen.get(seq, 0) + 1
+        out.append((rule, seen[seq]))
+    return out
+
+
+def rule_term(rule: dict, ordinal: int) -> str:
+    return f"m:rule-{sanitize(rule['sequenceId'])}-{ordinal}"
+
+
 def escape(literal: str) -> str:
     return (
         str(literal)
@@ -200,8 +233,8 @@ class MachineProjector:
                 statements.append(f"re:hasSequence {refs}")
         rules = metadata.get("triggerConfig", {}).get("rules", [])
         rule_refs = " , ".join(
-            f"m:rule-{sanitize(rule['sequenceId'])}"
-            for rule in rules
+            rule_term(rule, ordinal)
+            for rule, ordinal in with_rule_ordinals(rules)
             if rule.get("sequenceId")
         )
         if rule_refs:
@@ -373,11 +406,11 @@ class MachineProjector:
 
     def emit_trigger_rules(self) -> None:
         trigger_config = self.machine.get("metadata", {}).get("triggerConfig", {})
-        for rule in trigger_config.get("rules", []):
+        for rule, ordinal in with_rule_ordinals(trigger_config.get("rules", [])):
             sequence_id = rule.get("sequenceId")
             if not sequence_id:
                 continue
-            rule_term = f"m:rule-{sanitize(sequence_id)}"
+            term = rule_term(rule, ordinal)
             statements = ["a owl:NamedIndividual , re:TriggerRule"]
             if sequence_id in self.sequence_ids:
                 statements.append(f"re:appliesToSequence m:seq-{sanitize(sequence_id)}")
@@ -386,11 +419,16 @@ class MachineProjector:
                     f"{self.path.name}: trigger rule '{sequence_id}' has no matching "
                     "sequence"
                 )
+            # outputMatches is a value vector over the machine's output region,
+            # not a (tier, confidence) pair — see re-core.ttl 0.3.0. Emit it
+            # whole, and index the asserted cells for querying.
             matches = rule.get("outputMatches", [])
-            if len(matches) >= 1:
-                statements.append(f"re:matchesOutputTier {number(matches[0])}")
-            if len(matches) >= 2:
-                statements.append(f"re:matchesOutputConfidence {number(matches[1])}")
+            if matches:
+                joined = ",".join(str(number(value)) for value in matches)
+                statements.append(f're:outputMatchVector "{joined}"')
+                for index, value in enumerate(matches):
+                    if value:
+                        statements.append(f"re:matchesOutputPosition {index}")
             rag = rule.get("ragStatusCode")
             if rag in RAG_INDIVIDUALS:
                 statements.append(f"re:hasRagStatus {RAG_INDIVIDUALS[rag]}")
@@ -400,8 +438,8 @@ class MachineProjector:
                 statements.append(f'rdfs:comment "{escape(rule["description"])}"')
             governance = rule.get("governance", {})
             if governance:
-                statements.append(f"re:hasGovernance {rule_term}-governance")
-            self.block(rule_term, statements)
+                statements.append(f"re:hasGovernance {term}-governance")
+            self.block(term, statements)
             if governance:
                 governance_statements = [
                     "a owl:NamedIndividual , re:GovernancePolicy"
@@ -418,7 +456,7 @@ class MachineProjector:
                     governance_statements.append(
                         f're:ownerTeam "{escape(governance["ownerTeam"])}"'
                     )
-                self.block(f"{rule_term}-governance", governance_statements)
+                self.block(f"{term}-governance", governance_statements)
 
     def emit_interconnections(self) -> None:
         interconnections = self.machine.get("metadata", {}).get("interconnections", [])

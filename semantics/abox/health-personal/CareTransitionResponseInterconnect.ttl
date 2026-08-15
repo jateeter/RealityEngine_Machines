@@ -21,7 +21,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-care-transition-response-urgent-transfer , m:seq-care-transition-response-barrier-resolution , m:seq-care-transition-response-post-acute-review , m:seq-care-transition-response-stable-monitoring ;
-    re:hasTriggerRule m:rule-care-transition-response-urgent-transfer , m:rule-care-transition-response-barrier-resolution , m:rule-care-transition-response-post-acute-review , m:rule-care-transition-response-stable-monitoring .
+    re:hasTriggerRule m:rule-care-transition-response-urgent-transfer-1 , m:rule-care-transition-response-barrier-resolution-1 , m:rule-care-transition-response-post-acute-review-1 , m:rule-care-transition-response-stable-monitoring-1 .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -481,38 +481,38 @@ m:out-care-transition-response-stable-monitoring-output
     re:prescribesAction re:ContinueMonitoring ;
     re:actionNarrative "Route stable transition monitoring, human-services follow-up, and whole-person care preference alignment." .
 
-m:rule-care-transition-response-urgent-transfer
+m:rule-care-transition-response-urgent-transfer-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-care-transition-response-urgent-transfer ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0,0,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "Emergency transfer or escalation with acute wellness, daily-care, facility, or fall risk requires urgent transition response." .
 
-m:rule-care-transition-response-barrier-resolution
+m:rule-care-transition-response-barrier-resolution-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-care-transition-response-barrier-resolution ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "0,1,0,0" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Blocked transition with payer, medication, facility, wellness, or access barrier requires resolution workflow." .
 
-m:rule-care-transition-response-post-acute-review
+m:rule-care-transition-response-post-acute-review-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-care-transition-response-post-acute-review ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,1,0" ;
+    re:matchesOutputPosition 2 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Planned post-acute transition with wellness or facility concern requires placement and support review." .
 
-m:rule-care-transition-response-stable-monitoring
+m:rule-care-transition-response-stable-monitoring-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-care-transition-response-stable-monitoring ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,1" ;
+    re:matchesOutputPosition 3 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "Transition path is stable and remains under monitoring." .

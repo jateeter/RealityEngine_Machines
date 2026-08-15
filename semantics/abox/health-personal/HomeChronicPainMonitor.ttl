@@ -21,7 +21,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-chronic-pain-crisis , m:seq-chronic-pain-opioid-risk , m:seq-chronic-pain-functional-impairment , m:seq-chronic-pain-managed-ok ;
-    re:hasTriggerRule m:rule-chronic-pain-crisis , m:rule-chronic-pain-opioid-risk , m:rule-chronic-pain-functional-impairment , m:rule-chronic-pain-managed-ok ;
+    re:hasTriggerRule m:rule-chronic-pain-crisis-1 , m:rule-chronic-pain-opioid-risk-1 , m:rule-chronic-pain-functional-impairment-1 , m:rule-chronic-pain-managed-ok-1 ;
     re:hasInterconnection m:ix-health-personal_chronic-pain-mental-health-access_pain-burden ;
     re:hasOpenClawProjection m:openclaw-projection ;
     re:hasAgentBinding m:agent-binding .
@@ -317,38 +317,38 @@ m:out-cp-managed-output
     re:prescribesAction re:ContinueMonitoring ;
     re:actionNarrative "Mental health access monitor registers pain management stable" .
 
-m:rule-chronic-pain-crisis
+m:rule-chronic-pain-crisis-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-chronic-pain-crisis ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0,0,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "PAIN_CRISIS: uncontrolled acute pain episode requiring urgent pain management intervention at [2023:2027]" .
 
-m:rule-chronic-pain-opioid-risk
+m:rule-chronic-pain-opioid-risk-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-chronic-pain-opioid-risk ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "0,1,0,0" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "OPIOID_RISK_ELEVATED: opioid misuse or overuse pattern detected at [2023:2027]" .
 
-m:rule-chronic-pain-functional-impairment
+m:rule-chronic-pain-functional-impairment-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-chronic-pain-functional-impairment ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,1,0" ;
+    re:matchesOutputPosition 2 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "FUNCTIONAL_IMPAIRMENT: chronic pain causing sustained ADL and activity limitation at [2023:2027]" .
 
-m:rule-chronic-pain-managed-ok
+m:rule-chronic-pain-managed-ok-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-chronic-pain-managed-ok ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,1" ;
+    re:matchesOutputPosition 3 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "PAIN_MANAGED: chronic pain adequately controlled with maintained function at [2023:2027]" .

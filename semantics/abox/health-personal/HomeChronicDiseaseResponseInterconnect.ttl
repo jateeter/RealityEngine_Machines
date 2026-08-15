@@ -21,7 +21,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-chronic-disease-urgent-response , m:seq-chronic-disease-access-adherence-support , m:seq-chronic-disease-preventive-intensification , m:seq-chronic-disease-stable-monitoring ;
-    re:hasTriggerRule m:rule-chronic-disease-urgent-response , m:rule-chronic-disease-access-adherence-support , m:rule-chronic-disease-preventive-intensification , m:rule-chronic-disease-stable-monitoring .
+    re:hasTriggerRule m:rule-chronic-disease-urgent-response-1 , m:rule-chronic-disease-access-adherence-support-1 , m:rule-chronic-disease-preventive-intensification-1 , m:rule-chronic-disease-stable-monitoring-1 .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -481,38 +481,38 @@ m:out-cdr-stable-monitoring-output
     re:prescribesAction re:ContinueMonitoring ;
     re:actionNarrative "Continue lightweight monitoring and outcome stabilization." .
 
-m:rule-chronic-disease-urgent-response
+m:rule-chronic-disease-urgent-response-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-chronic-disease-urgent-response ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0,0,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "URGENT_DISEASE_RESPONSE: acute chronic disease deterioration with access/adherence co-risk at [4386:4390]" .
 
-m:rule-chronic-disease-access-adherence-support
+m:rule-chronic-disease-access-adherence-support-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-chronic-disease-access-adherence-support ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "0,1,0,0" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "ACCESS_ADHERENCE_SUPPORT: poor control driven by medication, transportation, or food-access barriers at [4386:4390]" .
 
-m:rule-chronic-disease-preventive-intensification
+m:rule-chronic-disease-preventive-intensification-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-chronic-disease-preventive-intensification ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,1,0" ;
+    re:matchesOutputPosition 2 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "PREVENTIVE_INTENSIFICATION: borderline disease control with early risk signals at [4386:4390]" .
 
-m:rule-chronic-disease-stable-monitoring
+m:rule-chronic-disease-stable-monitoring-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-chronic-disease-stable-monitoring ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,1" ;
+    re:matchesOutputPosition 3 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "STABLE_CHRONIC_DISEASE_MONITORING: disease and support lanes stable at [4386:4390]" .
