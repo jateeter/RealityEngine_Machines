@@ -43,6 +43,7 @@ FIXTURES = REPO_ROOT / "semantics" / "shapes" / "fixtures"
 CASES_TRIG = FIXTURES / "cases.trig"
 CASES_JSON = FIXTURES / "cases.json"
 LANE_REGISTRY = FIXTURES / "lane-registry.ttl"
+LANE_GRAPH = REPO_ROOT / "semantics" / "lanes" / "lane-graph.ttl"
 QUDT_SUBSET = REPO_ROOT / "semantics" / "ontology" / "qudt-subset.ttl"
 
 FIXTURE_NS = "https://realityengine.example.org/fixtures/guardrails#"
@@ -136,6 +137,29 @@ def main() -> int:
         failures.append(f"{name}: declared in cases.json but absent from cases.trig")
     for name in orphans:
         failures.append(f"{name}: present in cases.trig but not declared in cases.json")
+
+    # The fixtures prove the rules; the projected corpus proves they hold on
+    # the real thing. A guardrail green on fixtures and silent about 941 live
+    # lanes would be measuring the wrong system.
+    if LANE_GRAPH.exists():
+        corpus = Graph()
+        for path in (ONTOLOGY, SHAPES, QUDT_SUBSET, LANE_GRAPH):
+            corpus.parse(path, format="turtle")
+        conforms, results_graph, _ = validate(
+            corpus, shacl_graph=shapes, advanced=True, inference="none",
+            abort_on_first=False, meta_shacl=False,
+        )
+        lanes = len(set(corpus.subjects(
+            URIRef("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+            URIRef("https://realityengine.example.org/ontology/re-guardrails#IngressLane"),
+        )))
+        if conforms:
+            print(f"validate-guardrails: projected lane graph conforms ({lanes} lanes)")
+        else:
+            detail = sorted(set(result_strings(results_graph)))[:5]
+            failures.append(
+                "projected lane graph does not conform: " + "; ".join(detail)
+            )
 
     total = len(cases)
     if failures:

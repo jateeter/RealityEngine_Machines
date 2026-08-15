@@ -81,6 +81,14 @@
         },
         "maxValue": {
           "type": "number"
+        },
+        "contendedNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true,
+          "description": "Alternative names other writers give this position, kept so the arbiter sees the divergence when it resolves the cell."
         }
       }
     }
@@ -277,6 +285,64 @@
             },
             "uniqueItems": true,
             "description": "Machines whose output region writes cells of this lane. M1(output i) feeding M2(input j) is the interconnect mechanism, so an ingress lane is normally written from inside as well as outside \u2014 703 of 983 lanes have at least one."
+          },
+          "permittedProviders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true,
+            "description": "External writer classes admitted into this lane. Machine outputs write the same cells and are listed separately in machineWriters."
+          },
+          "carriesAutonomy": {
+            "enum": [
+              "observe",
+              "advise",
+              "supervised-act",
+              "automated-act"
+            ],
+            "description": "The autonomy a value admitted here carries FORWARD. Autonomy is transitive: it rides the value through the arbiter into the next machine's input, the minimum along a chain dominates, and acting above it takes a specific approval."
+          },
+          "lifeSafety": {
+            "type": "boolean"
+          },
+          "requiredAutonomy": {
+            "enum": [
+              "observe",
+              "advise",
+              "supervised-act",
+              "automated-act"
+            ],
+            "description": "Autonomy floor a writer must hold. Required on life-safety lanes."
+          },
+          "semanticContention": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "flagged",
+              "namings"
+            ],
+            "description": "Writers contending for this lane do not agree on what its cells mean. Flagged rather than eliminated: the divergence is surfaced through the arbiter as a second check on the semantic integrity of the deterministic core.",
+            "properties": {
+              "flagged": {
+                "type": "boolean"
+              },
+              "namings": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "names": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

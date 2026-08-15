@@ -94,15 +94,22 @@ def profile_name(key: tuple) -> str:
     return f"{label}/{bits}"
 
 
+# Every openClawProjection is owned by openclaw-input-analyst and reaches PE
+# over ACP, so the external writer class of a machine-input lane is derivable.
+MACHINE_INPUT_PROVIDER = "acp"
+
+# Decision: Advise is the default floor, and it is transitive — the autonomy a
+# value carries rides through the arbiter into the next machine's input rather
+# than being re-established per hop. Acting above the inherited level takes a
+# specific approval; nothing else curtails it.
+DEFAULT_CARRIED_AUTONOMY = "advise"
+LIFE_SAFETY_AUTONOMY_FLOOR = "advise"
+
+
 REVIEW_REASONS = {
     "profile-unrecognised": (
         "The normalization label and bitsPerElement do not form a settled "
         "profile; the label is contradicted by the element width."
-    ),
-    "axis-name-disagreement": (
-        "Machines sharing this region disagree on what its positions mean. "
-        "re:axisName is functional, so this is an inconsistency to adjudicate, "
-        "not a spelling variant."
     ),
     "contention-undeclared": (
         "This region shares cells with another externally-writable region and "
@@ -215,19 +222,29 @@ def build() -> dict:
     for (offset, length), records in sorted(by_region.items()):
         lane_id = f"mi-{offset}-{length}"
         readers = sorted(record["stem"] for record in records)
+        life_safety = any(record.get("severity") == "life-safety" for record in records)
         lane = {
             "id": lane_id,
             "source": "machine-input",
             "offset": offset,
             "length": length,
             "readers": readers,
+            "permittedProviders": [MACHINE_INPUT_PROVIDER],
+            "carriesAutonomy": DEFAULT_CARRIED_AUTONOMY,
         }
+        if life_safety:
+            lane["lifeSafety"] = True
+            lane["requiredAutonomy"] = LIFE_SAFETY_AUTONOMY_FLOOR
 
         reasons: list[str] = []
 
+        # Divergent namings are kept and flagged, not treated as a defect.
+        # Two writers contending for a cell may legitimately mean different
+        # things by it; surfacing that through the arbiter is a second check on
+        # the semantic integrity of the deterministic core, so the lane carries
+        # every naming rather than collapsing to one.
         distinct_names = {tuple(record["semantics"]) for record in records}
-        if len(distinct_names) > 1:
-            reasons.append("axis-name-disagreement")
+        semantic_contention = len(distinct_names) > 1
 
         profiles = {(record["normalization"], record["bits"]) for record in records}
         profile = None
@@ -261,6 +278,18 @@ def build() -> dict:
         if profile and len(names) == length and not reasons:
             lane["profile"] = profile_name(next(iter(profiles)))
             lane["axes"] = build_axes(list(names))
+            if semantic_contention:
+                for axis in lane["axes"]:
+                    alternatives = sorted(
+                        {
+                            naming[axis["index"]]
+                            for naming in distinct_names
+                            if len(naming) > axis["index"]
+                            and naming[axis["index"]] != axis["name"]
+                        }
+                    )
+                    if alternatives:
+                        axis["contendedNames"] = alternatives
         else:
             lane["axes"] = []
             if profile and len(names) != length:
@@ -276,6 +305,14 @@ def build() -> dict:
                     item["undeclaredCells"] = lane["contention"]["undeclaredCells"]
                 review.append(item)
 
+        if semantic_contention:
+            lane["semanticContention"] = {
+                "flagged": True,
+                "namings": [
+                    {"names": list(naming)} for naming in sorted(distinct_names)
+                ],
+            }
+
         lanes.append(lane)
 
     # Service lanes: allocation is authoritative, semantics are not derivable.
@@ -289,6 +326,8 @@ def build() -> dict:
                 "offset": entry["offset"],
                 "length": entry["length"],
                 "provider": entry.get("provider"),
+                "permittedProviders": [entry["provider"]] if entry.get("provider") else [],
+                "carriesAutonomy": DEFAULT_CARRIED_AUTONOMY,
                 "readers": sorted(
                     Path(name).stem for name in entry.get("corpusReaders", [])
                 ),

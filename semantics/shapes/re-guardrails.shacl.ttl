@@ -113,6 +113,26 @@ reg:arbitrationRule a owl:DatatypeProperty ; rdfs:domain reg:IngressLane ; rdfs:
     rdfs:label "arbitration rule" ;
     rdfs:comment "The rule resolving this lane's contended cells, from domains/arbitration-registry.json — PRECEDENCE, SEVERITY, or a combination. The registry holds the per-cell resolution; the lane records that one exists." .
 
+reg:carriesAutonomy a owl:ObjectProperty ; rdfs:domain reg:IngressLane ; rdfs:range re:AutonomyMode ;
+    rdfs:label "carries autonomy" ;
+    rdfs:comment "The autonomy a value admitted into this lane carries FORWARD. Autonomy is transitive here: it rides the value through the arbiter into the next machine's input rather than being re-established per hop, and the minimum along a chain dominates. Acting above the inherited level requires a specific approval; nothing else curtails it." .
+
+reg:semanticContention a owl:DatatypeProperty ; rdfs:domain reg:IngressLane ; rdfs:range xsd:boolean ;
+    rdfs:label "semantic contention" ;
+    rdfs:comment "True when writers contending for this lane's cells do not agree on what those cells mean. This is flagged rather than eliminated: two writers may legitimately mean different things by the same cell, and surfacing the divergence through the arbiter is a second check on the semantic integrity of the deterministic core." .
+
+reg:contendedName a owl:DatatypeProperty ; rdfs:domain reg:LaneAxis ; rdfs:range xsd:string ;
+    rdfs:label "contended name" ;
+    rdfs:comment "An alternative name another writer gives this position. Kept alongside re:axisName so the arbiter can see the divergence at the moment it resolves the cell." .
+
+reg:inheritedAutonomy a owl:ObjectProperty ; rdfs:domain reg:EgressDispatch ; rdfs:range re:AutonomyMode ;
+    rdfs:label "inherited autonomy" ;
+    rdfs:comment "The autonomy carried forward by the evidence this dispatch rests on — the minimum over its contributing lanes. A dispatch may not act above it without a recorded approval." .
+
+reg:approvalRef a owl:DatatypeProperty ; rdfs:domain reg:EgressDispatch ; rdfs:range xsd:string ;
+    rdfs:label "approval reference" ;
+    rdfs:comment "The specific approval permitting this dispatch to act above its inherited autonomy. The only thing that curtails transitive autonomy." .
+
 reg:contendedCellCount a owl:DatatypeProperty ; rdfs:domain reg:IngressLane ; rdfs:range xsd:integer ;
     rdfs:label "contended cell count" ;
     rdfs:comment "How many cells of this lane are contended. A cell ci of a Reality Event E = {c1..cn} is contended when more than one writer competes for ci's next value — M1(j) and M2(l) both targeting ci. It is a property of a cell and its writers, not of how two regions overlap. Contention is the normal state here, not an exception: 2,835 of 4,005 lane cells are contended, which is why the guardrail asks for a declared resolution rather than treating it as a defect." .
@@ -469,6 +489,16 @@ reg:IngressLaneShape
         sh:datatype xsd:string ;
     ] ;
     sh:property [
+        sh:path reg:carriesAutonomy ;
+        sh:class re:AutonomyMode ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A lane must declare the autonomy its values carry forward; autonomy is transitive and cannot be re-established per hop." ;
+    ] ;
+    sh:property [
+        sh:path reg:semanticContention ;
+        sh:datatype xsd:boolean ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
         sh:path reg:contentionArbitrated ;
         sh:datatype xsd:boolean ;
         sh:maxCount 1 ;
@@ -643,6 +673,10 @@ reg:LaneAxisShape
     sh:property [
         sh:path reg:observableProperty ;
         sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:contendedName ;
+        sh:datatype xsd:string ;
     ] ;
 
     # U1. The canonical unit must itself be accepted.
@@ -1420,6 +1454,37 @@ reg:EgressDispatchShape
         sh:path reg:governedByBinding ;
         sh:class re:AgentBinding ;
         sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:inheritedAutonomy ;
+        sh:class re:AutonomyMode ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:approvalRef ;
+        sh:datatype xsd:string ; sh:maxCount 1 ;
+    ] ;
+
+    # E5. Transitive autonomy.
+    #
+    # Autonomy rides the value through the arbiter into the next machine's
+    # input; the minimum along the chain dominates. Acting above what the
+    # evidence carries takes a specific approval, and nothing else curtails it.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Dispatch acts above the autonomy its evidence carries forward, with no approval recorded." ;
+        sh:severity sh:Violation ;
+        sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this reg:underAutonomy ?value ;
+                      reg:inheritedAutonomy ?inherited .
+                ?value reg:autonomyRank ?actual .
+                ?inherited reg:autonomyRank ?carried .
+                FILTER (?actual > ?carried)
+                FILTER NOT EXISTS { $this reg:approvalRef ?approval }
+            }
+        """ ;
     ] ;
 
     # ── E1. The escalation invariant ─────────────────────────────────────

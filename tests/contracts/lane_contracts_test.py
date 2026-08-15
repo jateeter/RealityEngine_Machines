@@ -80,6 +80,25 @@ class LaneContractsTest(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_projection_is_deterministic(self) -> None:
+        """The projector is a build step, so its output must be a function of
+        its inputs alone — otherwise the gate reports drift that is not there."""
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "project_lanes", REPO_ROOT / "scripts" / "project-lanes.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        first, summary = module.project(self.document)
+        second, again = module.project(self.document)
+        self.assertEqual(first, second)
+        self.assertEqual(summary, again)
+        self.assertEqual(
+            summary["lanesEmitted"] + summary["lanesOmitted"], len(self.lanes)
+        )
+        self.assertGreater(summary["lanesEmitted"], 0)
+
     # -- separation of concerns -------------------------------------------
 
     def test_service_lanes_mirror_the_allocation_exactly(self) -> None:
@@ -101,6 +120,35 @@ class LaneContractsTest(unittest.TestCase):
                 )
 
     # -- shape parity ------------------------------------------------------
+
+    def test_every_lane_declares_carried_autonomy(self) -> None:
+        """Autonomy is transitive: a lane that does not say what its values
+        carry forward breaks the chain at that hop."""
+        for lane in self.lanes:
+            with self.subTest(lane=lane["id"]):
+                self.assertIn("carriesAutonomy", lane)
+
+    def test_life_safety_lanes_declare_an_autonomy_floor(self) -> None:
+        for lane in self.lanes:
+            if lane.get("lifeSafety"):
+                with self.subTest(lane=lane["id"]):
+                    self.assertIn("requiredAutonomy", lane)
+
+    def test_semantic_contention_is_flagged_not_dropped(self) -> None:
+        """Divergent namings are signal, not defect. A flagged lane keeps every
+        naming, and its axes carry the alternatives so the arbiter can surface
+        the divergence at the moment it resolves the cell."""
+        flagged = [l for l in self.lanes if l.get("semanticContention")]
+        self.assertGreater(len(flagged), 0, "no lane carries divergent namings")
+        for lane in flagged:
+            with self.subTest(lane=lane["id"]):
+                self.assertTrue(lane["semanticContention"]["flagged"])
+                self.assertGreaterEqual(len(lane["semanticContention"]["namings"]), 2)
+                if lane["axes"]:
+                    self.assertTrue(
+                        any(axis.get("contendedNames") for axis in lane["axes"]),
+                        "flagged lane whose axes carry no alternative names",
+                    )
 
     def test_lane_ids_satisfy_the_shape_pattern(self) -> None:
         for lane in self.lanes:
