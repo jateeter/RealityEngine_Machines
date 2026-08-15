@@ -438,6 +438,110 @@ published in the 2017 Recommendation. The SHACL 1.2 family (Core, Node
 Expressions, Rules, Profiling, User Interfaces) is at Working Draft as of
 August 2026. Do not take a dependency on 1.2 features.
 
+## Where lane contracts live
+
+**Semantics are a sidecar; allocation is untouched.**
+
+`domains/region-allocation.json` remains the single authority on which span of
+the universal vector belongs to whom. `domains/lane-contracts.json`
+(`schemas/lane-contract.schema.json`) carries what those spans *mean* — per
+position: name, unit, quantity kind, value domain, conversion policy and scale
+type. The two are separate files with separate schemas so that neither can
+quietly become the other's authority, and
+`tests/contracts/lane_contracts_test.py` gates the separation: a service lane
+whose offset or length drifts from the allocation fails.
+
+**A lane is a region, not a machine.** 1,185 machines carry an
+`openClawProjection`, but they land on 983 distinct write-back regions —
+several machines legitimately read one externally-written lane. Modelling per
+machine would invent lanes that overlap by construction.
+
+**Axes carry only what varies.** Position and meaning live on the axis; the
+unit contract comes from a named `derivationProfile`. That keeps a rule change
+one edit rather than 3,617, keeps the rule legible rather than buried in
+thousands of copies, and took the sidecar from 2.0 MB to 625 KB. The projector
+resolves an axis as its lane's profile overlaid with the axis's own overrides.
+
+### Derivation
+
+`scripts/backfill-lane-contracts.py` derives from evidence, never from the
+`normalization` label alone — the label is contradicted by the data often
+enough not to be trusted on its own. The evidence is the label,
+`perceptualMapping.bitsPerElement`, and the values the machine's own sequence
+vectors actually contain:
+
+| label | bits | values | scale | policy | domain |
+| --- | ---: | --- | --- | --- | --- |
+| `machine-native-binary` | 1 | `{0,1}` | nominal | prohibited | `[0,1]` |
+| `machine-native-ordinal` | 4 | `{0..3}` | ordinal | prohibited | `[0..3]` |
+| `machine-native-scalar` | 8 | 0..1 continuous | ratio | none | 0..1 |
+
+All three are dimensionless — UCUM `1`, `qkind:Dimensionless`,
+`unit:UNITLESS`. A machine-native ordinal or normalized index is not a physical
+quantity, which is why the categorical cases prohibit conversion outright.
+
+**Anything the evidence does not settle goes to `review` rather than being
+guessed.** A fabricated unit sitting behind a guardrail is worse than an absent
+one: the guardrail is the thing that is supposed to be trustworthy.
+
+Current state — 991 lanes, 913 annotated (3,705 positions), 78 in review:
+
+| reason | lanes | |
+| --- | ---: | --- |
+| `profile-unrecognised` | 42 | The label is contradicted by the element width — machines declaring `machine-native-binary` while carrying 8-bit elements and continuous values |
+| `axis-name-disagreement` | 29 | Machines sharing a region disagree on what its positions mean. `re:axisName` is functional, so this is an inconsistency to adjudicate, not a spelling variant |
+| `physical-units-need-owner` | 8 | The service lanes. Real physical quantities; units need a domain owner, not a derivation |
+| `contention-undeclared` | 0 | A shared cell with no entry in the arbitration registry. None at present |
+
+### An ingress lane is written from two directions
+
+Worth stating plainly, because two earlier drafts of this contract got it
+wrong. An ingress lane has **two classes of writer**:
+
+- **external providers** — OpenClaw/ACP, HealthKit, localAI and the rest. This
+  is what makes the lane *ingress*, and `reg:permittedProvider` lists them.
+- **machine outputs** — `M1(output i)` feeding `M2(input j)` is how this
+  perceptual space composes. `reg:machineWriter` names them.
+
+The second is not an edge case. **703 of 983 lanes have at least one machine
+writer**, 669 machine output regions equal a machine input region exactly, and
+**2,835 of 4,005 lane cells are contended**. Contention is the normal state of
+an ingress lane, not an exception to it.
+
+**Definition.** Given a Reality Event `E = {c1 … cn}`, a cell `ci` is
+*contended* when more than one writer competes for `ci`'s **next value** —
+`M1(j)` and `M2(l)` both targeting `ci`. It is a property of a cell and its
+writers, not of how two regions happen to overlap. Two earlier drafts of this
+contract used "shared cell" for region-against-region overlap, which is a
+different and much smaller set: 20 pairs against the registry's 2,837 cells.
+Deriving the definition above from the corpus reproduces
+`domains/arbitration-registry.json` exactly — 2,837 cells, none extra, none
+missing — and `tests/contracts/lane_contracts_test.py` gates that agreement, so
+a registry gone stale against the machines is caught rather than trusted.
+
+So overlap is not the question and geometry is not the test. The first draft of
+`IngressLaneShape` refused overlapping lanes outright, which would have rejected
+the corpus's correct design; the second replaced that with a lane-against-lane
+overlap check, which saw 20 pairs where the registry records 2,837 contended
+cells — it was still measuring geometry, and still missing the machine writers
+entirely.
+
+What `docs/ARBITER_CONTRACT.md` calls a corpus error is a *contended* cell —
+one with more than one writer — carrying **no declared resolution**. The
+guardrail therefore constrains the declaration:
+
+| | |
+| --- | --- |
+| a lane with a `reg:machineWriter` | must assert `reg:contentionArbitrated true` |
+| a lane with `reg:contendedCellCount > 0` | must name its `reg:arbitrationRule` |
+| a lane asserting arbitration with neither | warns — the declaration describes nothing |
+
+`domains/arbitration-registry.json` holds the per-cell resolution itself: 2,837
+cells, of which 2,796 have both an `acp` writer and a `machine` writer, under
+PRECEDENCE. Every contended cell in the current corpus is declared there, which
+is why `contention-undeclared` has zero members — an accurate statement about
+this corpus rather than a silence.
+
 ## Implementation status
 
 Written and gated:
@@ -445,28 +549,37 @@ Written and gated:
 - `semantics/shapes/re-guardrails.shacl.ttl` — vocabulary, SOSA alignment, the
   UCUM/QUDT unit contract, corpus-time lane shapes, ingress shapes, egress
   shapes.
-- `semantics/shapes/fixtures/` — lane registry fixture, illustrative QUDT
-  subset, 43-case parity suite.
+- `semantics/shapes/fixtures/` — lane registry fixture and 47-case parity suite.
+- `semantics/ontology/qudt-subset.ttl` — pinned QUDT v3.5.0 extraction, via
+  `scripts/extract-qudt-subset.py`.
+- `scripts/ucum.py` — canonicalizer, with `tests/contracts/ucum_test.py`.
+- `domains/lane-contracts.json` — the semantics sidecar, via
+  `scripts/backfill-lane-contracts.py`, with
+  `tests/contracts/lane_contracts_test.py`.
 - `scripts/validate_guardrails.py`, `scripts/validate-guardrails.sh`.
 
 Not yet written — in dependency order:
 
-1. **The lane projector.** `domains/region-allocation.json` declares `id`,
-   `offset`, `length`, `provider`, `corpusReaders` and `corpusWriters`, which
-   is most of a lane. It does not yet declare the unit annotations, value
-   domain, permitted provenance, staleness ceiling or autonomy floor. Those
-   fields must be added to `schemas/region-allocation.schema.json` (the block
-   is drafted above) and backfilled, then a projector generates the lane graph
-   the shapes validate. Everything else depends on this.
-2. **A real QUDT subset extractor**, replacing the fixture stand-in, plus a
-   UCUM canonicalizer in the projector and the adapter SDK so code comparison
-   by string is sound.
-3. **Life-safety lane derivation.** `reg:lifeSafetyLane` should be computed
-   from the corpus — a lane feeding the input region of a machine carrying an
-   `re:LifeSafetySequence` — not hand-flagged.
+1. **The lane projector.** `scripts/project-lanes.py`, consuming
+   `region-allocation.json` (allocation) plus `lane-contracts.json`
+   (semantics) plus the corpus, emitting the lane graph the shapes validate.
+   Byte-deterministic with `--check`, mirroring `generate-owl.py`.
+   `sharedOutputLanes` and `interDomainBuses` are machine-to-machine merges and
+   are explicitly out of scope: they are not ingress.
+2. **Life-safety lane derivation.** `reg:lifeSafetyLane` computed from the
+   corpus — a lane feeding the input region of a machine carrying an
+   `re:LifeSafetySequence` — not hand-flagged. This is the one flag whose being
+   wrong is a safety issue.
+3. **Resolving the 98 review lanes**, which needs domain owners rather than
+   tooling.
 4. **Per-lane severity configuration**, so the observe→warn→block staging can
    advance domain by domain.
 5. **The compile step** in each runtime: shapes → decision table at load.
-6. **Porting `owl_semantics_test.py`** to shapes, once (1) proves the pattern.
+6. **Porting `owl_semantics_test.py`** to shapes.
 7. **Wiring** `validate-guardrails.sh` into `npm run validate` and the
    `RealityEngine_CI` gate list in `INTEGRATED_SPECIFICATION.md`.
+
+Deferred by decision: adding unit fields to
+`schemas/region-allocation.schema.json` and `schemas/machine.schema.json`. The
+sidecar makes them unnecessary for now, and the full corpus review will cover
+both files together.

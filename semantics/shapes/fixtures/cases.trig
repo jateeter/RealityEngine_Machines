@@ -575,6 +575,7 @@ fx:reject-egress-missing-correlation {
 
 fx:reject-lane-axis-count-mismatch {
     fx:bad-lane a reg:IngressLane ;
+        reg:carriesAutonomy re:Advise ;
         reg:laneId "bad-axis-count" ;
         reg:laneOffset 9000 ;
         reg:laneLength 4 ;
@@ -590,23 +591,38 @@ fx:reject-lane-axis-count-mismatch {
         reg:permittedValue 0 , 1 .
 }
 
-fx:reject-lane-overlap {
-    fx:overlapping-lane a reg:IngressLane ;
-        reg:laneId "overlaps-fall-detection" ;
-        reg:laneOffset 3814 ;
-        reg:laneLength 2 ;
-        reg:permittedProvider "manual" ;
-        reg:hasAxis fx:ov-axis-0 , fx:ov-axis-1 .
+fx:reject-contention-undeclared {
+    fx:unarbitrated-lane a reg:IngressLane ;
+        reg:carriesAutonomy re:Advise ;
+        reg:laneId "written-by-machine-unarbitrated" ;
+        reg:laneOffset 9950 ;
+        reg:laneLength 1 ;
+        reg:permittedProvider "openclaw" ;
+        reg:machineWriter "SomeUpstreamMachine" ;
+        reg:hasAxis fx:unarb-axis-0 .
 
-    fx:ov-axis-0 a reg:LaneAxis ;
-        re:axisIndex 0 ; re:axisName "ov_zero" ;
+    fx:unarb-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "unarb_zero" ;
         reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
         reg:quantityKind qkind:Dimensionless ;
         reg:conversionPolicy reg:ProhibitedConversion ;
         reg:scaleType reg:OrdinalScale ;
         reg:permittedValue 0 , 1 .
-    fx:ov-axis-1 a reg:LaneAxis ;
-        re:axisIndex 1 ; re:axisName "ov_one" ;
+}
+
+fx:reject-contended-without-rule {
+    fx:noruleLane a reg:IngressLane ;
+        reg:carriesAutonomy re:Advise ;
+        reg:laneId "contended-without-rule" ;
+        reg:laneOffset 9960 ;
+        reg:laneLength 1 ;
+        reg:permittedProvider "openclaw" ;
+        reg:contendedCellCount 1 ;
+        reg:contentionArbitrated true ;
+        reg:hasAxis fx:norule-axis-0 .
+
+    fx:norule-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "norule_zero" ;
         reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
         reg:quantityKind qkind:Dimensionless ;
         reg:conversionPolicy reg:ProhibitedConversion ;
@@ -616,6 +632,7 @@ fx:reject-lane-overlap {
 
 fx:reject-life-safety-lane-without-floor {
     fx:unfloored-lane a reg:IngressLane ;
+        reg:carriesAutonomy re:Advise ;
         reg:laneId "life-safety-no-floor" ;
         reg:laneOffset 9100 ;
         reg:laneLength 1 ;
@@ -634,6 +651,7 @@ fx:reject-life-safety-lane-without-floor {
 
 fx:reject-axis-without-canonical-unit {
     fx:unitless-lane a reg:IngressLane ;
+        reg:carriesAutonomy re:Advise ;
         reg:laneId "unitless" ;
         reg:laneOffset 9200 ;
         reg:laneLength 1 ;
@@ -657,6 +675,7 @@ fx:reject-axis-without-canonical-unit {
 # a linear policy would silently drop 273.15.
 fx:reject-affine-declared-linear {
     fx:bad-temp-lane a reg:IngressLane ;
+        reg:carriesAutonomy re:Advise ;
         reg:laneId "bad-temp" ;
         reg:laneOffset 9300 ;
         reg:laneLength 1 ;
@@ -675,6 +694,7 @@ fx:reject-affine-declared-linear {
 
 fx:reject-ordinal-axis-convertible {
     fx:bad-ordinal-lane a reg:IngressLane ;
+        reg:carriesAutonomy re:Advise ;
         reg:laneId "bad-ordinal" ;
         reg:laneOffset 9400 ;
         reg:laneLength 1 ;
@@ -692,6 +712,7 @@ fx:reject-ordinal-axis-convertible {
 
 fx:reject-canonical-unit-not-accepted {
     fx:bad-accept-lane a reg:IngressLane ;
+        reg:carriesAutonomy re:Advise ;
         reg:laneId "bad-accept" ;
         reg:laneOffset 9500 ;
         reg:laneLength 1 ;
@@ -709,6 +730,7 @@ fx:reject-canonical-unit-not-accepted {
 
 fx:reject-quantity-kind-disagreement {
     fx:bad-kind-lane a reg:IngressLane ;
+        reg:carriesAutonomy re:Advise ;
         reg:laneId "bad-kind" ;
         reg:laneOffset 9600 ;
         reg:laneLength 1 ;
@@ -727,6 +749,7 @@ fx:reject-quantity-kind-disagreement {
 
 fx:reject-prohibited-axis-multi-unit {
     fx:bad-prohibited-lane a reg:IngressLane ;
+        reg:carriesAutonomy re:Advise ;
         reg:laneId "bad-prohibited" ;
         reg:laneOffset 9700 ;
         reg:laneLength 1 ;
@@ -746,6 +769,7 @@ fx:reject-prohibited-axis-multi-unit {
 # linked to Kelvin, so it would inherit K's conversion facts and lose 273.15.
 fx:reject-qudt-unit-code-mismatch {
     fx:mismatch-lane a reg:IngressLane ;
+        reg:carriesAutonomy re:Advise ;
         reg:laneId "qudt-mismatch" ;
         reg:laneOffset 9800 ;
         reg:laneLength 1 ;
@@ -766,6 +790,7 @@ fx:reject-qudt-unit-code-mismatch {
 # this refusable at corpus time rather than at runtime.
 fx:reject-dimension-incompatible-accepted {
     fx:dim-lane a reg:IngressLane ;
+        reg:carriesAutonomy re:Advise ;
         reg:laneId "dim-incompatible" ;
         reg:laneOffset 9900 ;
         reg:laneLength 1 ;
@@ -780,4 +805,93 @@ fx:reject-dimension-incompatible-accepted {
         reg:conversionPolicy reg:AffineConversion ;
         reg:scaleType reg:IntervalScale ;
         reg:minValue -40 ; reg:maxValue 60 .
+}
+
+# The ordinary case: an ingress lane written externally AND by a machine
+# output, with the contention resolved. M1(out) -> M2(in) is the interconnect
+# mechanism, so this must be admitted — 703 of 983 corpus lanes look like this.
+fx:accept-arbitrated-contention {
+    fx:arbitrated-lane a reg:IngressLane ;
+        reg:carriesAutonomy re:Advise ;
+        reg:laneId "written-by-machine-arbitrated" ;
+        reg:laneOffset 3900 ;
+        reg:laneLength 2 ;
+        reg:permittedProvider "openclaw" ;
+        reg:machineWriter "AGX001_aquaculture-water-quality-stability" ;
+        reg:contentionArbitrated true ;
+        reg:contendedCellCount 2 ;
+        reg:arbitrationRule "PRECEDENCE" ;
+        reg:hasAxis fx:arb-axis-0 , fx:arb-axis-1 .
+
+    fx:arb-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "arb_zero" ;
+        reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
+        reg:quantityKind qkind:Dimensionless ;
+        reg:conversionPolicy reg:ProhibitedConversion ;
+        reg:scaleType reg:OrdinalScale ;
+        reg:permittedValue 0 , 1 .
+    fx:arb-axis-1 a reg:LaneAxis ;
+        re:axisIndex 1 ; re:axisName "arb_one" ;
+        reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
+        reg:quantityKind qkind:Dimensionless ;
+        reg:conversionPolicy reg:ProhibitedConversion ;
+        reg:scaleType reg:OrdinalScale ;
+        reg:permittedValue 0 , 1 .
+}
+
+# Transitive autonomy: the dispatch acts at supervised-act while its evidence
+# carries only advise, and no approval is recorded.
+fx:reject-egress-above-inherited-autonomy {
+    fx:disp a reg:EgressDispatch ;
+        reg:dispatchesAction re:CaregiverCheckIn ;
+        reg:fromDetermination fx:determination-amber ;
+        reg:toTarget "care-team" ;
+        reg:envelopeId "env_010" ;
+        reg:correlationId "corr_010" ;
+        reg:humanApproved true ;
+        reg:underAutonomy re:SupervisedAct ;
+        reg:inheritedAutonomy re:Advise ;
+        reg:dispatchStatus reg:Pending ;
+        reg:governedByBinding fx:binding-supervised .
+}
+
+# The same dispatch with the specific approval that curtails the inheritance.
+fx:accept-egress-approved-above-inherited {
+    fx:disp a reg:EgressDispatch ;
+        reg:dispatchesAction re:CaregiverCheckIn ;
+        reg:fromDetermination fx:determination-amber ;
+        reg:toTarget "care-team" ;
+        reg:envelopeId "env_011" ;
+        reg:correlationId "corr_011" ;
+        reg:humanApproved true ;
+        reg:underAutonomy re:SupervisedAct ;
+        reg:inheritedAutonomy re:Advise ;
+        reg:approvalRef "approval:care-team-lead-2026-08-14" ;
+        reg:dispatchStatus reg:Delivered ;
+        reg:governedByBinding fx:binding-supervised .
+}
+
+# Divergent namings on a contended lane are kept and flagged, not refused.
+fx:accept-flagged-semantic-contention {
+    fx:sem-lane a reg:IngressLane ;
+        reg:carriesAutonomy re:Advise ;
+        reg:laneId "semantically-contended" ;
+        reg:laneOffset 9990 ;
+        reg:laneLength 1 ;
+        reg:permittedProvider "acp" ;
+        reg:machineWriter "AGX001_aquaculture-water-quality-stability" ;
+        reg:contentionArbitrated true ;
+        reg:contendedCellCount 1 ;
+        reg:arbitrationRule "PRECEDENCE" ;
+        reg:semanticContention true ;
+        reg:hasAxis fx:sem-axis-0 .
+
+    fx:sem-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "process_stability" ;
+        reg:contendedName "water_ph_in_band" ;
+        reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
+        reg:quantityKind qkind:Dimensionless ;
+        reg:conversionPolicy reg:ProhibitedConversion ;
+        reg:scaleType reg:NominalScale ;
+        reg:permittedValue 0 , 1 .
 }

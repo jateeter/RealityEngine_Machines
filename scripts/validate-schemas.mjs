@@ -7,6 +7,7 @@
  *   - domains/domain-manifest.json  -> domain-manifest.schema.json
  *   - domains/domain-registry.json  -> domain-registry.schema.json
  *   - domains/semantic-bus-registry.json -> semantic-bus-registry.schema.json
+ *   - domains/lane-contracts.json   -> lane-contract.schema.json
  *   - triggers/*.example.json       -> ai-trigger-envelope.schema.json
  *   - triggers/*scenario*.json      -> trigger-scenario.schema.json
  *   (triggers/*.template.json is a documentation scaffold and is skipped.)
@@ -78,6 +79,7 @@ validateSet("domain-registry", [join(REPO, "domains/domain-registry.json")], "do
 validateSet("semantic-bus-registry", [join(REPO, "domains/semantic-bus-registry.json")], "semantic-bus-registry.schema.json");
 validateSet("region-allocation", [join(REPO, "domains/region-allocation.json")], "region-allocation.schema.json");
 validateSet("arbitration-registry", [join(REPO, "domains/arbitration-registry.json")], "arbitration-registry.schema.json");
+validateSet("lane-contracts", [join(REPO, "domains/lane-contracts.json")], "lane-contract.schema.json");
 
 const trig = existsSync(join(REPO, "triggers")) ? readdirSync(join(REPO, "triggers")).filter((n) => n.endsWith(".json")) : [];
 const examples = trig.filter((n) => n.endsWith(".example.json")).map((n) => join(REPO, "triggers", n));
