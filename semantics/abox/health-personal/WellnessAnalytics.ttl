@@ -21,7 +21,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-wa-sustained-alert-community , m:seq-wa-critical-community , m:seq-wa-sustained-alert-facility , m:seq-wa-critical-facility , m:seq-wa-rapid-decline , m:seq-wa-wellness-improving ;
-    re:hasTriggerRule m:rule-wa-sustained-alert-community , m:rule-wa-critical-community , m:rule-wa-sustained-alert-facility , m:rule-wa-critical-facility , m:rule-wa-rapid-decline , m:rule-wa-wellness-improving ;
+    re:hasTriggerRule m:rule-wa-sustained-alert-community-1 , m:rule-wa-critical-community-1 , m:rule-wa-sustained-alert-facility-1 , m:rule-wa-critical-facility-1 , m:rule-wa-rapid-decline-1 , m:rule-wa-wellness-improving-1 ;
     re:hasInterconnection m:ix-health-personal_care-transition-response_wellness-transition-routing , m:ix-health-personal_facilities-maintenance-response_wellness-escalation , m:ix-health-personal_medication-access-adherence_wellness-routing , m:ix-health-personal_sleep-recovery-wellness_wellness-recovery , m:ix-health-personal_intake-wellness-routing_wellness-analytics ;
     re:hasOpenClawProjection m:openclaw-projection ;
     re:hasAgentBinding m:agent-binding .
@@ -955,56 +955,56 @@ m:out-out-wellness-improving
     re:prescribesAction re:NotifyCareTeam ;
     re:actionNarrative "Notify care team of wellness improvement. Do NOT cancel any pending TRANSITION_REVIEW meetings — confirm recovery holds at next assessment cycle before closing the ALERT episode. Document which interventions correlated with the improvement. Maintain increased monitoring frequency for 2 more cycles. If recovery is confirmed at next cycle, de-escalate to standard bi-weekly monitoring." .
 
-m:rule-wa-sustained-alert-community
+m:rule-wa-sustained-alert-community-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-wa-sustained-alert-community ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0,0,0,0,0,0,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "INFLOW_EVALUATION — sustained ALERT in community-dwelling patient; initiate NewPatientInflow standard evaluation sequence" .
 
-m:rule-wa-critical-community
+m:rule-wa-critical-community-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-wa-critical-community ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "0,1,0,0,0,0,0,0" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "INFLOW_URGENT — CRITICAL wellness in community-dwelling patient; initiate urgent NewPatientInflow evaluation with accelerated timeline" .
 
-m:rule-wa-sustained-alert-facility
+m:rule-wa-sustained-alert-facility-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-wa-sustained-alert-facility ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,1,0,0,0,0,0" ;
+    re:matchesOutputPosition 2 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "TRANSITION_REVIEW — sustained ALERT in facility resident; activate CareTransitionWorkflow for care level review" .
 
-m:rule-wa-critical-facility
+m:rule-wa-critical-facility-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-wa-critical-facility ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,1,0,0,0,0" ;
+    re:matchesOutputPosition 3 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "TRANSITION_ESCALATION — CRITICAL wellness in facility resident; activate CareTransitionWorkflow emergency escalation to hospital" .
 
-m:rule-wa-rapid-decline
+m:rule-wa-rapid-decline-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-wa-rapid-decline ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,0,1,0,0,0" ;
+    re:matchesOutputPosition 4 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "TRANSITION_URGENT — rapid 2-level wellness decline in facility resident; initiate priority care level review without waiting for two-cycle confirmation" .
 
-m:rule-wa-wellness-improving
+m:rule-wa-wellness-improving-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-wa-wellness-improving ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,0,0,1,0,0" ;
+    re:matchesOutputPosition 5 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "WELLNESS_IMPROVING — facility resident returning to GOOD level after ALERT; no care escalation required; care team notified of recovery" .

@@ -22,7 +22,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-maint-daily-routine , m:seq-maint-weekly-deep-clean , m:seq-maint-hygiene-concern , m:seq-maint-safety-concern , m:seq-maint-wellness-concern , m:seq-maint-inaccessible ;
-    re:hasTriggerRule m:rule-maint-daily-routine , m:rule-maint-weekly-deep-clean , m:rule-maint-hygiene-concern , m:rule-maint-safety-concern , m:rule-maint-wellness-concern , m:rule-maint-inaccessible ;
+    re:hasTriggerRule m:rule-maint-daily-routine-1 , m:rule-maint-weekly-deep-clean-1 , m:rule-maint-hygiene-concern-1 , m:rule-maint-safety-concern-1 , m:rule-maint-wellness-concern-1 , m:rule-maint-inaccessible-1 ;
     re:hasInterconnection m:ix-health-personal_daily-patient-care-response_facilities-observation , m:ix-health-personal_facilities-maintenance-response_facilities-observation ;
     re:hasOpenClawProjection m:openclaw-projection ;
     re:hasAgentBinding m:agent-binding .
@@ -1616,56 +1616,56 @@ m:out-out-inaccessibility-alert
     re:prescribesAction re:UrgentIntervention ;
     re:actionNarrative "Immediate: notify charge nurse and supervisor. Charge nurse accompanies facilities staff for emergency access (supervisor key or master key). Assess patient status on entry. If medical emergency: activate 911 and CareTransitionWorkflow Sequence 1. If not found: activate elopement protocol. If safe (sleeping, showering): document resolved incident. File incident report regardless." .
 
-m:rule-maint-daily-routine
+m:rule-maint-daily-routine-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-maint-daily-routine ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0,0,0,0,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "DAILY_COMPLETE — routine daily maintenance visit completed with no concerns. Hygiene, safety, and patient observation all within norms. No downstream clinical alerts." .
 
-m:rule-maint-weekly-deep-clean
+m:rule-maint-weekly-deep-clean-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-maint-weekly-deep-clean ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "0,1,0,0,0,0" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "WEEKLY_COMPLETE — full weekly deep-clean completed with no concerns. All dimensions (hygiene, safety, nutrition, patient observation) within norms." .
 
-m:rule-maint-hygiene-concern
+m:rule-maint-hygiene-concern-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-maint-hygiene-concern ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,1,0,0,0" ;
+    re:matchesOutputPosition 2 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "HYGIENE_ALERT — bathroom or linen hygiene deficit observed by facilities staff. Downstream: DailyPatientCare bathroom-nonuse detection." .
 
-m:rule-maint-safety-concern
+m:rule-maint-safety-concern-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-maint-safety-concern ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,1,0,0" ;
+    re:matchesOutputPosition 3 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "SAFETY_ALERT — fall hazard or unsafe living space condition identified by facilities staff. Downstream: DailyPatientCare fall detection." .
 
-m:rule-maint-wellness-concern
+m:rule-maint-wellness-concern-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-maint-wellness-concern ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,0,1,0" ;
+    re:matchesOutputPosition 4 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "WELLNESS_CONCERN — patient observation by facilities staff raised welfare flag. Downstream: WellnessAnalytics longitudinal tracking." .
 
-m:rule-maint-inaccessible
+m:rule-maint-inaccessible-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-maint-inaccessible ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,0,0,1" ;
+    re:matchesOutputPosition 5 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "INACCESSIBILITY_ALERT — unit inaccessible after multiple attempts by facilities staff. Welfare check protocol activated. Potential downstream: CareTransitionWorkflow emergency sequences." .

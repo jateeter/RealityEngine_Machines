@@ -21,7 +21,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-activity-active , m:seq-activity-sedentary , m:seq-activity-prolonged ;
-    re:hasTriggerRule m:rule-activity-active , m:rule-activity-sedentary , m:rule-activity-prolonged ;
+    re:hasTriggerRule m:rule-activity-active-1 , m:rule-activity-sedentary-1 , m:rule-activity-prolonged-1 ;
     re:hasInterconnection m:ix-health-personal_daily-activity-wellness_activity-burden , m:ix-health-personal_chronic-disease-response_activity-tolerance-status , m:ix-health-personal_sleep-recovery-wellness_activity-tolerance ;
     re:hasOpenClawProjection m:openclaw-projection ;
     re:hasAgentBinding m:agent-binding .
@@ -139,29 +139,29 @@ m:out-activity-out-prolonged
     re:outputConfidence 1 ;
     re:hasRagStatus re:RED .
 
-m:rule-activity-active
+m:rule-activity-active-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-activity-active ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0" ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "ok" ;
     rdfs:comment "Movement on par with baseline" .
 
-m:rule-activity-sedentary
+m:rule-activity-sedentary-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-activity-sedentary ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Below baseline today — suggest a short activity nudge" .
 
-m:rule-activity-prolonged
+m:rule-activity-prolonged-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-activity-prolonged ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "1,1" ;
+    re:matchesOutputPosition 0 ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "Multi-day inactivity streak — escalate to caregiver / clinician" .

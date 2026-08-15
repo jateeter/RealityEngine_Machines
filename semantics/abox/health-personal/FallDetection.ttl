@@ -22,7 +22,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-fall-nominal , m:seq-fall-stumble-recovered , m:seq-fall-sustained-instability , m:seq-fall-impact-recovered , m:seq-fall-confirmed , m:seq-fall-slow-collapse , m:seq-fall-intentional-lying ;
-    re:hasTriggerRule m:rule-fall-nominal , m:rule-fall-stumble-recovered , m:rule-fall-sustained-instability , m:rule-fall-impact-recovered , m:rule-fall-confirmed , m:rule-fall-slow-collapse , m:rule-fall-intentional-lying ;
+    re:hasTriggerRule m:rule-fall-nominal-1 , m:rule-fall-stumble-recovered-1 , m:rule-fall-sustained-instability-1 , m:rule-fall-impact-recovered-1 , m:rule-fall-confirmed-1 , m:rule-fall-slow-collapse-1 , m:rule-fall-intentional-lying-1 ;
     re:hasInterconnection m:ix-health-personal_patient-safety-transport_fall-outcome , m:ix-health-personal_daily-patient-care-response_fall-criticality ;
     re:hasOpenClawProjection m:openclaw-projection ;
     re:hasAgentBinding m:agent-binding .
@@ -563,78 +563,83 @@ m:out-fall-intent-out
     re:hasRagStatus re:GREEN ;
     re:prescribesAction re:LogActivity .
 
-m:rule-fall-nominal
+m:rule-fall-nominal-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-fall-nominal ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 3 ;
+    re:outputMatchVector "0,3" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "ok" ;
     rdfs:comment "Nominal monitoring — no fall indication" .
 
-m:rule-fall-stumble-recovered
+m:rule-fall-stumble-recovered-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-fall-stumble-recovered ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 2 ;
+    re:outputMatchVector "1,2" ;
+    re:matchesOutputPosition 0 ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "info" ;
     rdfs:comment "Brief stumble + recovery (1 tick of motion, then nominal) — log only" .
 
-m:rule-fall-sustained-instability
+m:rule-fall-sustained-instability-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-fall-sustained-instability ;
-    re:matchesOutputTier 2 ;
-    re:matchesOutputConfidence 2 ;
+    re:outputMatchVector "2,2" ;
+    re:matchesOutputPosition 0 ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Three ticks of progressively worsening motion without recovery — caregiver should monitor" .
 
-m:rule-fall-impact-recovered
+m:rule-fall-impact-recovered-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-fall-impact-recovered ;
-    re:matchesOutputTier 3 ;
-    re:matchesOutputConfidence 3 ;
+    re:outputMatchVector "3,3" ;
+    re:matchesOutputPosition 0 ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Severe motion sustained then recovered — caregiver check-in recommended" .
 
-m:rule-fall-confirmed
+m:rule-fall-confirmed-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-fall-confirmed ;
-    re:matchesOutputTier 4 ;
-    re:matchesOutputConfidence 3 ;
+    re:outputMatchVector "4,3" ;
+    re:matchesOutputPosition 0 ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "Confirmed fall: motion onset → sustained → severe → impact stillness over six ticks. Dispatch caregiver / emergency contact." ;
-    re:hasGovernance m:rule-fall-confirmed-governance .
+    re:hasGovernance m:rule-fall-confirmed-1-governance .
 
-m:rule-fall-confirmed-governance
+m:rule-fall-confirmed-1-governance
     a owl:NamedIndividual , re:GovernancePolicy ;
     re:slaSeconds 30 ;
     re:runbook "https://runbooks.example.org/patient-safety/fall-detection#confirmed-red"^^xsd:anyURI ;
     re:ownerTeam "patient-safety-on-call-tier-1" .
 
-m:rule-fall-slow-collapse
+m:rule-fall-slow-collapse-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-fall-slow-collapse ;
-    re:matchesOutputTier 4 ;
-    re:matchesOutputConfidence 2 ;
+    re:outputMatchVector "4,2" ;
+    re:matchesOutputPosition 0 ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "Sudden onset of stillness escalating over three ticks without preceding motion — possible syncope / silent collapse" ;
-    re:hasGovernance m:rule-fall-slow-collapse-governance .
+    re:hasGovernance m:rule-fall-slow-collapse-1-governance .
 
-m:rule-fall-slow-collapse-governance
+m:rule-fall-slow-collapse-1-governance
     a owl:NamedIndividual , re:GovernancePolicy ;
     re:slaSeconds 45 ;
     re:runbook "https://runbooks.example.org/patient-safety/fall-detection#slow-collapse"^^xsd:anyURI .
 
-m:rule-fall-intentional-lying
+m:rule-fall-intentional-lying-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-fall-intentional-lying ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 2 ;
+    re:outputMatchVector "0,2" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "Stillness reached without preceding motion or impact — likely intentional lying down (sleep / rest)" .

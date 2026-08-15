@@ -21,7 +21,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-social-isolation-severe , m:seq-social-isolation-risk , m:seq-social-connected-ok ;
-    re:hasTriggerRule m:rule-social-isolation-severe , m:rule-social-isolation-risk , m:rule-social-connected-ok ;
+    re:hasTriggerRule m:rule-social-isolation-severe-1 , m:rule-social-isolation-risk-1 , m:rule-social-connected-ok-1 ;
     re:hasInterconnection m:ix-health-personal_patient-safety-transport_social-context , m:ix-health-personal_daily-activity-wellness_social-context , m:ix-health-personal_child-development-support_household-social-context , m:ix-health-personal_facilities-maintenance-response_social-isolation , m:ix-health-personal_medication-access-adherence_social-isolation , m:ix-health-personal_sleep-recovery-wellness_social-context , m:ix-health-personal_social-isolation-access_social-isolation ;
     re:hasOpenClawProjection m:openclaw-projection ;
     re:hasAgentBinding m:agent-binding .
@@ -360,29 +360,29 @@ m:out-si-connected-output
     re:prescribesAction re:ContinueMonitoring ;
     re:actionNarrative "No isolation intervention required; continue monitoring" .
 
-m:rule-social-isolation-severe
+m:rule-social-isolation-severe-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-social-isolation-severe ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0,0,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "SEVERE_ISOLATION: patient housebound with dual access barrier crisis; self-neglect risk at [2035:2039]" .
 
-m:rule-social-isolation-risk
+m:rule-social-isolation-risk-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-social-isolation-risk ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,1,0" ;
+    re:matchesOutputPosition 2 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "ISOLATION_RISK: converging access barriers approaching isolation threshold at [2035:2039]" .
 
-m:rule-social-connected-ok
+m:rule-social-connected-ok-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-social-connected-ok ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,1" ;
+    re:matchesOutputPosition 3 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "SOCIALLY_CONNECTED: access barriers resolved; social participation maintained at [2035:2039]" .

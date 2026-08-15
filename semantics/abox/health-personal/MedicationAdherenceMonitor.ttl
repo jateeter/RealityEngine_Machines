@@ -21,7 +21,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-med-taken-on-time , m:seq-med-delayed , m:seq-med-missed ;
-    re:hasTriggerRule m:rule-med-taken-on-time , m:rule-med-delayed , m:rule-med-missed ;
+    re:hasTriggerRule m:rule-med-taken-on-time-1 , m:rule-med-delayed-1 , m:rule-med-missed-1 ;
     re:hasInterconnection m:ix-health-personal_daily-patient-care-response_medication-adherence , m:ix-health-personal_medication-access-adherence_medication-adherence ;
     re:hasOpenClawProjection m:openclaw-projection ;
     re:hasAgentBinding m:agent-binding .
@@ -139,29 +139,29 @@ m:out-med-out-missed
     re:outputConfidence 1 ;
     re:hasRagStatus re:RED .
 
-m:rule-med-taken-on-time
+m:rule-med-taken-on-time-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-med-taken-on-time ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0" ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "ok" ;
     rdfs:comment "Dose acknowledged within window" .
 
-m:rule-med-delayed
+m:rule-med-delayed-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-med-delayed ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Dose pending past reminder window — nudge the patient / caregiver" .
 
-m:rule-med-missed
+m:rule-med-missed-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-med-missed ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "1,1" ;
+    re:matchesOutputPosition 0 ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "Dose missed past grace window — escalate to clinical contact" .

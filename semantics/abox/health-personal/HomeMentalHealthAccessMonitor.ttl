@@ -21,7 +21,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-mh-access-crisis , m:seq-mh-referral-needed , m:seq-mh-comorbidity-risk , m:seq-mh-access-adequate ;
-    re:hasTriggerRule m:rule-mh-access-crisis , m:rule-mh-referral-needed , m:rule-mh-comorbidity-risk , m:rule-mh-access-adequate ;
+    re:hasTriggerRule m:rule-mh-access-crisis-1 , m:rule-mh-referral-needed-1 , m:rule-mh-comorbidity-risk-1 , m:rule-mh-access-adequate-1 ;
     re:hasInterconnection m:ix-health-personal_chronic-pain-mental-health-access_mental-health-access , m:ix-health-personal_social-isolation-access_mental-health-access ;
     re:hasOpenClawProjection m:openclaw-projection ;
     re:hasAgentBinding m:agent-binding .
@@ -430,38 +430,38 @@ m:out-mh-adequate-output
     re:prescribesAction re:ContinueMonitoring ;
     re:actionNarrative "No additional mental health intervention required; maintain current support level" .
 
-m:rule-mh-access-crisis
+m:rule-mh-access-crisis-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-mh-access-crisis ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0,0,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "MENTAL_HEALTH_CRISIS: dual chronic illness crisis driving acute mental health decompensation at [2039:2043]" .
 
-m:rule-mh-referral-needed
+m:rule-mh-referral-needed-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-mh-referral-needed ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "0,1,0,0" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "MH_REFERRAL_NEEDED: chronic illness burden driving mental health comorbidity requiring behavioral health integration at [2039:2043]" .
 
-m:rule-mh-comorbidity-risk
+m:rule-mh-comorbidity-risk-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-mh-comorbidity-risk ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,1,0" ;
+    re:matchesOutputPosition 2 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "COMORBIDITY_RISK: chronic disease or pain burden is degrading mental health resilience but has not reached referral/crisis threshold at [2039:2043]" .
 
-m:rule-mh-access-adequate
+m:rule-mh-access-adequate-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-mh-access-adequate ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,1" ;
+    re:matchesOutputPosition 3 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "MH_ACCESS_ADEQUATE: chronic illness managed; mental health comorbidity risk low; no access gap at [2039:2043]" .

@@ -21,7 +21,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-transport-critical-failure , m:seq-transport-transit-dependent-risk , m:seq-transport-adequate ;
-    re:hasTriggerRule m:rule-transport-critical-failure , m:rule-transport-transit-dependent-risk , m:rule-transport-adequate ;
+    re:hasTriggerRule m:rule-transport-critical-failure-1 , m:rule-transport-transit-dependent-risk-1 , m:rule-transport-adequate-1 ;
     re:hasInterconnection m:ix-health-personal_patient-safety-transport_transport-access , m:ix-health-personal_chronic-disease-response_transport-access-status , m:ix-health-personal_facilities-maintenance-response_transport-access , m:ix-health-personal_medication-access-adherence_transport-access , m:ix-health-personal_social-isolation-access_transport-access , m:ix-health_infrastructure-support_consumer_home_transportation_barrier_context ;
     re:hasOpenClawProjection m:openclaw-projection ;
     re:hasAgentBinding m:agent-binding .
@@ -240,29 +240,29 @@ m:out-tp-adequate-output
     re:prescribesAction re:ContinueMonitoring ;
     re:actionNarrative "Social isolation monitor registers transportation stable" .
 
-m:rule-transport-critical-failure
+m:rule-transport-critical-failure-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-transport-critical-failure ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0,0,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "CRITICAL_ACCESS_FAILURE: patient missing critical care due to transportation barrier at [2015:2019]" .
 
-m:rule-transport-transit-dependent-risk
+m:rule-transport-transit-dependent-risk-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-transport-transit-dependent-risk ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,1,0" ;
+    re:matchesOutputPosition 2 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "TRANSIT_DEPENDENT_RISK: care access contingent on fragile transit arrangement at [2015:2019]" .
 
-m:rule-transport-adequate
+m:rule-transport-adequate-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-transport-adequate ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,1" ;
+    re:matchesOutputPosition 3 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "TRANSPORTATION_ADEQUATE: care access not transport-limited at [2015:2019]" .

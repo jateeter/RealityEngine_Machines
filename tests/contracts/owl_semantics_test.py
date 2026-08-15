@@ -21,6 +21,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ONTOLOGY = REPO_ROOT / "semantics" / "ontology" / "re-core.ttl"
 GENERATOR = REPO_ROOT / "scripts" / "generate-owl.py"
+MACHINES_DIR = REPO_ROOT / "machines"
 FALL_JSON = REPO_ROOT / "machines" / "domains" / "health-personal" / "FallDetection.json"
 FALL_ABOX = REPO_ROOT / "semantics" / "abox" / "health-personal" / "FallDetection.ttl"
 
@@ -174,14 +175,103 @@ class OwlSemanticsTests(unittest.TestCase):
 
     def test_trigger_rules_match_sequence_outputs(self) -> None:
         rules = self.machine["metadata"]["triggerConfig"]["rules"]
+        ordinals: dict[str, int] = {}
         for rule in rules:
-            block = self.abox_text.split(f"m:rule-{rule['sequenceId']}\n", 1)[1].split("\n\n", 1)[0]
-            self.assertIn(f"re:appliesToSequence m:seq-{rule['sequenceId']}", block)
-            self.assertIn(f"re:matchesOutputTier {rule['outputMatches'][0]}", block)
-            self.assertIn(
-                f"re:matchesOutputConfidence {rule['outputMatches'][1]}", block,
-            )
+            seq = rule["sequenceId"]
+            ordinals[seq] = ordinals.get(seq, 0) + 1
+            block = self.abox_text.split(
+                f"m:rule-{seq}-{ordinals[seq]}\n", 1
+            )[1].split("\n\n", 1)[0]
+            self.assertIn(f"re:appliesToSequence m:seq-{seq}", block)
+            joined = ",".join(str(v) for v in rule["outputMatches"])
+            self.assertIn(f're:outputMatchVector "{joined}"', block)
+            for index, value in enumerate(rule["outputMatches"]):
+                if value:
+                    self.assertIn(f"re:matchesOutputPosition {index}", block)
             self.assertIn(f"re:hasRagStatus re:{rule['ragStatusCode']}", block)
+
+    def test_rule_iris_are_injective_across_the_corpus(self) -> None:
+        """One trigger rule, one individual.
+
+        Rule IRIs were minted from sequenceId alone, so a sequence with several
+        rules produced one individual asserting several RAG statuses on the
+        functional re:hasRagStatus. HermiT rejected the merged graph; ELK, which
+        does not implement functional properties, passed it. This asserts the
+        generator's side of that directly rather than relying on a reasoner the
+        local gate may skip.
+        """
+        for machine_path in sorted(MACHINES_DIR.glob("domains/*/*.json")):
+            document = json.loads(machine_path.read_text(encoding="utf-8"))
+            machine = document.get("machine", document)
+            rules = (
+                (machine.get("metadata") or {}).get("triggerConfig") or {}
+            ).get("rules") or []
+            ordinals: dict[str, int] = {}
+            terms = []
+            for rule in rules:
+                seq = rule.get("sequenceId")
+                if not seq:
+                    continue
+                ordinals[seq] = ordinals.get(seq, 0) + 1
+                terms.append(f"{seq}-{ordinals[seq]}")
+            self.assertEqual(
+                len(terms), len(set(terms)),
+                f"{machine_path.name}: trigger rule IRIs collide",
+            )
+
+    def test_no_rule_pair_contradicts_itself(self) -> None:
+        """Two rules matching the same output vector of the same sequence must
+        not reach different determinations.
+
+        Injective rule IRIs fix the inconsistency, and in doing so they stop the
+        reasoner from surfacing this: each rule becomes its own individual with
+        one RAG status, so a contradictory pair is merely two individuals that
+        happen to disagree. The signal has to be asserted structurally instead.
+        Redundant pairs that agree are permitted — eight exist and are harmless.
+
+        One contradiction is known and filed as #56: AIHardwareResilience emits
+        both "schedule maintenance" (GREEN) and "emergency replacement" (RED)
+        for output position 5. Which is correct is a domain decision — the
+        machine also tags "immediately evacuate all workloads" GREEN, so the
+        action rules may be systematically mis-tagged rather than one being
+        stray — so it is allowlisted rather than guessed at. The allowlist is
+        exact: fixing #56 fails this test until the entry is removed, and any
+        new contradiction fails it immediately.
+        """
+        known = {
+            "AIHardwareResilience.json: aihr-hw-degradation "
+            "[0, 0, 0, 0, 0, 1] -> ['GREEN', 'RED']",  # jateeter/RealityEngine_Machines#56
+        }
+        contradictions = []
+        for machine_path in sorted(MACHINES_DIR.glob("domains/*/*.json")):
+            document = json.loads(machine_path.read_text(encoding="utf-8"))
+            machine = document.get("machine", document)
+            rules = (
+                (machine.get("metadata") or {}).get("triggerConfig") or {}
+            ).get("rules") or []
+            grouped: dict[tuple, set] = {}
+            for rule in rules:
+                key = (rule.get("sequenceId"), tuple(rule.get("outputMatches") or []))
+                grouped.setdefault(key, set()).add(rule.get("ragStatusCode"))
+            for (seq, vector), statuses in grouped.items():
+                if len(statuses) > 1:
+                    contradictions.append(
+                        f"{machine_path.name}: {seq} {list(vector)} "
+                        f"-> {sorted(statuses)}"
+                    )
+        self.assertEqual(
+            sorted(set(contradictions) - known), [],
+            "new trigger-rule contradictions:\n" + "\n".join(
+                sorted(set(contradictions) - known)
+            ),
+        )
+        self.assertEqual(
+            sorted(known - set(contradictions)), [],
+            "allowlisted contradiction no longer present — remove it from "
+            "`known` (see jateeter/RealityEngine_Machines#56):\n" + "\n".join(
+                sorted(known - set(contradictions))
+            ),
+        )
 
     def test_manifest_matches_regeneration_and_covers_corpus(self) -> None:
         """semantics/abox-manifest.json is the corpus-wide semantic identity

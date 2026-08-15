@@ -21,7 +21,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-hydration-adequate , m:seq-hydration-low , m:seq-hydration-critical ;
-    re:hasTriggerRule m:rule-hydration-adequate , m:rule-hydration-low , m:rule-hydration-critical ;
+    re:hasTriggerRule m:rule-hydration-adequate-1 , m:rule-hydration-low-1 , m:rule-hydration-critical-1 ;
     re:hasInterconnection m:ix-health-personal_daily-activity-wellness_hydration-status , m:ix-health-personal_daily-patient-care-response_hydration-status , m:ix-health-personal_medication-access-adherence_hydration-status , m:ix-health-personal_sleep-recovery-wellness_hydration-status ;
     re:hasOpenClawProjection m:openclaw-projection ;
     re:hasAgentBinding m:agent-binding .
@@ -139,29 +139,29 @@ m:out-hydration-out-crit
     re:outputConfidence 1 ;
     re:hasRagStatus re:RED .
 
-m:rule-hydration-adequate
+m:rule-hydration-adequate-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-hydration-adequate ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0" ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "ok" ;
     rdfs:comment "Intake on track" .
 
-m:rule-hydration-low
+m:rule-hydration-low-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-hydration-low ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Below daily target at midday — remind the patient" .
 
-m:rule-hydration-critical
+m:rule-hydration-critical-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-hydration-critical ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "1,1" ;
+    re:matchesOutputPosition 0 ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "Severely below target — escalate to caregiver" .

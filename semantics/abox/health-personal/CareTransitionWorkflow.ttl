@@ -22,7 +22,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-transition-acute-emergency , m:seq-transition-hospital-to-rehab , m:seq-transition-rehab-to-alf , m:seq-transition-blocked , m:seq-transition-emergency-escalation ;
-    re:hasTriggerRule m:rule-transition-acute-emergency , m:rule-transition-hospital-to-rehab , m:rule-transition-rehab-to-alf , m:rule-transition-blocked , m:rule-transition-emergency-escalation ;
+    re:hasTriggerRule m:rule-transition-acute-emergency-1 , m:rule-transition-hospital-to-rehab-1 , m:rule-transition-rehab-to-alf-1 , m:rule-transition-blocked-1 , m:rule-transition-emergency-escalation-1 ;
     re:hasInterconnection m:ix-health-personal_care-transition-response_transition-outcome , m:ix-health-personal_intake-wellness-routing_care-transition , m:ix-health_infrastructure-support_consumer_care_transition_context ;
     re:hasOpenClawProjection m:openclaw-projection ;
     re:hasAgentBinding m:agent-binding .
@@ -1316,47 +1316,47 @@ m:out-out-emergency-escalation
     re:outputTier 0 ;
     re:outputConfidence 0 .
 
-m:rule-transition-acute-emergency
+m:rule-transition-acute-emergency-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-transition-acute-emergency ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0,0,0,0,0,0,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "HOSPITAL_TRANSFER_COMPLETE — patient successfully transferred to acute hospital. Emergency intake protocol active." .
 
-m:rule-transition-hospital-to-rehab
+m:rule-transition-hospital-to-rehab-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-transition-hospital-to-rehab ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "0,1,0,0,0,0,0,0" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "REHAB_TRANSFER_COMPLETE — all readiness criteria met; patient cleared for transfer to rehabilitation facility" .
 
-m:rule-transition-rehab-to-alf
+m:rule-transition-rehab-to-alf-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-transition-rehab-to-alf ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,1,0,0,0,0,0" ;
+    re:matchesOutputPosition 2 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "ALF_TRANSFER_COMPLETE — all readiness criteria met; patient cleared for transition to assisted living" .
 
-m:rule-transition-blocked
+m:rule-transition-blocked-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-transition-blocked ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,1,0,0,0,0" ;
+    re:matchesOutputPosition 3 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "TRANSFER_BLOCKED — barrier detected during planned transfer authorization; resolution pathway initiated; transfer suspended pending clearance" .
 
-m:rule-transition-emergency-escalation
+m:rule-transition-emergency-escalation-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-transition-emergency-escalation ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,0,1,0,0,0" ;
+    re:matchesOutputPosition 4 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "EMERGENCY_ESCALATION — acute deterioration in post-acute/assisted living facility; patient transferred emergently to hospital for higher level of care" .

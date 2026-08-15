@@ -20,7 +20,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-motion-none , m:seq-motion-brief , m:seq-motion-sustained , m:seq-motion-severe ;
-    re:hasTriggerRule m:rule-motion-none , m:rule-motion-brief , m:rule-motion-sustained , m:rule-motion-severe .
+    re:hasTriggerRule m:rule-motion-none-1 , m:rule-motion-brief-1 , m:rule-motion-sustained-1 , m:rule-motion-severe-1 .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -128,34 +128,37 @@ m:out-preagg-motion-severe-out
     a owl:NamedIndividual , re:Determination ;
     re:outputTier 3 .
 
-m:rule-motion-none
+m:rule-motion-none-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-motion-none ;
-    re:matchesOutputTier 0 ;
+    re:outputMatchVector "0" ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "ok" ;
     rdfs:comment "Quiescent — no motion samples above threshold this tick." .
 
-m:rule-motion-brief
+m:rule-motion-brief-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-motion-brief ;
-    re:matchesOutputTier 1 ;
+    re:outputMatchVector "1" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "Brief motion — 1 to 2 above-threshold samples." .
 
-m:rule-motion-sustained
+m:rule-motion-sustained-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-motion-sustained ;
-    re:matchesOutputTier 2 ;
+    re:outputMatchVector "2" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Sustained motion — 3 to 4 above-threshold samples." .
 
-m:rule-motion-severe
+m:rule-motion-severe-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-motion-severe ;
-    re:matchesOutputTier 3 ;
+    re:outputMatchVector "3" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Severe motion — 5 or more above-threshold samples." .

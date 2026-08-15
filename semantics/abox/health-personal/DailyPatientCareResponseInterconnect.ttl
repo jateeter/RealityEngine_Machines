@@ -21,7 +21,7 @@ m:machine
     re:hasPerceptualMapping m:perceptual-mapping ;
     re:hasGovernance m:governance ;
     re:hasSequence m:seq-daily-patient-care-urgent-safety-response , m:seq-daily-patient-care-routine-recovery , m:seq-daily-patient-care-medication-hydration-review , m:seq-daily-patient-care-stable ;
-    re:hasTriggerRule m:rule-daily-patient-care-urgent-safety-response , m:rule-daily-patient-care-routine-recovery , m:rule-daily-patient-care-medication-hydration-review , m:rule-daily-patient-care-stable .
+    re:hasTriggerRule m:rule-daily-patient-care-urgent-safety-response-1 , m:rule-daily-patient-care-routine-recovery-1 , m:rule-daily-patient-care-medication-hydration-review-1 , m:rule-daily-patient-care-stable-1 .
 
 m:perceptual-mapping
     a owl:NamedIndividual , re:PerceptualMapping ;
@@ -481,38 +481,38 @@ m:out-daily-patient-care-stable-output
     re:prescribesAction re:ContinueMonitoring ;
     re:actionNarrative "Route stable daily-care monitoring without urgent dispatch." .
 
-m:rule-daily-patient-care-urgent-safety-response
+m:rule-daily-patient-care-urgent-safety-response-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-daily-patient-care-urgent-safety-response ;
-    re:matchesOutputTier 1 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "1,0,0,0" ;
+    re:matchesOutputPosition 0 ;
     re:hasRagStatus re:RED ;
     re:processStatus "error" ;
     rdfs:comment "Unresponsive fall, safety alert, inaccessibility, fall criticality, or critical wellness requires urgent safety response." .
 
-m:rule-daily-patient-care-routine-recovery
+m:rule-daily-patient-care-routine-recovery-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-daily-patient-care-routine-recovery ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 1 ;
+    re:outputMatchVector "0,1,0,0" ;
+    re:matchesOutputPosition 1 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Bathroom, wandering, hygiene, wellness, or hydration routine disruption requires care routine recovery." .
 
-m:rule-daily-patient-care-medication-hydration-review
+m:rule-daily-patient-care-medication-hydration-review-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-daily-patient-care-medication-hydration-review ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,1,0" ;
+    re:matchesOutputPosition 2 ;
     re:hasRagStatus re:AMBER ;
     re:processStatus "warning" ;
     rdfs:comment "Medication miss or adherence issue with hydration/wellness context requires medication hydration review." .
 
-m:rule-daily-patient-care-stable
+m:rule-daily-patient-care-stable-1
     a owl:NamedIndividual , re:TriggerRule ;
     re:appliesToSequence m:seq-daily-patient-care-stable ;
-    re:matchesOutputTier 0 ;
-    re:matchesOutputConfidence 0 ;
+    re:outputMatchVector "0,0,0,1" ;
+    re:matchesOutputPosition 3 ;
     re:hasRagStatus re:GREEN ;
     re:processStatus "info" ;
     rdfs:comment "Daily routines are complete with no active alert bits; continue stable monitoring." .

@@ -10,7 +10,7 @@
     a owl:Ontology ;
     dcterms:title "RealityEngine Core Semantics Ontology" ;
     dcterms:description "OWL vocabulary for the semantic representation of RealityEngine machine behavior: machines, critical event sequences, sequence steps, determinations, prescribed actions, trigger rules, governance, interconnections, the agent corpus bound to those machines, and the audit records produced by the PE->RE->PE cycle. Machine ABox files under semantics/abox/ are generated from the canonical machine JSON corpus by scripts/generate-owl.py and must stay byte-deterministic." ;
-    owl:versionInfo "0.2.0" .
+    owl:versionInfo "0.3.0" .
 
 #################################################################
 # Classes: structural corpus concepts
@@ -334,13 +334,32 @@ re:processStatus a owl:DatatypeProperty ;
     rdfs:domain re:TriggerRule ; rdfs:range xsd:string ;
     rdfs:label "process status" .
 
-re:matchesOutputTier a owl:DatatypeProperty ;
-    rdfs:domain re:TriggerRule ; rdfs:range xsd:integer ;
-    rdfs:label "matches output tier" .
+# `triggerConfig.outputMatches` is a value vector over the machine's output
+# region: len(outputMatches) == perceptualMapping.output.length holds for all
+# 1,328 machines in the corpus without exception. What differs between machines
+# is what their output space *means* — binary flags, a 2-bit state code, or
+# small integers — not how the vector is encoded.
+#
+# 0.2.0 modelled it as a (tier, confidence) pair read off matches[0]/matches[1].
+# That is a 2-cell reading applied to every machine: correct only where the
+# output region is two cells meaning exactly that, wrong for the rest, and
+# lossy for every machine with more than two output cells — [0,0,1,0] and
+# [0,0,0,1] both emitted "tier 0, confidence 0". re:matchesOutputTier and
+# re:matchesOutputConfidence are removed rather than deprecated; nothing
+# outside the generated ABoxes consumed them.
+#
+# re:outputMatchVector is the lossless form. re:matchesOutputPosition is the
+# queryable one, asserted once per non-zero cell, and is deliberately NOT
+# functional: a rule may assert several output positions at once.
+re:outputMatchVector a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain re:TriggerRule ; rdfs:range xsd:string ;
+    rdfs:comment "Comma-joined value vector over the machine's output region, in cell order." ;
+    rdfs:label "output match vector" .
 
-re:matchesOutputConfidence a owl:DatatypeProperty ;
+re:matchesOutputPosition a owl:DatatypeProperty ;
     rdfs:domain re:TriggerRule ; rdfs:range xsd:integer ;
-    rdfs:label "matches output confidence" .
+    rdfs:comment "Zero-based index of an output-region cell this rule requires to be non-zero." ;
+    rdfs:label "matches output position" .
 
 re:slaSeconds a owl:DatatypeProperty ;
     rdfs:range xsd:integer ;
