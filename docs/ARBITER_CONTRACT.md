@@ -84,9 +84,18 @@ they are the minority case. The dominant case is a deterministic machine output
 and an advisory agent assessment landing on one position in one instant with no
 rule to resolve them.
 
-By contrast the ACP completion band `[17000:22311]` contains **0** bus cells and
-is read by **0** machines, so completions currently contribute to nothing and
-arbitrate over nothing. See jateeter/localOpenClawStack#18.
+The ACP completion band `[17000:25000]` that once sat above the corpus has been
+retired. It contained **0** bus cells and was read by **0** machines, so
+completions landing there contributed to nothing and arbitrated over nothing —
+the observation that motivated jateeter/localOpenClawStack#18. ACP completions
+reach the vector through the `acp-openclaw-completion` service lane instead,
+where they are read and arbitrated like any other writer.
+
+Removing the band from `rangePolicy.reservedRanges` retires the declaration.
+The 1,216 per-machine completion source mappings in
+`RealityEngine_CI/config/integrations.json` that still target `17000+` are the
+other half and are retired separately; until they are, they write cells no
+allocation declares and nothing reads.
 
 ## 2. Position
 
