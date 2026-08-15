@@ -1,7 +1,7 @@
 # Conformance fixtures for semantics/shapes/re-guardrails.shacl.ttl.
 #
 # One named graph per case. Each is validated as:
-#     re-core.ttl + re-guardrails.shacl.ttl + qudt-subset.ttl
+#     re-core.ttl + re-guardrails.shacl.ttl + semantics/ontology/qudt-subset.ttl
 #   + lane-registry.ttl + <this graph>
 # Expected outcomes live in cases.json.
 #
@@ -700,7 +700,7 @@ fx:reject-canonical-unit-not-accepted {
 
     fx:bad-accept-axis-0 a reg:LaneAxis ;
         re:axisIndex 0 ; re:axisName "bad_accept" ;
-        reg:canonicalUcum "/min" ; reg:acceptedUcum "1" ;
+        reg:canonicalUcum "min-1" ; reg:acceptedUcum "1" ;
         reg:quantityKind qkind:Frequency ;
         reg:conversionPolicy reg:LinearConversion ;
         reg:scaleType reg:RatioScale ;
@@ -740,4 +740,44 @@ fx:reject-prohibited-axis-multi-unit {
         reg:conversionPolicy reg:ProhibitedConversion ;
         reg:scaleType reg:OrdinalScale ;
         reg:permittedValue 0 , 1 .
+}
+
+# The QUDT link points at the wrong unit: the axis stores Celsius but is
+# linked to Kelvin, so it would inherit K's conversion facts and lose 273.15.
+fx:reject-qudt-unit-code-mismatch {
+    fx:mismatch-lane a reg:IngressLane ;
+        reg:laneId "qudt-mismatch" ;
+        reg:laneOffset 9800 ;
+        reg:laneLength 1 ;
+        reg:permittedProvider "mqtt" ;
+        reg:hasAxis fx:mismatch-axis-0 .
+
+    fx:mismatch-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "mismatched_temp" ;
+        reg:canonicalUcum "Cel" ; reg:acceptedUcum "Cel" ;
+        reg:quantityKind qkind:Temperature ;
+        reg:qudtUnitIri unit:K ;
+        reg:conversionPolicy reg:AffineConversion ;
+        reg:scaleType reg:IntervalScale ;
+        reg:minValue -40 ; reg:maxValue 60 .
+}
+
+# A temperature axis accepting a frequency unit. QUDT dimension vectors make
+# this refusable at corpus time rather than at runtime.
+fx:reject-dimension-incompatible-accepted {
+    fx:dim-lane a reg:IngressLane ;
+        reg:laneId "dim-incompatible" ;
+        reg:laneOffset 9900 ;
+        reg:laneLength 1 ;
+        reg:permittedProvider "mqtt" ;
+        reg:hasAxis fx:dim-axis-0 .
+
+    fx:dim-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "confused_temp" ;
+        reg:canonicalUcum "Cel" ; reg:acceptedUcum "Cel" , "min-1" ;
+        reg:quantityKind qkind:Temperature ;
+        reg:qudtUnitIri unit:DEG_C ;
+        reg:conversionPolicy reg:AffineConversion ;
+        reg:scaleType reg:IntervalScale ;
+        reg:minValue -40 ; reg:maxValue 60 .
 }
