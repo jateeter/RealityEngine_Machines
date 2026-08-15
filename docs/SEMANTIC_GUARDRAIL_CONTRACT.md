@@ -438,6 +438,61 @@ published in the 2017 Recommendation. The SHACL 1.2 family (Core, Node
 Expressions, Rules, Profiling, User Interfaces) is at Working Draft as of
 August 2026. Do not take a dependency on 1.2 features.
 
+## Where lane contracts live
+
+**Semantics are a sidecar; allocation is untouched.**
+
+`domains/region-allocation.json` remains the single authority on which span of
+the universal vector belongs to whom. `domains/lane-contracts.json`
+(`schemas/lane-contract.schema.json`) carries what those spans *mean* — per
+position: name, unit, quantity kind, value domain, conversion policy and scale
+type. The two are separate files with separate schemas so that neither can
+quietly become the other's authority, and
+`tests/contracts/lane_contracts_test.py` gates the separation: a service lane
+whose offset or length drifts from the allocation fails.
+
+**A lane is a region, not a machine.** 1,185 machines carry an
+`openClawProjection`, but they land on 983 distinct write-back regions —
+several machines legitimately read one externally-written lane. Modelling per
+machine would invent lanes that overlap by construction.
+
+**Axes carry only what varies.** Position and meaning live on the axis; the
+unit contract comes from a named `derivationProfile`. That keeps a rule change
+one edit rather than 3,617, keeps the rule legible rather than buried in
+thousands of copies, and took the sidecar from 2.0 MB to 625 KB. The projector
+resolves an axis as its lane's profile overlaid with the axis's own overrides.
+
+### Derivation
+
+`scripts/backfill-lane-contracts.py` derives from evidence, never from the
+`normalization` label alone — the label is contradicted by the data often
+enough not to be trusted on its own. The evidence is the label,
+`perceptualMapping.bitsPerElement`, and the values the machine's own sequence
+vectors actually contain:
+
+| label | bits | values | scale | policy | domain |
+| --- | ---: | --- | --- | --- | --- |
+| `machine-native-binary` | 1 | `{0,1}` | nominal | prohibited | `[0,1]` |
+| `machine-native-ordinal` | 4 | `{0..3}` | ordinal | prohibited | `[0..3]` |
+| `machine-native-scalar` | 8 | 0..1 continuous | ratio | none | 0..1 |
+
+All three are dimensionless — UCUM `1`, `qkind:Dimensionless`,
+`unit:UNITLESS`. A machine-native ordinal or normalized index is not a physical
+quantity, which is why the categorical cases prohibit conversion outright.
+
+**Anything the evidence does not settle goes to `review` rather than being
+guessed.** A fabricated unit sitting behind a guardrail is worse than an absent
+one: the guardrail is the thing that is supposed to be trustworthy.
+
+Current state — 991 lanes, 893 annotated (3,617 positions), 98 in review:
+
+| reason | lanes | |
+| --- | ---: | --- |
+| `profile-unrecognised` | 42 | The label is contradicted by the element width — machines declaring `machine-native-binary` while carrying 8-bit elements and continuous values |
+| `region-overlap` | 34 | 17 pairs of partially overlapping externally-writable regions. An external write lands inside a neighbouring machine's input — the failure the guardrail exists to prevent, present structurally in the corpus |
+| `axis-name-disagreement` | 29 | Machines sharing a region disagree on what its positions mean. `re:axisName` is functional, so this is an inconsistency to adjudicate, not a spelling variant |
+| `physical-units-need-owner` | 8 | The service lanes. Real physical quantities; units need a domain owner, not a derivation |
+
 ## Implementation status
 
 Written and gated:
@@ -445,28 +500,37 @@ Written and gated:
 - `semantics/shapes/re-guardrails.shacl.ttl` — vocabulary, SOSA alignment, the
   UCUM/QUDT unit contract, corpus-time lane shapes, ingress shapes, egress
   shapes.
-- `semantics/shapes/fixtures/` — lane registry fixture, illustrative QUDT
-  subset, 43-case parity suite.
+- `semantics/shapes/fixtures/` — lane registry fixture and 45-case parity suite.
+- `semantics/ontology/qudt-subset.ttl` — pinned QUDT v3.5.0 extraction, via
+  `scripts/extract-qudt-subset.py`.
+- `scripts/ucum.py` — canonicalizer, with `tests/contracts/ucum_test.py`.
+- `domains/lane-contracts.json` — the semantics sidecar, via
+  `scripts/backfill-lane-contracts.py`, with
+  `tests/contracts/lane_contracts_test.py`.
 - `scripts/validate_guardrails.py`, `scripts/validate-guardrails.sh`.
 
 Not yet written — in dependency order:
 
-1. **The lane projector.** `domains/region-allocation.json` declares `id`,
-   `offset`, `length`, `provider`, `corpusReaders` and `corpusWriters`, which
-   is most of a lane. It does not yet declare the unit annotations, value
-   domain, permitted provenance, staleness ceiling or autonomy floor. Those
-   fields must be added to `schemas/region-allocation.schema.json` (the block
-   is drafted above) and backfilled, then a projector generates the lane graph
-   the shapes validate. Everything else depends on this.
-2. **A real QUDT subset extractor**, replacing the fixture stand-in, plus a
-   UCUM canonicalizer in the projector and the adapter SDK so code comparison
-   by string is sound.
-3. **Life-safety lane derivation.** `reg:lifeSafetyLane` should be computed
-   from the corpus — a lane feeding the input region of a machine carrying an
-   `re:LifeSafetySequence` — not hand-flagged.
+1. **The lane projector.** `scripts/project-lanes.py`, consuming
+   `region-allocation.json` (allocation) plus `lane-contracts.json`
+   (semantics) plus the corpus, emitting the lane graph the shapes validate.
+   Byte-deterministic with `--check`, mirroring `generate-owl.py`.
+   `sharedOutputLanes` and `interDomainBuses` are machine-to-machine merges and
+   are explicitly out of scope: they are not ingress.
+2. **Life-safety lane derivation.** `reg:lifeSafetyLane` computed from the
+   corpus — a lane feeding the input region of a machine carrying an
+   `re:LifeSafetySequence` — not hand-flagged. This is the one flag whose being
+   wrong is a safety issue.
+3. **Resolving the 98 review lanes**, which needs domain owners rather than
+   tooling.
 4. **Per-lane severity configuration**, so the observe→warn→block staging can
    advance domain by domain.
 5. **The compile step** in each runtime: shapes → decision table at load.
-6. **Porting `owl_semantics_test.py`** to shapes, once (1) proves the pattern.
+6. **Porting `owl_semantics_test.py`** to shapes.
 7. **Wiring** `validate-guardrails.sh` into `npm run validate` and the
    `RealityEngine_CI` gate list in `INTEGRATED_SPECIFICATION.md`.
+
+Deferred by decision: adding unit fields to
+`schemas/region-allocation.schema.json` and `schemas/machine.schema.json`. The
+sidecar makes them unnecessary for now, and the full corpus review will cover
+both files together.
