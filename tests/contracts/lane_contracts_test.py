@@ -110,14 +110,21 @@ class LaneContractsTest(unittest.TestCase):
             entry["id"]: (entry["offset"], entry["length"])
             for entry in allocation.get("serviceLanes", [])
         }
-        service = [lane for lane in self.lanes if lane["source"] == "service-lane"]
-        self.assertEqual(len(service), len(allocated))
-        for lane in service:
-            with self.subTest(lane=lane["id"]):
-                self.assertIn(lane["id"], allocated)
-                self.assertEqual(
-                    (lane["offset"], lane["length"]), allocated[lane["id"]]
-                )
+        # Every allocated service lane must be represented exactly once, at the
+        # allocation's own offset and length — either as a service-lane entry
+        # or, where its span coincides with a machine input region, folded into
+        # that lane and named in alsoDeclaredAs. One region, one contract.
+        represented: dict[str, tuple[int, int]] = {}
+        for lane in self.lanes:
+            if lane["source"] == "service-lane":
+                represented[lane["id"]] = (lane["offset"], lane["length"])
+            for merged in lane.get("alsoDeclaredAs", []):
+                represented[merged] = (lane["offset"], lane["length"])
+
+        self.assertEqual(sorted(represented), sorted(allocated))
+        for lane_id, span in represented.items():
+            with self.subTest(lane=lane_id):
+                self.assertEqual(span, allocated[lane_id])
 
     # -- shape parity ------------------------------------------------------
 
@@ -299,6 +306,64 @@ class LaneContractsTest(unittest.TestCase):
             "no lane declares a machine writer, yet most ingress lanes are fed "
             "by machine outputs — the interconnect is not being modelled",
         )
+
+    def test_no_two_lanes_claim_the_same_region(self) -> None:
+        """One region, one contract. A region declared twice — as a service
+        lane and as a machine input, say — would give the same cells two
+        contracts and silently lose one when keyed for the runtime."""
+        seen: dict[tuple[int, int], str] = {}
+        for lane in self.lanes:
+            key = (lane["offset"], lane["length"])
+            with self.subTest(lane=lane["id"]):
+                self.assertNotIn(
+                    key, seen,
+                    f"{lane['id']} and {seen.get(key)} both claim {key}",
+                )
+            seen[key] = lane["id"]
+
+    def test_decision_table_covers_every_annotated_lane(self) -> None:
+        """The runtime table is what engines actually enforce. A lane the
+        shapes validate but the table omits is a lane with no guardrail."""
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "compile_decision_table", REPO_ROOT / "scripts" / "compile-decision-table.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        table = module.compile_table()
+        compiled = table["ingress"]["lanesByRegion"]
+
+        self.assertEqual(len(compiled), len(self.annotated))
+        for lane in self.annotated:
+            key = f"{lane['offset']}:{lane['length']}"
+            with self.subTest(lane=lane["id"]):
+                self.assertIn(key, compiled)
+                self.assertEqual(compiled[key]["id"], lane["id"])
+
+        self.assertEqual(
+            module.render(table), module.render(module.compile_table())
+        )
+        self.assertGreater(len(table["egress"]["actionClasses"]), 0)
+
+    def test_every_lane_declares_an_enforcement_stage(self) -> None:
+        for lane in self.lanes:
+            with self.subTest(lane=lane["id"]):
+                self.assertIn(lane.get("enforcement"), ("block", "warn", "observe"))
+
+    def test_life_safety_lanes_start_at_block(self) -> None:
+        """A refusal on a life-safety lane is the cheaper error."""
+        for lane in self.lanes:
+            if lane.get("lifeSafety"):
+                with self.subTest(lane=lane["id"]):
+                    self.assertEqual(lane["enforcement"], "block")
+
+    def test_unresolved_lanes_do_not_block(self) -> None:
+        """Blocking on a contract nobody has agreed is worse than not having one."""
+        for lane in self.lanes:
+            if not lane["axes"]:
+                with self.subTest(lane=lane["id"]):
+                    self.assertEqual(lane["enforcement"], "observe")
 
     # -- units -------------------------------------------------------------
 

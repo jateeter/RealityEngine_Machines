@@ -87,7 +87,24 @@ PROFILES = {
         "minValue": 0,
         "maxValue": 1,
     },
+    # 43 machines declare machine-native-binary while carrying 8-bit elements
+    # and continuous values in [0,1] — the same distribution as the declared
+    # scalars. The width and the values agree with each other and disagree with
+    # the label, so the positions are read as scalars and the label is recorded
+    # as inconsistent rather than silently believed or silently blocking. The
+    # corpus review decides which side to correct; nothing here edits machine
+    # JSON to force the question.
+    ("machine-native-binary", 8): {
+        "scaleType": "ratio",
+        "conversionPolicy": "none",
+        "minValue": 0,
+        "maxValue": 1,
+        "labelInconsistent": True,
+    },
 }
+
+# Profile keys whose label is contradicted by the element width.
+INCONSISTENT_PROFILES = {("machine-native-binary", 8)}
 
 def profile_name(key: tuple) -> str:
     label, bits = key
@@ -104,6 +121,16 @@ MACHINE_INPUT_PROVIDER = "acp"
 # specific approval; nothing else curtails it.
 DEFAULT_CARRIED_AUTONOMY = "advise"
 LIFE_SAFETY_AUTONOMY_FLOOR = "advise"
+
+# Enforcement staging. With 991 lanes the guardrail cannot be switched to
+# blocking everywhere on day one, so each lane carries the stage it is at and
+# the runtime maps it: block refuses, warn admits and counts, observe records.
+# Life-safety lanes start at block because a refusal there is the cheaper error;
+# a lane the evidence did not settle starts at observe because blocking on a
+# contract nobody has agreed is worse than not having one.
+ENFORCEMENT_BLOCK = "block"
+ENFORCEMENT_WARN = "warn"
+ENFORCEMENT_OBSERVE = "observe"
 
 
 REVIEW_REASONS = {
@@ -182,6 +209,56 @@ def contention_index() -> dict[int, dict]:
         if isinstance(cell, int):
             index[cell] = entry
     return index
+
+
+def input_regions() -> list[dict]:
+    """Machine input regions with their declared position semantics.
+
+    A service lane's meaning is not free-floating: where a machine's input
+    region covers the lane, that machine's inputSemantics already names those
+    positions, and slicing it at the lane's offsets recovers the lane's axes.
+    Where nothing covers the lane there is no corpus evidence and the lane goes
+    to review rather than being invented.
+    """
+    regions = []
+    for path in sorted(MACHINES.rglob("*.json")):
+        try:
+            document = json.loads(path.read_text())
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            continue
+        machine = document.get("machine") or document
+        if not isinstance(machine, dict):
+            continue
+        mapping = machine.get("perceptualMapping") or {}
+        region = mapping.get("input") or {}
+        semantics = (machine.get("metadata") or {}).get("inputSemantics")
+        offset, length = region.get("offset"), region.get("length")
+        if not isinstance(offset, int) or not isinstance(length, int):
+            continue
+        if not isinstance(semantics, list) or len(semantics) != length:
+            continue
+        regions.append({
+            "stem": path.stem,
+            "offset": offset,
+            "length": length,
+            "semantics": semantics,
+            "bits": mapping.get("bitsPerElement"),
+        })
+    return regions
+
+
+def cover_service_lane(lane_offset: int, lane_length: int, regions: list[dict]):
+    """The machine input region containing this lane, and the slice of its
+    semantics that describes the lane's own cells."""
+    for region in regions:
+        if region["offset"] <= lane_offset and (
+            lane_offset + lane_length <= region["offset"] + region["length"]
+        ):
+            start = lane_offset - region["offset"]
+            names = region["semantics"][start:start + lane_length]
+            if len(names) == lane_length:
+                return region, names
+    return None, None
 
 
 def machine_writers_of(entry: dict) -> list[str]:
@@ -276,7 +353,10 @@ def build() -> dict:
 
         names = sorted(distinct_names)[0] if distinct_names else ()
         if profile and len(names) == length and not reasons:
-            lane["profile"] = profile_name(next(iter(profiles)))
+            key = next(iter(profiles))
+            lane["profile"] = profile_name(key)
+            if key in INCONSISTENT_PROFILES:
+                lane["labelInconsistent"] = True
             lane["axes"] = build_axes(list(names))
             if semantic_contention:
                 for axis in lane["axes"]:
@@ -305,6 +385,12 @@ def build() -> dict:
                     item["undeclaredCells"] = lane["contention"]["undeclaredCells"]
                 review.append(item)
 
+        lane["enforcement"] = (
+            ENFORCEMENT_BLOCK if life_safety
+            else ENFORCEMENT_WARN if lane["axes"]
+            else ENFORCEMENT_OBSERVE
+        )
+
         if semantic_contention:
             lane["semanticContention"] = {
                 "flagged": True,
@@ -315,33 +401,74 @@ def build() -> dict:
 
         lanes.append(lane)
 
-    # Service lanes: allocation is authoritative, semantics are not derivable.
+    # Service lanes: allocation stays authoritative; semantics come from the
+    # machine whose input region covers the lane, where one does.
     allocation = json.loads(REGION_ALLOCATION.read_text())
+    regions = input_regions()
     for entry in allocation.get("serviceLanes", []):
         lane_id = entry["id"]
-        lanes.append(
-            {
-                "id": lane_id,
-                "source": "service-lane",
-                "offset": entry["offset"],
-                "length": entry["length"],
-                "provider": entry.get("provider"),
-                "permittedProviders": [entry["provider"]] if entry.get("provider") else [],
-                "carriesAutonomy": DEFAULT_CARRIED_AUTONOMY,
-                "readers": sorted(
-                    Path(name).stem for name in entry.get("corpusReaders", [])
-                ),
-                "axes": [],
-            }
+        offset, length = entry["offset"], entry["length"]
+        lane = {
+            "id": lane_id,
+            "source": "service-lane",
+            "offset": offset,
+            "length": length,
+            "provider": entry.get("provider"),
+            "permittedProviders": [entry["provider"]] if entry.get("provider") else [],
+            "carriesAutonomy": DEFAULT_CARRIED_AUTONOMY,
+            "readers": sorted(
+                Path(name).stem for name in entry.get("corpusReaders", [])
+            ),
+            "axes": [],
+        }
+
+        # A service lane whose span exactly matches a machine-input lane is the
+        # same region declared twice — the ACP completion lane at 4210 is also
+        # OpenClawCompletionE2E's input region. Merge rather than emit a second
+        # lane for the same cells, which would give one region two contracts.
+        existing = next(
+            (
+                candidate for candidate in lanes
+                if candidate["offset"] == offset and candidate["length"] == length
+            ),
+            None,
         )
-        review.append(
-            {
-                "laneId": lane_id,
-                "reason": "physical-units-need-owner",
-                "provider": entry.get("provider"),
-                "detail": REVIEW_REASONS["physical-units-need-owner"],
-            }
+        if existing is not None:
+            for provider in lane["permittedProviders"]:
+                if provider not in existing["permittedProviders"]:
+                    existing["permittedProviders"].append(provider)
+            existing["permittedProviders"].sort()
+            existing.setdefault("alsoDeclaredAs", []).append(lane_id)
+            existing["provider"] = existing.get("provider") or entry.get("provider")
+            continue
+
+        covering, names = cover_service_lane(offset, length, regions)
+        profile_key = None
+        if covering is not None:
+            profile_key = (
+                ("machine-native-binary", 1) if covering["bits"] == 1
+                else ("machine-native-scalar", 8) if covering["bits"] == 8
+                else None
+            )
+
+        if profile_key and profile_key in PROFILES and names:
+            lane["profile"] = profile_name(profile_key)
+            lane["axes"] = build_axes(list(names))
+            lane["semanticsDerivedFrom"] = covering["stem"]
+        else:
+            review.append(
+                {
+                    "laneId": lane_id,
+                    "reason": "physical-units-need-owner",
+                    "provider": entry.get("provider"),
+                    "detail": REVIEW_REASONS["physical-units-need-owner"],
+                }
+            )
+
+        lane["enforcement"] = (
+            ENFORCEMENT_WARN if lane["axes"] else ENFORCEMENT_OBSERVE
         )
+        lanes.append(lane)
 
     lanes.sort(key=lambda lane: (lane["offset"], lane["length"], lane["id"]))
     review.sort(key=lambda item: (item["reason"], item["laneId"]))
@@ -367,6 +494,10 @@ def build() -> dict:
             "lanesNeedingReview": len(lanes) - len(annotated),
             "positionsAnnotated": positions,
             "machinesCovered": len(machines),
+            "byEnforcement": {
+                stage: sum(1 for lane in lanes if lane.get("enforcement") == stage)
+                for stage in (ENFORCEMENT_BLOCK, ENFORCEMENT_WARN, ENFORCEMENT_OBSERVE)
+            },
             "reviewByReason": {
                 reason: sum(1 for item in review if item["reason"] == reason)
                 for reason in sorted({item["reason"] for item in review})

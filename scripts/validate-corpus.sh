@@ -34,6 +34,7 @@ python3 "$SCRIPT_DIR/generate-owl.py" --domain health-personal --check --strict-
 python3 "$SCRIPT_DIR/generate-owl.py" --manifest-check --strict-actions
 bash "$SCRIPT_DIR/reason-owl.sh"
 python3 "$SCRIPT_DIR/project-lanes.py" --write
+python3 "$SCRIPT_DIR/compile-decision-table.py" --write
 bash "$SCRIPT_DIR/validate-guardrails.sh"
 
 # JSON-Schema enforcement (machines + registries + trigger files vs schemas/).
