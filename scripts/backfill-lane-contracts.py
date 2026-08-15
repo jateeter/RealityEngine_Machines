@@ -56,6 +56,7 @@ from ucum import UcumError, canonical  # noqa: E402
 
 MACHINES = REPO_ROOT / "machines"
 REGION_ALLOCATION = REPO_ROOT / "domains" / "region-allocation.json"
+ARBITRATION_REGISTRY = REPO_ROOT / "domains" / "arbitration-registry.json"
 OUTPUT = REPO_ROOT / "domains" / "lane-contracts.json"
 
 SCHEMA_VERSION = "1.0.0"
@@ -103,9 +104,13 @@ REVIEW_REASONS = {
         "re:axisName is functional, so this is an inconsistency to adjudicate, "
         "not a spelling variant."
     ),
-    "region-overlap": (
-        "This region partially overlaps another externally-writable region. An "
-        "external write lands inside a neighbouring machine's input."
+    "contention-undeclared": (
+        "This region shares cells with another externally-writable region and "
+        "at least one shared cell has no entry in domains/arbitration-registry.json. "
+        "Overlap itself is normal — a machine output feeding another machine's "
+        "input is the interconnect mechanism, and 669 output regions equal an "
+        "input region exactly. What is a corpus error, per ARBITER_CONTRACT.md, "
+        "is a contended cell with no declared resolution."
     ),
     "physical-units-need-owner": (
         "A service lane carrying real physical quantities. Units, value domain "
@@ -148,10 +153,27 @@ def load_machines() -> list[dict]:
     return records
 
 
-def partial_overlaps(regions: list[tuple[int, int]]) -> set[tuple[int, int]]:
-    """Regions that partially overlap a different region. Identical regions are
-    not overlaps: they are one lane with several readers."""
-    flagged: set[tuple[int, int]] = set()
+def arbitrated_cells() -> set[int]:
+    """Cells with a declared resolution in the arbitration registry."""
+    registry = json.loads(ARBITRATION_REGISTRY.read_text())
+    cells: set[int] = set()
+    for entry in registry.get("entries", []):
+        cell = entry.get("cell")
+        if isinstance(cell, int):
+            cells.add(cell)
+    return cells
+
+
+def shared_cells(regions: list[tuple[int, int]]) -> dict[tuple[int, int], set[int]]:
+    """Cells a region shares with a *different* region.
+
+    Overlap is not a defect. A machine output feeding another machine's input
+    region is how interconnection works here, and identical regions are simply
+    one lane with several readers. What matters is whether a cell with more
+    than one writer has a declared resolution — ARBITER_CONTRACT.md is explicit
+    that an undeclared contended cell is the corpus error, not the overlap.
+    """
+    overlap: dict[tuple[int, int], set[int]] = {}
     ordered = sorted(set(regions))
     for index, (offset, length) in enumerate(ordered):
         for other_offset, other_length in ordered[index + 1:]:
@@ -159,9 +181,15 @@ def partial_overlaps(regions: list[tuple[int, int]]) -> set[tuple[int, int]]:
                 break
             if (other_offset, other_length) == (offset, length):
                 continue
-            flagged.add((offset, length))
-            flagged.add((other_offset, other_length))
-    return flagged
+            cells = set(
+                range(
+                    max(offset, other_offset),
+                    min(offset + length, other_offset + other_length),
+                )
+            )
+            overlap.setdefault((offset, length), set()).update(cells)
+            overlap.setdefault((other_offset, other_length), set()).update(cells)
+    return overlap
 
 
 def build_axes(names: list[str]) -> list[dict]:
@@ -185,7 +213,8 @@ def build() -> dict:
     for record in machines:
         by_region[(record["offset"], record["length"])].append(record)
 
-    overlapping = partial_overlaps(list(by_region))
+    overlap = shared_cells(list(by_region))
+    arbitrated = arbitrated_cells()
 
     lanes: list[dict] = []
     review: list[dict] = []
@@ -217,8 +246,16 @@ def build() -> dict:
         else:
             reasons.append("profile-unrecognised")
 
-        if (offset, length) in overlapping:
-            reasons.append("region-overlap")
+        contended = overlap.get((offset, length), set())
+        if contended:
+            undeclared = sorted(contended - arbitrated)
+            lane["contention"] = {
+                "sharedCells": len(contended),
+                "arbitrated": not undeclared,
+            }
+            if undeclared:
+                lane["contention"]["undeclaredCells"] = undeclared
+                reasons.append("contention-undeclared")
 
         names = sorted(distinct_names)[0] if distinct_names else ()
         if profile and len(names) == length and not reasons:
@@ -229,14 +266,15 @@ def build() -> dict:
             if profile and len(names) != length:
                 reasons.append("profile-unrecognised")
             for reason in sorted(set(reasons)) or ["profile-unrecognised"]:
-                review.append(
-                    {
-                        "laneId": lane_id,
-                        "reason": reason,
-                        "readers": readers,
-                        "detail": REVIEW_REASONS[reason],
-                    }
-                )
+                item = {
+                    "laneId": lane_id,
+                    "reason": reason,
+                    "readers": readers,
+                    "detail": REVIEW_REASONS[reason],
+                }
+                if reason == "contention-undeclared":
+                    item["undeclaredCells"] = lane["contention"]["undeclaredCells"]
+                review.append(item)
 
         lanes.append(lane)
 

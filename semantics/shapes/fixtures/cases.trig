@@ -590,9 +590,9 @@ fx:reject-lane-axis-count-mismatch {
         reg:permittedValue 0 , 1 .
 }
 
-fx:reject-lane-overlap {
+fx:reject-contention-undeclared {
     fx:overlapping-lane a reg:IngressLane ;
-        reg:laneId "overlaps-fall-detection" ;
+        reg:laneId "shares-cells-unarbitrated" ;
         reg:laneOffset 3814 ;
         reg:laneLength 2 ;
         reg:permittedProvider "manual" ;
@@ -780,4 +780,34 @@ fx:reject-dimension-incompatible-accepted {
         reg:conversionPolicy reg:AffineConversion ;
         reg:scaleType reg:IntervalScale ;
         reg:minValue -40 ; reg:maxValue 60 .
+}
+
+# Overlap with a declared resolution. A machine output feeding another
+# machine's input is the interconnect mechanism, so this must be admitted.
+fx:accept-arbitrated-overlap {
+    fx:lane-fall-detection-input reg:contentionArbitrated true ; reg:sharedCellCount 2 .
+
+    fx:arbitrated-lane a reg:IngressLane ;
+        reg:laneId "shares-cells-arbitrated" ;
+        reg:laneOffset 3814 ;
+        reg:laneLength 2 ;
+        reg:permittedProvider "manual" ;
+        reg:contentionArbitrated true ;
+        reg:sharedCellCount 1 ;
+        reg:hasAxis fx:arb-axis-0 , fx:arb-axis-1 .
+
+    fx:arb-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "arb_zero" ;
+        reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
+        reg:quantityKind qkind:Dimensionless ;
+        reg:conversionPolicy reg:ProhibitedConversion ;
+        reg:scaleType reg:OrdinalScale ;
+        reg:permittedValue 0 , 1 .
+    fx:arb-axis-1 a reg:LaneAxis ;
+        re:axisIndex 1 ; re:axisName "arb_one" ;
+        reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
+        reg:quantityKind qkind:Dimensionless ;
+        reg:conversionPolicy reg:ProhibitedConversion ;
+        reg:scaleType reg:OrdinalScale ;
+        reg:permittedValue 0 , 1 .
 }

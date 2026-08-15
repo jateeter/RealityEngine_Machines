@@ -484,14 +484,32 @@ quantity, which is why the categorical cases prohibit conversion outright.
 guessed.** A fabricated unit sitting behind a guardrail is worse than an absent
 one: the guardrail is the thing that is supposed to be trustworthy.
 
-Current state — 991 lanes, 893 annotated (3,617 positions), 98 in review:
+Current state — 991 lanes, 913 annotated (3,705 positions), 78 in review:
 
 | reason | lanes | |
 | --- | ---: | --- |
 | `profile-unrecognised` | 42 | The label is contradicted by the element width — machines declaring `machine-native-binary` while carrying 8-bit elements and continuous values |
-| `region-overlap` | 34 | 17 pairs of partially overlapping externally-writable regions. An external write lands inside a neighbouring machine's input — the failure the guardrail exists to prevent, present structurally in the corpus |
 | `axis-name-disagreement` | 29 | Machines sharing a region disagree on what its positions mean. `re:axisName` is functional, so this is an inconsistency to adjudicate, not a spelling variant |
 | `physical-units-need-owner` | 8 | The service lanes. Real physical quantities; units need a domain owner, not a derivation |
+| `contention-undeclared` | 0 | A shared cell with no entry in the arbitration registry. None at present |
+
+### Overlap is not a defect
+
+Worth stating plainly, because an earlier draft of this contract had it wrong.
+Lanes overlap as a matter of course: `M1(output i) → M2(input j)` is the
+interconnect mechanism of this perceptual space, and **669 machine output
+regions equal a machine input region exactly**. Identical regions are simply
+one lane with several readers. A rule refusing overlapping lanes outright would
+reject the corpus's correct design.
+
+What `docs/ARBITER_CONTRACT.md` calls a corpus error is a *contended* cell — one
+with more than one writer — carrying **no declared resolution**. So the
+guardrail constrains the declaration, not the geometry: a lane sharing cells
+with another must assert `reg:contentionArbitrated true`, and
+`domains/arbitration-registry.json` holds the resolution itself. All 20 pairs of
+partially overlapping externally-writable regions in the current corpus have
+every shared cell declared there, which is why the review count for this reason
+is zero.
 
 ## Implementation status
 
@@ -500,7 +518,7 @@ Written and gated:
 - `semantics/shapes/re-guardrails.shacl.ttl` — vocabulary, SOSA alignment, the
   UCUM/QUDT unit contract, corpus-time lane shapes, ingress shapes, egress
   shapes.
-- `semantics/shapes/fixtures/` — lane registry fixture and 45-case parity suite.
+- `semantics/shapes/fixtures/` — lane registry fixture and 46-case parity suite.
 - `semantics/ontology/qudt-subset.ttl` — pinned QUDT v3.5.0 extraction, via
   `scripts/extract-qudt-subset.py`.
 - `scripts/ucum.py` — canonicalizer, with `tests/contracts/ucum_test.py`.

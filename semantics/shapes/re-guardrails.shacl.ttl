@@ -119,6 +119,14 @@ reg:lifeSafetyLane a owl:DatatypeProperty ; rdfs:domain reg:IngressLane ; rdfs:r
     rdfs:label "life-safety lane" ;
     rdfs:comment "True when the lane feeds the input region of a machine carrying an re:LifeSafetySequence." .
 
+reg:contentionArbitrated a owl:DatatypeProperty ; rdfs:domain reg:IngressLane ; rdfs:range xsd:boolean ;
+    rdfs:label "contention arbitrated" ;
+    rdfs:comment "True when every cell this lane shares with another lane has a declared resolution in domains/arbitration-registry.json. Overlap between lanes is ordinary — machine outputs feed machine inputs — so this records the thing that actually matters: whether a cell with more than one writer has a rule." .
+
+reg:sharedCellCount a owl:DatatypeProperty ; rdfs:domain reg:IngressLane ; rdfs:range xsd:integer ;
+    rdfs:label "shared cell count" ;
+    rdfs:comment "How many of this lane's cells are also claimed by another lane. Informational; the guardrail checks the arbitration declaration, not the count." .
+
 # ── Units: UCUM canonical in data, QUDT canonical in semantics ───────────
 #
 # SOSA carries no unit on hasSimpleResult, so the unit contract lives here.
@@ -448,6 +456,16 @@ reg:IngressLaneShape
         sh:class re:AutonomyMode ;
         sh:maxCount 1 ;
     ] ;
+    sh:property [
+        sh:path reg:contentionArbitrated ;
+        sh:datatype xsd:boolean ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:sharedCellCount ;
+        sh:datatype xsd:integer ; sh:minInclusive 0 ;
+        sh:maxCount 1 ;
+    ] ;
 
     sh:sparql [
         a sh:SPARQLConstraint ;
@@ -493,9 +511,22 @@ reg:IngressLaneShape
             }
         """ ;
     ] ;
+    # Overlap is NOT a defect.
+    #
+    # A machine output feeding another machine's input region is how
+    # interconnection works in this perceptual space — 669 output regions equal
+    # an input region exactly, and identical regions are simply one lane with
+    # several readers. Refusing overlap outright would reject the corpus's
+    # correct design.
+    #
+    # What ARBITER_CONTRACT.md calls a corpus error is a *contended* cell with
+    # no declared resolution. So the constraint is on the declaration, not the
+    # geometry: a lane sharing cells with another must say that the contention
+    # is arbitrated, and domains/arbitration-registry.json is where the
+    # resolution itself lives.
     sh:sparql [
         a sh:SPARQLConstraint ;
-        sh:message "Lane overlaps lane {?value}. Overlapping lanes make a well-formed write ambiguous in meaning." ;
+        sh:message "Lane shares cells with lane {?value} but does not declare the contention arbitrated; an undeclared contended cell has no resolution." ;
         sh:severity sh:Violation ;
         sh:prefixes <https://realityengine.example.org/ontology/re-guardrails> ;
         sh:select """
@@ -506,6 +537,7 @@ reg:IngressLaneShape
                        reg:laneOffset ?bOff ; reg:laneLength ?bLen ; reg:laneId ?value .
                 FILTER (?aId != ?value)
                 FILTER (?aOff < (?bOff + ?bLen) && ?bOff < (?aOff + ?aLen))
+                FILTER NOT EXISTS { $this reg:contentionArbitrated true }
             }
         """ ;
     ] .
