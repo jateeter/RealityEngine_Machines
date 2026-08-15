@@ -128,6 +128,10 @@ def project(document: dict) -> tuple[str, dict]:
             f"reg:laneLength {lane['length']}",
         ]
 
+        statements.append(
+            f"reg:enforcementStage {literal(lane.get('enforcement', 'observe'))}"
+        )
+
         for provider in lane.get("permittedProviders", []):
             statements.append(f"reg:permittedProvider {literal(provider)}")
 

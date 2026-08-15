@@ -163,6 +163,13 @@
             "type": "integer",
             "minimum": 0
           }
+        },
+        "byEnforcement": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
         }
       }
     },
@@ -343,6 +350,30 @@
                 }
               }
             }
+          },
+          "enforcement": {
+            "enum": [
+              "block",
+              "warn",
+              "observe"
+            ],
+            "description": "How a runtime treats a violation here. Staged per lane because 991 lanes cannot go to blocking on one day, and staged in the corpus rather than per-runtime config so four runtimes cannot drift."
+          },
+          "labelInconsistent": {
+            "type": "boolean",
+            "description": "The machine's normalization label is contradicted by its element width. The positions are read from the width and the values; the corpus review decides which side to correct."
+          },
+          "semanticsDerivedFrom": {
+            "type": "string",
+            "description": "The machine whose input region covers this service lane and whose inputSemantics named its positions."
+          },
+          "alsoDeclaredAs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true,
+            "description": "Other ids under which this same region is declared. One region, one contract."
           }
         }
       }

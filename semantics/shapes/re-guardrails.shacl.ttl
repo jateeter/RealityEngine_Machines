@@ -133,6 +133,10 @@ reg:approvalRef a owl:DatatypeProperty ; rdfs:domain reg:EgressDispatch ; rdfs:r
     rdfs:label "approval reference" ;
     rdfs:comment "The specific approval permitting this dispatch to act above its inherited autonomy. The only thing that curtails transitive autonomy." .
 
+reg:enforcementStage a owl:DatatypeProperty ; rdfs:domain reg:IngressLane ; rdfs:range xsd:string ;
+    rdfs:label "enforcement stage" ;
+    rdfs:comment "How a runtime treats a violation on this lane: block refuses per the fail-closed rules, warn admits and counts, observe records only. Staged per lane because 991 lanes cannot be switched to blocking on one day, and staged HERE rather than in per-runtime configuration so four runtimes cannot drift into staging it differently. Life-safety lanes start at block; a lane whose contract the evidence did not settle starts at observe, because blocking on a contract nobody has agreed is worse than not having one." .
+
 reg:contendedCellCount a owl:DatatypeProperty ; rdfs:domain reg:IngressLane ; rdfs:range xsd:integer ;
     rdfs:label "contended cell count" ;
     rdfs:comment "How many cells of this lane are contended. A cell ci of a Reality Event E = {c1..cn} is contended when more than one writer competes for ci's next value — M1(j) and M2(l) both targeting ci. It is a property of a cell and its writers, not of how two regions overlap. Contention is the normal state here, not an exception: 2,835 of 4,005 lane cells are contended, which is why the guardrail asks for a declared resolution rather than treating it as a defect." .
@@ -497,6 +501,13 @@ reg:IngressLaneShape
     sh:property [
         sh:path reg:semanticContention ;
         sh:datatype xsd:boolean ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path reg:enforcementStage ;
+        sh:datatype xsd:string ;
+        sh:in ( "block" "warn" "observe" ) ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A lane must declare its enforcement stage; a runtime cannot infer whether to refuse or record." ;
     ] ;
     sh:property [
         sh:path reg:contentionArbitrated ;

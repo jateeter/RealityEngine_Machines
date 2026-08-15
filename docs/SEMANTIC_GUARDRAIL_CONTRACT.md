@@ -484,14 +484,70 @@ quantity, which is why the categorical cases prohibit conversion outright.
 guessed.** A fabricated unit sitting behind a guardrail is worse than an absent
 one: the guardrail is the thing that is supposed to be trustworthy.
 
-Current state — 991 lanes, 913 annotated (3,705 positions), 78 in review:
+Current state — 990 lanes, 987 annotated (4079 positions),
+3 in review:
 
 | reason | lanes | |
 | --- | ---: | --- |
-| `profile-unrecognised` | 42 | The label is contradicted by the element width — machines declaring `machine-native-binary` while carrying 8-bit elements and continuous values |
-| `axis-name-disagreement` | 29 | Machines sharing a region disagree on what its positions mean. `re:axisName` is functional, so this is an inconsistency to adjudicate, not a spelling variant |
-| `physical-units-need-owner` | 8 | The service lanes. Real physical quantities; units need a domain owner, not a derivation |
-| `contention-undeclared` | 0 | A shared cell with no entry in the arbitration registry. None at present |
+| `physical-units-need-owner` | 3 | `agent-completion-risk`, `healthkit-activity`, `healthkit-steps` — no machine input region covers them, so there is no corpus evidence for what their positions mean |
+
+The other five service lanes are derived: where a machine's input region covers
+a lane, that machine's `inputSemantics` already names those positions, and
+slicing it at the lane's offsets recovers the axes. `semanticsDerivedFrom`
+records which machine each came from.
+
+**The 42 label/width contradictions are resolved rather than deferred.** Those
+machines declare `machine-native-binary` while carrying 8-bit elements and
+continuous values in `[0,1]` — the same distribution as the declared scalars.
+The width and the values agree with each other and disagree with the label, so
+the positions are read as scalars under a `machine-native-binary/8` profile and
+the lane is marked `labelInconsistent`. Nothing edits machine JSON to force the
+question; the corpus review decides which side to correct.
+
+### Enforcement staging
+
+Every lane declares an `enforcement` stage, and the runtime maps it: **block**
+refuses per the fail-closed rules, **warn** admits and counts, **observe**
+records only.
+
+| stage | lanes | |
+| --- | ---: | --- |
+| block | 10 | the life-safety lanes — a refusal there is the cheaper error |
+| warn | 977 | everything with a settled contract |
+| observe | 3 | contracts the evidence did not settle; blocking on a contract nobody has agreed is worse than not having one |
+
+Staged in the corpus rather than in per-runtime configuration, so four runtimes
+cannot drift into staging it differently.
+
+### One region, one contract
+
+A region declared twice — as a service lane and as a machine input — would give
+the same cells two contracts and silently lose one when keyed for the runtime.
+`acp-openclaw-completion` at 4210 is also `OpenClawCompletionE2E`'s input
+region; the two are merged, with both provider classes on one lane and the
+other id kept in `alsoDeclaredAs`. A contract test refuses any two lanes
+claiming the same span.
+
+### The runtime decision table
+
+`scripts/compile-decision-table.py` emits `semantics/lanes/decision-table.json`:
+the guardrail with every rule reduced to a lookup or a comparison.
+
+```
+CI            reasoner + SHACL over the lane graph   correctness
+engine load   decision-table.json                    speed
+push cycle    region lookup + bounds test            hot path
+```
+
+Keyed by `"offset:length"` — three regions in this corpus share an offset with
+a different width, so offset alone does not identify a lane. Egress rules that
+do not vary per lane travel in their own block, so a runtime does not need
+`re-core.ttl` to evaluate a dispatch: the autonomy ranks, the 17 canonical
+action codes with their consequence classes, and the escalation invariant.
+
+A contract test asserts the table covers every annotated lane. A lane the
+shapes validate but the table omits is a lane with no guardrail at runtime,
+which is the failure this whole layer exists to prevent.
 
 ### An ingress lane is written from two directions
 
