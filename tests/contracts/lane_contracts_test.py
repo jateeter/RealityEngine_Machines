@@ -163,36 +163,43 @@ class LaneContractsTest(unittest.TestCase):
                     with self.subTest(lane=lane["id"], axis=axis["index"]):
                         self.assertEqual(len(resolved["acceptedUcum"]), 1)
 
-    def test_overlapping_lanes_declare_arbitrated_contention(self) -> None:
-        """Overlap is not a defect. A machine output feeding another machine's
-        input region is how interconnection works here, and 669 output regions
-        equal an input region exactly. ARBITER_CONTRACT.md is explicit that the
-        corpus error is a *contended* cell with no declared resolution, so that
-        is what is gated — never the geometry."""
+    def test_contended_lanes_declare_an_arbitrated_resolution(self) -> None:
+        """Contention is the normal state, not a defect. An ingress lane is
+        written externally — that is what makes it ingress — and by machine
+        outputs, because M1(output i) feeding M2(input j) is how this perceptual
+        space composes: 703 of 983 lanes have a machine writer and 2,835 of
+        4,005 lane cells carry more than one writer. ARBITER_CONTRACT.md is
+        explicit that the corpus error is a contended cell with no declared
+        resolution, so that is what is gated — never the geometry."""
         for lane in self.annotated:
             contention = lane.get("contention")
             if contention:
                 with self.subTest(lane=lane["id"]):
                     self.assertTrue(
                         contention["arbitrated"],
-                        f"{lane['id']} shares {contention['sharedCells']} cells with "
-                        "another lane and some have no arbitration entry",
+                        f"{lane['id']} has {contention['contendedCells']} contended "
+                        "cells and some have no arbitration entry",
                     )
+                    if contention["contendedCells"]:
+                        self.assertTrue(
+                            contention["rules"],
+                            f"{lane['id']} is contended but names no rule",
+                        )
 
-    def test_contention_matches_the_arbitration_registry(self) -> None:
-        registry = json.loads(
-            (REPO_ROOT / "domains" / "arbitration-registry.json").read_text()
-        )
-        arbitrated = {
-            entry["cell"] for entry in registry.get("entries", [])
-            if isinstance(entry.get("cell"), int)
-        }
-        self.assertGreater(len(arbitrated), 0)
+    def test_machine_writers_are_real_machines(self) -> None:
+        stems = {path.stem for path in (REPO_ROOT / "machines").rglob("*.json")}
+        self.assertGreater(len(stems), 0)
+        declared = 0
         for lane in self.lanes:
-            contention = lane.get("contention")
-            if contention and contention["arbitrated"]:
-                with self.subTest(lane=lane["id"]):
-                    self.assertEqual(contention.get("undeclaredCells", []), [])
+            for writer in lane.get("machineWriters", []):
+                declared += 1
+                with self.subTest(lane=lane["id"], writer=writer):
+                    self.assertIn(writer, stems)
+        self.assertGreater(
+            declared, 0,
+            "no lane declares a machine writer, yet most ingress lanes are fed "
+            "by machine outputs — the interconnect is not being modelled",
+        )
 
     # -- units -------------------------------------------------------------
 

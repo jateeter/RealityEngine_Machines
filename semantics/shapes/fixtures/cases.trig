@@ -591,22 +591,35 @@ fx:reject-lane-axis-count-mismatch {
 }
 
 fx:reject-contention-undeclared {
-    fx:overlapping-lane a reg:IngressLane ;
-        reg:laneId "shares-cells-unarbitrated" ;
-        reg:laneOffset 3814 ;
-        reg:laneLength 2 ;
-        reg:permittedProvider "manual" ;
-        reg:hasAxis fx:ov-axis-0 , fx:ov-axis-1 .
+    fx:unarbitrated-lane a reg:IngressLane ;
+        reg:laneId "written-by-machine-unarbitrated" ;
+        reg:laneOffset 9950 ;
+        reg:laneLength 1 ;
+        reg:permittedProvider "openclaw" ;
+        reg:machineWriter "SomeUpstreamMachine" ;
+        reg:hasAxis fx:unarb-axis-0 .
 
-    fx:ov-axis-0 a reg:LaneAxis ;
-        re:axisIndex 0 ; re:axisName "ov_zero" ;
+    fx:unarb-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "unarb_zero" ;
         reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
         reg:quantityKind qkind:Dimensionless ;
         reg:conversionPolicy reg:ProhibitedConversion ;
         reg:scaleType reg:OrdinalScale ;
         reg:permittedValue 0 , 1 .
-    fx:ov-axis-1 a reg:LaneAxis ;
-        re:axisIndex 1 ; re:axisName "ov_one" ;
+}
+
+fx:reject-contended-without-rule {
+    fx:noruleLane a reg:IngressLane ;
+        reg:laneId "contended-without-rule" ;
+        reg:laneOffset 9960 ;
+        reg:laneLength 1 ;
+        reg:permittedProvider "openclaw" ;
+        reg:contendedCellCount 1 ;
+        reg:contentionArbitrated true ;
+        reg:hasAxis fx:norule-axis-0 .
+
+    fx:norule-axis-0 a reg:LaneAxis ;
+        re:axisIndex 0 ; re:axisName "norule_zero" ;
         reg:canonicalUcum "1" ; reg:acceptedUcum "1" ;
         reg:quantityKind qkind:Dimensionless ;
         reg:conversionPolicy reg:ProhibitedConversion ;
@@ -782,18 +795,19 @@ fx:reject-dimension-incompatible-accepted {
         reg:minValue -40 ; reg:maxValue 60 .
 }
 
-# Overlap with a declared resolution. A machine output feeding another
-# machine's input is the interconnect mechanism, so this must be admitted.
-fx:accept-arbitrated-overlap {
-    fx:lane-fall-detection-input reg:contentionArbitrated true ; reg:sharedCellCount 2 .
-
+# The ordinary case: an ingress lane written externally AND by a machine
+# output, with the contention resolved. M1(out) -> M2(in) is the interconnect
+# mechanism, so this must be admitted — 703 of 983 corpus lanes look like this.
+fx:accept-arbitrated-contention {
     fx:arbitrated-lane a reg:IngressLane ;
-        reg:laneId "shares-cells-arbitrated" ;
-        reg:laneOffset 3814 ;
+        reg:laneId "written-by-machine-arbitrated" ;
+        reg:laneOffset 3900 ;
         reg:laneLength 2 ;
-        reg:permittedProvider "manual" ;
+        reg:permittedProvider "openclaw" ;
+        reg:machineWriter "AGX001_aquaculture-water-quality-stability" ;
         reg:contentionArbitrated true ;
-        reg:sharedCellCount 1 ;
+        reg:contendedCellCount 2 ;
+        reg:arbitrationRule "PRECEDENCE" ;
         reg:hasAxis fx:arb-axis-0 , fx:arb-axis-1 .
 
     fx:arb-axis-0 a reg:LaneAxis ;

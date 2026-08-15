@@ -493,23 +493,43 @@ Current state — 991 lanes, 913 annotated (3,705 positions), 78 in review:
 | `physical-units-need-owner` | 8 | The service lanes. Real physical quantities; units need a domain owner, not a derivation |
 | `contention-undeclared` | 0 | A shared cell with no entry in the arbitration registry. None at present |
 
-### Overlap is not a defect
+### An ingress lane is written from two directions
 
-Worth stating plainly, because an earlier draft of this contract had it wrong.
-Lanes overlap as a matter of course: `M1(output i) → M2(input j)` is the
-interconnect mechanism of this perceptual space, and **669 machine output
-regions equal a machine input region exactly**. Identical regions are simply
-one lane with several readers. A rule refusing overlapping lanes outright would
-reject the corpus's correct design.
+Worth stating plainly, because two earlier drafts of this contract got it
+wrong. An ingress lane has **two classes of writer**:
 
-What `docs/ARBITER_CONTRACT.md` calls a corpus error is a *contended* cell — one
-with more than one writer — carrying **no declared resolution**. So the
-guardrail constrains the declaration, not the geometry: a lane sharing cells
-with another must assert `reg:contentionArbitrated true`, and
-`domains/arbitration-registry.json` holds the resolution itself. All 20 pairs of
-partially overlapping externally-writable regions in the current corpus have
-every shared cell declared there, which is why the review count for this reason
-is zero.
+- **external providers** — OpenClaw/ACP, HealthKit, localAI and the rest. This
+  is what makes the lane *ingress*, and `reg:permittedProvider` lists them.
+- **machine outputs** — `M1(output i)` feeding `M2(input j)` is how this
+  perceptual space composes. `reg:machineWriter` names them.
+
+The second is not an edge case. **703 of 983 lanes have at least one machine
+writer**, 669 machine output regions equal a machine input region exactly, and
+**2,835 of 4,005 lane cells carry more than one writer**. Contention is the
+normal state of an ingress lane, not an exception to it.
+
+So overlap is not the question and geometry is not the test. The first draft of
+`IngressLaneShape` refused overlapping lanes outright, which would have rejected
+the corpus's correct design; the second replaced that with a lane-against-lane
+overlap check, which saw 20 pairs where the registry records 2,837 contended
+cells — it was still measuring geometry, and still missing the machine writers
+entirely.
+
+What `docs/ARBITER_CONTRACT.md` calls a corpus error is a *contended* cell —
+one with more than one writer — carrying **no declared resolution**. The
+guardrail therefore constrains the declaration:
+
+| | |
+| --- | --- |
+| a lane with a `reg:machineWriter` | must assert `reg:contentionArbitrated true` |
+| a lane with `reg:contendedCellCount > 0` | must name its `reg:arbitrationRule` |
+| a lane asserting arbitration with neither | warns — the declaration describes nothing |
+
+`domains/arbitration-registry.json` holds the per-cell resolution itself: 2,837
+cells, of which 2,796 have both an `acp` writer and a `machine` writer, under
+PRECEDENCE. Every contended cell in the current corpus is declared there, which
+is why `contention-undeclared` has zero members — an accurate statement about
+this corpus rather than a silence.
 
 ## Implementation status
 
@@ -518,7 +538,7 @@ Written and gated:
 - `semantics/shapes/re-guardrails.shacl.ttl` — vocabulary, SOSA alignment, the
   UCUM/QUDT unit contract, corpus-time lane shapes, ingress shapes, egress
   shapes.
-- `semantics/shapes/fixtures/` — lane registry fixture and 46-case parity suite.
+- `semantics/shapes/fixtures/` — lane registry fixture and 47-case parity suite.
 - `semantics/ontology/qudt-subset.ttl` — pinned QUDT v3.5.0 extraction, via
   `scripts/extract-qudt-subset.py`.
 - `scripts/ucum.py` — canonicalizer, with `tests/contracts/ucum_test.py`.

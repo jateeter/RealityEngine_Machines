@@ -153,15 +153,38 @@ def load_machines() -> list[dict]:
     return records
 
 
-def arbitrated_cells() -> set[int]:
-    """Cells with a declared resolution in the arbitration registry."""
+def arbitration() -> tuple[set[int], dict[int, str]]:
+    """Cells with a declared resolution, and the rule resolving each."""
     registry = json.loads(ARBITRATION_REGISTRY.read_text())
     cells: set[int] = set()
+    rules: dict[int, str] = {}
     for entry in registry.get("entries", []):
         cell = entry.get("cell")
         if isinstance(cell, int):
             cells.add(cell)
-    return cells
+            if entry.get("rule"):
+                rules[cell] = entry["rule"]
+    return cells, rules
+
+
+def machine_output_regions() -> list[tuple[int, int, str]]:
+    """Every machine output region. These write ingress-lane cells from inside:
+    M1(output i) feeding M2(input j) is the interconnect mechanism, so a lane is
+    normally written from both directions."""
+    regions = []
+    for path in sorted(MACHINES.rglob("*.json")):
+        try:
+            document = json.loads(path.read_text())
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            continue
+        machine = document.get("machine") or document
+        if not isinstance(machine, dict):
+            continue
+        output = (machine.get("perceptualMapping") or {}).get("output") or {}
+        offset, length = output.get("offset"), output.get("length")
+        if isinstance(offset, int) and isinstance(length, int):
+            regions.append((offset, length, path.stem))
+    return regions
 
 
 def shared_cells(regions: list[tuple[int, int]]) -> dict[tuple[int, int], set[int]]:
@@ -214,7 +237,8 @@ def build() -> dict:
         by_region[(record["offset"], record["length"])].append(record)
 
     overlap = shared_cells(list(by_region))
-    arbitrated = arbitrated_cells()
+    arbitrated, rules = arbitration()
+    outputs = machine_output_regions()
 
     lanes: list[dict] = []
     review: list[dict] = []
@@ -246,12 +270,30 @@ def build() -> dict:
         else:
             reasons.append("profile-unrecognised")
 
-        contended = overlap.get((offset, length), set())
-        if contended:
+        # Writers of this lane's cells: external providers make it ingress,
+        # machine outputs write the same cells from inside. A cell with more
+        # than one writer is contended, which is the normal state here.
+        cells = set(range(offset, offset + length))
+        machine_writers = sorted(
+            {
+                name
+                for out_offset, out_length, name in outputs
+                if out_offset < offset + length and offset < out_offset + out_length
+            }
+        )
+        contended = set(overlap.get((offset, length), set()))
+        for out_offset, out_length, _ in outputs:
+            contended |= cells & set(range(out_offset, out_offset + out_length))
+
+        if machine_writers or contended:
             undeclared = sorted(contended - arbitrated)
+            lane["machineWriters"] = machine_writers
             lane["contention"] = {
-                "sharedCells": len(contended),
+                "contendedCells": len(contended),
                 "arbitrated": not undeclared,
+                "rules": sorted(
+                    {rules[cell] for cell in contended if cell in rules}
+                ),
             }
             if undeclared:
                 lane["contention"]["undeclaredCells"] = undeclared

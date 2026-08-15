@@ -242,17 +242,25 @@
             "type": "object",
             "additionalProperties": false,
             "required": [
-              "sharedCells",
-              "arbitrated"
+              "contendedCells",
+              "arbitrated",
+              "rules"
             ],
-            "description": "Present when this lane shares cells with another lane. Overlap is ordinary \u2014 a machine output feeding another machine's input is the interconnect mechanism. What is recorded here is whether the resulting contention has a declared resolution in domains/arbitration-registry.json.",
+            "description": "Cells of this lane with more than one writer. Contention is the normal state, not a defect; what matters is whether domains/arbitration-registry.json declares a resolution.",
             "properties": {
-              "sharedCells": {
+              "contendedCells": {
                 "type": "integer",
-                "minimum": 1
+                "minimum": 0
               },
               "arbitrated": {
                 "type": "boolean"
+              },
+              "rules": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true
               },
               "undeclaredCells": {
                 "type": "array",
@@ -262,6 +270,14 @@
                 }
               }
             }
+          },
+          "machineWriters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true,
+            "description": "Machines whose output region writes cells of this lane. M1(output i) feeding M2(input j) is the interconnect mechanism, so an ingress lane is normally written from inside as well as outside \u2014 703 of 983 lanes have at least one."
           }
         }
       }
