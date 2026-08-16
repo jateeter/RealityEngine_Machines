@@ -10,7 +10,8 @@
     a owl:Ontology ;
     dcterms:title "RealityEngine Core Semantics Ontology" ;
     dcterms:description "OWL vocabulary for the semantic representation of RealityEngine machine behavior: machines, critical event sequences, sequence steps, determinations, prescribed actions, trigger rules, governance, interconnections, the agent corpus bound to those machines, and the audit records produced by the PE->RE->PE cycle. Machine ABox files under semantics/abox/ are generated from the canonical machine JSON corpus by scripts/generate-owl.py and must stay byte-deterministic." ;
-    owl:versionInfo "0.3.0" .
+    dcterms:license <https://opensource.org/licenses/MIT> ;
+    owl:versionInfo "0.3.1" .
 
 #################################################################
 # Classes: structural corpus concepts
@@ -688,12 +689,23 @@ re:PublishBus a owl:NamedIndividual , re:AutomationAction ;
 
 # Any determination that prescribes an escalation action is an
 # EscalationDetermination, and every EscalationDetermination must carry RED.
+# The equivalence carries re:Determination explicitly rather than leaving it to
+# be inferred. re:prescribesAction already has rdfs:domain re:Determination, so a
+# reasoner derives the same class either way and this changes no entailment — it
+# states the genus that ROBOT's equivalent_class_axiom_no_genus asks for, and
+# makes the axiom readable without chasing the property's domain. The invariant
+# is unchanged and still fires: verified by asserting an escalation action on a
+# non-RED determination and confirming HermiT rejects it.
 re:EscalationDetermination a owl:Class ;
     rdfs:subClassOf re:Determination ;
     owl:equivalentClass [
-        a owl:Restriction ;
-        owl:onProperty re:prescribesAction ;
-        owl:someValuesFrom re:EscalationAction
+        a owl:Class ;
+        owl:intersectionOf (
+            re:Determination
+            [ a owl:Restriction ;
+              owl:onProperty re:prescribesAction ;
+              owl:someValuesFrom re:EscalationAction ]
+        )
     ] ;
     rdfs:subClassOf [
         a owl:Restriction ;
@@ -735,6 +747,7 @@ re:hasFamilyMember a owl:ObjectProperty ;
 # corpus never fills is not an error, but it is a claim of coverage that is
 # not met, and it should be visible as such rather than inferred from absence.
 re:UnrealizedAgentFamily a owl:Class ;
+    rdfs:subClassOf re:AgentFamily ;
     owl:equivalentClass [
         a owl:Class ;
         owl:intersectionOf (
