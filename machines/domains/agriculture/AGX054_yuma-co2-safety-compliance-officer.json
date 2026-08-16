@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "machine": {
     "name": "Agriculture Yuma CO2 Safety Compliance Officer",
-    "description": "Yuma MQTT-driven life-safety CO2 compliance machine. Reads the four CO2 safety cells at offsets [228:232) populated by the live LATERAL/AmbientSuite/DEV0000009/SensorReadings/v1 MQTT stream (CO2 enrichment/watch/danger bands plus ambient temp) and produces a 4-cell compliance signal at offsets [268:272): URGENT_MAINT, FORECAST_MAINT, CALIBRATE, NORMAL. Tier-1 to AGX032 (which gates evacuation logic) \u2014 drives compliance reporting, calibration, and exhaust verification ahead of any threshold breach.",
+    "description": "Yuma MQTT-driven life-safety CO2 compliance machine. Reads the four CO2 safety cells at offsets [228:232) populated by the live LATERAL/AmbientSuite/DEV0000009/SensorReadings/v1 MQTT stream (CO2 enrichment/watch/danger bands plus ambient temp) and produces a 4-cell compliance signal at offsets [268:272): URGENT_MAINT, FORECAST_MAINT, CALIBRATE, NORMAL. Tier-1 to AGX032 (which gates evacuation logic) — drives compliance reporting, calibration, and exhaust verification ahead of any threshold breach.",
     "metadata": {
       "category": "agriculture",
       "domain": "Agriculture - Indoor Grow House",
@@ -23,7 +23,7 @@
           "CO2 in danger band (3000-5000 ppm)",
           "ambient temp in band"
         ],
-        "rationale": "Same MQTT region as AGX032 but a maintenance lens \u2014 distinct outputs."
+        "rationale": "Same MQTT region as AGX032 but a maintenance lens — distinct outputs."
       },
       "upstreamMachine": "Agriculture Indoor Grow House CO2 Enrichment Safety",
       "upstreamOutputRegion": null,
@@ -129,7 +129,7 @@
           "warning": 1800,
           "error": 300
         },
-        "notes": "Yuma MQTT-driven AGX054 \u2014 auto-generated from scripts/generate_yuma_mqtt_maintenance_machines.py.  MQTT topic: LATERAL/AmbientSuite/DEV0000009/SensorReadings/v1."
+        "notes": "Yuma MQTT-driven AGX054 — auto-generated from scripts/generate_yuma_mqtt_maintenance_machines.py.  MQTT topic: LATERAL/AmbientSuite/DEV0000009/SensorReadings/v1."
       },
       "triggerConfig": {
         "processId": "AGX054_YUMA_CO2_SAFETY_COMPLIANCE_OFFICER",
@@ -216,10 +216,10 @@
             "length": 4
           },
           "semantics": [
-            "CO2 in enrichment band (600-1500 ppm)",
-            "CO2 in watch band (1500-3000 ppm)",
-            "CO2 in danger band (3000-5000 ppm)",
-            "ambient temp in band"
+            "co2_in_enrichment_band_600_1500_ppm",
+            "co2_in_watch_band_1500_3000_ppm",
+            "co2_in_danger_band_3000_5000_ppm",
+            "ambient_temp_in_band"
           ],
           "ttlMs": 300000,
           "normalization": "already-normalized-0-1",
@@ -426,7 +426,7 @@
             "isInitial": false,
             "metadata": {
               "name": "CRITICAL",
-              "description": "Two sensor cells outside nominal \u2014 fault state (HD=1 from WATCH)."
+              "description": "Two sensor cells outside nominal — fault state (HD=1 from WATCH)."
             },
             "outputVectors": [
               {
@@ -438,7 +438,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "Dispatch maintenance immediately \u2014 sensor data shows a fault condition.",
+                  "description": "Dispatch maintenance immediately — sensor data shows a fault condition.",
                   "action": "dispatch-agent",
                   "actionNarrative": "Dispatch growhouse_safety_compliance_agent for urgent maintenance and record corrective action."
                 }
@@ -504,7 +504,7 @@
         "id": "agx-054-calibrate",
         "name": "Yuma CO2 Safety Compliance: CALIBRATE input pattern -> CALIBRATE",
         "metadata": {
-          "description": "Sensor drift suspected \u2014 run calibration.",
+          "description": "Sensor drift suspected — run calibration.",
           "pattern": "CALIBRATE",
           "output": "[0,0,1,0]"
         },
@@ -532,7 +532,7 @@
             "isInitial": true,
             "metadata": {
               "name": "CALIBRATE",
-              "description": "Sensor drift suspected \u2014 run calibration."
+              "description": "Sensor drift suspected — run calibration."
             },
             "outputVectors": [
               {
@@ -544,7 +544,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "Sensor drift suspected \u2014 run calibration.",
+                  "description": "Sensor drift suspected — run calibration.",
                   "action": "trigger-agent-workflow",
                   "actionNarrative": "Run sensor-calibration workflow via growhouse_safety_compliance_agent for the yuma co2 safety compliance stream."
                 }
@@ -557,7 +557,7 @@
         "id": "agx-054-normal",
         "name": "Yuma CO2 Safety Compliance: NORMAL input pattern -> NORMAL",
         "metadata": {
-          "description": "Equipment is healthy \u2014 continue automated monitoring.",
+          "description": "Equipment is healthy — continue automated monitoring.",
           "pattern": "NORMAL",
           "output": "[0,0,0,1]"
         },
@@ -585,7 +585,7 @@
             "isInitial": true,
             "metadata": {
               "name": "NORMAL",
-              "description": "Equipment is healthy \u2014 continue automated monitoring."
+              "description": "Equipment is healthy — continue automated monitoring."
             },
             "outputVectors": [
               {
@@ -597,7 +597,7 @@
                   1
                 ],
                 "metadata": {
-                  "description": "Equipment is healthy \u2014 continue automated monitoring.",
+                  "description": "Equipment is healthy — continue automated monitoring.",
                   "action": "continue-monitoring",
                   "actionNarrative": "Continue automated monitoring for yuma co2 safety compliance while preserving current setpoints."
                 }
@@ -639,7 +639,7 @@
       },
       {
         "name": "Maintenance forecast",
-        "description": "Inner sensor cells degrade \u2014 the forecast model flags scheduled service.",
+        "description": "Inner sensor cells degrade — the forecast model flags scheduled service.",
         "vectors": [
           [
             0,
@@ -656,7 +656,7 @@
       },
       {
         "name": "Sensor calibration required",
-        "description": "Inner cells flap while outer cells stay healthy \u2014 a drift pattern that calls for calibration.",
+        "description": "Inner cells flap while outer cells stay healthy — a drift pattern that calls for calibration.",
         "vectors": [
           [
             1,
@@ -673,7 +673,7 @@
       },
       {
         "name": "Normal operating window",
-        "description": "Three of four sensor cells healthy \u2014 equipment in good working order.",
+        "description": "Three of four sensor cells healthy — equipment in good working order.",
         "vectors": [
           [
             1,

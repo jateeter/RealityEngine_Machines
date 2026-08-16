@@ -2,12 +2,12 @@
   "version": "1.0.0",
   "machine": {
     "name": "Agriculture Yuma Facility AI Synthesis Bridge",
-    "description": "Yuma MQTT \u2192 AI Synthesis Bridge. Aggregates the four Yuma MQTT-driven maintenance machines (AGX051-054) at offsets [256:272) and projects a 12-cell synthesis vector onto AgYieldOptimizationAI's input window at offsets [3959:3971], completing the path from live broker sensors through domain-specific maintenance machines into the cross-domain yield AI.",
+    "description": "Yuma MQTT → AI Synthesis Bridge. Aggregates the four Yuma MQTT-driven maintenance machines (AGX051-054) at offsets [256:272) and projects a 12-cell synthesis vector onto AgYieldOptimizationAI's input window at offsets [3959:3971], completing the path from live broker sensors through domain-specific maintenance machines into the cross-domain yield AI.",
     "metadata": {
       "category": "agriculture",
       "domain": "Agriculture - Facility AI",
       "author": "Reality Engine",
-      "operationalFocus": "Yuma MQTT \u2192 AI Synthesis Bridge",
+      "operationalFocus": "Yuma MQTT → AI Synthesis Bridge",
       "focusDescription": "Aggregates the four Yuma MQTT-driven maintenance machines and projects them onto AgYieldOptimizationAI.",
       "mqttIntegration": {
         "configFile": "RealityEngine_CPP/config/mqtt-mappings.yuma-agriculture.json",
@@ -36,7 +36,7 @@
         "Run facility-wide AI optimization when all sources stable.",
         "Escalate to ag-emergency-response when any source is URGENT."
       ],
-      "outputSpace": "12D one-hot at [3959:3971] \u2014 three cells per Yuma source: [AQUA, DO, CLIMATE, SAFETY] \u00d7 [URGENT, FORECAST, STABLE]",
+      "outputSpace": "12D one-hot at [3959:3971] — three cells per Yuma source: [AQUA, DO, CLIMATE, SAFETY] × [URGENT, FORECAST, STABLE]",
       "tags": [
         "agriculture",
         "agriculture-ai-bridge",
@@ -88,7 +88,7 @@
       "downstreamMachines": [
         "Ag Yield Optimization AI"
       ],
-      "downstreamPattern": "Output region [3959:3971] lands directly on the AgYieldOptimizationAI input window \u2014 completing the yuma.lateraledge.cloud \u2192 maintenance machines \u2192 yield AI chain.",
+      "downstreamPattern": "Output region [3959:3971] lands directly on the AgYieldOptimizationAI input window — completing the yuma.lateraledge.cloud → maintenance machines → yield AI chain.",
       "tagging": {
         "schemaVersion": "1.0.0",
         "managedBy": "scripts/generate_yuma_mqtt_maintenance_machines.py",
@@ -141,7 +141,7 @@
           "warning": 1800,
           "error": 600
         },
-        "notes": "Yuma MQTT \u2192 AI bridge.  Auto-generated; do not hand-edit \u2014 re-run scripts/generate_yuma_mqtt_maintenance_machines.py instead."
+        "notes": "Yuma MQTT → AI bridge.  Auto-generated; do not hand-edit — re-run scripts/generate_yuma_mqtt_maintenance_machines.py instead."
       },
       "triggerConfig": {
         "processId": "AGX055_YUMA_FACILITY_AI_SYNTHESIS_BRIDGE",
@@ -165,7 +165,7 @@
             ],
             "ragStatusCode": "RED",
             "processStatus": "error",
-            "description": "Aqua maintenance is critical \u2014 escalate via AgYieldOptimizationAI."
+            "description": "Aqua maintenance is critical — escalate via AgYieldOptimizationAI."
           },
           {
             "sequenceId": "agx-055-do-urgent",
@@ -185,7 +185,7 @@
             ],
             "ragStatusCode": "RED",
             "processStatus": "error",
-            "description": "DO probe fault \u2014 escalate via AgYieldOptimizationAI."
+            "description": "DO probe fault — escalate via AgYieldOptimizationAI."
           },
           {
             "sequenceId": "agx-055-climate-urgent",
@@ -205,7 +205,7 @@
             ],
             "ragStatusCode": "RED",
             "processStatus": "error",
-            "description": "HVAC service required urgently \u2014 escalate via AgYieldOptimizationAI."
+            "description": "HVAC service required urgently — escalate via AgYieldOptimizationAI."
           },
           {
             "sequenceId": "agx-055-safety-urgent",
@@ -225,7 +225,7 @@
             ],
             "ragStatusCode": "RED",
             "processStatus": "error",
-            "description": "CO2 safety breach \u2014 escalate via AgYieldOptimizationAI."
+            "description": "CO2 safety breach — escalate via AgYieldOptimizationAI."
           },
           {
             "sequenceId": "agx-055-facility-stable",
@@ -245,7 +245,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "All four Yuma sources stable \u2014 AI may run optimization passes."
+            "description": "All four Yuma sources stable — AI may run optimization passes."
           }
         ],
         "endpoint": "http://localhost:4000/graphql",
@@ -278,22 +278,22 @@
             "length": 16
           },
           "semantics": [
-            "localai_writeback_0",
-            "localai_writeback_1",
-            "localai_writeback_2",
-            "localai_writeback_3",
-            "localai_writeback_4",
-            "localai_writeback_5",
-            "localai_writeback_6",
-            "localai_writeback_7",
-            "localai_writeback_8",
-            "localai_writeback_9",
-            "localai_writeback_10",
-            "localai_writeback_11",
-            "localai_writeback_12",
-            "localai_writeback_13",
-            "localai_writeback_14",
-            "localai_writeback_15"
+            "agx051_aquaculture_maintenance_forecast_bit_1",
+            "agx051_aquaculture_maintenance_forecast_bit_2",
+            "agx051_aquaculture_maintenance_forecast_bit_3",
+            "agx051_aquaculture_maintenance_forecast_bit_4",
+            "agx052_dissolved_oxygen_probe_reliability_bit_1",
+            "agx052_dissolved_oxygen_probe_reliability_bit_2",
+            "agx052_dissolved_oxygen_probe_reliability_bit_3",
+            "agx052_dissolved_oxygen_probe_reliability_bit_4",
+            "agx053_hvac_service_plan_bit_1",
+            "agx053_hvac_service_plan_bit_2",
+            "agx053_hvac_service_plan_bit_3",
+            "agx053_hvac_service_plan_bit_4",
+            "agx054_co2_safety_compliance_bit_1",
+            "agx054_co2_safety_compliance_bit_2",
+            "agx054_co2_safety_compliance_bit_3",
+            "agx054_co2_safety_compliance_bit_4"
           ],
           "ttlMs": 300000,
           "normalization": "already-normalized-0-1",
@@ -426,7 +426,7 @@
         "id": "agx-055-aqua-urgent",
         "name": "Facility Bridge: AQUA_URGENT",
         "metadata": {
-          "description": "Aqua maintenance is critical \u2014 escalate via AgYieldOptimizationAI.",
+          "description": "Aqua maintenance is critical — escalate via AgYieldOptimizationAI.",
           "pattern": "AQUA_URGENT",
           "output": "[1,0,0,0,0,0,0,0,0,0,0,0]"
         },
@@ -502,7 +502,7 @@
             "isInitial": true,
             "metadata": {
               "name": "AQUA_URGENT",
-              "description": "Aqua maintenance is critical \u2014 escalate via AgYieldOptimizationAI."
+              "description": "Aqua maintenance is critical — escalate via AgYieldOptimizationAI."
             },
             "outputVectors": [
               {
@@ -522,7 +522,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "Aqua maintenance is critical \u2014 escalate via AgYieldOptimizationAI.",
+                  "description": "Aqua maintenance is critical — escalate via AgYieldOptimizationAI.",
                   "action": "create-work-order",
                   "actionNarrative": "Project synthesis vector onto AgYieldOptimizationAI input window at [3959:3971]; AI dispatches cross-domain optimization."
                 }
@@ -535,7 +535,7 @@
         "id": "agx-055-do-urgent",
         "name": "Facility Bridge: DO_URGENT",
         "metadata": {
-          "description": "DO probe fault \u2014 escalate via AgYieldOptimizationAI.",
+          "description": "DO probe fault — escalate via AgYieldOptimizationAI.",
           "pattern": "DO_URGENT",
           "output": "[0,0,0,1,0,0,0,0,0,0,0,0]"
         },
@@ -611,7 +611,7 @@
             "isInitial": true,
             "metadata": {
               "name": "DO_URGENT",
-              "description": "DO probe fault \u2014 escalate via AgYieldOptimizationAI."
+              "description": "DO probe fault — escalate via AgYieldOptimizationAI."
             },
             "outputVectors": [
               {
@@ -631,7 +631,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "DO probe fault \u2014 escalate via AgYieldOptimizationAI.",
+                  "description": "DO probe fault — escalate via AgYieldOptimizationAI.",
                   "action": "create-work-order",
                   "actionNarrative": "Project synthesis vector onto AgYieldOptimizationAI input window at [3959:3971]; AI dispatches cross-domain optimization."
                 }
@@ -644,7 +644,7 @@
         "id": "agx-055-climate-urgent",
         "name": "Facility Bridge: CLIMATE_URGENT",
         "metadata": {
-          "description": "HVAC service required urgently \u2014 escalate via AgYieldOptimizationAI.",
+          "description": "HVAC service required urgently — escalate via AgYieldOptimizationAI.",
           "pattern": "CLIMATE_URGENT",
           "output": "[0,0,0,0,0,0,1,0,0,0,0,0]"
         },
@@ -720,7 +720,7 @@
             "isInitial": true,
             "metadata": {
               "name": "CLIMATE_URGENT",
-              "description": "HVAC service required urgently \u2014 escalate via AgYieldOptimizationAI."
+              "description": "HVAC service required urgently — escalate via AgYieldOptimizationAI."
             },
             "outputVectors": [
               {
@@ -740,7 +740,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "HVAC service required urgently \u2014 escalate via AgYieldOptimizationAI.",
+                  "description": "HVAC service required urgently — escalate via AgYieldOptimizationAI.",
                   "action": "create-work-order",
                   "actionNarrative": "Project synthesis vector onto AgYieldOptimizationAI input window at [3959:3971]; AI dispatches cross-domain optimization."
                 }
@@ -753,7 +753,7 @@
         "id": "agx-055-safety-urgent",
         "name": "Facility Bridge: SAFETY_URGENT",
         "metadata": {
-          "description": "CO2 safety breach \u2014 escalate via AgYieldOptimizationAI.",
+          "description": "CO2 safety breach — escalate via AgYieldOptimizationAI.",
           "pattern": "SAFETY_URGENT",
           "output": "[0,0,0,0,0,0,0,0,0,1,0,0]"
         },
@@ -829,7 +829,7 @@
             "isInitial": true,
             "metadata": {
               "name": "SAFETY_URGENT",
-              "description": "CO2 safety breach \u2014 escalate via AgYieldOptimizationAI."
+              "description": "CO2 safety breach — escalate via AgYieldOptimizationAI."
             },
             "outputVectors": [
               {
@@ -849,7 +849,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "CO2 safety breach \u2014 escalate via AgYieldOptimizationAI.",
+                  "description": "CO2 safety breach — escalate via AgYieldOptimizationAI.",
                   "action": "create-work-order",
                   "actionNarrative": "Project synthesis vector onto AgYieldOptimizationAI input window at [3959:3971]; AI dispatches cross-domain optimization."
                 }
@@ -862,7 +862,7 @@
         "id": "agx-055-facility-stable",
         "name": "Facility Bridge: FACILITY_STABLE",
         "metadata": {
-          "description": "All four Yuma sources stable \u2014 AI may run optimization passes.",
+          "description": "All four Yuma sources stable — AI may run optimization passes.",
           "pattern": "FACILITY_STABLE",
           "output": "[0,0,0,0,0,0,0,0,0,0,0,1]"
         },
@@ -938,7 +938,7 @@
             "isInitial": true,
             "metadata": {
               "name": "FACILITY_STABLE",
-              "description": "All four Yuma sources stable \u2014 AI may run optimization passes."
+              "description": "All four Yuma sources stable — AI may run optimization passes."
             },
             "outputVectors": [
               {
@@ -958,7 +958,7 @@
                   1
                 ],
                 "metadata": {
-                  "description": "All four Yuma sources stable \u2014 AI may run optimization passes.",
+                  "description": "All four Yuma sources stable — AI may run optimization passes.",
                   "action": "create-work-order",
                   "actionNarrative": "Project synthesis vector onto AgYieldOptimizationAI input window at [3959:3971]; AI dispatches cross-domain optimization."
                 }
@@ -971,7 +971,7 @@
     "inputSequences": [
       {
         "name": "AQUA_URGENT",
-        "description": "Aqua maintenance is critical \u2014 escalate via AgYieldOptimizationAI.",
+        "description": "Aqua maintenance is critical — escalate via AgYieldOptimizationAI.",
         "vectors": [
           [
             1,
@@ -1000,7 +1000,7 @@
       },
       {
         "name": "DO_URGENT",
-        "description": "DO probe fault \u2014 escalate via AgYieldOptimizationAI.",
+        "description": "DO probe fault — escalate via AgYieldOptimizationAI.",
         "vectors": [
           [
             0,
@@ -1029,7 +1029,7 @@
       },
       {
         "name": "CLIMATE_URGENT",
-        "description": "HVAC service required urgently \u2014 escalate via AgYieldOptimizationAI.",
+        "description": "HVAC service required urgently — escalate via AgYieldOptimizationAI.",
         "vectors": [
           [
             0,
@@ -1058,7 +1058,7 @@
       },
       {
         "name": "SAFETY_URGENT",
-        "description": "CO2 safety breach \u2014 escalate via AgYieldOptimizationAI.",
+        "description": "CO2 safety breach — escalate via AgYieldOptimizationAI.",
         "vectors": [
           [
             0,
@@ -1087,7 +1087,7 @@
       },
       {
         "name": "FACILITY_STABLE",
-        "description": "All four Yuma sources stable \u2014 AI may run optimization passes.",
+        "description": "All four Yuma sources stable — AI may run optimization passes.",
         "vectors": [
           [
             0,
