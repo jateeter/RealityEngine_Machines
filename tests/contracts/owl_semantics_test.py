@@ -190,6 +190,55 @@ class OwlSemanticsTests(unittest.TestCase):
                     self.assertIn(f"re:matchesOutputPosition {index}", block)
             self.assertIn(f"re:hasRagStatus re:{rule['ragStatusCode']}", block)
 
+    def test_every_class_is_documented(self) -> None:
+        """rdfs:comment is this project's documentation vehicle, so assert it.
+
+        ROBOT's `missing_definition` looks for a definition annotation property
+        (IAO:0000115 by convention) and reports 120 terms. That measures an OBO
+        Foundry publishing convention this ontology does not follow: it documents
+        with rdfs:comment, and every class already carries one. Rather than write
+        120 definitions to satisfy a linter, or silently drop the rule, this
+        asserts the rule the project does follow — so the 120 remaining INFOs are
+        a known, deliberate difference rather than an unmeasured gap.
+
+        Scoped to classes on purpose. Properties like re:hasSequence are fully
+        described by their label, domain and range; requiring prose for each
+        would add 104 restatements of the obvious.
+        """
+        text = self.ontology_text
+        blocks = re.split(r"\n(?=re:)", text)
+        undocumented = []
+        unlabelled = []
+        for block in blocks:
+            match = re.match(r"re:([A-Za-z0-9_]+)\s", block)
+            if not match or "owl:Class" not in block:
+                continue
+            # A term may be declared across several statement blocks; only the
+            # one carrying its type declaration is checked.
+            if "rdfs:label" not in block:
+                unlabelled.append(match.group(1))
+            if "rdfs:comment" not in block:
+                undocumented.append(match.group(1))
+        self.assertEqual(unlabelled, [], f"classes without rdfs:label: {unlabelled}")
+        self.assertEqual(
+            undocumented, [], f"classes without rdfs:comment: {undocumented}"
+        )
+
+    def test_escalation_invariant_is_stated_with_a_genus(self) -> None:
+        """The audit axiom names re:Determination in its equivalence.
+
+        re:prescribesAction already has rdfs:domain re:Determination, so the
+        genus changes no entailment — but stating it is what lets the axiom be
+        read without chasing the property's domain, and it is what ROBOT's
+        equivalent_class_axiom_no_genus asks for. Asserting it here stops the
+        genus being dropped again as a simplification.
+        """
+        block = self.ontology_text.split("re:EscalationDetermination a owl:Class", 1)[1]
+        block = block.split("\n\n", 1)[0]
+        self.assertIn("owl:intersectionOf", block)
+        self.assertIn("re:Determination", block)
+        self.assertIn("re:EscalationAction", block)
+
     def test_rule_iris_are_injective_across_the_corpus(self) -> None:
         """One trigger rule, one individual.
 
