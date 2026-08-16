@@ -33,12 +33,17 @@ split: the three dependent repos are blocked on §3, and §4 does not block them
 ## 2. The pinned ref
 
 ```
-tag     corpus-exit-v1.0
-commit  c1b7c29
+tag  corpus-exit-v1.0
 ```
 
 Regenerate against the tag, not against `main`. Record the tag in whatever
 artifact you generate, so a later mismatch is detectable rather than inferred.
+
+The tag is the ref, deliberately, rather than a commit SHA written into this
+file: the tag lands on the commit that merges this document, which cannot be
+known while writing it. `git rev-parse corpus-exit-v1.0` resolves it. The SHA in
+§6 is a different claim — the commit the figures were measured against, which is
+the parent of the merge and is what makes those numbers auditable.
 
 ## 3. Settled
 
