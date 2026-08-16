@@ -43,6 +43,18 @@ npm run test:e2e
 - Machine ID, schema, trigger, and PE source expectations are cross-repo contracts.
 - `domains/region-allocation.json` is the generated universal-vector allocation registry (reserved provider bands, cross-service PE source lanes, inter-domain bus lanes, frozen output-overlap baseline); regenerate with `npm run region-allocation:write` and let `tests/contracts/region_allocation_test.py` gate drift.
 - On-disk machine addressing is path-aware: every engine's `GET /api/machines/json/list` enumerates the corpus recursively and reports `relFile` (path relative to the machines root); `GET /api/machines/json/:name` accepts a basename and falls back to a recursive search, so corpus filenames must stay globally unique (`tests/integration/machine-json-listing.spec.ts` enforces both).
+- Name uniqueness is scope-relative, and the scopes are the contract
+  (`tests/contracts/name_uniqueness_test.py`, #68): every **CES name is unique
+  within its machine**, every **machine is unique within its domain**, and every
+  **domain is unique within the universe** — including its `codePrefixes`, since
+  a prefix claimed by two domains makes machine codes ambiguous. The same
+  sequence id across different machines is fine and is used (`rs-set-sequence`
+  appears in three flip-flops); within one machine it collapses two OWL
+  individuals onto one IRI, which is the failure #65 fixed for trigger rules.
+  Machine file stems are additionally **globally** unique — stronger than the
+  policy, and required because `GET /api/machines/json/:name` resolves a bare
+  basename. Names are the MVP identity mechanism; UUIDs are the intended
+  direction.
 - `domains/domain-manifest.json` is the authoritative domain inventory; recursive corpus counts must match `currentMachineCount`, and unmanifested domains are validation failures.
 - `domains/semantic-bus-registry.json` is the authoritative semantic-bus inventory; refresh it with `npm run semantic-buses:write` when semantic published buses change.
 - Do not treat stale generated expectations as truth when live registry endpoints disagree.
