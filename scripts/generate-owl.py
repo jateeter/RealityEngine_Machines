@@ -66,6 +66,29 @@ def sanitize(local: str) -> str:
     return cleaned or "unnamed"
 
 
+def label(text: str) -> str:
+    """One rdfs:label statement, from the corpus's own naming.
+
+    Machines and sequences were the only labelled individuals: 6,405 of 91,283,
+    leaving 84,878 anonymous. That is INFO under this project's ROBOT profile by
+    the #46 calibration, which was right when it meant 3,417 on one domain and
+    reads differently at corpus scale — a reasoner that reports
+    `m:step-agx-033-normal-e2` names something no reader can identify without
+    opening the machine JSON, which is what every diagnosis in #61 had to do.
+
+    Seven classes carry a name in the corpus and use it, the same way
+    machine.name and sequence.name already do. Four carry none — ElementValue is
+    {value, threshold}, PerceptualMapping is offsets — so their label is composed
+    from the properties they do carry. Composed labels are marked in the emitters
+    that build them; none of them invent corpus metadata. See #80.
+
+    Use MachineProjector.qlabel for anything below the machine: the corpus reuses
+    state, team and axis names across machines on purpose, so a bare label is not
+    unique in the merged graph.
+    """
+    return f'rdfs:label "{escape(text)}"'
+
+
 def with_rule_ordinals(rules):
     """Pair each trigger rule with its 1-based ordinal among the rules sharing
     its sequenceId, in corpus order.
@@ -143,6 +166,54 @@ class MachineProjector:
         self.warnings: list[str] = []
         self.local_actions: dict[str, str] = {}
         self.sequence_ids: set[str] = set()
+        self.ambiguous_labels = self._ambiguous_labels()
+
+    def _ambiguous_labels(self) -> set[str]:
+        """Display names used by more than one individual in this machine.
+
+        Two steps can share a metadata.name and two interconnections can share a
+        role — 25 and 12 groups respectively across the corpus. Both are correct
+        data: `agx-053-normal` and `agx-053-normal-event` are different steps that
+        both mean NORMAL, and one role legitimately appears on two buses. Their
+        IRIs already differ; only the human-readable name coincides.
+
+        So the fix belongs in the label, not the corpus, and only where it is
+        needed — appending an id everywhere would make 10,798 labels noisier to
+        disambiguate 93. Collisions are resolved by appending the entity's own
+        id, which is deterministic and derived from corpus order.
+        """
+        from collections import Counter
+        names: Counter = Counter()
+        metadata = self.machine.get("metadata") or {}
+        for sequence in self.machine.get("sequences") or []:
+            for vector in sequence.get("vectors") or []:
+                name = (vector.get("metadata") or {}).get("name")
+                if name:
+                    names[str(name)] += 1
+        for interconnection in metadata.get("interconnections") or []:
+            role = interconnection.get("role")
+            if role:
+                names[str(role)] += 1
+        return {name for name, count in names.items() if count > 1}
+
+    def qlabel(self, text: str) -> str:
+        """A machine-qualified rdfs:label for anything below the machine.
+
+        The corpus reuses names across machines by design and correctly: 417
+        machines have a CRITICAL step, 200 share a governance owner, and the
+        OpenClaw projection owner is the same string on all 1,185. Those are
+        distinct individuals that legitimately mean the same thing, so bare
+        corpus names collide the moment every individual is labelled — 13,407
+        duplicate_label ERRORs, against 411 distinct label values.
+
+        Qualifying by the machine reduces that to 93, and it is what makes the
+        label useful for the reason #80 exists: a reasoner reporting `CRITICAL`
+        identifies nothing, while `AIPowerEfficiency — CRITICAL` is the thing a
+        reader needs. The source is unchanged — still the corpus's own name,
+        scoped to the machine that owns it. The machine's own label stays bare,
+        since machine.name is already corpus-unique.
+        """
+        return label(f"{self.machine.get('name', self.path.stem)} — {text}")
 
     def project(self) -> str:
         rel = self.path.resolve().relative_to(REPO_ROOT.resolve())
@@ -256,9 +327,20 @@ class MachineProjector:
         mapping = self.machine.get("perceptualMapping")
         if not mapping:
             return
-        statements = ["a owl:NamedIndividual , re:PerceptualMapping"]
         input_region = mapping.get("input", {})
         output_region = mapping.get("output", {})
+        # Composed: the corpus names no perceptual mapping. Its regions are what
+        # identify it, and they are what a reader needs when one is flagged.
+        statements = [
+            "a owl:NamedIndividual , re:PerceptualMapping",
+            self.qlabel(
+                f"{self.machine.get('name', self.path.stem)} mapping "
+                f"in[{input_region.get('offset', '?')}:"
+                f"{input_region.get('offset', 0) + input_region.get('length', 0)}] "
+                f"out[{output_region.get('offset', '?')}:"
+                f"{output_region.get('offset', 0) + output_region.get('length', 0)}]"
+            ),
+        ]
         if "offset" in input_region:
             statements.append(f"re:inputOffset {number(input_region['offset'])}")
         if "length" in input_region:
@@ -277,7 +359,10 @@ class MachineProjector:
             return
         statements = ["a owl:NamedIndividual , re:GovernancePolicy"]
         if governance.get("ownerTeam"):
+            statements.append(self.qlabel(f"{governance['ownerTeam']} governance"))
             statements.append(f're:ownerTeam "{escape(governance["ownerTeam"])}"')
+        else:
+            statements.append(self.qlabel(f"{self.machine.get('name', self.path.stem)} governance"))
         if governance.get("runbook"):
             statements.append(
                 f're:runbook "{escape(governance["runbook"])}"^^xsd:anyURI'
@@ -331,7 +416,15 @@ class MachineProjector:
         metadata = vector.get("metadata", {})
         statements = ["a owl:NamedIndividual , re:SequenceStep"]
         if metadata.get("name"):
+            step_label = str(metadata["name"])
+            if step_label in self.ambiguous_labels:
+                step_label = f"{step_label} ({vector_id})"
+            statements.append(self.qlabel(step_label))
             statements.append(f're:stateName "{escape(metadata["name"])}"')
+        else:
+            # 5,078 of 9,546 steps carry no metadata.name; the step id is the
+            # only thing the corpus names them by.
+            statements.append(self.qlabel(str(vector_id)))
         if metadata.get("stepIndex") is not None:
             statements.append(f"re:stepIndex {number(metadata['stepIndex'])}")
         statements.append(
@@ -361,6 +454,10 @@ class MachineProjector:
         for index, element in enumerate(elements):
             element_statements = [
                 "a owl:NamedIndividual , re:ElementValue",
+                # Composed. An element is {value, threshold} — the corpus has no
+                # name for it and could not sensibly carry one. The step it
+                # belongs to and its index are its identity.
+                self.qlabel(f"{vector_id} element {index}"),
                 f"re:elementIndex {index}",
                 f"re:elementLevel {number(element.get('value', 0))}",
             ]
@@ -376,8 +473,13 @@ class MachineProjector:
         output_id = output.get("id")
         if not output_id:
             return
+        # The corpus names determinations by id; the description is already
+        # carried separately as rdfs:comment, and is prose rather than a label.
         metadata = output.get("metadata", {})
-        statements = ["a owl:NamedIndividual , re:Determination"]
+        statements = [
+            "a owl:NamedIndividual , re:Determination",
+            self.qlabel(str(output_id)),
+        ]
         vector = output.get("vector", [])
         if len(vector) >= 1:
             statements.append(f"re:outputTier {number(vector[0])}")
@@ -411,7 +513,17 @@ class MachineProjector:
             if not sequence_id:
                 continue
             term = rule_term(rule, ordinal)
-            statements = ["a owl:NamedIndividual , re:TriggerRule"]
+            # Composed. A trigger rule carries a description but no name, and the
+            # description is already emitted as rdfs:comment below — duplicating
+            # prose into rdfs:label would make the label unreadable at a glance.
+            # The sequence, ordinal and determination are what identify it.
+            rule_label = f"{sequence_id} rule {ordinal}"
+            if rule.get("ragStatusCode"):
+                rule_label += f" ({rule['ragStatusCode']})"
+            statements = [
+                "a owl:NamedIndividual , re:TriggerRule",
+                self.qlabel(rule_label),
+            ]
             if sequence_id in self.sequence_ids:
                 statements.append(f"re:appliesToSequence m:seq-{sanitize(sequence_id)}")
             else:
@@ -442,7 +554,8 @@ class MachineProjector:
             self.block(term, statements)
             if governance:
                 governance_statements = [
-                    "a owl:NamedIndividual , re:GovernancePolicy"
+                    "a owl:NamedIndividual , re:GovernancePolicy",
+                    self.qlabel(f"{rule_label} governance"),
                 ]
                 if governance.get("slaSeconds") is not None:
                     governance_statements.append(
@@ -458,12 +571,22 @@ class MachineProjector:
                     )
                 self.block(f"{term}-governance", governance_statements)
 
+    def _interconnection_label(self, interconnection: dict[str, Any], index: int) -> str:
+        role = interconnection.get("role")
+        if not role:
+            return str(interconnection.get("id") or f"interconnection {index}")
+        if str(role) in self.ambiguous_labels:
+            return f"{role} ({interconnection.get('id', index)})"
+        return str(role)
+
     def emit_interconnections(self) -> None:
         interconnections = self.machine.get("metadata", {}).get("interconnections", [])
         for index, interconnection in enumerate(interconnections):
             term = f"m:ix-{sanitize(interconnection.get('id', str(index)))}"
             statements = [
                 "a owl:NamedIndividual , re:Interconnection",
+                # role is what the corpus calls this interconnection.
+                self.qlabel(self._interconnection_label(interconnection, index)),
                 "re:sourceMachine m:machine",
             ]
             if interconnection.get("id"):
@@ -509,6 +632,8 @@ class MachineProjector:
         if not projection:
             return
         statements = ["a owl:NamedIndividual , re:OpenClawProjection",
+                      self.qlabel(str(projection.get("projectionId")
+                                or f"{self.machine.get('name', self.path.stem)} projection")),
                       "re:sourceMachine m:machine"]
         if projection.get("projectionId"):
             statements.append(
@@ -553,7 +678,14 @@ class MachineProjector:
         if not binding and not projection:
             return
 
+        # Composed. A binding carries an agent, a mode and a trigger, but no
+        # name of its own — and now that #67 emits two of them per machine, the
+        # label is what tells a reader which is which.
+        binding_label = "agent binding"
+        if binding:
+            binding_label = f"{binding.get('agent', 'agent')} ({binding.get('mode', 'unknown mode')})"
         statements = ["a owl:NamedIndividual , re:AgentBinding",
+                      self.qlabel(binding_label),
                       "re:writesToRegionOf m:machine"]
 
         # Agent identity. The curated binding names a provider agent; the
@@ -607,6 +739,7 @@ class MachineProjector:
         if projection:
             projection_statements = [
                 "a owl:NamedIndividual , re:AgentBinding",
+                self.qlabel(f"{projection.get('owner', 'openclaw')} projection binding"),
                 "re:writesToRegionOf m:machine",
             ]
             if agent_id:
@@ -622,6 +755,7 @@ class MachineProjector:
 
         if agent_id:
             agent_statements = ["a owl:NamedIndividual , re:Agent",
+                                self.qlabel(str(agent_id)),
                                 f're:agentId "{escape(agent_id)}"']
             if projection and projection.get("owner"):
                 agent_statements.append(f're:agentRole "{escape(projection["owner"])}"')
@@ -630,6 +764,7 @@ class MachineProjector:
         for term, axis in axes:
             self.block(term, [
                 "a owl:NamedIndividual , re:SemanticAxis",
+                self.qlabel(str(axis["name"])),
                 f"re:axisIndex {number(axis['index'])}",
                 f're:axisName "{escape(axis["name"])}"',
                 f're:axisNameSource "{escape(axis["source"])}"',
