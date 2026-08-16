@@ -1,7 +1,19 @@
 # Output Arbiter Contract v1.0
 
-Status: **specification** — no runtime implements this yet.
+Status: **implemented in all four runtimes**, with conformance partially gated.
 Applies to: RealityEngine_CPP, RealityEngine_LSP, RealityEngine_Scala, RealityEngine_Manager (TypeScript PE).
+
+| | |
+|---|---|
+| resolution | implemented in all four |
+| `GET /api/arbitration` (§6 observability) | all four — Scala first, the rest in jateeter/RealityEngine_CPP#31, jateeter/RealityEngine_LSP#49, jateeter/RealityEngine_Manager#60 |
+| §9 fixtures | in the corpus, and exercised by the `arbiter` regression stage (jateeter/RealityEngine_CI#123) |
+| §8 acceptance | criteria 1, 2, 4, 5, 5a, 8 and 9 gated; 3, 5b–5e, 7, 10 and 11 deferred with their blockers recorded in that issue |
+
+The header said "no runtime implements this yet" until 2026-08-16, well after all
+four did. It is restated here because this document is what the conformance
+stage is built against, and a status line that lags the runtimes invites
+building against a specification everyone already left behind.
 
 This document is the single source of truth for how output Reality Events are
 resolved into the next InputSpace Reality Event. All four runtimes build to it,
