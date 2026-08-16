@@ -579,17 +579,46 @@ class MachineProjector:
                 statements.append(f"re:requiresHumanApproval {flag}")
             if controls.get("maxAutonomy"):
                 statements.append(f"re:maxAutonomy {self.autonomy_term(controls['maxAutonomy'])}")
-        elif projection and projection.get("dispatchMode"):
-            # A projection without a curated binding still asserts an autonomy
-            # posture: it writes an assessment for RE to evaluate.
-            statements.append("re:autonomyMode re:Advise")
 
         axes = self.semantic_axes()
-        if axes:
-            statements.append(
-                "re:hasSemanticAxis " + " , ".join(term for term, _ in axes)
-            )
-        self.block("m:agent-binding", statements)
+
+        # One individual per binding source, never a union of both.
+        #
+        # These are two different bindings, and merging them produced a chimera:
+        # the curated agentBinding's autonomy mode wearing the OpenClaw
+        # projection's write-back axes. For the 109 observe-mode bindings that
+        # is a straight contradiction — observe is egress-only
+        # (writeBack {"type": "none"}, canWriteBack false, stage 0), so it has
+        # no return leg and therefore no landing positions, which is exactly
+        # what re:ObserveBinding rdfs:subClassOf (re:hasSemanticAxis max 0)
+        # says. Every one of those 109 also carries an openClawProjection that
+        # *does* write back, and the merge attached its four axes to the
+        # observe binding. HermiT rejected the union, correctly: the five
+        # domains it made inconsistent (transportation, built-space,
+        # data-center, energy, agriculture) are precisely the five with observe
+        # bindings.
+        #
+        # The corpus and the axiom were both right. Only the projection binding
+        # carries the axes, because semantic_axes() derives them from
+        # openClawProjection.semantics.
+        if binding:
+            self.block("m:agent-binding", statements)
+
+        if projection:
+            projection_statements = [
+                "a owl:NamedIndividual , re:AgentBinding",
+                "re:writesToRegionOf m:machine",
+            ]
+            if agent_id:
+                projection_statements.append("re:boundAgent m:agent")
+            # A projection asserts an autonomy posture of its own: it writes an
+            # assessment for RE to evaluate, which is advisory by construction.
+            projection_statements.append("re:autonomyMode re:Advise")
+            if axes:
+                projection_statements.append(
+                    "re:hasSemanticAxis " + " , ".join(term for term, _ in axes)
+                )
+            self.block("m:openclaw-binding", projection_statements)
 
         if agent_id:
             agent_statements = ["a owl:NamedIndividual , re:Agent",
