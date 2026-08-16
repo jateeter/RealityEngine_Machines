@@ -34,6 +34,34 @@ ABOX_ROOT = REPO_ROOT / "semantics" / "abox"
 MANIFEST_PATH = REPO_ROOT / "semantics" / "abox-manifest.json"
 
 MACHINE_BASE = "https://realityengine.example.org/machines"
+DOMAIN_REGISTRY_PATH = REPO_ROOT / "domains" / "domain-registry.json"
+
+
+def load_agent_families() -> dict[str, str]:
+    """Agent families declared by domains, mapped family id -> declaring domain.
+
+    re:AgentFamily has been in the vocabulary since 0.2.0 with nothing populating
+    it (#50). It is derivable: domain-registry.json declares defaultAgentFamilies
+    per domain, and a machine's agentBinding.agent names one of them for 389 of
+    the 1,058 curated bindings.
+
+    Families are corpus-level, not machine-level, so they get their own namespace
+    rather than a per-machine one. The same family is declared identically by
+    every machine that binds it — RDF merge is a union, so the repeated
+    declaration is idempotent rather than a conflict, and it keeps the generator
+    emitting one self-contained file per machine.
+    """
+    if not DOMAIN_REGISTRY_PATH.exists():
+        return {}
+    document = json.loads(DOMAIN_REGISTRY_PATH.read_text(encoding="utf-8"))
+    domains = document.get("domains") or document
+    families: dict[str, str] = {}
+    for domain, entry in sorted(domains.items()):
+        if not isinstance(entry, dict):
+            continue
+        for family in entry.get("defaultAgentFamilies") or []:
+            families.setdefault(str(family), domain)
+    return families
 
 PREFIXES = """@prefix re:      <https://realityengine.example.org/ontology/re-core#> .
 @prefix owl:     <http://www.w3.org/2002/07/owl#> .
@@ -41,6 +69,7 @@ PREFIXES = """@prefix re:      <https://realityengine.example.org/ontology/re-co
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix fam:     <https://realityengine.example.org/agent-families#> .
 """
 
 RAG_INDIVIDUALS = {"GREEN": "re:GREEN", "AMBER": "re:AMBER", "RED": "re:RED"}
@@ -58,6 +87,9 @@ def load_action_vocabulary() -> dict[str, str]:
     for match in ACTION_PATTERN.finditer(text):
         vocabulary[match.group("code")] = f"re:{match.group('name')}"
     return vocabulary
+
+
+AGENT_FAMILIES: dict[str, str] = {}
 
 
 def sanitize(local: str) -> str:
@@ -757,9 +789,20 @@ class MachineProjector:
             agent_statements = ["a owl:NamedIndividual , re:Agent",
                                 self.qlabel(str(agent_id)),
                                 f're:agentId "{escape(agent_id)}"']
+            family_domain = AGENT_FAMILIES.get(str(agent_id))
+            if family_domain:
+                agent_statements.append(
+                    f"re:inAgentFamily fam:{sanitize(agent_id)}"
+                )
             if projection and projection.get("owner"):
                 agent_statements.append(f're:agentRole "{escape(projection["owner"])}"')
             self.block("m:agent", agent_statements)
+            if family_domain:
+                self.block(f"fam:{sanitize(agent_id)}", [
+                    "a owl:NamedIndividual , re:AgentFamily",
+                    label(str(agent_id)),
+                    f're:domainName "{escape(family_domain)}"',
+                ])
 
         for term, axis in axes:
             axis_statements = [
@@ -901,6 +944,8 @@ def main() -> int:
         parser.error("choose --machine, --domain, or --all")
 
     actions = load_action_vocabulary()
+
+    AGENT_FAMILIES.update(load_agent_families())
     if not actions:
         raise SystemExit(f"no action vocabulary found in {ONTOLOGY_PATH}")
 
