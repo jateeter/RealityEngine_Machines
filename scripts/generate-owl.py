@@ -762,13 +762,25 @@ class MachineProjector:
             self.block("m:agent", agent_statements)
 
         for term, axis in axes:
-            self.block(term, [
+            axis_statements = [
                 "a owl:NamedIndividual , re:SemanticAxis",
                 self.qlabel(str(axis["name"])),
                 f"re:axisIndex {number(axis['index'])}",
                 f're:axisName "{escape(axis["name"])}"',
                 f're:axisNameSource "{escape(axis["source"])}"',
-            ])
+            ]
+            if "confirming" in axis:
+                # A second re:axisName from the other corpus source. The property
+                # is functional, so this makes the graph inconsistent — which is
+                # the intended outcome: two sources naming one position
+                # differently is a contradiction, not a variant spelling.
+                axis_statements.append(
+                    f're:axisName "{escape(axis["confirming"])}"'
+                )
+                axis_statements.append(
+                    're:axisNameSource "agent-binding-writeback"'
+                )
+            self.block(term, axis_statements)
 
     @staticmethod
     def autonomy_term(mode: str) -> str:
@@ -780,27 +792,58 @@ class MachineProjector:
         }.get(mode, "re:Advise")
 
     def semantic_axes(self) -> list[tuple[str, dict[str, Any]]]:
-        """One axis per element of the write-back region.
+        """One axis per element of the write-back region, from BOTH sources.
 
-        Provenance is recorded because the corpus has two disagreeing sources for
-        these names, and a resolution that cannot say where a name came from
-        cannot be adjudicated (localOpenClawStack#17).
+        The corpus names each write-back position twice — in
+        metadata.openClawProjection.semantics and in
+        metadata.agentBinding.writeBack.semantics — and they describe the same
+        region: identical offset and length on all 949 machines carrying both.
+
+        Only the projection was emitted, so the curated names were dropped and
+        nothing compared them. re:axisName is owl:FunctionalProperty precisely so
+        a disagreement about what a position *means* becomes a reasoner-detectable
+        inconsistency rather than a difference nobody looks at; emitting one side
+        left that mechanism declared and never fired.
+
+        Both are emitted onto the same m:axis-N individual, so a divergence is a
+        build failure. That is only safe now: the two sources previously differed
+        as strings on 948 of 949 machines, almost all of it `process stability`
+        against `process_stability`, and turning this on before canonicalising
+        would have produced ~947 false inconsistencies and buried the real ones.
+        They now agree exactly, 949 of 949. See #81.
         """
         metadata = self.machine.get("metadata", {})
         projection = metadata.get("openClawProjection") or {}
+        curated = (metadata.get("agentBinding") or {}).get("writeBack") or {}
         names = projection.get("semantics")
         source = "openclaw-projection"
+        if not names:
+            names = curated.get("semantics")
+            source = "agent-binding-writeback"
         if not names:
             names = metadata.get("inputSemantics")
             source = "input-semantics"
         if not names:
             return []
+
+        # The second source, when it names the same positions. Emitted as its own
+        # axisName assertion on the shared individual; equal names collapse, and
+        # unequal ones make the graph inconsistent, which is the point.
+        confirming = curated.get("semantics") if source == "openclaw-projection" else None
+        if confirming is not None and len(confirming) != len(names):
+            self.warnings.append(
+                f"{self.path.name}: agentBinding.writeBack.semantics has "
+                f"{len(confirming)} names for {len(names)} projection positions; "
+                "not cross-asserted"
+            )
+            confirming = None
+
         axes = []
         for index, name in enumerate(names):
-            axes.append((
-                f"m:axis-{index}",
-                {"index": index, "name": name, "source": source},
-            ))
+            axis: dict[str, Any] = {"index": index, "name": name, "source": source}
+            if confirming is not None and confirming[index] != name:
+                axis["confirming"] = confirming[index]
+            axes.append((f"m:axis-{index}", axis))
         return axes
 
     def emit_local_actions(self) -> None:
