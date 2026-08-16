@@ -278,19 +278,12 @@ class OwlSemanticsTests(unittest.TestCase):
         happen to disagree. The signal has to be asserted structurally instead.
         Redundant pairs that agree are permitted — eight exist and are harmless.
 
-        One contradiction is known and filed as #56: AIHardwareResilience emits
-        both "schedule maintenance" (GREEN) and "emergency replacement" (RED)
-        for output position 5. Which is correct is a domain decision — the
-        machine also tags "immediately evacuate all workloads" GREEN, so the
-        action rules may be systematically mis-tagged rather than one being
-        stray — so it is allowlisted rather than guessed at. The allowlist is
-        exact: fixing #56 fails this test until the entry is removed, and any
-        new contradiction fails it immediately.
+        No contradiction remains. AIHardwareResilience carried the last one —
+        output position 5 was both "schedule maintenance" (GREEN) and "emergency
+        replacement" (RED) — resolved in #56 by tagging its action rules with the
+        severity of the state that emits them. The allowlist that stood here is
+        gone; any contradiction now fails outright.
         """
-        known = {
-            "AIHardwareResilience.json: aihr-hw-degradation "
-            "[0, 0, 0, 0, 0, 1] -> ['GREEN', 'RED']",  # jateeter/RealityEngine_Machines#56
-        }
         contradictions = []
         for machine_path in sorted(MACHINES_DIR.glob("domains/*/*.json")):
             document = json.loads(machine_path.read_text(encoding="utf-8"))
@@ -309,17 +302,8 @@ class OwlSemanticsTests(unittest.TestCase):
                         f"-> {sorted(statuses)}"
                     )
         self.assertEqual(
-            sorted(set(contradictions) - known), [],
-            "new trigger-rule contradictions:\n" + "\n".join(
-                sorted(set(contradictions) - known)
-            ),
-        )
-        self.assertEqual(
-            sorted(known - set(contradictions)), [],
-            "allowlisted contradiction no longer present — remove it from "
-            "`known` (see jateeter/RealityEngine_Machines#56):\n" + "\n".join(
-                sorted(known - set(contradictions))
-            ),
+            contradictions, [],
+            "trigger-rule contradictions:\n" + "\n".join(contradictions),
         )
 
     def test_manifest_matches_regeneration_and_covers_corpus(self) -> None:
