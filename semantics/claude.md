@@ -31,6 +31,26 @@ by verification and auditing in the RE and PE components. See
   file renames therefore change semantic identity and must be treated as
   contract changes.
 
+## Which corpus routine validation reasons over
+
+**The full corpus is not loaded by routine validation.** The regression lanes
+boot a minimal provable corpus, and full-corpus checks run manually or on a
+cycle. The reasoner follows the same split:
+
+| scope | command | cost | when |
+|---|---|--:|---|
+| minimal provable corpus | `npm run owl:reason:corpus` | ~5s | every PR |
+| arbiter fixtures | `npm run owl:reason:arbiter` | ~4s | with the arbiter gate |
+| one domain | `npm run owl:reason` | ~5-20s | while working in it |
+| every domain | `npm run owl:reason:domains` | ~3min | cyclic |
+| corpus-wide merge | `npm run owl:reason:all:complete` | ~18min | weekly |
+
+This matters more as the corpus grows. Domains, machines and CES all expand at
+MVP, and a gate whose cost scales with the corpus is a gate that eventually gets
+switched off — which is worse than a smaller gate that keeps running. The
+minimal corpus is chosen to be *provable*, not merely small: it carries the
+machine classes, the bus and the fixtures the contracts are stated against.
+
 ## The ROBOT report profile, and its two deliberate INFOs
 
 `robot-report-profile.txt` lists all 32 rules ROBOT ships rather than expressing
