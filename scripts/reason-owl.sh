@@ -34,6 +34,38 @@ DOMAIN="health-personal"
 REASONER=""
 MANIFEST=""
 
+# Corpus manifests live in RealityEngine_CI/config/, and where that is depends
+# on who is calling. A workstation has the repos as siblings; the CI corpus-gates
+# job checks RealityEngine_CI out at the workspace root and this repo *underneath*
+# it, so the same manifest sits at ../config rather than ../RealityEngine_CI/config.
+# Hardcoding either layout breaks the other — the sibling form was assumed in
+# jateeter/RealityEngine_Machines#91 and the gate could not find its manifest.
+#
+# So --corpus takes a name ("standard-deployment") or a path, and a name is
+# searched for across the known layouts. Callers that know their layout can set
+# RE_CI_CONFIG_DIR and skip the search entirely.
+resolve_manifest() {
+  local want="$1" candidate
+  # An explicit path that exists wins, so callers keep full control.
+  if [ -f "$want" ]; then printf '%s\n' "$want"; return 0; fi
+  local stem="${want%.txt}"; stem="${stem%-corpus}"; stem="$(basename "$stem")"
+  local roots=()
+  [ -n "${RE_CI_CONFIG_DIR:-}" ] && roots+=("$RE_CI_CONFIG_DIR")
+  roots+=("$REPO_ROOT/../RealityEngine_CI/config" "$REPO_ROOT/../config")
+  for candidate in "${roots[@]}"; do
+    if [ -f "$candidate/$stem-corpus.txt" ]; then
+      printf '%s\n' "$candidate/$stem-corpus.txt"; return 0
+    fi
+  done
+  {
+    echo "reason-owl: no corpus manifest for '$want'"
+    echo "  looked for '$stem-corpus.txt' in:"
+    for candidate in "${roots[@]}"; do echo "    $candidate"; done
+    echo "  set RE_CI_CONFIG_DIR to the RealityEngine_CI config directory, or pass a path."
+  } >&2
+  return 2
+}
+
 while [ $# -gt 0 ]; do
   case "$1" in
     --all)          SCOPE="corpus"; shift ;;
@@ -84,7 +116,7 @@ trap 'rm -rf "$WORKDIR"' EXIT
 
 MERGE_INPUTS=(--input "$REPO_ROOT/semantics/ontology/re-core.ttl")
 if [ "$SCOPE" = "manifest" ]; then
-  [ -f "$MANIFEST" ] || { echo "reason-owl: no manifest at $MANIFEST" >&2; exit 2; }
+  MANIFEST="$(resolve_manifest "$MANIFEST")"
   LABEL="corpus manifest $(basename "$MANIFEST")"
   _count=0
   while IFS= read -r _line; do
