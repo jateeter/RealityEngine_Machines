@@ -8,9 +8,16 @@
 #
 # Usage:
 #   reason-owl.sh [DOMAIN]                 one domain, ELK + HermiT   (~5-20s)
+#   reason-owl.sh --corpus <manifest>      just those machines        (~5s)
 #   reason-owl.sh --all                    whole corpus, ELK only     (~45s)
 #   reason-owl.sh --all --reasoner both    whole corpus, + HermiT     (~18min)
 #   reason-owl.sh --all --reasoner hermit  whole corpus, HermiT only
+#
+# --corpus is the frequent path. The full corpus is not loaded by routine
+# validation: the regression lanes boot a minimal provable corpus, and
+# full-corpus checks run manually or on a cycle. That separation matters more as
+# the corpus grows — domains, machines and CES all expand at MVP, and a gate
+# whose cost scales with the corpus is a gate that gets switched off.
 #
 # ROBOT (https://robot.obolibrary.org) is an external toolchain and is not a
 # developer-laptop requirement: without it this script prints SKIPPED and
@@ -25,10 +32,13 @@ ROBOT="${ROBOT_BIN:-robot}"
 SCOPE="domain"
 DOMAIN="health-personal"
 REASONER=""
+MANIFEST=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --all)          SCOPE="corpus"; shift ;;
+    --corpus)       SCOPE="manifest"; MANIFEST="$2"; shift 2 ;;
+    --corpus=*)     SCOPE="manifest"; MANIFEST="${1#*=}"; shift ;;
     --reasoner)     REASONER="$(printf '%s' "$2" | tr '[:upper:]' '[:lower:]')"; shift 2 ;;
     --reasoner=*)   REASONER="$(printf '%s' "${1#*=}" | tr '[:upper:]' '[:lower:]')"; shift ;;
     -h|--help)      sed -n '6,12p' "$0"; exit 0 ;;
@@ -54,8 +64,9 @@ done
 # cross-domain interaction increases. See RealityEngine_Machines#79.
 if [ -z "$REASONER" ]; then
   case "$SCOPE" in
-    domain) REASONER="both" ;;
-    corpus) REASONER="elk" ;;
+    domain)   REASONER="both" ;;
+    manifest) REASONER="both" ;;
+    corpus)   REASONER="elk" ;;
   esac
 fi
 case "$REASONER" in
@@ -72,7 +83,24 @@ WORKDIR="$(mktemp -d)"
 trap 'rm -rf "$WORKDIR"' EXIT
 
 MERGE_INPUTS=(--input "$REPO_ROOT/semantics/ontology/re-core.ttl")
-if [ "$SCOPE" = "corpus" ]; then
+if [ "$SCOPE" = "manifest" ]; then
+  [ -f "$MANIFEST" ] || { echo "reason-owl: no manifest at $MANIFEST" >&2; exit 2; }
+  LABEL="corpus manifest $(basename "$MANIFEST")"
+  _count=0
+  while IFS= read -r _line; do
+    case "$_line" in ''|'#'*) continue ;; esac
+    _stem="$(basename "$_line" .json)"
+    _domain="$(dirname "$_line")"; _domain="$(basename "$_domain")"
+    _abox="$REPO_ROOT/semantics/abox/$_domain/$_stem.ttl"
+    if [ ! -f "$_abox" ]; then
+      python3 "$SCRIPT_DIR/generate-owl.py" \
+        --machine "$REPO_ROOT/machines/$_line" --write --strict-actions >/dev/null
+    fi
+    [ -f "$_abox" ] && { MERGE_INPUTS+=(--input "$_abox"); _count=$((_count + 1)); }
+  done < "$MANIFEST"
+  [ "$_count" -gt 0 ] || { echo "reason-owl: manifest named no loadable machines" >&2; exit 2; }
+  LABEL="$LABEL ($_count machines)"
+elif [ "$SCOPE" = "corpus" ]; then
   LABEL="corpus (12 domains)"
   # The merged graph is ~96MB in memory and the default JVM heap will not hold
   # it. Only set a default if the caller has not: a runner with less than this
