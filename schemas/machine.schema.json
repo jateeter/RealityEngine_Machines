@@ -4,7 +4,10 @@
   "title": "RealityEngine Machine",
   "description": "Compatibility-safe schema for canonical RealityEngine machine corpus files. It constrains the cross-engine contract surface while leaving domain-specific metadata extensible.",
   "type": "object",
-  "required": ["version", "machine"],
+  "required": [
+    "version",
+    "machine"
+  ],
   "properties": {
     "version": {
       "type": "string",
@@ -44,11 +47,28 @@
         },
         "arbiterRule": {
           "type": "string",
-          "enum": ["PASSTHROUGH"]
+          "enum": [
+            "PASSTHROUGH"
+          ]
         },
         "matchAlgorithm": {
           "type": "string",
-          "enum": ["equals", "gte"]
+          "enum": [
+            "equals",
+            "gte"
+          ]
+        },
+        "outputMergeTransformation": {
+          "type": "string",
+          "enum": [
+            "or",
+            "and",
+            "xor",
+            "nor",
+            "nand"
+          ],
+          "default": "or",
+          "description": "How the Reality Engine folds this machine's collection of potential outputs into the single output it presents to the Perception Engine. At the completion boundary of the atomic matching action a machine holds one potential output per completed Reality Event; this names the deterministic elementwise transformation applied over the output space vectors to combine them. Absent means \"or\". Read when the machine is interned and mutable between steps at runtime; it is a training variable, so it is declared on the machine rather than configured per deployment."
         },
         "perceptualMapping": {
           "$ref": "#/$defs/perceptualMapping"
@@ -144,7 +164,11 @@
     },
     "perceptualMapping": {
       "type": "object",
-      "required": ["input", "output", "bitsPerElement"],
+      "required": [
+        "input",
+        "output",
+        "bitsPerElement"
+      ],
       "properties": {
         "input": {
           "$ref": "#/$defs/region"
@@ -154,14 +178,22 @@
         },
         "bitsPerElement": {
           "type": "integer",
-          "enum": [1, 2, 4, 8]
+          "enum": [
+            1,
+            2,
+            4,
+            8
+          ]
         }
       },
       "additionalProperties": true
     },
     "region": {
       "type": "object",
-      "required": ["offset", "length"],
+      "required": [
+        "offset",
+        "length"
+      ],
       "properties": {
         "offset": {
           "type": "integer",
@@ -176,7 +208,10 @@
     },
     "sequence": {
       "type": "object",
-      "required": ["id", "vectors"],
+      "required": [
+        "id",
+        "vectors"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -206,7 +241,9 @@
     },
     "vectorState": {
       "type": "object",
-      "required": ["elements"],
+      "required": [
+        "elements"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -244,7 +281,9 @@
     },
     "vectorElement": {
       "type": "object",
-      "required": ["value"],
+      "required": [
+        "value"
+      ],
       "properties": {
         "value": {
           "type": "number"
@@ -261,7 +300,9 @@
     },
     "outputVector": {
       "type": "object",
-      "required": ["vector"],
+      "required": [
+        "vector"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -283,7 +324,10 @@
     },
     "inputSequence": {
       "type": "object",
-      "required": ["name", "vectors"],
+      "required": [
+        "name",
+        "vectors"
+      ],
       "properties": {
         "name": {
           "type": "string",
@@ -315,7 +359,13 @@
     },
     "governance": {
       "type": "object",
-      "required": ["schemaVersion", "ownerTeam", "runbook", "escalationPolicy", "sla"],
+      "required": [
+        "schemaVersion",
+        "ownerTeam",
+        "runbook",
+        "escalationPolicy",
+        "sla"
+      ],
       "properties": {
         "schemaVersion": {
           "type": "string",
@@ -340,7 +390,10 @@
         "sla": {
           "type": "object",
           "additionalProperties": {
-            "type": ["integer", "null"],
+            "type": [
+              "integer",
+              "null"
+            ],
             "minimum": 0
           }
         },
@@ -352,7 +405,9 @@
     },
     "triggerConfig": {
       "type": "object",
-      "required": ["rules"],
+      "required": [
+        "rules"
+      ],
       "properties": {
         "processId": {
           "type": "string",
@@ -386,7 +441,11 @@
     },
     "triggerRule": {
       "type": "object",
-      "required": ["sequenceId", "outputMatches", "ragStatusCode"],
+      "required": [
+        "sequenceId",
+        "outputMatches",
+        "ragStatusCode"
+      ],
       "properties": {
         "sequenceId": {
           "type": "string",
@@ -400,7 +459,11 @@
         },
         "ragStatusCode": {
           "type": "string",
-          "enum": ["GREEN", "AMBER", "RED"]
+          "enum": [
+            "GREEN",
+            "AMBER",
+            "RED"
+          ]
         },
         "processStatus": {
           "type": "string",
@@ -469,7 +532,12 @@
     },
     "interconnection": {
       "type": "object",
-      "required": ["id", "type", "busId", "busTag"],
+      "required": [
+        "id",
+        "type",
+        "busId",
+        "busTag"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -508,7 +576,14 @@
     },
     "publishedDomainBus": {
       "type": "object",
-      "required": ["id", "tag", "domain", "inputRegion", "outputRegion", "inputComposition"],
+      "required": [
+        "id",
+        "tag",
+        "domain",
+        "inputRegion",
+        "outputRegion",
+        "inputComposition"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -540,7 +615,11 @@
           "minItems": 1,
           "items": {
             "type": "object",
-            "required": ["role", "sourceMachine", "machineOutputRegion"],
+            "required": [
+              "role",
+              "sourceMachine",
+              "machineOutputRegion"
+            ],
             "properties": {
               "role": {
                 "type": "string",
@@ -575,7 +654,10 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["machine", "inputRegion"],
+            "required": [
+              "machine",
+              "inputRegion"
+            ],
             "properties": {
               "machine": {
                 "type": "string",

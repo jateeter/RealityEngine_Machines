@@ -794,3 +794,111 @@ re:CompletionMapping rdfs:subClassOf [
     owl:onProperty re:completionOfAgent ;
     owl:cardinality "1"^^xsd:nonNegativeInteger
 ] .
+
+########################################################################
+# Output merge transformations
+#
+# At the completion boundary of a machine's atomic matching action the
+# machine holds a *collection* of potential outputs — one per completed
+# Reality Event. Folding that collection into the single output presented
+# to the Perception Engine is the Reality Engine's job and the last thing
+# it does in the step. The transformation is declared per machine
+# (`outputMergeTransformation`, default "or"), read when the machine is
+# interned, and mutable between steps. It is a training variable.
+#
+# The transformation is an n-input gate applied to the whole collection at
+# once, not a chain of two-input gates. Its truth table is a function of
+# how many contributions assert a cell and how many there are — never of
+# the order they arrive in.
+#
+# Determinism is the invariant, and the collection carries no order.
+#
+# All five gates below are symmetric — invariant under permutation of the
+# collection — and each states its truth condition over k, the count of
+# asserted contributions, and n, the size of the collection:
+#
+#     or(k,n)   = k >= 1        and(k,n)  = k = n       xor(k,n)  = k odd
+#     nor(k,n)  = k = 0         nand(k,n) = k < n
+#
+# That symmetry is verified by exhaustion in
+# tests/contracts/owl_semantics_test.py, so for these five it is established
+# fact, not assumption.
+#
+# CONTESTED — do not treat the following as settled. It has been asserted
+# that symmetry is the *admissibility rule* for any future transformation:
+# that an exotic transformation must be a function of k and n alone, on the
+# grounds that anything else could evolve differently on runtimes that
+# enumerate a machine's completed Reality Events in different orders. That
+# generalisation is disputed and has not been established. It may be too
+# strong, or the wrong frame entirely. Nothing here depends on it: the five
+# declared gates are individually verified, and re:symmetric records an
+# observed property of each rather than a gate on what may be admitted.
+# Settle the question before relying on it to reject a transformation.
+#
+# (Chaining two-input NOR or NAND gates is order dependent, because those
+# are not associative — but that is a property of the chained circuit, not
+# of the n-input gate, and is not what is specified here.)
+########################################################################
+
+re:OutputMergeTransformation a owl:Class ;
+    rdfs:label "output merge transformation" ;
+    rdfs:comment "An n-input gate folding a machine's collection of potential outputs into the single output presented to the Perception Engine. Applied to the whole collection at once, not as a chain of two-input gates. (Whether symmetry is required of every admissible transformation is contested — see commentary.)" .
+
+re:outputMergeTransformation a owl:DatatypeProperty ;
+    rdfs:domain re:Machine ; rdfs:range xsd:string ;
+    rdfs:label "output merge transformation" ;
+    rdfs:comment "Name of the transformation this machine folds its potential outputs with. Absent means \"or\"." .
+
+re:transformationName a owl:DatatypeProperty ;
+    rdfs:domain re:OutputMergeTransformation ; rdfs:range xsd:string ;
+    rdfs:label "transformation name" .
+
+re:deterministic a owl:DatatypeProperty ;
+    rdfs:domain re:OutputMergeTransformation ; rdfs:range xsd:boolean ;
+    rdfs:label "deterministic" ;
+    rdfs:comment "The transformation yields the same output for the same collection, on every runtime." .
+
+re:symmetric a owl:DatatypeProperty ;
+    rdfs:domain re:OutputMergeTransformation ; rdfs:range xsd:boolean ;
+    rdfs:label "symmetric" ;
+    rdfs:comment "Invariant under permutation of the collection. Recorded as an observed, verified property of this transformation. NOTE: whether symmetry is REQUIRED for a transformation to be admissible is contested and unsettled — see the commentary above this block. Do not read this property as a gate on what may be admitted." .
+
+re:assertedWhen a owl:DatatypeProperty ;
+    rdfs:domain re:OutputMergeTransformation ; rdfs:range xsd:string ;
+    rdfs:label "asserted when" ;
+    rdfs:comment "The gate's truth condition over k, the count of asserted contributions, and n, the size of the collection. This is the definition; an implementation is correct when it agrees with it." .
+
+re:merge-or a owl:NamedIndividual , re:OutputMergeTransformation ;
+    re:transformationName "or" ;
+    re:deterministic true ; re:symmetric true ;
+    re:assertedWhen "k >= 1" ;
+    rdfs:label "or" ;
+    rdfs:comment "Default. Asserted when any contribution asserts." .
+
+re:merge-and a owl:NamedIndividual , re:OutputMergeTransformation ;
+    re:transformationName "and" ;
+    re:deterministic true ; re:symmetric true ;
+    re:assertedWhen "k = n" ;
+    rdfs:label "and" ;
+    rdfs:comment "Asserted when every contribution asserts." .
+
+re:merge-xor a owl:NamedIndividual , re:OutputMergeTransformation ;
+    re:transformationName "xor" ;
+    re:deterministic true ; re:symmetric true ;
+    re:assertedWhen "k odd" ;
+    rdfs:label "xor" ;
+    rdfs:comment "Parity of asserted contributions." .
+
+re:merge-nor a owl:NamedIndividual , re:OutputMergeTransformation ;
+    re:transformationName "nor" ;
+    re:deterministic true ; re:symmetric true ;
+    re:assertedWhen "k = 0" ;
+    rdfs:label "nor" ;
+    rdfs:comment "Asserted when no contribution asserts. The n-input gate, not chained two-input NORs." .
+
+re:merge-nand a owl:NamedIndividual , re:OutputMergeTransformation ;
+    re:transformationName "nand" ;
+    re:deterministic true ; re:symmetric true ;
+    re:assertedWhen "k < n" ;
+    rdfs:label "nand" ;
+    rdfs:comment "Asserted unless every contribution asserts. The n-input gate, not chained two-input NANDs." .

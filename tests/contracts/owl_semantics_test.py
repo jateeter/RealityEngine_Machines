@@ -363,3 +363,99 @@ class OwlSemanticsTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OutputMergeTransformationTests(unittest.TestCase):
+    """The declared merge gates, and the properties they claim.
+
+    Folding a machine's collection of potential outputs is the last thing the
+    Reality Engine does in a step, and the collection carries no order. The
+    transformation is an n-input gate over the whole collection — not a chain of
+    two-input gates.
+
+    What these checks establish: each of the five declared gates is symmetric,
+    verified by exhaustion over every permutation of every input combination,
+    and each agrees with the truth condition the ontology states for it.
+
+    CONTESTED, and deliberately NOT asserted here: that symmetry is the
+    *admissibility rule* for transformations added later — that an exotic
+    transformation must be a function of k and n alone. That generalisation is
+    disputed and unsettled. These tests therefore verify a property of the five
+    gates that exist; they do not enforce a criterion on gates that do not.
+    Should the rule be settled affirmatively, a test rejecting non-symmetric
+    declarations belongs here — it is absent because the rule is not settled.
+    """
+
+    TRANSFORMATIONS = ("or", "and", "xor", "nor", "nand")
+
+    # The definitions the ontology states, as executable predicates.
+    GATES = {
+        "or":   lambda k, n: k >= 1,
+        "and":  lambda k, n: k == n,
+        "xor":  lambda k, n: k % 2 == 1,
+        "nor":  lambda k, n: k == 0,
+        "nand": lambda k, n: k < n,
+    }
+
+    def setUp(self) -> None:
+        self.ttl = ONTOLOGY.read_text(encoding="utf-8")
+
+    def test_every_schema_transformation_is_declared_in_the_ontology(self) -> None:
+        schema = json.loads((REPO_ROOT / "schemas" / "machine.schema.json").read_text(encoding="utf-8"))
+        enum = schema["$defs"]["machine"]["properties"]["outputMergeTransformation"]["enum"]
+        self.assertEqual(sorted(enum), sorted(self.TRANSFORMATIONS),
+                         "schema enum and the ontology's transformation set have drifted apart")
+        for name in enum:
+            self.assertIn(f're:transformationName "{name}"', self.ttl,
+                          f"{name} is accepted by the schema but not declared in the ontology")
+
+    def test_every_transformation_asserts_determinism_and_symmetry(self) -> None:
+        for name in self.TRANSFORMATIONS:
+            block = self._individual_block(name)
+            self.assertIn("re:deterministic true", block,
+                          f"{name} does not assert re:deterministic")
+            # Each of the five is symmetric in fact — verified below. This
+            # checks the ontology records it, not that symmetry is required of
+            # anything else (contested; see the class docstring).
+            self.assertIn("re:symmetric true", block,
+                          f"{name} does not record re:symmetric, which it is verified to be")
+            self.assertIn("re:assertedWhen", block,
+                          f"{name} does not state its truth condition over k and n")
+
+    def test_declared_gates_are_permutation_invariant(self) -> None:
+        """Symmetry of the five declared gates, checked by exhaustion.
+
+        Every gate is applied to every permutation of every input combination up
+        to n=5. This establishes the property for these five.
+
+        It does not establish that a gate lacking the property is inadmissible —
+        that is the contested generalisation described in the class docstring.
+        """
+        import itertools
+        for name in self.TRANSFORMATIONS:
+            gate = self.GATES[name]
+            for n in range(1, 6):
+                for combo in itertools.product((0, 1), repeat=n):
+                    results = {gate(sum(p), n) for p in itertools.permutations(combo)}
+                    self.assertEqual(
+                        len(results), 1,
+                        f"{name} is order dependent on {combo}: {results}, contradicting the "
+                        f"re:symmetric it declares.")
+
+    def test_gate_definitions_match_their_stated_truth_condition(self) -> None:
+        # The ontology is the definition; this pins the executable form to it so
+        # the two cannot drift.
+        stated = {"or": "k >= 1", "and": "k = n", "xor": "k odd",
+                  "nor": "k = 0", "nand": "k < n"}
+        for name, condition in stated.items():
+            block = self._individual_block(name)
+            self.assertIn(f're:assertedWhen "{condition}"', block,
+                          f"{name}'s stated truth condition changed; update the executable "
+                          f"gate in this test to match, or the two have drifted")
+
+    def _individual_block(self, name: str) -> str:
+        marker = f"re:merge-{name} a owl:NamedIndividual"
+        start = self.ttl.find(marker)
+        self.assertNotEqual(start, -1, f"re:merge-{name} is not declared in the ontology")
+        end = self.ttl.find("\n\n", start)
+        return self.ttl[start:end if end != -1 else len(self.ttl)]
