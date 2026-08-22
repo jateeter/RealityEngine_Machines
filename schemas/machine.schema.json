@@ -65,10 +65,15 @@
             "and",
             "xor",
             "nor",
-            "nand"
+            "nand",
+            "meet",
+            "join",
+            "strong-disjunction",
+            "strong-conjunction",
+            "discrete-median"
           ],
           "default": "or",
-          "description": "How the Reality Engine folds this machine's collection of potential outputs into the single output it presents to the Perception Engine. At the completion boundary of the atomic matching action a machine holds one potential output per completed Reality Event; this names the deterministic elementwise transformation applied over the output space vectors to combine them. Absent means \"or\". Read when the machine is interned and mutable between steps at runtime; it is a training variable, so it is declared on the machine rather than configured per deployment."
+          "description": "How the Reality Engine folds this machine's collection of potential outputs into the single output it presents to the Perception Engine. At the completion boundary of the atomic matching action a machine holds one potential output per completed Reality Event; this names the deterministic elementwise transformation applied over the output space vectors to combine them. Absent means \"or\". Read when the machine is interned and mutable between steps at runtime; it is a training variable, so it is declared on the machine rather than configured per deployment. Two domains: \"or\"/\"and\"/\"xor\"/\"nor\"/\"nand\" are Boolean gates over {0,1} and flatten every value above 1 to 1, which destroys a multi-valued machine's alphabet; \"meet\"/\"join\"/\"strong-disjunction\"/\"strong-conjunction\"/\"discrete-median\" are defined over an ordered chain {0..k} and preserve it. See the \"Output merge transformations\" block in semantics/ontology/re-core.ttl for the per-transformation definitions and properties. UNRESOLVED: \"strong-disjunction\" and \"strong-conjunction\" are parameterised by the chain top k, which is not declared anywhere in the corpus and is NOT derivable from bitsPerElement."
         },
         "perceptualMapping": {
           "$ref": "#/$defs/perceptualMapping"
@@ -87,7 +92,37 @@
           }
         }
       },
-      "additionalProperties": true
+      "additionalProperties": true,
+      "allOf": [
+        {
+          "$comment": "strong-disjunction and strong-conjunction are undefined without a chain top: one clamps to k and the other's closure bound holds only while every value is <= k. A machine selecting either must declare perceptualMapping.outputAlphabetTop. Every other transformation ignores it, so no existing machine is affected.",
+          "if": {
+            "properties": {
+              "outputMergeTransformation": {
+                "enum": [
+                  "strong-disjunction",
+                  "strong-conjunction"
+                ]
+              }
+            },
+            "required": [
+              "outputMergeTransformation"
+            ]
+          },
+          "then": {
+            "properties": {
+              "perceptualMapping": {
+                "required": [
+                  "outputAlphabetTop"
+                ]
+              }
+            },
+            "required": [
+              "perceptualMapping"
+            ]
+          }
+        }
+      ]
     },
     "metadata": {
       "type": "object",
@@ -184,6 +219,11 @@
             4,
             8
           ]
+        },
+        "outputAlphabetTop": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "k, the top of the ordered chain {0..k} this machine's cells range over \u2014 absolute truth in the Lukasiewicz sense. Optional, and no machine in the corpus declares it today. Required only when outputMergeTransformation is strong-disjunction or strong-conjunction, which are undefined without it. Deliberately distinct from bitsPerElement, which gives the REPRESENTABLE range rather than the alphabet: FallDetection declares 4 bits (representable 0..15) and ranges over {0..4}, and folding that ladder at k=15 makes the truncated sum yield 14, outside the machine's alphabet entirely. The two are co-located because that is the point at which they are confused."
         }
       },
       "additionalProperties": true

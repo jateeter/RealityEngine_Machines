@@ -838,11 +838,54 @@ re:CompletionMapping rdfs:subClassOf [
 # (Chaining two-input NOR or NAND gates is order dependent, because those
 # are not associative — but that is a property of the chained circuit, not
 # of the n-input gate, and is not what is specified here.)
+#
+# THE DOMAIN OF THOSE FIVE IS {0,1}, AND THAT IS THEIR LIMIT. A Boolean
+# gate reads a cell as asserted or not, so it flattens every value above 1
+# to 1. Fold a multi-valued machine with one and the machine's alphabet is
+# gone: FallDetection ranks severity over {0,1,2,3,4}, and `or` answers
+# that ladder with 1 — asserted, rung unknown. 55 corpus machines declare
+# bitsPerElement > 1 and two of them use values above 1 today, so this is
+# a live gap and not a hypothetical one.
+#
+# Five multi-valued transformations over an ordered chain {0..k} are
+# declared further down, under "Multi-valued output merge transformations".
+# The two families are split into re:BooleanMergeTransformation and
+# re:ChainMergeTransformation — disjoint classes — so a consumer can tell
+# from the declaration alone which domain a transformation is defined over
+# rather than inferring it from the name.
+#
+# NAME COLLISION, kept deliberately because renaming either side would
+# churn what is already implemented and documented: `k` above is the count
+# of asserted contributions; `k` in the multi-valued block is the chain
+# top, absolute truth. `n` is the size of the collection in both. The two
+# blocks never share a formula, so the collision is confined to reading.
 ########################################################################
 
 re:OutputMergeTransformation a owl:Class ;
     rdfs:label "output merge transformation" ;
     rdfs:comment "An n-input gate folding a machine's collection of potential outputs into the single output presented to the Perception Engine. Applied to the whole collection at once, not as a chain of two-input gates. (Whether symmetry is required of every admissible transformation is contested — see commentary.)" .
+
+# The domain a transformation is defined over. Disjoint, because a
+# transformation is one or the other: a Boolean gate reads a cell as asserted
+# or not and cannot preserve a rung, and a chain operation is not defined by a
+# truth table over {0,1}. Splitting them makes the mismatch that motivated this
+# vocabulary — a multi-valued machine declaring a Boolean fold — a statable
+# fact about the declaration rather than folklore about which names are safe.
+re:BooleanMergeTransformation a owl:Class ;
+    rdfs:subClassOf re:OutputMergeTransformation ;
+    owl:disjointWith re:ChainMergeTransformation ;
+    rdfs:label "Boolean Merge Transformation" ;
+    rdfs:comment "An output merge transformation defined over {0,1}, stating its truth condition with re:assertedWhen over the count of asserted contributions. Applied to cells carrying values above 1 it flattens them to 1, losing the machine's alphabet." .
+
+re:ChainMergeTransformation a owl:Class ;
+    rdfs:subClassOf re:OutputMergeTransformation ;
+    rdfs:label "Chain Merge Transformation" ;
+    rdfs:comment "An output merge transformation defined over an ordered chain {0..k}, stating its definition with re:mergeFormula. Closed over the chain, so folding a multi-valued machine with one preserves the machine's alphabet." .
+
+re:outputAlphabetTop a owl:DatatypeProperty ;
+    rdfs:domain re:PerceptualMapping ; rdfs:range xsd:nonNegativeInteger ;
+    rdfs:label "output alphabet top" ;
+    rdfs:comment "k, the top of the ordered chain {0..k} a machine's cells range over — absolute truth in the Lukasiewicz sense. Optional and undeclared across the corpus today. Required only for strong-disjunction and strong-conjunction, which are undefined without it: one clamps to k, and the other's closure bound holds only while every contribution is <= k, so at the wrong k it yields a value outside both the chain and the machine's alphabet. Deliberately distinct from bitsPerElement, which gives the representable range rather than the alphabet — FallDetection declares 4 bits, representable 0..15, and ranges over {0..4}. meet, join and discrete-median take no k; join reads one only as an early-exit bound and answers the same with or without it." .
 
 re:outputMergeTransformation a owl:DatatypeProperty ;
     rdfs:domain re:Machine ; rdfs:range xsd:string ;
@@ -866,39 +909,188 @@ re:symmetric a owl:DatatypeProperty ;
 re:assertedWhen a owl:DatatypeProperty ;
     rdfs:domain re:OutputMergeTransformation ; rdfs:range xsd:string ;
     rdfs:label "asserted when" ;
-    rdfs:comment "The gate's truth condition over k, the count of asserted contributions, and n, the size of the collection. This is the definition; an implementation is correct when it agrees with it." .
+    rdfs:comment "The gate's truth condition over k, the count of asserted contributions, and n, the size of the collection. This is the definition; an implementation is correct when it agrees with it. Boolean-domain transformations only; a chain transformation states re:mergeFormula instead." .
 
-re:merge-or a owl:NamedIndividual , re:OutputMergeTransformation ;
+re:mergeFormula a owl:DatatypeProperty ;
+    rdfs:domain re:ChainMergeTransformation ; rdfs:range xsd:string ;
+    rdfs:label "merge formula" ;
+    rdfs:comment "The transformation's definition over the collection x_1..x_n on the chain {0..k}, where k is the chain top. The chain analogue of re:assertedWhen: this is the definition, and an implementation is correct when it agrees with it. Integer arithmetic throughout — a fold that divides gives three runtimes three answers. PRECONDITION: every x_i lies in {0..k}. Closure depends on it and is not robust to its violation — strong-conjunction's bound sum(x_i) - k(n-1) <= k holds only because each x_i <= k, so feeding it cells above the declared k returns a value above the chain top (k=1 over [2,2] gives 3). What an engine should do when the precondition fails is deliberately not stated here." .
+
+re:idempotent a owl:DatatypeProperty ;
+    rdfs:domain re:OutputMergeTransformation ; rdfs:range xsd:boolean ;
+    rdfs:label "idempotent" ;
+    rdfs:comment "f(x,x,..,x) = x for every x in the domain. NOT a requirement of the fold contract: the Łukasiewicz strong operations are deliberately non-idempotent, since x ⊕ x saturating and x ⊙ x extinguishing is the behaviour they are chosen for. Recorded so that a runtime cannot optimise a repeated contribution away where doing so would change the answer." .
+
+re:returnsAContributor a owl:DatatypeProperty ;
+    rdfs:domain re:OutputMergeTransformation ; rdfs:range xsd:boolean ;
+    rdfs:label "returns a contributor" ;
+    rdfs:comment "The result is always one of the collection's own values, so the fold cannot assert a level no completed Reality Event asserted. Strictly stronger than closure: bitwise or of 1 and 2 is 3, which is inside a chain {0..3} and asserted by nobody — on an ordinal severity ladder that invents a rung. False does not mean unsound; the Łukasiewicz operations combine evidence and are expected to land between contributors." .
+
+re:requiresChainTop a owl:DatatypeProperty ;
+    rdfs:domain re:OutputMergeTransformation ; rdfs:range xsd:boolean ;
+    rdfs:label "requires chain top" ;
+    rdfs:comment "The transformation's result depends on k, the chain top, so k must be supplied for the fold to be defined. Where false the transformation may still accept k as an early-exit optimisation, but the answer is identical without it. See the UNRESOLVED note in the multi-valued commentary: k is not declared anywhere in the corpus today." .
+
+re:deMorganDualOf a owl:ObjectProperty , owl:SymmetricProperty ;
+    rdfs:domain re:ChainMergeTransformation ; rdfs:range re:ChainMergeTransformation ;
+    rdfs:label "De Morgan dual of" ;
+    rdfs:comment "Each is the other under the chain's negation, ¬x = k − x. Recorded because it is the cheapest correctness check a runtime has: implement one, derive the other, and a disagreement localises the defect to one of the two." .
+
+re:merge-or a owl:NamedIndividual , re:BooleanMergeTransformation ;
     re:transformationName "or" ;
     re:deterministic true ; re:symmetric true ;
     re:assertedWhen "k >= 1" ;
     rdfs:label "or" ;
     rdfs:comment "Default. Asserted when any contribution asserts." .
 
-re:merge-and a owl:NamedIndividual , re:OutputMergeTransformation ;
+re:merge-and a owl:NamedIndividual , re:BooleanMergeTransformation ;
     re:transformationName "and" ;
     re:deterministic true ; re:symmetric true ;
     re:assertedWhen "k = n" ;
     rdfs:label "and" ;
     rdfs:comment "Asserted when every contribution asserts." .
 
-re:merge-xor a owl:NamedIndividual , re:OutputMergeTransformation ;
+re:merge-xor a owl:NamedIndividual , re:BooleanMergeTransformation ;
     re:transformationName "xor" ;
     re:deterministic true ; re:symmetric true ;
     re:assertedWhen "k odd" ;
     rdfs:label "xor" ;
     rdfs:comment "Parity of asserted contributions." .
 
-re:merge-nor a owl:NamedIndividual , re:OutputMergeTransformation ;
+re:merge-nor a owl:NamedIndividual , re:BooleanMergeTransformation ;
     re:transformationName "nor" ;
     re:deterministic true ; re:symmetric true ;
     re:assertedWhen "k = 0" ;
     rdfs:label "nor" ;
     rdfs:comment "Asserted when no contribution asserts. The n-input gate, not chained two-input NORs." .
 
-re:merge-nand a owl:NamedIndividual , re:OutputMergeTransformation ;
+re:merge-nand a owl:NamedIndividual , re:BooleanMergeTransformation ;
     re:transformationName "nand" ;
     re:deterministic true ; re:symmetric true ;
     re:assertedWhen "k < n" ;
     rdfs:label "nand" ;
     rdfs:comment "Asserted unless every contribution asserts. The n-input gate, not chained two-input NANDs." .
+
+########################################################################
+# Multi-valued output merge transformations
+#
+# The five gates above are defined over {0,1}. A multi-valued machine's
+# cells range over an ordered chain {0..k}, and folding those with a
+# Boolean gate destroys them: FallDetection's severity ladder
+# {0,1,2,3,4} answered by `or` is 1 — asserted, rung unknown.
+#
+# The five below are defined over that chain instead. They are folds of
+# the same shape as the Boolean gates — n-input, applied to the whole
+# collection at once, deterministic, and symmetric — and they differ only
+# in what the cells are allowed to mean.
+#
+#     meet                min(x_i)                    weakest link
+#     join                max(x_i)                    envelope
+#     strong-disjunction  min(k, sum(x_i))            evidence accumulation
+#     strong-conjunction  max(0, sum(x_i) - k(n-1))   simultaneous onset
+#     discrete-median     sort(x)[floor((n-1)/2)]     majority consensus
+#
+# meet and join are the lattice operations of the chain. The two strong
+# operations are the Łukasiewicz t-conorm ⊕ and t-norm ⊙, De Morgan duals
+# under the chain's negation ¬x = k − x, which is why re:deMorganDualOf
+# relates them: implement one, derive the other, and a disagreement
+# localises the defect to one of the two rather than to the pair.
+#
+# WHICH PROPERTIES ARE CLAIMED, AND WHICH ARE NOT
+#
+# All five are closed over the chain, symmetric, and deterministic —
+# integer arithmetic throughout, including the median, where floor of the
+# median over integers is exactly the lower middle element and therefore
+# a selection rather than a division. That distinction is a determinism
+# property before it is an efficiency one: an integer selection cannot
+# differ across three runtimes the way a float division can.
+#
+# meet, join and discrete-median additionally return one of their own
+# inputs (re:returnsAContributor), which is strictly stronger than
+# closure — bitwise or of 1 and 2 is 3, inside the chain and asserted by
+# nobody, which on a severity ladder invents a rung.
+#
+# The two strong operations are NOT idempotent, and that is the point of
+# them rather than a defect: x ⊕ x saturates and x ⊙ x extinguishes.
+# Nothing here asserts idempotence of them, and a runtime that "optimises"
+# a repeated contribution away is wrong. A fold over a collection is well
+# defined without idempotence as long as the operation is symmetric.
+#
+# Every one of these claims is verified by exhaustion over the chain
+# {0..3} in tests/contracts/owl_semantics_test.py rather than asserted —
+# including the negative claims, which are checked by counterexample so
+# that `re:idempotent false` cannot quietly become true.
+#
+# The CONTESTED note in the Boolean block above stands unchanged and is
+# not settled by anything here. That these five ARE symmetric is verified
+# fact; whether symmetry is the admissibility RULE for transformations
+# added later remains disputed, and adding five symmetric transformations
+# is not evidence either way.
+#
+# UNRESOLVED — k, THE CHAIN TOP
+#
+# join, strong-disjunction and strong-conjunction are the transformations
+# that can read k. For join it is an early-exit optimisation only and the
+# answer is identical without it (re:requiresChainTop false, verified).
+# For the two strong operations k is a parameter of the definition and
+# the result moves with it, so it must be supplied.
+#
+# k IS NOT DECLARED ANYWHERE IN THE CORPUS TODAY, and it is NOT derivable
+# from bitsPerElement. bitsPerElement gives the representable range, not
+# the alphabet: FallDetection declares 4 bits — representable 0..15 —
+# and uses {0,1,2,3,4}. Fold its severity ladder [0,1,2,3,4,4,0] with
+# k=15 and strong-disjunction yields 14, a rung outside the machine's
+# alphabet entirely, while strong-conjunction extinguishes almost
+# everything. Both answers are useless, and neither is detectably wrong
+# at the point of use.
+#
+# A schema field is therefore needed before strong-disjunction or
+# strong-conjunction can be declared by a corpus machine. It is
+# deliberately absent: guessing a derivation rule here would bake the
+# k=15 answer into the contract silently. Until it exists, meet, join and
+# discrete-median are the multi-valued folds a machine can declare
+# without an undeclared parameter — they take no k and are unaffected by
+# the question.
+########################################################################
+
+re:merge-meet a owl:NamedIndividual , re:ChainMergeTransformation ;
+    re:transformationName "meet" ;
+    re:deterministic true ; re:symmetric true ;
+    re:idempotent true ; re:returnsAContributor true ; re:requiresChainTop false ;
+    re:mergeFormula "min(x_i)" ;
+    rdfs:label "meet" ;
+    rdfs:comment "Lattice minimum: the weakest link. Bounded by the lowest contributor, so a single 0 vetoes the whole collection. Takes no chain top." .
+
+re:merge-join a owl:NamedIndividual , re:ChainMergeTransformation ;
+    re:transformationName "join" ;
+    re:deterministic true ; re:symmetric true ;
+    re:idempotent true ; re:returnsAContributor true ; re:requiresChainTop false ;
+    re:mergeFormula "max(x_i)" ;
+    rdfs:label "join" ;
+    rdfs:comment "Lattice maximum: the envelope. Bounded by the highest contributor, so no completed Reality Event's severity is lost — the safety-preserving fold. Accepts the chain top as an early-exit optimisation only; the answer is identical without it." .
+
+re:merge-strong-disjunction a owl:NamedIndividual , re:ChainMergeTransformation ;
+    re:transformationName "strong-disjunction" ;
+    re:deterministic true ; re:symmetric true ;
+    re:idempotent false ; re:returnsAContributor false ; re:requiresChainTop true ;
+    re:mergeFormula "min(k, sum(x_i))" ;
+    re:deMorganDualOf re:merge-strong-conjunction ;
+    rdfs:label "strong disjunction" ;
+    rdfs:comment "Łukasiewicz t-conorm ⊕: evidence accumulation, saturating at the chain top. Several weak independent indicators combine into a strong one — on {0..3}, 1 ⊕ 1 ⊕ 1 = 3. Non-idempotent by design: x ⊕ x saturates, so a repeated contribution may not be optimised away." .
+
+re:merge-strong-conjunction a owl:NamedIndividual , re:ChainMergeTransformation ;
+    re:transformationName "strong-conjunction" ;
+    re:deterministic true ; re:symmetric true ;
+    re:idempotent false ; re:returnsAContributor false ; re:requiresChainTop true ;
+    re:mergeFormula "max(0, sum(x_i) - k(n-1))" ;
+    re:deMorganDualOf re:merge-strong-disjunction ;
+    rdfs:label "strong conjunction" ;
+    rdfs:comment "Łukasiewicz t-norm ⊙: strict simultaneous onset. Rises above 0 only on near-unanimous high agreement, and one absolute disagreement extinguishes it — on {0..3}, [3,3,2] gives 2 but [3,3,0] gives 0. Non-idempotent by design: x ⊙ x extinguishes." .
+
+re:merge-discrete-median a owl:NamedIndividual , re:ChainMergeTransformation ;
+    re:transformationName "discrete-median" ;
+    re:deterministic true ; re:symmetric true ;
+    re:idempotent true ; re:returnsAContributor true ; re:requiresChainTop false ;
+    re:mergeFormula "sort(x)[floor((n-1)/2)]" ;
+    rdfs:label "discrete median" ;
+    rdfs:comment "Majority consensus, rejecting anomalous outliers — [3,3,0,3] gives 3, filtering the transient dropout. For even n the lower of the two middle elements, which over integers is exactly floor of the median: a selection, never a division, so no float arithmetic enters the step for runtimes to differ over. Takes no chain top." .
