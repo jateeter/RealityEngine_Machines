@@ -4,7 +4,10 @@
   "title": "RealityEngine Machine",
   "description": "Compatibility-safe schema for canonical RealityEngine machine corpus files. It constrains the cross-engine contract surface while leaving domain-specific metadata extensible.",
   "type": "object",
-  "required": ["version", "machine"],
+  "required": [
+    "version",
+    "machine"
+  ],
   "properties": {
     "version": {
       "type": "string",
@@ -44,11 +47,33 @@
         },
         "arbiterRule": {
           "type": "string",
-          "enum": ["PASSTHROUGH"]
+          "enum": [
+            "PASSTHROUGH"
+          ]
         },
         "matchAlgorithm": {
           "type": "string",
-          "enum": ["equals", "gte"]
+          "enum": [
+            "equals",
+            "gte"
+          ]
+        },
+        "outputMergeTransformation": {
+          "type": "string",
+          "enum": [
+            "or",
+            "and",
+            "xor",
+            "nor",
+            "nand",
+            "meet",
+            "join",
+            "strong-disjunction",
+            "strong-conjunction",
+            "discrete-median"
+          ],
+          "default": "or",
+          "description": "How the Reality Engine folds this machine's collection of potential outputs into the single output it presents to the Perception Engine. At the completion boundary of the atomic matching action a machine holds one potential output per completed Reality Event; this names the deterministic elementwise transformation applied over the output space vectors to combine them. Absent means \"or\". Read when the machine is interned and mutable between steps at runtime; it is a training variable, so it is declared on the machine rather than configured per deployment. Two domains: \"or\"/\"and\"/\"xor\"/\"nor\"/\"nand\" are Boolean gates over {0,1} and flatten every value above 1 to 1, which destroys a multi-valued machine's alphabet; \"meet\"/\"join\"/\"strong-disjunction\"/\"strong-conjunction\"/\"discrete-median\" are defined over an ordered chain {0..k} and preserve it. See the \"Output merge transformations\" block in semantics/ontology/re-core.ttl for the per-transformation definitions and properties. UNRESOLVED: \"strong-disjunction\" and \"strong-conjunction\" are parameterised by the chain top k, which is not declared anywhere in the corpus and is NOT derivable from bitsPerElement."
         },
         "perceptualMapping": {
           "$ref": "#/$defs/perceptualMapping"
@@ -67,7 +92,37 @@
           }
         }
       },
-      "additionalProperties": true
+      "additionalProperties": true,
+      "allOf": [
+        {
+          "$comment": "strong-disjunction and strong-conjunction are undefined without a chain top: one clamps to k and the other's closure bound holds only while every value is <= k. A machine selecting either must declare perceptualMapping.outputAlphabetTop. Every other transformation ignores it, so no existing machine is affected.",
+          "if": {
+            "properties": {
+              "outputMergeTransformation": {
+                "enum": [
+                  "strong-disjunction",
+                  "strong-conjunction"
+                ]
+              }
+            },
+            "required": [
+              "outputMergeTransformation"
+            ]
+          },
+          "then": {
+            "properties": {
+              "perceptualMapping": {
+                "required": [
+                  "outputAlphabetTop"
+                ]
+              }
+            },
+            "required": [
+              "perceptualMapping"
+            ]
+          }
+        }
+      ]
     },
     "metadata": {
       "type": "object",
@@ -144,7 +199,11 @@
     },
     "perceptualMapping": {
       "type": "object",
-      "required": ["input", "output", "bitsPerElement"],
+      "required": [
+        "input",
+        "output",
+        "bitsPerElement"
+      ],
       "properties": {
         "input": {
           "$ref": "#/$defs/region"
@@ -154,14 +213,27 @@
         },
         "bitsPerElement": {
           "type": "integer",
-          "enum": [1, 2, 4, 8]
+          "enum": [
+            1,
+            2,
+            4,
+            8
+          ]
+        },
+        "outputAlphabetTop": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "k, the top of the ordered chain {0..k} this machine's cells range over \u2014 absolute truth in the Lukasiewicz sense. Optional, and no machine in the corpus declares it today. Required only when outputMergeTransformation is strong-disjunction or strong-conjunction, which are undefined without it. Deliberately distinct from bitsPerElement, which gives the REPRESENTABLE range rather than the alphabet: FallDetection declares 4 bits (representable 0..15) and ranges over {0..4}, and folding that ladder at k=15 makes the truncated sum yield 14, outside the machine's alphabet entirely. The two are co-located because that is the point at which they are confused."
         }
       },
       "additionalProperties": true
     },
     "region": {
       "type": "object",
-      "required": ["offset", "length"],
+      "required": [
+        "offset",
+        "length"
+      ],
       "properties": {
         "offset": {
           "type": "integer",
@@ -176,7 +248,10 @@
     },
     "sequence": {
       "type": "object",
-      "required": ["id", "vectors"],
+      "required": [
+        "id",
+        "vectors"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -206,7 +281,9 @@
     },
     "vectorState": {
       "type": "object",
-      "required": ["elements"],
+      "required": [
+        "elements"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -244,7 +321,9 @@
     },
     "vectorElement": {
       "type": "object",
-      "required": ["value"],
+      "required": [
+        "value"
+      ],
       "properties": {
         "value": {
           "type": "number"
@@ -261,7 +340,9 @@
     },
     "outputVector": {
       "type": "object",
-      "required": ["vector"],
+      "required": [
+        "vector"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -283,7 +364,10 @@
     },
     "inputSequence": {
       "type": "object",
-      "required": ["name", "vectors"],
+      "required": [
+        "name",
+        "vectors"
+      ],
       "properties": {
         "name": {
           "type": "string",
@@ -315,7 +399,13 @@
     },
     "governance": {
       "type": "object",
-      "required": ["schemaVersion", "ownerTeam", "runbook", "escalationPolicy", "sla"],
+      "required": [
+        "schemaVersion",
+        "ownerTeam",
+        "runbook",
+        "escalationPolicy",
+        "sla"
+      ],
       "properties": {
         "schemaVersion": {
           "type": "string",
@@ -340,7 +430,10 @@
         "sla": {
           "type": "object",
           "additionalProperties": {
-            "type": ["integer", "null"],
+            "type": [
+              "integer",
+              "null"
+            ],
             "minimum": 0
           }
         },
@@ -352,7 +445,9 @@
     },
     "triggerConfig": {
       "type": "object",
-      "required": ["rules"],
+      "required": [
+        "rules"
+      ],
       "properties": {
         "processId": {
           "type": "string",
@@ -386,7 +481,11 @@
     },
     "triggerRule": {
       "type": "object",
-      "required": ["sequenceId", "outputMatches", "ragStatusCode"],
+      "required": [
+        "sequenceId",
+        "outputMatches",
+        "ragStatusCode"
+      ],
       "properties": {
         "sequenceId": {
           "type": "string",
@@ -400,7 +499,11 @@
         },
         "ragStatusCode": {
           "type": "string",
-          "enum": ["GREEN", "AMBER", "RED"]
+          "enum": [
+            "GREEN",
+            "AMBER",
+            "RED"
+          ]
         },
         "processStatus": {
           "type": "string",
@@ -469,7 +572,12 @@
     },
     "interconnection": {
       "type": "object",
-      "required": ["id", "type", "busId", "busTag"],
+      "required": [
+        "id",
+        "type",
+        "busId",
+        "busTag"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -508,7 +616,14 @@
     },
     "publishedDomainBus": {
       "type": "object",
-      "required": ["id", "tag", "domain", "inputRegion", "outputRegion", "inputComposition"],
+      "required": [
+        "id",
+        "tag",
+        "domain",
+        "inputRegion",
+        "outputRegion",
+        "inputComposition"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -540,7 +655,11 @@
           "minItems": 1,
           "items": {
             "type": "object",
-            "required": ["role", "sourceMachine", "machineOutputRegion"],
+            "required": [
+              "role",
+              "sourceMachine",
+              "machineOutputRegion"
+            ],
             "properties": {
               "role": {
                 "type": "string",
@@ -575,7 +694,10 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["machine", "inputRegion"],
+            "required": [
+              "machine",
+              "inputRegion"
+            ],
             "properties": {
               "machine": {
                 "type": "string",

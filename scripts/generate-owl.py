@@ -321,6 +321,12 @@ class MachineProjector:
             statements.append(f're:arbiterRule "{escape(machine["arbiterRule"])}"')
         if machine.get("matchAlgorithm"):
             statements.append(f're:matchAlgorithm "{escape(machine["matchAlgorithm"])}"')
+        # Emitted only when the machine declares it, so the ABox stays a
+        # statement of what the corpus says rather than of what the loader
+        # defaults to. Absent means "or" everywhere that reads it.
+        if machine.get("outputMergeTransformation"):
+            statements.append(
+                f're:outputMergeTransformation "{escape(machine["outputMergeTransformation"])}"')
         rel = self.path.resolve().relative_to(REPO_ROOT.resolve())
         statements.append(f're:sourceFile "{escape(str(rel))}"')
         if machine.get("perceptualMapping"):
