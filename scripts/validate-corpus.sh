@@ -1,6 +1,12 @@
 #!/bin/bash
 # Architecture-aware corpus validation before seeding or accepting new domains.
 #
+# This script is the gate the domain-addition protocol runs on. What a domain
+# must supply, what each gate below proves, and when a domain must extend the
+# regression corpus are specified in:
+#
+#     RealityEngine_CI/MACHINE_CONCEPT.md  §9  Adding a Domain
+#
 # Default mode is compatibility-safe: hard schema errors fail the build, while
 # migration gaps such as legacy dispatchableAgent without agentBinding are
 # reported as warnings.  Set STRICT_DOMAIN_CONTRACT=1 to make warnings fail.

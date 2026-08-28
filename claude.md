@@ -56,6 +56,7 @@ npm run test:e2e
   basename. Names are the MVP identity mechanism; UUIDs are the intended
   direction.
 - `domains/domain-manifest.json` is the authoritative domain inventory; recursive corpus counts must match `currentMachineCount`, and unmanifested domains are validation failures.
+- **Adding a domain** follows a specified protocol — `RealityEngine_CI/MACHINE_CONCEPT.md` §9. It is the canonical statement of what a domain must supply (at least one machine, a manifest entry with non-colliding `codePrefixes`, a region allocation), what acceptance validates (semantic integrity, machine definitions, interconnectivity, arbitration), and when a domain must extend the regression corpus rather than relying on the standard-deployment twelve. `scripts/validate-corpus.sh` is the gate; a domain's `status` stays non-`accepted` until it passes. Do not restate the protocol here.
 - `domains/semantic-bus-registry.json` is the authoritative semantic-bus inventory; refresh it with `npm run semantic-buses:write` when semantic published buses change.
 - Do not treat stale generated expectations as truth when live registry endpoints disagree.
 
