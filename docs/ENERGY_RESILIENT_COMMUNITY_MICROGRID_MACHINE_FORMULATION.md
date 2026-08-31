@@ -375,7 +375,7 @@ Required PE behavior:
 - Normalize protocol telemetry into bounded vector lanes.
 - Dispatch command intents asynchronously.
 - Ingest acknowledgements and completions as PE sources.
-- Preserve audit metadata outside the universal reality vector.
+- Preserve audit metadata outside the universal Reality Event.
 - Never wait in PE cycles for command completion, field confirmation, OpenClaw, Ollama, DERMS, SCADA, or utility response.
 
 ## OpenClaw And Ollama Roles
