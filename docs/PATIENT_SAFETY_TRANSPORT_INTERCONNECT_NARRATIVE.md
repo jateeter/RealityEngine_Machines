@@ -204,7 +204,7 @@ This is the scaling pattern for future interconnection growth:
 
 ## Privacy Boundary
 
-The universal reality vector carries normalized state only. Raw observations,
+The universal Reality Event carries normalized state only. Raw observations,
 clinical notes, device payloads, or other PHI-bearing source records remain in
 the upstream source ledger or system of record. The published bus carries only
 the compact state needed for deterministic CES evaluation and downstream

@@ -200,7 +200,7 @@ derivable from the corpus and IS(k) alone (4.3a).
 
 This is the intended substrate for the *omega sprite* work: agents that occupy a
 declared footprint, can be swapped, compared and scored against a fixed
-contract, and whose effect on the reality vector is reproducible because the
+contract, and whose effect on the Reality Event is reproducible because the
 footprint and the resolution rules were declared before the agent existed.
 
 Nothing in section 6 is designed yet. It is recorded here because it is the

@@ -483,7 +483,7 @@ localAIStack/Ollama receives only compact status and returns completion through 
 
 ## Privacy Boundary
 
-The universal reality vector carries compact normalized state only. Pain diaries,
+The universal Reality Event carries compact normalized state only. Pain diaries,
 PHQ-9 responses, medication histories, PDMP details, clinician notes, and other
 PHI-bearing records should remain in upstream source systems or source ledgers.
 The PE-visible workflow should carry only the vector elements required for
