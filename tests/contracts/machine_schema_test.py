@@ -4,12 +4,18 @@
 from __future__ import annotations
 
 import json
+import sys
 import unittest
 from pathlib import Path
 from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+# Corpus reads go through the shared accessors so both schema spellings
+# resolve while RealityEngine_CI#220 layer 1 is in flight.
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+from event_keys import sequence_events  # noqa: E402
 MACHINES = REPO_ROOT / "machines"
 SCHEMA = REPO_ROOT / "schemas" / "machine.schema.json"
 MACHINE_CLASS_SCHEMA = REPO_ROOT / "schemas" / "machine-class.schema.json"
@@ -151,7 +157,7 @@ class MachineSchemaTests(unittest.TestCase):
                     continue
                 if not isinstance(sequence.get("id"), str) or not sequence["id"]:
                     failures.append(f"{rel}: sequences[{idx}].id must be non-empty string")
-                if not isinstance(sequence.get("vectors"), list) or not sequence["vectors"]:
+                if not sequence_events(sequence):
                     failures.append(f"{rel}: sequences[{idx}].vectors must be non-empty array")
 
         self.assertFalse(failures, "\n".join(failures[:50]))

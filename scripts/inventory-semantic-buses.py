@@ -15,6 +15,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 from typing import Any
+from event_keys import output_events, sequence_events
 
 RANGE_BUS_RE = re.compile(
     r"^[a-z][a-z0-9-]*\.(agx|bsx|csx|dcx|dlx|enx|hsph|lsx|tfx)-\d{3}-\d{3}$"
@@ -93,10 +94,10 @@ def derive_output_semantics(machine: dict[str, Any]) -> list[dict[str, Any]]:
             "name": seq.get("name"),
         }
         vectors = []
-        for vector in as_list(seq.get("vectors")):
+        for vector in sequence_events(seq):
             if not isinstance(vector, dict):
                 continue
-            for out in as_list(vector.get("outputVectors")):
+            for out in output_events(vector):
                 if isinstance(out, dict):
                     vectors.append({
                         "id": out.get("id"),
