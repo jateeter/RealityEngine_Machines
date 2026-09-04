@@ -10,11 +10,6 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-
-# Corpus reads go through the shared accessors so both schema spellings
-# resolve while RealityEngine_CI#220 layer 1 is in flight.
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
-from event_keys import sequence_events  # noqa: E402
 FIXTURE = next((REPO_ROOT / "machines").rglob("OpenClawCompletionE2E.json"))
 
 
@@ -54,7 +49,7 @@ class OpenClawFixtureTests(unittest.TestCase):
 
     def test_authored_vectors_match_e2e_protocol(self) -> None:
         authored = {
-            item["name"]: sequence_events(item)
+            item["name"]: (item.get("events") or [])
             for item in self.machine["inputSequences"]
         }
         self.assertEqual(authored["Create ACP dispatch record"], [[0, 1, 0, 1]])

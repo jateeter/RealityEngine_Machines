@@ -39,11 +39,6 @@ from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-
-# Corpus reads go through the shared accessors so both schema spellings
-# resolve while RealityEngine_CI#220 layer 1 is in flight.
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
-from event_keys import output_events, sequence_events  # noqa: E402
 MACHINES = REPO_ROOT / "machines"
 REGISTRY = REPO_ROOT / "domains" / "arbitration-registry.json"
 
@@ -84,8 +79,8 @@ def derive_writers(machines) -> dict[int, set]:
         outp = pm.get("output")
         if outp:
             for seq in m.get("sequences") or []:
-                for vec in sequence_events(seq):
-                    for ov in output_events(vec):
+                for vec in (seq.get("events") or []):
+                    for ov in (vec.get("outputEvents") or []):
                         n = min(len(ov.get("vector") or []), outp["length"])
                         for k in range(n):
                             writers[outp["offset"] + k].add(("machine", rel))

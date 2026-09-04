@@ -26,7 +26,6 @@ import json
 import re
 from collections import defaultdict
 from pathlib import Path
-from event_keys import output_events, sequence_events
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MACHINES_ROOT = REPO_ROOT / "machines"
@@ -139,8 +138,8 @@ def main() -> int:
         domain = rel.parts[1] if rel.parts[0] == "domains" else "core"
         doc = json.loads(path.read_text())
         for sequence in doc.get("machine", {}).get("sequences", []):
-            for vector in sequence_events(sequence):
-                for output in output_events(vector):
+            for vector in (sequence.get("events") or []):
+                for output in (vector.get("outputEvents") or []):
                     action = output.get("metadata", {}).get("action")
                     if not action or action in codes:
                         continue

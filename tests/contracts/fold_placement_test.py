@@ -52,11 +52,6 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-
-# Corpus reads go through the shared accessors so both schema spellings
-# resolve while RealityEngine_CI#220 layer 1 is in flight.
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
-from event_keys import output_events, sequence_events  # noqa: E402
 MACHINES = REPO_ROOT / "machines"
 SCHEMA = REPO_ROOT / "schemas" / "machine.schema.json"
 
@@ -90,8 +85,8 @@ def load_corpus() -> list[tuple[Path, dict[str, Any]]]:
 def output_vectors(machine: dict[str, Any]):
     """(sequenceId, outputVector) for every potential output the machine holds."""
     for sequence in machine.get("sequences") or []:
-        for vector in sequence_events(sequence):
-            for output in output_events(vector):
+        for vector in (sequence.get("events") or []):
+            for output in (vector.get("outputEvents") or []):
                 yield sequence.get("id"), output
 
 
