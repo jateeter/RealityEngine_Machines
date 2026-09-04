@@ -268,13 +268,6 @@
           "type": "object",
           "additionalProperties": true
         },
-        "vectors": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "$ref": "#/$defs/vectorState"
-          }
-        },
         "events": {
           "type": "array",
           "minItems": 1,
@@ -284,18 +277,14 @@
         }
       },
       "additionalProperties": true,
-      "anyOf": [
-        {
-          "required": [
-            "vectors"
-          ]
-        },
-        {
-          "required": [
-            "events"
-          ]
-        }
-      ]
+      "required": [
+        "events"
+      ],
+      "not": {
+        "required": [
+          "vectors"
+        ]
+      }
     },
     "vectorState": {
       "type": "object",
@@ -317,19 +306,6 @@
             "$ref": "#/$defs/vectorElement"
           }
         },
-        "nextVectorIds": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "outputVectors": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/outputVector"
-          }
-        },
         "metadata": {
           "type": "object",
           "additionalProperties": true
@@ -348,7 +324,21 @@
           }
         }
       },
-      "additionalProperties": true
+      "additionalProperties": true,
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "outputVectors"
+            ]
+          },
+          {
+            "required": [
+              "nextVectorIds"
+            ]
+          }
+        ]
+      }
     },
     "vectorElement": {
       "type": "object",
@@ -409,17 +399,6 @@
         "description": {
           "type": "string"
         },
-        "vectors": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "type": "number"
-            }
-          }
-        },
         "metadata": {
           "type": "object",
           "additionalProperties": true
@@ -437,18 +416,14 @@
         }
       },
       "additionalProperties": true,
-      "anyOf": [
-        {
-          "required": [
-            "vectors"
-          ]
-        },
-        {
-          "required": [
-            "events"
-          ]
-        }
-      ]
+      "required": [
+        "events"
+      ],
+      "not": {
+        "required": [
+          "vectors"
+        ]
+      }
     },
     "governance": {
       "type": "object",
