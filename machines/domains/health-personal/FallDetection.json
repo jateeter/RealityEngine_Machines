@@ -299,7 +299,7 @@
         "metadata": {
           "description": "All-clear baseline. Fires every tick the sensor reports no motion progression and no stillness progression."
         },
-        "vectors": [
+        "events": [
           {
             "id": "fall-nominal-v",
             "elements": [
@@ -317,7 +317,7 @@
               "name": "nominal",
               "state": "NOMINAL"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "fall-nominal-out",
                 "vector": [
@@ -340,7 +340,7 @@
         "metadata": {
           "description": "Single tick of motion-progression=1 followed by full recovery. Logged but not escalated."
         },
-        "vectors": [
+        "events": [
           {
             "id": "fall-stumble-v1",
             "elements": [
@@ -359,7 +359,7 @@
               "state": "MOTION_BRIEF",
               "stepIndex": 1
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fall-stumble-v2"
             ]
           },
@@ -381,7 +381,7 @@
               "state": "RECOVERED",
               "stepIndex": 2
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "fall-stumble-out",
                 "vector": [
@@ -405,7 +405,7 @@
         "metadata": {
           "description": "Motion progression climbs across three ticks without a corresponding impact or recovery \u2014 caregiver should watch the resident."
         },
-        "vectors": [
+        "events": [
           {
             "id": "fall-sust-v1",
             "elements": [
@@ -423,7 +423,7 @@
               "name": "motion-brief",
               "stepIndex": 1
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fall-sust-v2"
             ]
           },
@@ -444,7 +444,7 @@
               "name": "motion-sustained",
               "stepIndex": 2
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fall-sust-v3"
             ]
           },
@@ -465,7 +465,7 @@
               "name": "motion-severe",
               "stepIndex": 3
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "fall-sust-out",
                 "vector": [
@@ -489,7 +489,7 @@
         "metadata": {
           "description": "Same motion-1\u21922\u21923 progression as 'sustained-instability', but the resident then returns to fully nominal. Log + suggest caregiver check-in. Note: this sequence runs in parallel with 'sustained-instability' and only reaches its terminal output if the resident actually recovers; if they stay severe, only the AMBER-medium fires."
         },
-        "vectors": [
+        "events": [
           {
             "id": "fall-imprec-v1",
             "elements": [
@@ -507,7 +507,7 @@
               "name": "motion-brief",
               "stepIndex": 1
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fall-imprec-v2"
             ]
           },
@@ -528,7 +528,7 @@
               "name": "motion-sustained",
               "stepIndex": 2
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fall-imprec-v3"
             ]
           },
@@ -549,7 +549,7 @@
               "name": "motion-severe",
               "stepIndex": 3
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fall-imprec-v4"
             ]
           },
@@ -570,7 +570,7 @@
               "name": "recovered",
               "stepIndex": 4
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "fall-imprec-out",
                 "vector": [
@@ -595,7 +595,7 @@
           "description": "The only path that escalates to emergency dispatch. Six ticks of monotonic evidence are required: motion onset \u2192 sustained motion \u2192 severe motion \u2192 post-event stillness onset \u2192 sustained stillness \u2192 very-sustained stillness. Each transition is Hamming-distance 1, so a single anomalous tick (recovery, sensor noise) aborts the sequence and prevents an unwarranted RED dispatch.",
           "severity": "life-safety"
         },
-        "vectors": [
+        "events": [
           {
             "id": "fall-conf-v1",
             "elements": [
@@ -613,7 +613,7 @@
               "name": "motion-brief",
               "stepIndex": 1
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fall-conf-v2"
             ]
           },
@@ -634,7 +634,7 @@
               "name": "motion-sustained",
               "stepIndex": 2
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fall-conf-v3"
             ]
           },
@@ -655,7 +655,7 @@
               "name": "motion-severe",
               "stepIndex": 3
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fall-conf-v4"
             ]
           },
@@ -676,7 +676,7 @@
               "name": "post-impact-stillness-onset",
               "stepIndex": 4
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fall-conf-v5"
             ]
           },
@@ -697,7 +697,7 @@
               "name": "stillness-sustained",
               "stepIndex": 5
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fall-conf-v6"
             ]
           },
@@ -719,7 +719,7 @@
               "stepIndex": 6,
               "lifeSafety": true
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "fall-conf-out",
                 "vector": [
@@ -746,7 +746,7 @@
           "description": "Catches the case where a resident slumps without struggle (syncope, stroke, cardiac event). Three ticks of monotonically increasing stillness with zero motion-progression. Lower confidence than the motion-validated path because silent stillness can also indicate intentional rest \u2014 the sequence requires the stillness signal to climb from 1\u21922\u21923, which is unusual for normal sleep transitions.",
           "severity": "life-safety"
         },
-        "vectors": [
+        "events": [
           {
             "id": "fall-slow-v1",
             "elements": [
@@ -764,7 +764,7 @@
               "name": "stillness-onset-no-motion",
               "stepIndex": 1
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fall-slow-v2"
             ]
           },
@@ -785,7 +785,7 @@
               "name": "stillness-sustained-no-motion",
               "stepIndex": 2
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fall-slow-v3"
             ]
           },
@@ -807,7 +807,7 @@
               "stepIndex": 3,
               "lifeSafety": true
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "fall-slow-out",
                 "vector": [
@@ -833,7 +833,7 @@
         "metadata": {
           "description": "Stillness-progression=2 reached without progressing through level 1 first (i.e., the resident chose to lie down). Logged at GREEN as 'intentional rest' so the dashboard reflects current activity without any alert."
         },
-        "vectors": [
+        "events": [
           {
             "id": "fall-intent-v",
             "elements": [
@@ -851,7 +851,7 @@
               "name": "intentional-rest",
               "state": "INTENTIONAL_LYING"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "fall-intent-out",
                 "vector": [
@@ -875,7 +875,7 @@
         "name": "Quiet baseline",
         "pattern": "[0,0]\u2026",
         "description": "Resident moving normally \u2014 only the NOMINAL sequence fires.",
-        "vectors": [
+        "events": [
           [
             0,
             0
@@ -901,7 +901,7 @@
         "name": "Brief stumble (recovered)",
         "pattern": "[0,0]\u2192[1,0]\u2192[0,0]",
         "description": "One tick of brief motion, then immediate recovery. Triggers AMBER-low only.",
-        "vectors": [
+        "events": [
           [
             0,
             0
@@ -926,7 +926,7 @@
         "name": "Sustained instability (no recovery)",
         "pattern": "[0,0]\u2192[1,0]\u2192[2,0]\u2192[3,0]\u2192[3,0]\u2026",
         "description": "Motion climbs across three ticks and stays severe \u2014 AMBER-medium fires at tick 4 to alert caregiver to watch.",
-        "vectors": [
+        "events": [
           [
             0,
             0
@@ -961,7 +961,7 @@
         "name": "Hard impact recovered",
         "pattern": "[0,0]\u2192[1,0]\u2192[2,0]\u2192[3,0]\u2192[0,0]",
         "description": "Severe motion then full recovery. AMBER-medium fires at tick 4 (sustained-instability terminal) and AMBER-high at tick 5 (impact-recovered terminal).",
-        "vectors": [
+        "events": [
           [
             0,
             0
@@ -998,7 +998,7 @@
         "name": "Confirmed fall (motion \u2192 impact \u2192 sustained stillness)",
         "pattern": "[0,0]\u2192[1,0]\u2192[2,0]\u2192[3,0]\u2192[3,1]\u2192[3,2]\u2192[3,3]",
         "description": "Full six-tick validated fall pattern. AMBER-medium fires at tick 4, then RED fires at tick 7 once stillness has climbed to maximum.",
-        "vectors": [
+        "events": [
           [
             0,
             0
@@ -1042,7 +1042,7 @@
         "name": "Slow collapse (silent fall, no motion)",
         "pattern": "[0,0]\u2192[0,1]\u2192[0,2]\u2192[0,3]",
         "description": "Stillness escalates over three ticks with zero motion \u2014 RED at lower confidence to surface possible syncope.",
-        "vectors": [
+        "events": [
           [
             0,
             0
@@ -1074,7 +1074,7 @@
         "name": "Intentional lying down",
         "pattern": "[0,0]\u2192[0,2]\u2026",
         "description": "Resident lies down directly (without progressing through stillness=1 from a fall). Only the NOMINAL 'intentional-lying' sequence fires; slow-collapse never starts because its initial vector requires stillness=1.",
-        "vectors": [
+        "events": [
           [
             0,
             0

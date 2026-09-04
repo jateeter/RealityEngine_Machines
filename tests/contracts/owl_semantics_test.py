@@ -20,6 +20,11 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+# Corpus reads go through the shared accessors so both schema spellings
+# resolve while RealityEngine_CI#220 layer 1 is in flight.
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+from event_keys import output_events, sequence_events  # noqa: E402
 ONTOLOGY = REPO_ROOT / "semantics" / "ontology" / "re-core.ttl"
 GENERATOR = REPO_ROOT / "scripts" / "generate-owl.py"
 MACHINES_DIR = REPO_ROOT / "machines"
@@ -112,8 +117,8 @@ class OwlSemanticsTests(unittest.TestCase):
             with machine_path.open() as handle:
                 machine = json.load(handle)["machine"]
             for sequence in machine.get("sequences", []):
-                for vector in sequence.get("vectors", []):
-                    for output in vector.get("outputVectors", []):
+                for vector in sequence_events(sequence):
+                    for output in output_events(vector):
                         metadata = output.get("metadata", {})
                         action = metadata.get("action")
                         if action is None:
@@ -142,7 +147,7 @@ class OwlSemanticsTests(unittest.TestCase):
         expected = {
             seq["id"] for seq in self.machine["sequences"]
             if seq.get("metadata", {}).get("severity") == "life-safety"
-            or any(v.get("metadata", {}).get("lifeSafety") for v in seq["vectors"])
+            or any(v.get("metadata", {}).get("lifeSafety") for v in sequence_events(seq))
         }
         self.assertEqual(expected, {"fall-confirmed", "fall-slow-collapse"})
         for seq_id in expected:
@@ -160,8 +165,8 @@ class OwlSemanticsTests(unittest.TestCase):
         self.assertIn("EmergencyDispatch", escalation_individuals)
         red_outputs = []
         for sequence in self.machine["sequences"]:
-            for vector in sequence["vectors"]:
-                for output in vector.get("outputVectors", []):
+            for vector in sequence_events(sequence):
+                for output in output_events(vector):
                     if output.get("metadata", {}).get("ragStatusCode") == "RED":
                         red_outputs.append(output)
         self.assertGreaterEqual(len(red_outputs), 2)
@@ -728,8 +733,8 @@ class OutputMergeTransformationTests(unittest.TestCase):
                       "the ontology no longer warns against deriving k from bitsPerElement")
 
         fall = json.loads(FALL_JSON.read_text(encoding="utf-8"))["machine"]
-        outputs = [o["vector"] for s in fall["sequences"] for v in s["vectors"]
-                   for o in (v.get("outputVectors") or [])]
+        outputs = [o["vector"] for s in fall["sequences"] for v in sequence_events(s)
+                   for o in output_events(v)]
         alphabet = {x for vector in outputs for x in vector}
         representable = (1 << fall["perceptualMapping"]["bitsPerElement"]) - 1
         self.assertGreater(representable, max(alphabet),

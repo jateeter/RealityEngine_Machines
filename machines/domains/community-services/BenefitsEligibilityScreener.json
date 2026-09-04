@@ -234,7 +234,7 @@
           "path": "ELIGIBLE+ → BORDERLINE → INELIGIBLE → output[1,0,0,0]",
           "output": "[1,0,0,0] (ELIGIBILITY_DENIED)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "be-eligible",
             "elements": [
@@ -261,7 +261,7 @@
               "description": "ELIGIBLE+ — income within limits, residency documented, categorical qualifier confirmed, application complete. isInitial A*A = A+.",
               "income_status": "0.60–0.78 (income 80–100% of program threshold)"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "be-eligible",
               "be-borderline"
             ]
@@ -292,7 +292,7 @@
               "description": "BORDERLINE — income approaching or slightly above threshold; documentation partially lapsing; categorical qualifier under review.",
               "income_status": "0.30–0.48 (income 100–115% of threshold; marginal)"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "be-ineligible"
             ]
           },
@@ -322,7 +322,7 @@
               "description": "INELIGIBLE — income clearly over threshold OR categorical qualifier lost OR residency documentation expired. Fires ELIGIBILITY_DENIED.",
               "income_status": "0.0–0.22 (income >130% of threshold; program ineligible)"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "be-denied-output",
                 "vector": [
@@ -349,7 +349,7 @@
           "pattern": "DOCS_PENDING+",
           "output": "[0,0,1,0] (DOCUMENTATION_NEEDED)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "be-docs-pending",
             "elements": [
@@ -376,7 +376,7 @@
               "description": "DOCS_PENDING+ — income qualifies, categorical eligibility met, but residency documentation incomplete or application has missing fields. isInitial A*A = A+: fires DOCUMENTATION_NEEDED each cycle.",
               "scenario": "Applicant has pay stubs and SSI letter but cannot produce current lease or utility bill after recent move"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "be-docs-needed-output",
                 "vector": [
@@ -403,7 +403,7 @@
           "pattern": "CONFIRMED+",
           "output": "[0,0,0,1] (ELIGIBILITY_CONFIRMED)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "be-confirmed",
             "elements": [
@@ -430,7 +430,7 @@
               "description": "CONFIRMED+ — all eligibility criteria met; documentation complete; application verified and ready for enrollment. Fires ELIGIBILITY_CONFIRMED each cycle.",
               "scenario": "SNAP applicant: income verified at 95% FPL, current lease provided, application complete — ready for 30-day determination"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "be-confirmed-output",
                 "vector": [
@@ -455,7 +455,7 @@
         "name": "Job Loss to SNAP Enrollment",
         "pattern": "5-step: ELIGIBLE→ELIGIBLE→DOCS_PENDING (income verified but pay stub needed)→CONFIRMED→CONFIRMED",
         "description": "Recently unemployed applicant; income clearly within limits after layoff; missing final pay stub initially; navigator assists with documentation; eligibility confirmed.",
-        "vectors": [
+        "events": [
           [
             0.66,
             0.63,

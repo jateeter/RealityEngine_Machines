@@ -255,7 +255,7 @@
           "path": "DARK_HUMID_WATCH+ \u2192 DARK_HUMID \u2192 CONDENSATION_DARK \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (FUNGAL_ALERT)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "ag-ipm-dark-humid-watch",
             "elements": [
@@ -298,7 +298,7 @@
               "description": "DARK_HUMID_WATCH+ \u2014 LIGHTS_OFF=1, HUMIDITY_ALERT=1: elevated humidity during dark period. isInitial A*A = A+: at least one cycle of dark+humidity confirmed before escalating.",
               "condition": "LIGHTS_OFF=1, HUMIDITY_ALERT=1, ATMOS_OK=0"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "ag-ipm-dark-humid-watch",
               "ag-ipm-dark-humid"
             ]
@@ -345,7 +345,7 @@
               "description": "DARK_HUMID \u2014 LIGHTS_OFF + VENT_OPEN response triggered but HUMIDITY_ALERT persists: ventilation insufficient to resolve humidity.",
               "condition": "LIGHTS_OFF=1, VENT_OPEN=1, HUMIDITY_ALERT=1"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "ag-ipm-condensation-dark"
             ]
           },
@@ -391,7 +391,7 @@
               "description": "CONDENSATION_DARK \u2014 sustained dark+humidity+vent-open with no resolution: condensation forming on plant surfaces. Fires FUNGAL_ALERT.",
               "condition": "LIGHTS_OFF=1, VENT_OPEN=1, HUMIDITY_ALERT=1 (sustained)"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "ag-ipm-fungal-alert-output",
                 "vector": [
@@ -418,7 +418,7 @@
           "path": "LIGHT_STAGNANT+ \u2192 CO2_PEAK_LIGHT \u2192 output[0,1,0,0]",
           "output": "[0,1,0,0] (INSECT_ALERT)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "ag-ipm-light-stagnant",
             "elements": [
@@ -461,7 +461,7 @@
               "description": "LIGHT_STAGNANT+ \u2014 LIGHTS_ON=1, PHOTO_OK=1, CO2_INJECT=1 (CO2 depleted in stagnant zones), ATMOS_OK=0. isInitial A*A = A+.",
               "condition": "LIGHTS_ON=1, PHOTO_OK=1, CO2_INJECT=1 (poor air mixing)"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "ag-ipm-light-stagnant",
               "ag-ipm-co2-peak-light"
             ]
@@ -508,7 +508,7 @@
               "description": "CO2_PEAK_LIGHT \u2014 LIGHTS_ON + CO2_INJECT, PHOTO_OK lost: hot stagnant microclimate zones forming around canopy. Fires INSECT_ALERT.",
               "condition": "LIGHTS_ON=1, CO2_INJECT=1, PHOTO_OK=0 (canopy stress)"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "ag-ipm-insect-alert-output",
                 "vector": [
@@ -535,7 +535,7 @@
           "pattern": "CLEAR+",
           "output": "[0,0,0,1] (IPM_OK)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "ag-ipm-clear",
             "elements": [
@@ -578,7 +578,7 @@
               "description": "CLEAR+ \u2014 LIGHTS_ON=1, PHOTO_OK=1, ATMOS_OK=1: active photoperiod with clean atmosphere and no humidity alert. Fires IPM_OK each matching cycle.",
               "condition": "LIGHTS_ON=1, PHOTO_OK=1, ATMOS_OK=1, no alerts"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "ag-ipm-ok-output",
                 "vector": [
@@ -603,7 +603,7 @@
         "name": "Night Humidity Spike Leading to Fungal Alert",
         "pattern": "6-step: CLEAR(day)\u2192DARK_OK\u2192DARK_HUMID_WATCH\u2192DARK_HUMID\u2192CONDENSATION\u2192CLEAR(next day)",
         "description": "Photoperiod transition to dark period; humidity rises beyond ventilation capacity; FUNGAL_ALERT fires before canopy inspection.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.1,

@@ -248,7 +248,15 @@ if offset is None or length is None:
 
 inputs = []
 for seq in machine.get('inputSequences', []):
-    for vec in seq.get('vectors', []):
+    # Both schema spellings, for the duration of RealityEngine_CI#220 layer 1.
+    # Inlined rather than imported from scripts/event_keys.py because this runs
+    # as an embedded interpreter with no import path set up. Note the `exit(1)`
+    # below is a *silent skip*: reading the wrong key here would seed nothing
+    # and say nothing.
+    events = seq.get('events')
+    if events is None:
+        events = seq.get('vectors')
+    for vec in events or []:
         inputs.append([float(v) for v in vec])
 
 if not inputs:

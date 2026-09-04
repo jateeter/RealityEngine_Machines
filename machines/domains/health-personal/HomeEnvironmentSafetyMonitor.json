@@ -369,7 +369,7 @@
           "path": "SOUND+ \u2192 DETERIORATING \u2192 HAZARDOUS \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (UNSAFE_HOUSING)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "henv-sound",
             "elements": [
@@ -396,7 +396,7 @@
               "description": "SOUND+ \u2014 all housing dimensions above threshold: livable temperature, acceptable air quality, no major structural hazards, utilities current. isInitial A*A = A+.",
               "scenario": "Baseline safe housing \u2014 may have minor deferred maintenance but not health-threatening"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "henv-sound",
               "henv-deteriorating"
             ]
@@ -427,7 +427,7 @@
               "description": "DETERIORATING \u2014 multiple housing dimensions falling below adequate threshold: unreliable heating, suspected mold, past-due utility balance.",
               "scenario": "Winter heating concerns; landlord non-responsive to maintenance; utility shutoff notice received"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "henv-hazardous"
             ]
           },
@@ -457,7 +457,7 @@
               "description": "HAZARDOUS \u2014 temperature habitability threatened; confirmed mold or lead hazard; active utility shutoff risk. Fires UNSAFE_HOUSING.",
               "scenario": "Below-freezing interior; children exposed to peeling lead paint; utility service disconnected"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "henv-unsafe-output",
                 "vector": [
@@ -484,7 +484,7 @@
           "path": "CURRENT+ \u2192 PAST_DUE \u2192 SHUTOFF_RISK \u2192 output[0,1,0,0]",
           "output": "[0,1,0,0] (UTILITY_FAILURE)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "henv-utility-current",
             "elements": [
@@ -511,7 +511,7 @@
               "description": "CURRENT+ \u2014 utilities paid and reliable; home temperature controlled; structural sound. isInitial A*A = A+.",
               "utility_status": "0.78\u20130.90 (current; no arrears)"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "henv-utility-current",
               "henv-past-due"
             ]
@@ -542,7 +542,7 @@
               "description": "PAST_DUE \u2014 utility balance past due; shutoff notice timeline starting; household managing but at risk.",
               "utility_status": "0.25\u20130.48 (past-due balance; shutoff notice issued)"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "henv-shutoff-risk"
             ]
           },
@@ -572,7 +572,7 @@
               "description": "SHUTOFF_RISK \u2014 imminent disconnection; temperature control failing; immediate intervention needed. Fires UTILITY_FAILURE.",
               "utility_status": "0.0\u20130.15 (shutoff within 24\u201372 hours or already disconnected)"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "henv-utility-failure-output",
                 "vector": [
@@ -599,7 +599,7 @@
           "pattern": "HAZARD_PRESENT+",
           "output": "[0,0,1,0] (HEALTH_HAZARD_RISK)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "henv-health-hazard-risk",
             "elements": [
@@ -626,7 +626,7 @@
               "description": "HAZARD_PRESENT+ home environment: indoor air or structural risk is active, temperature and utilities may still be partly stable, and conditions warrant health follow-up before crisis escalation.",
               "upstream_state": "HomeEnvironmentSafety=HEALTH_HAZARD_RISK"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "henv-health-hazard-risk-output",
                 "vector": [
@@ -653,7 +653,7 @@
           "pattern": "SAFE+",
           "output": "[0,0,0,1] (ENVIRONMENT_SAFE)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "henv-safe",
             "elements": [
@@ -680,7 +680,7 @@
               "description": "SAFE+ \u2014 all dimensions clearly above threshold: stable temperature, clean air, sound structure, current utilities. Fires ENVIRONMENT_SAFE each matching cycle.",
               "scenario": "Well-maintained housing; utilities current; no known hazards"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "henv-safe-output",
                 "vector": [
@@ -705,7 +705,7 @@
         "name": "Winter Heating Failure Cascade",
         "pattern": "6-step: SOUND\u2192SOUND\u2192DETERIORATING\u2192HAZARDOUS\u2192UNSAFE\u2192(intervention)\u2192SAFE",
         "description": "Heating system failure in January; landlord delayed response; temperature drops to hazardous; emergency housing assistance intervenes.",
-        "vectors": [
+        "events": [
           [
             0.63,
             0.61,

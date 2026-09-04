@@ -246,7 +246,7 @@
           "path": "BASELINE+ \u2192 GROWING \u2192 VIGOROUS \u2192 output[0,0,0,1]",
           "output": "[0,0,0,1] (GROWTH_OK)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "ag-gc-baseline",
             "elements": [
@@ -289,7 +289,7 @@
               "description": "BASELINE+ \u2014 TEMP_OK=HIGH, FLOW_OK=HIGH, all stress alerts=LOW. Represents healthy baseline conditions. isInitial A*A = A+: at least one confirmed baseline before GROWING arms.",
               "condition": "TEMP_OK=1, FLOW_OK=1, no alerts active"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "ag-gc-baseline",
               "ag-gc-growing"
             ]
@@ -336,7 +336,7 @@
               "description": "GROWING \u2014 sustained healthy conditions; vegetative growth active.",
               "condition": "TEMP_OK=1, FLOW_OK=1, no alerts"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "ag-gc-vigorous"
             ]
           },
@@ -382,7 +382,7 @@
               "description": "VIGOROUS \u2014 confirmed sustained growth cycle. Fires GROWTH_OK.",
               "condition": "Three or more consecutive healthy cycles confirmed"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "ag-gc-growth-ok-output",
                 "vector": [
@@ -409,7 +409,7 @@
           "path": "TEMP_WATCH+ \u2192 TEMP_ALERT \u2192 GROWTH_STALL \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (TEMP_STRESS)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "ag-gc-temp-watch",
             "elements": [
@@ -452,7 +452,7 @@
               "description": "TEMP_WATCH+ \u2014 COOLING_ON active; TEMP_OK gone but irrigation still healthy. Monitors for sustained temperature stress. isInitial A*A = A+.",
               "condition": "COOLING_ON=1, TEMP_OK=0, FLOW_OK=1"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "ag-gc-temp-watch",
               "ag-gc-temp-alert"
             ]
@@ -499,7 +499,7 @@
               "description": "TEMP_ALERT \u2014 COOLING_ON and irrigation demand active simultaneously; heat stress affecting transpiration.",
               "condition": "COOLING_ON=1, IRRIGATE_ON=1 (stress-driven demand)"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "ag-gc-growth-stall"
             ]
           },
@@ -545,7 +545,7 @@
               "description": "GROWTH_STALL \u2014 heating demand alongside irrigation deficit; growth suppression confirmed. Fires TEMP_STRESS.",
               "condition": "HEATING_ON=1, IRRIGATE_ON=1, no OK signals"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "ag-gc-temp-stress-output",
                 "vector": [
@@ -572,7 +572,7 @@
           "path": "WATER_WATCH+ \u2192 IRRIGATION_ACTIVE \u2192 DROUGHT_STRESS \u2192 output[0,1,0,0]",
           "output": "[0,1,0,0] (WATER_STRESS)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "ag-gc-water-watch",
             "elements": [
@@ -615,7 +615,7 @@
               "description": "WATER_WATCH+ \u2014 TEMP_OK=1 but IRRIGATE_ON active; substrate entering deficit. isInitial A*A = A+.",
               "condition": "TEMP_OK=1, IRRIGATE_ON=1, FLOW_OK=0"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "ag-gc-water-watch",
               "ag-gc-irrigation-active"
             ]
@@ -662,7 +662,7 @@
               "description": "IRRIGATION_ACTIVE \u2014 sustained irrigation demand; no OK signals active; potential pump failure or channel blockage.",
               "condition": "IRRIGATE_ON=1, no TEMP_OK or FLOW_OK"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "ag-gc-drought-stress"
             ]
           },
@@ -708,7 +708,7 @@
               "description": "DROUGHT_STRESS \u2014 IRRIGATE_ON with EC_ALERT (concentrated nutrients in drying substrate). Fires WATER_STRESS.",
               "condition": "IRRIGATE_ON=1, EC_ALERT=1 (salt accumulation in dry substrate)"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "ag-gc-water-stress-output",
                 "vector": [
@@ -733,7 +733,7 @@
         "name": "Healthy Growth then Temp Stress Recovery",
         "pattern": "7-step: BASELINE\u2192BASELINE\u2192GROWING\u2192VIGOROUS (ok)\u2192TEMP_WATCH\u2192TEMP_ALERT\u2192GROWTH_STALL",
         "description": "Three cycles of healthy growth followed by afternoon heat event triggering temperature stress cascade.",
-        "vectors": [
+        "events": [
           [
             0.1,
             0.1,

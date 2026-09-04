@@ -4,11 +4,17 @@
 from __future__ import annotations
 
 import json
+import sys
 import unittest
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+# Corpus reads go through the shared accessors so both schema spellings
+# resolve while RealityEngine_CI#220 layer 1 is in flight.
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+from event_keys import sequence_events  # noqa: E402
 MACHINES = REPO_ROOT / "machines"
 FIXTURE = next(MACHINES.rglob("PatientSafetyTransportInterconnect.json"))
 BUS_TAG = "published-bus-health-personal-patient-safety-transport"
@@ -63,7 +69,7 @@ class PatientSafetyTransportBusTests(unittest.TestCase):
     def test_authored_sequence_activates_urgent_fanout(self) -> None:
         authored = {item["name"]: item for item in self.machine["inputSequences"]}
         sequence = authored["Confirmed fall with transportation failure fan-out"]
-        self.assertEqual(sequence["vectors"], [[1, 0, 1, 1, 0, 0, 0, 0, 0, 1]])
+        self.assertEqual(sequence_events(sequence), [[1, 0, 1, 1, 0, 0, 0, 0, 0, 1]])
         self.assertEqual(sequence["metadata"]["expectedOutputVector"], [1, 0, 0, 0])
         self.assertEqual(sequence["metadata"]["sourceRegionInputs"]["FallDetection[1941:1943]"], [4, 3])
         self.assertIn(

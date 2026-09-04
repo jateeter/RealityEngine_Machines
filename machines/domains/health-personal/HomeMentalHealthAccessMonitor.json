@@ -299,7 +299,7 @@
           "path": "STABLE+ → DISTRESSED → MH_DETERIORATING → output[1,0,0,0]",
           "output": "[1,0,0,0] (MENTAL_HEALTH_CRISIS)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "mh-stable",
             "elements": [
@@ -342,7 +342,7 @@
               "description": "STABLE+ — DISEASE_CONTROLLED (bit 369) and PAIN_MANAGED (bit 373) both high. Chronic illness managed; pain controlled; mental health not acutely burdened. isInitial A*A = A+.",
               "upstream_state": "ChronicDisease=DISEASE_CONTROLLED, ChronicPain=PAIN_MANAGED"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "mh-stable",
               "mh-distressed"
             ]
@@ -389,7 +389,7 @@
               "description": "DISTRESSED — POOR_CONTROL (bit 367) and FUNCTIONAL_IMPAIRMENT (bit 372). Disease slipping; pain limiting function. PHQ-9 score rising; hopelessness reported.",
               "upstream_state": "ChronicDisease=POOR_CONTROL, ChronicPain=FUNCTIONAL_IMPAIRMENT"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "mh-deteriorating"
             ]
           },
@@ -435,7 +435,7 @@
               "description": "MH_DETERIORATING — dual crisis: DISEASE_EXACERBATION (bit 366) and PAIN_CRISIS (bit 370). Both upstream machines in acute crisis. Severe depression likely; suicidality screening mandatory. Fires MENTAL_HEALTH_CRISIS.",
               "upstream_state": "ChronicDisease=DISEASE_EXACERBATION, ChronicPain=PAIN_CRISIS"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "mh-crisis-output",
                 "vector": [
@@ -462,7 +462,7 @@
           "pattern": "COMORBID+",
           "output": "[0,1,0,0] (MH_REFERRAL_NEEDED)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "mh-comorbid",
             "elements": [
@@ -505,7 +505,7 @@
               "description": "COMORBID+ — DISEASE_EXACERBATION (bit 366) and FUNCTIONAL_IMPAIRMENT (bit 372). One upstream in acute crisis; other in sustained impairment. PHQ-9 moderate to severe range expected. isInitial A*A = A+: fires MH_REFERRAL_NEEDED each cycle.",
               "scenario": "COPD exacerbation patient with chronic back pain; scoring PHQ-9=12; no mental health provider; home health nurse is only contact"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "mh-referral-output",
                 "vector": [
@@ -532,7 +532,7 @@
           "pattern": "SUBCLINICAL_COMORBIDITY+",
           "output": "[0,0,1,0] (COMORBIDITY_RISK)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "mh-comorbidity-risk-state",
             "elements": [
@@ -575,7 +575,7 @@
               "description": "POOR_CONTROL plus FUNCTIONAL_IMPAIRMENT without acute disease or pain crisis. Depression/anxiety risk is elevated, but immediate crisis/referral thresholds are not yet met.",
               "upstream_state": "ChronicDisease=POOR_CONTROL, ChronicPain=FUNCTIONAL_IMPAIRMENT"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "mh-comorbidity-risk-output",
                 "vector": [
@@ -602,7 +602,7 @@
           "pattern": "SUPPORTED+",
           "output": "[0,0,0,1] (MH_ACCESS_ADEQUATE)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "mh-supported",
             "elements": [
@@ -645,7 +645,7 @@
               "description": "SUPPORTED+ — DISEASE_CONTROLLED (bit 369) and PAIN_MANAGED (bit 373) both high. Chronic illness and pain managed; mental health comorbidity not active; access adequate. Fires MH_ACCESS_ADEQUATE each cycle.",
               "scenario": "Patient stable on CHW-supported chronic disease program; pain controlled; enrolled in telehealth therapy group"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "mh-adequate-output",
                 "vector": [
@@ -670,7 +670,7 @@
         "name": "Chronic Disease Crisis Driving Depression Spiral",
         "pattern": "6-step: STABLE→STABLE→DISTRESSED→COMORBID (referral needed)→MH_CRISIS→STABLE (after integrated care)",
         "description": "Diabetic patient with chronic back pain loses job and insurance; A1c spikes to 11.5 while pain worsens; PHQ-9=18; suicidal ideation at home visit; integrated behavioral health enrollment resolves cycle.",
-        "vectors": [
+        "events": [
           [
             0.09,
             0.09,

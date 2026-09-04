@@ -24,6 +24,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from event_keys import output_events, sequence_events
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MACHINES_ROOT = REPO_ROOT / "machines"
@@ -85,8 +86,8 @@ def main() -> int:
         mapping = mappings[domain]
         dirty = False
         for sequence in machine.get("sequences", []):
-            for vector in sequence.get("vectors", []):
-                for output in vector.get("outputVectors", []):
+            for vector in sequence_events(sequence):
+                for output in output_events(vector):
                     metadata = output.get("metadata")
                     if not metadata or "action" not in metadata:
                         continue

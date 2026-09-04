@@ -122,7 +122,7 @@
         "metadata": {
           "description": "The meta-CES asserts referral-complete once {benefits-eligible.fired, intake-complete.fired, housing-placed.fired} have all been latched on the event bus.  Latching is monotonic \u2014 once a producer fires, the bit stays 1 until the engine is reset \u2014 so this conjunction terminates the workflow regardless of arrival order.  Order discipline (benefits \u2192 intake \u2192 housing) is enforced upstream by the producer agents, not by the meta-CES."
         },
-        "vectors": [
+        "events": [
           {
             "id": "ccr-all-milestones-reached",
             "isInitial": true,
@@ -140,7 +140,7 @@
                 "threshold": 0.5
               }
             ],
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "ccr-out-referral-complete",
                 "vector": [
@@ -165,7 +165,7 @@
         "metadata": {
           "description": "Continuously asserts that referral is NOT complete (terminal value [0,1,0,0]) while at least one milestone is unmet.  Pairs with the referral-completion sequence on the same output region \u2014 final write wins per merge ordering, so once all three latch, REFERRAL_COMPLETE supersedes."
         },
-        "vectors": [
+        "events": [
           {
             "id": "ccr-await-all",
             "isInitial": true,
@@ -183,7 +183,7 @@
                 "threshold": 0.5
               }
             ],
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "ccr-out-referral-pending",
                 "vector": [
@@ -207,7 +207,7 @@
       {
         "name": "No milestones \u2014 referral not started",
         "description": "All three event-bus bits are unlatched. Machine asserts REFERRAL_PENDING immediately.",
-        "vectors": [
+        "events": [
           [
             0,
             0,
@@ -223,7 +223,7 @@
       {
         "name": "Benefits eligible only \u2014 first milestone latched",
         "description": "Only the benefits-eligibility bit is set. Intake and housing are still pending; referral remains incomplete.",
-        "vectors": [
+        "events": [
           [
             1,
             0,
@@ -238,7 +238,7 @@
       {
         "name": "Benefits + intake \u2014 two of three milestones",
         "description": "Benefits-eligibility and intake-triage have fired. Housing placement is still outstanding; referral remains incomplete.",
-        "vectors": [
+        "events": [
           [
             1,
             1,
@@ -253,7 +253,7 @@
       {
         "name": "All milestones latched \u2014 referral complete",
         "description": "All three event-bus bits are set simultaneously. Machine asserts REFERRAL_COMPLETE.",
-        "vectors": [
+        "events": [
           [
             1,
             1,
@@ -269,7 +269,7 @@
       {
         "name": "Full workflow progression \u2014 none through completion",
         "description": "Replays the nominal happy-path: workflow starts with no milestones, benefits fires first, intake second, housing last. Final vector asserts REFERRAL_COMPLETE.",
-        "vectors": [
+        "events": [
           [
             0,
             0,
