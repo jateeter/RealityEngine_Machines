@@ -104,7 +104,7 @@ def derive_output_semantics(machine: dict[str, Any]) -> list[dict[str, Any]]:
                         "vector": out.get("vector"),
                     })
         if vectors:
-            item["outputVectors"] = vectors
+            item["outputEvents"] = vectors
         semantics.append(item)
     return semantics
 
