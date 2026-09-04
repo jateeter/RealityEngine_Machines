@@ -43,7 +43,6 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
-from event_keys import output_events, sequence_events
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MACHINES = REPO_ROOT / "machines"
@@ -95,8 +94,8 @@ def derive_writers(machines) -> tuple[dict[int, set], dict[int, set]]:
                 readers[c].add(rel)
         if outp:
             for seq in m.get("sequences") or []:
-                for vec in sequence_events(seq):
-                    for ov in output_events(vec):
+                for vec in (seq.get("events") or []):
+                    for ov in (vec.get("outputEvents") or []):
                         n = min(len(ov.get("vector") or []), outp["length"])
                         for k in range(n):
                             writers[outp["offset"] + k].add(("machine", rel))

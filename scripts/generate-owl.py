@@ -26,7 +26,6 @@ import re as regex
 import sys
 from pathlib import Path
 from typing import Any
-from event_keys import next_event_ids, output_events, sequence_events
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MACHINES_ROOT = REPO_ROOT / "machines"
@@ -219,7 +218,7 @@ class MachineProjector:
         names: Counter = Counter()
         metadata = self.machine.get("metadata") or {}
         for sequence in self.machine.get("sequences") or []:
-            for vector in sequence_events(sequence):
+            for vector in (sequence.get("events") or []):
                 name = (vector.get("metadata") or {}).get("name")
                 if name:
                     names[str(name)] += 1
@@ -419,7 +418,7 @@ class MachineProjector:
                 continue
             seq_term = f"m:seq-{sanitize(seq_id)}"
             metadata = sequence.get("metadata", {})
-            vectors = sequence_events(sequence)
+            vectors = (sequence.get("events") or [])
             life_safety = metadata.get("severity") == "life-safety" or any(
                 vector.get("metadata", {}).get("lifeSafety") for vector in vectors
             )
@@ -478,13 +477,13 @@ class MachineProjector:
         if element_refs:
             statements.append(f"re:hasElementValue {element_refs}")
         next_refs = " , ".join(
-            f"m:step-{sanitize(next_id)}" for next_id in next_event_ids(vector)
+            f"m:step-{sanitize(next_id)}" for next_id in (vector.get("nextEventIds") or [])
         )
         if next_refs:
             statements.append(f"re:hasNextStep {next_refs}")
         output_refs = " , ".join(
             f"m:out-{sanitize(output['id'])}"
-            for output in output_events(vector)
+            for output in (vector.get("outputEvents") or [])
             if output.get("id")
         )
         if output_refs:
@@ -505,7 +504,7 @@ class MachineProjector:
                     f"re:elementThreshold {number(element['threshold'])}"
                 )
             self.block(f"m:step-{sanitize(vector_id)}-e{index}", element_statements)
-        for output in output_events(vector):
+        for output in (vector.get("outputEvents") or []):
             self.emit_determination(output)
 
     def emit_determination(self, output: dict[str, Any]) -> None:
