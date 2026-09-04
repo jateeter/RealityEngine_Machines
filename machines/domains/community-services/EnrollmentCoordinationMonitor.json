@@ -241,7 +241,7 @@
           "path": "ON_TRACK+ \u2192 STALLED \u2192 LAPSED \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (ENROLLMENT_FAILURE)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "ec-on-track",
             "elements": [
@@ -284,7 +284,7 @@
               "description": "ON_TRACK+ \u2014 ELIGIBILITY_CONFIRMED (bit 433) and INTAKE_COMPLETE (bit 437) both high. Eligible applicant has completed intake; enrollment should proceed. isInitial A*A = A+.",
               "upstream_state": "BenefitsEligibility=ELIGIBILITY_CONFIRMED, ServiceIntake=INTAKE_COMPLETE"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "ec-on-track",
               "ec-stalled"
             ]
@@ -331,7 +331,7 @@
               "description": "STALLED \u2014 DOCUMENTATION_NEEDED (bit 432) and COMPLEX_INTAKE (bit 435). Eligibility gated by documentation; intake revealed complexity requiring more intensive handling. Enrollment stalled.",
               "upstream_state": "BenefitsEligibility=DOCUMENTATION_NEEDED, ServiceIntake=COMPLEX_INTAKE"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "ec-lapsed"
             ]
           },
@@ -377,7 +377,7 @@
               "description": "LAPSED \u2014 ELIGIBILITY_DENIED (bit 430) and PRIORITY_INTAKE (bit 434). Eligibility has lapsed or been denied while intake revealed urgent needs. Client in crisis with no enrollment path. Fires ENROLLMENT_FAILURE.",
               "upstream_state": "BenefitsEligibility=ELIGIBILITY_DENIED, ServiceIntake=PRIORITY_INTAKE"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "ec-failure-output",
                 "vector": [
@@ -404,7 +404,7 @@
           "pattern": "BLOCKED+",
           "output": "[0,1,0,0] (ENROLLMENT_BARRIER)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "ec-blocked",
             "elements": [
@@ -447,7 +447,7 @@
               "description": "BLOCKED+ \u2014 ELIGIBILITY_CONFIRMED (bit 433) but COMPLEX_INTAKE (bit 435). Eligible but intake revealed functional, literacy, or logistical barriers preventing standard enrollment. isInitial A*A = A+: fires ENROLLMENT_BARRIER each cycle.",
               "scenario": "Eligible SNAP applicant with cognitive disability who completed intake but cannot navigate online enrollment portal; needs navigator to complete enrollment on their behalf"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "ec-barrier-output",
                 "vector": [
@@ -474,7 +474,7 @@
           "pattern": "PROCEEDING+",
           "output": "[0,0,0,1] (ENROLLMENT_ON_TRACK)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "ec-proceeding",
             "elements": [
@@ -517,7 +517,7 @@
               "description": "PROCEEDING+ \u2014 ELIGIBILITY_CONFIRMED (bit 433) and INTAKE_COMPLETE (bit 437) both high. Fires ENROLLMENT_ON_TRACK each cycle.",
               "upstream_state": "BenefitsEligibility=ELIGIBILITY_CONFIRMED, ServiceIntake=INTAKE_COMPLETE"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "ec-on-track-output",
                 "vector": [
@@ -542,7 +542,7 @@
         "name": "Eligible Client Lost Between Eligibility and Enrollment",
         "pattern": "5-step: ON_TRACK\u2192ON_TRACK\u2192STALLED (documentation gap)\u2192LAPSED (deadline missed)\u2192ON_TRACK (after navigator intervention)",
         "description": "Eligible client's 30-day SNAP determination window lapses while documentation gap unresolved; priority re-intake triggers navigator intervention; eligibility confirmed again; enrollment completed.",
-        "vectors": [
+        "events": [
           [
             0.09,
             0.09,

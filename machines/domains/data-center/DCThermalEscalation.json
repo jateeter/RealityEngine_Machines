@@ -231,7 +231,7 @@
           "path": "NORMAL+ → WARM+ → HOT → CRITICAL+ → EMERGENCY",
           "output": "[1,0] (THERMAL ALARM)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "dc-therm-esc-normal",
             "elements": [
@@ -262,7 +262,7 @@
               "kleeneOperator": "+",
               "semantics": "isInitial (A*A = A+): never deactivates; on each match fires nextVectorIds — activating WARM (and keeping NORMAL active via self-loop). At least one NORMAL match is required to prime WARM. This is A*A not A*."
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "dc-therm-esc-normal",
               "dc-therm-esc-warm"
             ]
@@ -297,7 +297,7 @@
               "kleeneOperator": "+",
               "semantics": "Non-initial transitional with self-loop: deactivates after match, re-activated by its own nextVectorId. Also activates HOT when matched."
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "dc-therm-esc-warm",
               "dc-therm-esc-hot"
             ]
@@ -331,7 +331,7 @@
               "cpu_load_range": "0.75–0.91 (75%–91%)",
               "semantics": "Non-initial transitional (no self-loop): exactly one HOT observation advances to CRITICAL. Prevents false critical triggers from transient spikes."
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "dc-therm-esc-critical"
             ]
           },
@@ -365,7 +365,7 @@
               "kleeneOperator": "+",
               "semantics": "Non-initial transitional with self-loop: must be observed at least once before EMERGENCY. Models a sustained critical condition rather than a transient spike."
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "dc-therm-esc-critical",
               "dc-therm-esc-emergency"
             ]
@@ -399,7 +399,7 @@
               "cpu_load_range": "0.95–1.00 (>95%)",
               "semantics": "Final vector with output: stays active on match (fires alarm each cycle), deactivates on no-match (temperature drops below threshold)."
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "dc-therm-esc-alarm-output",
                 "vector": [
@@ -425,7 +425,7 @@
           "pattern": "SAFE+",
           "output": "[0,1] (THERMAL SAFE)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "dc-thermal-safe-event",
             "elements": [
@@ -455,7 +455,7 @@
               "cpu_load_range": "0.17–0.53 (same as NORMAL)",
               "semantics": "isInitial (A*A = A+): always active; fires [0,1] to [1375:1377] on each matching cycle. At least one safe sensor reading is required before any reset output is produced. SAFE* would be incorrect — it would imply output is possible without any sensor match."
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "dc-thermal-safe-output",
                 "vector": [
@@ -479,7 +479,7 @@
         "name": "Gradual Thermal Escalation to Emergency",
         "pattern": "12-step: NORMAL→NORMAL→WARM→WARM→WARM→HOT→CRITICAL→CRITICAL→EMERGENCY→EMERGENCY→WARM→NORMAL",
         "description": "Complete escalation-and-recovery scenario demonstrating all 5 thermal stages",
-        "vectors": [
+        "events": [
           [
             0.3,
             0.35,
@@ -572,7 +572,7 @@
         "name": "Abrupt Spike (Non-Escalating)",
         "pattern": "NORMAL → HOT → NORMAL (skips WARM — fails to trigger escalation)",
         "description": "Demonstrates that abrupt temperature spikes without gradual escalation cannot trigger the alarm. HOT requires WARM+ to have been active first.",
-        "vectors": [
+        "events": [
           [
             0.3,
             0.35,

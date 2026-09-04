@@ -246,7 +246,7 @@
           "path": "COMPLETE+ \u2192 PARTIAL \u2192 STALLED \u2192 output[1,0,0,0]",
           "output": "[1,0,0,0] (WORKFLOW_BLOCKED)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "wc-complete",
             "elements": [
@@ -289,7 +289,7 @@
               "description": "COMPLETE+ \u2014 SIGNING_COMPLETE (bit 441) and FULLY_QUALIFIED (bit 445) both high. All workflow requirements met; unrestricted service delivery authorized. isInitial A*A = A+.",
               "upstream_state": "DocSigning=SIGNING_COMPLETE, QualVerification=FULLY_QUALIFIED"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "wc-complete",
               "wc-partial"
             ]
@@ -336,7 +336,7 @@
               "description": "PARTIAL \u2014 PARTIAL_SIGNING (bit 440) and REVERIFICATION_REQUIRED (bit 443). Both workflows have outstanding items; services partially restricted.",
               "upstream_state": "DocSigning=PARTIAL_SIGNING, QualVerification=REVERIFICATION_REQUIRED"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "wc-stalled"
             ]
           },
@@ -382,7 +382,7 @@
               "description": "STALLED \u2014 SIGNING_BLOCKED (bit 438) and QUALIFICATION_FAILED (bit 442). Both upstream workflows in failure state. Full service delivery block. Fires WORKFLOW_BLOCKED.",
               "upstream_state": "DocSigning=SIGNING_BLOCKED, QualVerification=QUALIFICATION_FAILED"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "wc-blocked-output",
                 "vector": [
@@ -409,7 +409,7 @@
           "pattern": "PARTIAL_OPEN+",
           "output": "[0,0,1,0] (WORKFLOW_PARTIAL)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "wc-partial-open",
             "elements": [
@@ -452,7 +452,7 @@
               "description": "PARTIAL_OPEN+ \u2014 SIGNING_COMPLETE (bit 441) but REVERIFICATION_REQUIRED (bit 443). Documents signed; qualification needs renewal. Primary services active; full authorization pending reverification. isInitial A*A = A+: fires WORKFLOW_PARTIAL each cycle.",
               "scenario": "Medicaid managed care enrollment: all consent forms signed; annual reverification of income due; services continue during reverification window"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "wc-partial-output",
                 "vector": [
@@ -479,7 +479,7 @@
           "pattern": "BOTH_COMPLETE+",
           "output": "[0,0,0,1] (WORKFLOW_COMPLETE)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "wc-both-complete",
             "elements": [
@@ -522,7 +522,7 @@
               "description": "BOTH_COMPLETE+ \u2014 SIGNING_COMPLETE (bit 441) and FULLY_QUALIFIED (bit 445). All workflow requirements satisfied. Fires WORKFLOW_COMPLETE each cycle.",
               "upstream_state": "DocSigning=SIGNING_COMPLETE, QualVerification=FULLY_QUALIFIED"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "wc-complete-output",
                 "vector": [
@@ -547,7 +547,7 @@
         "name": "Redetermination Creates Simultaneous Signing and Qualification Gap",
         "pattern": "5-step: COMPLETE\u2192COMPLETE\u2192PARTIAL (reverification due)\u2192STALLED (forms expired + qualification failed)\u2192COMPLETE (after in-person resolution)",
         "description": "Annual redetermination triggers simultaneous signing expiry and income verification failure; both workflows stall; case manager conducts in-person session resolving both; workflow complete.",
-        "vectors": [
+        "events": [
           [
             0.09,
             0.09,

@@ -494,7 +494,7 @@
           "path": "CONNECTED+ → WITHDRAWING → ISOLATED → output[1,0,0,0]",
           "output": "[1,0,0,0] (SEVERE_ISOLATION)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "si-connected",
             "elements": [
@@ -537,7 +537,7 @@
               "description": "CONNECTED+ — MEDICATION_MANAGED (bit 361) and TRANSPORTATION_ADEQUATE (bit 365) both high. Medications managed; transport available; patient engaged in community. isInitial A*A = A+.",
               "upstream_state": "MedCostBarrier=MEDICATION_MANAGED, TransportBarrier=TRANSPORTATION_ADEQUATE"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "si-connected",
               "si-withdrawing"
             ]
@@ -584,7 +584,7 @@
               "description": "WITHDRAWING — COST_BARRIER_ACTIVE (bit 359) and TRANSIT_DEPENDENT_RISK (bit 364). One moderate barrier in each domain. Patient reducing community trips to conserve resources; social contact decreasing.",
               "upstream_state": "MedCostBarrier=COST_BARRIER_ACTIVE, TransportBarrier=TRANSIT_DEPENDENT_RISK"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "si-isolated"
             ]
           },
@@ -630,7 +630,7 @@
               "description": "ISOLATED — dual crisis: ADHERENCE_CRISIS (bit 358) and CRITICAL_ACCESS_FAILURE (bit 362). Both upstream machines in full crisis state. Patient housebound; self-care declining. Fires SEVERE_ISOLATION.",
               "upstream_state": "MedCostBarrier=ADHERENCE_CRISIS, TransportBarrier=CRITICAL_ACCESS_FAILURE"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "si-severe-output",
                 "vector": [
@@ -657,7 +657,7 @@
           "pattern": "BARRIER_RISK+",
           "output": "[0,0,1,0] (ISOLATION_RISK)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "si-barrier-risk",
             "elements": [
@@ -700,7 +700,7 @@
               "description": "BARRIER_RISK+ — ADHERENCE_CRISIS (bit 358) and TRANSIT_DEPENDENT_RISK (bit 364). Medication fully failing; transport fragile. Patient at threshold of full social isolation. isInitial A*A = A+: fires ISOLATION_RISK each cycle.",
               "scenario": "Rural elder: medications unaffordable, riding borrowed car to pharmacy — one breakdown away from complete isolation"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "si-risk-output",
                 "vector": [
@@ -727,7 +727,7 @@
           "pattern": "STABLE+",
           "output": "[0,0,0,1] (SOCIALLY_CONNECTED)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "si-stable",
             "elements": [
@@ -770,7 +770,7 @@
               "description": "STABLE+ — MEDICATION_MANAGED (bit 361) and TRANSPORTATION_ADEQUATE (bit 365) both high. No access barriers; patient maintaining community connection. Fires SOCIALLY_CONNECTED each cycle.",
               "scenario": "Patient on Medicaid with generic coverage; NEMT enrolled; attends senior center twice weekly"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "si-connected-output",
                 "vector": [
@@ -795,7 +795,7 @@
         "name": "Post-Retirement Income Drop — Dual Barrier Isolation",
         "pattern": "6-step: CONNECTED→CONNECTED→WITHDRAWING→ISOLATION_RISK→SEVERE_ISOLATION→CONNECTED (after outreach)",
         "description": "Widowed elder retires; pension cuts trigger medication rationing; simultaneously stops driving; county transit route cut; full isolation; outreach worker intervention restores connection.",
-        "vectors": [
+        "events": [
           [
             0.08,
             0.09,

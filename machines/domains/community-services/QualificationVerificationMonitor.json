@@ -234,7 +234,7 @@
           "path": "QUALIFIED+ → DISCREPANCY → HOLD → output[1,0,0,0]",
           "output": "[1,0,0,0] (QUALIFICATION_FAILED)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "qv-qualified",
             "elements": [
@@ -261,7 +261,7 @@
               "description": "QUALIFIED+ — identity verified, income verified, program rules met, enrollment active. isInitial A*A = A+.",
               "enrollment_status": "0.65–0.80 (active enrollment; all verifications current)"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "qv-qualified",
               "qv-discrepancy"
             ]
@@ -292,7 +292,7 @@
               "description": "DISCREPANCY — one or more verification factors showing data mismatch; income figure inconsistent with reported amount; program rule borderline.",
               "enrollment_status": "0.40–0.48 (provisional; discrepancy notice issued; cure period open)"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "qv-hold"
             ]
           },
@@ -322,7 +322,7 @@
               "description": "HOLD — verification hold active; benefits suspended or restricted; discrepancy unresolved after cure period. Fires QUALIFICATION_FAILED.",
               "enrollment_status": "0.0–0.22 (enrollment suspended; hearing rights issued)"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "qv-failed-output",
                 "vector": [
@@ -349,7 +349,7 @@
           "pattern": "LAPSING+",
           "output": "[0,1,0,0] (REVERIFICATION_REQUIRED)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "qv-lapsing",
             "elements": [
@@ -376,7 +376,7 @@
               "description": "LAPSING+ — identity and program qualification current; income verification approaching expiry or triggered event detected; enrollment still active but reverification window open. isInitial A*A = A+: fires REVERIFICATION_REQUIRED each cycle.",
               "scenario": "Annual redetermination due in 30 days; income verification from last year; new job start date reported"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "qv-reverification-output",
                 "vector": [
@@ -403,7 +403,7 @@
           "pattern": "VERIFIED+",
           "output": "[0,0,0,1] (FULLY_QUALIFIED)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "qv-verified",
             "elements": [
@@ -430,7 +430,7 @@
               "description": "VERIFIED+ — all verification factors confirmed; program rules met; enrollment fully active without restriction. Fires FULLY_QUALIFIED each cycle.",
               "scenario": "Medicaid enrollee: SSA identity match confirmed, income verified via W-2, household composition confirmed at redetermination, active enrollment with no holds"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "qv-qualified-output",
                 "vector": [
@@ -455,7 +455,7 @@
         "name": "Annual Redetermination with Income Change",
         "pattern": "5-step: QUALIFIED→QUALIFIED→LAPSING (redetermination due)→DISCREPANCY (new income flagged)→QUALIFIED (income verified within limits)",
         "description": "Medicaid enrollee hits annual redetermination; new part-time job income flagged; verified as still within threshold; qualification confirmed.",
-        "vectors": [
+        "events": [
           [
             0.66,
             0.63,

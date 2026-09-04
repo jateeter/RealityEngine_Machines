@@ -528,7 +528,7 @@
           "path": "RISE \u2192 BATH_VISIT \u2192 BREAKFAST \u2192 MED_AM",
           "output": "MORNING_COMPLETE=[1,0,0,0,0,0,0,0]"
         },
-        "vectors": [
+        "events": [
           {
             "id": "mr-rise",
             "elements": [
@@ -571,7 +571,7 @@
               "description": "Patient exits bed and is ambulatory. Detected via bed sensor, room motion sensor, or staff morning rounds. Repeats via Kleene-plus if patient moves around before bathroom visit.",
               "signal": "[H,L,L,L,L,L,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "mr-bath"
             ]
           },
@@ -617,7 +617,7 @@
               "description": "Patient uses bathroom as part of morning hygiene routine. Confirmed via bathroom door sensor or motion sensor. HD=1 from RISE (D1_BATHROOM: L\u2192H).",
               "signal": "[H,H,L,L,L,L,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "mr-breakfast"
             ]
           },
@@ -663,7 +663,7 @@
               "description": "Patient arrives in dining room or receives and eats breakfast tray. Confirmed via dining check-in or tray scan. HD=1 from BATH_VISIT (D2_MORNING_MEAL: L\u2192H).",
               "signal": "[H,H,H,L,L,L,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "mr-med-am"
             ]
           },
@@ -709,7 +709,7 @@
               "description": "Morning medications confirmed administered. MAR barcode scan or medication dispenser acknowledgment recorded. Completes the morning routine sequence. HD=1 from BREAKFAST (D3_MEDICATION: L\u2192H).",
               "signal": "[H,H,H,H,L,L,L,L]"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "out-morning-complete",
                 "vector": [
@@ -741,7 +741,7 @@
           "path": "DINNER \u2192 BATH_PM \u2192 MED_PM \u2192 SETTLE",
           "output": "EVENING_COMPLETE=[0,1,0,0,0,0,0,0]"
         },
-        "vectors": [
+        "events": [
           {
             "id": "er-dinner",
             "elements": [
@@ -784,7 +784,7 @@
               "description": "Patient arrives at dining room or receives dinner tray for the evening meal. D4_EVENING_MEAL distinguishes this from breakfast (D2_MORNING_MEAL) ensuring the two routines have distinct initial vectors. Repeats via Kleene-plus across multiple dinner-hour check-ins.",
               "signal": "[H,L,L,L,H,L,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "er-bath-pm"
             ]
           },
@@ -830,7 +830,7 @@
               "description": "Patient uses bathroom after dinner as part of evening hygiene routine. HD=1 from DINNER (D1_BATHROOM: L\u2192H).",
               "signal": "[H,H,L,L,H,L,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "er-med-pm"
             ]
           },
@@ -876,7 +876,7 @@
               "description": "Evening medications administered after dinner and bathroom visit. MAR scan confirms administration. HD=1 from BATH_PM (D3_MEDICATION: L\u2192H).",
               "signal": "[H,H,L,H,H,L,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "er-settle"
             ]
           },
@@ -922,7 +922,7 @@
               "description": "Patient returns to room, lights dim, nighttime monitoring mode activates. Bed sensor confirms patient is in bed. D7_NIGHT flag set. HD=1 from MED_PM (D7_NIGHT: L\u2192H). This vector also serves as the initial state for nighttime wandering detection.",
               "signal": "[H,H,L,H,H,L,L,H]"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "out-evening-complete",
                 "vector": [
@@ -954,7 +954,7 @@
           "path": "RISE \u2192 FALL_EVENT \u2192 FALL_CALL",
           "output": "FALL_CONFIRMED=[0,0,1,0,0,0,0,0]"
         },
-        "vectors": [
+        "events": [
           {
             "id": "fr-rise",
             "elements": [
@@ -997,7 +997,7 @@
               "description": "Patient is up and ambulatory. Daytime monitoring context. Repeats via Kleene-plus across normal ambulation events before the fall occurs.",
               "signal": "[H,L,L,L,L,L,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fr-fall-event"
             ]
           },
@@ -1043,7 +1043,7 @@
               "description": "Fall event triggered \u2014 floor pressure sensor, wearable accelerometer, or staff witness. Patient still ambulatory (D0=H, not yet confirmed down). HD=1 from RISE (D6_FALL: L\u2192H).",
               "signal": "[H,L,L,L,L,L,H,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fr-fall-call"
             ]
           },
@@ -1089,7 +1089,7 @@
               "description": "Patient or staff activates call button or pendant alarm following the fall. D5_ALERT=H indicates a response signal is in flight. Patient may be on the floor but is conscious and communicating. HD=1 from FALL_EVENT (D5_ALERT: L\u2192H).",
               "signal": "[H,L,L,L,L,H,H,L]"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "out-fall-confirmed",
                 "vector": [
@@ -1123,7 +1123,7 @@
           "output": "UNRESPONSIVE_FALL=[0,0,0,1,0,0,0,0]",
           "severity": "life-safety"
         },
-        "vectors": [
+        "events": [
           {
             "id": "fu-rise",
             "elements": [
@@ -1166,7 +1166,7 @@
               "description": "Patient is up and ambulatory. Normal daytime activity before fall event. Kleene-plus allows multiple prior ambulation events.",
               "signal": "[H,L,L,L,L,L,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fu-fall-event"
             ]
           },
@@ -1212,7 +1212,7 @@
               "description": "Fall event triggered by sensor. Patient still ambulatory context (D0=H). HD=1 from RISE (D6_FALL: L\u2192H). Branches with fr-fall-event to two outcomes.",
               "signal": "[H,L,L,L,L,L,H,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "fu-post-fall-still"
             ]
           },
@@ -1258,7 +1258,7 @@
               "description": "Patient is on the floor and not moving. D0_AMBULATE=L (no motion detected), D6_FALL=H (fall flag persists), no ALERT signal raised. Indicates patient may be unconscious, confused, or unable to reach call button. HD=1 from FALL_EVENT (D0_AMBULATE: H\u2192L).",
               "signal": "[L,L,L,L,L,L,H,L]"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "out-unresponsive-fall",
                 "vector": [
@@ -1291,7 +1291,7 @@
           "path": "BATH_VISIT \u2192 BATH_OVERDUE",
           "output": "BATHROOM_ALERT=[0,0,0,0,1,0,0,0]"
         },
-        "vectors": [
+        "events": [
           {
             "id": "bn-bath-visit",
             "elements": [
@@ -1334,7 +1334,7 @@
               "description": "Patient uses bathroom \u2014 ambulatory + bathroom sensor confirmation. Kleene-plus semantics: each successful bathroom visit resets the baseline and the overdue timer. Sequence only completes if followed by BATH_OVERDUE before the next visit.",
               "signal": "[H,H,L,L,L,L,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "bn-overdue"
             ]
           },
@@ -1380,7 +1380,7 @@
               "description": "Scheduled bathroom check interval exceeded with no bathroom use detected. D5_ALERT=H raised by care management system when 8-hour threshold lapses. Patient is still ambulatory (D0=H) but has not used facilities. HD=1 from BATH_VISIT (D5_ALERT: L\u2192H).",
               "signal": "[H,H,L,L,L,H,L,L]"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "out-bathroom-alert",
                 "vector": [
@@ -1413,7 +1413,7 @@
           "path": "BREAKFAST \u2192 MEDICATION_MISSED_ALERT",
           "output": "MEDICATION_MISSED=[0,0,0,0,0,1,0,0]"
         },
-        "vectors": [
+        "events": [
           {
             "id": "mm-breakfast",
             "elements": [
@@ -1456,7 +1456,7 @@
               "description": "Patient has eaten breakfast, establishing the medication administration window. Kleene-plus allows multiple breakfast observations (e.g., tray confirmed, meal percentage noted) before the window closes.",
               "signal": "[H,H,H,L,L,L,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "mm-med-missed"
             ]
           },
@@ -1502,7 +1502,7 @@
               "description": "AM medication window has expired with no MAR administration confirmation. Alert raised by medication management system. D3_MEDICATION=L (not given), D5_ALERT=H (overdue). HD=1 from BREAKFAST (D5_ALERT: L\u2192H).",
               "signal": "[H,H,H,L,L,H,L,L]"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "out-medication-missed",
                 "vector": [
@@ -1535,7 +1535,7 @@
           "path": "SETTLE \u2192 NIGHT_AWAKE \u2192 NIGHT_AWAKE \u2192 NIGHT_AWAKE",
           "output": "WANDERING_ALERT=[0,0,0,0,0,0,1,0]"
         },
-        "vectors": [
+        "events": [
           {
             "id": "nw-settle",
             "elements": [
@@ -1578,7 +1578,7 @@
               "description": "Patient is in bed with nighttime monitoring active. Same vector as the SETTLE terminal of the evening routine. This initial Kleene-plus node re-establishes the nocturnal baseline; a single restroom visit would not advance the sequence because NIGHT_AWAKE (with D5_ALERT) must fire three times consecutively.",
               "signal": "[H,H,L,H,H,L,L,H]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "nw-awake-1"
             ]
           },
@@ -1624,7 +1624,7 @@
               "description": "Patient detected leaving room during nocturnal monitoring window. D5_ALERT=H raised by door or motion sensor. HD=1 from SETTLE (D5_ALERT: L\u2192H). One nighttime exit is within normal range; sequence requires two more to complete.",
               "signal": "[H,H,L,H,H,H,L,H]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "nw-awake-2"
             ]
           },
@@ -1670,7 +1670,7 @@
               "description": "Second nighttime room exit detected. Same vector as the first exit (HD=0 between consecutive NIGHT_AWAKE events \u2014 sequential matching advances the sequence node pointer). Pattern is emerging; one more exit confirms wandering behavior.",
               "signal": "[H,H,L,H,H,H,L,H]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "nw-awake-3"
             ]
           },
@@ -1716,7 +1716,7 @@
               "description": "Third nighttime room exit in the same nocturnal monitoring period. Three repeated NIGHT_AWAKE events confirm a wandering pattern rather than isolated sleep disruption. Terminal node \u2014 fires WANDERING_ALERT output.",
               "signal": "[H,H,L,H,H,H,L,H]"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "out-wandering-alert",
                 "vector": [
@@ -1746,7 +1746,7 @@
         "name": "TC-01: Normal Morning Routine",
         "pattern": "RISE \u00b7 BATH_VISIT \u00b7 BREAKFAST \u00b7 MED_AM",
         "description": "ROUTINE COMPLETE: Patient follows the full morning care sequence \u2014 rises, uses bathroom, eats breakfast, and takes AM medications. Primary happy path with no friction.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.1,
@@ -1799,7 +1799,7 @@
         "name": "TC-02: Normal Morning Routine \u2014 Multiple Rises (Kleene+)",
         "pattern": "(RISE)\u00b3 \u00b7 BATH_VISIT \u00b7 BREAKFAST \u00b7 MED_AM",
         "description": "ROUTINE COMPLETE: Patient is detected up and moving three times before bathroom visit \u2014 e.g., gets up, moves to chair, gets up again. Validates Kleene-plus RISE initial semantics. Outcome unchanged.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.1,
@@ -1872,7 +1872,7 @@
         "name": "TC-03: Normal Evening Routine",
         "pattern": "DINNER \u00b7 BATH_PM \u00b7 MED_PM \u00b7 SETTLE",
         "description": "ROUTINE COMPLETE: Patient completes all evening care milestones \u2014 attends dinner, uses bathroom, takes PM medications, and returns to room settled for the night.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.1,
@@ -1925,7 +1925,7 @@
         "name": "TC-04: Fall \u2014 Responsive (Call Button Activated)",
         "pattern": "RISE \u00b7 FALL_EVENT \u00b7 FALL_CALL",
         "description": "ANOMALY \u2014 FALL CONFIRMED: Patient falls during daytime ambulation and activates pendant alarm. Staff dispatched. Patient is alert and responsive.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.1,
@@ -1968,7 +1968,7 @@
         "name": "TC-05: Fall \u2014 Unresponsive (No Call, Patient Still)",
         "pattern": "RISE \u00b7 FALL_EVENT \u00b7 POST_FALL_STILL",
         "description": "ANOMALY \u2014 CRITICAL UNRESPONSIVE FALL: Patient falls and does not activate any call system. Sensor detects continued stillness. Patient may be unconscious or unable to reach call device.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.1,
@@ -2012,7 +2012,7 @@
         "name": "TC-06: Bathroom Non-Use Alert (8+ Hour Lapse)",
         "pattern": "(BATH_VISIT)\u00b2 \u00b7 BATH_OVERDUE",
         "description": "ANOMALY \u2014 BATHROOM ALERT: Patient had two prior bathroom visits during the day but has exceeded the care-plan bathroom interval without a new visit. Alert raised for assessment.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.9,
@@ -2055,7 +2055,7 @@
         "name": "TC-07: Missed Morning Medication",
         "pattern": "BREAKFAST \u00b7 MEDICATION_MISSED_ALERT",
         "description": "ANOMALY \u2014 MEDICATION MISSED: Patient ate breakfast but the AM medication administration window closed without MAR confirmation. Alert raised for immediate nursing follow-up.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.9,
@@ -2089,7 +2089,7 @@
         "name": "TC-08: Nighttime Wandering (3 Room Exits)",
         "pattern": "SETTLE \u00b7 NIGHT_AWAKE \u00b7 NIGHT_AWAKE \u00b7 NIGHT_AWAKE",
         "description": "ANOMALY \u2014 WANDERING ALERT: Patient settled for the night exits their room three times during nocturnal monitoring. Three exits distinguish wandering from a normal single bathroom visit.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.9,

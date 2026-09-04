@@ -372,11 +372,11 @@
         "id": "aihr-hw-degradation",
         "name": "Hardware Degradation Escalation",
         "description": "4-step escalation: HEALTHY → WARNING → DEGRADED → CRITICAL as hardware fault indicators accumulate across disk, memory, network, and fault counters",
-        "vectors": [
+        "events": [
           {
             "id": "aihr-healthy",
             "isInitial": true,
-            "nextVectorIds": [
+            "nextEventIds": [
               "aihr-warning"
             ],
             "elements": [
@@ -397,7 +397,7 @@
                 "threshold": 0.5
               }
             ],
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "aihr-out-healthy",
                 "vector": [
@@ -418,7 +418,7 @@
           {
             "id": "aihr-warning",
             "isInitial": false,
-            "nextVectorIds": [
+            "nextEventIds": [
               "aihr-degraded"
             ],
             "elements": [
@@ -439,7 +439,7 @@
                 "threshold": 0.5
               }
             ],
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "aihr-out-warning",
                 "vector": [
@@ -460,7 +460,7 @@
           {
             "id": "aihr-degraded",
             "isInitial": false,
-            "nextVectorIds": [
+            "nextEventIds": [
               "aihr-critical"
             ],
             "elements": [
@@ -481,7 +481,7 @@
                 "threshold": 0.5
               }
             ],
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "aihr-out-degraded",
                 "vector": [
@@ -517,7 +517,7 @@
           {
             "id": "aihr-critical",
             "isInitial": false,
-            "nextVectorIds": [],
+            "nextEventIds": [],
             "elements": [
               {
                 "value": 0.92,
@@ -536,7 +536,7 @@
                 "threshold": 0.5
               }
             ],
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "aihr-out-critical",
                 "vector": [
@@ -590,11 +590,11 @@
         "id": "aihr-sudden-network-failure",
         "name": "Sudden Network Fabric Failure",
         "description": "2-step detection: NETWORK_NOMINAL → NETWORK_FAULT — fires when packet loss spikes HIGH while disk and memory health remain LOW (isolated network component failure)",
-        "vectors": [
+        "events": [
           {
             "id": "aihr-net-nominal",
             "isInitial": true,
-            "nextVectorIds": [
+            "nextEventIds": [
               "aihr-net-fault"
             ],
             "elements": [
@@ -615,12 +615,12 @@
                 "threshold": 0.5
               }
             ],
-            "outputVectors": []
+            "outputEvents": []
           },
           {
             "id": "aihr-net-fault",
             "isInitial": false,
-            "nextVectorIds": [],
+            "nextEventIds": [],
             "elements": [
               {
                 "value": 0.08,
@@ -639,7 +639,7 @@
                 "threshold": 0.5
               }
             ],
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "aihr-out-net-warn",
                 "vector": [
@@ -680,7 +680,7 @@
         "id": "aihr-seq-1",
         "name": "Healthy Hardware Baseline",
         "description": "All hardware health metrics well within nominal ranges — no faults detected",
-        "vectors": [
+        "events": [
           [
             0.04,
             0.06,
@@ -709,7 +709,7 @@
           "expectedOutputs": 4,
           "scenario": "NVMe drive predictive failure cascade in AI training storage cluster"
         },
-        "vectors": [
+        "events": [
           [
             0.05,
             0.08,
@@ -744,7 +744,7 @@
           "expectedOutputs": 1,
           "scenario": "Top-of-rack switch ASIC failure causing packet loss for GPU training cluster"
         },
-        "vectors": [
+        "events": [
           [
             0.06,
             0.08,

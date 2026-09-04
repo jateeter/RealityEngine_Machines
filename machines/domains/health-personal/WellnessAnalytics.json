@@ -577,7 +577,7 @@
           "downstreamMachine": "NewPatientInflow",
           "downstreamSequence": "npi-acceptance or rejection paths based on evaluation outcome"
         },
-        "vectors": [
+        "events": [
           {
             "id": "sac-good",
             "elements": [
@@ -620,7 +620,7 @@
               "description": "Community-dwelling patient at GOOD wellness level. D5=H identifies community origin. D1=H (BELOW_OPTIMAL) and D2=L (not yet at alert). Kleene-plus: multiple consecutive GOOD readings during routine monitoring before first ALERT appears.",
               "signal": "[H,H,L,L,L,H,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "sac-alert"
             ]
           },
@@ -666,7 +666,7 @@
               "description": "First ALERT-level reading for this community-dwelling patient. D2=H (ALERT_OR_WORSE) rises. HD=1 from COMMUNITY_GOOD (D2: L\u2192H). D4=L (first occurrence, not yet repeat). Care team notified; single reading triggers monitoring increase but not yet ALF referral.",
               "signal": "[H,H,H,L,L,H,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "sac-alert-repeat"
             ]
           },
@@ -712,7 +712,7 @@
               "description": "Second (or later) consecutive ALERT-level reading for this community patient. D4=H (REPEAT_CYCLE). HD=1 from COMMUNITY_ALERT (D4: L\u2192H). Sustained pattern confirmed \u2014 structural intervention warranted. Terminal node \u2014 fires INFLOW_EVALUATION output.",
               "signal": "[H,H,H,L,H,H,L,L]"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "out-inflow-evaluation",
                 "vector": [
@@ -752,7 +752,7 @@
           "downstreamMachine": "NewPatientInflow",
           "downstreamSequence": "npi-acceptance with accelerated timeline"
         },
-        "vectors": [
+        "events": [
           {
             "id": "cc-alert",
             "elements": [
@@ -795,7 +795,7 @@
               "description": "Community patient at ALERT level \u2014 the typical pre-critical observation period. Kleene-plus: may have been at ALERT for multiple cycles (captured as prior INFLOW_EVALUATION output if 2+ cycles preceded). This initial state also activates concurrently with Sequence 1 \u2014 the machine begins monitoring for CRITICAL escalation from the first ALERT observation.",
               "signal": "[H,H,H,L,L,H,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "cc-critical"
             ]
           },
@@ -841,7 +841,7 @@
               "description": "CRITICAL wellness level in community-dwelling patient. D3=H (CRITICAL_LEVEL). HD=1 from COMMUNITY_ALERT (D3: L\u2192H). Terminal node \u2014 fires INFLOW_URGENT. If concurrently a life-threatening clinical condition exists (falls, cardiac event), CareTransitionWorkflow Sequence 1 (acute emergency transfer) takes priority; INFLOW_URGENT is queued for post-stabilization.",
               "signal": "[H,H,H,H,L,H,L,L]"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "out-inflow-urgent",
                 "vector": [
@@ -881,7 +881,7 @@
           "downstreamMachine": "CareTransitionWorkflow",
           "downstreamSequences": "transition-hospital-to-rehab (if SNF level needed) or transition-rehab-to-alf (if ALF to higher SNF)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "saf-good",
             "elements": [
@@ -924,7 +924,7 @@
               "description": "Facility resident at GOOD wellness level. D5=L identifies facility origin. Kleene-plus: multiple consecutive GOOD readings before first ALERT. This initial vector is shared with Sequence 5 (rapid decline) \u2014 both sequences activate simultaneously on FACILITY_GOOD events and diverge at step 2.",
               "signal": "[H,H,L,L,L,L,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "saf-alert"
             ]
           },
@@ -970,7 +970,7 @@
               "description": "First ALERT-level reading for this facility resident. D2=H (ALERT_OR_WORSE). HD=1 from FACILITY_GOOD (D2: L\u2192H). D4=L (first occurrence). The sequence advances to monitor for a repeat cycle. Concurrently, Sequence 4 activates monitoring for CRITICAL escalation from this state.",
               "signal": "[H,H,H,L,L,L,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "saf-alert-repeat"
             ]
           },
@@ -1016,7 +1016,7 @@
               "description": "Second or later consecutive ALERT reading for this facility resident. D4=H (REPEAT_CYCLE). HD=1 from FACILITY_ALERT (D4: L\u2192H). Sustained pattern confirmed \u2014 care level review warranted. Terminal \u2014 fires TRANSITION_REVIEW.",
               "signal": "[H,H,H,L,H,L,L,L]"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "out-transition-review",
                 "vector": [
@@ -1055,7 +1055,7 @@
           "downstreamMachine": "CareTransitionWorkflow",
           "downstreamSequence": "transition-emergency-escalation (Sequence 5)"
         },
-        "vectors": [
+        "events": [
           {
             "id": "cf-alert",
             "elements": [
@@ -1098,7 +1098,7 @@
               "description": "Facility resident at ALERT level \u2014 the pre-critical monitoring state. Kleene-plus: prior alert cycles may have already produced a TRANSITION_REVIEW output (Sequence 3). This initial state activates concurrently with Sequence 3 and Sequence 6, monitoring for CRITICAL escalation or recovery from the same ALERT state.",
               "signal": "[H,H,H,L,L,L,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "cf-critical"
             ]
           },
@@ -1144,7 +1144,7 @@
               "description": "CRITICAL wellness level in facility resident. D3=H (CRITICAL_LEVEL). HD=1 from FACILITY_ALERT (D3: L\u2192H). Terminal \u2014 fires TRANSITION_ESCALATION. Physician notification is immediate. CareTransitionWorkflow emergency escalation sequence activated.",
               "signal": "[H,H,H,H,L,L,L,L]"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "out-transition-escalation",
                 "vector": [
@@ -1185,7 +1185,7 @@
           "downstreamSequence": "transition-blocked (if barrier exists) or planned transition sequences based on clinical assessment",
           "divergenceNote": "Sequences 3 and 5 share the FACILITY_GOOD initial. They diverge at step 2: Sequence 3 observes FACILITY_ALERT (D2\u2191, alert level rises), while Sequence 5 observes FACILITY_VELOCITY (D6\u2191, velocity flag rises with D2 still L). The CES evaluates both paths simultaneously and advances the matching sequence when the next event disambiguates."
         },
-        "vectors": [
+        "events": [
           {
             "id": "rd-good",
             "elements": [
@@ -1228,7 +1228,7 @@
               "description": "Facility resident at GOOD level \u2014 the baseline state before rapid decline is detected. Shared initial vector with Sequence 3. Kleene-plus allows multiple prior GOOD readings. The sequence advances when D6 (velocity) rises, distinguishing this path from Sequence 3 which advances when D2 (alert level) rises.",
               "signal": "[H,H,L,L,L,L,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "rd-velocity"
             ]
           },
@@ -1274,7 +1274,7 @@
               "description": "The integration layer has set D6=H indicating that this assessment cycle's wellness score dropped \u22652 levels from the prior cycle. D2 is still L \u2014 the full alert level classification is pending confirmation at the next node. HD=1 from FACILITY_GOOD (D6: L\u2192H). This intermediate state ensures the rapid-decline path is HD=1 compliant by separating the velocity detection from the alert classification.",
               "signal": "[H,H,L,L,L,L,H,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "rd-alert-rapid"
             ]
           },
@@ -1320,7 +1320,7 @@
               "description": "ALERT or worse level confirmed (D2=H) with velocity flag still active (D6=H). HD=1 from FACILITY_VELOCITY (D2: L\u2192H). The combination of D2=H and D6=H uniquely identifies a velocity-driven alert \u2014 distinct from a normal gradual alert (D2=H, D6=L). Terminal \u2014 fires TRANSITION_URGENT.",
               "signal": "[H,H,H,L,L,L,H,L]"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "out-transition-urgent",
                 "vector": [
@@ -1359,7 +1359,7 @@
           "vectorNote": "FACILITY_STABILIZING and FACILITY_GOOD share the same raw vector [H,H,L,L,L,L,L,L]. CES node identity within Sequence 6 correctly routes to WELLNESS_IMPROVING rather than treating this as a new baseline GOOD event. The distinction is sequentially meaningful: observing GOOD after ALERT is qualitatively different from observing GOOD in steady-state monitoring.",
           "divergenceNote": "Sequences 4 and 6 share the FACILITY_ALERT initial. They diverge at step 2: Sequence 4 observes FACILITY_CRITICAL (D3\u2191, worsening), while Sequence 6 observes FACILITY_STABILIZING (D2\u2193, improving). The CES evaluates both simultaneously and advances the matching path."
         },
-        "vectors": [
+        "events": [
           {
             "id": "wi-alert",
             "elements": [
@@ -1402,7 +1402,7 @@
               "description": "Facility resident at ALERT level \u2014 the state from which recovery will be observed. Kleene-plus: the patient may have been at ALERT for multiple cycles (triggering TRANSITION_REVIEW from Sequence 3) before improvement is detected. This sequence activates simultaneously with Sequences 3 and 4 on FACILITY_ALERT events.",
               "signal": "[H,H,H,L,L,L,L,L]"
             },
-            "nextVectorIds": [
+            "nextEventIds": [
               "wi-stabilizing"
             ]
           },
@@ -1448,7 +1448,7 @@
               "description": "Patient's wellness level has improved from ALERT to GOOD. D2=L (ALERT_OR_WORSE de-asserted). HD=1 from FACILITY_ALERT (D2: H\u2192L). Terminal \u2014 fires WELLNESS_IMPROVING. The raw vector [H,H,L,L,L,L,L,L] is identical to FACILITY_GOOD; however, in this sequence context (preceded by FACILITY_ALERT), it semantically represents improvement rather than sustained baseline wellness.",
               "signal": "[H,H,L,L,L,L,L,L]"
             },
-            "outputVectors": [
+            "outputEvents": [
               {
                 "id": "out-wellness-improving",
                 "vector": [
@@ -1481,7 +1481,7 @@
         "name": "TC-01: Community Resident \u2014 Sustained ALERT \u2192 NewPatientInflow Evaluation",
         "pattern": "COMMUNITY_GOOD \u00b7 COMMUNITY_GOOD \u00b7 COMMUNITY_ALERT \u00b7 COMMUNITY_ALERT_REPEAT",
         "description": "INFLOW_EVALUATION: 76-year-old female living alone in independent apartment. Two consecutive bi-weekly wellness assessments at GOOD (stress elevated post-bereavement). Third assessment: ALERT (anxiety elevated, exercise stopped after minor fall, nutrition declining \u2014 MNA dropped below threshold). Fourth assessment: ALERT again (D4=H, repeat cycle). Second consecutive ALERT triggers NewPatientInflow evaluation recommendation. Family notified; intake appointment scheduled.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.9,
@@ -1536,7 +1536,7 @@
         "name": "TC-02: Community Resident \u2014 CRITICAL Level \u2192 Urgent NewPatientInflow",
         "pattern": "COMMUNITY_ALERT \u00b7 COMMUNITY_ALERT \u00b7 COMMUNITY_CRITICAL",
         "description": "INFLOW_URGENT: 81-year-old male living with adult son. ALERT for two prior cycles (Sequence 1 already fired INFLOW_EVALUATION). Before intake appointment is scheduled, third assessment confirms CRITICAL \u2014 MoCA drops from 19 to 14 (below 85+ threshold of 18), active decline trend. Son reports increasing confusion, not recognizing neighbors, found wandering twice. INFLOW_URGENT overrides the standard evaluation timeline; 48-hour expedited intake initiated.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.9,
@@ -1581,7 +1581,7 @@
         "name": "TC-03: Facility Resident \u2014 Sustained ALERT \u2192 CareTransitionWorkflow Review",
         "pattern": "FACILITY_GOOD \u00b7 FACILITY_GOOD \u00b7 FACILITY_ALERT \u00b7 FACILITY_ALERT_REPEAT",
         "description": "TRANSITION_REVIEW: 78-year-old female in assisted living for 8 months. Two prior GOOD cycles. Assessment cycle 7: ALERT \u2014 anxiety, stress, and exercise all below norm (new atrial fibrillation diagnosis creating health anxiety; fall fear limiting activity). Assessment cycle 9: ALERT again (D4=H). No improvement despite care plan adjustment. CareTransitionWorkflow care level review initiated; interdisciplinary team conference scheduled.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.9,
@@ -1636,7 +1636,7 @@
         "name": "TC-04: Facility Resident \u2014 CRITICAL Level \u2192 Emergency Care Transition",
         "pattern": "FACILITY_ALERT \u00b7 FACILITY_ALERT \u00b7 FACILITY_CRITICAL",
         "description": "TRANSITION_ESCALATION: 86-year-old male in ALF with two prior ALERT cycles (TRANSITION_REVIEW fired at cycle 2, care conference held). Assessment cycle 5: CRITICAL \u2014 MMSE dropped from 20 to 14, active decline trend (D6 in PatientWellness set 3 cycles ago). Cognitive decline has crossed the age-cohort threshold despite in-facility interventions. CareTransitionWorkflow Sequence 5 activated: physician assessment for reversible causes; if none, emergency hospital transfer for comprehensive neuropsychological evaluation.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.9,
@@ -1681,7 +1681,7 @@
         "name": "TC-05: Facility Resident \u2014 Rapid 2-Level Decline \u2192 Urgent Transition",
         "pattern": "FACILITY_GOOD \u00b7 FACILITY_GOOD \u00b7 FACILITY_VELOCITY \u00b7 FACILITY_ALERT_RAPID",
         "description": "TRANSITION_URGENT: 74-year-old female in ALF, previously at GOOD level for 4 consecutive cycles. New assessment: PatientWellness reports ALERT (3 dims below norm) AND the integration layer sets D6=H \u2014 the prior cycle was OPTIMAL, making this a 2-level drop (OPTIMAL\u2192ALERT) in one bi-weekly period. Correlation: new medication started 3 weeks ago. TRANSITION_URGENT fires without waiting for two-cycle confirmation; physician assessment within 24 hours, medication review initiated.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.9,
@@ -1737,7 +1737,7 @@
         "name": "TC-06: Facility Resident \u2014 ALERT Then Recovery \u2192 Wellness Improving",
         "pattern": "FACILITY_ALERT \u00b7 FACILITY_ALERT \u00b7 FACILITY_STABILIZING",
         "description": "WELLNESS_IMPROVING: 79-year-old female in ALF. ALERT for two cycles (TRANSITION_REVIEW fired; care conference held; interventions implemented: anxiety counseling started, walking group enrollment, nutrition supplement added). Third assessment: GOOD level restored across 5 of 6 dimensions. D2=L (ALERT_OR_WORSE de-asserted). WELLNESS_IMPROVING fires. Care team documents effective intervention. TRANSITION_REVIEW episode closed after two confirming cycles.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.9,
@@ -1782,7 +1782,7 @@
         "name": "TC-07: Community Resident \u2014 Multiple GOOD Cycles (Kleene+) Before ALERT \u2192 INFLOW_EVALUATION",
         "pattern": "(COMMUNITY_GOOD)\u00b3 \u00b7 COMMUNITY_ALERT \u00b7 COMMUNITY_ALERT_REPEAT",
         "description": "INFLOW_EVALUATION: 68-year-old male living independently. Three consecutive GOOD wellness cycles during routine bi-monthly community wellness checks. Fourth assessment: ALERT. Fifth assessment: ALERT repeat. Validates Kleene-plus COMMUNITY_GOOD initial semantics \u2014 three prior GOOD readings are consumed before the sequence advances on ALERT. INFLOW_EVALUATION fires on the second consecutive ALERT.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.9,
@@ -1846,7 +1846,7 @@
         "name": "TC-08: Facility Resident \u2014 Multiple ALERT Cycles (Kleene+) Then CRITICAL \u2192 TRANSITION_ESCALATION",
         "pattern": "(FACILITY_ALERT)\u00b3 \u00b7 FACILITY_CRITICAL",
         "description": "TRANSITION_ESCALATION: 88-year-old female in memory-care ALF unit. ALERT for three consecutive assessment cycles \u2014 TRANSITION_REVIEW (Sequence 3) fired at cycle 2. Care conference held; additional cognitive support added; family meeting conducted. Cycle 4 assessment: CRITICAL \u2014 cognitive decline has crossed clinical threshold despite all in-facility interventions. Three prior ALERT cycles consumed by Kleene-plus initial of Sequence 4 before CRITICAL fires TRANSITION_ESCALATION. Validates Kleene-plus semantics on FACILITY_ALERT initial.",
-        "vectors": [
+        "events": [
           [
             0.9,
             0.9,
