@@ -1,0 +1,27 @@
+version: 2
+
+# Dependency currency for the corpus repo.
+#
+# House policy across this workspace: weekly, and **majors are proposed too** —
+# Dependabot opens the PR, a human still merges it.
+#
+# The corpus itself is JSON with no package manager; what is tracked here is
+# the tooling that validates and tests it. That tooling is a contract gate for
+# all four runtimes, so a Playwright or TypeScript major landing unreviewed
+# would change what "the corpus passes" means without anyone deciding to.
+
+updates:
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Chicago
+    groups:
+      playwright:
+        patterns:
+          - "@playwright/*"
+          - "playwright*"
+    open-pull-requests-limit: 5
