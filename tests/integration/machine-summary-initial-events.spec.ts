@@ -114,7 +114,9 @@ test.describe('Machine Summary Initial Events', () => {
     expect(allKeys.size, 'engines must report sequences to compare').toBeGreaterThan(0);
 
     // Order matters as much as membership: the engines sort initial event ids
-    // so a majority comparison has something to agree on (RealityEngine_CI#197).
+    // so the comparison has something to agree on (RealityEngine_CI#197).
+    // Quorum is 3-of-3 (RealityEngine_CI/docs/QUORUM_CONTRACT.md) — every
+    // engine below is a party to the verdict, none is the reference.
     const disagreements: string[] = [];
     for (const key of allKeys) {
       const rendered = [...perEngine.entries()].map(
