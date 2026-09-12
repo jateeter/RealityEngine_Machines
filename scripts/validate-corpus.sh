@@ -36,12 +36,30 @@ python3 "$SCRIPT_DIR/build-arbitration-registry.py" --check
 # for exemplar domains, corpus-wide manifest drift, and — when ROBOT is
 # installed (CI) — reasoner consistency.
 python3 "$SCRIPT_DIR/backfill-lane-contracts.py" --check
-python3 "$SCRIPT_DIR/generate-owl.py" --domain health-personal --check --strict-actions
+# --all, not a nominated domain. This read `--domain health-personal` and so
+# checked one domain out of the manifest: every domain added since shipped
+# without its ABox ever being gated, and the next one would have too.
+python3 "$SCRIPT_DIR/generate-owl.py" --all --check --strict-actions
 python3 "$SCRIPT_DIR/generate-owl.py" --manifest-check --strict-actions
 bash "$SCRIPT_DIR/reason-owl.sh"
-python3 "$SCRIPT_DIR/project-lanes.py" --write
-python3 "$SCRIPT_DIR/compile-decision-table.py" --write
+# --check, not --write. A generator run in write mode inside a validation gate
+# cannot fail: it rewrites the artifact to match whatever the corpus now says
+# and exits 0, so drift is absorbed silently and the gate reports health it
+# never established. Regenerate deliberately with the :write npm scripts.
+python3 "$SCRIPT_DIR/project-lanes.py" --check
+python3 "$SCRIPT_DIR/compile-decision-table.py" --check
 bash "$SCRIPT_DIR/validate-guardrails.sh"
+
+# Unit-vocabulary gates. Both shipped with verification modes that no gate
+# invoked, so neither had ever run against the corpus (RealityEngine_CI#352
+# is the same finding in the CI repo).
+python3 "$SCRIPT_DIR/extract-qudt-subset.py" --source "$REPO_ROOT/.qudt-cache" --check
+python3 "$SCRIPT_DIR/ucum.py" --scan "$REPO_ROOT/domains/region-allocation.json"
+
+# Inventory gate: every generator on disk is declared, scoped to a corpus, and
+# reachable from a gate. This is what keeps a new domain's generator from
+# arriving unwired — the failure this file could not previously detect.
+python3 "$SCRIPT_DIR/check-generators.py" --check
 
 # JSON-Schema enforcement (machines + registries + trigger files vs schemas/).
 # Requires devDependencies (ajv); skip with a clear notice if not installed so
