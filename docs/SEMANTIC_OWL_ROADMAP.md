@@ -113,7 +113,7 @@ Original plan:
   become an RDF graph; validate region overlap and privacy-boundary
   annotations semantically.
 
-### M4 — Engine surfacing (RE/PE APIs)
+### M4 — Engine surfacing (RE/PE APIs) — verified 3-of-3 (2026-09-12)
 
 - Each engine (C++, LSP, Scala, TypeScript PE) serves the semantic identity of
   its loaded machines: `GET /api/machines/semantics/:name` returning the ABox
@@ -122,11 +122,80 @@ Original plan:
 - Parity tests compare `semanticsHash` across engines: semantic equivalence
   becomes a first-class verification class alongside byte equivalence.
 
-### M5 — Semantic audit records (PE→RE→PE cycle) — in progress
+**Measured on the three-engine lane** (`--engines=cpp:1,lsp:1,scala:1`,
+regression corpus), `scripts/verify-semantic-parity.sh`:
+
+```
+semantic-parity: 'Fall Detection' — 3 engine(s) answered, 0 unmeasurable
+  cpp-1:   fbd54a18bb8320faeb2dcf07f9c19eee5509e7eaae6aac037a6ccf20f6e8807e
+  lsp-1:   fbd54a18bb8320faeb2dcf07f9c19eee5509e7eaae6aac037a6ccf20f6e8807e
+  scala-1: fbd54a18bb8320faeb2dcf07f9c19eee5509e7eaae6aac037a6ccf20f6e8807e
+semantic-parity: OK (engines agree with each other and the corpus manifest)
+```
+
+All three serve the surface and agree, and the agreed hash matches the corpus
+manifest — so the comparison has an authority and is not three engines agreeing
+with each other about something wrong.
+
+**Why this read as unbuilt until now.** The surface answered `404` in the
+single-engine Docker lane, which looks identical to an unimplemented endpoint.
+It was not: the engine resolves semantic identity from
+`semantics/abox-manifest.json`, and the container mounted only `machines/`, so
+there was nothing to answer from. See M5 below — the same root cause, three
+times.
+
+Still open for M4: `semanticsIri`/`semanticsHash` on machine **list** responses
+(the per-machine endpoint is what parity exercises today), and the TypeScript PE,
+which is not in the instance registry and needs `--extra-runtime` to be compared.
+
+### M5 — Semantic audit records (PE→RE→PE cycle) — invariants verified 3-of-3 (2026-09-12)
 
 Record shapes and the shared `GET /api/audit/semantics` surface are
-specified in `docs/SEMANTIC_AUDIT_CONTRACT.md`; per-runtime implementations
-are tracked in the engine repos' Phase 2 issues.
+specified in `SEMANTIC_AUDIT_CONTRACT.md` (master in `RealityEngine_CI/docs/`);
+per-runtime implementations are tracked in the engine repos' Phase 2 issues.
+
+**Measured**, `scripts/verify-audit-chain.sh` on the three-engine lane:
+
+```
+cpp-1:   15 observation(s); confirmed-fall path fall-conf-v1 -> ... -> fall-conf-v6
+lsp-1:   14 observation(s); confirmed-fall path fall-conf-v1 -> ... -> fall-conf-v6
+scala-1: 14 observation(s); confirmed-fall path fall-conf-v1 -> ... -> fall-conf-v6
+OK (3 engine(s) produced a complete, corpus-joined evidence chain)
+```
+
+All three audit invariants hold on every runtime: the confirmed-fall path
+completes (1), every IRI shares the machine's manifest base (2), and no
+escalation determination contradicts `re:EscalationDetermination` (3).
+`re:PerceptionEvent` resolves on the PE side too — 378 of 400 records carry a
+`machineIri`, the remaining 22 being localAI sources genuinely outside the
+corpus manifest.
+
+**The manifest must travel with the corpus.** Every engine resolves audit IRIs
+by walking up from `MACHINES_DIR` for `semantics/abox-manifest.json`. That was
+missing in three places, and each one silently produced records with
+`machineIri`, `sequenceIri` and `stepIri` null — which the contract also permits
+for a machine genuinely absent from the manifest, so *"the corpus was
+relocated"* and *"this machine has no ABox"* were indistinguishable:
+
+| where | fix |
+|---|---|
+| RE container mounted only `machines/` | `RealityEngine_CI` `fe14e39` |
+| PE container mounted no corpus at all | `RealityEngine_CI` `cddbf52` |
+| materialized corpus carried no `semantics/` | `RealityEngine_CI` `2e7a80d` |
+
+The third meant **every** corpus-scoped lane — regression, standard-deployment,
+arbiter-fixture — ran without the join M5 exists to provide.
+
+`FallDetection.json` also had to join `config/regression-corpus.txt`: audit
+invariant 1 names that machine, `verify-audit-chain.sh` drives it, and the
+deployment gate runs on the regression corpus — where it was absent. All three
+runtimes answered "0 records", which reads as an incomplete chain rather than as
+a machine nobody loaded. An invariant whose subject is absent is not a passing
+invariant.
+
+Still open for M5: `re:DispatchRecord` (item 3 below) is unverified — the two
+observation types are what the chain exercises today; and the TypeScript PE is
+outside the registry-backed comparison.
 
 Recognition of the semantic representations inside the live workflow:
 
