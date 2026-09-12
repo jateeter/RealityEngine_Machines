@@ -204,19 +204,38 @@ runtimes answered "0 records", which reads as an incomplete chain rather than as
 a machine nobody loaded. An invariant whose subject is absent is not a passing
 invariant.
 
-Still open for M5:
+**TypeScript PE emission — verified 2026-09-12.** Driven with
+`POST /api/signals {region, values, triggerPush:true}`, it emits
+`re:PerceptionEvent` with correct regions, and 32 of 50 records resolve a
+`machineIri` (the remainder are localAI sources genuinely outside the corpus
+manifest). Two conditions are required and neither is obvious:
 
-- **`re:DispatchRecord`** (item 3 below) is unverified. The chain exercises the
-  two observation types; the `semantics` block on ledger entries has not been
-  measured on any runtime.
-- **TypeScript PE emission.** Its surface is correct — `GET /api/audit/semantics`
-  answers `{"records": [], "count": 0}` on an empty buffer, which is the shape
-  the contract requires and never a 404. Emission is *not* demonstrated: driving
-  it needs an active source carrying a value, and a source registered through
-  `POST /api/sources` with no value contributes nothing to `assembleVector`, so
-  no `re:PerceptionEvent` is written. The three engines were driven through
-  `verify-audit-chain.sh`, which has no TS PE equivalent yet. Treat TS PE M5 as
-  surface-verified and emission-unverified.
+- a source must be **active and carrying a value** — one registered through
+  `POST /api/sources` with no value contributes nothing to `assembleVector`;
+- `REALITY_ENGINE_URL` must reach a live RE, because emission happens *after*
+  the push to the RE. With an unreachable target the push throws first and the
+  buffer stays empty, which looks exactly like an unimplemented emitter.
+
+**`re:DispatchRecord` — measured, and partially populated.** With
+`TRIGGERS_ENABLED=true TRIGGER_DISPATCH_MODE=ledger`, every ledger entry carries
+a `semantics` block and `machineIri` resolves:
+
+```json
+"semantics": {
+  "machineIri": "…/health-personal/HomeTransportationBarrierMonitor#machine",
+  "sequenceIri": null,
+  "actionCode": null
+}
+```
+
+The contract specifies all three. `sequenceIri` and `actionCode` are null, so the
+link from a dispatch to the sequence that caused it and the action it prescribes
+is not yet made — which is the join item 3 exists for. **This is the open item in
+M5**, and it is a partial implementation rather than an absent one.
+
+Note the default: the ledger ships `enabled:false, mode:dry-run`, so a deployment
+that has not turned it on emits no dispatch records at all and looks identical to
+one where the feature is missing.
 
 Recognition of the semantic representations inside the live workflow:
 
