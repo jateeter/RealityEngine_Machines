@@ -239,7 +239,39 @@ record.sequenceId  ''    ->  'transport-adequate'
 sequenceIri        null  ->  …/HomeTransportationBarrierMonitor#seq-transport-adequate
 ```
 
-**`actionCode` remains null, and the PE cannot fix it** — `RealityEngine_CI#365`.
+**`actionCode` — implemented in all three engines and the PE, confirmed on two.**
+`RealityEngine_CI#365`; C++ `bc40bc3`, Scala `8a55631`, LSP `e7edc69`, PE
+`RealityEngine_Manager` `469c07d`.
+
+```
+cpp-1     9 entries, 5 with actionCode  ['continue-monitoring', 'log-activity', 'log-only']
+scala-1   8 entries, 3 with actionCode  ['continue-monitoring', 'log-activity']
+lsp-1     0 entries, 0 with actionCode  []   ← unmeasured, see below
+```
+
+and end to end on the dispatch ledger:
+
+```
+machineIri   …/HomeTransportationBarrierMonitor#machine
+sequenceIri  …/HomeTransportationBarrierMonitor#seq-transport-adequate
+actionCode   'continue-monitoring'
+```
+
+`lsp-1` emitted no merge entries at all — every source reports `"active": false`
+and 0 of its 28 machines are active, so there was nothing to carry the field.
+That is `RealityEngine_CI#358` (the 2-1 source-activity split) and predates this
+work; LSP's implementation passes oracle parity 4966/4966. **Unmeasured, not
+disagreeing** — a runtime that produced nothing has told us nothing.
+
+Two notes for whoever finishes this. The PE's Dispatcher had been reading
+`op.action`, a top-level field no engine has ever emitted, so that read was dead
+from the day it was written and supplying the engine field alone changed nothing.
+And the action cannot be recovered downstream of governance resolution, which
+matches a rule by sequenceId and values and never sees the output event — so it
+travels with the contributor and attaches to the decision that *wins* the
+severity join, per the "decision travels whole" rule each engine already states.
+
+Superseded note (the state before this work):
 The corpus keeps `action` on the output event's metadata
 (`fall-conf-out: action=emergency-dispatch`), but the RE does not propagate it
 into the merge entry: `governance` carries `sequenceId`, `ragStatusCode` and
