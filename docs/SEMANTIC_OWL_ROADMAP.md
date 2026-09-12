@@ -144,9 +144,20 @@ It was not: the engine resolves semantic identity from
 there was nothing to answer from. See M5 below — the same root cause, three
 times.
 
-Still open for M4: `semanticsIri`/`semanticsHash` on machine **list** responses
-(the per-machine endpoint is what parity exercises today), and the TypeScript PE,
-which is not in the instance registry and needs `--extra-runtime` to be compared.
+**The TypeScript PE conforms.** It is not an engine instance, so
+`verify-semantic-parity.sh` gained `--extra-runtime id=url`; per the shaping on
+`RealityEngine_CI#327` it conforms to the quorum rather than voting in it, so it
+is compared against the settled result and cannot change it:
+
+```
+semantic-parity: conformer ts-1: conforms (fbd54a18…807e)
+```
+
+Same IRI and same hash as the three engines. M4's surface is therefore
+implemented and agreeing across all four runtimes.
+
+Still open for M4: `semanticsIri`/`semanticsHash` on machine **list** responses —
+the per-machine endpoint is what parity exercises today.
 
 ### M5 — Semantic audit records (PE→RE→PE cycle) — invariants verified 3-of-3 (2026-09-12)
 
@@ -193,9 +204,19 @@ runtimes answered "0 records", which reads as an incomplete chain rather than as
 a machine nobody loaded. An invariant whose subject is absent is not a passing
 invariant.
 
-Still open for M5: `re:DispatchRecord` (item 3 below) is unverified — the two
-observation types are what the chain exercises today; and the TypeScript PE is
-outside the registry-backed comparison.
+Still open for M5:
+
+- **`re:DispatchRecord`** (item 3 below) is unverified. The chain exercises the
+  two observation types; the `semantics` block on ledger entries has not been
+  measured on any runtime.
+- **TypeScript PE emission.** Its surface is correct — `GET /api/audit/semantics`
+  answers `{"records": [], "count": 0}` on an empty buffer, which is the shape
+  the contract requires and never a 404. Emission is *not* demonstrated: driving
+  it needs an active source carrying a value, and a source registered through
+  `POST /api/sources` with no value contributes nothing to `assembleVector`, so
+  no `re:PerceptionEvent` is written. The three engines were driven through
+  `verify-audit-chain.sh`, which has no TS PE equivalent yet. Treat TS PE M5 as
+  surface-verified and emission-unverified.
 
 Recognition of the semantic representations inside the live workflow:
 
