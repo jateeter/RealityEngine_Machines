@@ -228,10 +228,26 @@ a `semantics` block and `machineIri` resolves:
 }
 ```
 
-The contract specifies all three. `sequenceIri` and `actionCode` are null, so the
-link from a dispatch to the sequence that caused it and the action it prescribes
-is not yet made — which is the join item 3 exists for. **This is the open item in
-M5**, and it is a partial implementation rather than an absent one.
+`sequenceIri` was fixed on 2026-09-12 (`RealityEngine_Manager` `2b324a4`): the PE
+read `op.sequenceId`, which the engines stopped emitting when the fold moved into
+the machine's atomic step — they now emit `sequenceIds` and
+`governance.sequenceId`. Reading only the singular field yielded `""` with no
+error, so the join looked implemented and produced nothing. Measured after:
+
+```
+record.sequenceId  ''    ->  'transport-adequate'
+sequenceIri        null  ->  …/HomeTransportationBarrierMonitor#seq-transport-adequate
+```
+
+**`actionCode` remains null, and the PE cannot fix it** — `RealityEngine_CI#365`.
+The corpus keeps `action` on the output event's metadata
+(`fall-conf-out: action=emergency-dispatch`), but the RE does not propagate it
+into the merge entry: `governance` carries `sequenceId`, `ragStatusCode` and
+`processStatus`, and no `action` under any spelling. The consequence is larger
+than one null field — `ESCALATION_ACTIONS` is keyed on `actionCode`, so the
+escalation guardrail matches nothing and invariant 3 counts zero escalations
+whatever was dispatched. It is not failing; it is unevaluable, which looks the
+same from outside. **This is the open item in M5.**
 
 Note the default: the ledger ships `enabled:false, mode:dry-run`, so a deployment
 that has not turned it on emits no dispatch records at all and looks identical to
