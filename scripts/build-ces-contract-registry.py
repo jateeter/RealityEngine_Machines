@@ -52,6 +52,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -65,15 +66,46 @@ MACHINES = REPO_ROOT / "machines"
 DOMAINS = MACHINES / "domains"
 REGISTRY = REPO_ROOT / "domains" / "ces-contract-registry.json"
 
-CI_ROOT = REPO_ROOT.parent / "RealityEngine_CI"
-SHARD_DIR = CI_ROOT / "config" / "ces-contracts"
+def _discover_ci_root() -> Path | None:
+    """Where RealityEngine_CI is, across the layouts this runs in.
+
+    Locally the two repos are siblings (`../RealityEngine_CI`). In the CI
+    workflow the RealityEngine_CI checkout is the *workspace root* and this repo
+    is a subdirectory of it, so the sibling path does not exist. Probing for a
+    marker rather than assuming a layout, because assuming produced a gate that
+    reported the registry stale in CI while it was correct on every developer
+    machine -- the shards were simply unreachable, and unreachable was being
+    read as absent.
+    """
+    marker = Path("scripts") / "regression-ces-contracts.py"
+    env = os.environ.get("REALITY_ENGINE_CI_DIR")
+    if env:
+        # Authoritative when set. Falling back to a probe would mean an explicit
+        # override could be silently ignored, and the operator would be reading
+        # results from a repo they did not name.
+        root = Path(env)
+        return root if (root / marker).is_file() else None
+    for c in (REPO_ROOT.parent / "RealityEngine_CI", REPO_ROOT.parent):
+        if (c / marker).is_file():
+            return c
+    return None
+
+
+CI_ROOT = _discover_ci_root()
+# Absent only when RealityEngine_CI is not checked out alongside. Shard paths
+# stay well-formed so the registry still records where a shard *would* live.
+# One resolved path, so no call site has to remember the fallback. CI_ROOT stays
+# None-able because "is RealityEngine_CI reachable?" is a real question the check
+# has to answer differently from "does the registry disagree?".
+CI_DIR = CI_ROOT or (REPO_ROOT.parent / "RealityEngine_CI")
+SHARD_DIR = CI_DIR / "config" / "ces-contracts"
 LOCAL_AI_MACHINES = REPO_ROOT.parent / "localAIStack" / "data" / "machines"
 
 # The regression corpus predates the shard directory and is already the
 # authoritative artifact the CI drift gate runs against, at its own path. It is
 # registered where it lives rather than copied, because two files holding one
 # contract is how the two come to disagree.
-LEGACY_SHARD_PATHS = {"corpus:regression": CI_ROOT / "config" / "ces-contracts.json"}
+LEGACY_SHARD_PATHS = {"corpus:regression": CI_DIR / "config" / "ces-contracts.json"}
 
 MAX_CHAIN_DEPTH = 4  # the recorder's cap; mirrored so counts are comparable
 
@@ -117,7 +149,7 @@ def corpus_scopes(files: dict[str, Path]) -> tuple[dict[str, list[Path]], dict[s
     """
     scopes: dict[str, list[Path]] = {}
     unresolved: dict[str, list[str]] = {}
-    config = CI_ROOT / "config"
+    config = CI_DIR / "config"
     if not config.is_dir():
         return scopes, unresolved
     for listing in sorted(config.glob("*-corpus.txt")):
@@ -344,6 +376,36 @@ def main() -> int:
 
     if args.check:
         existing = REGISTRY.read_text(encoding="utf-8") if REGISTRY.exists() else None
+        if CI_ROOT is None:
+            # The shards live in RealityEngine_CI. Without it there is nothing to
+            # read a recording status from, and every scope would resolve
+            # `unrecorded` -- which compared against a registry recording them as
+            # recorded reads as "stale" when the truth is "not visible from here".
+            # Absence of evidence is not evidence of drift; that conflation is
+            # what this whole artifact class exists to stop.
+            #
+            # The corpus-derived half is still checked, and it is the half this
+            # repo owns: which scopes exist, how big they are, and the fingerprint
+            # of each. A machine added here without rebuilding the registry still
+            # fails, so the gate is not hollowed out.
+            def corpus_half(doc: dict[str, Any]) -> Any:
+                return {s: {k: e[k] for k in ("kind", "name", "machineCount",
+                                              "chainCount", "corpus")}
+                        for s, e in doc["scopes"].items()}
+            if existing is None:
+                print(f"missing: {REGISTRY.relative_to(REPO_ROOT)}", file=sys.stderr)
+                return 1
+            if corpus_half(json.loads(existing)) != corpus_half(document):
+                print(f"stale: {REGISTRY.relative_to(REPO_ROOT)} does not match the corpus",
+                      file=sys.stderr)
+                print("regenerate with: python3 scripts/build-ces-contract-registry.py --write",
+                      file=sys.stderr)
+                return 1
+            print("ces-contract-registry: corpus half verified — "
+                  f"{document['scopeCount']} scopes. Recording status NOT checked: "
+                  "RealityEngine_CI is not checked out alongside, so the shards are "
+                  "unreachable from here (set REALITY_ENGINE_CI_DIR to check them).")
+            return 0
         if existing != serialized:
             print(f"stale: {REGISTRY.relative_to(REPO_ROOT)} does not match the corpus",
                   file=sys.stderr)
