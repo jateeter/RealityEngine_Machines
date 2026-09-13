@@ -82,6 +82,13 @@ python3 "$SCRIPT_DIR/ucum.py" --scan "$REPO_ROOT/domains/region-allocation.json"
 # Inventory gate: every generator on disk is declared, scoped to a corpus, and
 # reachable from a gate. This is what keeps a new domain's generator from
 # arriving unwired — the failure this file could not previously detect.
+# The cesgen registry must not fall behind the corpus. It records which CES
+# contract shards exist and what corpus each was recorded against, so a machine
+# added here makes some shard stale — and a stale shard is a false statement
+# that reads as a passing contract. Checked with the corpus because this is
+# where the change that invalidates it is made.
+python3 "$SCRIPT_DIR/build-ces-contract-registry.py" --check
+
 python3 "$SCRIPT_DIR/check-generators.py" --check
 
 # JSON-Schema enforcement (machines + registries + trigger files vs schemas/).
