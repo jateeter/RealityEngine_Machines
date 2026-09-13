@@ -72,6 +72,22 @@ _spec.loader.exec_module(_builder)
 # this gating did not work on its first attempt.
 SHARDS_REACHABLE = _builder.SHARD_DIR.is_dir() or _builder.LEGACY_SHARD_PATHS[
     "corpus:regression"].is_file()
+
+
+def _shard_readable(scope: str) -> bool:
+    """Whether THIS scope's shard can actually be opened from here.
+
+    The directory existing is not the same as a given shard resolving, and the
+    difference is not hypothetical: in the corpus-gate job the RealityEngine_CI
+    checkout is the workspace root, so `SHARD_DIR` resolves and exists while
+    `REPO_ROOT / "../RealityEngine_CI/config/..."` -- the canonical spelling the
+    registry records -- points at nothing. Reachability said yes, every shard
+    read said no, and the suite reported 16 failures for a layout difference.
+    """
+    try:
+        return _builder.shard_path(scope).is_file()
+    except Exception:  # noqa: BLE001
+        return False
 UNREACHABLE_WHY = (f"no CES contract shards under {_builder.SHARD_DIR}; "
                    "shard-reading assertions cannot be evaluated in this checkout")
 
@@ -153,7 +169,7 @@ class CesContractRegistry(unittest.TestCase):
     def test_recorded_shards_exist_and_parse(self) -> None:
         for scope, entry in self.recorded_scopes():
             with self.subTest(scope=scope):
-                path = (REPO_ROOT / entry["artifact"]).resolve()
+                path = _builder.shard_path(scope)
                 self.assertTrue(path.exists(), f"{scope}: no shard at {entry['artifact']}")
                 json.loads(path.read_text())
 
@@ -168,7 +184,7 @@ class CesContractRegistry(unittest.TestCase):
         """
         for scope, entry in self.recorded_scopes():
             with self.subTest(scope=scope):
-                shard = json.loads((REPO_ROOT / entry["artifact"]).resolve().read_text())
+                shard = json.loads(_builder.shard_path(scope).read_text())
                 recorded = shard.get("corpusFingerprint")
                 self.assertIsNotNone(recorded, f"{scope}: shard carries no corpusFingerprint")
                 drift = fp.compare(recorded, entry["corpus"])
@@ -187,7 +203,7 @@ class CesContractRegistry(unittest.TestCase):
         """
         for scope, entry in self.recorded_scopes():
             with self.subTest(scope=scope):
-                shard = json.loads((REPO_ROOT / entry["artifact"]).resolve().read_text())
+                shard = json.loads(_builder.shard_path(scope).read_text())
                 self.assertEqual(
                     sorted(entry["corpus"]["members"]),
                     sorted((shard.get("corpusFingerprint") or {}).get("members", {})),
@@ -215,7 +231,7 @@ class CesContractRegistry(unittest.TestCase):
                 continue
             with self.subTest(scope=scope):
                 own = {p.name for p in (DOMAINS / entry["name"]).rglob("*.json")}
-                shard = json.loads((REPO_ROOT / entry["artifact"]).resolve().read_text())
+                shard = json.loads(_builder.shard_path(scope).read_text())
 
                 foreign = set()
                 for key in ("contracts", "disagreements", "noRuntimeEmits",
@@ -243,7 +259,7 @@ class CesContractRegistry(unittest.TestCase):
         """
         for scope, entry in self.recorded_scopes():
             with self.subTest(scope=scope):
-                shard = json.loads((REPO_ROOT / entry["artifact"]).resolve().read_text())
+                shard = json.loads(_builder.shard_path(scope).read_text())
                 quorum = shard.get("quorum") or {}
                 self.assertEqual(QUORUM_RULE, quorum.get("rule"), f"{scope}: not {QUORUM_RULE}")
                 self.assertTrue(quorum.get("formed"), f"{scope}: quorum not formed")
@@ -277,7 +293,7 @@ class CesContractRegistry(unittest.TestCase):
             if entry["status"] == "unrecorded":
                 continue
             with self.subTest(scope=scope):
-                shard = json.loads((REPO_ROOT / entry["artifact"]).resolve().read_text())
+                shard = json.loads(_builder.shard_path(scope).read_text())
                 undriven = {r for u in shard.get("unmeasurable", [])
                             for r in u.get("undrivenRuntimes", [])}
                 if not undriven:
