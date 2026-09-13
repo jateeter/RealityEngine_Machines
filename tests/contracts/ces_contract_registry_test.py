@@ -35,6 +35,7 @@ Gates:
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import subprocess
 import sys
@@ -45,6 +46,34 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 import ces_corpus_fingerprint as fp  # noqa: E402
+
+# Whether the shards are reachable from this checkout, decided by the builder's
+# own discovery rather than a second copy of it here. The shards live in
+# RealityEngine_CI, and the two repos sit differently in different places:
+# siblings locally, but in the e2e-tests workflow the RealityEngine_CI checkout
+# is the workspace root with this repo inside it, and localAIStack is not present
+# at all.
+#
+# Every shard-reading assertion below is SKIPPED, not passed, when they cannot be
+# reached. Skipped says "not evaluated here" and shows up as such; passing would
+# claim the shards were checked and found good, which is the conflation this
+# whole artifact class exists to prevent. Asserting instead — which is what this
+# suite did on its first CI run — reports 16 failures and 76 errors for a
+# checkout that is simply missing a sibling repo.
+_spec = importlib.util.spec_from_file_location(
+    "ces_registry_builder", REPO_ROOT / "scripts" / "build-ces-contract-registry.py")
+_builder = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_builder)
+# Tested on the artifacts themselves, not on whether the repo was located.
+# Finding RealityEngine_CI does not mean it carries the shards: the corpus-gate
+# job checks it out at the PR ref, and a branch that has not recorded any shard
+# has no config/ces-contracts at all. "Repo found" and "shards present" are
+# different facts and the first was standing in for the second, which is why
+# this gating did not work on its first attempt.
+SHARDS_REACHABLE = _builder.SHARD_DIR.is_dir() or _builder.LEGACY_SHARD_PATHS[
+    "corpus:regression"].is_file()
+UNREACHABLE_WHY = (f"no CES contract shards under {_builder.SHARD_DIR}; "
+                   "shard-reading assertions cannot be evaluated in this checkout")
 
 REGISTRY = REPO_ROOT / "domains" / "ces-contract-registry.json"
 SCHEMA = REPO_ROOT / "schemas" / "ces-contract-registry.schema.json"
@@ -120,6 +149,7 @@ class CesContractRegistry(unittest.TestCase):
     def recorded_scopes(self) -> list[tuple[str, dict]]:
         return [(s, e) for s, e in self.scopes.items() if e["status"] == "recorded"]
 
+    @unittest.skipUnless(SHARDS_REACHABLE, UNREACHABLE_WHY)
     def test_recorded_shards_exist_and_parse(self) -> None:
         for scope, entry in self.recorded_scopes():
             with self.subTest(scope=scope):
@@ -127,6 +157,7 @@ class CesContractRegistry(unittest.TestCase):
                 self.assertTrue(path.exists(), f"{scope}: no shard at {entry['artifact']}")
                 json.loads(path.read_text())
 
+    @unittest.skipUnless(SHARDS_REACHABLE, UNREACHABLE_WHY)
     def test_recorded_fingerprint_matches_the_corpus_per_machine(self) -> None:
         """Recomputed here rather than trusted from the registry.
 
@@ -145,6 +176,7 @@ class CesContractRegistry(unittest.TestCase):
                     {"added": [], "changed": [], "removed": []}, drift,
                     f"{scope} is registered as recorded but the corpus has moved")
 
+    @unittest.skipUnless(SHARDS_REACHABLE, UNREACHABLE_WHY)
     def test_shard_covers_exactly_the_scope(self) -> None:
         """The shard's own machine list is the scope's machine list.
 
@@ -161,6 +193,7 @@ class CesContractRegistry(unittest.TestCase):
                     sorted((shard.get("corpusFingerprint") or {}).get("members", {})),
                     f"{scope}: the shard covers a different set of machines")
 
+    @unittest.skipUnless(SHARDS_REACHABLE, UNREACHABLE_WHY)
     def test_domain_shards_contain_only_their_own_domain(self) -> None:
         """A domain shard describes that domain and nothing else.
 
@@ -201,6 +234,7 @@ class CesContractRegistry(unittest.TestCase):
                     own, members,
                     f"{scope}: the fingerprint does not cover exactly the domain directory")
 
+    @unittest.skipUnless(SHARDS_REACHABLE, UNREACHABLE_WHY)
     def test_no_shard_records_below_quorum(self) -> None:
         """A recorded contract came from all three native runtimes.
 
@@ -222,6 +256,7 @@ class CesContractRegistry(unittest.TestCase):
                     self.assertEqual(3, len(contract.get("agreedBy", [])),
                                      f"{scope}: {contract.get('chain')} agreed by fewer than three")
 
+    @unittest.skipUnless(SHARDS_REACHABLE, UNREACHABLE_WHY)
     def test_no_shard_claims_a_quorum_it_did_not_hold(self) -> None:
         """A shard's quorum claim is checked against its own evidence.
 
