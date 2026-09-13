@@ -112,6 +112,23 @@ MAX_CHAIN_DEPTH = 4  # the recorder's cap; mirrored so counts are comparable
 
 # ── Scope discovery ─────────────────────────────────────────────────────────
 
+def missing_corpus_roots() -> list[str]:
+    """Corpus roots this checkout cannot see.
+
+    A corpus selection can name machines owned by another repo -- the regression
+    corpus draws `rag_corrective_cycle`, `session_rag_context` and
+    `session_agent_context` from localAIStack. Where that repo is not checked
+    out those three do not resolve, the scope silently shrinks from 21 machines
+    to 18, its fingerprint changes, and a registry built with all three present
+    is then reported stale.
+
+    It is not stale. Three machines are invisible, which is a fact about the
+    checkout and not about the corpus -- the same distinction the CI_ROOT
+    handling draws, and the same one this artifact class exists to keep.
+    """
+    return [str(r) for r in (LOCAL_AI_MACHINES,) if not r.is_dir()]
+
+
 def corpus_roots() -> list[Path]:
     """Where a selection's machines may live. More than one repo, deliberately.
 
@@ -226,17 +243,34 @@ def read_shard(path: Path) -> dict[str, Any] | None:
 
 
 def rel_to_repo(path: Path) -> str:
-    """A path as written into the registry: repo-relative where possible.
+    """A path as written into the registry: canonical, not resolved.
 
-    Shards live in the sibling CI repo, so most come out as `../RealityEngine_CI/...`.
+    Shards live in the CI repo, so most come out as `../RealityEngine_CI/...`.
     That the registry has to point outside this repo is the honest shape of the
     thing: the corpus is here, the runtimes that record against it are not.
+
+    **Canonical, because the two repos sit differently in different places.**
+    Locally they are siblings; in the e2e-tests workflow the RealityEngine_CI
+    checkout is the workspace root and this repo is a subdirectory of it. A path
+    computed from wherever CI happens to be resolves to `../RealityEngine_CI/...`
+    in one and `../config/...` in the other, so the same corpus and the same
+    shards produced two different registries and the gate called the committed
+    one stale. It was not stale; it was written on a different machine layout.
+
+    This field records where a shard *belongs*, which is a fact about the two
+    repos and not about this checkout. So a path under the CI root is always
+    spelled against the repository name.
     """
+    resolved = path.resolve()
     try:
-        return path.resolve().relative_to(REPO_ROOT.resolve()).as_posix()
+        return resolved.relative_to(REPO_ROOT.resolve()).as_posix()
+    except ValueError:
+        pass
+    try:
+        return "../RealityEngine_CI/" + resolved.relative_to(CI_DIR.resolve()).as_posix()
     except ValueError:
         try:
-            return "../" + path.resolve().relative_to(REPO_ROOT.resolve().parent).as_posix()
+            return "../" + resolved.relative_to(REPO_ROOT.resolve().parent).as_posix()
         except ValueError:
             return path.as_posix()
 
@@ -376,7 +410,8 @@ def main() -> int:
 
     if args.check:
         existing = REGISTRY.read_text(encoding="utf-8") if REGISTRY.exists() else None
-        if CI_ROOT is None:
+        absent_roots = missing_corpus_roots()
+        if CI_ROOT is None or absent_roots:
             # The shards live in RealityEngine_CI. Without it there is nothing to
             # read a recording status from, and every scope would resolve
             # `unrecorded` -- which compared against a registry recording them as
@@ -389,9 +424,13 @@ def main() -> int:
             # of each. A machine added here without rebuilding the registry still
             # fails, so the gate is not hollowed out.
             def corpus_half(doc: dict[str, Any]) -> Any:
+                # Domain scopes only. A `corpus:` selection can name machines
+                # from an absent root, so its size and fingerprint are a
+                # property of the checkout here, not of the corpus. Domains are
+                # wholly owned by this repo and are always comparable.
                 return {s: {k: e[k] for k in ("kind", "name", "machineCount",
                                               "chainCount", "corpus")}
-                        for s, e in doc["scopes"].items()}
+                        for s, e in doc["scopes"].items() if e["kind"] == "domain"}
             if existing is None:
                 print(f"missing: {REGISTRY.relative_to(REPO_ROOT)}", file=sys.stderr)
                 return 1
@@ -401,10 +440,16 @@ def main() -> int:
                 print("regenerate with: python3 scripts/build-ces-contract-registry.py --write",
                       file=sys.stderr)
                 return 1
-            print("ces-contract-registry: corpus half verified — "
-                  f"{document['scopeCount']} scopes. Recording status NOT checked: "
-                  "RealityEngine_CI is not checked out alongside, so the shards are "
-                  "unreachable from here (set REALITY_ENGINE_CI_DIR to check them).")
+            why = []
+            if CI_ROOT is None:
+                why.append("RealityEngine_CI is not checked out alongside, so the "
+                           "shards are unreachable (set REALITY_ENGINE_CI_DIR)")
+            if absent_roots:
+                why.append("these corpus roots are absent, so selections naming "
+                           "their machines resolve short: " + ", ".join(absent_roots))
+            print(f"ces-contract-registry: corpus half verified — "
+                  f"{document['scopeCount']} scopes. Full check SKIPPED because "
+                  + "; ".join(why) + ".")
             return 0
         if existing != serialized:
             print(f"stale: {REGISTRY.relative_to(REPO_ROOT)} does not match the corpus",
