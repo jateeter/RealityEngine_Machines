@@ -2,12 +2,12 @@
   "version": "1.0.0",
   "machine": {
     "name": "Ag Photo Period Lighting Controller",
-    "description": "Controls photoperiod and light intensity for indoor growing zones. Monitors PAR (photosynthetically active radiation) intensity, accumulated daily light integral (DLI), and dark-period integrity. Fires LIGHTS_ON/OFF transitions and DLI insufficiency alerts. Upstream: light sensors at [12:16]. Downstream: AgNutrientCycleOptimizer and AgIPMPestAlertMonitor read output at [32:36].",
+    "description": "Controls photoperiod and light intensity for indoor growing zones. Monitors PAR (photosynthetically active radiation) intensity, accumulated daily light integral (DLI), and dark-period integrity. Fires LIGHTS_ON/OFF transitions and DLI insufficiency alerts. Upstream: light sensors at [12:15]. Downstream: AgNutrientCycleOptimizer and AgIPMPestAlertMonitor read output at [32:35].",
     "metadata": {
       "category": "agriculture",
       "domain": "Agriculture — Photoperiod / Lighting Control",
       "author": "Reality Engine",
-      "outputSpace": "4D binary at [32:36]: [1,0,0,0]=LIGHTS_ON, [0,1,0,0]=LIGHTS_OFF, [0,0,1,0]=DLI_ALERT, [0,0,0,1]=PHOTO_OK",
+      "outputSpace": "4D binary at [32:35]: [1,0,0,0]=LIGHTS_ON, [0,1,0,0]=LIGHTS_OFF, [0,0,1,0]=DLI_ALERT, [0,0,0,1]=PHOTO_OK",
       "tags": [
         "ag-photo-period-lighting-controller",
         "agriculture",
@@ -36,8 +36,8 @@
         "dark_period_integrity_norm": "0.0=dark period fully satisfied, 0.5=partial dark, 1.0=no dark period (light leak)"
       },
       "downstreamMachines": [
-        "AgNutrientCycleOptimizer (reads [32:36])",
-        "AgIPMPestAlertMonitor (reads [32:36])"
+        "AgNutrientCycleOptimizer (reads [32:35])",
+        "AgIPMPestAlertMonitor (reads [32:35])"
       ],
       "tagging": {
         "schemaVersion": "1.0.0",
@@ -124,7 +124,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "LIGHTS_ON: light cycle active and at peak intensity at [32:36]"
+            "description": "LIGHTS_ON: light cycle active and at peak intensity at [32:35]"
           },
           {
             "sequenceId": "ag-photo-lights-off-cycle",
@@ -136,7 +136,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "LIGHTS_OFF: DLI target met; begin dark period at [32:36]"
+            "description": "LIGHTS_OFF: DLI target met; begin dark period at [32:35]"
           },
           {
             "sequenceId": "ag-photo-ok",
@@ -148,7 +148,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "PHOTO_OK: photoperiod within optimal parameters at [32:36]"
+            "description": "PHOTO_OK: photoperiod within optimal parameters at [32:35]"
           }
         ]
       },
@@ -374,7 +374,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "LIGHTS_ON: light cycle active and at peak intensity at [32:36]",
+                  "description": "LIGHTS_ON: light cycle active and at peak intensity at [32:35]",
                   "action": "continue-monitoring",
                   "actionNarrative": "Downstream IPM and nutrient cycle monitors register active photoperiod"
                 }
@@ -489,7 +489,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "LIGHTS_OFF: DLI target met; begin dark period at [32:36]",
+                  "description": "LIGHTS_OFF: DLI target met; begin dark period at [32:35]",
                   "action": "adjust-operations",
                   "actionNarrative": "Power down grow lights; dark period timer starts"
                 }
@@ -544,7 +544,7 @@
                   1
                 ],
                 "metadata": {
-                  "description": "PHOTO_OK: photoperiod within optimal parameters at [32:36]",
+                  "description": "PHOTO_OK: photoperiod within optimal parameters at [32:35]",
                   "action": "continue-monitoring",
                   "actionNarrative": "Downstream nutrient and IPM monitors register healthy light environment"
                 }

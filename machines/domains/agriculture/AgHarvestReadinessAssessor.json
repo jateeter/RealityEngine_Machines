@@ -2,12 +2,12 @@
   "version": "1.0.0",
   "machine": {
     "name": "Ag Harvest Readiness Assessor",
-    "description": "Evaluates plant readiness for harvest by correlating growth cycle state with nutrient cycle quality. Reads binary outputs from AgPlantGrowthCycleMonitor [3955:3959] and AgNutrientCycleOptimizer [3959:3963]. HARVEST_READY fires only after sustained GROWTH_OK + NUTRIENT_OK signals — ensuring plants have completed adequate vegetative cycles with quality nutrition. Also detects when stress conditions have delayed or compromised the harvest window. Output feeds AgYieldOptimizationAI at [3967:3971].",
+    "description": "Evaluates plant readiness for harvest by correlating growth cycle state with nutrient cycle quality. Reads binary outputs from AgPlantGrowthCycleMonitor [3955:3958] and AgNutrientCycleOptimizer [3959:3962]. HARVEST_READY fires only after sustained GROWTH_OK + NUTRIENT_OK signals — ensuring plants have completed adequate vegetative cycles with quality nutrition. Also detects when stress conditions have delayed or compromised the harvest window. Output feeds AgYieldOptimizationAI at [3967:3970].",
     "metadata": {
       "category": "agriculture",
       "domain": "Agriculture — Harvest Management / Crop Readiness",
       "author": "Reality Engine",
-      "outputSpace": "4D binary at [3967:3971]: [1,0,0,0]=HARVEST_DELAYED, [0,1,0,0]=STRESS_RECOVERY, [0,0,1,0]=HARVEST_APPROACHING, [0,0,0,1]=HARVEST_READY",
+      "outputSpace": "4D binary at [3967:3970]: [1,0,0,0]=HARVEST_DELAYED, [0,1,0,0]=STRESS_RECOVERY, [0,0,1,0]=HARVEST_APPROACHING, [0,0,0,1]=HARVEST_READY",
       "tags": [
         "ag-harvest-readiness-assessor",
         "agriculture",
@@ -38,10 +38,10 @@
         "elem_7": "NUTRIENT_OK from AgNutrientCycleOptimizer [287]"
       },
       "upstreamMachines": [
-        "AgPlantGrowthCycleMonitor (output at [3955:3959])",
-        "AgNutrientCycleOptimizer (output at [3959:3963])"
+        "AgPlantGrowthCycleMonitor (output at [3955:3958])",
+        "AgNutrientCycleOptimizer (output at [3959:3962])"
       ],
-      "downstreamMachine": "AgYieldOptimizationAI (reads [3967:3971])",
+      "downstreamMachine": "AgYieldOptimizationAI (reads [3967:3970])",
       "tagging": {
         "schemaVersion": "1.0.0",
         "managedBy": "scripts/manage_machine_tags.mjs",
@@ -123,7 +123,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "HARVEST_APPROACHING: plant entering harvestable window at [3967:3971]"
+            "description": "HARVEST_APPROACHING: plant entering harvestable window at [3967:3970]"
           },
           {
             "sequenceId": "ag-harvest-ready-sequence",
@@ -135,7 +135,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "HARVEST_READY: crop is ready for harvest at [3967:3971]"
+            "description": "HARVEST_READY: crop is ready for harvest at [3967:3970]"
           },
           {
             "sequenceId": "ag-harvest-delayed",
@@ -147,7 +147,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "HARVEST_DELAYED: stress conditions preventing harvest readiness at [3967:3971]"
+            "description": "HARVEST_DELAYED: stress conditions preventing harvest readiness at [3967:3970]"
           },
           {
             "sequenceId": "ag-harvest-stress-recovery",
@@ -159,7 +159,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "STRESS_RECOVERY: growth resuming after stress event at [3967:3971]"
+            "description": "STRESS_RECOVERY: growth resuming after stress event at [3967:3970]"
           }
         ]
       },
@@ -364,7 +364,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "HARVEST_APPROACHING: plant entering harvestable window at [3967:3971]",
+                  "description": "HARVEST_APPROACHING: plant entering harvestable window at [3967:3970]",
                   "action": "route-review",
                   "actionNarrative": "Initiate harvest planning; schedule labor; AI optimizer begins yield projection"
                 }
@@ -426,7 +426,7 @@
                   1
                 ],
                 "metadata": {
-                  "description": "HARVEST_READY: crop is ready for harvest at [3967:3971]",
+                  "description": "HARVEST_READY: crop is ready for harvest at [3967:3970]",
                   "action": "trigger-agent-workflow",
                   "actionNarrative": "Execute harvest protocol; AI optimizer calculates optimal harvest window"
                 }
@@ -543,7 +543,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "HARVEST_DELAYED: stress conditions preventing harvest readiness at [3967:3971]",
+                  "description": "HARVEST_DELAYED: stress conditions preventing harvest readiness at [3967:3970]",
                   "action": "adjust-operations",
                   "actionNarrative": "Extend grow cycle; AI optimizer revises harvest date estimate"
                 }
@@ -613,7 +613,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "STRESS_RECOVERY: growth resuming after stress event at [3967:3971]",
+                  "description": "STRESS_RECOVERY: growth resuming after stress event at [3967:3970]",
                   "action": "continue-monitoring",
                   "actionNarrative": "AI optimizer logs recovery; adjusts yield projection; continues monitoring toward harvest window"
                 }

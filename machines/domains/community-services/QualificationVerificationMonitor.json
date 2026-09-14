@@ -2,12 +2,12 @@
   "version": "1.0.0",
   "machine": {
     "name": "Qualification Verification Monitor",
-    "description": "Tracks identity verification, income verification, program-specific qualification criteria, and active enrollment status for community service participants. Qualification verification is the formal determination layer sitting between eligibility screening and active benefit delivery — it catches identity mismatches, income discrepancies, and program-specific rules (residency duration, asset limits, household composition) that screening tools miss. Output at [964:968] feeds the Workflow Completion Monitor.",
+    "description": "Tracks identity verification, income verification, program-specific qualification criteria, and active enrollment status for community service participants. Qualification verification is the formal determination layer sitting between eligibility screening and active benefit delivery — it catches identity mismatches, income discrepancies, and program-specific rules (residency duration, asset limits, household composition) that screening tools miss. Output at [964:967] feeds the Workflow Completion Monitor.",
     "metadata": {
       "category": "community-services",
       "domain": "Community Services — Qualification Verification / Enrollment",
       "author": "Reality Engine",
-      "outputSpace": "4D binary at [964:968]: [1,0,0,0]=QUALIFICATION_FAILED, [0,1,0,0]=REVERIFICATION_REQUIRED, [0,0,1,0]=CONDITIONALLY_QUALIFIED, [0,0,0,1]=FULLY_QUALIFIED",
+      "outputSpace": "4D binary at [964:967]: [1,0,0,0]=QUALIFICATION_FAILED, [0,1,0,0]=REVERIFICATION_REQUIRED, [0,0,1,0]=CONDITIONALLY_QUALIFIED, [0,0,0,1]=FULLY_QUALIFIED",
       "tags": [
         "benefits-eligibility",
         "ces-sequences",
@@ -33,7 +33,7 @@
         "program_qualification_norm": "0.0=program-specific rules not met (asset limit exceeded, residency duration insufficient, household composition mismatch), 0.5=program rules met but one qualifier requires additional documentation, 1.0=all program-specific qualification criteria confirmed",
         "enrollment_active_norm": "0.0=enrollment lapsed, suspended, or terminated; benefits not flowing, 0.5=enrollment conditionally active (provisional benefits; verification hold), 1.0=enrollment fully active; benefits flowing without restriction"
       },
-      "downstreamMachine": "WorkflowCompletionMonitor (reads [960:968])",
+      "downstreamMachine": "WorkflowCompletionMonitor (reads [960:967])",
       "tagging": {
         "schemaVersion": "1.0.0",
         "managedBy": "scripts/manage_machine_tags.mjs",
@@ -113,7 +113,7 @@
             ],
             "ragStatusCode": "RED",
             "processStatus": "error",
-            "description": "QUALIFICATION_FAILED: qualification verification failed; benefits suspended at [964:968]"
+            "description": "QUALIFICATION_FAILED: qualification verification failed; benefits suspended at [964:967]"
           },
           {
             "sequenceId": "qualification-reverification",
@@ -125,7 +125,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "REVERIFICATION_REQUIRED: qualification verification approaching expiry or triggered event detected at [964:968]"
+            "description": "REVERIFICATION_REQUIRED: qualification verification approaching expiry or triggered event detected at [964:967]"
           },
           {
             "sequenceId": "qualification-confirmed",
@@ -137,7 +137,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "FULLY_QUALIFIED: all verification criteria met; enrollment fully active at [964:968]"
+            "description": "FULLY_QUALIFIED: all verification criteria met; enrollment fully active at [964:967]"
           }
         ]
       },
@@ -332,7 +332,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "QUALIFICATION_FAILED: qualification verification failed; benefits suspended at [964:968]",
+                  "description": "QUALIFICATION_FAILED: qualification verification failed; benefits suspended at [964:967]",
                   "action": "route-review",
                   "actionNarrative": "Formal adverse action notice; fair hearing rights notification; appeal process initiation; navigator assistance for documentation cure"
                 }
@@ -386,7 +386,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "REVERIFICATION_REQUIRED: qualification verification approaching expiry or triggered event detected at [964:968]",
+                  "description": "REVERIFICATION_REQUIRED: qualification verification approaching expiry or triggered event detected at [964:967]",
                   "action": "route-review",
                   "actionNarrative": "Redetermination appointment scheduling; document collection checklist; proactive outreach to prevent gap in benefits"
                 }
@@ -440,7 +440,7 @@
                   1
                 ],
                 "metadata": {
-                  "description": "FULLY_QUALIFIED: all verification criteria met; enrollment fully active at [964:968]",
+                  "description": "FULLY_QUALIFIED: all verification criteria met; enrollment fully active at [964:967]",
                   "action": "continue-monitoring",
                   "actionNarrative": "Workflow completion monitor registers qualification confirmed; unrestricted service delivery authorized"
                 }

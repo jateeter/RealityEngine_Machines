@@ -2,12 +2,12 @@
   "version": "1.0.0",
   "machine": {
     "name": "Ag Nutrient Cycle Optimizer",
-    "description": "Correlates nutrient solution quality signals with active photoperiod state to optimize nutrient uptake timing. Reads binary outputs from AgNutrientSolutionMonitor [28:32] and AgPhotoPeriodLightingController [32:36]. During active photosynthesis, elevated nutrient demand is expected; mismatches between solution quality and light state indicate suboptimal scheduling. Output feeds AgHarvestReadinessAssessor and AgYieldOptimizationAI at [3959:3963].",
+    "description": "Correlates nutrient solution quality signals with active photoperiod state to optimize nutrient uptake timing. Reads binary outputs from AgNutrientSolutionMonitor [28:31] and AgPhotoPeriodLightingController [32:35]. During active photosynthesis, elevated nutrient demand is expected; mismatches between solution quality and light state indicate suboptimal scheduling. Output feeds AgHarvestReadinessAssessor and AgYieldOptimizationAI at [3959:3962].",
     "metadata": {
       "category": "agriculture",
       "domain": "Agriculture — Nutrient Management / Crop Optimization",
       "author": "Reality Engine",
-      "outputSpace": "4D binary at [3959:3963]: [1,0,0,0]=NUTRIENT_LOCKOUT, [0,1,0,0]=UPTAKE_MISMATCH, [0,0,1,0]=NIGHT_REST, [0,0,0,1]=NUTRIENT_OK",
+      "outputSpace": "4D binary at [3959:3962]: [1,0,0,0]=NUTRIENT_LOCKOUT, [0,1,0,0]=UPTAKE_MISMATCH, [0,0,1,0]=NIGHT_REST, [0,0,0,1]=NUTRIENT_OK",
       "tags": [
         "ag-nutrient-cycle-optimizer",
         "agriculture",
@@ -38,12 +38,12 @@
         "elem_7": "PHOTO_OK from AgPhotoPeriodLightingController [275]"
       },
       "upstreamMachines": [
-        "AgNutrientSolutionMonitor (output at [28:32])",
-        "AgPhotoPeriodLightingController (output at [32:36])"
+        "AgNutrientSolutionMonitor (output at [28:31])",
+        "AgPhotoPeriodLightingController (output at [32:35])"
       ],
       "downstreamMachines": [
-        "AgHarvestReadinessAssessor (reads [3959:3963])",
-        "AgYieldOptimizationAI (reads [3959:3963])"
+        "AgHarvestReadinessAssessor (reads [3959:3962])",
+        "AgYieldOptimizationAI (reads [3959:3962])"
       ],
       "tagging": {
         "schemaVersion": "1.0.0",
@@ -128,7 +128,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "NUTRIENT_OK: optimal nutrient uptake conditions active at [3959:3963]"
+            "description": "NUTRIENT_OK: optimal nutrient uptake conditions active at [3959:3962]"
           },
           {
             "sequenceId": "ag-nutrient-lockout",
@@ -140,7 +140,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "NUTRIENT_LOCKOUT: pH-induced nutrient unavailability during active photosynthesis at [3959:3963]"
+            "description": "NUTRIENT_LOCKOUT: pH-induced nutrient unavailability during active photosynthesis at [3959:3962]"
           },
           {
             "sequenceId": "ag-nutrient-night-rest",
@@ -152,7 +152,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "NIGHT_REST: dark period with optimal solution ready at [3959:3963]"
+            "description": "NIGHT_REST: dark period with optimal solution ready at [3959:3962]"
           }
         ]
       },
@@ -357,7 +357,7 @@
                   1
                 ],
                 "metadata": {
-                  "description": "NUTRIENT_OK: optimal nutrient uptake conditions active at [3959:3963]",
+                  "description": "NUTRIENT_OK: optimal nutrient uptake conditions active at [3959:3962]",
                   "action": "continue-monitoring",
                   "actionNarrative": "Harvest assessor and AI optimizer register healthy nutrient state"
                 }
@@ -520,7 +520,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "NUTRIENT_LOCKOUT: pH-induced nutrient unavailability during active photosynthesis at [3959:3963]",
+                  "description": "NUTRIENT_LOCKOUT: pH-induced nutrient unavailability during active photosynthesis at [3959:3962]",
                   "action": "urgent-intervention",
                   "actionNarrative": "Emergency pH adjustment; reduce lighting duration; AI optimizer enters corrective mode"
                 }
@@ -590,7 +590,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "NIGHT_REST: dark period with optimal solution ready at [3959:3963]",
+                  "description": "NIGHT_REST: dark period with optimal solution ready at [3959:3962]",
                   "action": "continue-monitoring",
                   "actionNarrative": "Expected quiescent state; AI optimizer logs rest cycle"
                 }
