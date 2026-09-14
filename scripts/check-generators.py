@@ -67,6 +67,14 @@ EXCLUDED = {
     "remap-cross-domain-output-lanes.py",
     "rename-corpus-event-keys.py",
     "check-generators.py",
+    # Shared library, not a generator: it produces no artifact and has no CLI.
+    # Detection is a text scan for mode strings, and its docstring explains why
+    # the stamp must not be time-derived -- "would break every --check drift
+    # gate" -- which the scan reads as offering --check. Excluded for what it is
+    # rather than by loosening the scan, which would stop catching real cases.
+    "asset_provenance.py",
+    # Same shape: the fingerprint definition both repos import.
+    "ces_corpus_fingerprint.py",
 }
 
 
