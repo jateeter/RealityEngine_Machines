@@ -208,8 +208,24 @@ fi
 # makes a rise in the count visible to `diff`.
 INFO_COUNT="$(awk -F'\t' 'NR>1 && $1=="INFO"' "$WORKDIR/report.tsv" 2>/dev/null | wc -l | tr -d ' ')"
 WARN_COUNT="$(awk -F'\t' 'NR>1 && $1=="WARN"' "$WORKDIR/report.tsv" 2>/dev/null | wc -l | tr -d ' ')"
-RELEASE_DATE="$(date -u +%Y-%m-%d)"
-CORPUS_SHA="$(cd "$REPO_ROOT" && git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+# Content-derived, for the same reason asset_provenance.py is, and for one more
+# that is specific to this gate. `date -u` and `git rev-parse HEAD` both move
+# when the ontology did not, so every rebuild would stamp a new version IRI and
+# a new dcterms:created onto identical axioms. `diff` below compares this
+# artifact against the released baseline to answer "did an axiom change" — fed a
+# stamp that always differs, it always answers yes, and the check that exists to
+# find real changes reports one on every run. A drift gate that always fires is
+# the same as no gate. The digest moves only when the corpus does.
+CORPUS_VERSION="$(cd "$REPO_ROOT" && python3 - <<'PROV'
+import sys, pathlib
+sys.path.insert(0, "scripts")
+import asset_provenance as prov
+root = pathlib.Path(".").resolve()
+print(prov.stamp("scripts/reason-owl.sh",
+                 sorted(root.joinpath("machines").rglob("*.json")))["assetVersion"])
+PROV
+)" || CORPUS_VERSION="unknown"
+RELEASE_DATE="$CORPUS_VERSION"
 SLUG="$(printf '%s' "$LABEL" | tr '[:upper:] ' '[:lower:]-' | tr -cd 'a-z0-9-' | sed 's/--*/-/g;s/^-//;s/-$//')"
 [ -n "$SLUG" ] || SLUG="semantics"
 ANNOTATED="$WORKDIR/annotated.owl"
@@ -218,13 +234,13 @@ RE_NS="https://realityengine.example.org/semantics"
   --ontology-iri "$RE_NS/$SLUG" \
   --version-iri "$RE_NS/$SLUG/$RELEASE_DATE" \
   --annotation rdfs:comment "RealityEngine semantics — $LABEL" \
-  --annotation "http://purl.org/dc/terms/created" "$RELEASE_DATE" \
-  --annotation "http://purl.org/dc/terms/source" "RealityEngine_Machines@$CORPUS_SHA" \
+  --annotation "http://purl.org/dc/terms/hasVersion" "$CORPUS_VERSION" \
+  --annotation "http://purl.org/dc/terms/source" "RealityEngine_Machines@$CORPUS_VERSION" \
   --annotation "$RE_NS#reportInfoPendingTriage" "$INFO_COUNT" \
   --annotation "$RE_NS#reportWarnPendingTriage" "$WARN_COUNT" \
   --annotation "$RE_NS#reportProfile" "semantics/robot-report-profile.txt" \
   --output "$ANNOTATED"
-echo "reason-owl: annotated — version $RELEASE_DATE, corpus $CORPUS_SHA, ${INFO_COUNT} INFO / ${WARN_COUNT} WARN pending triage"
+echo "reason-owl: annotated — version $CORPUS_VERSION, ${INFO_COUNT} INFO / ${WARN_COUNT} WARN pending triage"
 
 # ── diff: what changed against the last released artifact ────────────────────
 #
@@ -238,7 +254,13 @@ if [ -f "$RELEASED" ]; then
        --format markdown --output "$DIFF_OUT" 2>/dev/null; then
     if grep -qiE "^#+ *(Added|Removed)" "$DIFF_OUT" 2>/dev/null; then
       echo "reason-owl: diff vs released — axiom changes present:"
-      grep -E "^#+ |^- " "$DIFF_OUT" | head -20 | sed 's/^/    /'
+      # awk, not `grep | head`, and the reason is this script's own exit status.
+      # Under `set -euo pipefail`, `head -20` closing the pipe kills grep with
+      # SIGPIPE, pipefail promotes 141 to the pipeline's status, and errexit
+      # ends the run right here — so --release below and the final OK line were
+      # unreachable on exactly the runs that had something to report. The gate
+      # exited 141 while printing a diff that looked like success.
+      awk '/^#+ |^- / { if (++n > 20) exit; print "    " $0 }' "$DIFF_OUT"
       echo "    (full diff: $DIFF_OUT)"
     else
       echo "reason-owl: diff vs released — no axiom changes"
