@@ -1113,6 +1113,7 @@ m:out-out-hygiene-alert
     rdfs:label "FacilitiesMaintenance — out-hygiene-alert" ;
     re:outputTier 0 ;
     re:outputConfidence 0 ;
+    re:hasRagStatus re:RED ;
     re:prescribesAction re:UrgentIntervention ;
     re:actionNarrative "Alert charge nurse immediately. CNA dispatched for hygiene assistance within 1 hour. Nurse assesses for incontinence, mobility decline, or cognitive factors. Document in care record. Integration layer writes BATHROOM/ALERT input to DailyPatientCare perceptual region." .
 
@@ -1385,6 +1386,7 @@ m:out-out-safety-alert
     rdfs:label "FacilitiesMaintenance — out-safety-alert" ;
     re:outputTier 0 ;
     re:outputConfidence 0 ;
+    re:hasRagStatus re:RED ;
     re:prescribesAction re:UrgentIntervention ;
     re:actionNarrative "Immediately mitigate hazard (wet floor sign, remove rug, clear pathway). Alert charge nurse with specific hazard description. Nurse assesses patient for evidence of prior fall or injury. Submit work order for permanent remediation. File incident report per facility policy." .
 
@@ -1721,6 +1723,7 @@ m:out-out-wellness-concern
     rdfs:label "FacilitiesMaintenance — out-wellness-concern" ;
     re:outputTier 0 ;
     re:outputConfidence 0 ;
+    re:hasRagStatus re:RED ;
     re:prescribesAction re:UrgentIntervention ;
     re:actionNarrative "Immediately inform charge nurse. Worker documents specific observed behaviors (did not recognize worker, appeared tearful, was unable to state the day). Nurse assesses within 2 hours (immediately if acute). Integration layer evaluates patient context and writes to WellnessAnalytics input at offset 234." .
 
@@ -1865,6 +1868,7 @@ m:out-out-inaccessibility-alert
     rdfs:label "FacilitiesMaintenance — out-inaccessibility-alert" ;
     re:outputTier 0 ;
     re:outputConfidence 0 ;
+    re:hasRagStatus re:RED ;
     re:prescribesAction re:UrgentIntervention ;
     re:actionNarrative "Immediate: notify charge nurse and supervisor. Charge nurse accompanies facilities staff for emergency access (supervisor key or master key). Assess patient status on entry. If medical emergency: activate 911 and CareTransitionWorkflow Sequence 1. If not found: activate elopement protocol. If safe (sleeping, showering): document resolved incident. File incident report regardless." .
 
@@ -1890,12 +1894,12 @@ m:rule-maint-weekly-deep-clean-1
 
 m:rule-maint-hygiene-concern-1
     a owl:NamedIndividual , re:TriggerRule ;
-    rdfs:label "FacilitiesMaintenance — maint-hygiene-concern rule 1 (AMBER)" ;
+    rdfs:label "FacilitiesMaintenance — maint-hygiene-concern rule 1 (RED)" ;
     re:appliesToSequence m:seq-maint-hygiene-concern ;
     re:outputMatchVector "0,0,1,0,0,0" ;
     re:matchesOutputPosition 2 ;
-    re:hasRagStatus re:AMBER ;
-    re:processStatus "warning" ;
+    re:hasRagStatus re:RED ;
+    re:processStatus "error" ;
     rdfs:comment "HYGIENE_ALERT — bathroom or linen hygiene deficit observed by facilities staff. Downstream: DailyPatientCare bathroom-nonuse detection." .
 
 m:rule-maint-safety-concern-1
@@ -1910,12 +1914,12 @@ m:rule-maint-safety-concern-1
 
 m:rule-maint-wellness-concern-1
     a owl:NamedIndividual , re:TriggerRule ;
-    rdfs:label "FacilitiesMaintenance — maint-wellness-concern rule 1 (AMBER)" ;
+    rdfs:label "FacilitiesMaintenance — maint-wellness-concern rule 1 (RED)" ;
     re:appliesToSequence m:seq-maint-wellness-concern ;
     re:outputMatchVector "0,0,0,0,1,0" ;
     re:matchesOutputPosition 4 ;
-    re:hasRagStatus re:AMBER ;
-    re:processStatus "warning" ;
+    re:hasRagStatus re:RED ;
+    re:processStatus "error" ;
     rdfs:comment "WELLNESS_CONCERN — patient observation by facilities staff raised welfare flag. Downstream: WellnessAnalytics longitudinal tracking." .
 
 m:rule-maint-inaccessible-1
