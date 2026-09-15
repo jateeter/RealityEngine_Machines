@@ -2,12 +2,12 @@
   "version": "1.0.0",
   "machine": {
     "name": "Document Signing Workflow Monitor",
-    "description": "Tracks document collection completeness, signature status, witness verification, and legal validity for community service enrollment agreements, consent forms, release of information authorizations, and benefit assignment documents. Document signing is a critical gating step in community services — unsigned consent forms block care coordination, unsigned ROIs prevent inter-agency data sharing, and missing program agreements delay benefit issuance by days or weeks. Output at [960:964] feeds the Workflow Completion Monitor.",
+    "description": "Tracks document collection completeness, signature status, witness verification, and legal validity for community service enrollment agreements, consent forms, release of information authorizations, and benefit assignment documents. Document signing is a critical gating step in community services — unsigned consent forms block care coordination, unsigned ROIs prevent inter-agency data sharing, and missing program agreements delay benefit issuance by days or weeks. Output at [960:963] feeds the Workflow Completion Monitor.",
     "metadata": {
       "category": "community-services",
       "domain": "Community Services — Document Signing / Workflow",
       "author": "Reality Engine",
-      "outputSpace": "4D binary at [960:964]: [1,0,0,0]=SIGNING_BLOCKED, [0,1,0,0]=SIGNATURE_PENDING, [0,0,1,0]=PARTIAL_SIGNING, [0,0,0,1]=SIGNING_COMPLETE",
+      "outputSpace": "4D binary at [960:963]: [1,0,0,0]=SIGNING_BLOCKED, [0,1,0,0]=SIGNATURE_PENDING, [0,0,1,0]=PARTIAL_SIGNING, [0,0,0,1]=SIGNING_COMPLETE",
       "tags": [
         "ces-sequences",
         "ces-sequences-3",
@@ -34,7 +34,7 @@
         "witness_verification_norm": "0.0=witness signature required but not obtained; notarization missing; co-signer absent, 0.5=witness present but verification pending (identity check in progress), 1.0=all witness and notarization requirements satisfied",
         "legal_validity_norm": "0.0=documents legally invalid (expired forms, wrong version, jurisdiction mismatch, capacity concern), 0.5=documents submitted but legal review pending, 1.0=all documents legally valid and accepted by receiving program"
       },
-      "downstreamMachine": "WorkflowCompletionMonitor (reads [960:968])",
+      "downstreamMachine": "WorkflowCompletionMonitor (reads [960:967])",
       "tagging": {
         "schemaVersion": "1.0.0",
         "managedBy": "scripts/manage_machine_tags.mjs",
@@ -117,7 +117,7 @@
             ],
             "ragStatusCode": "RED",
             "processStatus": "error",
-            "description": "SIGNING_BLOCKED: document signing failure halting service enrollment at [960:964]"
+            "description": "SIGNING_BLOCKED: document signing failure halting service enrollment at [960:963]"
           },
           {
             "sequenceId": "signing-partial",
@@ -129,7 +129,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "PARTIAL_SIGNING: primary documents signed; supplementary forms outstanding at [960:964]"
+            "description": "PARTIAL_SIGNING: primary documents signed; supplementary forms outstanding at [960:963]"
           },
           {
             "sequenceId": "signing-complete",
@@ -141,7 +141,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "SIGNING_COMPLETE: all required documents executed and legally valid at [960:964]"
+            "description": "SIGNING_COMPLETE: all required documents executed and legally valid at [960:963]"
           }
         ]
       },
@@ -336,7 +336,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "SIGNING_BLOCKED: document signing failure halting service enrollment at [960:964]",
+                  "description": "SIGNING_BLOCKED: document signing failure halting service enrollment at [960:963]",
                   "action": "route-referral",
                   "actionNarrative": "Outreach worker escalation; alternative signing method assessment (in-person, paper); legal capacity evaluation referral; guardian/POA contact"
                 }
@@ -390,7 +390,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "PARTIAL_SIGNING: primary documents signed; supplementary forms outstanding at [960:964]",
+                  "description": "PARTIAL_SIGNING: primary documents signed; supplementary forms outstanding at [960:963]",
                   "action": "route-review",
                   "actionNarrative": "Initiate services on signed agreements; schedule follow-up for remaining forms; limit cross-agency data sharing until ROI obtained"
                 }
@@ -444,7 +444,7 @@
                   1
                 ],
                 "metadata": {
-                  "description": "SIGNING_COMPLETE: all required documents executed and legally valid at [960:964]",
+                  "description": "SIGNING_COMPLETE: all required documents executed and legally valid at [960:963]",
                   "action": "continue-monitoring",
                   "actionNarrative": "Workflow completion monitor registers signing complete; full inter-agency coordination authorized"
                 }

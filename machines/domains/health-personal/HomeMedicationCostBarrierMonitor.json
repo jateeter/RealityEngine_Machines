@@ -2,12 +2,12 @@
   "version": "1.0.0",
   "machine": {
     "name": "Home Medication Cost Barrier Monitor",
-    "description": "Monitors prescription fill rates, dose adherence, cost-driven non-adherence, and generic/assistance program access for low- and medium-income adults managing chronic conditions at home. Medication cost barriers are a leading driver of avoidable hospitalization and disease progression in economically vulnerable populations. Output at [2011:2015] feeds the Home Social Isolation Monitor, capturing how pharmacy access barriers compound transportation and social barriers.",
+    "description": "Monitors prescription fill rates, dose adherence, cost-driven non-adherence, and generic/assistance program access for low- and medium-income adults managing chronic conditions at home. Medication cost barriers are a leading driver of avoidable hospitalization and disease progression in economically vulnerable populations. Output at [2011:2014] feeds the Home Social Isolation Monitor, capturing how pharmacy access barriers compound transportation and social barriers.",
     "metadata": {
       "category": "health-personal",
-      "domain": "Home Health \u2014 Medication Access / Cost Barriers",
+      "domain": "Home Health — Medication Access / Cost Barriers",
       "author": "Reality Engine",
-      "outputSpace": "4D binary at [2011:2015]: [1,0,0,0]=ADHERENCE_CRISIS, [0,1,0,0]=COST_BARRIER_ACTIVE, [0,0,1,0]=PARTIAL_ADHERENCE, [0,0,0,1]=MEDICATION_MANAGED",
+      "outputSpace": "4D binary at [2011:2014]: [1,0,0,0]=ADHERENCE_CRISIS, [0,1,0,0]=COST_BARRIER_ACTIVE, [0,0,1,0]=PARTIAL_ADHERENCE, [0,0,0,1]=MEDICATION_MANAGED",
       "tags": [
         "ces-sequences",
         "ces-sequences-3",
@@ -35,7 +35,7 @@
         "cost_barrier_norm": "0.0=cost explicitly cited as reason for not filling (unaffordable even with insurance), 0.5=difficulty but managing with assistance, 1.0=no cost barrier reported",
         "generic_access_norm": "0.0=no access to generic or assistance programs; paying full brand price or going without, 0.5=partial program access (copay cards, one drug covered), 1.0=fully enrolled in PAP or full generic coverage"
       },
-      "downstreamMachine": "HomeSocialIsolationMonitor (reads [2011:2019])",
+      "downstreamMachine": "HomeSocialIsolationMonitor (reads [2011:2018])",
       "tagging": {
         "schemaVersion": "1.0.0",
         "managedBy": "scripts/manage_machine_tags.mjs",
@@ -118,7 +118,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "ADHERENCE_CRISIS: complete medication non-adherence due to cost barrier at [2011:2015]"
+            "description": "ADHERENCE_CRISIS: complete medication non-adherence due to cost barrier at [2011:2014]"
           },
           {
             "sequenceId": "med-cost-barrier-active",
@@ -130,7 +130,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "COST_BARRIER_ACTIVE: ongoing cost barrier to prescribed medications at [2011:2015]"
+            "description": "COST_BARRIER_ACTIVE: ongoing cost barrier to prescribed medications at [2011:2014]"
           },
           {
             "sequenceId": "med-managed",
@@ -142,7 +142,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "MEDICATION_MANAGED: prescription access and adherence adequate at [2011:2015]"
+            "description": "MEDICATION_MANAGED: prescription access and adherence adequate at [2011:2014]"
           }
         ]
       },
@@ -321,10 +321,10 @@
     "sequences": [
       {
         "id": "med-cost-adherence-crisis",
-        "name": "Adherence Collapse: ADHERENT+ \u2192 RATIONING \u2192 NON_ADHERENT \u2192 ADHERENCE_CRISIS",
+        "name": "Adherence Collapse: ADHERENT+ → RATIONING → NON_ADHERENT → ADHERENCE_CRISIS",
         "metadata": {
-          "description": "Tracks cost-driven medication adherence collapse. Patients who cannot afford medications first ration (splitting doses, skipping days), then stop refilling entirely. This sequence requires a confirmed ADHERENT baseline before the crisis escalation can arm \u2014 preventing false flags on patients who were never on medications.",
-          "path": "ADHERENT+ \u2192 RATIONING \u2192 NON_ADHERENT \u2192 output[1,0,0,0]",
+          "description": "Tracks cost-driven medication adherence collapse. Patients who cannot afford medications first ration (splitting doses, skipping days), then stop refilling entirely. This sequence requires a confirmed ADHERENT baseline before the crisis escalation can arm — preventing false flags on patients who were never on medications.",
+          "path": "ADHERENT+ → RATIONING → NON_ADHERENT → output[1,0,0,0]",
           "output": "[1,0,0,0] (ADHERENCE_CRISIS)"
         },
         "events": [
@@ -351,8 +351,8 @@
             "isInitial": true,
             "metadata": {
               "name": "ADHERENT",
-              "description": "ADHERENT+ \u2014 prescriptions being filled; doses taken as prescribed; cost barriers manageable; generics or assistance covering most needs. isInitial A*A = A+.",
-              "fill_ratio": "0.65\u20130.85 (most fills completed on schedule)"
+              "description": "ADHERENT+ — prescriptions being filled; doses taken as prescribed; cost barriers manageable; generics or assistance covering most needs. isInitial A*A = A+.",
+              "fill_ratio": "0.65–0.85 (most fills completed on schedule)"
             },
             "nextEventIds": [
               "med-adherent",
@@ -382,8 +382,8 @@
             "isInitial": false,
             "metadata": {
               "name": "RATIONING",
-              "description": "RATIONING \u2014 fill rate dropping; patient splitting doses or skipping days; cost barrier explicitly reported.",
-              "fill_ratio": "0.30\u20130.48 (skipping refills; dose splitting reported)"
+              "description": "RATIONING — fill rate dropping; patient splitting doses or skipping days; cost barrier explicitly reported.",
+              "fill_ratio": "0.30–0.48 (skipping refills; dose splitting reported)"
             },
             "nextEventIds": [
               "med-non-adherent"
@@ -412,8 +412,8 @@
             "isInitial": false,
             "metadata": {
               "name": "NON_ADHERENT",
-              "description": "NON_ADHERENT \u2014 prescriptions not being filled; most or all doses missed; cost barrier unresolved; no assistance program active. Fires ADHERENCE_CRISIS.",
-              "fill_ratio": "0.0\u20130.20 (prescriptions not filled; high hospitalization risk)"
+              "description": "NON_ADHERENT — prescriptions not being filled; most or all doses missed; cost barrier unresolved; no assistance program active. Fires ADHERENCE_CRISIS.",
+              "fill_ratio": "0.0–0.20 (prescriptions not filled; high hospitalization risk)"
             },
             "outputEvents": [
               {
@@ -425,7 +425,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "ADHERENCE_CRISIS: complete medication non-adherence due to cost barrier at [2011:2015]",
+                  "description": "ADHERENCE_CRISIS: complete medication non-adherence due to cost barrier at [2011:2014]",
                   "action": "route-referral",
                   "actionNarrative": "Patient assistance program enrollment; 340B pharmacy referral; social worker outreach; emergency supply bridge"
                 }
@@ -436,9 +436,9 @@
       },
       {
         "id": "med-cost-barrier-active",
-        "name": "Cost Barrier: STRUGGLING+ \u2192 COST_BARRIER_ACTIVE signal",
+        "name": "Cost Barrier: STRUGGLING+ → COST_BARRIER_ACTIVE signal",
         "metadata": {
-          "description": "Fires COST_BARRIER_ACTIVE when patient reports consistent cost barriers to medication access but has not yet reached full non-adherence. Targets the working-poor population managing chronic conditions on bare minimum insurance coverage or no coverage \u2014 the largest unserved medication access group.",
+          "description": "Fires COST_BARRIER_ACTIVE when patient reports consistent cost barriers to medication access but has not yet reached full non-adherence. Targets the working-poor population managing chronic conditions on bare minimum insurance coverage or no coverage — the largest unserved medication access group.",
           "pattern": "STRUGGLING+",
           "output": "[0,1,0,0] (COST_BARRIER_ACTIVE)"
         },
@@ -466,7 +466,7 @@
             "isInitial": true,
             "metadata": {
               "name": "STRUGGLING",
-              "description": "STRUGGLING+ \u2014 partial fill rate; some adherence; cost barrier present with no active assistance program. isInitial A*A = A+: fires COST_BARRIER_ACTIVE each matching cycle.",
+              "description": "STRUGGLING+ — partial fill rate; some adherence; cost barrier present with no active assistance program. isInitial A*A = A+: fires COST_BARRIER_ACTIVE each matching cycle.",
               "scenario": "Patient buying insulin at Walmart; skipping cholesterol med to afford blood pressure medication"
             },
             "outputEvents": [
@@ -479,7 +479,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "COST_BARRIER_ACTIVE: ongoing cost barrier to prescribed medications at [2011:2015]",
+                  "description": "COST_BARRIER_ACTIVE: ongoing cost barrier to prescribed medications at [2011:2014]",
                   "action": "route-referral",
                   "actionNarrative": "Pharmacy assistance program review; GoodRx/NeedyMeds screening; formulary substitution review"
                 }
@@ -490,7 +490,7 @@
       },
       {
         "id": "med-managed",
-        "name": "Medication Managed: MANAGED+ \u2192 MEDICATION_MANAGED signal",
+        "name": "Medication Managed: MANAGED+ → MEDICATION_MANAGED signal",
         "metadata": {
           "description": "Fires MEDICATION_MANAGED when fill rates are adequate, adherence confirmed, and cost barriers resolved through generics, assistance programs, or insurance coverage. Represents successful pharmacy access navigation for a low-income patient.",
           "pattern": "MANAGED+",
@@ -520,7 +520,7 @@
             "isInitial": true,
             "metadata": {
               "name": "MANAGED",
-              "description": "MANAGED+ \u2014 all prescriptions filled; adherence confirmed; cost barriers resolved via generics or assistance programs. Fires MEDICATION_MANAGED each matching cycle.",
+              "description": "MANAGED+ — all prescriptions filled; adherence confirmed; cost barriers resolved via generics or assistance programs. Fires MEDICATION_MANAGED each matching cycle.",
               "scenario": "Patient enrolled in Medicaid managed care with generic coverage; or enrolled in manufacturer PAP"
             },
             "outputEvents": [
@@ -533,7 +533,7 @@
                   1
                 ],
                 "metadata": {
-                  "description": "MEDICATION_MANAGED: prescription access and adherence adequate at [2011:2015]",
+                  "description": "MEDICATION_MANAGED: prescription access and adherence adequate at [2011:2014]",
                   "action": "continue-monitoring",
                   "actionNarrative": "Social isolation monitor registers medication access stable"
                 }
@@ -546,7 +546,7 @@
     "inputSequences": [
       {
         "name": "Medicare Part D Donut Hole Gap",
-        "pattern": "6-step: ADHERENT\u2192ADHERENT\u2192RATIONING\u2192NON_ADHERENT (crisis)\u2192COST_BARRIER\u2192MANAGED (after LIS enrollment)",
+        "pattern": "6-step: ADHERENT→ADHERENT→RATIONING→NON_ADHERENT (crisis)→COST_BARRIER→MANAGED (after LIS enrollment)",
         "description": "Senior hits Medicare Part D coverage gap in August; begins rationing insulin; home health nurse identifies crisis; Low Income Subsidy enrollment resolves gap.",
         "events": [
           [

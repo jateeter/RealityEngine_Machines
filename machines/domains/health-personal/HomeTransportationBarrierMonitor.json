@@ -2,12 +2,12 @@
   "version": "1.0.0",
   "machine": {
     "name": "Home Transportation Barrier Monitor",
-    "description": "Monitors transportation access barriers that prevent low- and medium-income home health patients from attending medical appointments, filling prescriptions, and accessing community services. Transportation is a top driver of missed care in rural and low-income urban settings — more predictive of care gaps than insurance status alone. Output at [2015:2019] feeds the Home Social Isolation Monitor alongside the Medication Cost Barrier Monitor.",
+    "description": "Monitors transportation access barriers that prevent low- and medium-income home health patients from attending medical appointments, filling prescriptions, and accessing community services. Transportation is a top driver of missed care in rural and low-income urban settings — more predictive of care gaps than insurance status alone. Output at [2015:2018] feeds the Home Social Isolation Monitor alongside the Medication Cost Barrier Monitor.",
     "metadata": {
       "category": "health-personal",
       "domain": "Home Health — Social Determinants / Transportation Access",
       "author": "Reality Engine",
-      "outputSpace": "4D binary at [2015:2019]: [1,0,0,0]=CRITICAL_ACCESS_FAILURE, [0,1,0,0]=APPOINTMENT_BARRIER, [0,0,1,0]=TRANSIT_DEPENDENT_RISK, [0,0,0,1]=TRANSPORTATION_ADEQUATE",
+      "outputSpace": "4D binary at [2015:2018]: [1,0,0,0]=CRITICAL_ACCESS_FAILURE, [0,1,0,0]=APPOINTMENT_BARRIER, [0,0,1,0]=TRANSIT_DEPENDENT_RISK, [0,0,0,1]=TRANSPORTATION_ADEQUATE",
       "tags": [
         "agent-dispatcher",
         "ai-trigger",
@@ -39,7 +39,7 @@
         "missed_critical_care_norm": "0.0=critical care missed (dialysis, chemotherapy, specialty follow-up) due to transport, 0.5=non-critical missed (primary care, routine labs), 1.0=no care missed due to transport",
         "proximity_norm": "0.0=>30 miles from nearest relevant provider with no transit, 0.5=10–30 miles with unreliable transit, 1.0=within 5 miles or transport resolved"
       },
-      "downstreamMachine": "HomeSocialIsolationMonitor (reads [2011:2019])",
+      "downstreamMachine": "HomeSocialIsolationMonitor (reads [2011:2018])",
       "tagging": {
         "schemaVersion": "1.0.0",
         "managedBy": "scripts/manage_machine_tags.mjs",
@@ -134,7 +134,7 @@
             ],
             "ragStatusCode": "RED",
             "processStatus": "error",
-            "description": "CRITICAL_ACCESS_FAILURE: patient missing critical care due to transportation barrier at [2015:2019]"
+            "description": "CRITICAL_ACCESS_FAILURE: patient missing critical care due to transportation barrier at [2015:2018]"
           },
           {
             "sequenceId": "transport-transit-dependent-risk",
@@ -146,7 +146,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "TRANSIT_DEPENDENT_RISK: care access contingent on fragile transit arrangement at [2015:2019]"
+            "description": "TRANSIT_DEPENDENT_RISK: care access contingent on fragile transit arrangement at [2015:2018]"
           },
           {
             "sequenceId": "transport-adequate",
@@ -158,7 +158,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "TRANSPORTATION_ADEQUATE: care access not transport-limited at [2015:2019]"
+            "description": "TRANSPORTATION_ADEQUATE: care access not transport-limited at [2015:2018]"
           }
         ],
         "endpoint": "http://localhost:4000/graphql",
@@ -633,7 +633,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "CRITICAL_ACCESS_FAILURE: patient missing critical care due to transportation barrier at [2015:2019]",
+                  "description": "CRITICAL_ACCESS_FAILURE: patient missing critical care due to transportation barrier at [2015:2018]",
                   "action": "route-referral",
                   "actionNarrative": "NEMT (non-emergency medical transport) referral; volunteer driver program; care coordination for telemedicine substitution where appropriate"
                 }
@@ -687,7 +687,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "TRANSIT_DEPENDENT_RISK: care access contingent on fragile transit arrangement at [2015:2019]",
+                  "description": "TRANSIT_DEPENDENT_RISK: care access contingent on fragile transit arrangement at [2015:2018]",
                   "action": "route-referral",
                   "actionNarrative": "Backup transportation plan; volunteer driver registration; identify family/neighbor support; telemedicine option assessment"
                 }
@@ -741,7 +741,7 @@
                   1
                 ],
                 "metadata": {
-                  "description": "TRANSPORTATION_ADEQUATE: care access not transport-limited at [2015:2019]",
+                  "description": "TRANSPORTATION_ADEQUATE: care access not transport-limited at [2015:2018]",
                   "action": "continue-monitoring",
                   "actionNarrative": "Social isolation monitor registers transportation stable"
                 }

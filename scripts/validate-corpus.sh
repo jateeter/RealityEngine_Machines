@@ -76,7 +76,7 @@ bash "$SCRIPT_DIR/validate-guardrails.sh"
 # Unit-vocabulary gates. Both shipped with verification modes that no gate
 # invoked, so neither had ever run against the corpus (RealityEngine_CI#352
 # is the same finding in the CI repo).
-python3 "$SCRIPT_DIR/extract-qudt-subset.py" --source "$REPO_ROOT/.qudt-cache" --check
+bash "$SCRIPT_DIR/extract-qudt-subset.sh" --source "$REPO_ROOT/.qudt-cache" --check
 python3 "$SCRIPT_DIR/ucum.py" --scan "$REPO_ROOT/domains/region-allocation.json"
 
 # Inventory gate: every generator on disk is declared, scoped to a corpus, and

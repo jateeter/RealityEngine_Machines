@@ -2,12 +2,12 @@
   "version": "1.0.0",
   "machine": {
     "name": "Ag Irrigation Flow Controller",
-    "description": "Monitors substrate moisture, flow rate, and electrical conductivity to detect irrigation deficits and waterlogging in hydroponic and soil-based indoor systems. Two escalation sequences (DRY_DOWN and WATERLOG) plus a BALANCED signal for optimal drainage cycles. Upstream: raw flow sensors at [4:8]. Downstream: AgPlantGrowthCycleMonitor reads output at [24:28].",
+    "description": "Monitors substrate moisture, flow rate, and electrical conductivity to detect irrigation deficits and waterlogging in hydroponic and soil-based indoor systems. Two escalation sequences (DRY_DOWN and WATERLOG) plus a BALANCED signal for optimal drainage cycles. Upstream: raw flow sensors at [4:8]. Downstream: AgPlantGrowthCycleMonitor reads output at [24:27].",
     "metadata": {
       "category": "agriculture",
       "domain": "Agriculture — Water Management / Irrigation",
       "author": "Reality Engine",
-      "outputSpace": "4D binary at [24:28]: [1,0,0,0]=IRRIGATE_ON, [0,1,0,0]=DRAIN_ALERT, [0,0,1,0]=EC_ALERT, [0,0,0,1]=FLOW_OK",
+      "outputSpace": "4D binary at [24:27]: [1,0,0,0]=IRRIGATE_ON, [0,1,0,0]=DRAIN_ALERT, [0,0,1,0]=EC_ALERT, [0,0,0,1]=FLOW_OK",
       "tags": [
         "ag-irrigation-flow-controller",
         "agriculture",
@@ -32,7 +32,7 @@
         "substrate_ec_norm": "0.0=distilled water, 0.5=2.0 mS/cm (target), 1.0=4.0+ mS/cm (toxic)",
         "runoff_ratio_norm": "0.0=zero runoff, 0.5=15–20% (healthy drainage), 1.0=100% runoff"
       },
-      "downstreamMachine": "AgPlantGrowthCycleMonitor (reads [24:28])",
+      "downstreamMachine": "AgPlantGrowthCycleMonitor (reads [24:27])",
       "tagging": {
         "schemaVersion": "1.0.0",
         "managedBy": "scripts/manage_machine_tags.mjs",
@@ -111,7 +111,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "IRRIGATE_ON: open irrigation valve and run pump at [24:28]"
+            "description": "IRRIGATE_ON: open irrigation valve and run pump at [24:27]"
           },
           {
             "sequenceId": "ag-irrig-waterlog",
@@ -123,7 +123,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "DRAIN_ALERT: open drain valve; halt irrigation pump at [24:28]"
+            "description": "DRAIN_ALERT: open drain valve; halt irrigation pump at [24:27]"
           },
           {
             "sequenceId": "ag-irrig-balanced",
@@ -135,7 +135,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "FLOW_OK: optimal irrigation cycle active at [24:28]"
+            "description": "FLOW_OK: optimal irrigation cycle active at [24:27]"
           }
         ]
       },
@@ -362,7 +362,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "IRRIGATE_ON: open irrigation valve and run pump at [24:28]",
+                  "description": "IRRIGATE_ON: open irrigation valve and run pump at [24:27]",
                   "action": "continue-monitoring",
                   "actionNarrative": "Immediate irrigation; downstream growth monitor registers water-stress state"
                 }
@@ -508,7 +508,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "DRAIN_ALERT: open drain valve; halt irrigation pump at [24:28]",
+                  "description": "DRAIN_ALERT: open drain valve; halt irrigation pump at [24:27]",
                   "action": "urgent-intervention",
                   "actionNarrative": "Emergency drain; downstream growth monitor registers waterlogging state"
                 }
@@ -563,7 +563,7 @@
                   1
                 ],
                 "metadata": {
-                  "description": "FLOW_OK: optimal irrigation cycle active at [24:28]",
+                  "description": "FLOW_OK: optimal irrigation cycle active at [24:27]",
                   "action": "continue-monitoring",
                   "actionNarrative": "Downstream AgPlantGrowthCycleMonitor registers healthy water state"
                 }

@@ -2,12 +2,12 @@
   "version": "1.0.0",
   "machine": {
     "name": "Ag Atmospheric Controller",
-    "description": "Monitors CO2 concentration, relative humidity, and vapor pressure deficit (VPD) within indoor growing zones. Three concurrent patterns detect CO2 depletion during photosynthesis peaks, high-humidity fungal risk, and optimal atmospheric conditions. Upstream: atmospheric sensors at [16:20]. Downstream: AgIPMPestAlertMonitor reads output at [36:40].",
+    "description": "Monitors CO2 concentration, relative humidity, and vapor pressure deficit (VPD) within indoor growing zones. Three concurrent patterns detect CO2 depletion during photosynthesis peaks, high-humidity fungal risk, and optimal atmospheric conditions. Upstream: atmospheric sensors at [16:19]. Downstream: AgIPMPestAlertMonitor reads output at [36:39].",
     "metadata": {
       "category": "agriculture",
       "domain": "Agriculture — Atmospheric CO2 / Humidity Control",
       "author": "Reality Engine",
-      "outputSpace": "4D binary at [36:40]: [1,0,0,0]=CO2_INJECT, [0,1,0,0]=VENT_OPEN, [0,0,1,0]=HUMIDITY_ALERT, [0,0,0,1]=ATMOS_OK",
+      "outputSpace": "4D binary at [36:39]: [1,0,0,0]=CO2_INJECT, [0,1,0,0]=VENT_OPEN, [0,0,1,0]=HUMIDITY_ALERT, [0,0,0,1]=ATMOS_OK",
       "tags": [
         "ag-atmospheric-controller",
         "agriculture",
@@ -32,7 +32,7 @@
         "vpd_norm": "0.0=0.0 kPa (zero VPD, no transpiration), 0.5=1.0 kPa (optimal), 1.0=2.5 kPa (excessive)",
         "air_exchange_norm": "0.0=stagnant, 0.5=nominal ACH, 1.0=maximum ventilation"
       },
-      "downstreamMachine": "AgIPMPestAlertMonitor (reads [36:40])",
+      "downstreamMachine": "AgIPMPestAlertMonitor (reads [36:39])",
       "tagging": {
         "schemaVersion": "1.0.0",
         "managedBy": "scripts/manage_machine_tags.mjs",
@@ -111,7 +111,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "CO2_INJECT: open CO2 valve; restore enriched atmosphere at [36:40]"
+            "description": "CO2_INJECT: open CO2 valve; restore enriched atmosphere at [36:39]"
           },
           {
             "sequenceId": "ag-atmos-humidity-escalation",
@@ -123,7 +123,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "HUMIDITY_ALERT: open ventilation; activate dehumidifier at [36:40]"
+            "description": "HUMIDITY_ALERT: open ventilation; activate dehumidifier at [36:39]"
           },
           {
             "sequenceId": "ag-atmos-optimal",
@@ -135,7 +135,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "ATMOS_OK: atmospheric conditions optimal for plant growth at [36:40]"
+            "description": "ATMOS_OK: atmospheric conditions optimal for plant growth at [36:39]"
           }
         ]
       },
@@ -360,7 +360,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "CO2_INJECT: open CO2 valve; restore enriched atmosphere at [36:40]",
+                  "description": "CO2_INJECT: open CO2 valve; restore enriched atmosphere at [36:39]",
                   "action": "adjust-operations",
                   "actionNarrative": "Open CO2 regulator; enrichment cycle begins; IPM monitor registers CO2 stress"
                 }
@@ -508,7 +508,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "HUMIDITY_ALERT: open ventilation; activate dehumidifier at [36:40]",
+                  "description": "HUMIDITY_ALERT: open ventilation; activate dehumidifier at [36:39]",
                   "action": "adjust-operations",
                   "actionNarrative": "Increase air exchange; IPM monitor registers elevated fungal pressure"
                 }
@@ -564,7 +564,7 @@
                   1
                 ],
                 "metadata": {
-                  "description": "ATMOS_OK: atmospheric conditions optimal for plant growth at [36:40]",
+                  "description": "ATMOS_OK: atmospheric conditions optimal for plant growth at [36:39]",
                   "action": "continue-monitoring",
                   "actionNarrative": "IPM and plant monitors register clean atmospheric baseline"
                 }

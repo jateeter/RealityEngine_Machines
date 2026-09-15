@@ -453,8 +453,8 @@ def check_reserved_ranges(
             continue
         if start < r_off + r_len and r_off < end:
             warnings.append(
-                f"perceptualMapping.{label} [{start}:{end}] overlaps reserved range "
-                f"{reserved.get('id', '?')} [{r_off}:{r_off + r_len}] "
+                f"perceptualMapping.{label} [{start}:{end - 1}] overlaps reserved range "
+                f"{reserved.get('id', '?')} [{r_off}:{r_off + r_len - 1}] "
                 f"(owner={reserved.get('owner', '?')})"
             )
 

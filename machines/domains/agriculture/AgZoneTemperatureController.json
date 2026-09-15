@@ -2,12 +2,12 @@
   "version": "1.0.0",
   "machine": {
     "name": "Ag Zone Temperature Controller",
-    "description": "Monitors air and root-zone temperature to detect overheating and frost risk in indoor growing zones. Implements two concurrent escalation patterns (OVERTEMP and UNDERTEMP) plus a continuous OPTIMAL signal. Upstream: raw zone sensors at [0:4]. Downstream: AgPlantGrowthCycleMonitor reads output at [20:24].",
+    "description": "Monitors air and root-zone temperature to detect overheating and frost risk in indoor growing zones. Implements two concurrent escalation patterns (OVERTEMP and UNDERTEMP) plus a continuous OPTIMAL signal. Upstream: raw zone sensors at [0:4]. Downstream: AgPlantGrowthCycleMonitor reads output at [20:23].",
     "metadata": {
       "category": "agriculture",
       "domain": "Agriculture — Zone Climate / Temperature",
       "author": "Reality Engine",
-      "outputSpace": "4D binary at [20:24]: [1,0,0,0]=HEATING_ON, [0,1,0,0]=COOLING_ON, [0,0,1,0]=VPD_ALERT, [0,0,0,1]=TEMP_OK",
+      "outputSpace": "4D binary at [20:23]: [1,0,0,0]=HEATING_ON, [0,1,0,0]=COOLING_ON, [0,0,1,0]=VPD_ALERT, [0,0,0,1]=TEMP_OK",
       "tags": [
         "ag-zone-temperature-controller",
         "agriculture",
@@ -33,7 +33,7 @@
         "heater_status": "0.0=off, 1.0=on (active heating)",
         "cooler_status": "0.0=off, 1.0=on (active cooling)"
       },
-      "downstreamMachine": "AgPlantGrowthCycleMonitor (reads [20:24])",
+      "downstreamMachine": "AgPlantGrowthCycleMonitor (reads [20:23])",
       "tagging": {
         "schemaVersion": "1.0.0",
         "managedBy": "scripts/manage_machine_tags.mjs",
@@ -114,7 +114,7 @@
             ],
             "ragStatusCode": "RED",
             "processStatus": "error",
-            "description": "COOLING_ON: activate zone cooling system at [20:24]"
+            "description": "COOLING_ON: activate zone cooling system at [20:23]"
           },
           {
             "sequenceId": "ag-zone-temp-undertemp",
@@ -126,7 +126,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "HEATING_ON: activate zone heating at [20:24]"
+            "description": "HEATING_ON: activate zone heating at [20:23]"
           },
           {
             "sequenceId": "ag-zone-temp-optimal",
@@ -138,7 +138,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "TEMP_OK: zone temperature within optimal growth range at [20:24]"
+            "description": "TEMP_OK: zone temperature within optimal growth range at [20:23]"
           }
         ]
       },
@@ -367,7 +367,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "COOLING_ON: activate zone cooling system at [20:24]",
+                  "description": "COOLING_ON: activate zone cooling system at [20:23]",
                   "action": "adjust-operations",
                   "actionNarrative": "Enable cooling; downstream AgPlantGrowthCycleMonitor will register high-temp condition"
                 }
@@ -513,7 +513,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "HEATING_ON: activate zone heating at [20:24]",
+                  "description": "HEATING_ON: activate zone heating at [20:23]",
                   "action": "adjust-operations",
                   "actionNarrative": "Enable heating; frost risk prevention mode"
                 }
@@ -568,7 +568,7 @@
                   1
                 ],
                 "metadata": {
-                  "description": "TEMP_OK: zone temperature within optimal growth range at [20:24]",
+                  "description": "TEMP_OK: zone temperature within optimal growth range at [20:23]",
                   "action": "continue-monitoring",
                   "actionNarrative": "Downstream AgPlantGrowthCycleMonitor registers healthy temp condition"
                 }

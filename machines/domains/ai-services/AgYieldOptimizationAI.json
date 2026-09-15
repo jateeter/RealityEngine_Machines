@@ -2,12 +2,12 @@
   "version": "1.0.0",
   "machine": {
     "name": "Ag Yield Optimization AI",
-    "description": "AI-augmented yield optimization engine that synthesizes nutrient cycle quality, IPM pest pressure, and harvest readiness signals across the entire agricultural deployment. Implements corrective strategies: when nutrient lockout co-occurs with pest pressure, triggers emergency intervention; when harvest approaches with clear IPM status, optimizes the final push for peak yield; monitors recovery trajectories to forecast adjusted harvest windows. Reads outputs from AgNutrientCycleOptimizer [3959:3963], AgIPMPestAlertMonitor [3963:3967], and AgHarvestReadinessAssessor [3967:3971]. Cross-domain: this machine bridges the Agriculture and AI domains.",
+    "description": "AI-augmented yield optimization engine that synthesizes nutrient cycle quality, IPM pest pressure, and harvest readiness signals across the entire agricultural deployment. Implements corrective strategies: when nutrient lockout co-occurs with pest pressure, triggers emergency intervention; when harvest approaches with clear IPM status, optimizes the final push for peak yield; monitors recovery trajectories to forecast adjusted harvest windows. Reads outputs from AgNutrientCycleOptimizer [3959:3962], AgIPMPestAlertMonitor [3963:3966], and AgHarvestReadinessAssessor [3967:3970]. Cross-domain: this machine bridges the Agriculture and AI domains.",
     "metadata": {
       "category": "ai-services",
-      "domain": "Agriculture \u2014 AI Yield Optimization",
+      "domain": "Agriculture — AI Yield Optimization",
       "author": "Reality Engine",
-      "outputSpace": "6D binary at [310:316]: [1,0,0,0,0,0]=EMERGENCY_INTERVENTION, [0,1,0,0,0,0]=CORRECTIVE_ACTION, [0,0,1,0,0,0]=OPTIMIZE_HARVEST, [0,0,0,1,0,0]=YIELD_FORECAST_UPDATE, [0,0,0,0,1,0]=NOMINAL_MONITORING, [0,0,0,0,0,1]=PEAK_YIELD_CONFIRMED",
+      "outputSpace": "6D binary at [310:315]: [1,0,0,0,0,0]=EMERGENCY_INTERVENTION, [0,1,0,0,0,0]=CORRECTIVE_ACTION, [0,0,1,0,0,0]=OPTIMIZE_HARVEST, [0,0,0,1,0,0]=YIELD_FORECAST_UPDATE, [0,0,0,0,1,0]=NOMINAL_MONITORING, [0,0,0,0,0,1]=PEAK_YIELD_CONFIRMED",
       "tags": [
         "ag-yield-optimization-ai",
         "agriculture",
@@ -28,7 +28,7 @@
         "yield-optimization"
       ],
       "sequenceCount": 3,
-      "crossDomainNote": "This machine is authored as an AI-pipeline component. Its input reads from the Agriculture domain perceptual space [3959:3971] while its outputs can trigger actions processed by the broader AI/decision layer at [310:316]. Category 'ai-pipeline' overrides the 'Ag' name prefix to correctly classify it in the AI domain.",
+      "crossDomainNote": "This machine is authored as an AI-pipeline component. Its input reads from the Agriculture domain perceptual space [3959:3970] while its outputs can trigger actions processed by the broader AI/decision layer at [310:315]. Category 'ai-pipeline' overrides the 'Ag' name prefix to correctly classify it in the AI domain.",
       "inputSignalMap": {
         "elem_0": "NUTRIENT_LOCKOUT from AgNutrientCycleOptimizer [284]",
         "elem_1": "UPTAKE_MISMATCH from AgNutrientCycleOptimizer [285]",
@@ -44,14 +44,14 @@
         "elem_11": "HARVEST_READY from AgHarvestReadinessAssessor [295]"
       },
       "upstreamMachines": [
-        "AgNutrientCycleOptimizer (output at [3959:3963])",
-        "AgIPMPestAlertMonitor (output at [3963:3967])",
-        "AgHarvestReadinessAssessor (output at [3967:3971])"
+        "AgNutrientCycleOptimizer (output at [3959:3962])",
+        "AgIPMPestAlertMonitor (output at [3963:3966])",
+        "AgHarvestReadinessAssessor (output at [3967:3970])"
       ],
       "regularExpression": {
-        "emergency": "NUTRIENT_LOCKOUT + PEST_ALERT \u2192 EMERGENCY_INTERVENTION",
-        "optimize": "NUTRIENT_OK + IPM_OK + HARVEST_APPROACHING \u2192 OPTIMIZE_HARVEST \u2192 PEAK_YIELD",
-        "nominal": "NUTRIENT_OK + IPM_OK + NOMINAL_STATE \u2192 NOMINAL_MONITORING",
+        "emergency": "NUTRIENT_LOCKOUT + PEST_ALERT → EMERGENCY_INTERVENTION",
+        "optimize": "NUTRIENT_OK + IPM_OK + HARVEST_APPROACHING → OPTIMIZE_HARVEST → PEAK_YIELD",
+        "nominal": "NUTRIENT_OK + IPM_OK + NOMINAL_STATE → NOMINAL_MONITORING",
         "combined": "Three concurrent sequences: emergency detection runs continuously alongside harvest optimization and nominal monitoring. Emergency sequence fires EMERGENCY_INTERVENTION when crisis signals co-occur; harvest sequence fires PEAK_YIELD_CONFIRMED when all positive signals align; nominal fires NOMINAL_MONITORING during healthy steady-state."
       },
       "tagging": {
@@ -142,7 +142,7 @@
             ],
             "ragStatusCode": "RED",
             "processStatus": "error",
-            "description": "EMERGENCY_INTERVENTION: multi-threat crop crisis at [310:316]"
+            "description": "EMERGENCY_INTERVENTION: multi-threat crop crisis at [310:315]"
           },
           {
             "sequenceId": "ag-yield-ai-harvest-optimize",
@@ -156,7 +156,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "OPTIMIZE_HARVEST: AI entering final yield optimization mode at [310:316]"
+            "description": "OPTIMIZE_HARVEST: AI entering final yield optimization mode at [310:315]"
           },
           {
             "sequenceId": "ag-yield-ai-harvest-optimize",
@@ -170,7 +170,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "PEAK_YIELD_CONFIRMED: execute harvest at peak quality/quantity at [310:316]"
+            "description": "PEAK_YIELD_CONFIRMED: execute harvest at peak quality/quantity at [310:315]"
           },
           {
             "sequenceId": "ag-yield-ai-nominal",
@@ -184,7 +184,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "NOMINAL_MONITORING: system operating within parameters; no AI intervention required at [310:316]"
+            "description": "NOMINAL_MONITORING: system operating within parameters; no AI intervention required at [310:315]"
           }
         ]
       },
@@ -291,10 +291,10 @@
     "sequences": [
       {
         "id": "ag-yield-ai-emergency",
-        "name": "Emergency Intervention: CRISIS_WATCH+ \u2192 COMPOUND_CRISIS \u2192 EMERGENCY_INTERVENTION",
+        "name": "Emergency Intervention: CRISIS_WATCH+ → COMPOUND_CRISIS → EMERGENCY_INTERVENTION",
         "metadata": {
-          "description": "Detects compounding crisis conditions where nutrient lockout co-occurs with active pest alerts \u2014 the highest-severity scenario in indoor growing. The A*A = A+ pattern ensures at least one confirmed crisis cycle before triggering emergency mode, preventing false alarms from sensor transients.",
-          "path": "CRISIS_WATCH+ \u2192 COMPOUND_CRISIS \u2192 output[1,0,0,0,0,0]",
+          "description": "Detects compounding crisis conditions where nutrient lockout co-occurs with active pest alerts — the highest-severity scenario in indoor growing. The A*A = A+ pattern ensures at least one confirmed crisis cycle before triggering emergency mode, preventing false alarms from sensor transients.",
+          "path": "CRISIS_WATCH+ → COMPOUND_CRISIS → output[1,0,0,0,0,0]",
           "output": "[1,0,0,0,0,0] (EMERGENCY_INTERVENTION)"
         },
         "events": [
@@ -353,7 +353,7 @@
             "isInitial": true,
             "metadata": {
               "name": "CRISIS_WATCH",
-              "description": "CRISIS_WATCH+ \u2014 NUTRIENT_LOCKOUT=1, FUNGAL_ALERT=1, HARVEST_DELAYED=1: all three crisis signals present. isInitial A*A = A+: at least one crisis cycle confirmed.",
+              "description": "CRISIS_WATCH+ — NUTRIENT_LOCKOUT=1, FUNGAL_ALERT=1, HARVEST_DELAYED=1: all three crisis signals present. isInitial A*A = A+: at least one crisis cycle confirmed.",
               "condition": "NUTRIENT_LOCKOUT=1, FUNGAL_ALERT=1, HARVEST_DELAYED=1"
             },
             "nextEventIds": [
@@ -416,7 +416,7 @@
             "isInitial": false,
             "metadata": {
               "name": "COMPOUND_CRISIS",
-              "description": "COMPOUND_CRISIS \u2014 sustained NUTRIENT_LOCKOUT + FUNGAL_ALERT + INSECT_ALERT: multiple simultaneous threats. Fires EMERGENCY_INTERVENTION.",
+              "description": "COMPOUND_CRISIS — sustained NUTRIENT_LOCKOUT + FUNGAL_ALERT + INSECT_ALERT: multiple simultaneous threats. Fires EMERGENCY_INTERVENTION.",
               "condition": "NUTRIENT_LOCKOUT=1, FUNGAL_ALERT=1, INSECT_ALERT=1, HARVEST_DELAYED=1"
             },
             "outputEvents": [
@@ -431,7 +431,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "EMERGENCY_INTERVENTION: multi-threat crop crisis at [310:316]",
+                  "description": "EMERGENCY_INTERVENTION: multi-threat crop crisis at [310:315]",
                   "action": "adjust-operations",
                   "actionNarrative": "Dispatch grow technician; initiate emergency flush; halt normal automation; log crisis event for AI learning"
                 }
@@ -442,10 +442,10 @@
       },
       {
         "id": "ag-yield-ai-harvest-optimize",
-        "name": "Harvest Optimization: GOOD_CONDITIONS+ \u2192 APPROACHING_CLEAN \u2192 OPTIMIZE_HARVEST \u2192 PEAK_YIELD",
+        "name": "Harvest Optimization: GOOD_CONDITIONS+ → APPROACHING_CLEAN → OPTIMIZE_HARVEST → PEAK_YIELD",
         "metadata": {
           "description": "Activates yield optimization mode when NUTRIENT_OK + IPM_OK align with HARVEST_APPROACHING. In this window the AI can fine-tune photoperiod, nutrient concentration, and temperature to maximize final yield weight and quality. PEAK_YIELD_CONFIRMED fires when HARVEST_READY arrives with clean conditions.",
-          "path": "GOOD_CONDITIONS+ \u2192 APPROACHING_CLEAN \u2192 OPTIMIZE_HARVEST \u2192 PEAK_YIELD_CONFIRMED",
+          "path": "GOOD_CONDITIONS+ → APPROACHING_CLEAN → OPTIMIZE_HARVEST → PEAK_YIELD_CONFIRMED",
           "output": "[0,0,0,0,0,1] (PEAK_YIELD_CONFIRMED)"
         },
         "events": [
@@ -504,7 +504,7 @@
             "isInitial": true,
             "metadata": {
               "name": "GOOD_CONDITIONS",
-              "description": "GOOD_CONDITIONS+ \u2014 NUTRIENT_OK=1, IPM_OK=1: baseline healthy state with no harvest signal yet. isInitial A*A = A+.",
+              "description": "GOOD_CONDITIONS+ — NUTRIENT_OK=1, IPM_OK=1: baseline healthy state with no harvest signal yet. isInitial A*A = A+.",
               "condition": "NUTRIENT_OK=1, IPM_OK=1, no alerts"
             },
             "nextEventIds": [
@@ -567,7 +567,7 @@
             "isInitial": false,
             "metadata": {
               "name": "APPROACHING_CLEAN",
-              "description": "APPROACHING_CLEAN \u2014 NUTRIENT_OK + IPM_OK + HARVEST_APPROACHING: harvest window opening with clean conditions. Fires OPTIMIZE_HARVEST.",
+              "description": "APPROACHING_CLEAN — NUTRIENT_OK + IPM_OK + HARVEST_APPROACHING: harvest window opening with clean conditions. Fires OPTIMIZE_HARVEST.",
               "condition": "NUTRIENT_OK=1, IPM_OK=1, HARVEST_APPROACHING=1"
             },
             "outputEvents": [
@@ -582,7 +582,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "OPTIMIZE_HARVEST: AI entering final yield optimization mode at [310:316]",
+                  "description": "OPTIMIZE_HARVEST: AI entering final yield optimization mode at [310:315]",
                   "action": "adjust-operations",
                   "actionNarrative": "Begin end-of-cycle flush scheduling; optimize DLI for final days; calculate harvest date"
                 }
@@ -647,7 +647,7 @@
             "isInitial": false,
             "metadata": {
               "name": "PEAK_YIELD",
-              "description": "PEAK_YIELD \u2014 NUTRIENT_OK + IPM_OK + HARVEST_READY: all signals aligned for maximum yield harvest. Fires PEAK_YIELD_CONFIRMED.",
+              "description": "PEAK_YIELD — NUTRIENT_OK + IPM_OK + HARVEST_READY: all signals aligned for maximum yield harvest. Fires PEAK_YIELD_CONFIRMED.",
               "condition": "NUTRIENT_OK=1, IPM_OK=1, HARVEST_READY=1"
             },
             "outputEvents": [
@@ -662,7 +662,7 @@
                   1
                 ],
                 "metadata": {
-                  "description": "PEAK_YIELD_CONFIRMED: execute harvest at peak quality/quantity at [310:316]",
+                  "description": "PEAK_YIELD_CONFIRMED: execute harvest at peak quality/quantity at [310:315]",
                   "action": "continue-monitoring",
                   "actionNarrative": "Schedule immediate harvest; log yield metrics; reset grow cycle; seed next batch"
                 }
@@ -673,7 +673,7 @@
       },
       {
         "id": "ag-yield-ai-nominal",
-        "name": "Nominal Monitoring: NOMINAL+ \u2192 NOMINAL_MONITORING",
+        "name": "Nominal Monitoring: NOMINAL+ → NOMINAL_MONITORING",
         "metadata": {
           "description": "Fires NOMINAL_MONITORING during healthy steady-state: NUTRIENT_OK + IPM_OK with no harvest signals active. This is the continuous background confirmation that the system is operating within parameters and no AI intervention is required.",
           "pattern": "NOMINAL+",
@@ -735,7 +735,7 @@
             "isInitial": true,
             "metadata": {
               "name": "NOMINAL",
-              "description": "NOMINAL+ \u2014 NIGHT_REST=1, NUTRIENT_OK=1, IPM_OK=1: healthy nighttime state with all systems nominal. isInitial A*A = A+: fires on every matching cycle during steady-state operation.",
+              "description": "NOMINAL+ — NIGHT_REST=1, NUTRIENT_OK=1, IPM_OK=1: healthy nighttime state with all systems nominal. isInitial A*A = A+: fires on every matching cycle during steady-state operation.",
               "condition": "NIGHT_REST=1, NUTRIENT_OK=1, IPM_OK=1, no harvest or crisis signals"
             },
             "outputEvents": [
@@ -750,7 +750,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "NOMINAL_MONITORING: system operating within parameters; no AI intervention required at [310:316]",
+                  "description": "NOMINAL_MONITORING: system operating within parameters; no AI intervention required at [310:315]",
                   "action": "continue-monitoring",
                   "actionNarrative": "Log metrics; update yield forecast model; continue passive monitoring"
                 }
@@ -762,8 +762,8 @@
     ],
     "inputSequences": [
       {
-        "name": "Full Grow Cycle: Nominal \u2192 Optimization \u2192 Peak Yield",
-        "pattern": "8-step: NOMINAL(\u00d73) \u2192 GOOD_CONDITIONS(\u00d72) \u2192 APPROACHING_CLEAN \u2192 OPTIMIZE \u2192 PEAK_YIELD",
+        "name": "Full Grow Cycle: Nominal → Optimization → Peak Yield",
+        "pattern": "8-step: NOMINAL(×3) → GOOD_CONDITIONS(×2) → APPROACHING_CLEAN → OPTIMIZE → PEAK_YIELD",
         "description": "Complete indoor grow cycle from steady-state nominal monitoring through harvest optimization to peak yield confirmation.",
         "events": [
           [
@@ -892,7 +892,7 @@
       },
       {
         "name": "Crisis Detection: Nutrient Lockout + Pest Storm",
-        "pattern": "4-step: NOMINAL \u2192 CRISIS_WATCH \u2192 CRISIS_WATCH \u2192 COMPOUND_CRISIS",
+        "pattern": "4-step: NOMINAL → CRISIS_WATCH → CRISIS_WATCH → COMPOUND_CRISIS",
         "description": "Simulates rapid system deterioration: nutrient lockout develops during active pest pressure; emergency intervention triggered.",
         "events": [
           [

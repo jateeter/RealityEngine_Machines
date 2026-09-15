@@ -2,12 +2,12 @@
   "version": "1.0.0",
   "machine": {
     "name": "Benefits Eligibility Screener",
-    "description": "Monitors income threshold compliance, residency documentation status, categorical eligibility criteria, and application completeness for community benefits programs (SNAP, LIHEAP, housing assistance, childcare subsidies). Tracks the eligibility determination workflow from initial screening through confirmation, identifying documentation gaps and conditional holds before they stall service delivery. Output at [952:956] feeds the Enrollment Coordination Monitor.",
+    "description": "Monitors income threshold compliance, residency documentation status, categorical eligibility criteria, and application completeness for community benefits programs (SNAP, LIHEAP, housing assistance, childcare subsidies). Tracks the eligibility determination workflow from initial screening through confirmation, identifying documentation gaps and conditional holds before they stall service delivery. Output at [952:955] feeds the Enrollment Coordination Monitor.",
     "metadata": {
       "category": "community-services",
       "domain": "Community Services — Benefits Eligibility / Qualification",
       "author": "Reality Engine",
-      "outputSpace": "4D binary at [952:956]: [1,0,0,0]=ELIGIBILITY_DENIED, [0,1,0,0]=ELIGIBILITY_CONDITIONAL, [0,0,1,0]=DOCUMENTATION_NEEDED, [0,0,0,1]=ELIGIBILITY_CONFIRMED",
+      "outputSpace": "4D binary at [952:955]: [1,0,0,0]=ELIGIBILITY_DENIED, [0,1,0,0]=ELIGIBILITY_CONDITIONAL, [0,0,1,0]=DOCUMENTATION_NEEDED, [0,0,0,1]=ELIGIBILITY_CONFIRMED",
       "tags": [
         "benefits-eligibility",
         "benefits-eligibility-screener",
@@ -33,7 +33,7 @@
         "categorical_eligibility_norm": "0.0=no categorical qualifier met (not disabled, not elderly, no minor children, not pregnant), 0.5=one categorical qualifier pending verification, 1.0=categorical eligibility confirmed (SSI recipient, Medicaid enrolled, TANF active)",
         "application_completeness_norm": "0.0=application not started or less than 50% complete, 0.5=application submitted but key fields missing, 1.0=application complete and all required fields populated"
       },
-      "downstreamMachine": "EnrollmentCoordinationMonitor (reads [952:960])",
+      "downstreamMachine": "EnrollmentCoordinationMonitor (reads [952:959])",
       "tagging": {
         "schemaVersion": "1.0.0",
         "managedBy": "scripts/manage_machine_tags.mjs",
@@ -113,7 +113,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "ELIGIBILITY_DENIED: applicant does not meet program criteria at [952:956]"
+            "description": "ELIGIBILITY_DENIED: applicant does not meet program criteria at [952:955]"
           },
           {
             "sequenceId": "benefits-documentation-needed",
@@ -125,7 +125,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "DOCUMENTATION_NEEDED: applicant is income-eligible but missing required documentation at [952:956]"
+            "description": "DOCUMENTATION_NEEDED: applicant is income-eligible but missing required documentation at [952:955]"
           },
           {
             "sequenceId": "benefits-confirmed",
@@ -137,7 +137,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "ELIGIBILITY_CONFIRMED: all criteria met; proceed to enrollment at [952:956]"
+            "description": "ELIGIBILITY_CONFIRMED: all criteria met; proceed to enrollment at [952:955]"
           }
         ]
       },
@@ -332,7 +332,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "ELIGIBILITY_DENIED: applicant does not meet program criteria at [952:956]",
+                  "description": "ELIGIBILITY_DENIED: applicant does not meet program criteria at [952:955]",
                   "action": "route-referral",
                   "actionNarrative": "Denial notice with appeal rights; alternative program screening; benefits navigator referral for near-miss cases"
                 }
@@ -386,7 +386,7 @@
                   0
                 ],
                 "metadata": {
-                  "description": "DOCUMENTATION_NEEDED: applicant is income-eligible but missing required documentation at [952:956]",
+                  "description": "DOCUMENTATION_NEEDED: applicant is income-eligible but missing required documentation at [952:955]",
                   "action": "continue-monitoring",
                   "actionNarrative": "Document checklist provision; benefits navigator document collection support; alternative documentation acceptance review; 30-day cure period activation"
                 }
@@ -440,7 +440,7 @@
                   1
                 ],
                 "metadata": {
-                  "description": "ELIGIBILITY_CONFIRMED: all criteria met; proceed to enrollment at [952:956]",
+                  "description": "ELIGIBILITY_CONFIRMED: all criteria met; proceed to enrollment at [952:955]",
                   "action": "route-review",
                   "actionNarrative": "Enrollment coordination monitor receives ELIGIBILITY_CONFIRMED; benefit issuance workflow initiated"
                 }

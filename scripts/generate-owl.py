@@ -994,9 +994,19 @@ def main() -> int:
     for warning in warnings:
         print(f"WARN {warning}", file=sys.stderr)
     if args.manifest_write or args.manifest_check:
+        # Provenance over the machines this manifest was generated from, using
+        # the one definition in asset_provenance.py. Content-derived, never
+        # time-derived: a timestamp would change on every run and break the
+        # --manifest-check drift gate below.
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import asset_provenance as _prov  # noqa: E402
+        _stamp = _prov.stamp("scripts/generate-owl.py",
+                             sorted(REPO_ROOT.joinpath("machines").rglob("*.json")))
         document = {
             "version": "1.0.0",
             "generator": "scripts/generate-owl.py",
+            "assetVersion": _stamp["assetVersion"],
+            "inputs": _stamp["inputs"],
             "ontology": "semantics/ontology/re-core.ttl",
             "machines": dict(sorted(manifest.items())),
         }
