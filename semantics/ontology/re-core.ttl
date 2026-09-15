@@ -4,6 +4,7 @@
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix obo:     <http://purl.obolibrary.org/obo/> .
 @prefix prov:    <http://www.w3.org/ns/prov#> .
 
 <https://realityengine.example.org/ontology/re-core>
@@ -18,75 +19,92 @@
 #################################################################
 
 re:Machine a owl:Class ;
+    obo:IAO_0000115 "A named behavioural contract in the canonical corpus, loaded identically by every Reality Engine runtime, declaring a perceptual mapping into the universal reality vector and the critical event sequences it recognises." ;
     rdfs:label "Machine" ;
     rdfs:comment "A canonical RealityEngine machine: a named behavioral contract loaded by RE engines, with a perceptual mapping into the universal reality vector and a set of critical event sequences." .
 
 re:CriticalEventSequence a owl:Class ;
+    obo:IAO_0000115 "A representation of a regular expression over reality events: an ordered set of steps a candidate must traverse before the terminal determination is emitted. Because it is a regular expression, any difference in how two runtimes evaluate it is a defect rather than variance." ;
     rdfs:label "Critical Event Sequence" ;
     rdfs:comment "A multi-step validated pattern (CES) within a machine. A candidate event must traverse the sequence's steps in order before the terminal determination is emitted." .
 
 re:LifeSafetySequence a owl:Class ;
+    obo:IAO_0000115 "A critical event sequence whose terminal determination can page emergency response. Verification tooling treats these with the strictest parity requirements." ;
     rdfs:subClassOf re:CriticalEventSequence ;
     rdfs:label "Life-Safety Sequence" ;
     rdfs:comment "A critical event sequence whose terminal determination can page emergency response. Verification tooling treats these with the strictest parity requirements." .
 
 re:SequenceStep a owl:Class ;
+    obo:IAO_0000115 "One state vector within a critical event sequence, giving the input-element levels that must match at a tick for the sequence to advance." ;
     rdfs:label "Sequence Step" ;
     rdfs:comment "One state vector within a critical event sequence: the input-element levels that must match at a given tick for the sequence to advance." .
 
 re:ElementValue a owl:Class ;
+    obo:IAO_0000115 "The required level of a single input element, identified by its index within a sequence step." ;
     rdfs:label "Element Value" ;
     rdfs:comment "The required level of a single input element (by index) within a sequence step." .
 
 re:Determination a owl:Class ;
+    obo:IAO_0000115 "The judgement a machine commits when a sequence step completes, carrying tier, confidence and RAG status together with the action it prescribes." ;
     rdfs:label "Determination" ;
     rdfs:comment "An output vector emitted when a sequence step completes: the machine's judgement (tier, confidence, RAG status) plus the action it prescribes." .
 
 re:Action a owl:Class ;
+    obo:IAO_0000115 "An act prescribed by a determination. Subclasses stratify actions by consequence so audit rules can be written against the class rather than the string." ;
     rdfs:label "Action" ;
     rdfs:comment "An action prescribed by a determination. Subclasses stratify actions by consequence so audit rules can be written against the class, not the string." .
 
 re:LoggingAction a owl:Class ;
+    obo:IAO_0000115 "Record-only action: no human is notified." ;
     rdfs:subClassOf re:Action ;
     rdfs:label "Logging Action" ;
     rdfs:comment "Record-only action: no human is notified." .
 
 re:NotificationAction a owl:Class ;
+    obo:IAO_0000115 "A human is informed on a non-emergency channel (caregiver watch, check-in)." ;
     rdfs:subClassOf re:Action ;
     rdfs:label "Notification Action" ;
     rdfs:comment "A human is informed on a non-emergency channel (caregiver watch, check-in)." .
 
 re:EscalationAction a owl:Class ;
+    obo:IAO_0000115 "Emergency-path action: pages an on-call responder or dispatches emergency response." ;
     rdfs:subClassOf re:Action ;
     rdfs:label "Escalation Action" ;
     rdfs:comment "Emergency-path action: pages an on-call responder or dispatches emergency response." .
 
 re:AutomationAction a owl:Class ;
+    obo:IAO_0000115 "Machine-to-machine action with no direct human recipient: bus publication, agent workflow invocation." ;
     rdfs:subClassOf re:Action ;
     rdfs:label "Automation Action" ;
     rdfs:comment "Machine-to-machine action with no direct human recipient: bus publication, agent workflow invocation." .
 
 re:RagStatus a owl:Class ;
+    obo:IAO_0000115 "A red/amber/green assessment attached to a determination, used by the escalation guardrail to decide whether an escalating action is admissible." ;
     rdfs:label "RAG Status" ;
     rdfs:comment "Red/Amber/Green status attached to determinations and trigger rules." .
 
 re:TriggerRule a owl:Class ;
+    obo:IAO_0000115 "A rule binding an output match on a sequence to a downstream process, evaluated by the Perception Engine rather than by the corpus." ;
     rdfs:label "Trigger Rule" ;
     rdfs:comment "A rule from the machine's triggerConfig that maps a sequence's terminal output to a process status and RAG code for downstream trigger dispatch." .
 
 re:GovernancePolicy a owl:Class ;
+    obo:IAO_0000115 "The ownership and response obligations attached to a machine or sequence: owning team, runbook, escalation policy and service-level bound." ;
     rdfs:label "Governance Policy" ;
     rdfs:comment "Ownership, runbook, escalation, and SLA metadata governing a machine or an individual trigger rule." .
 
 re:Interconnection a owl:Class ;
+    obo:IAO_0000115 "A declared lane relationship between two machines, by which one machine's output region is read as another's input." ;
     rdfs:label "Interconnection" ;
     rdfs:comment "A published-bus relationship in which one machine's output region feeds another machine's input region, usually composed by the Perception Engine." .
 
 re:PerceptualMapping a owl:Class ;
+    obo:IAO_0000115 "A machine's claim on the universal reality vector: the input region it reads and the output region it writes, each given as an offset and a length." ;
     rdfs:label "Perceptual Mapping" ;
     rdfs:comment "The machine's input and output regions within the universal reality vector." .
 
 re:OpenClawProjection a owl:Class ;
+    obo:IAO_0000115 "The projection of a machine into the OpenClaw agent surface, naming the identifiers under which agents may act on that machine." ;
     rdfs:label "OpenClaw Projection" ;
     rdfs:comment "An OpenClaw agent projection that writes machine-native ordinals into the machine's input region via the Perception Engine." .
 
@@ -110,30 +128,37 @@ re:OpenClawProjection a owl:Class ;
 #################################################################
 
 re:Agent a owl:Class ;
+    obo:IAO_0000115 "An autonomous actor bound to one or more machines, permitted to act only within the bounds its binding declares." ;
     rdfs:label "Agent" ;
     rdfs:comment "An external reasoning agent that can be dispatched on a machine's behalf. Identified by re:agentId; grouped by re:AgentFamily." .
 
 re:AgentFamily a owl:Class ;
+    obo:IAO_0000115 "A named grouping of agents that share a role and a permission envelope." ;
     rdfs:label "Agent Family" ;
     rdfs:comment "A role-level grouping of agents (for example a care coordinator or a data-centre operations role). Declared per domain by the domain registry's defaultAgentFamilies and realized by the agents actually bound to machines in that domain." .
 
 re:AgentBinding a owl:Class ;
+    obo:IAO_0000115 "The contract attaching an agent to a machine: what triggers it, which actions it may take, how much autonomy it holds, and whether a human must approve." ;
     rdfs:label "Agent Binding" ;
     rdfs:comment "The binding of one agent to one machine: its autonomy mode, the trigger it answers, the actions it is permitted, and the region its response is written back to." .
 
 re:AutonomyMode a owl:Class ;
+    obo:IAO_0000115 "The degree of independent action a binding grants an agent, from advisory through to unattended execution." ;
     rdfs:label "Autonomy Mode" ;
     rdfs:comment "How far a binding may act without a human: observe, advise, supervised-act, or automated-act. Mirrors the enum in schemas/agent-binding.schema.json." .
 
 re:SemanticAxis a owl:Class ;
+    obo:IAO_0000115 "A named dimension of a machine's input or output region, giving meaning to a cell index that would otherwise be positional only." ;
     rdfs:label "Semantic Axis" ;
     rdfs:comment "The named meaning of one element position within a write-back region — what the value at that index represents. An axis belongs to exactly one region position of one machine." .
 
 re:CompletionMapping a owl:Class ;
+    obo:IAO_0000115 "The declared route by which an agent completion is written back into a machine's region, naming the sensor, offset and length so the write has a single approved path." ;
     rdfs:label "Completion Mapping" ;
     rdfs:comment "A PE source mapping that ingests an agent's completion into the reserved completion band, distinct from the machine's own input region." .
 
 re:ResponseMapping a owl:Class ;
+    obo:IAO_0000115 "The translation from an agent's response into the values a machine's region expects." ;
     rdfs:label "Response Mapping" ;
     rdfs:comment "The extraction contract turning an agent's textual or structured response into element values for the write-back region." .
 
@@ -142,16 +167,19 @@ re:ResponseMapping a owl:Class ;
 #################################################################
 
 re:PerceptionEvent a owl:Class ;
+    obo:IAO_0000115 "A PE write into a machine's input region at a tick. Emitted by the Perception Engine when a source updates the universal reality vector." ;
     rdfs:subClassOf prov:Activity ;
     rdfs:label "Perception Event" ;
     rdfs:comment "A PE write into a machine's input region at a tick. Emitted by the Perception Engine when a source updates the universal reality vector." .
 
 re:SequenceObservation a owl:Class ;
+    obo:IAO_0000115 "An RE observation that a critical event sequence advanced to (or completed at) a given step during a tick." ;
     rdfs:subClassOf prov:Activity ;
     rdfs:label "Sequence Observation" ;
     rdfs:comment "An RE observation that a critical event sequence advanced to (or completed at) a given step during a tick." .
 
 re:DispatchRecord a owl:Class ;
+    obo:IAO_0000115 "A ledger entry recording that a determination's prescribed action was dispatched (trigger fired, bus published, or agent invoked)." ;
     rdfs:subClassOf prov:Entity ;
     rdfs:label "Dispatch Record" ;
     rdfs:comment "A ledger entry recording that a determination's prescribed action was dispatched (trigger fired, bus published, or agent invoked)." .
@@ -161,86 +189,106 @@ re:DispatchRecord a owl:Class ;
 #################################################################
 
 re:hasSequence a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a machine to a critical event sequence it declares." ;
     rdfs:domain re:Machine ; rdfs:range re:CriticalEventSequence ;
     rdfs:label "has sequence" .
 
 re:hasStep a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a critical event sequence to one of its steps." ;
     rdfs:domain re:CriticalEventSequence ; rdfs:range re:SequenceStep ;
     rdfs:label "has step" .
 
 re:hasInitialStep a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a critical event sequence to the step at which matching begins." ;
     rdfs:subPropertyOf re:hasStep ;
     rdfs:label "has initial step" .
 
 re:hasNextStep a owl:ObjectProperty ;
+    obo:IAO_0000115 "Direct tick-to-tick succession between steps. Each hop is Hamming-distance 1 in well-formed corpora." ;
     rdfs:domain re:SequenceStep ; rdfs:range re:SequenceStep ;
     rdfs:label "has next step" ;
     rdfs:comment "Direct tick-to-tick succession between steps. Each hop is Hamming-distance 1 in well-formed corpora." .
 
 re:leadsTo a owl:ObjectProperty , owl:TransitiveProperty ;
+    obo:IAO_0000115 "Relates a sequence step to any step reachable from it, as the transitive closure of hasNextStep, so a reasoner can ask whether a step can reach a terminal determination." ;
     rdfs:label "leads to" ;
     rdfs:comment "Transitive closure of hasNextStep; lets a reasoner ask whether a step can reach a terminal determination." .
 
 re:hasNextStep rdfs:subPropertyOf re:leadsTo .
 
 re:hasElementValue a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a sequence step to the required level of one of its input elements." ;
     rdfs:domain re:SequenceStep ; rdfs:range re:ElementValue ;
     rdfs:label "has element value" .
 
 re:emitsDetermination a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a sequence step to the determination emitted when that step completes." ;
     rdfs:domain re:SequenceStep ; rdfs:range re:Determination ;
     rdfs:label "emits determination" .
 
 re:prescribesAction a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a determination to the action it prescribes." ;
     rdfs:domain re:Determination ; rdfs:range re:Action ;
     rdfs:label "prescribes action" .
 
 re:hasRagStatus a owl:ObjectProperty , owl:FunctionalProperty ;
+    obo:IAO_0000115 "Relates a determination to its single RAG status. Functional, because an individual holding both GREEN and RED would otherwise be no contradiction under open-world semantics and the escalation audit axiom could never fail." ;
     rdfs:range re:RagStatus ;
     rdfs:label "has RAG status" ;
     rdfs:comment "Functional: a determination carries exactly one RAG status. Without this the escalation audit axiom below cannot fail — the reasoner infers the RED it requires and, under open-world semantics, an individual holding both GREEN and RED is not a contradiction." .
 
 re:hasTriggerRule a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a machine to a trigger rule evaluated against its output." ;
     rdfs:domain re:Machine ; rdfs:range re:TriggerRule ;
     rdfs:label "has trigger rule" .
 
 re:appliesToSequence a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a trigger rule to the critical event sequence whose output it matches." ;
     rdfs:domain re:TriggerRule ; rdfs:range re:CriticalEventSequence ;
     rdfs:label "applies to sequence" .
 
 re:hasGovernance a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a machine or sequence to the governance policy that owns its response." ;
     rdfs:range re:GovernancePolicy ;
     rdfs:label "has governance" .
 
 re:hasInterconnection a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a machine to a declared lane relationship with another machine." ;
     rdfs:domain re:Machine ; rdfs:range re:Interconnection ;
     rdfs:label "has interconnection" .
 
 re:sourceMachine a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates an interconnection to the machine whose output region it reads." ;
     rdfs:domain re:Interconnection ; rdfs:range re:Machine ;
     rdfs:label "source machine" .
 
 re:hasPerceptualMapping a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a machine to its claim on the universal reality vector." ;
     rdfs:domain re:Machine ; rdfs:range re:PerceptualMapping ;
     rdfs:label "has perceptual mapping" .
 
 re:hasOpenClawProjection a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a machine to its projection into the OpenClaw agent surface." ;
     rdfs:domain re:Machine ; rdfs:range re:OpenClawProjection ;
     rdfs:label "has OpenClaw projection" .
 
 re:observedSequence a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a runtime sequence observation to the corpus sequence it observed, by IRI rather than by name." ;
     rdfs:domain re:SequenceObservation ; rdfs:range re:CriticalEventSequence ;
     rdfs:label "observed sequence" .
 
 re:observedStep a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a runtime sequence observation to the corpus step it observed, by IRI rather than by name." ;
     rdfs:domain re:SequenceObservation ; rdfs:range re:SequenceStep ;
     rdfs:label "observed step" .
 
 re:recordsDetermination a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a dispatch record to the determination that prompted the dispatch." ;
     rdfs:domain re:DispatchRecord ; rdfs:range re:Determination ;
     rdfs:label "records determination" .
 
 re:targetsMachine a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a perception event to the machine whose input region the event was written into." ;
     rdfs:domain re:PerceptionEvent ; rdfs:range re:Machine ;
     rdfs:label "targets machine" .
 
@@ -249,89 +297,110 @@ re:targetsMachine a owl:ObjectProperty ;
 #################################################################
 
 re:machineClass a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The behavioural category a machine declares, used to group machines that share a contract shape." ;
     rdfs:domain re:Machine ; rdfs:range xsd:string ;
     rdfs:label "machine class" .
 
 re:domainName a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The corpus domain a machine belongs to, matching the directory under machines/domains/ and the first segment of its semantic IRI." ;
     rdfs:domain re:Machine ; rdfs:range xsd:string ;
     rdfs:label "domain name" .
 
 re:severity a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The severity band asserted by a determination or governance policy." ;
     rdfs:range xsd:string ;
     rdfs:label "severity" .
 
 re:arbiterRule a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The rule a machine's arbiter applies to resolve competing contributions on a contended cell." ;
     rdfs:domain re:Machine ; rdfs:range xsd:string ;
     rdfs:label "arbiter rule" .
 
 re:matchAlgorithm a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The comparison a machine uses to decide whether an input element satisfies a step's required level." ;
     rdfs:domain re:Machine ; rdfs:range xsd:string ;
     rdfs:label "match algorithm" .
 
 re:sourceFile a owl:DatatypeProperty ;
+    obo:IAO_0000115 "Repo-relative path of the canonical machine JSON this ABox was generated from." ;
     rdfs:domain re:Machine ; rdfs:range xsd:string ;
     rdfs:label "source file" ;
     rdfs:comment "Repo-relative path of the canonical machine JSON this ABox was generated from." .
 
 re:sequenceId a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The identifier of a critical event sequence, unique within its machine rather than corpus-wide." ;
     rdfs:domain re:CriticalEventSequence ; rdfs:range xsd:string ;
     rdfs:label "sequence id" .
 
 re:stepIndex a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The zero-based position of a step within its critical event sequence." ;
     rdfs:domain re:SequenceStep ; rdfs:range xsd:integer ;
     rdfs:label "step index" .
 
 re:isInitialStep a owl:DatatypeProperty ;
+    obo:IAO_0000115 "Whether matching of the sequence begins at this step." ;
     rdfs:domain re:SequenceStep ; rdfs:range xsd:boolean ;
     rdfs:label "is initial step" .
 
 re:lifeSafety a owl:DatatypeProperty ;
+    obo:IAO_0000115 "Whether the sequence can page emergency response, which subjects it to the strictest parity requirements." ;
     rdfs:range xsd:boolean ;
     rdfs:label "life safety" .
 
 re:stateName a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The human-readable name of the state a sequence step represents." ;
     rdfs:domain re:SequenceStep ; rdfs:range xsd:string ;
     rdfs:label "state name" .
 
 re:elementIndex a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The position of the input element this value constrains, counted from the start of the machine's input region." ;
     rdfs:domain re:ElementValue ; rdfs:range xsd:integer ;
     rdfs:label "element index" .
 
 re:elementLevel a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The level an input element must reach for the step to be satisfied." ;
     rdfs:domain re:ElementValue ; rdfs:range xsd:decimal ;
     rdfs:label "element level" .
 
 re:elementThreshold a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The boundary against which an input element is compared under the machine's match algorithm." ;
     rdfs:domain re:ElementValue ; rdfs:range xsd:decimal ;
     rdfs:label "element threshold" .
 
 re:outputTier a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The numeric tier of a determination, ordering determinations by consequence." ;
     rdfs:domain re:Determination ; rdfs:range xsd:integer ;
     rdfs:label "output tier" .
 
 re:outputConfidence a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The numeric confidence a determination carries." ;
     rdfs:domain re:Determination ; rdfs:range xsd:integer ;
     rdfs:label "output confidence" .
 
 re:tierLabel a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The human-readable name of a determination's tier." ;
     rdfs:domain re:Determination ; rdfs:range xsd:string ;
     rdfs:label "tier label" .
 
 re:confidenceLabel a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The human-readable name of a determination's confidence." ;
     rdfs:domain re:Determination ; rdfs:range xsd:string ;
     rdfs:label "confidence label" .
 
 re:actionCode a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The literal action string used in machine JSON output metadata." ;
     rdfs:domain re:Action ; rdfs:range xsd:string ;
     rdfs:label "action code" ;
     rdfs:comment "The literal action string used in machine JSON output metadata." .
 
 re:actionNarrative a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The original free-text action prose preserved when the machine JSON action was normalized to a controlled code (see scripts/backfill-action-codes.py)." ;
     rdfs:domain re:Determination ; rdfs:range xsd:string ;
     rdfs:label "action narrative" ;
     rdfs:comment "The original free-text action prose preserved when the machine JSON action was normalized to a controlled code (see scripts/backfill-action-codes.py)." .
 
 re:processStatus a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The downstream process state a trigger rule asserts when it matches." ;
     rdfs:domain re:TriggerRule ; rdfs:range xsd:string ;
     rdfs:label "process status" .
 
@@ -353,104 +422,129 @@ re:processStatus a owl:DatatypeProperty ;
 # queryable one, asserted once per non-zero cell, and is deliberately NOT
 # functional: a rule may assert several output positions at once.
 re:outputMatchVector a owl:DatatypeProperty , owl:FunctionalProperty ;
+    obo:IAO_0000115 "The output pattern a trigger rule matches against a machine's emitted determination." ;
     rdfs:domain re:TriggerRule ; rdfs:range xsd:string ;
     rdfs:comment "Comma-joined value vector over the machine's output region, in cell order." ;
     rdfs:label "output match vector" .
 
 re:matchesOutputPosition a owl:DatatypeProperty ;
+    obo:IAO_0000115 "Zero-based index of an output-region cell this rule requires to be non-zero." ;
     rdfs:domain re:TriggerRule ; rdfs:range xsd:integer ;
     rdfs:comment "Zero-based index of an output-region cell this rule requires to be non-zero." ;
     rdfs:label "matches output position" .
 
 re:slaSeconds a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The response time a governance policy commits to, in seconds." ;
     rdfs:range xsd:integer ;
     rdfs:label "SLA seconds" .
 
 re:ownerTeam a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The team accountable for responding when the governed machine or sequence fires." ;
     rdfs:domain re:GovernancePolicy ; rdfs:range xsd:string ;
     rdfs:label "owner team" .
 
 re:runbook a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The document describing how to respond when the governed machine or sequence fires." ;
     rdfs:domain re:GovernancePolicy ; rdfs:range xsd:anyURI ;
     rdfs:label "runbook" .
 
 re:escalationPolicy a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The rule governing how an unmet response obligation is escalated." ;
     rdfs:domain re:GovernancePolicy ; rdfs:range xsd:string ;
     rdfs:label "escalation policy" .
 
 re:interconnectionId a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The identifier of a declared lane relationship between machines." ;
     rdfs:domain re:Interconnection ; rdfs:range xsd:string ;
     rdfs:label "interconnection id" .
 
 re:interconnectionType a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The kind of lane relationship declared, such as a direct write or a shared bus." ;
     rdfs:domain re:Interconnection ; rdfs:range xsd:string ;
     rdfs:label "interconnection type" .
 
 re:busId a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The semantic bus over which an interconnection publishes." ;
     rdfs:domain re:Interconnection ; rdfs:range xsd:string ;
     rdfs:label "bus id" .
 
 re:targetMachineName a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The corpus name of the machine reading this interconnection, used because machine ids are minted per runtime and only the name is stable across engines." ;
     rdfs:domain re:Interconnection ; rdfs:range xsd:string ;
     rdfs:label "target machine name" .
 
 re:privacyBoundary a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The privacy boundary an interconnection crosses, if any, constraining what may traverse it." ;
     rdfs:domain re:Interconnection ; rdfs:range xsd:string ;
     rdfs:label "privacy boundary" .
 
 re:dispatchMode a owl:DatatypeProperty ;
+    obo:IAO_0000115 "How a dispatch is delivered, in particular whether the caller waits for completion." ;
     rdfs:range xsd:string ;
     rdfs:label "dispatch mode" .
 
 re:projectionId a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The identifier of a machine's projection into the OpenClaw agent surface." ;
     rdfs:domain re:OpenClawProjection ; rdfs:range xsd:string ;
     rdfs:label "projection id" .
 
 re:sourceOutputOffset a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The first cell of the source machine's output region that this interconnection reads. With sourceOutputLength it gives the half-open span [offset, offset+length)." ;
     rdfs:domain re:Interconnection ; rdfs:range xsd:integer ;
     rdfs:label "source output offset" .
 
 re:sourceOutputLength a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The number of cells this interconnection reads from the source machine's output region." ;
     rdfs:domain re:Interconnection ; rdfs:range xsd:integer ;
     rdfs:label "source output length" .
 
 re:targetInputOffset a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The first cell of the target machine's input region that this interconnection writes." ;
     rdfs:range xsd:integer ;
     rdfs:label "target input offset" .
 
 re:targetInputLength a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The number of cells this interconnection writes into the target machine's input region." ;
     rdfs:range xsd:integer ;
     rdfs:label "target input length" .
 
 re:publishedOutputOffset a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The first cell of the region an interconnection publishes onto its bus." ;
     rdfs:domain re:Interconnection ; rdfs:range xsd:integer ;
     rdfs:label "published output offset" .
 
 re:publishedOutputLength a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The number of cells an interconnection publishes onto its bus." ;
     rdfs:domain re:Interconnection ; rdfs:range xsd:integer ;
     rdfs:label "published output length" .
 
 re:inputOffset a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The first cell of the universal reality vector a machine reads. With inputLength it gives the half-open span [offset, offset+length); rendered in prose the range is closed, so a two-cell region at offset 16920 is written [16920:16921]." ;
     rdfs:domain re:PerceptualMapping ; rdfs:range xsd:integer ;
     rdfs:label "input offset" .
 
 re:inputLength a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The number of cells a machine reads from the universal reality vector." ;
     rdfs:domain re:PerceptualMapping ; rdfs:range xsd:integer ;
     rdfs:label "input length" .
 
 re:outputOffset a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The first cell of the universal reality vector a machine writes." ;
     rdfs:domain re:PerceptualMapping ; rdfs:range xsd:integer ;
     rdfs:label "output offset" .
 
 re:outputLength a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The number of cells a machine writes into the universal reality vector." ;
     rdfs:domain re:PerceptualMapping ; rdfs:range xsd:integer ;
     rdfs:label "output length" .
 
 re:bitsPerElement a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The number of bits carried by each element of a machine's region." ;
     rdfs:domain re:PerceptualMapping ; rdfs:range xsd:integer ;
     rdfs:label "bits per element" .
 
 re:atTick a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The tick at which a runtime observation was made." ;
     rdfs:range xsd:integer ;
     rdfs:label "at tick" .
 
@@ -459,57 +553,68 @@ re:atTick a owl:DatatypeProperty ;
 #################################################################
 
 re:hasAgentBinding a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a machine to a binding permitting an agent to act on it." ;
     rdfs:domain re:Machine ;
     rdfs:range re:AgentBinding ;
     rdfs:label "has agent binding" .
 
 re:boundAgent a owl:ObjectProperty , owl:FunctionalProperty ;
+    obo:IAO_0000115 "Relates an agent binding to the agent it binds." ;
     rdfs:domain re:AgentBinding ;
     rdfs:range re:Agent ;
     rdfs:label "bound agent" .
 
 re:inAgentFamily a owl:ObjectProperty , owl:FunctionalProperty ;
+    obo:IAO_0000115 "Relates an agent to the family whose role and permission envelope it shares." ;
     rdfs:domain re:Agent ;
     rdfs:range re:AgentFamily ;
     rdfs:label "in agent family" .
 
 re:autonomyMode a owl:ObjectProperty , owl:FunctionalProperty ;
+    obo:IAO_0000115 "Relates an agent binding to the autonomy it grants." ;
     rdfs:domain re:AgentBinding ;
     rdfs:range re:AutonomyMode ;
     rdfs:label "autonomy mode" .
 
 re:maxAutonomy a owl:ObjectProperty , owl:FunctionalProperty ;
+    obo:IAO_0000115 "The greatest autonomy an agent binding may exercise, bounding the mode actually granted." ;
     rdfs:domain re:AgentBinding ;
     rdfs:range re:AutonomyMode ;
     rdfs:label "maximum autonomy" ;
     rdfs:comment "The ceiling the binding's risk controls impose. re:autonomyMode may not exceed it." .
 
 re:writesToRegionOf a owl:ObjectProperty ;
+    obo:IAO_0000115 "The machine whose region receives the binding's write-back. For the assessment axis this is the bound machine itself." ;
     rdfs:domain re:AgentBinding ;
     rdfs:range re:Machine ;
     rdfs:label "writes to region of" ;
     rdfs:comment "The machine whose region receives the binding's write-back. For the assessment axis this is the bound machine itself." .
 
 re:hasSemanticAxis a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a machine or mapping to a named dimension of its region." ;
     rdfs:range re:SemanticAxis ;
     rdfs:label "has semantic axis" .
 
 re:hasResponseMapping a owl:ObjectProperty , owl:FunctionalProperty ;
+    obo:IAO_0000115 "Relates an agent binding to the translation from agent response to machine values." ;
     rdfs:domain re:AgentBinding ;
     rdfs:range re:ResponseMapping ;
     rdfs:label "has response mapping" .
 
 re:hasCompletionMapping a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a machine to an approved route for writing agent completions into its region." ;
     rdfs:domain re:Machine ;
     rdfs:range re:CompletionMapping ;
     rdfs:label "has completion mapping" .
 
 re:completionOfAgent a owl:ObjectProperty , owl:FunctionalProperty ;
+    obo:IAO_0000115 "Relates a completion mapping to the agent whose completions it admits." ;
     rdfs:domain re:CompletionMapping ;
     rdfs:range re:Agent ;
     rdfs:label "completion of agent" .
 
 re:declaresAgentFamily a owl:ObjectProperty ;
+    obo:IAO_0000115 "A domain declares the families its machines may bind. A family declared but never bound is an unrealized declaration." ;
     rdfs:range re:AgentFamily ;
     rdfs:label "declares agent family" ;
     rdfs:comment "A domain declares the families its machines may bind. A family declared but never bound is an unrealized declaration." .
@@ -519,64 +624,76 @@ re:declaresAgentFamily a owl:ObjectProperty ;
 #################################################################
 
 re:agentId a owl:DatatypeProperty , owl:FunctionalProperty ;
+    obo:IAO_0000115 "The identifier of an agent, stable across the bindings that reference it." ;
     rdfs:domain re:Agent ;
     rdfs:range xsd:string ;
     rdfs:label "agent id" .
 
 re:agentFamilyName a owl:DatatypeProperty , owl:FunctionalProperty ;
+    obo:IAO_0000115 "The name of an agent family." ;
     rdfs:domain re:AgentFamily ;
     rdfs:range xsd:string ;
     rdfs:label "agent family name" .
 
 re:agentRole a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The role an agent performs, which its family shares." ;
     rdfs:domain re:Agent ;
     rdfs:range xsd:string ;
     rdfs:label "agent role" .
 
 re:agentTrigger a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The condition on which an agent binding activates." ;
     rdfs:domain re:AgentBinding ;
     rdfs:range xsd:string ;
     rdfs:label "agent trigger" .
 
 re:allowedAction a owl:DatatypeProperty ;
+    obo:IAO_0000115 "An action an agent binding permits, enumerated so permission is declared rather than inferred." ;
     rdfs:domain re:AgentBinding ;
     rdfs:range xsd:string ;
     rdfs:label "allowed action" .
 
 re:requiresHumanApproval a owl:DatatypeProperty ;
+    obo:IAO_0000115 "Whether an agent binding requires a human to approve before the action takes effect." ;
     rdfs:domain re:AgentBinding ;
     rdfs:range xsd:boolean ;
     rdfs:label "requires human approval" .
 
 re:axisIndex a owl:DatatypeProperty , owl:FunctionalProperty ;
+    obo:IAO_0000115 "The position of a semantic axis within its machine's region, counted from the start of that region." ;
     rdfs:domain re:SemanticAxis ;
     rdfs:range xsd:integer ;
     rdfs:label "axis index" ;
     rdfs:comment "Element offset within the write-back region, zero-based." .
 
 re:axisName a owl:DatatypeProperty , owl:FunctionalProperty ;
+    obo:IAO_0000115 "The name given to one dimension of a machine's region." ;
     rdfs:domain re:SemanticAxis ;
     rdfs:range xsd:string ;
     rdfs:label "axis name" ;
     rdfs:comment "Functional: one position of one region carries exactly one meaning. Two sources asserting different names for the same axis is an inconsistency, not a variant spelling." .
 
 re:axisNameSource a owl:DatatypeProperty ;
+    obo:IAO_0000115 "Where the name came from: sensor-normalization, input-semantics, or openclaw-projection. Records provenance so a disagreement can be adjudicated rather than merely detected." ;
     rdfs:domain re:SemanticAxis ;
     rdfs:range xsd:string ;
     rdfs:label "axis name source" ;
     rdfs:comment "Where the name came from: sensor-normalization, input-semantics, or openclaw-projection. Records provenance so a disagreement can be adjudicated rather than merely detected." .
 
 re:sensorId a owl:DatatypeProperty , owl:FunctionalProperty ;
+    obo:IAO_0000115 "The Perception Engine source through which a completion mapping writes, naming the one approved writer for that region." ;
     rdfs:domain re:CompletionMapping ;
     rdfs:range xsd:string ;
     rdfs:label "sensor id" .
 
 re:completionOffset a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The first cell an agent completion may write, under this completion mapping." ;
     rdfs:domain re:CompletionMapping ;
     rdfs:range xsd:integer ;
     rdfs:label "completion offset" .
 
 re:completionLength a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The number of cells an agent completion may write, under this completion mapping." ;
     rdfs:domain re:CompletionMapping ;
     rdfs:range xsd:integer ;
     rdfs:label "completion length" .
@@ -697,6 +814,7 @@ re:PublishBus a owl:NamedIndividual , re:AutomationAction ;
 # is unchanged and still fires: verified by asserting an escalation action on a
 # non-RED determination and confirming HermiT rejects it.
 re:EscalationDetermination a owl:Class ;
+    obo:IAO_0000115 "Audit invariant: an emergency-path action may only be prescribed by a RED determination." ;
     rdfs:subClassOf re:Determination ;
     owl:equivalentClass [
         a owl:Class ;
@@ -738,6 +856,7 @@ re:CriticalEventSequence rdfs:subClassOf [
 #################################################################
 
 re:hasFamilyMember a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates an agent family to an agent belonging to it." ;
     owl:inverseOf re:inAgentFamily ;
     rdfs:domain re:AgentFamily ;
     rdfs:range re:Agent ;
@@ -747,6 +866,7 @@ re:hasFamilyMember a owl:ObjectProperty ;
 # corpus never fills is not an error, but it is a claim of coverage that is
 # not met, and it should be visible as such rather than inferred from absence.
 re:UnrealizedAgentFamily a owl:Class ;
+    obo:IAO_0000115 "An agent family declared by a domain that no agent belongs to." ;
     rdfs:subClassOf re:AgentFamily ;
     owl:equivalentClass [
         a owl:Class ;
@@ -763,6 +883,7 @@ re:UnrealizedAgentFamily a owl:Class ;
 # An observing binding contributes nothing to the reality vector. If it carries
 # a semantic axis, something is writing under an autonomy mode that forbids it.
 re:ObserveBinding a owl:Class ;
+    obo:IAO_0000115 "Audit invariant: an observe-mode binding writes no element of the reality vector." ;
     rdfs:subClassOf re:AgentBinding ;
     owl:equivalentClass [
         a owl:Restriction ;
@@ -862,6 +983,7 @@ re:CompletionMapping rdfs:subClassOf [
 ########################################################################
 
 re:OutputMergeTransformation a owl:Class ;
+    obo:IAO_0000115 "The rule folding several contributed output events into the one value a machine commits, and the algebraic properties that rule guarantees." ;
     rdfs:label "output merge transformation" ;
     rdfs:comment "An n-input gate folding a machine's collection of potential outputs into the single output presented to the Perception Engine. Applied to the whole collection at once, not as a chain of two-input gates. (Whether symmetry is required of every admissible transformation is contested — see commentary.)" .
 
@@ -872,66 +994,79 @@ re:OutputMergeTransformation a owl:Class ;
 # vocabulary — a multi-valued machine declaring a Boolean fold — a statable
 # fact about the declaration rather than folklore about which names are safe.
 re:BooleanMergeTransformation a owl:Class ;
+    obo:IAO_0000115 "An output merge transformation defined over {0,1}, stating its truth condition with re:assertedWhen over the count of asserted contributions. Applied to cells carrying values above 1 it flattens them to 1, losing the machine's alphabet." ;
     rdfs:subClassOf re:OutputMergeTransformation ;
     owl:disjointWith re:ChainMergeTransformation ;
     rdfs:label "Boolean Merge Transformation" ;
     rdfs:comment "An output merge transformation defined over {0,1}, stating its truth condition with re:assertedWhen over the count of asserted contributions. Applied to cells carrying values above 1 it flattens them to 1, losing the machine's alphabet." .
 
 re:ChainMergeTransformation a owl:Class ;
+    obo:IAO_0000115 "An output merge transformation defined over an ordered chain {0..k}, stating its definition with re:mergeFormula. Closed over the chain, so folding a multi-valued machine with one preserves the machine's alphabet." ;
     rdfs:subClassOf re:OutputMergeTransformation ;
     rdfs:label "Chain Merge Transformation" ;
     rdfs:comment "An output merge transformation defined over an ordered chain {0..k}, stating its definition with re:mergeFormula. Closed over the chain, so folding a multi-valued machine with one preserves the machine's alphabet." .
 
 re:outputAlphabetTop a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The top of the ordered chain {0..k} a machine's cells range over, in the Lukasiewicz sense. Required only for strong disjunction and strong conjunction, which are undefined without it, and deliberately distinct from bitsPerElement, which gives the representable range rather than the alphabet." ;
     rdfs:domain re:PerceptualMapping ; rdfs:range xsd:nonNegativeInteger ;
     rdfs:label "output alphabet top" ;
     rdfs:comment "k, the top of the ordered chain {0..k} a machine's cells range over — absolute truth in the Lukasiewicz sense. Optional and undeclared across the corpus today. Required only for strong-disjunction and strong-conjunction, which are undefined without it: one clamps to k, and the other's closure bound holds only while every contribution is <= k, so at the wrong k it yields a value outside both the chain and the machine's alphabet. Deliberately distinct from bitsPerElement, which gives the representable range rather than the alphabet — FallDetection declares 4 bits, representable 0..15, and ranges over {0..4}. meet, join and discrete-median take no k; join reads one only as an early-exit bound and answers the same with or without it." .
 
 re:outputMergeTransformation a owl:DatatypeProperty ;
+    obo:IAO_0000115 "Name of the transformation this machine folds its potential outputs with. Absent means \"or\"." ;
     rdfs:domain re:Machine ; rdfs:range xsd:string ;
     rdfs:label "has output merge transformation" ;
     rdfs:comment "Name of the transformation this machine folds its potential outputs with. Absent means \"or\"." .
 
 re:transformationName a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The name of an output merge transformation, matching the value a machine declares." ;
     rdfs:domain re:OutputMergeTransformation ; rdfs:range xsd:string ;
     rdfs:label "transformation name" .
 
 re:deterministic a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The transformation yields the same output for the same collection, on every runtime." ;
     rdfs:domain re:OutputMergeTransformation ; rdfs:range xsd:boolean ;
     rdfs:label "deterministic" ;
     rdfs:comment "The transformation yields the same output for the same collection, on every runtime." .
 
 re:symmetric a owl:DatatypeProperty ;
+    obo:IAO_0000115 "Invariant under permutation of the collection. Recorded as an observed, verified property of this transformation. NOTE: whether symmetry is REQUIRED for a transformation to be admissible is contested and unsettled — see the commentary above this block. Do not read this property as a gate on what may be admitted." ;
     rdfs:domain re:OutputMergeTransformation ; rdfs:range xsd:boolean ;
     rdfs:label "symmetric" ;
     rdfs:comment "Invariant under permutation of the collection. Recorded as an observed, verified property of this transformation. NOTE: whether symmetry is REQUIRED for a transformation to be admissible is contested and unsettled — see the commentary above this block. Do not read this property as a gate on what may be admitted." .
 
 re:assertedWhen a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The gate's truth condition over k, the count of asserted contributions, and n, the size of the collection. This is the definition; an implementation is correct when it agrees with it. Boolean-domain transformations only; a chain transformation states re:mergeFormula instead." ;
     rdfs:domain re:OutputMergeTransformation ; rdfs:range xsd:string ;
     rdfs:label "asserted when" ;
     rdfs:comment "The gate's truth condition over k, the count of asserted contributions, and n, the size of the collection. This is the definition; an implementation is correct when it agrees with it. Boolean-domain transformations only; a chain transformation states re:mergeFormula instead." .
 
 re:mergeFormula a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The transformation's definition over the collection x_1..x_n on the chain {0..k}, where k is the chain top. The chain analogue of re:assertedWhen: this is the definition, and an implementation is correct when it agrees with it. Integer arithmetic throughout — a fold that divides gives three runtimes three answers. PRECONDITION: every x_i lies in {0..k}. Closure depends on it and is not robust to its violation — strong-conjunction's bound sum(x_i) - k(n-1) <= k holds only because each x_i <= k, so feeding it cells above the declared k returns a value above the chain top (k=1 over [2,2] gives 3). What an engine should do when the precondition fails is deliberately not stated here." ;
     rdfs:domain re:ChainMergeTransformation ; rdfs:range xsd:string ;
     rdfs:label "merge formula" ;
     rdfs:comment "The transformation's definition over the collection x_1..x_n on the chain {0..k}, where k is the chain top. The chain analogue of re:assertedWhen: this is the definition, and an implementation is correct when it agrees with it. Integer arithmetic throughout — a fold that divides gives three runtimes three answers. PRECONDITION: every x_i lies in {0..k}. Closure depends on it and is not robust to its violation — strong-conjunction's bound sum(x_i) - k(n-1) <= k holds only because each x_i <= k, so feeding it cells above the declared k returns a value above the chain top (k=1 over [2,2] gives 3). What an engine should do when the precondition fails is deliberately not stated here." .
 
 re:idempotent a owl:DatatypeProperty ;
+    obo:IAO_0000115 "Whether the transformation satisfies f(x,x,...,x) = x for every x in its domain. Not a requirement of the fold contract: the Lukasiewicz strong operations are deliberately non-idempotent, and this is recorded so a runtime cannot optimise a repeated contribution away where doing so would change the answer." ;
     rdfs:domain re:OutputMergeTransformation ; rdfs:range xsd:boolean ;
     rdfs:label "idempotent" ;
     rdfs:comment "f(x,x,..,x) = x for every x in the domain. NOT a requirement of the fold contract: the Łukasiewicz strong operations are deliberately non-idempotent, since x ⊕ x saturating and x ⊙ x extinguishing is the behaviour they are chosen for. Recorded so that a runtime cannot optimise a repeated contribution away where doing so would change the answer." .
 
 re:returnsAContributor a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The result is always one of the collection's own values, so the fold cannot assert a level no completed Reality Event asserted. Strictly stronger than closure: bitwise or of 1 and 2 is 3, which is inside a chain {0..3} and asserted by nobody — on an ordinal severity ladder that invents a rung. False does not mean unsound; the Łukasiewicz operations combine evidence and are expected to land between contributors." ;
     rdfs:domain re:OutputMergeTransformation ; rdfs:range xsd:boolean ;
     rdfs:label "returns a contributor" ;
     rdfs:comment "The result is always one of the collection's own values, so the fold cannot assert a level no completed Reality Event asserted. Strictly stronger than closure: bitwise or of 1 and 2 is 3, which is inside a chain {0..3} and asserted by nobody — on an ordinal severity ladder that invents a rung. False does not mean unsound; the Łukasiewicz operations combine evidence and are expected to land between contributors." .
 
 re:requiresChainTop a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The transformation's result depends on k, the chain top, so k must be supplied for the fold to be defined. Where false the transformation may still accept k as an early-exit optimisation, but the answer is identical without it. See the UNRESOLVED note in the multi-valued commentary: k is not declared anywhere in the corpus today." ;
     rdfs:domain re:OutputMergeTransformation ; rdfs:range xsd:boolean ;
     rdfs:label "requires chain top" ;
     rdfs:comment "The transformation's result depends on k, the chain top, so k must be supplied for the fold to be defined. Where false the transformation may still accept k as an early-exit optimisation, but the answer is identical without it. See the UNRESOLVED note in the multi-valued commentary: k is not declared anywhere in the corpus today." .
 
 re:deMorganDualOf a owl:ObjectProperty , owl:SymmetricProperty ;
+    obo:IAO_0000115 "Relates a chain merge transformation to the transformation that is its De Morgan dual under negation." ;
     rdfs:domain re:ChainMergeTransformation ; rdfs:range re:ChainMergeTransformation ;
     rdfs:label "De Morgan dual of" ;
     rdfs:comment "Each is the other under the chain's negation, ¬x = k − x. Recorded because it is the cheapest correctness check a runtime has: implement one, derive the other, and a disagreement localises the defect to one of the two." .
@@ -1094,3 +1229,42 @@ re:merge-discrete-median a owl:NamedIndividual , re:ChainMergeTransformation ;
     re:mergeFormula "sort(x)[floor((n-1)/2)]" ;
     rdfs:label "discrete median" ;
     rdfs:comment "Majority consensus, rejecting anomalous outliers — [3,3,0,3] gives 3, filtering the transient dropout. For even n the lower of the two middle elements, which over integers is exactly floor of the median: a selection, never a division, so no float arithmetic enters the step for runtimes to differ over. Takes no chain top." .
+
+#################################################################
+# Upper-ontology placement
+#################################################################
+#
+# The audit-record classes already sit under PROV (re:PerceptionEvent and
+# re:SequenceObservation as prov:Activity, re:DispatchRecord as prov:Entity).
+# The remaining top-level classes were roots, which ROBOT reports as
+# missing_superclass and which left the vocabulary with no shared ancestor a
+# reasoner could classify against.
+#
+# They are placed under PROV rather than under a root invented for the purpose.
+# Inventing re:Entity would satisfy the check while asserting nothing; PROV says
+# something true and already in use here — these are the things provenance is
+# recorded about. re:Agent goes under prov:Agent specifically: it is an actor
+# that bears responsibility for what it does, which is exactly what prov:Agent
+# denotes, and not merely a thing that exists.
+
+re:Agent rdfs:subClassOf prov:Agent .
+
+re:Machine                   rdfs:subClassOf prov:Entity .
+re:CriticalEventSequence     rdfs:subClassOf prov:Entity .
+re:SequenceStep              rdfs:subClassOf prov:Entity .
+re:ElementValue              rdfs:subClassOf prov:Entity .
+re:Determination             rdfs:subClassOf prov:Entity .
+re:Action                    rdfs:subClassOf prov:Entity .
+re:RagStatus                 rdfs:subClassOf prov:Entity .
+re:TriggerRule               rdfs:subClassOf prov:Entity .
+re:GovernancePolicy          rdfs:subClassOf prov:Entity .
+re:Interconnection           rdfs:subClassOf prov:Entity .
+re:PerceptualMapping         rdfs:subClassOf prov:Entity .
+re:OpenClawProjection        rdfs:subClassOf prov:Entity .
+re:AgentFamily               rdfs:subClassOf prov:Entity .
+re:AgentBinding              rdfs:subClassOf prov:Entity .
+re:AutonomyMode              rdfs:subClassOf prov:Entity .
+re:SemanticAxis              rdfs:subClassOf prov:Entity .
+re:CompletionMapping         rdfs:subClassOf prov:Entity .
+re:ResponseMapping           rdfs:subClassOf prov:Entity .
+re:OutputMergeTransformation rdfs:subClassOf prov:Entity .
