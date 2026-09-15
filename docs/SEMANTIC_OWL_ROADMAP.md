@@ -110,11 +110,33 @@ Compressed it is 4.4 MB, and `semantics/released/` as a whole went from ~100 MB
 to 4.6 MB. Both scopes now report `no axiom changes` on a re-run, so the gate is
 reachable *and* discriminating.
 
-**Still domain-scoped: HermiT.** The corpus-wide run reasons under ELK only, and
-ELK does not implement functional properties — a well-formedness check, not a
-completeness claim. HermiT runs at domain scope (health-personal) and is
-scheduled corpus-wide separately as #79. That is the one gate in this roadmap
-whose scope is narrower than the claim it supports.
+**HermiT now runs corpus-wide (#79, closed 2026-09-15).** ELK alone is a
+well-formedness check rather than a completeness claim, because it does not
+implement functional properties. The full corpus has now been reasoned under
+both:
+
+```
+No violations found.
+reason-owl: 0 INFO / 0 WARN pending triage
+reason-owl: diff vs released — no axiom changes
+reason-owl: OK (corpus (12 domains) merged, reported, and reasoned
+            consistently under ELK HermiT)
+
+real 20m51s
+```
+
+Run against the vocabulary as it stands after the definitions work, which
+matters: that change added 17 `rdfs:subClassOf prov:Entity`/`prov:Agent` axioms,
+and a full reasoner is exactly what can find a contradiction in those where ELK
+cannot. It found none.
+
+`--reasoner both` stays off by default corpus-wide — HermiT is 88x ELK there,
+1,061s against 12s on the merged graph — and is scheduled rather than run per
+change. What the merged graph tests that the shards cannot is cross-domain
+contradiction, and today the machine IRI scheme means domains share no
+individuals, so there is nothing for it to find. That is a property of the
+corpus as it stands, not a permanent one; raise the frequency as cross-domain
+interaction grows.
 
 Implementation note: instead of committing ~1,300 generated TTL files, the
 corpus-wide gate is `semantics/abox-manifest.json` — per-machine name, IRI,
