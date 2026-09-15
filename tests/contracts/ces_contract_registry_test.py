@@ -260,17 +260,53 @@ class CesContractRegistry(unittest.TestCase):
         for scope, entry in self.recorded_scopes():
             with self.subTest(scope=scope):
                 shard = json.loads(_builder.shard_path(scope).read_text())
-                quorum = shard.get("quorum") or {}
-                self.assertEqual(QUORUM_RULE, quorum.get("rule"), f"{scope}: not {QUORUM_RULE}")
-                self.assertTrue(quorum.get("formed"), f"{scope}: quorum not formed")
-                self.assertEqual([], quorum.get("missing"), f"{scope}: a runtime was missing")
+
+                # Two shard schemas, one claim. 1.x recorded per-chain and
+                # carried quorum as {"rule", "formed", "missing"} plus
+                # `runtimes` and `contracts`; 2.x records per machine from one
+                # corpus-composed drive and carries the rule as a string, the
+                # participants as `instances`, and the results as `machines`.
+                # The assertion is the same either way and is not relaxed for
+                # either: all three native runtimes took part, and nothing was
+                # recorded as agreed on fewer.
+                quorum = shard.get("quorum")
+                rule = quorum.get("rule") if isinstance(quorum, dict) else quorum
+                self.assertEqual(QUORUM_RULE, rule, f"{scope}: not {QUORUM_RULE}")
+
+                # 1.x listed runtime kinds ("cpp"); 2.x lists instance ids
+                # ("cpp-1"), since a quorum is over instances and there may one
+                # day be more than one per kind. Reduced to kinds here because
+                # the claim under test is that all three native runtimes took
+                # part, not how many instances each contributed.
+                participants = {str(r).rsplit("-", 1)[0] if str(r).rsplit("-", 1)[-1].isdigit()
+                                else str(r)
+                                for r in (shard.get("runtimes") or shard.get("instances") or [])}
                 self.assertTrue(
-                    NATIVE_RUNTIMES.issubset(set(shard.get("runtimes") or [])),
-                    f"{scope}: runtimes {shard.get('runtimes')} do not cover {sorted(NATIVE_RUNTIMES)}")
+                    NATIVE_RUNTIMES.issubset(participants),
+                    f"{scope}: participants {sorted(participants)} do not cover "
+                    f"{sorted(NATIVE_RUNTIMES)}")
+
+                if isinstance(quorum, dict):
+                    self.assertTrue(quorum.get("formed"), f"{scope}: quorum not formed")
+                    self.assertEqual([], quorum.get("missing"), f"{scope}: a runtime was missing")
+
                 for contract in shard.get("contracts", []):
                     self.assertEqual(QUORUM_RULE, contract.get("quorum"))
                     self.assertEqual(3, len(contract.get("agreedBy", [])),
                                      f"{scope}: {contract.get('chain')} agreed by fewer than three")
+
+                # 2.x: an `agreed` machine is agreed by the whole quorum, so a
+                # shard may not carry a cluster split under that verdict.
+                for name, entry in (shard.get("machines") or {}).items():
+                    verdict = entry.get("verdict")
+                    if verdict in ("agreed", "agreed-silent"):
+                        self.assertIsNone(
+                            entry.get("clusters"),
+                            f"{scope}: {name} is recorded {verdict} but carries clusters")
+                    elif verdict == "disagreement":
+                        self.assertGreater(
+                            len(entry.get("clusters") or []), 1,
+                            f"{scope}: {name} is recorded a disagreement with one cluster")
 
     @unittest.skipUnless(SHARDS_REACHABLE, UNREACHABLE_WHY)
     def test_no_shard_claims_a_quorum_it_did_not_hold(self) -> None:

@@ -75,6 +75,12 @@ EXCLUDED = {
     "asset_provenance.py",
     # Same shape: the fingerprint definition both repos import.
     "ces_corpus_fingerprint.py",
+    # One-shot corpus conversion, the case this set exists for. It rewrote
+    # 5,094 half-open lane references to closed form across 1,301 files, is
+    # idempotent (a second run reports 0 rewritten, 4,910 skipped) and has no
+    # artifact to keep current -- the corpus is the artifact. Holding it to
+    # "is this output current" would assert something meaningless.
+    "fix-lane-notation.py",
 }
 
 
@@ -150,8 +156,39 @@ def invocation_sites(script_name: str) -> tuple[list[str], list[str]]:
         if script_name not in text:
             continue
         rel = str(candidate.relative_to(REPO))
-        (gated if candidate.name in GATE_FILES else defined).append(rel)
+        if candidate.name in GATE_FILES:
+            gated.append(rel)
+        elif candidate.suffix == ".sh" and _reached_by_gate(candidate.name):
+            # One level of indirection, and only through a shell wrapper that a
+            # gate itself invokes. extract-qudt-subset.sh is the case: the gate
+            # calls the wrapper, the wrapper resolves QUDT_PYTHON and calls the
+            # .py. PEP 668 marks the system interpreter externally managed, so
+            # which interpreter owns the dependency has to be named rather than
+            # guessed, and that resolution is what the wrapper is for.
+            #
+            # Treating the .py as ungated there would be false — its --check
+            # does run in the gate — and the alternative, an `ungated_reason`,
+            # would record a decision nobody made. Depth is deliberately one:
+            # a chain long enough to need recursion is a chain nobody can see
+            # through either, which is the thing this check exists to prevent.
+            gated.append(rel)
+        else:
+            defined.append(rel)
     return gated, defined
+
+
+def _reached_by_gate(wrapper_name: str) -> bool:
+    """Whether a gate file invokes this wrapper directly."""
+    for gate in GATE_FILES:
+        path = SCRIPTS / gate if (SCRIPTS / gate).is_file() else REPO / gate
+        if not path.is_file():
+            continue
+        try:
+            if wrapper_name in path.read_text(encoding="utf-8", errors="replace"):
+                return True
+        except OSError:
+            continue
+    return False
 
 
 def check() -> int:

@@ -302,7 +302,12 @@ def scope_entry(scope: str, paths: list[Path], unresolved: list[str]) -> dict[st
     entry["recording"] = {
         "contractVersion": contract_version,
         "generatedBy": shard.get("generatedBy"),
-        "quorum": (shard.get("quorum") or {}).get("rule") or shard.get("quorum"),
+        # Shard schema 1.x carried quorum as {"rule": "3-of-3", ...}; 2.x, written
+        # by record-ces-contracts.py, carries the rule string directly. Both are
+        # read rather than one being migrated, because a shard states the terms it
+        # was recorded under and rewriting that would be editing the record.
+        "quorum": ((shard.get("quorum") or {}).get("rule")
+                   if isinstance(shard.get("quorum"), dict) else shard.get("quorum")),
         "runtimes": shard.get("runtimes"),
         "machineCorpus": shard.get("machineCorpus"),
         "counts": shard.get("counts"),
