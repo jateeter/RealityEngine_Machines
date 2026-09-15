@@ -1,18 +1,19 @@
-# ROBOT report triage — the 151 INFO violations
+# ROBOT report triage — the record of the 151 INFO violations
 
 Last reviewed: 2026-09-15
+Status: **resolved.** The gate reports 0 INFO / 0 WARN corpus-wide.
 
 `scripts/reason-owl.sh` runs `robot report` against
-`semantics/robot-report-profile.txt` and gates on ERROR. The corpus-wide run is
-clean at ERROR and WARN and carries **151 INFO** violations, stamped onto the
-released artifact as `reportInfoPendingTriage` so the debt travels with the
-thing it is debt about rather than living in a log.
+`semantics/robot-report-profile.txt`. For most of this ontology's life it was
+clean at ERROR and WARN and carried **151 INFO**, stamped onto every released
+artifact as `reportInfoPendingTriage`.
 
-This file is what that count means. It exists because a number with no
-decomposition is not triageable: nobody can tell whether 151 is one systematic
-omission or 151 separate judgements.
+This file is the record of what that number was and how it reached zero. It is
+kept rather than deleted because the count is the kind of thing that comes back,
+and the next person to see it rise should be able to find out what it meant last
+time and what was decided.
 
-## The decomposition
+## What the 151 were
 
 | Rule | Count | Where |
 | --- | --- | --- |
@@ -20,81 +21,106 @@ omission or 151 separate judgements.
 | `missing_superclass` | 17 | `semantics/ontology/re-core.ttl` |
 | **Total** | **151** | |
 
-**Every one is in the hand-authored TBox. None come from the 1,328 generated
-ABoxes.** That is the single most useful fact here, and it bounds the work: this
-is a review of one file, not a corpus sweep. It also means the generators are
-not producing under-specified individuals — a conclusion the bare count of 151
-actively obscured.
+**Every one was in the hand-authored TBox. None came from the 1,328 generated
+ABoxes.** That was the most useful fact in the whole investigation and the bare
+count actively obscured it: 151 sounds like a corpus problem and was in fact a
+review of one file. It also meant the generators were not emitting
+under-specified individuals, which nobody could have concluded from the number
+alone.
 
-Measured separately, merging `re-core.ttl` with `qudt-subset.ttl` reports 153:
-the extra two are a `missing_definition` and a `missing_label` on the
-`qudt-subset` **ontology header** itself, which is a vendored extract rather
-than authored vocabulary. The corpus-wide merge does not include it, which is
-why the gate reports 151 and not 153.
+Measured against `re-core.ttl` merged with `qudt-subset.ttl` the report gave
+153, not 151: the extra two were a `missing_definition` and a `missing_label` on
+the **qudt-subset ontology header**, a vendored extract the corpus-wide merge
+does not include. The discrepancy is recorded because it is the sort of thing
+that looks like a miscount later.
 
-## What each rule is asking for, and whether we should comply
+## How they were resolved
 
-### `missing_definition` — 134 entities
+### `missing_definition` — 134
 
-Every class and property in `re-core` lacks `IAO:0000115` (textual definition).
-Affected entities are the whole authored vocabulary: `re:Action`, `re:Agent`,
-`re:AgentBinding`, `re:AgentFamily`, `re:AutonomyMode`, `re:Determination`, and
-so on.
+`obo:IAO_0000115` was added to every class, property and individual.
 
-This is an OBO **publishing** convention. It matters when an ontology is
-consumed by people who did not write it — which is the direction this ontology
-is heading as integration vocabulary grows (see the MCP/ACP work in
-`RealityEngine_CPP/docs/SEMANTIC_OWL_ROADMAP.md`).
+**89 were authored.** They were written from each term's domain, range and role
+rather than paraphrased from its label, because a definition that restates the
+label teaches nobody anything and a wrong definition is worse than none — it
+will be believed. Where a term carries a meaning a reader could plausibly get
+wrong, the definition says so explicitly:
 
-Recommended: **comply, incrementally.** A definition per entity is cheap
-individually and expensive in one sitting, and a wrong definition is worse than
-none because it will be believed. Take them as each area of the vocabulary is
-next touched rather than as a bulk pass, and let the count fall.
+- `re:inputOffset` records that `{offset, length}` is a **half-open** span while
+  prose renders the range **closed** — the distinction that produced 5,094
+  incorrect lane references across the corpus.
+- `re:targetMachineName` records *why* it exists: machine ids are minted per
+  runtime, so only the corpus name is stable across engines.
+- `re:hasRagStatus` records why it is functional: without it an individual
+  holding both GREEN and RED is no contradiction under open-world semantics, and
+  the escalation audit axiom could never fail.
 
-### `missing_superclass` — 17 classes
+**30 were adopted from an existing `rdfs:comment`.** Those comments were already
+definitional; only the predicate was wrong. A definition filed under
+`rdfs:comment` is invisible to every consumer that expects the standard
+annotation, which is exactly what the rule was reporting. `rdfs:comment` is kept
+throughout for commentary that is not definition.
 
-Seventeen classes assert no `rdfs:subClassOf`. OBO convention places everything
-beneath a root so a reasoner can classify the whole graph.
+**Adopting comments introduced two new violations, which were fixed properly.**
+`lowercase_definition` fired on `re:idempotent` and `re:outputAlphabetTop`,
+whose comments open with `f(x,x,..,x)` and `k`. Both were rewritten as
+definitions rather than downgrading the rule; the algebraic detail stays in
+`rdfs:comment`, which is where it belongs.
 
-Recommended: **decide, then either comply or record the exemption.** Whether a
-top-level `re:Entity` earns its keep is a modelling question, not a lint
-question. Seventeen roots may be correct for a vocabulary that deliberately does
-not commit to an upper ontology. What is not acceptable is leaving it undecided
-and reading 17 as debt forever.
+### `missing_superclass` — 17
 
-If the answer is "these are intentional roots", the profile should downgrade
-`missing_superclass` for them explicitly, so the report stops reporting a
-decision that has been made.
+The top-level classes were placed under **PROV**, not under a root invented for
+the purpose.
 
-## Why this is INFO and not ERROR
+This followed a pattern already in the file: `re:PerceptionEvent` and
+`re:SequenceObservation` were already `prov:Activity`, and `re:DispatchRecord`
+already `prov:Entity`. An invented `re:Entity` would have satisfied the check
+while asserting nothing.
 
-`semantics/robot-report-profile.txt` maps OBO publishing conventions down from
-ERROR deliberately. The gate's job is to catch statements that are *wrong* —
-`illegal_use_of_built_in_vocabulary`, `duplicate_definition`,
-`deprecated_class_reference` — not statements that are *absent*. Both of these
-rules report absence.
+`re:Agent` is placed under `prov:Agent` specifically, and the rest under
+`prov:Entity`. That distinction is deliberate: an agent is an actor that bears
+responsibility for what it does, which is what `prov:Agent` denotes, and not
+merely a thing that exists.
 
-Keeping them visible at INFO rather than removing them from the profile is the
-point: an absent definition is real debt, and a profile that stops mentioning it
-converts debt into a silence nobody revisits.
+## What was deliberately not done
 
-## What must not happen
+**The count was not cleared by editing the profile.** Downgrading these rules to
+ignore would have reached zero while changing nothing about the ontology, and
+`reportInfoPendingTriage` would then have asserted a cleanliness achieved by not
+looking.
 
-**Do not clear the count by editing the profile.** Downgrading these rules to
-ignore would take the number to zero while changing nothing about the ontology,
-and the released artifact's `reportInfoPendingTriage` annotation would then
-assert a cleanliness that was achieved by not looking.
+`semantics/robot-report-profile.txt` is untouched. Both rules still fail if a
+future term arrives undefined or unplaced — which is the point of resolving the
+count this way rather than the other.
 
-The only two legitimate ways for the count to fall are: the definitions get
-written, or a modelling decision is recorded and the profile is changed *to
-match that decision*, in a PR that says so.
+## What the gate guarantees now
+
+```
+robot report (re-core)         0 violations, all levels
+reason-owl.sh --all            0 INFO / 0 WARN, consistent under ELK
+reason-owl.sh health-personal  consistent under ELK and HermiT
+generate-owl --all --check     exit 0   (generated ABoxes unaffected)
+generate-owl --manifest-check  exit 0   (manifest unchanged)
+validate-corpus.sh             exit 0
+```
+
+A new term added without a definition, or a new top-level class added without a
+superclass, now moves the count off zero. Before this work it moved it from 151
+to 152 and nobody would have noticed.
 
 ## Reproducing
 
 ```bash
-scripts/reason-owl.sh --all              # corpus-wide, ELK; prints the INFO count
+scripts/reason-owl.sh --all              # corpus-wide; prints the INFO count
 robot report --input <merged.owl> \
      --profile semantics/robot-report-profile.txt \
      --fail-on none --output report.tsv
-awk -F'\t' 'NR>1 && $1=="INFO" {c[$2]++} END{for (r in c) print c[r], r}' report.tsv
+awk -F'\t' 'NR>1 {c[$1" "$2]++} END{for (r in c) print c[r], r}' report.tsv
 ```
+
+## History
+
+- Raised while closing the semantic OWL roadmap (M0–M5 complete and measured);
+  disclosed debt behind a passing gate, not a regression.
+- Filed as #141 with this document as the analysis.
+- Resolved in the same sitting rather than incrementally as first recommended.
