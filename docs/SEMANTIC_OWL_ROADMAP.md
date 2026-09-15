@@ -89,7 +89,32 @@ Fall Detection TBox + ABox + generator + contract tests, as above.
   `actionNarrative` metadata field so nothing is lost.
 - Gate: `generate-owl.py --all --strict-actions` passes.
 
-### M3 — Corpus-wide generation + validation gates (done)
+### M3 — Corpus-wide generation + validation gates (done; reasoned corpus-wide 2026-09-14)
+
+Every reasoning result before this was single-domain, which is a weaker claim
+than the milestone makes. `scripts/reason-owl.sh --all` now runs the whole
+corpus:
+
+```
+reason-owl: ERROR 0  WARN 0  INFO 151
+reason-owl: diff vs released — no axiom changes
+reason-owl: OK (corpus (12 domains) merged, reported, and reasoned
+            consistently under ELK)
+```
+
+**Released baselines are gzipped**, because otherwise this gate could not exist
+at corpus scope. The merged corpus artifact is 96 MB raw — too large to commit,
+and an uncommitted baseline makes `diff` report SKIPPED forever, which is an
+unreachable verifier reporting healthy for the same reason a passing one does.
+Compressed it is 4.4 MB, and `semantics/released/` as a whole went from ~100 MB
+to 4.6 MB. Both scopes now report `no axiom changes` on a re-run, so the gate is
+reachable *and* discriminating.
+
+**Still domain-scoped: HermiT.** The corpus-wide run reasons under ELK only, and
+ELK does not implement functional properties — a well-formedness check, not a
+completeness claim. HermiT runs at domain scope (health-personal) and is
+scheduled corpus-wide separately as #79. That is the one gate in this roadmap
+whose scope is narrower than the claim it supports.
 
 Implementation note: instead of committing ~1,300 generated TTL files, the
 corpus-wide gate is `semantics/abox-manifest.json` — per-machine name, IRI,
@@ -279,7 +304,35 @@ into the merge entry: `governance` carries `sequenceId`, `ragStatusCode` and
 than one null field — `ESCALATION_ACTIONS` is keyed on `actionCode`, so the
 escalation guardrail matches nothing and invariant 3 counts zero escalations
 whatever was dispatched. It is not failing; it is unevaluable, which looks the
-same from outside. **This is the open item in M5.**
+same from outside. **This was the open item in M5. Closed 2026-09-14.**
+
+`actionCode` now travels with the contributor into the merge entry and attaches
+to the decision that wins the severity join, so invariant 3 evaluates instead of
+matching nothing. Measured on the live three-engine lane:
+
+```
+audit-chain: cpp-1:   14 observation(s); fall-conf-v1 -> ... -> fall-conf-v6
+audit-chain: lsp-1:   14 observation(s); fall-conf-v1 -> ... -> fall-conf-v6
+audit-chain: scala-1: 14 observation(s); fall-conf-v1 -> ... -> fall-conf-v6
+audit-chain: OK (3 engine(s) produced a complete, corpus-joined evidence chain)
+```
+
+| runtime | audit records | carrying `actionCode` | escalation records | ragStatus |
+|---|---|---|---|---|
+| cpp-1 | 100 | 40 | 1 | RED: 1 |
+| lsp-1 | 100 | 39 | 1 | RED: 1 |
+| scala-1 | 100 | 39 | 1 | RED: 1 |
+
+Two things this settles that a passing verifier alone does not. `actionCode`
+propagates — `verify-audit-chain.sh:195` fails outright if the confirmed-fall
+record does not carry `emergency-dispatch`, and it passed on all three. And
+invariant 3 is **evaluable rather than vacuous**: one escalation record per
+runtime, all `RED`, none unstated. It would now fail on a non-RED escalation,
+which it previously could not, because a guardrail that matches nothing passes
+for the same reason a satisfied one does.
+
+The 40/39 split is the same one-observation delta recorded above; it falls in
+the non-escalation set and does not reach the invariant.
 
 Note the default: the ledger ships `enabled:false, mode:dry-run`, so a deployment
 that has not turned it on emits no dispatch records at all and looks identical to

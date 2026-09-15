@@ -247,7 +247,17 @@ echo "reason-owl: annotated — version $CORPUS_VERSION, ${INFO_COUNT} INFO / ${
 # The tutorial's release step, and the facility this gate was missing. Byte
 # comparison cannot tell a reordered serialisation from a changed axiom; `diff`
 # answers in the ontology's own terms. Markdown because it is read in a PR.
+# Baselines are stored gzipped. The corpus-wide artifact is 96 MB raw and 4.6 MB
+# compressed; uncompressed it is too large to commit, and an uncommitted baseline
+# means `diff` reports SKIPPED forever — an unreachable verifier, which reports
+# healthy for the same reason a passing one does. Compressed, the gate stays
+# reachable at every scope rather than only the small ones.
+RELEASED_GZ="$REPO_ROOT/semantics/released/$SLUG.owl.gz"
 RELEASED="$REPO_ROOT/semantics/released/$SLUG.owl"
+if [ -f "$RELEASED_GZ" ]; then
+  RELEASED="$WORKDIR/baseline.owl"
+  gunzip -c "$RELEASED_GZ" > "$RELEASED"
+fi
 if [ -f "$RELEASED" ]; then
   DIFF_OUT="$WORKDIR/diff.md"
   if "$ROBOT" diff --left "$RELEASED" --right "$ANNOTATED" \
@@ -267,7 +277,7 @@ if [ -f "$RELEASED" ]; then
     fi
   fi
 else
-  echo "reason-owl: diff SKIPPED — no baseline at semantics/released/$SLUG.owl"
+  echo "reason-owl: diff SKIPPED — no baseline at semantics/released/$SLUG.owl.gz"
   echo "            (record one with --release to make future runs comparable)"
 fi
 
@@ -276,8 +286,9 @@ fi
 # run could never report a change, which is how a drift check becomes a no-op.
 if [ "$RELEASE" = "true" ]; then
   mkdir -p "$REPO_ROOT/semantics/released"
-  cp "$ANNOTATED" "$RELEASED"
-  echo "reason-owl: released — semantics/released/$SLUG.owl updated to $RELEASE_DATE"
+  gzip -9 -c "$ANNOTATED" > "$REPO_ROOT/semantics/released/$SLUG.owl.gz"
+  rm -f "$REPO_ROOT/semantics/released/$SLUG.owl"
+  echo "reason-owl: released — semantics/released/$SLUG.owl.gz updated to $RELEASE_DATE"
 fi
 
 if [ "$REASONER" = "elk" ]; then
