@@ -203,8 +203,33 @@ semantic-parity: conformer ts-1: conforms (fbd54a18…807e)
 Same IRI and same hash as the three engines. M4's surface is therefore
 implemented and agreeing across all four runtimes.
 
-Still open for M4: `semanticsIri`/`semanticsHash` on machine **list** responses —
-the per-machine endpoint is what parity exercises today.
+**The list surface is closed too (2026-09-15).** `semanticsIri`/`semanticsHash`
+on machine list responses was M4's last open item. Measured on a full-corpus
+three-engine universe:
+
+| runtime | machine registry | `json/list` | `semanticsHash` | `semanticsIri` |
+|---|---|---|---|---|
+| cpp-1 | 1328 | 1328 | 1328 | 1328 |
+| lsp-1 | 1328 | 1328 | 1328 | 1328 |
+| scala-1 | 1328 | 1328 | 1328 | 1328 |
+
+1328 common `relFile` keys, and the `semanticsHash` is identical across all
+three on every one of them.
+
+**It was not unimplemented — it was silently disabled on LSP by a path bug three
+layers away** (RealityEngine_LSP#110). `machine-json-list-rows` relativized
+against `(truename dir)` while the file walk used `uiop:directory-files`, which
+does not resolve symlinks. On macOS /tmp is a symlink to /private/tmp and the
+harness serves the corpus from /tmp, so the prefix test never matched and every
+row fell back to a bare basename. `relFile` stopped being path-aware, and
+`semantics-key-for-rel` then derived `core/<stem>` instead of `<domain>/<stem>`,
+matched nothing in the manifest, and dropped both fields: 0 of 21 on LSP against
+18 of 21 on cpp and scala.
+
+A comment asserting the walk returned truenames is what made the code look
+correct. Worth remembering as a shape: the surface reported a plausible value
+rather than an error, so nothing failed — the milestone simply read as
+unfinished.
 
 ### M5 — Semantic audit records (PE→RE→PE cycle) — invariants verified 3-of-3 (2026-09-12)
 
