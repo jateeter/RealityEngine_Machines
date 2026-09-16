@@ -275,6 +275,12 @@ def rule_completion_mappings(graphs, approved_ids, result: Result) -> None:
     re:SourceMappingWrite must name a re:CompletionMapping, and every mapping
     named must be one `integrations.json` approves.
     """
+    if not approved_ids:
+        result.gap(
+            "R5 approval half: no approved sourceMappings list is readable "
+            "(RealityEngine_CI/config/integrations.json is absent), so a write "
+            "through an unapproved mapping cannot be distinguished from an "
+            "approved one. Writes with NO mapping are still caught.")
     for name, g in graphs.items():
         for subj, props in g.items():
             if "re:SourceMappingWrite" not in props.get("a", []):
@@ -292,7 +298,16 @@ def rule_completion_mappings(graphs, approved_ids, result: Result) -> None:
                     result.add("R5", "completion-mapping-unnamed", "error", f"{name} {t}",
                                "completion mapping declares no re:sensorId")
                     continue
-                if approved_ids and not approved_sensor(sensor, approved_ids):
+                if not approved_ids:
+                    # Reported, not skipped. This check reads its approved list
+                    # from RealityEngine_CI/config/integrations.json, a sibling
+                    # repo that is not always checked out — and when it was
+                    # absent the check passed every write in silence. That is
+                    # the inert guard this milestone exists to prevent, found in
+                    # the checker itself by its own negative fixture failing in
+                    # a hosted lane. An absent approved list is now a stated gap.
+                    continue
+                if not approved_sensor(sensor, approved_ids):
                     result.add("R5", "unapproved-completion-mapping", "error",
                                f"{name} {t}",
                                f"sensor '{sensor}' matches no sourceMappings entry "
@@ -475,8 +490,13 @@ def run_fixtures(result_cls, actions, classes, approved_ids) -> int:
         ttl = (FIXTURE_ROOT / case["graph"]).read_text()
         graphs = {case["graph"]: parse_abox(ttl)}
         r = result_cls()
+        # A fixture declaring its own `approved` list is checked against that,
+        # never against the host's environment. A negative fixture that only
+        # fires when a sibling repository happens to be present is a fixture
+        # that proves nothing about the rule.
+        case_approved = case.get("approved") or approved_ids
         rule_dispatchable_actions(graphs, actions, r)
-        rule_completion_mappings(graphs, approved_ids, r)
+        rule_completion_mappings(graphs, case_approved, r)
         rule_no_downgrade(graphs, classes, r)
         kinds = {v.kind for v in r.violations}
         want = case["expect"]
