@@ -133,6 +133,24 @@ observation have no runtime surface, and it reports them as gaps rather than
 synthesising them. A generated push id would look exactly like a real one and
 would join two events nothing actually connected.
 
+`scripts/validate-runtime-trace.py` is M5: it merges ontology + profile ABoxes
++ trace, runs ROBOT report and HermiT, then the closed-world checks ROBOT cannot
+make — exact region writes, cardinality, forbidden endpoint use. Every finding
+becomes a named `re:SemanticGuardrailViolation` individual, because M5 asks for a
+named record rather than an exit code.
+
+| command | scope |
+|---|---|
+| `npm run trace:validate` | a live trace against the corpus it came from (~10s incl. HermiT) |
+| `npm run trace:validate:check` | the six bad-trace fixtures; each must be rejected *and* emit a named record |
+
+The allowed-endpoint catalogue M3's R2 reported as missing does exist — the PE
+serves it at `GET /api/integrations/localai/catalog`, not in
+`integrations.json`, which is why the static check could not see it. The
+validator reads it for forbidden-endpoint use. **MCP invocations are not
+recorded anywhere** (#152), so the invocation half of the MCP chain classifies
+from the worked examples rather than from a live run.
+
 Two things the prover reports rather than hides. It prints an `UNGATED` line for
 any rule it cannot evaluate: R2's workflow-class half has no source of truth
 (no `integrations.json` entry declares `allowedOperations`), and R6 cannot reach
