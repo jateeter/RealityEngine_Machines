@@ -111,6 +111,28 @@ Gated by `tests/contracts/static_provability_test.py` and
 invokes is not a gate — `generate-regression-profile.py --check` had existed
 since it was written and **nothing called it**.
 
+`scripts/export-runtime-trace.py` is the M4 counterpart: it converts one
+PE->RE->PE cycle into a graph in the same vocabulary, so a trace and the corpus
+it came from merge into one thing a reasoner can ask questions across.
+
+| command | scope |
+|---|---|
+| `npm run trace:export` | one cycle to Turtle + JSON-LD |
+| `npm run trace:check` | joinability; non-zero if any event joins to nothing |
+
+The join was already there and is the part worth knowing: the engines' own
+`GET /api/audit/semantics` records carry `machineIri`, `sequenceIri`, `stepIri`
+and `determinationIri` **byte-identical** to the ones `generate-owl.py` writes
+into the ABox. The corpus join goes through `machineName`, never `machineId` —
+ids are re-minted per runtime, so an id-keyed trace measures the runtime rather
+than the corpus.
+
+The exporter refuses to invent identifiers it is not given: a push id, a
+correlation id on PE source writes and the output region on a sequence
+observation have no runtime surface, and it reports them as gaps rather than
+synthesising them. A generated push id would look exactly like a real one and
+would join two events nothing actually connected.
+
 Two things the prover reports rather than hides. It prints an `UNGATED` line for
 any rule it cannot evaluate: R2's workflow-class half has no source of truth
 (no `integrations.json` entry declares `allowedOperations`), and R6 cannot reach
