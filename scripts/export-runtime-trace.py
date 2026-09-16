@@ -354,7 +354,13 @@ def export(engine_id: str, re_url: str, pe_url: str, do_push: bool) -> Trace:
         m_iri = rec.get("machineIri")
         stmts = [
             "a owl:NamedIndividual , re:SequenceObservation",
-            f'rdfs:label "{esc(rec.get("machineName"))} / {esc(rec.get("sequenceId"))}"',
+            # The observation index is part of the label, not decoration. A
+            # machine's sequence is observed at many steps, so machine+sequence
+            # alone repeats — and ROBOT reports duplicate_label as an ERROR,
+            # which failed M5's own validation gate on a corpus small enough for
+            # the same sequence to recur. Caught by the gate rather than by
+            # reading, which is the outcome the gate exists for.
+            f'rdfs:label "{esc(rec.get("machineName"))} / {esc(rec.get("sequenceId"))} #{i:05d}"',
             f"re:forMachine <{m_iri}>" if m_iri else "",
             f"re:observedSequence <{rec['sequenceIri']}>" if rec.get("sequenceIri") else "",
             f"re:observedStep <{rec['stepIri']}>" if rec.get("stepIri") else "",
