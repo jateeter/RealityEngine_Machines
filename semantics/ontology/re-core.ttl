@@ -12,7 +12,7 @@
     dcterms:title "RealityEngine Core Semantics Ontology" ;
     dcterms:description "OWL vocabulary for the semantic representation of RealityEngine machine behavior: machines, critical event sequences, sequence steps, determinations, prescribed actions, trigger rules, governance, interconnections, the agent corpus bound to those machines, and the audit records produced by the PE->RE->PE cycle. Machine ABox files under semantics/abox/ are generated from the canonical machine JSON corpus by scripts/generate-owl.py and must stay byte-deterministic." ;
     dcterms:license <https://opensource.org/licenses/MIT> ;
-    owl:versionInfo "0.3.1" .
+    owl:versionInfo "0.4.0" .
 
 #################################################################
 # Classes: structural corpus concepts
@@ -1231,6 +1231,261 @@ re:merge-discrete-median a owl:NamedIndividual , re:ChainMergeTransformation ;
     rdfs:comment "Majority consensus, rejecting anomalous outliers — [3,3,0,3] gives 3, filtering the transient dropout. For even n the lower of the two middle elements, which over integers is exactly floor of the median: a selection, never a division, so no float arithmetic enters the step for runtimes to differ over. Takes no chain top." .
 
 #################################################################
+# Classes: integration paths (PE.x.MCP/localAIStack, PE.x.ACP/localOpenClaw)
+#################################################################
+#
+# M2 of the Semantic OWL roadmap. Both integration paths leave the machine
+# corpus, reach an external provider, and come back as values written into a
+# machine's region — and until now none of that round trip was in the
+# vocabulary. Only re:CompletionMapping existed, which describes the last hop
+# and says nothing about who was invoked, under what permission, or on whose
+# evidence.
+#
+# The consequence is the one this ontology exists to prevent: a completion that
+# wrote through an approved mapping was indistinguishable from a completion that
+# had any right to be written at all, because nothing named the invocation that
+# produced it.
+#
+# ## What is deliberately *not* added here
+#
+# re:OpenClawAgentBinding declares no properties of its own. Its five required
+# relationships — machine, agent id, input axes, autonomy mode, completion
+# mapping — are exactly re:targetsMachine, re:agentId, re:hasSemanticAxis,
+# re:autonomyMode and re:hasCompletionMapping, which re:AgentBinding already
+# carries. Restating them under new names would create a second vocabulary for
+# the same facts and guarantee the two drift. The class earns its place by
+# naming *which* binding protocol is in play, not by re-describing a binding.
+#
+# ## Why the write is an Activity and the result is an Entity
+#
+# re:MCPInvocation and re:SourceMappingWrite are prov:Activity: they happen, at
+# a time, by someone. re:MCPToolResult, re:ACPDispatch and
+# re:SemanticGuardrailViolation are prov:Entity: they are records that persist
+# and can be pointed at afterwards. re:ACPDispatch specialises re:DispatchRecord
+# for the same reason — an ACP dispatch *is* a ledger entry, and reusing the
+# ledger class keeps one answer to "what was dispatched".
+
+re:IntegrationProvider a owl:Class ;
+    obo:IAO_0000115 "An external system a machine's workflow can reach out to — a local AI stack, an agent gateway, a model host — identified by an IRI that is stable across runs so that invocations remain attributable after the endpoint moves." ;
+    rdfs:subClassOf prov:Agent ;
+    rdfs:label "Integration Provider" ;
+    rdfs:comment "An external provider reachable from the PE integration path (localAIStack, OpenClaw gateway, Ollama, OpenAI). Under prov:Agent rather than prov:Entity: a provider bears responsibility for what it returns." .
+
+re:EvidenceArtifact a owl:Class ;
+    obo:IAO_0000115 "The material an external provider offers in support of a result — a retrieved passage, a graph query answer, an agent transcript — held as its own individual so that a completion can be traced back to what it was derived from." ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Evidence Artifact" ;
+    rdfs:comment "RAG passages, graph answers or agent output cited by an MCP tool result. Separate from the result so that one artifact can support several results and so that an unsupported result is visibly unsupported." .
+
+re:MCPInvocation a owl:Class ;
+    obo:IAO_0000115 "One call from the Perception Engine to an external provider on a machine's behalf, naming the machine and sequence that occasioned it, the provider and endpoint reached, and the operation requested." ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "MCP Invocation" ;
+    rdfs:comment "A PE.x.MCP/localAIStack call. Carries the machine and sequence it was made for, so that an invocation with no authored occasion is a detectable condition rather than an untraceable one." .
+
+re:MCPToolResult a owl:Class ;
+    obo:IAO_0000115 "What an MCP invocation returned: the evidence it rests on, the confidence it claims, and the completion mapping through which its values may be written back." ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "MCP Tool Result" ;
+    rdfs:comment "The result of one re:MCPInvocation. Names its target completion mapping explicitly, so that a result and the region it is permitted to write are stated together rather than assumed to correspond." .
+
+re:ACPDispatch a owl:Class ;
+    obo:IAO_0000115 "A ledger entry recording that an agent was dispatched over ACP for a machine's sequence, through a named agent binding, under the no-wait contract that keeps agent execution out of the synchronous push cycle." ;
+    rdfs:subClassOf re:DispatchRecord ;
+    rdfs:label "ACP Dispatch" ;
+    rdfs:comment "A PE.x.ACP/localOpenClawStack dispatch. Subclass of re:DispatchRecord: an ACP dispatch is a ledger entry, and sharing the ledger class keeps one answer to what was dispatched." .
+
+re:OpenClawAgentBinding a owl:Class ;
+    obo:IAO_0000115 "An agent binding realised through the OpenClaw gateway, whose agent specification is generated from the machine corpus and must therefore agree with it." ;
+    rdfs:subClassOf re:AgentBinding ;
+    rdfs:label "OpenClaw Agent Binding" ;
+    rdfs:comment "Declares no properties of its own. Machine, agent id, input axes, autonomy mode and completion mapping are re:AgentBinding's already; this class names which binding protocol is in play, and restating them here would create a second vocabulary for the same facts." .
+
+re:SourceMappingWrite a owl:Class ;
+    obo:IAO_0000115 "One write of external values into the universal reality vector through a declared completion mapping, naming the region touched, the agent responsible, and the correlation id that ties it to the invocation or dispatch that produced it." ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Source Mapping Write" ;
+    rdfs:comment "The last hop of both integration paths. The correlation id is what makes the round trip joinable: without it a write is attributable to a mapping but not to the invocation that justified it." .
+
+re:SemanticGuardrailViolation a owl:Class ;
+    obo:IAO_0000115 "A record that a semantic guardrail was breached, naming what kind of breach, how severe, which record exhibits it, and which policy it violates." ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Semantic Guardrail Violation" ;
+    rdfs:comment "Produced by static or dynamic validation. A violation is an individual rather than a log line so that a reasoner can count them, join them to the policy breached, and fail a profile on their presence." .
+
+#################################################################
+# Object properties: integration paths
+#################################################################
+#
+# Several of these leave rdfs:domain unstated. That is deliberate and not an
+# omission: re:forMachine and re:forSequence apply to invocations, dispatches
+# and writes alike, and under OWL an rdfs:domain is an inference rather than a
+# constraint — asserting one here would silently type any individual that used
+# the property, which is the opposite of the check being sought. The range is
+# stated in every case, because that is the half that is always true.
+
+re:forMachine a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates an integration event to the machine whose workflow occasioned it." ;
+    rdfs:range re:Machine ;
+    rdfs:label "for machine" ;
+    rdfs:comment "Domain left open: invocations, dispatches and writes all carry this. An event with no re:forMachine is an integration call no authored machine asked for." .
+
+re:forSequence a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates an integration event to the critical event sequence whose determination occasioned it." ;
+    rdfs:range re:CriticalEventSequence ;
+    rdfs:label "for sequence" .
+
+re:invokesProvider a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates an MCP invocation to the external provider it reached." ;
+    rdfs:domain re:MCPInvocation ; rdfs:range re:IntegrationProvider ;
+    rdfs:subPropertyOf prov:wasAssociatedWith ;
+    rdfs:label "invokes provider" .
+
+re:resultOfInvocation a owl:ObjectProperty , owl:FunctionalProperty ;
+    obo:IAO_0000115 "Relates an MCP tool result to the single invocation that produced it. Functional, because a result attributed to two invocations has no determinate provenance and the join to evidence would be ambiguous." ;
+    rdfs:domain re:MCPToolResult ; rdfs:range re:MCPInvocation ;
+    rdfs:subPropertyOf prov:wasGeneratedBy ;
+    rdfs:label "result of invocation" .
+
+re:hasEvidenceArtifact a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates an MCP tool result to material supporting it." ;
+    rdfs:domain re:MCPToolResult ; rdfs:range re:EvidenceArtifact ;
+    rdfs:label "has evidence artifact" .
+
+re:writesThroughMapping a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a result or a write to the completion mapping that authorises it, which is the only approved route into the machine's region." ;
+    rdfs:range re:CompletionMapping ;
+    rdfs:label "writes through mapping" ;
+    rdfs:comment "Domain left open: both re:MCPToolResult (the permission it claims) and re:SourceMappingWrite (the permission it exercised) carry this, and the static check that they agree is the point." .
+
+re:viaAgentBinding a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates an ACP dispatch to the agent binding under which it was made." ;
+    rdfs:domain re:ACPDispatch ; rdfs:range re:AgentBinding ;
+    rdfs:label "via agent binding" .
+
+re:writtenBy a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a source mapping write to the agent responsible for it." ;
+    rdfs:domain re:SourceMappingWrite ; rdfs:range prov:Agent ;
+    rdfs:subPropertyOf prov:wasAssociatedWith ;
+    rdfs:label "written by" .
+
+re:violatesPolicy a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a guardrail violation to the governance policy it breaches." ;
+    rdfs:domain re:SemanticGuardrailViolation ; rdfs:range re:GovernancePolicy ;
+    rdfs:label "violates policy" .
+
+#################################################################
+# Datatype properties: integration paths
+#################################################################
+
+re:providerId a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The stable identifier of an external provider, unchanged when its endpoint moves." ;
+    rdfs:domain re:IntegrationProvider ; rdfs:range xsd:string ;
+    rdfs:label "provider id" .
+
+re:integrationEndpoint a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The endpoint reached by an invocation, recorded as reached rather than as configured, so a call to an endpoint outside the profile is visible after the fact." ;
+    rdfs:range xsd:anyURI ;
+    rdfs:label "integration endpoint" .
+
+re:allowedOperationId a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The operation requested of the provider, named from the profile's allowed set so that membership is checkable rather than asserted." ;
+    rdfs:domain re:MCPInvocation ; rdfs:range xsd:string ;
+    rdfs:label "allowed operation id" .
+
+re:requestClass a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The named shape of the request sent to the provider." ;
+    rdfs:domain re:MCPInvocation ; rdfs:range xsd:string ;
+    rdfs:label "request class" .
+
+re:resultClass a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The named shape of the result expected back from the provider." ;
+    rdfs:domain re:MCPInvocation ; rdfs:range xsd:string ;
+    rdfs:label "result class" .
+
+re:resultConfidence a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The confidence an external provider claims for its result, in [0,1]. Recorded as claimed, never as verified." ;
+    rdfs:domain re:MCPToolResult ; rdfs:range xsd:decimal ;
+    rdfs:label "result confidence" .
+
+re:evidenceUri a owl:DatatypeProperty ;
+    obo:IAO_0000115 "Where the supporting material can be retrieved." ;
+    rdfs:domain re:EvidenceArtifact ; rdfs:range xsd:anyURI ;
+    rdfs:label "evidence uri" .
+
+re:dispatchId a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The ledger identifier of a dispatch." ;
+    rdfs:domain re:DispatchRecord ; rdfs:range xsd:string ;
+    rdfs:label "dispatch id" .
+
+re:noWaitDispatch a owl:DatatypeProperty ;
+    obo:IAO_0000115 "Whether the dispatch returned without waiting for the agent to finish. The no-wait contract is what keeps agent execution off the synchronous push path; a dispatch asserting false is a hot-path finding." ;
+    rdfs:domain re:ACPDispatch ; rdfs:range xsd:boolean ;
+    rdfs:label "no-wait dispatch" .
+
+re:sessionKeyHash a owl:DatatypeProperty ;
+    obo:IAO_0000115 "A hash of the ACP session key. The hash, never the key: the session must be identifiable across records without the material being recoverable from the graph." ;
+    rdfs:domain re:ACPDispatch ; rdfs:range xsd:string ;
+    rdfs:label "session key hash" .
+
+re:correlationId a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The identifier tying an invocation or dispatch to the write it eventually produced, which is what makes one PE.x.RE.x.PE round trip joinable end to end." ;
+    rdfs:range xsd:string ;
+    rdfs:label "correlation id" .
+
+re:writeOffset a owl:DatatypeProperty ;
+    obo:IAO_0000115 "Half-open start index of the vector region a source mapping write touched." ;
+    rdfs:domain re:SourceMappingWrite ; rdfs:range xsd:integer ;
+    rdfs:label "write offset" .
+
+re:writeLength a owl:DatatypeProperty ;
+    obo:IAO_0000115 "Number of elements a source mapping write touched, counted from re:writeOffset. Half-open on the wire, closed only in prose." ;
+    rdfs:domain re:SourceMappingWrite ; rdfs:range xsd:integer ;
+    rdfs:label "write length" .
+
+re:violationType a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The kind of guardrail breached — an endpoint outside the profile, a write outside an approved mapping, a criticality downgrade." ;
+    rdfs:domain re:SemanticGuardrailViolation ; rdfs:range xsd:string ;
+    rdfs:label "violation type" .
+
+re:recordId a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The identifier of the record that exhibits a violation, so the finding points at evidence rather than restating itself." ;
+    rdfs:domain re:SemanticGuardrailViolation ; rdfs:range xsd:string ;
+    rdfs:label "record id" .
+
+#################################################################
+# Audit axioms: integration paths — and the one that cannot be written here
+#################################################################
+#
+# There is no OWL axiom in this section, and that is the finding rather than an
+# omission.
+#
+# The property worth checking is: every re:SourceMappingWrite exercises a
+# declared re:CompletionMapping, because a write that names none went into the
+# vector by a route nothing authorised. The obvious encoding is a defined class
+# over `owl:maxCardinality 0` on re:writesThroughMapping — and it was written
+# that way first, and it was inert.
+#
+# Under the open world a write with no asserted mapping is not a write with zero
+# mappings; it is a write whose mappings are unknown, so nothing is entailed and
+# the class stays empty. Verified against the negative fixture in
+# semantics/integration/examples.ttl: HermiT classifies it as nothing. A defined
+# class with an empty extension and a defined class that cannot be satisfied are
+# indistinguishable from outside — the recurring shape in this system, where
+# something that cannot fail passes exactly like something that did.
+#
+# This is the same lesson as re:EscalationDetermination, which is correct,
+# open-world, and for 78 of 80 escalations evaluated nothing. So the same remedy
+# applies: the OWL stays open-world and the closed-world half moves to a
+# contract test, tests/contracts/integration_vocabulary_test.py, which is
+# closed over the graph it reads and can therefore say "no mapping" and mean it.
+#
+# The roadmap already puts it there — M3 "Every completion writes only through
+# an approved PE source mapping / Deterministic mapping check" and M5
+# "Deterministic closed-world checks". Writing an OWL class that appears to do
+# the job would have made that milestone look finished while checking nothing.
+
+#################################################################
 # Upper-ontology placement
 #################################################################
 #
@@ -1268,3 +1523,8 @@ re:SemanticAxis              rdfs:subClassOf prov:Entity .
 re:CompletionMapping         rdfs:subClassOf prov:Entity .
 re:ResponseMapping           rdfs:subClassOf prov:Entity .
 re:OutputMergeTransformation rdfs:subClassOf prov:Entity .
+
+# The integration-path classes declare their PROV placement inline, beside the
+# class, rather than being listed here — they were written after this section
+# existed, and a second place to state a superclass is a second place for it to
+# go stale. re:IntegrationProvider is the only other prov:Agent besides re:Agent.

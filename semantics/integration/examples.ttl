@@ -1,0 +1,176 @@
+# Worked examples for the M2 integration vocabulary (Semantic OWL roadmap).
+#
+# Hand-authored, unlike everything under semantics/abox/, which is generated
+# from the machine JSON corpus and must stay byte-deterministic. These are not
+# corpus data and no generator produces them: they exist so that M2's third
+# acceptance criterion — "at least one MCP and one ACP workflow classify under
+# the new vocabulary" — is something the reasoner checks rather than something
+# a reader is asked to believe.
+#
+# Both examples join to real machines in the corpus, by IRI:
+#
+#   MCP  ai-services/AIWellnessCoach        out[7396:7404]
+#   ACP  health-personal/AdolescentMentalHealthMonitor
+#
+# That matters. An example built on invented machine IRIs would classify just as
+# cleanly and would prove nothing about whether the vocabulary reaches the
+# corpus — merging it would simply add two disconnected islands. Because these
+# name corpus individuals, a merge that cannot resolve them is itself the
+# finding.
+#
+# ## What these do not claim
+#
+# These describe *shapes*, not observed runs. The confidence, the endpoints and
+# the correlation ids are illustrative values in the right form; no engine
+# emitted them. Runtime traces are M4, and when they arrive they replace these
+# as the thing the gate reasons over — these stay as the vocabulary's worked
+# reference.
+
+@prefix re:   <https://realityengine.example.org/ontology/re-core#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex:   <https://realityengine.example.org/integration-examples#> .
+@prefix wc:   <https://realityengine.example.org/machines/ai-services/AIWellnessCoach#> .
+@prefix amh:  <https://realityengine.example.org/machines/health-personal/AdolescentMentalHealthMonitor#> .
+
+#################################################################
+# Providers
+#################################################################
+
+ex:localAIStack
+    a owl:NamedIndividual , re:IntegrationProvider ;
+    rdfs:label "localAIStack" ;
+    re:providerId "localaistack" .
+
+ex:openClawGateway
+    a owl:NamedIndividual , re:IntegrationProvider ;
+    rdfs:label "localOpenClawStack ACP gateway" ;
+    re:providerId "openclaw-gateway" .
+
+#################################################################
+# Example 1 — PE.x.MCP/localAIStack
+#
+# AIWellnessCoach reaches a RAG endpoint for context on a wellness
+# determination, and the answer is written back into the reserved completion
+# band. The chain the vocabulary has to carry is invocation -> result ->
+# evidence -> mapping -> write, with one correlation id running through it.
+#################################################################
+
+ex:mcp-invocation-1
+    a owl:NamedIndividual , re:MCPInvocation ;
+    rdfs:label "AIWellnessCoach — RAG context query for the alert-escalate sequence" ;
+    re:forMachine wc:machine ;
+    re:forSequence wc:seq-aiwc-alert-escalate ;
+    re:invokesProvider ex:localAIStack ;
+    re:integrationEndpoint "http://localhost:4000/graphql"^^xsd:anyURI ;
+    re:allowedOperationId "rag.query" ;
+    re:requestClass "RagQueryRequest" ;
+    re:resultClass "RagQueryResult" ;
+    re:correlationId "corr-mcp-0001" .
+
+ex:mcp-evidence-1
+    a owl:NamedIndividual , re:EvidenceArtifact ;
+    rdfs:label "Retrieved wellness-protocol passage" ;
+    re:evidenceUri "http://localhost:4000/documents/wellness-protocol#p12"^^xsd:anyURI .
+
+ex:mcp-result-1
+    a owl:NamedIndividual , re:MCPToolResult ;
+    rdfs:label "AIWellnessCoach — RAG result, 0.82 claimed" ;
+    re:resultOfInvocation ex:mcp-invocation-1 ;
+    re:hasEvidenceArtifact ex:mcp-evidence-1 ;
+    re:resultConfidence "0.82"^^xsd:decimal ;
+    re:writesThroughMapping ex:mcp-completion-mapping-1 .
+
+# The first re:CompletionMapping individual in the repository. The class has
+# been declared since the ontology's first version and its extension was empty
+# across all twelve domains — nothing in the corpus described the route a
+# completion takes, only that such a route could be described.
+ex:mcp-completion-mapping-1
+    a owl:NamedIndividual , re:CompletionMapping ;
+    rdfs:label "AIWellnessCoach — localAIStack completion band" ;
+    re:sensorId "localai-wellness-completion" ;
+    re:completionOffset 7396 ;
+    re:completionLength 8 .
+
+ex:mcp-write-1
+    a owl:NamedIndividual , re:SourceMappingWrite ;
+    rdfs:label "AIWellnessCoach — completion write [7396:7404]" ;
+    re:forMachine wc:machine ;
+    re:writesThroughMapping ex:mcp-completion-mapping-1 ;
+    re:writtenBy ex:localAIStack ;
+    re:writeOffset 7396 ;
+    re:writeLength 8 ;
+    re:correlationId "corr-mcp-0001" .
+
+#################################################################
+# Example 2 — PE.x.ACP/localOpenClawStack
+#
+# AdolescentMentalHealthMonitor dispatches its bound agent over ACP under the
+# no-wait contract. The dispatch is a ledger entry; the agent's completion
+# returns later and writes through its own mapping, carrying the same
+# correlation id, which is what makes the two halves one round trip.
+#################################################################
+
+ex:acp-binding-1
+    a owl:NamedIndividual , re:OpenClawAgentBinding ;
+    rdfs:label "AdolescentMentalHealthMonitor — OpenClaw binding" ;
+    re:writesToRegionOf amh:machine ;
+    re:boundAgent amh:agent ;
+    re:autonomyMode re:Advise ;
+    re:hasCompletionMapping ex:acp-completion-mapping-1 .
+
+ex:acp-dispatch-1
+    a owl:NamedIndividual , re:ACPDispatch ;
+    rdfs:label "AdolescentMentalHealthMonitor — ACP dispatch on the crisis sequence" ;
+    re:forMachine amh:machine ;
+    re:forSequence amh:seq-adolescent-mh-crisis ;
+    re:viaAgentBinding ex:acp-binding-1 ;
+    re:dispatchId "disp-acp-0001" ;
+    re:noWaitDispatch true ;
+    re:sessionKeyHash "sha256:0f0c6d2e9a4b7c15" ;
+    re:correlationId "corr-acp-0001" .
+
+ex:acp-completion-mapping-1
+    a owl:NamedIndividual , re:CompletionMapping ;
+    rdfs:label "AdolescentMentalHealthMonitor — OpenClaw completion band" ;
+    re:sensorId "openclaw-adolescent-mh-completion" ;
+    re:completionOffset 2031 ;
+    re:completionLength 4 .
+
+ex:acp-write-1
+    a owl:NamedIndividual , re:SourceMappingWrite ;
+    rdfs:label "AdolescentMentalHealthMonitor — completion write [2031:2035]" ;
+    re:forMachine amh:machine ;
+    re:writesThroughMapping ex:acp-completion-mapping-1 ;
+    re:writtenBy ex:openClawGateway ;
+    re:writeOffset 2031 ;
+    re:writeLength 4 ;
+    re:correlationId "corr-acp-0001" .
+
+#################################################################
+# Example 3 — the negative case
+#
+# A write that names no completion mapping: it went into the vector by a route
+# nothing authorised.
+#
+# This fixture is why the ontology carries no OWL axiom for that condition. The
+# first version defined a class over `owl:maxCardinality 0` on
+# re:writesThroughMapping; HermiT classifies this individual as nothing, because
+# under the open world "no asserted mapping" is not "zero mappings". The axiom
+# could never fire, and an empty extension looks exactly like a clean result.
+#
+# The check that does fire is closed-world and lives in
+# tests/contracts/integration_vocabulary_test.py. This individual is what makes
+# that test honest — a guard with no violating case to catch is a guard nobody
+# has seen work.
+#################################################################
+
+ex:unmapped-write-1
+    a owl:NamedIndividual , re:SourceMappingWrite ;
+    rdfs:label "Negative fixture — completion write with no declared mapping" ;
+    re:forMachine wc:machine ;
+    re:writtenBy ex:localAIStack ;
+    re:writeOffset 7404 ;
+    re:writeLength 2 ;
+    re:correlationId "corr-unmapped-0001" .
