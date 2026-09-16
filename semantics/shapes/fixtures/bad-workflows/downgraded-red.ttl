@@ -1,0 +1,29 @@
+# R6 — a RED determination prescribing only an automation action. re-core.ttl
+# defines re:AutomationAction as having "no direct human recipient", so this
+# determination reaches nobody: the downgrade the rule names.
+@prefix re:   <https://realityengine.example.org/ontology/re-core#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix m:    <https://realityengine.example.org/machines/fixture/DowngradedRed#> .
+
+m:machine
+    a owl:NamedIndividual , re:Machine ;
+    rdfs:label "Fixture — downgraded RED" ;
+    re:hasSequence m:seq .
+
+m:seq
+    a owl:NamedIndividual , re:CriticalEventSequence ;
+    re:sequenceId "fixture-red-seq" ;
+    rdfs:label "fixture RED sequence" ;
+    re:hasStep m:step .
+
+m:step
+    a owl:NamedIndividual , re:SequenceStep ;
+    rdfs:label "fixture step" ;
+    re:emitsDetermination m:out .
+
+m:out
+    a owl:NamedIndividual , re:Determination ;
+    rdfs:label "fixture RED determination" ;
+    re:hasRagStatus re:RED ;
+    re:prescribesAction re:PublishBus .

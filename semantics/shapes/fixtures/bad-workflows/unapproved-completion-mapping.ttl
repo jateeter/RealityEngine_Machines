@@ -1,0 +1,27 @@
+# R5 — a write through a mapping whose sensor id matches no sourceMappings
+# template in integrations.json. The mapping exists and is well formed; it is
+# simply not one the deployment approved, which is the harder case to see.
+@prefix re:   <https://realityengine.example.org/ontology/re-core#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix m:    <https://realityengine.example.org/machines/fixture/UnapprovedMapping#> .
+
+m:machine
+    a owl:NamedIndividual , re:Machine ;
+    rdfs:label "Fixture — unapproved completion mapping" .
+
+m:mapping
+    a owl:NamedIndividual , re:CompletionMapping ;
+    rdfs:label "fixture mapping nobody approved" ;
+    re:sensorId "rogue.sensor.not.in.integrations" ;
+    re:completionOffset 4200 ;
+    re:completionLength 4 .
+
+m:write
+    a owl:NamedIndividual , re:SourceMappingWrite ;
+    rdfs:label "fixture write through an unapproved mapping" ;
+    re:forMachine m:machine ;
+    re:writesThroughMapping m:mapping ;
+    re:writeOffset 4200 ;
+    re:writeLength 4 ;
+    re:correlationId "fixture-corr-2" .
