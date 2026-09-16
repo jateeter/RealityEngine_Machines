@@ -12,7 +12,7 @@
     dcterms:title "RealityEngine Core Semantics Ontology" ;
     dcterms:description "OWL vocabulary for the semantic representation of RealityEngine machine behavior: machines, critical event sequences, sequence steps, determinations, prescribed actions, trigger rules, governance, interconnections, the agent corpus bound to those machines, and the audit records produced by the PE->RE->PE cycle. Machine ABox files under semantics/abox/ are generated from the canonical machine JSON corpus by scripts/generate-owl.py and must stay byte-deterministic." ;
     dcterms:license <https://opensource.org/licenses/MIT> ;
-    owl:versionInfo "0.4.0" .
+    owl:versionInfo "0.5.0" .
 
 #################################################################
 # Classes: structural corpus concepts
@@ -1484,6 +1484,89 @@ re:recordId a owl:DatatypeProperty ;
 # an approved PE source mapping / Deterministic mapping check" and M5
 # "Deterministic closed-world checks". Writing an OWL class that appears to do
 # the job would have made that milestone look finished while checking nothing.
+
+#################################################################
+# Classes: runtime traces (M4)
+#################################################################
+#
+# M2 gave the integration paths a vocabulary and M3 proved the authored corpus
+# against it. Both are static. M4 is the same vocabulary pointed at what
+# actually ran, so that a trace and the corpus it came from are one graph a
+# reasoner can ask questions across.
+#
+# Most of M4 needs nothing new. `re:PerceptionEvent` and `re:SequenceObservation`
+# have been here since the first version, and the engines already emit
+# `GET /api/audit/semantics` records carrying machine, sequence, step and
+# determination IRIs that are byte-identical to the ones `generate-owl.py`
+# writes into the ABox. The join M4's second criterion asks for is therefore
+# real rather than aspirational — it was built before anything needed it.
+#
+# What is added here is only what had no term: the push as an act, the run that
+# groups one cycle, and the few identifiers a trace needs to be joined back to
+# the process that produced it.
+
+re:TraceRun a owl:Class ;
+    obo:IAO_0000115 "One recorded pass through the PE->RE->PE cycle, grouping every event observed during it under a single run identifier so that a trace can be merged, diffed and reasoned over as a unit." ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Trace Run" ;
+    rdfs:comment "The unit of export. Without it, merging two traces produces one indistinguishable pile of events; with it, every event says which run it belongs to." .
+
+re:PerceptionPush a owl:Class ;
+    obo:IAO_0000115 "One assembly-and-push of the universal reality vector from the Perception Engine to a Reality Engine endpoint, naming the endpoint reached and the match algorithm selected for the evaluation it triggers." ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Perception Push" ;
+    rdfs:comment "Distinct from re:PerceptionEvent, which is one source's write into one machine's input region. A push is the whole assembled vector crossing to the RE, and it is what a sequence observation is downstream of." .
+
+#################################################################
+# Properties: runtime traces
+#################################################################
+
+re:inTraceRun a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a runtime event to the recorded run it was observed during." ;
+    rdfs:range re:TraceRun ;
+    rdfs:label "in trace run" ;
+    rdfs:comment "Domain left open: every event class carries this, and asserting a domain would type any individual that used the property." .
+
+re:observedOnEngine a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a trace run to the runtime instance it was recorded from. Machine ids are re-minted per runtime, so a trace that does not say which engine produced it cannot be compared with another." ;
+    rdfs:domain re:TraceRun ; rdfs:range prov:Agent ;
+    rdfs:label "observed on engine" .
+
+re:pushedVector a owl:ObjectProperty ;
+    obo:IAO_0000115 "Relates a sequence observation to the push whose assembled vector it evaluated." ;
+    rdfs:domain re:SequenceObservation ; rdfs:range re:PerceptionPush ;
+    rdfs:subPropertyOf prov:wasInformedBy ;
+    rdfs:label "pushed vector" .
+
+re:runId a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The identifier of one recorded cycle, stable for the life of the trace." ;
+    rdfs:domain re:TraceRun ; rdfs:range xsd:string ;
+    rdfs:label "run id" .
+
+re:engineId a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The instance-registry id of the runtime a trace was recorded from — cpp-1, lsp-1, scala-1." ;
+    rdfs:range xsd:string ;
+    rdfs:label "engine id" .
+
+re:pushId a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The identifier of one push, unique within its trace run." ;
+    rdfs:domain re:PerceptionPush ; rdfs:range xsd:string ;
+    rdfs:label "push id" .
+
+re:targetEndpoint a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The Reality Engine endpoint a push was delivered to, recorded as reached rather than as configured." ;
+    rdfs:domain re:PerceptionPush ; rdfs:range xsd:anyURI ;
+    rdfs:label "target endpoint" .
+
+re:sourceId a owl:DatatypeProperty ;
+    obo:IAO_0000115 "The Perception Engine's identifier for the source that performed a write." ;
+    rdfs:range xsd:string ;
+    rdfs:label "source id" .
+
+re:observedAtMs a owl:DatatypeProperty ;
+    obo:IAO_0000115 "Wall-clock milliseconds at which a runtime event was recorded. Distinct from re:atTick, which is the engine's own step counter: two runtimes agree on the tick and will not agree on the millisecond." ;
+    rdfs:range xsd:long ;
+    rdfs:label "observed at ms" .
 
 #################################################################
 # Upper-ontology placement
