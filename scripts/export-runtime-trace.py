@@ -160,6 +160,31 @@ def approved_mapping_for(sensor_id: str) -> str | None:
     return None
 
 
+def resolve_sequence_iri(machine_iri: str | None, sequence_id: str) -> str | None:
+    """A sequence IRI for this machine, only if the ABox actually declares it.
+
+    The generator writes sequences as `m:seq-<sanitised id>`, and callers may
+    pass the id with or without that prefix. Both spellings are tried and the
+    result is checked against the file — an unverified IRI would be a dangling
+    reference, which a reasoner either rejects or silently treats as a new
+    individual, and the second is worse.
+    """
+    if not machine_iri:
+        return None
+    m = re.match(r"(.*/machines/([\w-]+)/([\w-]+))#machine$", machine_iri)
+    if not m:
+        return None
+    base, domain, stem = m.groups()
+    abox = REPO_ROOT / "semantics" / "abox" / domain / f"{stem}.ttl"
+    if not abox.is_file():
+        return None
+    text = abox.read_text()
+    for candidate in (f"seq-{sequence_id}", sequence_id):
+        if re.search(rf"^m:{re.escape(candidate)}$", text, re.M):
+            return f"{base}#{candidate}"
+    return None
+
+
 def provider_of(machine_name: str | None) -> str | None:
     """The external provider a runtime-injected machine came from, if any.
 
@@ -219,6 +244,16 @@ def export(engine_id: str, re_url: str, pe_url: str, do_push: bool) -> Trace:
     except urllib.error.HTTPError:
         ledger = {"records": []}
     dispatches = ledger.get("records", [])
+
+    # MCP invocations. Until RealityEngine_Machines#152 no runtime recorded
+    # these at all, so the MCP half of a trace could only come from the worked
+    # examples. A runtime that does not serve the ledger yet is a stated gap
+    # rather than an empty list quietly standing in for "none happened".
+    try:
+        invocations = get(f"{pe_url}/api/integrations/localai/ledger").get("records", [])
+        has_invocation_ledger = True
+    except urllib.error.HTTPError:
+        invocations, has_invocation_ledger = [], False
 
     # ── The run ──────────────────────────────────────────────────────────────
     tr.add("t:run", [
@@ -427,6 +462,72 @@ def export(engine_id: str, re_url: str, pe_url: str, do_push: bool) -> Trace:
             if endpoint.get("url") else "",
         ])
         tr.count(cls)
+
+    # ── MCP invocations, results and evidence ────────────────────────────────
+    if not has_invocation_ledger:
+        tr.gap("this runtime serves no /api/integrations/localai/ledger, so MCP "
+               "invocations cannot be traced from it (RealityEngine_Machines#152)")
+    for i, inv in enumerate(invocations):
+        provider = f"prov_:{slug(inv.get('provider') or 'localai')}"
+        inv_iri = f"t:mcp-{i:05d}"
+        stmts = [
+            "a owl:NamedIndividual , re:MCPInvocation",
+            f'rdfs:label "{esc(inv.get("operationId") or inv.get("endpoint"))} #{i:05d}"',
+            f"re:invokesProvider {provider}",
+            f're:integrationEndpoint "{esc(inv.get("endpoint"))}"^^xsd:anyURI',
+            f're:allowedOperationId "{esc(inv.get("operationId"))}"' if inv.get("operationId") else "",
+            f're:requestClass "{esc(inv.get("requestClass"))}"' if inv.get("requestClass") else "",
+            f're:resultClass "{esc(inv.get("resultClass"))}"' if inv.get("resultClass") else "",
+            f're:correlationId "{esc(inv.get("correlationId"))}"' if inv.get("correlationId") else "",
+            f're:observedAtMs "{int(inv.get("startedAt") or 0)}"^^xsd:long',
+            "re:inTraceRun t:run",
+        ]
+        name = inv.get("machineName")
+        machine_iri = corpus_iris.get(name) if name else None
+        if machine_iri:
+            stmts.append(f"re:forMachine <{machine_iri}>")
+        seq_id = inv.get("sequenceId")
+        if seq_id:
+            # Constructed and then *verified against the ABox* before being
+            # asserted. A sequence IRI that names nothing is worse than an
+            # absent one: it is a dangling reference the reasoner will either
+            # reject or silently treat as a fresh individual.
+            seq_iri = resolve_sequence_iri(machine_iri, str(seq_id))
+            if seq_iri:
+                tr.add(inv_iri, [f"re:forSequence <{seq_iri}>"])
+            else:
+                tr.gap(f"invocation names sequenceId {seq_id!r} that resolves to no "
+                       f"sequence in the corpus ABox; recorded without re:forSequence")
+        tr.add(inv_iri, stmts)
+        tr.add(provider, [
+            "a owl:NamedIndividual , re:IntegrationProvider",
+            f'rdfs:label "{esc(inv.get("provider") or "localai")}"',
+            f're:providerId "{esc(inv.get("provider") or "localai")}"',
+        ])
+        tr.count("re:MCPInvocation")
+
+        # A result and its evidence exist only for an invocation that returned
+        # one. A failed call is still recorded as an invocation — that is the
+        # point of recording failures — but it produced nothing to cite.
+        ev = inv.get("evidence") or {}
+        if inv.get("success") and ev:
+            ev_iri = f"t:mcp-evidence-{i:05d}"
+            tr.add(ev_iri, [
+                "a owl:NamedIndividual , re:EvidenceArtifact",
+                f'rdfs:label "evidence for {esc(inv.get("operationId") or inv.get("endpoint"))} #{i:05d}"',
+                f're:evidenceUri "{esc(ev.get("uri"))}"^^xsd:anyURI' if ev.get("uri") else "",
+            ])
+            tr.count("re:EvidenceArtifact")
+            res = [
+                "a owl:NamedIndividual , re:MCPToolResult",
+                f'rdfs:label "result of {esc(inv.get("operationId") or inv.get("endpoint"))} #{i:05d}"',
+                f"re:resultOfInvocation {inv_iri}",
+                f"re:hasEvidenceArtifact {ev_iri}",
+            ]
+            if isinstance(inv.get("confidence"), (int, float)):
+                res.append(f're:resultConfidence "{inv["confidence"]}"^^xsd:decimal')
+            tr.add(f"t:mcp-result-{i:05d}", res)
+            tr.count("re:MCPToolResult")
 
     if push_result is not None:
         d = push_result.get("dispatch") or {}
