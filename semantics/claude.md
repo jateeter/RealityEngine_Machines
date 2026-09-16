@@ -96,6 +96,30 @@ that looks exactly like a clean result.
 Both keep a negative fixture, because a guard with no violating case to catch is
 a guard nobody has seen work.
 
+`scripts/prove-workflows.py` is where the rest of that closed-world work lives —
+M3's six static workflow rules over a named corpus profile, emitting findings as
+`re:SemanticGuardrailViolation` individuals:
+
+| command | scope |
+|---|---|
+| `npm run prove:workflows` | the `standard-deployment` profile; must be clean |
+| `npm run prove:workflows:fixtures` | the negative fixtures; each must fire |
+| `--profile <manifest>` | any corpus manifest, including a full-corpus one |
+
+Gated by `tests/contracts/static_provability_test.py` and
+`tests/contracts/openclaw_profile_drift_test.py`, because a checker nobody
+invokes is not a gate — `generate-regression-profile.py --check` had existed
+since it was written and **nothing called it**.
+
+Two things the prover reports rather than hides. It prints an `UNGATED` line for
+any rule it cannot evaluate: R2's workflow-class half has no source of truth
+(no `integrations.json` entry declares `allowedOperations`), and R6 cannot reach
+the 625 machines that state RED only on a `re:TriggerRule`, because
+`re:matchesOutputPosition` indexes the output *value vector* and not the
+sequence's determination list, so no rule→determination join exists in the
+ABox. Corpus-wide it finds 13 real violations, tracked in #149 — the limited
+profile is the gate, per S7.
+
 The escalation invariant — an emergency-path action may only be prescribed by a
 `RED` determination — is the reason `reason-owl.sh` runs HermiT and not ELK
 alone. ELK does not implement the constructs it relies on and passes a corpus
