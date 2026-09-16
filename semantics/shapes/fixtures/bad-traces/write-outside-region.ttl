@@ -1,0 +1,28 @@
+# A completion write that runs two cells past the region its mapping declares.
+# Arithmetic over asserted values: no reasoner concludes this, because nothing
+# in the graph contradicts anything.
+@prefix re:   <https://realityengine.example.org/ontology/re-core#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix t:    <https://realityengine.example.org/runtime-trace/fixture#> .
+
+t:run
+    a owl:NamedIndividual , re:TraceRun ;
+    rdfs:label "fixture run" ;
+    re:runId "fixture-write-outside-region" .
+
+t:mapping
+    a owl:NamedIndividual , re:CompletionMapping ;
+    rdfs:label "fixture mapping [4210:4214]" ;
+    re:sensorId "acp.openclaw.fixture.completion" ;
+    re:completionOffset 4210 ;
+    re:completionLength 4 .
+
+t:write
+    a owl:NamedIndividual , re:SourceMappingWrite ;
+    rdfs:label "fixture write [4212:4218]" ;
+    re:writesThroughMapping t:mapping ;
+    re:writeOffset 4212 ;
+    re:writeLength 6 ;
+    re:correlationId "fixture-corr-1" ;
+    re:inTraceRun t:run .

@@ -1,0 +1,33 @@
+# Two approved mappings claimed for one write. The approved route is then
+# whichever the reader looks at first, which is not an approval.
+@prefix re:   <https://realityengine.example.org/ontology/re-core#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix t:    <https://realityengine.example.org/runtime-trace/fixture#> .
+
+t:run
+    a owl:NamedIndividual , re:TraceRun ;
+    rdfs:label "fixture run" ;
+    re:runId "fixture-ambiguous-mapping" .
+
+t:mapping-a
+    a owl:NamedIndividual , re:CompletionMapping ;
+    rdfs:label "mapping a" ;
+    re:sensorId "acp.openclaw.a.completion" ;
+    re:completionOffset 4210 ;
+    re:completionLength 4 .
+
+t:mapping-b
+    a owl:NamedIndividual , re:CompletionMapping ;
+    rdfs:label "mapping b" ;
+    re:sensorId "agent.b.completion" ;
+    re:completionOffset 4200 ;
+    re:completionLength 4 .
+
+t:write
+    a owl:NamedIndividual , re:SourceMappingWrite ;
+    rdfs:label "fixture write claiming two mappings" ;
+    re:writesThroughMapping t:mapping-a , t:mapping-b ;
+    re:writeOffset 4210 ;
+    re:writeLength 4 ;
+    re:inTraceRun t:run .

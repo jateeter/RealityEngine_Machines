@@ -1,0 +1,20 @@
+# An invocation of an operation the deployment's catalogue does not allow.
+# Absence from a list is not a contradiction, so this is closed-world by
+# necessity: the reasoner has nothing to reject.
+@prefix re:   <https://realityengine.example.org/ontology/re-core#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix t:    <https://realityengine.example.org/runtime-trace/fixture#> .
+
+t:run
+    a owl:NamedIndividual , re:TraceRun ;
+    rdfs:label "fixture run" ;
+    re:runId "fixture-forbidden-endpoint" .
+
+t:inv
+    a owl:NamedIndividual , re:MCPInvocation ;
+    rdfs:label "invocation of an operation nobody allowed" ;
+    re:allowedOperationId "admin_drop_collection" ;
+    re:integrationEndpoint "http://localhost:4000/admin/drop"^^xsd:anyURI ;
+    re:inTraceRun t:run .

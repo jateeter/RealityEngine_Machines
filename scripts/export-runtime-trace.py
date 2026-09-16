@@ -135,6 +135,31 @@ class Trace:
         }, indent=2)
 
 
+def approved_mapping_for(sensor_id: str) -> str | None:
+    """The integrations.json sourceMappings id whose template this sensor matches.
+
+    Templates carry `{placeholder}` segments — `acp.openclaw.{agent}.completion`
+    — so the match is on shape, not equality. A sensor matching none is reported
+    as a gap rather than given a mapping: an unapproved write must stay visibly
+    unapproved, which is M3's R5 and M5's forbidden-endpoint check.
+    """
+    cfg = REPO_ROOT.parent / "RealityEngine_CI" / "config" / "integrations.json"
+    if not cfg.is_file():
+        return None
+    try:
+        mappings = json.loads(cfg.read_text()).get("sourceMappings", [])
+    except (OSError, ValueError):
+        return None
+    for m in mappings:
+        tpl = m.get("sensorIdTemplate")
+        if not tpl:
+            continue
+        pattern = re.sub(r"\\\{[^}]*\\\}", r"[^.]+", re.escape(tpl))
+        if re.fullmatch(pattern, sensor_id):
+            return m.get("id")
+    return None
+
+
 def provider_of(machine_name: str | None) -> str | None:
     """The external provider a runtime-injected machine came from, if any.
 
@@ -243,9 +268,18 @@ def export(engine_id: str, re_url: str, pe_url: str, do_push: bool) -> Trace:
         if name:
             machine_iri = corpus_iris.get(name)
         sid = slug(src.get("id", "unknown"))
+        # A source whose values arrived from outside the engine is a completion
+        # write-back, not a perception event: it is the last hop of an
+        # integration path, and re:SourceMappingWrite is the class M2 gave it.
+        # Classifying both as re:PerceptionEvent would have made a completion
+        # indistinguishable from a test sequence, which is exactly the
+        # distinction M5's acceptance criteria turn on.
+        is_completion = (src.get("origin") == "external"
+                         or str(src.get("sensorId") or "").startswith(("acp.", "agent.", "localai.")))
+        cls = "re:SourceMappingWrite" if is_completion else "re:PerceptionEvent"
         stmts = [
-            "a owl:NamedIndividual , re:PerceptionEvent",
-            f'rdfs:label "PE source write {esc(src.get("id"))}"',
+            f"a owl:NamedIndividual , {cls}",
+            f'rdfs:label "{"completion write-back" if is_completion else "PE source write"} {esc(src.get("id"))}"',
             f're:sourceId "{esc(src.get("id"))}"',
             f"re:writeOffset {offset}" if isinstance(offset, int) else "",
             f"re:writeLength {length}" if isinstance(length, int) else "",
@@ -273,14 +307,47 @@ def export(engine_id: str, re_url: str, pe_url: str, do_push: bool) -> Trace:
                 f're:providerId "{esc(pid)}"',
             ])
             tr.gap(f"runtime machine not in the corpus, attributed to provider '{pid}'")
+        elif is_completion:
+            # A completion write-back has no machine of its own: it is an
+            # external producer writing into a reserved band, and the producer
+            # is what it joins to. The sensor id names it — acp.openclaw.* is
+            # OpenClaw, localai.* is localAIStack.
+            pid = (str(src.get("sensorId") or "").split(".") or ["external"])[0]
+            if pid == "acp":
+                pid = str(src.get("sensorId") or "").split(".")[1] if "." in str(src.get("sensorId") or "") else "acp"
+            stmts.append(f"re:writtenBy prov_:{slug(pid)}")
+            tr.add(f"prov_:{slug(pid)}", [
+                "a owl:NamedIndividual , re:IntegrationProvider",
+                f'rdfs:label "{esc(pid)}"',
+                f're:providerId "{esc(pid)}"',
+            ])
         else:
             tr.unjoined.append(f"PE source write {src.get('id')}: "
                                f"machineName {name!r} matches no corpus machine "
                                f"and names no provider")
-        if not src.get("correlationId"):
+        if is_completion:
+            # The mapping the write exercised, resolved from the sensor id
+            # against the deployment's approved templates. Stated only when it
+            # resolves: naming a mapping the deployment does not approve would
+            # assert an authorisation that does not exist.
+            mapping = approved_mapping_for(str(src.get("sensorId") or ""))
+            if mapping:
+                mid = f"t:mapping-{slug(mapping)}"
+                stmts.append(f"re:writesThroughMapping {mid}")
+                tr.add(mid, [
+                    "a owl:NamedIndividual , re:CompletionMapping",
+                    f'rdfs:label "{esc(mapping)}"',
+                    f're:sensorId "{esc(src.get("sensorId"))}"',
+                    f"re:completionOffset {offset}" if isinstance(offset, int) else "",
+                    f"re:completionLength {length}" if isinstance(length, int) else "",
+                ])
+            else:
+                tr.gap(f"completion sensor '{src.get('sensorId')}' matches no approved "
+                       f"sourceMappings template")
+        elif not src.get("correlationId"):
             tr.gap("correlation id on PE source writes")
         tr.add(f"t:src-{sid}", stmts)
-        tr.count("re:PerceptionEvent")
+        tr.count(cls)
 
     # ── RE sequence observations ─────────────────────────────────────────────
     for i, rec in enumerate(audit):
