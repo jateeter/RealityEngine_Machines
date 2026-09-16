@@ -41,9 +41,21 @@ test.describe('EngineSwitcher UI', () => {
     const switcher = page.locator('[title="Switch active engine instance"]');
     await switcher.click();
 
-    // All instances should appear in the dropdown
+    // Scope to the open dropdown, not the page.
+    //
+    // `page.getByText(inst.id)` matched twice for the active instance: the
+    // collapsed switcher button renders its id alongside the dropdown's list
+    // item, and Playwright's strict mode rejects a locator resolving to two
+    // elements. The CI workflow excluded this spec by name to get past it.
+    //
+    // Asserting inside the dropdown is also the stronger claim — "listed in the
+    // dropdown" rather than "appears somewhere on the page", which the
+    // collapsed button alone would have satisfied even if the dropdown were
+    // empty.
+    const dropdown = page.getByTestId('engine-switcher-dropdown');
+    await expect(dropdown).toBeVisible({ timeout: 5_000 });
     for (const inst of instances) {
-      await expect(page.getByText(inst.id)).toBeVisible({ timeout: 5_000 });
+      await expect(dropdown.getByText(inst.id, { exact: true })).toBeVisible({ timeout: 5_000 });
     }
   });
 
