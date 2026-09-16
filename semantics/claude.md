@@ -20,6 +20,17 @@ by verification and auditing in the RE and PE components. See
   meaning, so two sources naming it differently is an inconsistency rather than
   a variant spelling. `generate-owl.py` does not emit these individuals yet;
   the vocabulary is declared ahead of the generator.
+- Integration vocabulary (`0.4.0`): `re:MCPInvocation`, `re:MCPToolResult`,
+  `re:ACPDispatch`, `re:OpenClawAgentBinding`, `re:SourceMappingWrite`,
+  `re:SemanticGuardrailViolation`, plus `re:IntegrationProvider` and
+  `re:EvidenceArtifact` to give provider and evidence a range. M2 of the
+  roadmap. `re:OpenClawAgentBinding` declares **no properties of its own** on
+  purpose — machine, agent id, input axes, autonomy mode and completion mapping
+  are `re:AgentBinding`'s already, and a second name for one fact is a second
+  thing to keep in step. Worked examples live in `integration/examples.ttl`,
+  are hand-authored rather than generated, and are merged by `reason-owl.sh` in
+  **every** scope so M2's "one MCP and one ACP workflow classify" is gated
+  rather than asserted.
 - `abox/<domain>/<MachineFile>.ttl`: generated per-machine ABox files.
   **Never edit by hand** — regenerate with
   `python3 scripts/generate-owl.py --machine <json> --write`. Machine JSON
@@ -51,26 +62,39 @@ switched off — which is worse than a smaller gate that keeps running. The
 minimal corpus is chosen to be *provable*, not merely small: it carries the
 machine classes, the bus and the fixtures the contracts are stated against.
 
-## The ROBOT report profile, and its two deliberate INFOs
+## The ROBOT report profile, and why it is now at zero
 
 `robot-report-profile.txt` lists all 32 rules ROBOT ships rather than expressing
-a delta, so a rule cannot be disabled by omission (#46). Two of them report
-against this ontology permanently, and that is a decision rather than a backlog:
+a delta, so a rule cannot be disabled by omission (#46).
 
-- **`missing_definition` (120)** looks for a definition annotation property
-  (`IAO:0000115` by convention). This ontology documents with `rdfs:comment`
-  instead, and every class carries one — asserted by
-  `owl_semantics_test.test_every_class_is_documented`. Properties are described
-  by label, domain and range; requiring prose for each would add ~104
-  restatements of the obvious.
-- **`missing_superclass` (16)** wants every class under an upper ontology (BFO
-  or similar). These 16 are the vocabulary's root concepts — `re:Machine`,
-  `re:Determination`, `re:Action` and so on. Introducing a vacuous `re:Entity`
-  to satisfy a linter would add a layer carrying no information.
+This section used to record two rules as permanently reporting — 120
+`missing_definition` and 16 `missing_superclass` — and argued both were OBO
+publishing conventions this ontology need not satisfy. **That is no longer the
+state.** Both were closed rather than tolerated: every class carries an
+`obo:IAO_0000115` definition, and the root classes sit under PROV, which says
+something true about them instead of introducing a vacuous `re:Entity`.
 
-Both are OBO Foundry publishing conventions, and this is not a published OBO
-ontology. `ERROR` and `WARN` are both zero and should stay that way; a new
-violation at either level is a real defect.
+`ERROR`, `WARN` and `INFO` are all zero. A violation at **any** of the three is
+now a real signal, which it was not while 136 were expected — an argument for
+tolerating a nonzero baseline is also an argument for never noticing the 137th.
+A class added without a definition is caught by
+`integration_vocabulary_test.test_every_new_class_carries_a_definition` before
+it reaches the report.
+
+## What OWL is not asked to check here
+
+Two invariants are deliberately **not** ontology axioms, for one shared reason:
+the open world concludes nothing from a *missing* assertion, so a class defined
+over an absence is inert — and an inert defined class has an empty extension
+that looks exactly like a clean result.
+
+| Invariant | Checked in | Why not in OWL |
+|---|---|---|
+| An escalating determination states its RAG status | `tests/contracts/escalation_rag_test.py` | unstated is not a contradiction; the axiom evaluated 2 of 80 escalations |
+| A source mapping write names a completion mapping | `tests/contracts/integration_vocabulary_test.py` | `owl:maxCardinality 0` is never entailed; HermiT classified the negative fixture as nothing |
+
+Both keep a negative fixture, because a guard with no violating case to catch is
+a guard nobody has seen work.
 
 The escalation invariant — an emergency-path action may only be prescribed by a
 `RED` determination — is the reason `reason-owl.sh` runs HermiT and not ELK

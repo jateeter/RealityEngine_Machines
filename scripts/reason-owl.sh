@@ -117,6 +117,12 @@ WORKDIR="$(mktemp -d)"
 trap 'rm -rf "$WORKDIR"' EXIT
 
 MERGE_INPUTS=(--input "$REPO_ROOT/semantics/ontology/re-core.ttl")
+# The integration worked examples ride along in every scope. They are ~120
+# triples, so the cost is nil, and merging them is what makes M2's "at least one
+# MCP and one ACP workflow classify under the new vocabulary" a gate rather than
+# a claim. They also join to real corpus machine IRIs, so a merge that cannot
+# resolve them says the vocabulary has come adrift from the corpus.
+MERGE_INPUTS+=(--input "$REPO_ROOT/semantics/integration/examples.ttl")
 if [ "$SCOPE" = "manifest" ]; then
   MANIFEST="$(resolve_manifest "$MANIFEST")"
   LABEL="corpus manifest $(basename "$MANIFEST")"
