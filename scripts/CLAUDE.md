@@ -1,16 +1,16 @@
-# RealityEngine_Machines Corpus Guidance
+# RealityEngine_Machines Scripts Guidance
 
-This directory contains the canonical machine definitions consumed by every engine.
+This directory contains corpus validation, backfill, and maintenance scripts.
 
-- Keep IDs, schema fields, triggers, and domain placement stable unless the change is intentional.
-- Validate with `npm run validate` or stricter contract tests after corpus changes.
-- Remember that C++, LSP, Scala, Manager, and localAIStack workflows may all consume this data.
-- Use JSON schema support when editing machine files.
+- Keep scripts deterministic and explicit about input/output paths.
+- Avoid rewriting large corpus areas without a clear user request.
+- Prefer registry-aware live checks when scripts validate runtime behavior.
+- Use TypeScript or Bash language servers as appropriate.
 
 ## Standing rules — authoritative in `../../RealityEngine_CI/docs/ENGINEERING_CONTRACT.md`
 
 These apply here and are **not** restated in this file. They were previously
-copied into eighteen `claude.md` files across six repositories, which is the
+copied into eighteen `CLAUDE.md` files across six repositories, which is the
 duplication problem the rules themselves warn about: copies drift, a rule added
 to one applies only where someone looked, and with no authority a reader cannot
 tell which copy is current.

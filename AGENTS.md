@@ -1,6 +1,6 @@
 # Codex Guidance: RealityEngine_Machines
 
-Read `claude.md` for the current codebase map and corpus contract context.
+Read `CLAUDE.md` for the current codebase map and corpus contract context.
 
 ## Role
 

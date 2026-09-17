@@ -1,16 +1,15 @@
-# RealityEngine_Machines Scripts Guidance
+# RealityEngine_Machines Docs Guidance
 
-This directory contains corpus validation, backfill, and maintenance scripts.
+This directory documents the machine corpus, schemas, triggers, and operating expectations.
 
-- Keep scripts deterministic and explicit about input/output paths.
-- Avoid rewriting large corpus areas without a clear user request.
-- Prefer registry-aware live checks when scripts validate runtime behavior.
-- Use TypeScript or Bash language servers as appropriate.
+- Update docs when schema fields, trigger shape, machine organization, or test commands change.
+- Keep cross-repo assumptions linked to `/Users/johnt/workspace/GitHub/CLAUDE.md`.
+- Use markdown LSP support for structural edits.
 
 ## Standing rules — authoritative in `../../RealityEngine_CI/docs/ENGINEERING_CONTRACT.md`
 
 These apply here and are **not** restated in this file. They were previously
-copied into eighteen `claude.md` files across six repositories, which is the
+copied into eighteen `CLAUDE.md` files across six repositories, which is the
 duplication problem the rules themselves warn about: copies drift, a rule added
 to one applies only where someone looked, and with no authority a reader cannot
 tell which copy is current.
