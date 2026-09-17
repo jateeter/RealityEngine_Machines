@@ -74,6 +74,15 @@ jobs:
           repository: jateeter/localAIStack
           path: localAIStack
 
+      # prove-workflows resolves OPENCLAW_ROOT as a workspace sibling and reads
+      # machine-behaviors/agents/INDEX.json for the agent inventory. Without it
+      # R3 and R4 evaluate 0 cases, which static_provability_test exists to
+      # reject -- "A clean run over nothing is not a clean run."
+      - uses: actions/checkout@v7
+        with:
+          repository: jateeter/localOpenClawStack
+          path: localOpenClawStack
+
       - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
