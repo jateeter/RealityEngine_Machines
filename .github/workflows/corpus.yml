@@ -1,25 +1,42 @@
-# Corpus validation.
+# Corpus validation — deliberately minimal.
 #
-# Until this file existed, nothing in this repository ran on a pull request.
-# `.github/` held only dependabot.yml, so `validate-corpus.sh`, the contract
-# suite and the inventory gates ran when a person remembered to run them. The
-# engineering contract records the symptom from the outside -- "RealityEngine_
-# Machines PRs report exactly one check (GitGuardian); that is not evidence
-# about the corpus, the registries, the engines, or any bridge" -- and the cause
-# was that there was nothing to report.
+# This lane exists to force the local validation, not to stand in for it.
+# `RealityEngine_CI/docs/ENGINEERING_CONTRACT.md` is authoritative: peripheral
+# repositories keep repo-specific CI small, and a fix is fully verified by the
+# _CI repo against a live universe.
 #
-# The gap was not theoretical. RealityEngine_Machines#158 merged a static gate
-# that failed on its own docstring: it scans `git ls-files`, so it excluded
-# itself while untracked, passed every pre-merge run, and went red the moment
-# the merge made it tracked. Nothing said so.
+# So this runs cheap, checkout-local gates and nothing else. It does NOT check
+# out sibling repositories, install heavy toolchains, or approximate a universe
+# — that work belongs in _CI, and a lane that needs three sibling checkouts to
+# mean anything has outgrown its remit.
+#
+# This file previously did all three. It checked out RealityEngine_CI,
+# localAIStack and localOpenClawStack, and installed ROBOT + Temurin to run the
+# OWL reasoner. That was added for a real reason — without the siblings the
+# cesgen registry check degrades to "12 scopes" instead of 16 and
+# prove-workflows evaluates 0 agents — but it was the wrong fix in the wrong
+# repository. The answer to "this lane cannot see enough to be meaningful" is to
+# let _CI verify it, not to rebuild a workspace here.
 #
 # WHAT THIS DOES NOT COVER
 # ------------------------
-# No engine, universe, PE or RE is started here. This repo owns the corpus, not
-# the runtimes: cross-runtime parity, CES contract recording and load-count
-# agreement need a live 3-of-3 universe and belong to RealityEngine_CI's
-# regression lanes. A green run here means the corpus is internally consistent
-# and its derived artifacts are current -- nothing about how an engine reads it.
+# Named rather than left silent, because a SKIP scrolling past in a green log is
+# how an unwired check goes unnoticed — the failure this repo has already paid
+# for twice (#115, #158). None of the following runs here; all of it belongs to
+# _CI's regression lanes:
+#
+#   cesgen registry, full        needs RealityEngine_CI checked out alongside
+#                                (corpus scopes + contract shards). Degrades to
+#                                the corpus half, which still fails on drift.
+#   prove-workflows R3/R4        needs localOpenClawStack's agent index
+#   regression corpus scope      needs localAIStack's three machines
+#   reason-owl / OWL reasoning   needs ROBOT + a JVM
+#   validate-guardrails          needs pyshacl
+#   extract-qudt-subset          needs rdflib + the gitignored .qudt-cache
+#
+# A green run here means the corpus is internally consistent and its derived
+# artifacts are current, as far as a lone checkout can tell. It is not evidence
+# that a change works, and must never be presented as such.
 
 name: corpus
 
@@ -39,49 +56,9 @@ jobs:
   validate:
     name: Corpus validation
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    # The cesgen registry check reads two sibling repos, and degrades quietly
-    # without them rather than failing:
-    #
-    #   RealityEngine_CI   the four corpus scopes (config/*-corpus.txt) and the
-    #                      contract shards (config/ces-contracts/). Absent, the
-    #                      gate reports "12 scopes" instead of 16 and exits 0.
-    #   localAIStack       owns three machines the regression selection names.
-    #                      Absent, that scope shrinks 21 -> 18 machines and its
-    #                      fingerprint changes.
-    #
-    # build-ces-contract-registry.py resolves both as siblings of this repo, and
-    # `LOCAL_AI_MACHINES` has no env override -- so the checkout has to produce
-    # the real layout rather than point at it. Hence the three paths below and
-    # `working-directory` on every step. Both repos are public and together
-    # ~3.4 MB; the alternative was a green check standing in for four scopes and
-    # three machines nobody looked at.
-    defaults:
-      run:
-        working-directory: RealityEngine_Machines
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
-        with:
-          path: RealityEngine_Machines
-
-      - uses: actions/checkout@v7
-        with:
-          repository: jateeter/RealityEngine_CI
-          path: RealityEngine_CI
-
-      - uses: actions/checkout@v7
-        with:
-          repository: jateeter/localAIStack
-          path: localAIStack
-
-      # prove-workflows resolves OPENCLAW_ROOT as a workspace sibling and reads
-      # machine-behaviors/agents/INDEX.json for the agent inventory. Without it
-      # R3 and R4 evaluate 0 cases, which static_provability_test exists to
-      # reject -- "A clean run over nothing is not a clean run."
-      - uses: actions/checkout@v7
-        with:
-          repository: jateeter/localOpenClawStack
-          path: localOpenClawStack
 
       - uses: actions/setup-python@v7
         with:
@@ -91,7 +68,6 @@ jobs:
         with:
           node-version: '25'
           cache: npm
-          cache-dependency-path: RealityEngine_Machines/package-lock.json
 
       # ajv + ajv-formats back validate-schemas.mjs, the last stage of
       # validate-corpus.sh. Without node_modules that stage prints SKIPPED and
@@ -100,85 +76,21 @@ jobs:
         run: npm ci
 
       # The audit scripts are stdlib-only; jsonschema is what the contract suite
-      # needs. Deliberately NOT installed: pyshacl and rdflib -- see the
-      # "unexercised" step below.
+      # needs. Nothing heavier is installed here on purpose — see the header.
       - name: Install python dependencies
         run: python -m pip install --disable-pip-version-check jsonschema
 
       - name: Validate corpus
         run: npm run validate
 
-      # `npm run test:contracts` is already `unittest discover` -- the same
-      # invocation run-all-tests.sh uses. Calling the declared script rather
-      # than restating it keeps one definition of what the suite is.
-      # -v names every test and every skip reason. Without it the suite reports
-      # a count, and a count cannot answer "which tests did this environment not
-      # run?" -- the question that took four runs to answer while wiring this
-      # lane, when CI collected 206 tests against 212 in a clean local clone.
+      # `npm run test:contracts` is already `unittest discover` — the same
+      # invocation run-all-tests.sh uses. -v names every test and every skip
+      # reason, so "which tests did this environment not run?" is answerable
+      # from the log rather than by inference.
       - name: Contract suite
         run: npm run test:contracts -- -v
 
-      # Two gates inside validate-corpus.sh print SKIPPED in this environment.
-      # They are named here rather than left silent, because a SKIP scrolling
-      # past in a green log is exactly how an unwired check goes unnoticed --
-      # the failure this repo has already paid for twice (#115, #158).
-      #
-      #   validate-guardrails      needs pyshacl
-      #   extract-qudt-subset      needs rdflib AND .qudt-cache, which is
-      #                            gitignored and fetched by `npm run
-      #                            qudt:extract --download`
-      #
-      # pyshacl pulls rdflib in, which would un-skip the QUDT gate and send it
-      # looking for a cache no checkout has. Wiring both needs the cache story
-      # settled first and is deliberately left to a follow-up.
-      #
-      # reason-owl also SKIPs here -- no ROBOT in this job by design. It is not
-      # unexercised: the semantics job below installs ROBOT and runs it, which
-      # is the whole reason that job exists separately.
-      - name: Report unexercised gates
+      - name: Report what this lane cannot check
         if: always()
         run: |
-          echo "::notice title=Unexercised gates::validate-guardrails (pyshacl) and extract-qudt-subset (rdflib + .qudt-cache) SKIP in this lane. reason-owl SKIPs here and runs in the semantics job."
-
-  semantics:
-    name: OWL reasoning (ROBOT)
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-python@v7
-        with:
-          python-version: '3.13'
-
-      - uses: actions/setup-java@v6
-        with:
-          distribution: temurin
-          java-version: '21'
-
-      # reason-owl.sh prints SKIPPED and exits 0 when ROBOT is absent, which is
-      # correct for a laptop and wrong for a gate: the whole job would pass
-      # having reasoned over nothing. It runs in its own job so that a ROBOT or
-      # JVM problem reads as a toolchain failure rather than as a corpus one,
-      # and so the skip cannot hide inside a green corpus run.
-      - name: Install ROBOT
-        run: |
-          set -euo pipefail
-          mkdir -p "$HOME/.local/bin"
-          curl -fsSL -o "$HOME/.local/bin/robot.jar" \
-            https://github.com/ontodev/robot/releases/download/v1.9.10/robot.jar
-          curl -fsSL -o "$HOME/.local/bin/robot" \
-            https://raw.githubusercontent.com/ontodev/robot/v1.9.10/bin/robot
-          chmod +x "$HOME/.local/bin/robot"
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-
-      - name: Verify ROBOT is present
-        run: robot --version
-
-      # The script defaults to -Xmx12g. A public-repo ubuntu-latest runner has
-      # 16 GB total, so that leaves the JVM competing with everything else on
-      # the box; 6 GB is enough for this corpus and leaves headroom.
-      - name: Reason over merged ontology
-        env:
-          ROBOT_JAVA_ARGS: -Xmx6g
-        run: bash scripts/reason-owl.sh
+          echo "::notice title=Verified in _CI, not here::cesgen registry (full), prove-workflows R3/R4, regression corpus scope, OWL reasoning, validate-guardrails, extract-qudt-subset. This lane is checkout-local by design; RealityEngine_CI verifies the rest against a live universe."
