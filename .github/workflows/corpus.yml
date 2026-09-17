@@ -1,0 +1,139 @@
+# Corpus validation.
+#
+# Until this file existed, nothing in this repository ran on a pull request.
+# `.github/` held only dependabot.yml, so `validate-corpus.sh`, the contract
+# suite and the inventory gates ran when a person remembered to run them. The
+# engineering contract records the symptom from the outside -- "RealityEngine_
+# Machines PRs report exactly one check (GitGuardian); that is not evidence
+# about the corpus, the registries, the engines, or any bridge" -- and the cause
+# was that there was nothing to report.
+#
+# The gap was not theoretical. RealityEngine_Machines#158 merged a static gate
+# that failed on its own docstring: it scans `git ls-files`, so it excluded
+# itself while untracked, passed every pre-merge run, and went red the moment
+# the merge made it tracked. Nothing said so.
+#
+# WHAT THIS DOES NOT COVER
+# ------------------------
+# No engine, universe, PE or RE is started here. This repo owns the corpus, not
+# the runtimes: cross-runtime parity, CES contract recording and load-count
+# agreement need a live 3-of-3 universe and belong to RealityEngine_CI's
+# regression lanes. A green run here means the corpus is internally consistent
+# and its derived artifacts are current -- nothing about how an engine reads it.
+
+name: corpus
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Corpus validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '25'
+          cache: npm
+
+      # ajv + ajv-formats back validate-schemas.mjs, the last stage of
+      # validate-corpus.sh. Without node_modules that stage prints SKIPPED and
+      # the schema check silently does not happen.
+      - name: Install node dependencies
+        run: npm ci
+
+      # The audit scripts are stdlib-only; jsonschema is what the contract suite
+      # needs. Deliberately NOT installed: pyshacl and rdflib -- see the
+      # "unexercised" step below.
+      - name: Install python dependencies
+        run: python -m pip install --disable-pip-version-check jsonschema
+
+      - name: Validate corpus
+        run: npm run validate
+
+      # `npm run test:contracts` is already `unittest discover` -- the same
+      # invocation run-all-tests.sh uses. Calling the declared script rather
+      # than restating it keeps one definition of what the suite is.
+      - name: Contract suite
+        run: npm run test:contracts
+
+      # Two gates inside validate-corpus.sh print SKIPPED in this environment.
+      # They are named here rather than left silent, because a SKIP scrolling
+      # past in a green log is exactly how an unwired check goes unnoticed --
+      # the failure this repo has already paid for twice (#115, #158).
+      #
+      #   validate-guardrails      needs pyshacl
+      #   extract-qudt-subset      needs rdflib AND .qudt-cache, which is
+      #                            gitignored and fetched by `npm run
+      #                            qudt:extract --download`
+      #
+      # pyshacl pulls rdflib in, which would un-skip the QUDT gate and send it
+      # looking for a cache no checkout has. Wiring both needs the cache story
+      # settled first and is deliberately left to a follow-up.
+      #
+      # reason-owl also SKIPs here -- no ROBOT in this job by design. It is not
+      # unexercised: the semantics job below installs ROBOT and runs it, which
+      # is the whole reason that job exists separately.
+      - name: Report unexercised gates
+        if: always()
+        run: |
+          echo "::notice title=Unexercised gates::validate-guardrails (pyshacl) and extract-qudt-subset (rdflib + .qudt-cache) SKIP in this lane. reason-owl SKIPs here and runs in the semantics job."
+
+  semantics:
+    name: OWL reasoning (ROBOT)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # reason-owl.sh prints SKIPPED and exits 0 when ROBOT is absent, which is
+      # correct for a laptop and wrong for a gate: the whole job would pass
+      # having reasoned over nothing. It runs in its own job so that a ROBOT or
+      # JVM problem reads as a toolchain failure rather than as a corpus one,
+      # and so the skip cannot hide inside a green corpus run.
+      - name: Install ROBOT
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL -o "$HOME/.local/bin/robot.jar" \
+            https://github.com/ontodev/robot/releases/download/v1.9.10/robot.jar
+          curl -fsSL -o "$HOME/.local/bin/robot" \
+            https://raw.githubusercontent.com/ontodev/robot/v1.9.10/bin/robot
+          chmod +x "$HOME/.local/bin/robot"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Verify ROBOT is present
+        run: robot --version
+
+      # The script defaults to -Xmx12g. A public-repo ubuntu-latest runner has
+      # 16 GB total, so that leaves the JVM competing with everything else on
+      # the box; 6 GB is enough for this corpus and leaves headroom.
+      - name: Reason over merged ontology
+        env:
+          ROBOT_JAVA_ARGS: -Xmx6g
+        run: bash scripts/reason-owl.sh
