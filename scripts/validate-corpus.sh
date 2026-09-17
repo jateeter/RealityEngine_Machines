@@ -91,6 +91,14 @@ python3 "$SCRIPT_DIR/build-ces-contract-registry.py" --check
 
 python3 "$SCRIPT_DIR/check-generators.py" --check
 
+# The mirror image of the gate above: a command this repo tells someone to run
+# that no longer exists. check-generators catches a generator reachable from
+# nothing; this catches a call that reaches nothing. A retired tool left in a
+# regeneration recipe is how RealityEngine_Machines#115 outlived the artifact it
+# was about -- and the recipe in question sits in a one-shot migration script
+# that check-generators correctly excludes, so nothing was looking at it.
+python3 "$SCRIPT_DIR/check-command-refs.py" --check
+
 # JSON-Schema enforcement (machines + registries + trigger files vs schemas/).
 # Requires devDependencies (ajv); skip with a clear notice if not installed so
 # the Python audit still runs in minimal environments.

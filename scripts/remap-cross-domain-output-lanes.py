@@ -22,12 +22,33 @@ OpenClaw agent projections stay valid. For every mover it updates:
     references to a moved bus or producer)
 
 Relocation blocks live in the free window at 7300-7440 (verified against the
-allocation registry: no machine lanes, bus lanes, service lanes, or reserved
-bands). Regenerate the derived artifacts afterwards:
+region-allocation registry: no machine lanes, bus lanes, service lanes, or
+reserved bands). Regenerate the derived artifacts afterwards:
 
   npm run semantic-buses:write && npm run corpus-index:write && \
-  npm run region-allocation:write && node scripts/cesgen-oracles.mjs && \
-  node scripts/cesgen-contracts.mjs
+  npm run region-allocation:write
+
+Then `npm run ces-contracts:check`, which reports the cesgen registry shards the
+move invalidated. Re-recording a shard is CI-side work; nothing here does it.
+
+This recipe used to end by invoking two more scripts, and neither exists. They
+are named here without their `node` prefix on purpose: a retired command written
+in runnable form is what `scripts/check-command-refs.py` exists to reject.
+
+  scripts/cesgen-oracles.mjs     lives in RealityEngine_CI, not this repo
+  scripts/cesgen-contracts.mjs   retired with the artifact it wrote
+
+`cesgen-contracts.mjs` produced `contracts.json`, a cross-runtime parity
+recording last written 2026-07-10 by this very script's commit and still being
+replayed against a corpus rewritten 2026-09-04. It asserted a behaviour the
+corpus no longer had, and the drift went unseen for nine weeks because the
+generator's own `--check` was wired into nothing. Both the generator and the
+artifact were retired (RealityEngine_CI#327, RealityEngine_Machines#115).
+
+Cross-runtime CES contract recording now lives in
+`RealityEngine_CI/scripts/regression-ces-contracts.py`, which writes
+`RealityEngine_CI/config/ces-contracts.json` from 3-of-3 engine agreement and is
+gated by that repo's `run-all-tests.sh`.
 
 Usage: python3 scripts/remap-cross-domain-output-lanes.py [--dry-run]
 """
