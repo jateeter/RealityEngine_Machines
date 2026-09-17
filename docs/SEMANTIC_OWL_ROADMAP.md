@@ -1,6 +1,21 @@
 # OWL Semantic Representation Roadmap
 
-Last reviewed: 2026-07-29
+Last reviewed: 2026-09-16 · Status: **M0-M5 complete and closed 2026-09-14**
+
+This roadmap is the corpus's own OWL rollout — generation, action vocabulary,
+corpus-wide gates, engine surfacing, audit records. It is finished.
+
+It is **not** `RealityEngine_CPP/docs/SEMANTIC_OWL_ROADMAP.md`, which shares this
+filename and covers a different sequence: the blocking ROBOT gate, the
+integration vocabulary, static provability, runtime traces and dynamic
+validation. That one is also complete (M1-M5, 2026-09-16). Two roadmaps, one
+filename, and a reader who finds the wrong copy will draw the wrong conclusion —
+so each now says which it is.
+
+What has been built on top of this one since it closed, all in the CPP roadmap's
+sequence: `re-core.ttl` 0.3.1 -> 0.5.0 with the integration and runtime-trace
+vocabularies, `scripts/prove-workflows.py` (M3), `scripts/export-runtime-trace.py`
+(M4) and `scripts/validate-runtime-trace.py` (M5). Contract suite 212 passing.
 
 ## Purpose
 
