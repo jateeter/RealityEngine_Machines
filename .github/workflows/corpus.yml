@@ -40,20 +40,39 @@ jobs:
     name: Corpus validation
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # The cesgen registry check reads two sibling repos, and degrades quietly
+    # without them rather than failing:
+    #
+    #   RealityEngine_CI   the four corpus scopes (config/*-corpus.txt) and the
+    #                      contract shards (config/ces-contracts/). Absent, the
+    #                      gate reports "12 scopes" instead of 16 and exits 0.
+    #   localAIStack       owns three machines the regression selection names.
+    #                      Absent, that scope shrinks 21 -> 18 machines and its
+    #                      fingerprint changes.
+    #
+    # build-ces-contract-registry.py resolves both as siblings of this repo, and
+    # `LOCAL_AI_MACHINES` has no env override -- so the checkout has to produce
+    # the real layout rather than point at it. Hence the three paths below and
+    # `working-directory` on every step. Both repos are public and together
+    # ~3.4 MB; the alternative was a green check standing in for four scopes and
+    # three machines nobody looked at.
+    defaults:
+      run:
+        working-directory: RealityEngine_Machines
     steps:
       - uses: actions/checkout@v7
+        with:
+          path: RealityEngine_Machines
 
-      # The cesgen registry check needs RealityEngine_CI reachable: the four
-      # corpus scopes come from its config/*-corpus.txt and the contract shards
-      # live under config/ces-contracts/. Without it the gate degrades to
-      # "corpus half verified -- 12 scopes" and still exits 0, which is a green
-      # check standing in for four scopes nobody looked at. Public and ~3 MB,
-      # so a sibling checkout is the cheap honest fix rather than a documented
-      # gap. build-ces-contract-registry.py reads REALITY_ENGINE_CI_DIR.
       - uses: actions/checkout@v7
         with:
           repository: jateeter/RealityEngine_CI
-          path: .sibling/RealityEngine_CI
+          path: RealityEngine_CI
+
+      - uses: actions/checkout@v7
+        with:
+          repository: jateeter/localAIStack
+          path: localAIStack
 
       - uses: actions/setup-python@v7
         with:
@@ -63,6 +82,7 @@ jobs:
         with:
           node-version: '25'
           cache: npm
+          cache-dependency-path: RealityEngine_Machines/package-lock.json
 
       # ajv + ajv-formats back validate-schemas.mjs, the last stage of
       # validate-corpus.sh. Without node_modules that stage prints SKIPPED and
@@ -77,8 +97,6 @@ jobs:
         run: python -m pip install --disable-pip-version-check jsonschema
 
       - name: Validate corpus
-        env:
-          REALITY_ENGINE_CI_DIR: ${{ github.workspace }}/.sibling/RealityEngine_CI
         run: npm run validate
 
       # `npm run test:contracts` is already `unittest discover` -- the same
