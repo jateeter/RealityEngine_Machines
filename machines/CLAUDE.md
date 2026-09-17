@@ -1,15 +1,16 @@
-# RealityEngine_Machines Docs Guidance
+# RealityEngine_Machines Corpus Guidance
 
-This directory documents the machine corpus, schemas, triggers, and operating expectations.
+This directory contains the canonical machine definitions consumed by every engine.
 
-- Update docs when schema fields, trigger shape, machine organization, or test commands change.
-- Keep cross-repo assumptions linked to `/Users/johnt/workspace/GitHub/claude.md`.
-- Use markdown LSP support for structural edits.
+- Keep IDs, schema fields, triggers, and domain placement stable unless the change is intentional.
+- Validate with `npm run validate` or stricter contract tests after corpus changes.
+- Remember that C++, LSP, Scala, Manager, and localAIStack workflows may all consume this data.
+- Use JSON schema support when editing machine files.
 
 ## Standing rules — authoritative in `../../RealityEngine_CI/docs/ENGINEERING_CONTRACT.md`
 
 These apply here and are **not** restated in this file. They were previously
-copied into eighteen `claude.md` files across six repositories, which is the
+copied into eighteen `CLAUDE.md` files across six repositories, which is the
 duplication problem the rules themselves warn about: copies drift, a rule added
 to one applies only where someone looked, and with no authority a reader cannot
 tell which copy is current.
