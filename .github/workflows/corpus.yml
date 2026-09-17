@@ -111,8 +111,12 @@ jobs:
       # `npm run test:contracts` is already `unittest discover` -- the same
       # invocation run-all-tests.sh uses. Calling the declared script rather
       # than restating it keeps one definition of what the suite is.
+      # -v names every test and every skip reason. Without it the suite reports
+      # a count, and a count cannot answer "which tests did this environment not
+      # run?" -- the question that took four runs to answer while wiring this
+      # lane, when CI collected 206 tests against 212 in a clean local clone.
       - name: Contract suite
-        run: npm run test:contracts
+        run: npm run test:contracts -- -v
 
       # Two gates inside validate-corpus.sh print SKIPPED in this environment.
       # They are named here rather than left silent, because a SKIP scrolling
