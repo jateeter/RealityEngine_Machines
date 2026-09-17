@@ -4,10 +4,11 @@
 WHY THIS EXISTS
 ---------------
 `scripts/remap-cross-domain-output-lanes.py` ended its regeneration recipe with
-two commands that had ceased to exist:
+two commands that had ceased to exist (named below without their `node` prefix,
+because this file is scanned by its own gate -- see SCANS ITSELF):
 
-    node scripts/cesgen-oracles.mjs     lives in RealityEngine_CI, not here
-    node scripts/cesgen-contracts.mjs   retired with the artifact it wrote
+    scripts/cesgen-oracles.mjs     lives in RealityEngine_CI, not here
+    scripts/cesgen-contracts.mjs   retired with the artifact it wrote
 
 The second wrote `contracts.json`, a cross-runtime parity recording that went
 nine weeks stale and was replayed all that time against a corpus it no longer
@@ -40,14 +41,33 @@ For every tracked text file, each of these that names a target in THIS repo:
     python3 scripts/<file>.py   -> the file exists
     bash scripts/<file>.sh      -> the file exists
 
-A reference introduced by another workspace repository -- `cd ../RealityEngine_CI
-&& node scripts/x.mjs` -- resolves against that repo's tree, not this one, and is
-skipped. The test is proximity, not the whole line: a sibling repo named 200
-characters away in a prose paragraph says nothing about which tree the command
-runs in, and treating it as cross-repo would silently drop this repo's own
-references from the checked set. Skipped references are listed under --summary so
-the unchecked set stays visible rather than silently absent -- which is the
-failure mode this file exists to stop, and not one to reproduce inside it.
+A reference introduced by another workspace repository resolves against that
+repo's tree, not this one, and is skipped -- the shape is a sibling repo path
+immediately before the command, as in a `cd ../RealityEngine_CI && ...` prefix.
+
+The test is proximity within one line, not the whole line and not across lines.
+A sibling repo named 200 characters away in a prose paragraph says nothing about
+which tree the command runs in, and treating it as cross-repo would silently drop
+this repo's own references from the checked set. Skipped references are listed
+under --summary so the unchecked set stays visible rather than silently absent --
+which is the failure mode this file exists to stop, and not one to reproduce
+inside it.
+
+SCANS ITSELF
+------------
+This file is tracked, so its own gate reads it. That is deliberate and must stay
+that way: a checker exempt from its own rule is the blind spot it was written to
+close, and `remap-cross-domain-output-lanes.py` rotted inside exactly such an
+exemption in check-generators' EXCLUDED set.
+
+The cost is that prose here cannot name a retired command in runnable form. Drop
+the `node`/`python3`/`bash` prefix when discussing one, as above. Do not add a
+self-exclusion to make a docstring convenient.
+
+This was not theory. The first version of this file shipped failing its own gate:
+the scan reads `git ls-files`, the file was untracked while being verified, and it
+came into scope only once committed -- green before the merge, red after it, on a
+repo with no CI to say so (#158, fixed in the follow-up).
 
 Usage:
     scripts/check-command-refs.py --check     # exit 1 on any dangling reference
