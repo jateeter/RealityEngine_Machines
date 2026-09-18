@@ -113,6 +113,48 @@ class NameUniquenessTest(unittest.TestCase):
             "machine file stems must be globally unique: " + repr(collisions),
         )
 
+    def test_b_machine_names_are_also_globally_unique(self) -> None:
+        """Stronger than the declared policy, and the runtime now depends on it.
+
+        The declared policy (test_b above) is that a machine is unique within
+        its DOMAIN. That is not enough for anything that treats `machine.name`
+        as an identity across the whole corpus, and several things do:
+
+        - `parity_identity.py` matches machines across runtimes **by corpus
+          name**, because engine-minted ids are per-runtime and cannot be
+          compared (RealityEngine_CI#146, #397). Two machines sharing a name
+          would silently join as one.
+        - `POST /api/machines` has no other global identity available in the
+          request body. The globally-unique thing the corpus does assert is the
+          FILE STEM, and a POST body carries the machine object, not its
+          filename. So any conflict rule for that route — reject, replace, or
+          anything else — rests on this property (RealityEngine_CI#357).
+
+        Asserted rather than assumed because the difference has already cost
+        something once: RealityEngine_CI#416 proposed ordering a compared field
+        on `machineName` and it took a measurement to notice that the corpus
+        only guarantees that per domain.
+
+        This holds today at zero cost — there are no duplicates — so the
+        assertion's job is to keep it holding, and to make its removal a
+        deliberate act rather than a side effect of adding a machine.
+        """
+        names: Counter = Counter()
+        where: dict[str, list[str]] = defaultdict(list)
+        for path in machine_files():
+            name = load(path).get("name")
+            if name:
+                names[str(name)] += 1
+                where[str(name)].append(f"{path.parent.name}/{path.name}")
+
+        collisions = {name: where[name] for name, count in names.items() if count > 1}
+        self.assertEqual(
+            collisions, {},
+            "machine.name must be globally unique across the corpus, not only "
+            "within a domain:\n" + "\n".join(
+                f"  {name}: {', '.join(paths)}" for name, paths in sorted(collisions.items())),
+        )
+
     def test_c_domains_are_unique_within_the_universe(self) -> None:
         manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
         domains = manifest.get("domains") or manifest
