@@ -27,11 +27,10 @@ const REGISTRY_URL = process.env.RE_REGISTRY_URL ?? '';
 const PE_URL = process.env.PE_BASE_URL ?? '';
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '../..');
 
-// Scala builds no envelopes yet. Marked as an expected failure rather than
-// skipped, so the mark has to come out the moment Scala starts passing.
-const EXPECTED_FAILURE: Record<string, string> = {
-  scala: 'RealityEngine_Scala#149 — trigger dispatch is unimplemented',
-};
+// Runtimes known not to conform yet, each with the issue that tracks it. Marked
+// as an expected failure rather than skipped, so a mark has to come out the
+// moment its runtime starts passing. Empty: Scala's came out with #149.
+const EXPECTED_FAILURE: Record<string, string> = {};
 
 interface EngineInstance { id: string; runtime: string; pe_url: string; status: string }
 
@@ -83,10 +82,13 @@ test.describe('trigger envelope contract', () => {
     for (const engine of engines) {
       const before = new Set((await ledgerRecords(request, engine.pe_url)).map(r => r.id));
       const sourceId = `envelope-contract-${engine.id}-${Date.now()}`;
-      await request.post(`${engine.pe_url}/api/sources`, {
+      const seeded = await request.post(`${engine.pe_url}/api/sources`, {
         data: { id: sourceId, type: 'test', name: 'Envelope contract seed', active: true,
                 region: { offset: 4210, length: 4 }, inputs: [[0, 1, 0, 1]], loop: false },
       });
+      // A refused seed must fail here, not be masked by a corpus source that
+      // happens to cover the same region (it did, on Scala, before #149).
+      expect(seeded.ok(), `${engine.id}: seed source registration answered ${seeded.status()}`).toBe(true);
       try {
         await request.post(`${engine.pe_url}/api/push`, { data: { compact: true } });
       } finally {
