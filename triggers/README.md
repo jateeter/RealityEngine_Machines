@@ -118,10 +118,41 @@ and restarting Reality Engine (`./startUniverse.sh` or `./startUniverse.sh
 
 The dispatcher observes terminal CES output events from RE/PE, resolves the
 matching `metadata.triggerConfig.rules[]` entry, and emits the canonical
-`ces.terminal.event` envelope defined by:
+`ces.terminal.event` envelope defined by `schemas/ai-trigger-envelope.schema.json`.
+`triggers/*.example.json` are real envelopes captured from a C++ PE, and
+`triggers/ai_trigger_envelope.template.json` is a copy of one with a comment.
 
-- `triggers/ai_trigger_envelope.template.json`
-- `schemas/ai-trigger-envelope.schema.json`
+### Envelope versioning
+
+The schema describes **what the runtimes emit**: the TypeScript PE, C++ and LSP.
+That shape is canonical `1.0.0`. It replaced an earlier schema that also claimed
+`1.0.0` but described a document no runtime ever produced. Every live C++ and
+LSP envelope failed it, and only the hand-written examples passed
+(RealityEngine_CI `INTEGRATION_ROADMAP.md` §6 Q3).
+
+- **`1.x` is additive-only.** Readers must ignore fields they don't recognise.
+- **A new field** is added to the schema as *optional*, and the minor version
+  is bumped. Producers then emit the new `schemaVersion`.
+- **Removing or renaming a field, making an optional field required, or
+  changing what a field means** is `2.0.0`, and needs a window in which
+  producers emit both versions.
+- **Conformance is closed.** Objects the schema defines reject undeclared
+  fields, so a producer can't add a field until the schema declares it.
+  `governance` and `dispatch.writeBack` are open, because they carry corpus
+  metadata through verbatim.
+
+Conformance is checked in two places:
+
+| Check | What it covers |
+|---|---|
+| `npm run validate:schemas` | `triggers/*.example.json`, plus the output of `scripts/build-dispatch-envelope.py` |
+| `tests/integration/trigger-envelope-contract.spec.ts` | Live envelopes from every PE in the instance registry, produced by the OpenClaw dispatch seed. Scala is an expected failure until RealityEngine_Scala#149 |
+
+The runtimes still differ where the schema allows it. C++ and LSP emit the
+post-fold `ces.sequenceIds[]`, and LSP adds `ces.sequenceNames[]`. The TS PE
+emits the single `ces.sequenceId`/`sequenceName`/`outputIndex`, and no
+`dispatch.autonomyMode`/`processId`/`processName`/`writeBack`. Converging
+those is a parity question (§6 Q5), not a versioning one.
 
 Every agent-bound machine has this dispatch contract in
 `metadata.triggerConfig`:

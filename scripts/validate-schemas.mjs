@@ -11,11 +11,13 @@
  *   - triggers/*.example.json       -> ai-trigger-envelope.schema.json
  *   - triggers/*scenario*.json      -> trigger-scenario.schema.json
  *   (triggers/*.template.json is a documentation scaffold and is skipped.)
+ *   - scripts/build-dispatch-envelope.py output -> ai-trigger-envelope.schema.json
  *
  * Exits non-zero on any schema violation. This is the enforcement the hand-coded
  * audit-corpus.py cannot provide (it once missed matchAlgorithm:"exact").
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { join, dirname, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import Ajv2020 from "ajv/dist/2020.js";
@@ -86,6 +88,25 @@ const examples = trig.filter((n) => n.endsWith(".example.json")).map((n) => join
 const scenarios = trig.filter((n) => n.includes("scenario")).map((n) => join(REPO, "triggers", n));
 validateSet(`trigger envelopes (${examples.length})`, examples, "ai-trigger-envelope.schema.json");
 validateSet(`trigger scenarios (${scenarios.length})`, scenarios, "trigger-scenario.schema.json");
+
+// scripts/build-dispatch-envelope.py is a producer too. It emitted a shape no
+// runtime used, and nothing checked it, so it stayed "canonical" in the README
+// while every engine disagreed with it. Validate what it builds, not only the
+// files it once built.
+{
+  const sample = join(REPO, "machines/domains/agriculture/AGX051_yuma-aqua-maintenance-forecaster.json");
+  const built = spawnSync("python3", [join(REPO, "scripts/build-dispatch-envelope.py"), sample], { encoding: "utf8" });
+  const v = V("ai-trigger-envelope.schema.json");
+  total++;
+  let msg = null;
+  if (built.status !== 0) msg = `builder exited ${built.status}: ${built.stderr.trim().split("\n").pop()}`;
+  else {
+    try { if (!v(JSON.parse(built.stdout))) msg = `${v.errors[0].instancePath || "(root)"} ${v.errors[0].message}`; }
+    catch (e) { msg = `unparseable builder output: ${e.message}`; }
+  }
+  if (msg) { failed++; failures.push([join(REPO, "scripts/build-dispatch-envelope.py"), msg]); }
+  console.log(`  ${msg ? "FAIL" : "ok  "} ${"build-dispatch-envelope.py output".padEnd(46)} ${msg ? 0 : 1} valid / ${msg ? 1 : 0} invalid  (vs ai-trigger-envelope.schema.json)`);
+}
 
 console.log(`\n  total=${total} failed=${failed}`);
 if (failed) {

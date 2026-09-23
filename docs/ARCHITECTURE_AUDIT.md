@@ -104,11 +104,13 @@ Example:
 
 ## 4. RE/PE to localAIStack Dispatch
 
-CES terminal events should use the canonical trigger envelope in
-`triggers/ai_trigger_envelope.template.json`, validated by
-`schemas/ai-trigger-envelope.schema.json`. The sample builder
-`scripts/build-dispatch-envelope.py` derives the envelope from one machine file,
-one trigger rule, and the current `metadata.agentBinding`.
+CES terminal events use the canonical trigger envelope defined by
+`schemas/ai-trigger-envelope.schema.json`: the shape the runtimes emit,
+additive-only within `1.x` (see `triggers/README.md` § Envelope versioning).
+`triggers/*.example.json` are envelopes captured from a running C++ PE. The
+sample builder `scripts/build-dispatch-envelope.py` derives the same shape from
+one machine file, one trigger rule, and the current `metadata.agentBinding`.
+Its output is validated by `npm run validate:schemas`.
 
 Dispatch sequence:
 

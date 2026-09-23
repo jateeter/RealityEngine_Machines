@@ -1,103 +1,136 @@
 {
-  "$schema": "https://realityengine.example.org/schemas/ai-trigger-envelope-1.0.0.json",
-  "$comment": "Canonical RE/PE → localAIStack trigger envelope. Emit one of these for every CES MergeOperation whose triggerConfig rule matches. The receiver (graphql_trigger_template.py / localAIStack /graphql) reads the top-level scalar fields for the existing updateProcessState mutation; the `outputVector`, `projection`, and `dispatch` blocks are the extension that carries CES-terminal-event semantics. Populate by mapping fields straight off the MergeOperation (the RE step path) and the machine's metadata.triggerConfig / metadata.mqttIntegration / governance / dispatchableAgent.",
-
-  "schemaVersion":  "1.0.0",
-  "envelopeType":   "ces.terminal.event",
-  "envelopeId":     "<uuid v4 — one per emitted event>",
-  "correlationId":  "<uuid v4 — shared across a causal cascade so the AI can stitch RE→AI→RE→AI chains>",
-  "emittedAt":      "<ISO-8601 timestamp at emission>",
-
-  "source": {
-    "$comment":  "Which engine emitted the event. RE = Reality Engine (TS, src/), PE = Perception Engine (RealityEngine_CPP). `endpoint` is the HTTPS base URL the dispatcher was watching.",
-    "engine":    "RE",
-    "instance":  "<hostname or container id>",
-    "endpoint":  "https://localhost:3001"
-  },
-
+  "$comment": "Documentation scaffold for schemas/ai-trigger-envelope.schema.json (canonical 1.0.0, the runtime shape). Copied from a real C++ PE envelope for AGX051 sequence agx-051-urgent-maint (dry-run). Not validated: this comment field is not part of the envelope. Real examples: triggers/*.example.json.",
   "ces": {
-    "$comment":          "Mirrors MergeOperation fields one-for-one. machineCode = the AGX###/HHX### prefix from the JSON filename.",
-    "machineId":         "<machine.id>",
-    "machineName":       "<machine.name>",
-    "machineCode":       "<AGX###>",
-    "sequenceId":        "<sequenceId fired>",
-    "sequenceName":      "<sequence.name>",
-    "outputIndex":       0,
-    "stepNumber":        0,
+    "deprecation": null,
+    "machineCode": "",
+    "machineId": "machine-agx051-yuma-aqua-maintenance-forecaster",
+    "machineName": "Agriculture Yuma Aqua Maintenance Forecaster",
     "perceptualMapping": {
-      "input":  { "offset": 0, "length": 0 },
-      "output": { "offset": 0, "length": 0 }
-    },
-    "provenance":  ["<vectorId chain leading to this assertion>"],
-    "deprecation": null
-  },
-
-  "outputVector": {
-    "$comment":      "The terminal event's payload. `values` is the raw bit-vector that just landed in perceptual space. `semantics[i].label` is the producer's name for cell i; this is the schema-on-write that lets the receiver decode the vector without consulting the machine JSON. `assertedLabel` is the one-hot category (or the join of multi-hot labels) — convenient for switch/case dispatch on the AI side.",
-    "values":        [0, 0, 0, 0],
-    "encoding":      "one-hot",
-    "semantics": [
-      { "index": 0, "label": "<LABEL>", "cluster": "<optional sub-cluster, e.g. AQUA>", "phase": "<optional phase, e.g. URGENT>", "sourceMachine": "<optional upstream AGX>" }
-    ],
-    "assertedLabel": "<LABEL>"
-  },
-
-  "projection": {
-    "$comment": "OPTIONAL. Populate when the producer's output region is intentionally overlaid onto another machine's input region (the AGX055 → AgYieldOptimizationAI pattern). `bitMapping[]` enumerates how each producer output cell lands on the target's input cells, AND what semantic schema the target should apply when interpreting them. `schemaOverlay` names the interpretation: the target's native inputSignalMap is bypassed in favour of the named overlay.",
-    "kind": "perceptual-overlay",
-    "target": {
-      "machineId":   "<target.machine.id>",
-      "machineName": "<target machine name>",
-      "inputRegion": { "offset": 0, "length": 0 }
-    },
-    "bitMapping": [
-      {
-        "outIndex":            0,
-        "targetCell":          0,
-        "targetInputElement":  "elem_0",
-        "targetNativeSemantic":"<what the target normally reads at this cell>",
-        "bridgeSemantic":      "<what THIS envelope means at this cell>"
+      "output": {
+        "length": 4,
+        "offset": 256
       }
+    },
+    "provenance": [
+      "agx-051-normal",
+      "agx-051-watch",
+      "agx-051-critical"
     ],
-    "schemaOverlay": "<overlay name registered with the target AI agent>",
-    "notes": "Bridge machines re-purpose a shared perceptual region. The receiver MUST switch on schemaOverlay before interpreting the cells."
+    "sequenceIds": [
+      "agx-051-urgent-maint"
+    ],
+    "stepNumber": 0
   },
-
-  "governance": {
-    "$comment":         "Copied verbatim from PagingDecision (services/GovernanceResolver.ts:resolveForOutput). The RE side computes this; the AI side does not re-derive it.",
-    "ragStatusCode":    "RED",
-    "processStatus":    "error",
-    "ownerTeam":        "<team>",
-    "slaSeconds":       null,
-    "runbook":          null,
-    "escalationPolicy": null,
-    "contact":          { "primary": null, "secondary": null },
-    "description":      null
-  },
-
+  "correlationId": "trigger-correlation-1790182022645-657045496",
   "dispatch": {
-    "$comment":            "Which agent in localAIStack receives this envelope and what it should do. `processId` and `processName` come from metadata.triggerConfig. Agent, trigger, autonomy, writeBack, and action catalog come from metadata.agentBinding. `endpoint.mutation` references the strawberry schema in localAIStack/services/api/routers/graphql_endpoint.py.",
-    "processId":            "<metadata.triggerConfig.processId>",
-    "processName":          "<metadata.triggerConfig.processName>",
-    "agent":               "<agent id, e.g. agriculture_yield_optimization_ai>",
-    "action":              "<primary action for this firing>",
-    "agentActionsCatalog": [],
-    "trigger":             "<metadata.aiTrigger>",
-    "autonomyMode":         "<observe | advise | supervised-act | automated-act>",
-    "writeBack":            null,
+    "action": "Dispatch aquaculture_predictive_maintenance_agent for urgent maintenance and record corrective action.",
+    "agent": "aquaculture_predictive_maintenance_agent",
+    "agentActionsCatalog": [
+      "Dispatch aquaculture_predictive_maintenance_agent for urgent maintenance and record corrective action.",
+      "Schedule preventive maintenance via aquaculture_predictive_maintenance_agent and verify completion telemetry.",
+      "Run sensor-calibration workflow via aquaculture_predictive_maintenance_agent for the yuma aqua maintenance forecast stream.",
+      "Continue automated monitoring for yuma aqua maintenance forecast while preserving current setpoints."
+    ],
+    "autonomyMode": "advise",
     "endpoint": {
-      "kind":      "graphql",
-      "url":       "http://localhost:4000/graphql",
-      "mutation":  "updateProcessState",
-      "schemaRef": "localAIStack/services/api/routers/graphql_endpoint.py"
+      "kind": "dry-run",
+      "mutation": "",
+      "schemaRef": "",
+      "url": ""
+    },
+    "processId": "AGX051_YUMA_AQUA_MAINTENANCE_FORECASTER",
+    "processName": "Agriculture Yuma Aqua Maintenance Forecaster",
+    "trigger": "agriculture-yuma-aqua-maintenance-forecaster-maintenance",
+    "writeBack": {
+      "ingest": {
+        "compactPush": true,
+        "endpoint": "/api/integrations/completions",
+        "method": "POST",
+        "triggerPush": false
+      },
+      "name": "localAIStack agx051 aquaculture.predictive.maintenance.agent completion",
+      "normalization": "already-normalized-0-1",
+      "provider": "localai",
+      "region": {
+        "length": 4,
+        "offset": 40
+      },
+      "semantics": [
+        "water_ph_in_band",
+        "water_ec_in_band",
+        "water_orp_in_band",
+        "water_turbidity_in_band"
+      ],
+      "sensorId": "localai.agx051.aquaculture.predictive.maintenance.agent.completion",
+      "sourceMapping": {
+        "id": "localai-agx051-completion",
+        "name": "localAIStack agx051 aquaculture.predictive.maintenance.agent completion",
+        "region": {
+          "length": 4,
+          "offset": 40
+        },
+        "sensorId": "localai.agx051.aquaculture.predictive.maintenance.agent.completion",
+        "ttlMs": 300000
+      },
+      "ttlMs": 300000,
+      "type": "pe-sensor"
     }
   },
-
-  "mqttContext": {
-    "$comment":    "OPTIONAL. Populate for MQTT-driven machines (metadata.mqttIntegration present) so the AI can correlate the firing back to the raw broker payload. Omit when not applicable.",
-    "configFile":  "<RealityEngine_CPP/config/mqtt-mappings.*.json>",
-    "topicFilter": "<topic that fed this event>",
-    "broker":      "<host:port>",
-    "inputRegion": { "offset": 0, "length": 0 }
+  "emittedAtMs": 1790182022645,
+  "envelopeId": "trigger-envelope-1790182022645-841697490",
+  "envelopeType": "ces.terminal.event",
+  "governance": {
+    "actionCode": "dispatch-agent",
+    "contact": {
+      "primary": "agriculture-operations-primary@example.org",
+      "secondary": "agriculture-operations-secondary@example.org"
+    },
+    "description": "Urgent maintenance dispatch required.",
+    "escalationPolicy": "pagerduty:ag-ops",
+    "hasMachineGovernance": true,
+    "machineId": "machine-agx051-yuma-aqua-maintenance-forecaster",
+    "machineName": "Agriculture Yuma Aqua Maintenance Forecaster",
+    "ownerTeam": "agriculture-operations",
+    "processStatus": "error",
+    "ragStatusCode": "RED",
+    "runbook": "https://runbooks.example.org/agriculture/agx051_yuma-aqua-maintenance-forecaster",
+    "sequenceId": "agx-051-urgent-maint",
+    "slaSeconds": 900,
+    "source": "rule-only"
+  },
+  "outputVector": {
+    "assertedLabel": "cell_0",
+    "encoding": "vector",
+    "semantics": [
+      {
+        "index": 0,
+        "label": "cell_0"
+      },
+      {
+        "index": 1,
+        "label": "cell_1"
+      },
+      {
+        "index": 2,
+        "label": "cell_2"
+      },
+      {
+        "index": 3,
+        "label": "cell_3"
+      }
+    ],
+    "values": [
+      1,
+      0,
+      0,
+      0
+    ]
+  },
+  "projection": null,
+  "schemaVersion": "1.0.0",
+  "source": {
+    "endpoint": "http://localhost:61195",
+    "engine": "PE",
+    "observedEngine": "RE"
   }
 }

@@ -1,7 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://realityengine.example.org/schemas/ai-trigger-envelope.schema.json",
-  "title": "RealityEngine RE to localAIStack Dispatch Envelope",
+  "title": "RealityEngine ces.terminal.event dispatch envelope",
+  "description": "The envelope a Perception Engine builds when a machine's output resolves to a dispatch (RealityEngine_CI INTEGRATION_ROADMAP.md §6 Q3). This schema describes what the runtimes emit -- TypeScript PE, C++, LSP -- and is the canonical 1.0.0. It replaced an earlier document that also claimed 1.0.0 but was never produced by any runtime.\n\nVERSIONING. 1.x is additive-only. Readers MUST ignore fields they do not recognise. A new field is added here as OPTIONAL and the minor version is bumped; producers then emit the new schemaVersion. Removing or renaming a field, making an optional field required, or changing a field's meaning is a MAJOR change (2.0.0) and requires a window in which producers emit both versions.\n\nCONFORMANCE. Objects this schema defines are closed (additionalProperties: false) so that a producer emitting an undeclared field fails conformance: declare the field here first. governance and dispatch.writeBack are open, because they carry corpus metadata through verbatim.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -9,69 +10,70 @@
     "envelopeType",
     "envelopeId",
     "correlationId",
-    "emittedAt",
+    "emittedAtMs",
     "source",
     "ces",
     "outputVector",
+    "projection",
     "governance",
     "dispatch"
   ],
   "properties": {
-    "$schema": { "type": "string" },
-    "$comment": { "type": "string" },
-    "schemaVersion": { "const": "1.0.0" },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "description": "Any 1.x is wire-compatible with this schema's readers. Producers of this revision emit 1.0.0."
+    },
     "envelopeType": { "const": "ces.terminal.event" },
     "envelopeId": { "type": "string", "minLength": 1 },
     "correlationId": { "type": "string", "minLength": 1 },
-    "emittedAt": { "type": "string", "minLength": 1 },
+    "emittedAtMs": { "type": "integer", "minimum": 0, "description": "Epoch milliseconds." },
     "source": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["engine", "instance", "endpoint"],
+      "required": ["engine", "observedEngine", "endpoint"],
       "properties": {
-        "engine": { "enum": ["RE", "PE"] },
-        "instance": { "type": "string", "minLength": 1 },
+        "engine": { "const": "PE", "description": "The engine that built the envelope." },
+        "observedEngine": { "const": "RE", "description": "The engine whose output it observed." },
         "endpoint": { "type": "string", "minLength": 1 }
       }
     },
     "ces": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "machineId",
-        "machineName",
-        "machineCode",
-        "sequenceId",
-        "sequenceName",
-        "outputIndex",
-        "stepNumber",
-        "perceptualMapping",
-        "provenance"
+      "required": ["machineId", "machineName", "machineCode", "stepNumber", "perceptualMapping", "provenance", "deprecation"],
+      "anyOf": [
+        { "required": ["sequenceIds"] },
+        { "required": ["sequenceId"] }
       ],
       "properties": {
         "machineId": { "type": "string", "minLength": 1 },
-        "machineName": { "type": "string", "minLength": 1 },
-        "machineCode": { "type": "string", "minLength": 1 },
-        "sequenceId": { "type": "string", "minLength": 1 },
-        "sequenceName": { "type": "string", "minLength": 1 },
-        "outputIndex": { "type": "integer", "minimum": 0 },
+        "machineName": { "type": "string" },
+        "machineCode": { "type": "string", "description": "Empty when the machine declares none." },
+        "sequenceIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Post-fold shape (RealityEngine_CI#327): every sequence contributing to the output. Emitted by C++ and LSP."
+        },
+        "sequenceNames": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Display names parallel to sequenceIds. Emitted by LSP only."
+        },
+        "sequenceId": { "type": "string", "description": "Pre-fold single sequence. Emitted by the TypeScript PE." },
+        "sequenceName": { "type": "string", "description": "Emitted by the TypeScript PE, mirroring sequenceId." },
+        "outputIndex": { "type": "integer", "minimum": 0, "description": "Emitted by the TypeScript PE." },
         "stepNumber": { "type": "integer", "minimum": 0 },
         "perceptualMapping": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["input", "output"],
+          "required": ["output"],
           "properties": {
-            "input": { "$ref": "#/$defs/region" },
-            "output": { "$ref": "#/$defs/region" }
+            "output": { "oneOf": [{ "$ref": "#/$defs/region" }, { "type": "null" }] }
           }
         },
-        "provenance": {
-          "type": "array",
-          "items": { "type": "string", "minLength": 1 }
-        },
-        "deprecation": {
-          "type": ["object", "null"]
-        }
+        "provenance": { "type": "array", "items": { "type": "string" } },
+        "deprecation": { "description": "null, or the machine's deprecation record passed through." }
       }
     },
     "outputVector": {
@@ -79,12 +81,8 @@
       "additionalProperties": false,
       "required": ["values", "encoding", "semantics", "assertedLabel"],
       "properties": {
-        "values": {
-          "type": "array",
-          "minItems": 1,
-          "items": { "type": "number" }
-        },
-        "encoding": { "enum": ["one-hot", "multi-hot", "dense"] },
+        "values": { "type": "array", "items": { "type": "number" } },
+        "encoding": { "const": "vector" },
         "semantics": {
           "type": "array",
           "items": {
@@ -93,69 +91,74 @@
             "required": ["index", "label"],
             "properties": {
               "index": { "type": "integer", "minimum": 0 },
-              "label": { "type": "string", "minLength": 1 }
+              "label": { "type": "string" }
             }
           }
         },
-        "assertedLabel": { "type": "string", "minLength": 1 }
+        "assertedLabel": { "type": "string", "description": "cell_<i>+cell_<j> for each non-zero cell, or \"none\"." }
       }
     },
-    "projection": { "type": ["object", "null"] },
+    "projection": { "type": ["object", "null"], "description": "Reserved. Every runtime emits null." },
     "governance": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["ragStatusCode", "processStatus", "ownerTeam", "slaSeconds", "runbook"],
+      "type": ["object", "null"],
+      "additionalProperties": true,
+      "description": "The machine's resolved governance, passed through. Open: corpus governance keys travel verbatim.",
       "properties": {
         "ragStatusCode": { "enum": ["GREEN", "AMBER", "RED"] },
-        "processStatus": { "type": "string", "minLength": 1 },
-        "ownerTeam": { "type": ["string", "null"] },
-        "slaSeconds": { "type": ["integer", "null"], "minimum": 0 },
-        "runbook": { "type": ["string", "null"] },
-        "escalationPolicy": { "type": ["string", "null"] },
-        "contact": { "type": ["object", "null"] },
-        "description": { "type": ["string", "null"] }
+        "actionCode": { "type": ["string", "null"], "description": "RealityEngine_CI#365." },
+        "processStatus": { "type": "string" },
+        "hasMachineGovernance": { "type": "boolean" },
+        "machineId": { "type": "string" },
+        "machineName": { "type": "string" },
+        "sequenceId": { "type": "string" },
+        "source": { "type": "string" },
+        "description": { "type": "string" },
+        "ownerTeam": { "type": "string" },
+        "escalationPolicy": { "type": "string" },
+        "runbook": { "type": "string" },
+        "slaSeconds": { "type": ["integer", "null"], "minimum": 0, "description": "null when the corpus declares no SLA." },
+        "contact": { "type": "object" }
       }
     },
     "dispatch": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "processId",
-        "processName",
-        "agent",
-        "action",
-        "agentActionsCatalog",
-        "trigger",
-        "autonomyMode",
-        "writeBack",
-        "endpoint"
-      ],
+      "required": ["agent", "action", "agentActionsCatalog", "trigger", "endpoint"],
       "properties": {
-        "processId": { "type": "string", "minLength": 1 },
-        "processName": { "type": "string", "minLength": 1 },
-        "agent": { "type": "string", "minLength": 1 },
-        "action": { "type": "string", "minLength": 1 },
-        "agentActionsCatalog": {
-          "type": "array",
-          "items": { "type": "string" }
+        "agent": { "type": "string" },
+        "action": { "type": "string" },
+        "agentActionsCatalog": { "type": "array", "items": { "type": "string" } },
+        "trigger": { "type": "string" },
+        "autonomyMode": { "type": "string", "description": "Emitted by C++ and LSP." },
+        "processId": { "type": "string", "description": "Emitted by C++ and LSP." },
+        "processName": { "type": "string", "description": "Emitted by C++ and LSP." },
+        "writeBack": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Where the completion returns: ingest route, source mapping, region. Emitted by C++ and LSP. Open.",
+          "properties": {
+            "type": { "type": "string" },
+            "provider": { "type": "string" },
+            "sensorId": { "type": "string" },
+            "region": { "$ref": "#/$defs/region" },
+            "ttlMs": { "type": "integer", "minimum": 0 },
+            "ingest": { "type": "object" },
+            "sourceMapping": { "type": "object" }
+          }
         },
-        "trigger": { "type": "string", "minLength": 1 },
-        "autonomyMode": { "enum": ["observe", "advise", "supervised-act", "automated-act"] },
-        "writeBack": { "type": ["object", "null"] },
         "endpoint": {
           "type": "object",
           "additionalProperties": false,
           "required": ["kind", "url", "mutation", "schemaRef"],
           "properties": {
-            "kind": { "const": "graphql" },
-            "url": { "type": "string", "minLength": 1 },
-            "mutation": { "const": "updateProcessState" },
-            "schemaRef": { "type": "string", "minLength": 1 }
+            "kind": { "type": "string", "minLength": 1, "description": "dry-run, graphql, or an adapter kind (ollama, acp, openai, ...)." },
+            "url": { "type": "string", "description": "Empty in dry-run." },
+            "mutation": { "type": "string", "description": "Empty unless kind is graphql." },
+            "schemaRef": { "type": "string", "description": "Empty unless kind is graphql." }
           }
         }
       }
-    },
-    "mqttContext": { "type": ["object", "null"] }
+    }
   },
   "$defs": {
     "region": {
