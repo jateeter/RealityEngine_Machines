@@ -129,10 +129,11 @@ test.describe('dispatch surface quorum', () => {
       active.push(rt);
       const before = new Set((await ledgerOf(request, inst)).records?.map(r => r.id) ?? []);
       const sourceId = `dispatch-quorum-${rt}-${Date.now()}`;
-      await request.post(`${inst.pe_url}/api/sources`, {
+      const seeded = await request.post(`${inst.pe_url}/api/sources`, {
         data: { id: sourceId, type: 'test', name: 'Dispatch quorum seed', active: true,
                 region: { offset: 4210, length: 4 }, inputs: [[0, 1, 0, 1]], loop: false },
       });
+      expect(seeded.ok(), `${rt}: seed source registration answered ${seeded.status()}`).toBe(true);
       try {
         await request.post(`${inst.pe_url}/api/push`, { data: { compact: true } });
       } finally {
@@ -152,18 +153,32 @@ test.describe('dispatch surface quorum', () => {
 
     if (active.length < NATIVES.length) return; // not evaluable; annotated above
 
-    // What each runtime determined, keyed by the contributing sequences, with
-    // the ids and times that legitimately differ stripped out.
-    const determinations = new Map<Runtime, string>();
+    // What each runtime derived for the same determination. Compared per
+    // (machineId, sequenceIds) and only for pairs all three produced: which
+    // sequences a push fires depends on each engine's history, and this test
+    // does not equalise state first. Comparing whole record sets assumed it
+    // had, and reported three histories as a disagreement (the defect class of
+    // RealityEngine_CI#283/#304/#307).
+    const byKey = new Map<Runtime, Map<string, string>>();
     for (const rt of NATIVES) {
-      const rows = created.get(rt)!.map(r => JSON.stringify({
-        sequenceIds: r.sequenceIds, machineId: r.machineId, target: r.target, status: r.status,
-        mode: r.mode, ragStatusCode: r.ragStatusCode, processStatus: r.processStatus,
-        semantics: r.semantics, replayOf: r.replayOf, error: r.error, providerReceipt: r.providerReceipt,
-      })).sort();
-      determinations.set(rt, JSON.stringify(rows));
+      const m = new Map<string, string>();
+      for (const r of created.get(rt)!) {
+        const key = JSON.stringify([r.machineId, r.sequenceIds]);
+        m.set(key, JSON.stringify({
+          target: r.target, status: r.status, mode: r.mode, ragStatusCode: r.ragStatusCode,
+          processStatus: r.processStatus, semantics: r.semantics, replayOf: r.replayOf,
+          error: r.error, providerReceipt: r.providerReceipt,
+        }));
+      }
+      byKey.set(rt, m);
     }
-    expectUnanimous('seeded dispatch records', determinations);
+    const common = [...byKey.get('cpp')!.keys()].filter(k => NATIVES.every(rt => byKey.get(rt)!.has(k)));
+    if (common.length === 0) {
+      notEvaluable(info, 'seeded determinations', 'no (machineId, sequenceIds) was produced by all three runtimes on this push');
+    }
+    for (const key of common) {
+      expectUnanimous(`seeded dispatch record ${key}`, new Map(NATIVES.map(rt => [rt, byKey.get(rt)!.get(key)!])));
+    }
 
     // PATCH semantics: the same body produces the same delivery metadata.
     const patched = new Map<Runtime, string>();
