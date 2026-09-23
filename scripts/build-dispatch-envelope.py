@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -18,11 +17,6 @@ def as_object(value: Any) -> dict[str, Any]:
 
 def as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
-
-
-def machine_code(path: Path) -> str:
-    match = re.match(r"([A-Za-z]+[-_]?\d+)", path.stem)
-    return match.group(1).replace("_", "-").upper() if match else path.stem
 
 
 def status_from_rag(rag: str) -> str:
@@ -64,44 +58,69 @@ def build_envelope(path: Path, sequence_id: str | None = None) -> dict[str, Any]
     )
     values = as_list(rule.get("outputMatches"))
     active = [idx for idx, value in enumerate(values) if value]
-    asserted_label = "+".join(f"cell-{idx}" for idx in active) if active else "none"
+    # Same algorithm as the runtimes' asserted_label(): cell_<i>+cell_<j>.
+    asserted_label = "+".join(f"cell_{idx}" for idx in active) if active else "none"
     actions = as_list(agent_binding.get("allowedActions"))
     action = str(actions[active[0]]) if active and active[0] < len(actions) else str(actions[0] if actions else rule.get("description"))
+    output_region = as_object(mapping.get("output"))
+    # The runtimes name a machine without an explicit id "machine-<file stem>".
+    machine_id = str(machine.get("id") or f"machine-{path.stem.lower().replace('_', '-')}")
+    # actionCode is the matching output event's metadata.action (RealityEngine_CI#365).
+    action_code = next(
+        (
+            as_object(out.get("metadata")).get("action")
+            for event in as_list(sequence.get("events"))
+            for out in as_list(as_object(event).get("outputEvents"))
+            if as_object(out).get("vector") == values
+        ),
+        None,
+    )
+    sequence_id = str(rule.get("sequenceId"))
+    governance = governance_for_rule(metadata, rule)
+    governance.update({
+        "hasMachineGovernance": bool(as_object(metadata.get("governance"))),
+        "machineId": machine_id,
+        "machineName": str(machine.get("name")),
+        "sequenceId": sequence_id,
+        "actionCode": action_code,
+        "source": "rule-only",
+    })
 
+    # The runtime shape: canonical 1.0.0 per schemas/ai-trigger-envelope.schema.json
+    # (RealityEngine_CI INTEGRATION_ROADMAP.md \u00a76 Q3). Field for field what
+    # the C++ PE emits for the same machine output, so an example built here is
+    # interchangeable with one captured from a running engine.
     return {
         "schemaVersion": "1.0.0",
         "envelopeType": "ces.terminal.event",
-        "envelopeId": str(uuid4()),
-        "correlationId": str(uuid4()),
-        "emittedAt": datetime.now(UTC).isoformat(),
+        "envelopeId": f"trigger-envelope-{uuid4()}",
+        "correlationId": f"trigger-correlation-{uuid4()}",
+        "emittedAtMs": int(datetime.now(UTC).timestamp() * 1000),
         "source": {
-            "engine": "RE",
-            "instance": "local",
-            "endpoint": "http://localhost:5001",
+            "engine": "PE",
+            "observedEngine": "RE",
+            "endpoint": "http://localhost:5301",
         },
         "ces": {
-            "machineId": str(machine.get("id") or path.stem),
+            "machineId": machine_id,
             "machineName": str(machine.get("name")),
-            "machineCode": machine_code(path),
-            "sequenceId": str(rule.get("sequenceId")),
-            "sequenceName": str(sequence.get("name") or rule.get("sequenceId")),
-            "outputIndex": active[0] if active else 0,
+            "machineCode": str(metadata.get("machineCode") or ""),
+            "sequenceIds": [sequence_id],
             "stepNumber": 0,
             "perceptualMapping": {
-                "input": as_object(mapping.get("input")),
-                "output": as_object(mapping.get("output")),
+                "output": output_region or None,
             },
-            "provenance": [str(sequence.get("id") or rule.get("sequenceId"))],
+            "provenance": [str(sequence.get("id") or sequence_id)],
             "deprecation": None,
         },
         "outputVector": {
             "values": values,
-            "encoding": "one-hot" if len(active) <= 1 else "multi-hot",
-            "semantics": [{"index": idx, "label": f"cell-{idx}"} for idx in range(len(values))],
+            "encoding": "vector",
+            "semantics": [{"index": idx, "label": f"cell_{idx}"} for idx in range(len(values))],
             "assertedLabel": asserted_label,
         },
         "projection": None,
-        "governance": governance_for_rule(metadata, rule),
+        "governance": governance,
         "dispatch": {
             "processId": str(trigger_config.get("processId")),
             "processName": str(trigger_config.get("processName")),
@@ -121,7 +140,6 @@ def build_envelope(path: Path, sequence_id: str | None = None) -> dict[str, Any]
                 ),
             },
         },
-        "mqttContext": None,
     }
 
 
