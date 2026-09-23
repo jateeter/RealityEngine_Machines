@@ -23,7 +23,7 @@ const PARTICIPATION = ['active', 'not-configured', 'not-active', 'unsupported', 
 
 const STATUS_KEYS = [
   'participation', 'enabled', 'mode', 'graphqlEndpoint', 'records', 'envelopesCreated',
-  'droppedNoGovernance', 'droppedNoDispatch', 'droppedCatalogCold', 'dispatchErrors',
+  'droppedNoGovernance', 'droppedNoDispatch', 'droppedCatalogCold', 'replaysCreated', 'dispatchErrors',
   'machineCatalogCold', 'machineCatalogRefreshedAt', 'machineCatalogSize',
 ].sort();
 const LEDGER_KEYS = ['enabled', 'mode', 'records'];
@@ -198,5 +198,53 @@ test.describe('dispatch surface quorum', () => {
       }));
     }
     expectUnanimous('PATCH /api/dispatch/records/:id', patched);
+  });
+
+  test('replay: POST /api/dispatch/records/:id/replay agrees', async ({ request }, info) => {
+    // SURFACE_SPEC.md "Dispatch replay" (INTEGRATION_ROADMAP §6 Q6). Compared as
+    // relations to the replayed record -- same ids or re-minted, delivery state
+    // reset, semantics carried -- so each runtime's own history does not matter.
+    const sigs = new Map<Runtime, string>();
+    for (const rt of NATIVES) {
+      const inst = engines.get(rt)!;
+      const records = (await ledgerOf(request, inst)).records ?? [];
+      const original = records.find(r => r.mode !== 'replay');
+      if (!original) {
+        notEvaluable(info, 'replay', `${rt} holds no dispatch record to replay`);
+        return;
+      }
+      const post = async (id: string, data: unknown) => {
+        const r = await request.post(`${inst.pe_url}/api/dispatch/records/${encodeURIComponent(id)}/replay`, { data });
+        return { status: r.status(), body: await r.json() as Record<string, any> };
+      };
+      const before = await statusOf(request, inst);
+      const plain = await post(original.id as string, {});
+      const fresh = await post(original.id as string, { freshIds: true });
+      const unknown = await post('quorum-no-such-record', {});
+      const after = await statusOf(request, inst);
+      const a = plain.body.record ?? {}, b = fresh.body.record ?? {};
+      sigs.set(rt, JSON.stringify({
+        plain: {
+          http: plain.status, keys: Object.keys(plain.body).sort(), recordKeys: Object.keys(a).sort(),
+          mode: a.mode, status: a.status, attempts: a.attempts, providerReceipt: a.providerReceipt, error: a.error,
+          replayOf: a.replayOf === original.id, newId: a.id !== original.id,
+          keptIds: a.envelopeId === original.envelopeId && a.correlationId === original.correlationId,
+          carried: ['target', 'machineId', 'sequenceIds', 'ragStatusCode', 'processStatus', 'semantics']
+            .every(k => JSON.stringify(a[k]) === JSON.stringify((original as any)[k])),
+          freshIds: plain.body.freshIds,
+        },
+        fresh: {
+          http: fresh.status, freshIds: fresh.body.freshIds,
+          reminted: b.envelopeId !== original.envelopeId && b.correlationId !== original.correlationId,
+          envelopeCarriesNewIds: b.envelope?.envelopeId === b.envelopeId && b.envelope?.correlationId === b.correlationId,
+        },
+        unknown,
+        counters: {
+          envelopesCreated: Number(after.envelopesCreated) - Number(before.envelopesCreated),
+          replaysCreated: Number(after.replaysCreated) - Number(before.replaysCreated),
+        },
+      }));
+    }
+    expectUnanimous('dispatch replay', sigs);
   });
 });
