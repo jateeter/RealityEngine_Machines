@@ -1,6 +1,6 @@
 # RealityEngine_Machines Guidance
 
-Last reviewed: 2026-06-22
+Last reviewed: 2026-09-25
 
 See `/Users/johnt/workspace/GitHub/CLAUDE.md` for the integrated application map. Update both this file and the root map when corpus ownership, schema contracts, or runtime test expectations change.
 
@@ -41,7 +41,7 @@ npm run test:e2e
 - Multi-engine tests should use `RE_REGISTRY_URL` when available.
 - Single-engine tests should use explicit `RE_BASE_URL` and `PE_BASE_URL`.
 - Machine ID, schema, trigger, and PE source expectations are cross-repo contracts.
-- `domains/region-allocation.json` is the generated universal-vector allocation registry (reserved provider bands, cross-service PE source lanes, inter-domain bus lanes, frozen output-overlap baseline); regenerate with `npm run region-allocation:write` and let `tests/contracts/region_allocation_test.py` gate drift.
+- `domains/region-allocation.json` is the generated universal-vector region allocation (reserved provider bands, cross-service PE source lanes, inter-domain bus lanes, frozen output-overlap baseline); regenerate with `npm run region-allocation:write` and let `tests/contracts/region_allocation_test.py` gate drift.
 - On-disk machine addressing is path-aware: every engine's `GET /api/machines/json/list` enumerates the corpus recursively and reports `relFile` (path relative to the machines root); `GET /api/machines/json/:name` accepts a basename and falls back to a recursive search, so corpus filenames must stay globally unique (`tests/integration/machine-json-listing.spec.ts` enforces both).
 - Name uniqueness is scope-relative, and the scopes are the contract
   (`tests/contracts/name_uniqueness_test.py`, #68): every **CES name is unique
@@ -55,12 +55,12 @@ npm run test:e2e
   policy, and required because `GET /api/machines/json/:name` resolves a bare
   basename. Names are the MVP identity mechanism; UUIDs are the intended
   direction.
-- `domains/ces-contract-registry.json` records which CES output-stream contract shards exist — one per domain, one per configured test-environment corpus — and whether each still describes the corpus it was recorded against. Regenerate with `npm run ces-contracts:write`; `npm run ces-contracts:status` prints the summary. The shards themselves live in `../RealityEngine_CI/config/ces-contracts/` and are recorded from a live 3-of-3 quorum by `RealityEngine_CI/scripts/record-ces-contract-shards.sh` — this repo owns the corpus, not the runtimes.
+- The cesgen registry, `domains/ces-contract-registry.json`, records which CES output-stream contract shards exist — one per domain, one per configured test-environment corpus — and whether each still describes the corpus it was recorded against. Regenerate with `npm run ces-contracts:write`; `npm run ces-contracts:status` prints the summary. The shards themselves live in `../RealityEngine_CI/config/ces-contracts/` and are recorded from a live 3-of-3 quorum by `RealityEngine_CI/scripts/record-ces-contracts.py` (`record-ces-contract-shards.sh` was retired 2026-09-14, RealityEngine_CI#376) — this repo owns the corpus, not the runtimes.
 - Adding, changing or removing a machine makes every shard covering it stale, and `tests/contracts/ces_contract_registry_test.py` fails naming the machines that moved. `unrecorded` is a tracked gap and does not fail; `stale` is a shard asserting something no longer true and does.
 - `domains/domain-manifest.json` is the authoritative domain inventory; recursive corpus counts must match `currentMachineCount`, and unmanifested domains are validation failures.
 - **Adding a domain** follows a specified protocol — `RealityEngine_CI/MACHINE_CONCEPT.md` §9. It is the canonical statement of what a domain must supply (at least one machine, a manifest entry with non-colliding `codePrefixes`, a region allocation), what acceptance validates (semantic integrity, machine definitions, interconnectivity, arbitration), and when a domain must extend the regression corpus rather than relying on the standard-deployment twelve. `scripts/validate-corpus.sh` is the gate; a domain's `status` stays non-`accepted` until it passes. Do not restate the protocol here.
 - `domains/semantic-bus-registry.json` is the authoritative semantic-bus inventory; refresh it with `npm run semantic-buses:write` when semantic published buses change.
-- Do not treat stale generated expectations as truth when live registry endpoints disagree.
+- Do not treat stale generated expectations as truth when the live instance registry or the engines' own endpoints disagree.
 
 ## LSP Support
 
@@ -74,18 +74,18 @@ Use JSON schema support for machine/config files, TypeScript language server for
 
 ## Standing rules — authoritative in `../RealityEngine_CI/docs/ENGINEERING_CONTRACT.md`
 
-These apply here and are **not** restated in this file. They were previously
-copied into eighteen `CLAUDE.md` files across six repositories, which is the
-duplication problem the rules themselves warn about: copies drift, a rule added
-to one applies only where someone looked, and with no authority a reader cannot
-tell which copy is current.
+These apply here and are **not** restated in this file. The table is an index
+to the contract, not a copy of it: it names every rule so you know what to look
+up, and the contract's wording governs wherever the two differ.
 
 | Rule | In short |
 | --- | --- |
 | Qualify every "registry" | Never the bare word — instance / machine / cesgen / arbitration / domain / semantic-bus / tag. |
+| Regenerate a stale `<name>` registry, don't fail it | Each `<name>` registry is a view of the running system. A gate regenerates it and fails only on a disagreement that survives regeneration. |
 | Verify a merge beyond the hosted checks | A green PR is not a verified PR; the hosted path cannot reach the integration points. Name what you could not exercise, and record what you noticed but did not chase. |
-| Never commit to main | Branch from `origin/main`, PR, verify, squash-merge, clean up. |
 | _CI is the authority | Peripheral repos keep minimal CI that forces local validation; RealityEngine_CI verifies fixes against a live universe. Check its `docs/` before adding CI anywhere else. |
+| Name it `CLAUDE.md` | Uppercase, always. On a case-insensitive filesystem `claude.md` is the same inode; dedupe on `st_ino`, never on a resolved path. |
+| Never commit to main | Branch from `origin/main`, PR, verify, squash-merge, clean up. |
 | Use bash, not zsh | Shell work runs in `/opt/homebrew/bin/bash` (5.x), not zsh or macOS `/bin/bash` 3.2: any loop, unquoted variable, glob or `set --` goes through it with `set -euo pipefail`, and you check the command's exit status, not the pipeline tail. |
 
 Read the contract for the full text, the qualifier table, and the cleanup steps.
