@@ -210,7 +210,7 @@ comparison that is not deterministic cannot support learning.
 
 ## 7. Where else the pattern applies
 
-- the 1,320 generated OpenClaw agents
+- the 1,323 generated OpenClaw agents (one per machine, less the five arbitration fixtures; `CORPUS_EXIT_CRITERIA.md` §3.3)
 - the mcp / mqtt / healthkit / carekit / sensor write-backs the arbitration
   registry generator cannot currently derive
 - the two runtime-synthesized topology machines, which have no static form
