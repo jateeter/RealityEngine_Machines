@@ -11,9 +11,9 @@ thing and the weaker one.
 
 ## Why the requirement belongs here
 
-The profile is derived from `RealityEngine_CI/config/standard-deployment-corpus.txt`
-plus this repository's machine corpus, so **this** repository is where it goes
-stale. A corpus change lands here; the profile it invalidates lives two repos
+The profile is derived from `RealityEngine_CI/config/regression-corpus.txt`, the
+regression-test corpus (standard-deployment until 2026-09-25), plus this
+repository's machine corpus, so **this** repository is where it goes stale. A corpus change lands here; the profile it invalidates lives two repos
 away in `localOpenClawStack`; and nothing connected the two. Putting the check
 in `localOpenClawStack`'s own CI would catch the drift only after someone
 happened to run that repo's suite, which is not "before OpenClaw validation".
@@ -54,7 +54,12 @@ OPENCLAW = WORKSPACE / "localOpenClawStack"
 GENERATOR = OPENCLAW / "scripts" / "generate-regression-profile.py"
 PROFILE = OPENCLAW / "machine-behaviors" / "agents" / "profiles" / "regression.txt"
 AGENT_INDEX = OPENCLAW / "machine-behaviors" / "agents" / "INDEX.json"
-MANIFEST = WORKSPACE / "RealityEngine_CI" / "config" / "standard-deployment-corpus.txt"
+# The regression-test corpus: the corpus of interest, and what the generator
+# reads by default. Entries with no agent by rule (arbitration fixtures,
+# localAIStack machines) are excluded from the profile, which only ever makes the
+# profiled set smaller than this manifest; the orphan check below is profile ->
+# manifest, so it holds either way.
+MANIFEST = WORKSPACE / "RealityEngine_CI" / "config" / "regression-corpus.txt"
 
 
 class OpenClawProfileDriftTests(unittest.TestCase):
@@ -98,7 +103,7 @@ class OpenClawProfileDriftTests(unittest.TestCase):
         self.assertEqual(
             proc.returncode, 0,
             "the OpenClaw regression profile no longer matches the corpus.\n"
-            "A machine added to, removed from or renamed in standard-deployment-corpus.txt\n"
+            "A machine added to, removed from or renamed in regression-corpus.txt\n"
             "changes which agents a regression run must dispatch to. Regenerate and commit:\n"
             "    cd ../localOpenClawStack && ./scripts/generate-regression-profile.py\n"
             f"--- stdout ---\n{proc.stdout}\n--- stderr ---\n{proc.stderr}")
@@ -126,7 +131,7 @@ class OpenClawProfileDriftTests(unittest.TestCase):
         drifted = [l for i, l in enumerate(lines) if i != machines[0]]
 
         with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "standard-deployment-corpus.txt"
+            path = Path(tmp) / "regression-corpus.txt"
             path.write_text("".join(drifted))
             proc = subprocess.run(
                 [sys.executable, str(GENERATOR), "--check", "--manifest", str(path)],
