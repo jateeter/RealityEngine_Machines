@@ -83,8 +83,9 @@ corpus:
 corpus identity in seven cases (`DailyActivityMonitor` carries
 `code: "activity-monitor"`, `MedicationAdherenceMonitor` carries
 `code: "medication-adherence"`, and so on), and `tagging.machineCode` is absent
-on 123 of 1,328 machines and duplicated once (`rsflipflop`, shared by `RSFlipFlop`
-and `RSFlipFlopDeprecatedDemo`). Any resolver keying on `code` will silently miss
+on 123 of 1,327 machines. It was also duplicated once (`rsflipflop`, shared by
+`RSFlipFlop` and `RSFlipFlopDeprecatedDemo`) until that demo was retired
+(RealityEngine_Machines#180). Any resolver keying on `code` will silently miss
 those machines.
 
 > Note for jateeter/localOpenClawStack#23: this supersedes that issue's

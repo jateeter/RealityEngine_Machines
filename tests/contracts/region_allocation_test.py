@@ -8,8 +8,9 @@ event vector:
   input region (external services write machine-native input lanes only)
 - the semantic-bus registry's lane regions match the interconnect
   machine's perceptualMapping exactly (inter-domain bus compliance)
-- no machine output claims a cross-service PE source lane unless it is
-  recorded in the allocation registry's serviceLanes corpusWriters
+- no machine output writes a cross-service PE source lane, apart from a
+  hand-kept list of known offenders that only shrinks (the generated
+  registry's corpusWriters is a view, not an approval)
 - the set of output-lane overlaps matches the frozen baseline in
   domains/region-allocation.json — a new overlap means either re-map the
   machine or deliberately regenerate the registry
@@ -29,6 +30,14 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 MACHINES = REPO_ROOT / "machines"
 REGISTRY = REPO_ROOT / "domains" / "region-allocation.json"
 BUS_REGISTRY = REPO_ROOT / "domains" / "semantic-bus-registry.json"
+
+# Corpus machines known to write a PE service lane, which is a defect. The list
+# only shrinks: a new writer fails, and a writer that stops writing must be
+# removed. The two below are tracked in RealityEngine_Machines#181.
+KNOWN_SERVICE_LANE_WRITERS: dict[str, set[str]] = {
+    "healthkit-heart-rate": {"DailyActivityWellnessInterconnect.json"},
+    "healthkit-steps": {"HomeChronicPainMentalHealthAccessInterconnect.json"},
+}
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -90,15 +99,27 @@ class RegionAllocationTests(unittest.TestCase):
                 bad.append(f"{bus.get('id')}: bus lanes {bus.get('inputRegion')}/{bus.get('outputRegion')} != machine {machine['input']}/{machine['output']}")
         self.assertEqual(bad, [], "semantic-bus registry lane drift:\n" + "\n".join(bad[:10]))
 
-    def test_service_lane_writers_are_registered(self) -> None:
-        bad = []
+    def test_no_corpus_machine_writes_a_service_lane(self) -> None:
+        # A service lane belongs to the PE source that fills it. A corpus
+        # machine whose output lands there overwrites the source's values in
+        # the perceptual space. RS Flip Flop (deprecated demo) did that to
+        # agent-completion-risk [4200:4204], firing on the completion itself and
+        # rewriting its confidence and actionClass (RealityEngine_Machines#180).
+        #
+        # This used to allow any writer listed in the generated registry's
+        # corpusWriters, so regenerating the registry approved the collision.
+        # Known writers are now listed here, by hand, and only shrink.
+        known = KNOWN_SERVICE_LANE_WRITERS
+        bad, stale = [], []
         for lane in self.registry["serviceLanes"]:
             lane_region = (int(lane["offset"]), int(lane["length"]))
-            allowed = set(lane["corpusWriters"])
-            for m in self.corpus:
-                if m["output"] and overlaps(m["output"], lane_region) and m["name"] not in allowed:
-                    bad.append(f"{m['name']} output {m['output']} writes service lane {lane['id']} without registration")
-        self.assertEqual(bad, [], "unregistered service-lane writers:\n" + "\n".join(bad[:10]))
+            writers = {m["name"] for m in self.corpus if m["output"] and overlaps(m["output"], lane_region)}
+            for name in sorted(writers - known.get(lane["id"], set())):
+                bad.append(f"{name} writes service lane {lane['id']} {lane_region}")
+            for name in sorted(known.get(lane["id"], set()) - writers):
+                stale.append(f"{lane['id']}: {name} no longer writes it — remove it from KNOWN_SERVICE_LANE_WRITERS")
+        self.assertEqual(bad, [], "corpus machines writing a PE service lane:\n" + "\n".join(bad[:10]))
+        self.assertEqual(stale, [], "stale known service-lane writers:\n" + "\n".join(stale))
 
     def test_output_overlap_baseline_is_frozen(self) -> None:
         cell_owners: dict[int, list[str]] = defaultdict(list)
