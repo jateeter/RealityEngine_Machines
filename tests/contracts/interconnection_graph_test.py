@@ -25,7 +25,7 @@ DOMAINS_DIR = REPO_ROOT / "machines" / "domains"
 # Machine stem -> why it carries no curated edge.
 EXPECTED_ISOLATED = {
     # Conformance fixtures. Deliberately outside the graph for the same reason
-    # they carry no agent (corpus-exit-v1.0 §3.3): they exist to prove a runtime
+    # they carry no agent (CORPUS_EXIT_CRITERIA §3.3): they exist to prove a runtime
     # property in isolation, and coupling them to the corpus would let corpus
     # behaviour perturb what they are proving.
     "ArbitrationProviderPeer": "arbitration conformance fixture (9b)",
