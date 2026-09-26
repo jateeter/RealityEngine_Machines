@@ -32,7 +32,7 @@ FoldConfigurationInvarianceTests derives that by exhaustion rather than
 asserting it. SharedOutputPositionTests applies it to the corpus.
 
 THE HONEST LIMIT, stated here because an unenforceable guarantee that looks
-enforced is worse than a documented gap. 1326 of 1328 machines emit only {0,1},
+enforced is worse than a documented gap. 1325 of 1327 machines emit only {0,1},
 so every non-zero contributor asserts 1 and value-agreement holds because the
 alphabet cannot express disagreement. The corpus does not corroborate constraint
 A; it is silent on it. The gate's discriminating power today is confined to the
@@ -207,7 +207,7 @@ class SharedOutputPositionTests(unittest.TestCase):
 
         This is the check that keeps the gate above from being read as evidence
         the constructors upheld constraint A. They may have; the corpus cannot
-        say. 1326 machines emit only {0,1}, so their non-zero contributors all
+        say. 1325 machines emit only {0,1}, so their non-zero contributors all
         assert 1 and agreement is forced by the alphabet rather than by
         construction. The two machines whose alphabet can express disagreement
         both do disagree -- 2 for 2 -- which is why they are already segregated
@@ -225,7 +225,7 @@ class SharedOutputPositionTests(unittest.TestCase):
 
         binary = [path.name for path, machine in self.corpus
                   if max(output_alphabet(machine) or {0}) <= 1]
-        self.assertEqual(len(binary), 1326)
+        self.assertEqual(len(binary), 1325)
         for path, machine in self.corpus:
             if max(output_alphabet(machine) or {0}) <= 1:
                 for index, contributors in shared_positions(machine).items():
@@ -387,7 +387,7 @@ class FoldConfigurationInvarianceTests(unittest.TestCase):
                          "or no longer fabricates on a lone multi-valued contributor")
 
     def test_the_default_or_selects_a_contributor_exactly_on_binary_alphabets(self) -> None:
-        """Why 1326 machines need no declaration and 2 do.
+        """Why 1325 machines need no declaration and 2 do.
 
         `or` is join restricted to {0,1}: on a binary alphabet it returns a
         contributor and preserves the alphabet, so the default is safe. One rung
@@ -420,7 +420,7 @@ class SeverityJoinTests(unittest.TestCase):
     join is well defined for the same reasons the fold is -- max over a finite
     chain -- and these checks execute that rather than restate it.
 
-    135 of 1328 machines have an outputMatches pattern mapping to more than one
+    135 of 1327 machines have an outputMatches pattern mapping to more than one
     RAG code. That is NOT a violation and nothing here fails on it: governance
     is resolved per contributing sequence, so the sequenceId filter disambiguates
     before the join ever runs. The invariant worth pinning is that the filter is

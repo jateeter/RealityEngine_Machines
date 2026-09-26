@@ -17,14 +17,14 @@ is well formed, so only a comparison finds it.
 
 WHAT THE CORPUS LOOKS LIKE, because it decides what these checks can prove.
 
-Exactly two of 1328 machines assert an output value above 1:
+Exactly two of 1327 machines assert an output value above 1:
 
     Fall Sensor Motion Pre-aggregator   asserts <=3   transform=join
     Fall Detection                      asserts <=4   transform=join
 
 Both declare `join`, which is a chain transformation, so both are correct today.
 They are correct *by their transformation choice alone* -- nothing else protects
-them. Changing either to `or`, which is what the other 1326 machines declare and
+them. Changing either to `or`, which is what the other 1325 machines declare and
 what the schema names as the default, would flatten 3 and 4 to 1 and no test
 would have said so. That is what MultiValuedMachineFoldTests pins.
 
@@ -34,7 +34,7 @@ THE HONEST LIMITS, three of them.
    machines. That is the argument for landing it while the corpus is small enough
    to reason about, not evidence that it is unnecessary.
 
-2. `outputAlphabetTop` is **absent on all 1328 machines**. Nothing declares it.
+2. `outputAlphabetTop` is **absent on all 1327 machines**. Nothing declares it.
    The C++ fold reads it as an optional and its comment records that the two
    chain-folding machines "need no top", so absence is permitted rather than
    broken -- DeclaredAlphabetTests therefore reports the gap and does not fail

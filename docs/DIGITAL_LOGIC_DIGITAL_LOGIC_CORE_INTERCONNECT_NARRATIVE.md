@@ -27,8 +27,8 @@ Input lane: `[14297:14312]`
 [8] RS2 active output[1] bit
 [9] RS Flip Flop active output[0] bit
 [10] RS Flip Flop active output[1] bit
-[11] RS Flip Flop (deprecated demo) active output[0] bit
-[12] RS Flip Flop (deprecated demo) active output[1] bit
+[11] RS Ring Latch Stage A active output[0] bit
+[12] RS Ring Latch Stage A active output[1] bit
 [13] RS Flipflop Trigger active output[0] bit
 [14] RS Flipflop Trigger active output[1] bit
 ```
