@@ -45,6 +45,19 @@ known while writing it. `git rev-parse corpus-exit-v1.0` resolves it. The SHA in
 §6 is a different claim — the commit the figures were measured against, which is
 the parent of the merge and is what makes those numbers auditable.
 
+### Revisions since the tag
+
+The figures in §3 are the corpus at `corpus-exit-v1.0` and are left as measured.
+Deliberate corpus changes since then, and what they moved:
+
+| date | change | machines | agent specs | `openClawProjection` | `agentBinding` |
+|---|---|---|---|---|---|
+| 2026-09-26 | RS Flip Flop (deprecated demo) retired (#180): it wrote into the `agent-completion-risk` service lane | 1,328 → **1,327** | 1,323 → **1,322** | 1,185 → **1,184** | 1,058 (unchanged) |
+
+`RealityEngine_CI/scripts/check-corpus-exit-criteria.py` enforces the current
+row, not the tag's. No new tag was cut for this revision; until one is,
+dependents that regenerate against `corpus-exit-v1.0` still include the demo.
+
 ## 3. Settled
 
 ### 3.1 Corpus shape
