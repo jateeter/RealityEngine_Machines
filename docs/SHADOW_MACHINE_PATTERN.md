@@ -227,7 +227,8 @@ replacing it with an implementation. A machine marked for this treatment is
 
 - `docs/ARBITER_CONTRACT.md` — 3.1 registry admission, 4.1 commutative rules,
   4.3a precedence
-- `docs/CORPUS_EXIT_CRITERIA.md` — §5 records the localAI machines as outside
-  corpus validation at `corpus-exit-v1.0`
+- `docs/CORPUS_EXIT_CRITERIA.md` — §5 records the localAI machines as
+  corpus-managed but not corpus files (`corpus-exit-v2.0`); at `corpus-exit-v1.0`
+  they were outside corpus validation
 - jateeter/localAIStack#38 — schema conformance of the localAI definitions
 - jateeter/localAIStack#46 — single-target bridge; 5.3 depends on it
