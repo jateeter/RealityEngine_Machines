@@ -39,8 +39,8 @@ occupies `[2023:2027]`, immediately adjacent to chronic disease output
     mental-health access status.
 
 - `HomeChronicPainMentalHealthAccessInterconnect.json`
-  - input: `[4320:4332]`
-  - output: `[4332:4336]`
+  - input: `[4974:4986]`
+  - output: `[4986:4990]`
   - role: publishes the `health-personal` chronic-pain mental-health access bus
     for downstream behavioral-health integration, opioid safety review, and
     managed monitoring consumers.
@@ -240,14 +240,14 @@ MENTAL_HEALTH_CRISIS
 PE also composes the published bus input:
 
 ```text
-HomeChronicPainMentalHealthAccessInterconnect[4320:4332]
+HomeChronicPainMentalHealthAccessInterconnect[4974:4986]
 = [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]
 ```
 
 RE emits:
 
 ```text
-HomeChronicPainMentalHealthAccessInterconnect[4332:4336] = [1, 0, 0, 0]
+HomeChronicPainMentalHealthAccessInterconnect[4986:4990] = [1, 0, 0, 0]
 ```
 
 That output means:
@@ -285,10 +285,10 @@ MH_REFERRAL_NEEDED
 The corresponding published-bus input and output are:
 
 ```text
-HomeChronicPainMentalHealthAccessInterconnect[4320:4332]
+HomeChronicPainMentalHealthAccessInterconnect[4974:4986]
 = [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0]
 
-HomeChronicPainMentalHealthAccessInterconnect[4332:4336] = [0, 1, 0, 0]
+HomeChronicPainMentalHealthAccessInterconnect[4986:4990] = [0, 1, 0, 0]
 ```
 
 The stable recovery workflow uses:
@@ -309,10 +309,10 @@ MH_ACCESS_ADEQUATE
 The corresponding published-bus input and output are:
 
 ```text
-HomeChronicPainMentalHealthAccessInterconnect[4320:4332]
+HomeChronicPainMentalHealthAccessInterconnect[4974:4986]
 = [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 
-HomeChronicPainMentalHealthAccessInterconnect[4332:4336] = [0, 0, 0, 1]
+HomeChronicPainMentalHealthAccessInterconnect[4986:4990] = [0, 0, 0, 1]
 ```
 
 ## Message Flow
@@ -333,9 +333,9 @@ sequenceDiagram
   PE->>PE: compose [2019:2023] + [2023:2027] into [2019:2027]
   PE->>RE: next vector snapshot includes mental-health access input
   RE-->>PE: HomeMentalHealthAccessMonitor[2039:2043]
-  PE->>PE: compose disease + pain + mental-health outputs into [4320:4332]
+  PE->>PE: compose disease + pain + mental-health outputs into [4974:4986]
   PE->>RE: next vector snapshot includes chronic-pain mental-health bus input
-  RE-->>PE: HomeChronicPainMentalHealthAccessInterconnect[4332:4336]
+  RE-->>PE: HomeChronicPainMentalHealthAccessInterconnect[4986:4990]
   PE-->>LAI: updateProcessState for mental health crisis/referral
   LAI-->>PE: resolver completion as PE source state
   PE->>RE: downstream machines observe only compact vector state
@@ -368,7 +368,7 @@ perform the same machine-native binary projection as described above.
    It publishes:
 
    ```text
-   HomeChronicPainMentalHealthAccessInterconnect[4332:4336]
+   HomeChronicPainMentalHealthAccessInterconnect[4986:4990]
    = [
      urgent_behavioral_health_response,
      integrated_behavioral_health_referral,
@@ -430,7 +430,7 @@ perform the same machine-native binary projection as described above.
    RE chronic-pain output -> PE [2023:2027]
    PE composed mental-health input -> RE [2019:2027]
    RE mental-health output -> localAIStack/Ollama resolver
-   resolver completion -> PE source region [4332:4336]
+   resolver completion -> PE source region [4986:4990]
    ```
 
 7. Fan-out destinations are lane-scoped.

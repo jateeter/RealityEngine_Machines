@@ -34,8 +34,8 @@ completion ingestion.
 
 - `DailyActivityWellnessInterconnect.json`
   - role: publishes the `health-personal` daily activity wellness bus.
-  - input: `[4310:4320]`
-  - output: `[4320:4324]`
+  - input: `[4960:4970]`
+  - output: `[4970:4974]`
 
 ## OpenClaw Native Input Projection
 
@@ -115,7 +115,7 @@ Output lane:
 ```
 
 The bridge machine is a normal RE machine. It receives the compact PE-composed
-input vector at `[4310:4320]` and emits `[4320:4324]`.
+input vector at `[4960:4970]` and emits `[4970:4974]`.
 
 ## Example Workflow
 
@@ -126,14 +126,14 @@ isolation is severe.
 PE composes the upstream outputs into:
 
 ```text
-DailyActivityWellnessInterconnect[4310:4320]
+DailyActivityWellnessInterconnect[4960:4970]
 = [1, 1, 1, 1, 1, 1, 1, 0, 0, 0]
 ```
 
 RE evaluates the interconnect and emits:
 
 ```text
-DailyActivityWellnessInterconnect[4320:4324]
+DailyActivityWellnessInterconnect[4970:4974]
 = [1, 0, 0, 0]
 ```
 
@@ -172,8 +172,8 @@ sequenceDiagram
   PE->>RE: next vector snapshot includes source inputs
   RE-->>PE: activity, sleep, hydration, and social outputs
   PE->>PE: compose [1953:1955] + [1945:1947] + [1949:1951] + [2035:2039]
-  PE->>RE: write compact bus input [4310:4320]
-  RE-->>PE: bus output [4320:4324]
+  PE->>RE: write compact bus input [4960:4970]
+  RE-->>PE: bus output [4970:4974]
   PE-->>LAI: accepted-no-wait resolver dispatch with compact bus output
   LAI-->>PE: resolver completion as PE source mapping
   PE-->>Downstream: lane-scoped fan-out, no PE cycle wait
