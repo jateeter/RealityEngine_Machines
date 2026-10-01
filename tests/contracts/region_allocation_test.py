@@ -34,10 +34,7 @@ BUS_REGISTRY = REPO_ROOT / "domains" / "semantic-bus-registry.json"
 # Corpus machines known to write a PE service lane, which is a defect. The list
 # only shrinks: a new writer fails, and a writer that stops writing must be
 # removed. The two below are tracked in RealityEngine_Machines#181.
-KNOWN_SERVICE_LANE_WRITERS: dict[str, set[str]] = {
-    "healthkit-heart-rate": {"DailyActivityWellnessInterconnect.json"},
-    "healthkit-steps": {"HomeChronicPainMentalHealthAccessInterconnect.json"},
-}
+KNOWN_SERVICE_LANE_WRITERS: dict[str, set[str]] = {}
 
 
 def load_json(path: Path) -> dict[str, Any]:
