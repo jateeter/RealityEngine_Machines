@@ -2,13 +2,13 @@ import { test, expect } from '@playwright/test';
 import { readdir, readFile } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { deployed, requireEngine } from '../support/deployed-endpoints.js';
 
 /**
  * Integration: Machine corpus integrity.
  * Every machine JSON in machines/ must be present in RE after seeding.
  */
 
-const RE_URL = process.env.RE_BASE_URL ?? 'https://localhost:5001';
 const MACHINES_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..', 'machines');
 
 async function collectMachineFiles(dir: string): Promise<string[]> {
@@ -49,6 +49,7 @@ test.describe('Machine Corpus Integrity', () => {
   });
 
   test('every corpus machine is present in RE after seeding', async ({ request }) => {
+    const RE_URL = requireEngine((await deployed(request)).re, 'RE');
     if (corpusIds.length === 0) {
       test.skip(true, 'No machine definitions found in machines/ — add JSON files to run this test');
       return;
@@ -67,6 +68,7 @@ test.describe('Machine Corpus Integrity', () => {
   });
 
   test('RE has at least as many machines as the corpus', async ({ request }) => {
+    const RE_URL = requireEngine((await deployed(request)).re, 'RE');
     const resp = await request.get(`${RE_URL}/api/machines`, { ignoreHTTPSErrors: true });
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();

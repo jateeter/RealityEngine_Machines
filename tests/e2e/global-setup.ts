@@ -17,14 +17,35 @@ async function globalSetup(_config: FullConfig) {
   console.log('All services are ready!');
 }
 
-async function waitForServices() {
-  const services = [
-    { name: 'Reality Engine',       url: 'https://localhost:5001/api/health' },
-    { name: 'Visualizer Backend',   url: 'https://localhost:3001/health' },
-    { name: 'Visualizer Frontend',  url: 'https://localhost:5173/' },
-    { name: 'Perception Engine',    url: 'https://localhost:3004/api/health' },
-    { name: 'localAIStack API',     url: 'http://localhost:4000/health' },
+// The deployed endpoints, never Docker-lane literals: the instance registry
+// (both lanes publish one since RealityEngine_CI#363) or the env overrides. With
+// neither there is nothing to wait for, and guessing ports would only make the
+// wait fail later against addresses nothing is bound to (RealityEngine_Machines#126).
+async function deployedServices(): Promise<Array<{ name: string; url: string }>> {
+  const registryUrl = process.env.RE_REGISTRY_URL ?? 'http://127.0.0.1:5999/re-registry.json';
+  let reg: any = {};
+  try {
+    const { stdout } = await execAsync(`curl -kfsS --max-time 5 "${registryUrl}"`);
+    reg = JSON.parse(stdout);
+  } catch { /* no registry: env overrides only */ }
+  const inst = (reg.instances ?? [])[0] ?? {};
+  const svc = (n: string) => reg.services?.[n]?.url;
+  const candidates = [
+    { name: 'Reality Engine',      base: process.env.RE_BASE_URL ?? inst.re_url,              path: '/api/health' },
+    { name: 'Perception Engine',   base: process.env.PE_BASE_URL ?? inst.pe_url,              path: '/api/health' },
+    { name: 'Visualizer Backend',  base: process.env.VIZ_BASE_URL ?? svc('manager_backend'),  path: '/health' },
+    { name: 'Visualizer Frontend', base: process.env.VIZ_FRONTEND_URL ?? svc('manager_frontend'), path: '/' },
+    { name: 'localAIStack API',    base: process.env.LAS_BASE_URL ?? svc('localai_api'),      path: '/health' },
   ];
+  return candidates.filter(c => c.base).map(c => ({ name: c.name, url: `${c.base}${c.path}` }));
+}
+
+async function waitForServices() {
+  const services = await deployedServices();
+  if (services.length === 0) {
+    console.log('Global setup: no deployment published (no instance registry, no *_BASE_URL); nothing to wait for');
+    return;
+  }
 
   const maxRetries = 60;
   const delayMs = 2000;

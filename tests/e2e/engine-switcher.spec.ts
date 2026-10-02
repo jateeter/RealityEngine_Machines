@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { deployed, requireService } from '../support/deployed-endpoints.js';
 
 /**
  * E2E test for the EngineSwitcher UI component.
@@ -8,7 +9,6 @@ import { test, expect } from '@playwright/test';
  * is available.
  */
 
-const VIZ_URL      = process.env.VIZ_FRONTEND_URL ?? 'https://localhost:5173';
 const REGISTRY_URL = process.env.RE_REGISTRY_URL ?? '';
 
 interface EngineInstance { id: string; re_url: string; pe_url: string; }
@@ -16,8 +16,8 @@ interface EngineInstance { id: string; re_url: string; pe_url: string; }
 test.describe('EngineSwitcher UI', () => {
   test.skip(() => !REGISTRY_URL, 'RE_REGISTRY_URL not set — skipping engine-switcher UI tests');
 
-  test.beforeEach(async ({ page }) => {
-    await page.goto(VIZ_URL, { waitUntil: 'networkidle' });
+  test.beforeEach(async ({ page, request }) => {
+    await page.goto(requireService((await deployed(request)).managerFrontend, 'Manager frontend'), { waitUntil: 'networkidle' });
   });
 
   test('switcher button is visible when multiple instances exist', async ({ page, request }) => {
@@ -66,7 +66,7 @@ test.describe('EngineSwitcher UI', () => {
     test.skip(instances.length < 2, `Only ${instances.length} instance(s)`);
 
     // Get initial machine list count from Manager
-    const beforeEnginesResp = await request.get(`${VIZ_URL.replace('5173', '3001')}/api/engines`, { ignoreHTTPSErrors: true });
+    const beforeEnginesResp = await request.get(`${requireService((await deployed(request)).managerBackend, 'Manager backend')}/api/engines`, { ignoreHTTPSErrors: true });
     const beforeEngines = await beforeEnginesResp.json() as { activeId: string | null };
     const firstActiveId = beforeEngines.activeId;
 
@@ -83,13 +83,13 @@ test.describe('EngineSwitcher UI', () => {
 
     // Verify Manager reports the new active ID
     await page.waitForTimeout(500);
-    const afterEnginesResp = await request.get(`${VIZ_URL.replace('5173', '3001')}/api/engines`, { ignoreHTTPSErrors: true });
+    const afterEnginesResp = await request.get(`${requireService((await deployed(request)).managerBackend, 'Manager backend')}/api/engines`, { ignoreHTTPSErrors: true });
     const afterEngines = await afterEnginesResp.json() as { activeId: string | null };
     expect(afterEngines.activeId).toBe(target.id);
 
     // Restore original active instance
     if (firstActiveId) {
-      await request.post(`${VIZ_URL.replace('5173', '3001')}/api/engines/active`, {
+      await request.post(`${requireService((await deployed(request)).managerBackend, 'Manager backend')}/api/engines/active`, {
         data: { id: firstActiveId },
         ignoreHTTPSErrors: true,
       });
