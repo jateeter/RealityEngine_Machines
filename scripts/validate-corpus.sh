@@ -55,19 +55,31 @@ bash "$SCRIPT_DIR/reason-owl.sh"
 # origin/main for files that cannot exist there, and failed by construction on
 # every lane, every run, before the universe ever started.
 #
-# Absence is not drift. There is nothing to have drifted from, so generating a
-# missing one establishes the baseline rather than absorbing a difference. An
-# artifact that EXISTS is never regenerated here, which is what keeps the rule
-# above intact: a stale one still reaches --check, and still fails.
-bootstrap_deployment_artifact() {  # generator-script output-path
-  local script="$1" output="$2"
+# Absence is not drift, and for these two neither is staleness. Being untracked,
+# the only thing a stale copy can disagree with is the corpus it was generated
+# from on this machine — there is no committed version for it to have drifted
+# from, so "stale" means "a local cache older than the corpus", not a defect.
+# Failing on it made every run after any corpus change red until someone ran
+# --write by hand (deploy-validate 20261002T162453Z: "lane-graph.ttl is stale",
+# RealityEngine_Machines#126). The standing rule applies: a stale view is
+# regenerated, and the gate fails only on a disagreement that survives
+# regeneration — so --check still runs after, and still fails if the generator
+# cannot reproduce its own output. Tracked artifacts above are unaffected: they
+# are checked, never rewritten, by this script.
+refresh_deployment_artifact() {  # generator-script output-path
+  local script="$1" output="$2" state
   if [ ! -e "$REPO_ROOT/$output" ]; then
-    echo "$(basename "$script" .py): $output absent — generating (deployment artifact, not tracked)"
-    python3 "$SCRIPT_DIR/$script" --write >/dev/null
+    state="absent"
+  elif ! python3 "$SCRIPT_DIR/$script" --check >/dev/null 2>&1; then
+    state="stale"
+  else
+    return 0
   fi
+  echo "$(basename "$script" .py): $output $state — regenerating (untracked deployment artifact)"
+  python3 "$SCRIPT_DIR/$script" --write >/dev/null
 }
-bootstrap_deployment_artifact project-lanes.py semantics/lanes/lane-graph.ttl
-bootstrap_deployment_artifact compile-decision-table.py semantics/lanes/decision-table.json
+refresh_deployment_artifact project-lanes.py semantics/lanes/lane-graph.ttl
+refresh_deployment_artifact compile-decision-table.py semantics/lanes/decision-table.json
 
 python3 "$SCRIPT_DIR/project-lanes.py" --check
 python3 "$SCRIPT_DIR/compile-decision-table.py" --check
