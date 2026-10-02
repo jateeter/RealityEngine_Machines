@@ -91,7 +91,8 @@ test.describe('STT: the incumbent source keeps a contended cell', () => {
 
         const state = await (await request.get(`${pe}/api/state`, opts)).json() as { assembledVector?: number[] };
         expect(state.assembledVector?.[lane], `${engine.id}: the incumbent's value is assembled`).toBe(0.25);
-        winners.push(cell!.winner.id.replace(`-${engine.id}-`, '-'));
+        // Ids carry a per-engine stamp; what must agree is which role won.
+        winners.push(cell!.winner.id === incumbentId ? 'incumbent' : 'newcomer');
       } finally {
         await request.delete(`${pe}/api/sources/${encodeURIComponent(newcomerId)}`, opts);
         await request.delete(`${pe}/api/sources/${encodeURIComponent(incumbentId)}`, opts);
