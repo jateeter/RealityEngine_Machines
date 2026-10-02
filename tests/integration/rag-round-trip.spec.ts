@@ -1,25 +1,25 @@
 import { test, expect } from '@playwright/test';
+import { deployed, requireEngine, requireService, type Deployed } from '../support/deployed-endpoints.js';
 
 /**
  * Integration: RAG query round-trip.
  * localAIStack FastAPI → Qdrant retrieval → RE perceive → perceptual space update.
  */
 
-const LAS_URL  = 'http://localhost:4000';
-const RE_URL   = process.env.RE_BASE_URL ?? 'https://localhost:5001';
-const PE_URL   = process.env.PE_BASE_URL ?? 'https://localhost:3004';
-const QD_URL   = 'http://localhost:4333';
 
 test.describe('RAG Round-Trip', () => {
+  let ep: Deployed;
+  test.beforeEach(async ({ request }) => { ep = await deployed(request); });
+
   test('Qdrant is reachable and reports collections', async ({ request }) => {
-    const resp = await request.get(`${QD_URL}/collections`);
+    const resp = await request.get(`${requireService(ep.qdrant, 'Qdrant')}/collections`);
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
     expect(body).toHaveProperty('result');
   });
 
   test('localAIStack /health reports all sub-services ok', async ({ request }) => {
-    const resp = await request.get(`${LAS_URL}/health`);
+    const resp = await request.get(`${requireService(ep.localai, 'localAIStack API')}/health`);
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
     expect(body.status).toBe('ok');
@@ -34,7 +34,7 @@ test.describe('RAG Round-Trip', () => {
     const dim = parseInt(process.env.VECTOR_DIMENSION ?? '768', 10);
     const zero = Array(dim).fill(0.0);
     const resp = await request.post(
-      `${RE_URL}/api/perceive`,
+      `${requireEngine(ep.re, 'RE')}/api/perceive`,
       { data: { vector: zero }, ignoreHTTPSErrors: true }
     );
     expect(resp.ok()).toBeTruthy();
@@ -47,7 +47,7 @@ test.describe('RAG Round-Trip', () => {
   });
 
   test('rag_corrective_cycle machine is registered in RE', async ({ request }) => {
-    const resp = await request.get(`${RE_URL}/api/machines`, { ignoreHTTPSErrors: true });
+    const resp = await request.get(`${requireEngine(ep.re, 'RE')}/api/machines`, { ignoreHTTPSErrors: true });
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
     const machines: any[] = body.machines ?? [];
@@ -58,7 +58,7 @@ test.describe('RAG Round-Trip', () => {
   });
 
   test('session machines are registered in RE', async ({ request }) => {
-    const resp = await request.get(`${RE_URL}/api/machines`, { ignoreHTTPSErrors: true });
+    const resp = await request.get(`${requireEngine(ep.re, 'RE')}/api/machines`, { ignoreHTTPSErrors: true });
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
     const ids: string[] = (body.machines ?? []).map((m: any) => (m.id ?? '').toLowerCase());

@@ -1,23 +1,25 @@
 import { test, expect } from '@playwright/test';
+import { deployed, requireEngine, requireService, type Deployed } from '../support/deployed-endpoints.js';
 
 /**
  * Integration: PE sensor source registration via localAIStack lifespan hooks.
  * Verifies that sensors are registered in the Perception Engine after startup.
  */
 
-const PE_URL = process.env.PE_BASE_URL ?? 'https://localhost:3004';
-const LAS_URL = 'http://localhost:4000';
 
 test.describe('PE Sensor Registration', () => {
+  let ep: Deployed;
+  test.beforeEach(async ({ request }) => { ep = await deployed(request); });
+
   test('localAIStack API is healthy', async ({ request }) => {
-    const resp = await request.get(`${LAS_URL}/health`);
+    const resp = await request.get(`${requireService(ep.localai, 'localAIStack API')}/health`);
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
     expect(body.status).toBe('ok');
   });
 
   test('PE has at least one sensor source registered', async ({ request }) => {
-    const resp = await request.get(`${PE_URL}/api/sources`, { ignoreHTTPSErrors: true });
+    const resp = await request.get(`${requireEngine(ep.pe, 'PE')}/api/sources`, { ignoreHTTPSErrors: true });
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
     const sensors = (body.sources ?? []).filter((s: any) => s.type === 'sensor');
@@ -49,7 +51,7 @@ test.describe('PE Sensor Registration', () => {
     // covered, contiguously, by one sensor per node. Names are stable; the
     // offsets belong to the region allocation and have already moved once.
     // Hardcoding the new number would only schedule the same failure again.
-    const resp = await request.get(`${PE_URL}/api/sources`, { ignoreHTTPSErrors: true });
+    const resp = await request.get(`${requireEngine(ep.pe, 'PE')}/api/sources`, { ignoreHTTPSErrors: true });
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
 
@@ -80,7 +82,7 @@ test.describe('PE Sensor Registration', () => {
 
   test('sensor write is accepted by PE', async ({ request }) => {
     const resp = await request.post(
-      `${PE_URL}/api/sensors/localai_rag_retrieval`,
+      `${requireEngine(ep.pe, 'PE')}/api/sensors/localai_rag_retrieval`,
       {
         data: { values: [1.0, 0.5, 0.0, 0.0] },
         ignoreHTTPSErrors: true,

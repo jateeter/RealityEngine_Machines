@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import type { APIRequestContext } from '@playwright/test';
+import { deployed, requireService } from '../support/deployed-endpoints.js';
 
 /**
  * Multi-instance integration tests.
@@ -16,7 +17,6 @@ import type { APIRequestContext } from '@playwright/test';
  */
 
 const REGISTRY_URL = process.env.RE_REGISTRY_URL ?? '';
-const VIZ_URL      = process.env.VIZ_BASE_URL ?? 'https://localhost:3001';
 
 interface EngineInstance {
   id: string;
@@ -87,7 +87,7 @@ test.describe('Multi-Engine Instance Tests', () => {
     const registryInstances = await fetchRegistry(request);
     test.skip(registryInstances.length < 2, 'Need at least 2 instances for multi-engine manager conformance');
 
-    const resp = await request.get(`${VIZ_URL}/api/engines`, { ignoreHTTPSErrors: true });
+    const resp = await request.get(`${requireService((await deployed(request)).managerBackend, 'Manager backend')}/api/engines`, { ignoreHTTPSErrors: true });
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json() as { instances: EngineInstance[]; activeId: string | null };
     expect(Array.isArray(body.instances)).toBeTruthy();
@@ -99,13 +99,13 @@ test.describe('Multi-Engine Instance Tests', () => {
     test.skip(instances.length < 2, 'Need at least 2 instances to test switching');
 
     // Get current active
-    const beforeResp = await request.get(`${VIZ_URL}/api/engines`, { ignoreHTTPSErrors: true });
+    const beforeResp = await request.get(`${requireService((await deployed(request)).managerBackend, 'Manager backend')}/api/engines`, { ignoreHTTPSErrors: true });
     expect(beforeResp.ok()).toBeTruthy();
     const before = await beforeResp.json() as { activeId: string | null };
 
     // Switch to the second instance
     const target = instances.find(i => i.id !== before.activeId) ?? instances[1];
-    const switchResp = await request.post(`${VIZ_URL}/api/engines/active`, {
+    const switchResp = await request.post(`${requireService((await deployed(request)).managerBackend, 'Manager backend')}/api/engines/active`, {
       data: { id: target.id },
       ignoreHTTPSErrors: true,
     });
@@ -115,7 +115,7 @@ test.describe('Multi-Engine Instance Tests', () => {
 
     // Restore original
     if (before.activeId) {
-      await request.post(`${VIZ_URL}/api/engines/active`, {
+      await request.post(`${requireService((await deployed(request)).managerBackend, 'Manager backend')}/api/engines/active`, {
         data: { id: before.activeId },
         ignoreHTTPSErrors: true,
       });
