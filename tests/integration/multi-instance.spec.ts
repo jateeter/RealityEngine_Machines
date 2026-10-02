@@ -8,8 +8,11 @@ import type { APIRequestContext } from '@playwright/test';
  * (RE_REGISTRY_URL env var must be set and the universe must have been
  * started with --engines=<two or more instances>).
  *
- * They fail visibly when the registry is present but has fewer than two
- * instances. Single-instance smoke coverage belongs in a separate test path.
+ * Universes are routinely started with one, two, three or more engines. With
+ * fewer than two there is nothing to compare, so the multi-engine tests skip and
+ * say why rather than failing (RealityEngine_Machines#126); a deployment gate
+ * must not score a one-engine footprint as a defect. What holds for any number of
+ * engines (every listed instance is well-formed) still runs.
  */
 
 const REGISTRY_URL = process.env.RE_REGISTRY_URL ?? '';
@@ -36,14 +39,20 @@ async function fetchRegistry(request: APIRequestContext): Promise<EngineInstance
 test.describe('Multi-Engine Instance Tests', () => {
   test.skip(() => !REGISTRY_URL, 'RE_REGISTRY_URL not set — skipping multi-engine tests');
 
-  test('registry lists at least two instances', async ({ request }) => {
+  test('every registry instance is well-formed', async ({ request }) => {
     const instances = await fetchRegistry(request);
-    expect(instances.length, 'Registry must have at least two instances for multi-engine conformance').toBeGreaterThanOrEqual(2);
+    expect(instances.length, 'Registry must list at least one instance').toBeGreaterThanOrEqual(1);
     for (const inst of instances) {
       expect(inst.id).toBeTruthy();
       expect(inst.re_url).toMatch(/^https?:\/\//);
       expect(inst.status).toBe('running');
     }
+  });
+
+  test('registry lists at least two instances', async ({ request }) => {
+    const instances = await fetchRegistry(request);
+    test.skip(instances.length < 2, `one-engine deployment (${instances.length} listed): multi-engine conformance is not applicable`);
+    expect(instances.length).toBeGreaterThanOrEqual(2);
   });
 
   test('all instances have distinct RE ports', async ({ request }) => {

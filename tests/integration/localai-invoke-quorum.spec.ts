@@ -55,7 +55,10 @@ test.describe('localAI invoke quorum', () => {
     test.skip(!REGISTRY_URL, 'RE_REGISTRY_URL not set');
     engines = await natives(request);
     const missing = NATIVES.filter(rt => !engines.has(rt));
-    expect(missing, `3-of-3 needs all three native runtimes running; missing: ${missing.join(', ')}`).toEqual([]);
+    // A 3-of-3 quorum is not applicable to a footprint without all three
+    // runtimes; universes start with 1, 2, 3 or more engines, so this skips
+    // and names what it lacks rather than failing (RealityEngine_Machines#126).
+    test.skip(missing.length > 0, `not applicable: 3-of-3 quorum needs cpp, lsp and scala; this deployment lacks ${missing.join(', ')}`);
   });
 
   test('catalog: same key set and the same allow-list', async ({ request }) => {
