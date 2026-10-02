@@ -44,6 +44,8 @@ import re
 import sys
 import time
 import urllib.error
+
+from engine_tls import urlopen as engine_urlopen
 import urllib.request
 from pathlib import Path
 
@@ -56,7 +58,7 @@ PROVIDER_NS = "https://realityengine.example.org/providers"
 
 
 def get(url: str, timeout: int = 60):
-    with urllib.request.urlopen(url, timeout=timeout) as r:
+    with engine_urlopen(url, timeout=timeout) as r:
         return json.loads(r.read())
 
 
@@ -64,7 +66,7 @@ def post(url: str, body: dict, timeout: int = 120):
     req = urllib.request.Request(
         url, data=json.dumps(body).encode(),
         headers={"Content-Type": "application/json"}, method="POST")
-    with urllib.request.urlopen(req, timeout=timeout) as r:
+    with engine_urlopen(req, timeout=timeout) as r:
         return json.loads(r.read())
 
 
