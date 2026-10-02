@@ -49,6 +49,8 @@ import subprocess
 import sys
 import tempfile
 import urllib.request
+
+from engine_tls import urlopen as engine_urlopen
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -261,7 +263,7 @@ def allowed_endpoints(pe_url: str | None) -> set[str] | None:
     if not pe_url:
         return None
     try:
-        with urllib.request.urlopen(f"{pe_url.rstrip('/')}/api/integrations/localai/catalog",
+        with engine_urlopen(f"{pe_url.rstrip('/')}/api/integrations/localai/catalog",
                                     timeout=20) as r:
             cat = json.loads(r.read())
     except Exception:
