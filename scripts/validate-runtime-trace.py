@@ -50,7 +50,13 @@ import sys
 import tempfile
 import urllib.request
 
-from engine_tls import urlopen as engine_urlopen
+# engine_tls sits beside this script. Running the script puts this directory on
+# sys.path; importing it as a module (importlib, as runtime_trace_test does) does
+# not, and the bare import then failed with ModuleNotFoundError (#191's regression).
+import os as _os
+import sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+from engine_tls import urlopen as engine_urlopen  # noqa: E402
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]

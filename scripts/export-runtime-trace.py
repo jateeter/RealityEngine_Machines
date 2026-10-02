@@ -45,7 +45,13 @@ import sys
 import time
 import urllib.error
 
-from engine_tls import urlopen as engine_urlopen
+# engine_tls sits beside this script. Running the script puts this directory on
+# sys.path; importing it as a module (importlib, as runtime_trace_test does) does
+# not, and the bare import then failed with ModuleNotFoundError (#191's regression).
+import os as _os
+import sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+from engine_tls import urlopen as engine_urlopen  # noqa: E402
 import urllib.request
 from pathlib import Path
 
@@ -187,6 +193,24 @@ def resolve_sequence_iri(machine_iri: str | None, sequence_id: str) -> str | Non
     return None
 
 
+def last_push_ms(last_push) -> int:
+    """When the last push happened, from GET /api/state.
+
+    SURFACE_SPEC "`lastPush` is the last step, not when it happened": lastPush is
+    null before any push and afterwards the whole step object, whose required
+    `timestamp` is the field a timestamp-only lastPush used to be. This read
+    lastPush as that old number and crashed on the step object
+    (TypeError: int() ... not 'dict') against every runtime that pushed.
+    A bare number is still accepted from a runtime that has not moved yet.
+    """
+    if isinstance(last_push, dict):
+        last_push = last_push.get("timestamp")
+    try:
+        return int(last_push or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
 def provider_of(machine_name: str | None) -> str | None:
     """The external provider a runtime-injected machine came from, if any.
 
@@ -287,7 +311,7 @@ def export(engine_id: str, re_url: str, pe_url: str, do_push: bool) -> Trace:
         f're:targetEndpoint "{esc(re_url)}"^^xsd:anyURI',
         f're:matchAlgorithm "{esc(state.get("matchAlgorithm"))}"' if state.get("matchAlgorithm") else "",
         f"re:atTick {step}" if isinstance(step, int) else "",
-        f're:observedAtMs "{int(state.get("lastPush") or 0)}"^^xsd:long',
+        f're:observedAtMs "{last_push_ms(state.get("lastPush"))}"^^xsd:long',
         "re:inTraceRun t:run",
     ])
     tr.count("re:PerceptionPush")
@@ -408,7 +432,25 @@ def export(engine_id: str, re_url: str, pe_url: str, do_push: bool) -> Trace:
             "re:inTraceRun t:run",
         ]
         if not m_iri:
-            tr.unjoined.append(f"sequence observation {i}: no machineIri")
+            # The same two-case join as PE source writes above (M4 criterion 2):
+            # a machine IRI, or an explicit external-provider IRI. The engines
+            # leave machineIri null for a machine the corpus semantics manifest
+            # does not define — localAIStack's runtime-injected machines
+            # (`localai/...`) — which is the second case, not a missing join.
+            # This path read machineIri alone, so those observations were
+            # counted unjoined while their PE source writes, one hop earlier,
+            # were attributed to the provider (RealityEngine_Machines#126).
+            pid = provider_of(rec.get("machineName"))
+            if pid:
+                stmts.append(f"re:invokesProvider prov_:{slug(pid)}")
+                tr.add(f"prov_:{slug(pid)}", [
+                    "a owl:NamedIndividual , re:IntegrationProvider",
+                    f'rdfs:label "{esc(pid)}"',
+                    f're:providerId "{esc(pid)}"',
+                ])
+                tr.gap(f"runtime machine not in the corpus, attributed to provider '{pid}'")
+            else:
+                tr.unjoined.append(f"sequence observation {i}: no machineIri")
         if rec.get("ragStatus"):
             rag = str(rec["ragStatus"]).upper()
             if rag in ("GREEN", "AMBER", "RED"):
