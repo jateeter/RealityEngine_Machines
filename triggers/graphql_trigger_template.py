@@ -1,7 +1,7 @@
 """
 Machine → local-AI upstream trigger template.
 
-This is the reference implementation for the "trigger sequence" carried in a
+This is a worked implementation of the "trigger sequence" carried in a
 machine's `triggerConfig` metadata block.  When a machine asserts an output
 whose `triggerOn` condition is satisfied, the dispatcher running on the
 visualizer/perception side invokes this handler with an event shaped like:
