@@ -226,6 +226,30 @@ def provider_of(machine_name: str | None) -> str | None:
     return prefix if prefix and not prefix.startswith(" ") else None
 
 
+# `origin` values that say how a source was written rather than who supplied it.
+_NON_PROVIDER_ORIGINS = {"", "signal", "external", "test", "simulated", "bootstrap", "corpus"}
+
+
+def provider_of_source(src: dict) -> str | None:
+    """The integration a machine-less source write came from (RealityEngine_CI#518).
+
+    `provider_of` reads the write's *machine* name, and a sensor an integration
+    declares for itself has no machine. Two statements the PE already makes name
+    the provider instead, and either is the explicit external-provider join M4
+    asks for:
+
+    * `origin` — HealthKit and CareKit ingest declare their sources with
+      `origin: "healthkit"` / `"carekit"` on every runtime and name them
+      `healthkit:<type>`, with no `/` prefix;
+    * the source's own name — localAIStack's roll-up and HealthKit slots are
+      `localai/health/...`, the same provider prefix its machines carry.
+    """
+    origin = str(src.get("origin") or "").strip().lower()
+    if origin not in _NON_PROVIDER_ORIGINS:
+        return origin
+    return provider_of(src.get("name"))
+
+
 def corpus_machine_iris() -> dict[str, str]:
     """machineName -> the corpus machine IRI, read from the generated ABoxes.
 
@@ -350,7 +374,7 @@ def export(engine_id: str, re_url: str, pe_url: str, do_push: bool) -> Trace:
         ]
         if machine_iri:
             stmts.append(f"re:forMachine <{machine_iri}>")
-        elif provider_of(name):
+        elif provider_of(name) or provider_of_source(src):
             # M4's joinability criterion is "a machine IRI **or an explicit
             # external-provider IRI**", and this is the second case, not a
             # failure of the first. These machines are real, live and loaded —
@@ -360,7 +384,7 @@ def export(engine_id: str, re_url: str, pe_url: str, do_push: bool) -> Trace:
             # statement; silently dropping them would understate the trace, and
             # minting a corpus IRI for them would assert a machine the corpus
             # does not define.
-            pid = provider_of(name)
+            pid = provider_of(name) or provider_of_source(src)
             stmts.append(f"re:invokesProvider prov_:{slug(pid)}")
             tr.add(f"prov_:{slug(pid)}", [
                 "a owl:NamedIndividual , re:IntegrationProvider",
