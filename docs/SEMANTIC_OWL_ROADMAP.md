@@ -153,6 +153,15 @@ individuals, so there is nothing for it to find. That is a property of the
 corpus as it stands, not a permanent one; raise the frequency as cross-domain
 interaction grows.
 
+**Every domain has a released baseline (2026-10-04).** Before this only
+`health-personal` and the corpus had one, so eleven domains reported
+`diff SKIPPED` on every run; and both of those baselines trailed the corpus by a
+week of lane remapping, so they reported `axiom changes present` on every run. All
+12 domains and the corpus are now released at `1.0.0+corpus.08e9269cb38d` under
+ELK + HermiT, every scope clean, and a re-run reports `no axiom changes`. The
+merged corpus took 30m17s under both reasoners. See `semantics/CLAUDE.md`,
+"Released baselines".
+
 Implementation note: instead of committing ~1,300 generated TTL files, the
 corpus-wide gate is `semantics/abox-manifest.json` — per-machine name, IRI,
 and sha256 of the generated ABox, checked by
