@@ -70,8 +70,7 @@ _spec.loader.exec_module(_builder)
 # has no config/ces-contracts at all. "Repo found" and "shards present" are
 # different facts and the first was standing in for the second, which is why
 # this gating did not work on its first attempt.
-SHARDS_REACHABLE = _builder.SHARD_DIR.is_dir() or _builder.LEGACY_SHARD_PATHS[
-    "corpus:regression"].is_file()
+SHARDS_REACHABLE = _builder.SHARD_DIR.is_dir()
 
 
 def _shard_readable(scope: str) -> bool:
