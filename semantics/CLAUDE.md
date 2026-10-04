@@ -81,6 +81,32 @@ A class added without a definition is caught by
 `integration_vocabulary_test.test_every_new_class_carries_a_definition` before
 it reaches the report.
 
+## Released baselines: every domain, and the corpus
+
+`semantics/released/` holds one gzipped baseline per domain
+(`<domain>.owl.gz`, all 12) and one for the merged corpus
+(`corpus-12-domains.owl.gz`). `reason-owl.sh` diffs every run against the
+matching baseline, so each scope reports either `no axiom changes` or the
+changes themselves. Until 2026-10-04 only `health-personal` and the corpus had
+one: the other eleven domains reported `diff SKIPPED` on every run, a check that
+cannot fail. Both of the baselines that did exist had also gone stale
+(corpus `cba104f1972d`, released 2026-09-25), so they reported `axiom changes
+present` on every run, which is just as uninformative.
+
+**Re-release when the corpus changes on purpose.** A baseline that trails the
+corpus turns the diff into permanent noise:
+
+```bash
+bash scripts/reason-owl.sh <domain> --release                 # one domain, ELK + HermiT
+bash scripts/reason-owl.sh --all --reasoner both --release    # merged corpus, ~30 min
+```
+
+Release under ELK + HermiT, not the ELK-only corpus default: a baseline should
+record a full-reasoner result. Commit the `.owl.gz` files only, in a PR of
+their own that names the corpus version they record (`1.0.0+corpus.<hash>`,
+which the files carry as their version IRI). Released at
+`1.0.0+corpus.08e9269cb38d`: about 9.6 MB in all, of which the corpus is 4.7 MB.
+
 ## What OWL is not asked to check here
 
 Two invariants are deliberately **not** ontology axioms, for one shared reason:
