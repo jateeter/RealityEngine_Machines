@@ -101,11 +101,11 @@ CI_DIR = CI_ROOT or (REPO_ROOT.parent / "RealityEngine_CI")
 SHARD_DIR = CI_DIR / "config" / "ces-contracts"
 LOCAL_AI_MACHINES = REPO_ROOT.parent / "localAIStack" / "data" / "machines"
 
-# The regression corpus predates the shard directory and is already the
-# authoritative artifact the CI drift gate runs against, at its own path. It is
-# registered where it lives rather than copied, because two files holding one
-# contract is how the two come to disagree.
-LEGACY_SHARD_PATHS = {"corpus:regression": CI_DIR / "config" / "ces-contracts.json"}
+# The regression corpus once had a shard of its own outside the directory,
+# config/ces-contracts.json, written by the retired recorder. record-ces-contracts.py
+# writes every scope as config/ces-contracts/<kind>-<name>.json, regression
+# included, so that path is gone and pointing at it left corpus:regression
+# `unrecorded` however often it was recorded (RealityEngine_CI#528).
 
 MAX_CHAIN_DEPTH = 4  # the recorder's cap; mirrored so counts are comparable
 
@@ -229,8 +229,6 @@ def chain_count(path: Path) -> int:
 # ── Shards ──────────────────────────────────────────────────────────────────
 
 def shard_path(scope: str) -> Path:
-    if scope in LEGACY_SHARD_PATHS:
-        return LEGACY_SHARD_PATHS[scope]
     kind, _, name = scope.partition(":")
     return SHARD_DIR / f"{kind}-{name}.json"
 
