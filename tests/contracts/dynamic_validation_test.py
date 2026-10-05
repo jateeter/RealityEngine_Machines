@@ -66,17 +66,17 @@ def universe_is_up() -> bool:
         return False
 
 
-def traced_instance() -> tuple[str, str]:
-    """The instance the trace is exported from, and its PE URL.
+def traced_instances() -> list[tuple[str, str]]:
+    """Every instance the instance registry lists, with its PE URL, by id.
 
-    Named explicitly so the allowed-endpoint catalogue is read from the same PE
-    whose ledger the trace came from. The exporter's own default is the same
-    instance (first id in sorted order).
+    Every engine is validated, not the first one: no engine is the reference
+    (owner rule, 3-of-3 at every observation point). Validating only cpp-1 left
+    a forbidden call logged by lsp-1 or scala-1 invisible to this gate. Each
+    trace is validated against the catalogue of the PE whose ledger it came from.
     """
     with urllib.request.urlopen(REGISTRY, timeout=5) as r:
-        instances = {i["id"]: i for i in json.loads(r.read()).get("instances", [])}
-    engine = sorted(instances)[0]
-    return engine, instances[engine]["pe_url"].rstrip("/")
+        instances = json.loads(r.read()).get("instances", [])
+    return sorted((i["id"], i["pe_url"].rstrip("/")) for i in instances if i.get("pe_url"))
 
 
 def run(script: Path, *args: str, timeout: int = 3600) -> subprocess.CompletedProcess[str]:
@@ -210,38 +210,51 @@ class LiveTraceValidationTests(unittest.TestCase):
                 "Criterion 3 is checked separately and does not skip.")
 
     def test_a_live_run_validates_against_the_corpus_it_came_from(self) -> None:
+        """On every engine the instance registry lists. Each engine's problems
+        are collected and reported together, named by engine."""
         import tempfile
 
-        with tempfile.TemporaryDirectory() as tmp:
-            trace = Path(tmp) / "trace.ttl"
-            violations = Path(tmp) / "violations.ttl"
+        engines = traced_instances()
+        self.assertTrue(engines, f"the instance registry at {REGISTRY} lists no engine")
+        problems: dict[str, list[str]] = {}
+        for engine, pe_url in engines:
+            found = problems.setdefault(engine, [])
+            with tempfile.TemporaryDirectory() as tmp:
+                trace = Path(tmp) / "trace.ttl"
+                violations = Path(tmp) / "violations.ttl"
 
-            engine, pe_url = traced_instance()
-            exported = run(EXPORTER, "--engine", engine, "--push", "--out", str(trace))
-            self.assertEqual(exported.returncode, 0,
-                             f"export failed\n{exported.stdout}\n{exported.stderr}")
+                exported = run(EXPORTER, "--engine", engine, "--push", "--out", str(trace))
+                if exported.returncode != 0:
+                    found.append(f"export failed\n{exported.stdout}\n{exported.stderr}")
+                    continue
 
-            # --pe-url adds the catalogue cross-check of operation ids. Before
-            # Machines#201 this test passed none, and the whole forbidden-endpoint
-            # check printed UNGATED on every stack.
-            proc = run(VALIDATOR, "--trace", str(trace), "--pe-url", pe_url,
-                       "--emit", str(violations))
-            self.assertEqual(
-                proc.returncode, 0,
-                "a live run does not obey the semantics the corpus declares.\n"
-                + proc.stdout + proc.stderr)
-            self.assertNotIn("catalogue cross-check SKIPPED", proc.stdout,
-                             f"the allowed-endpoint catalogue could not be read from "
-                             f"{pe_url}, so operation ids were not cross-checked")
+                # --pe-url adds the catalogue cross-check of operation ids. Before
+                # Machines#201 this test passed none, and the whole
+                # forbidden-endpoint check printed UNGATED on every stack.
+                proc = run(VALIDATOR, "--trace", str(trace), "--pe-url", pe_url,
+                           "--emit", str(violations))
+                if proc.returncode != 0:
+                    found.append("the run does not obey the semantics the corpus "
+                                 "declares\n" + proc.stdout + proc.stderr)
+                if "catalogue cross-check SKIPPED" in proc.stdout:
+                    found.append(f"the allowed-endpoint catalogue could not be read "
+                                 f"from {pe_url}, so operation ids were not cross-checked")
+                # The sequence must actually have run, not been skipped into silence.
+                for step in ("ROBOT merge", "ROBOT report", "ROBOT reason (HermiT)"):
+                    if step not in proc.stdout:
+                        found.append(f"'{step}' did not run; a clean result from a "
+                                     f"step that never executed is not a clean result")
+                if "profile ABoxes merged" not in proc.stdout:
+                    found.append("no profile ABoxes were merged, so the trace was "
+                                 "validated against the ontology alone and never met "
+                                 "its corpus")
 
-            # The sequence must actually have run, not been skipped into silence.
-            for step in ("ROBOT merge", "ROBOT report", "ROBOT reason (HermiT)"):
-                self.assertIn(step, proc.stdout,
-                              f"'{step}' did not run; a clean result from a step "
-                              f"that never executed is not a clean result")
-            self.assertIn("profile ABoxes merged", proc.stdout,
-                          "no profile ABoxes were merged, so the trace was validated "
-                          "against the ontology alone and never met its corpus")
+        failing = {e: p for e, p in problems.items() if p}
+        if failing:
+            self.fail(
+            f"live trace validation failed on {', '.join(sorted(failing))} "
+            f"(of {', '.join(e for e, _ in engines)}):\n\n"
+            + "\n\n".join(f"== {e}\n" + "\n".join(p) for e, p in sorted(failing.items())))
 
     def test_both_integration_chains_classify_in_the_merged_graph(self) -> None:
         """Criteria 1 and 2, stated as what must classify.
@@ -257,13 +270,31 @@ class LiveTraceValidationTests(unittest.TestCase):
 
         robot = os.environ.get("ROBOT_BIN") or shutil.which("robot")
         assert robot
+        engines = traced_instances()
+        self.assertTrue(engines, f"the instance registry at {REGISTRY} lists no engine")
+        missing: dict[str, list[str]] = {}
+        for engine, _pe_url in engines:
+            missing[engine] = self._unclassified(robot, engine)
+        failing = {e: m for e, m in missing.items() if m}
+        if failing:
+            self.fail(
+            "M5 requires both integration chains to classify; in the merged graph "
+            + "; ".join(f"{e} classifies no re:{', re:'.join(m)}"
+                        for e, m in sorted(failing.items())))
+
+    def _unclassified(self, robot: str, engine: str) -> list[str]:
+        """The chain classes that classify nowhere for this engine's trace."""
+        import tempfile
+
         with tempfile.TemporaryDirectory() as tmp:
             trace = Path(tmp) / "trace.ttl"
             merged = Path(tmp) / "merged.owl"
             reasoned = Path(tmp) / "reasoned.owl"
             out = Path(tmp) / "q.csv"
 
-            self.assertEqual(run(EXPORTER, "--push", "--out", str(trace)).returncode, 0)
+            exported = run(EXPORTER, "--engine", engine, "--push", "--out", str(trace))
+            self.assertEqual(exported.returncode, 0,
+                             f"{engine}: export failed\n{exported.stdout}\n{exported.stderr}")
             subprocess.run(
                 [robot, "merge",
                  "--input", str(REPO_ROOT / "semantics" / "ontology" / "re-core.ttl"),
@@ -288,12 +319,10 @@ class LiveTraceValidationTests(unittest.TestCase):
                            check=True, capture_output=True, timeout=1800)
 
             text = out.read_text()
-            for cls in ("MCPInvocation", "MCPToolResult", "EvidenceArtifact",
-                        "ACPDispatch", "OpenClawAgentBinding",
-                        "CompletionMapping", "SourceMappingWrite"):
-                self.assertIn(cls, text,
-                              f"re:{cls} classifies nowhere in the merged graph; "
-                              f"M5 requires both integration chains to classify")
+            return [cls for cls in ("MCPInvocation", "MCPToolResult", "EvidenceArtifact",
+                                    "ACPDispatch", "OpenClawAgentBinding",
+                                    "CompletionMapping", "SourceMappingWrite")
+                    if cls not in text]
 
 
 if __name__ == "__main__":
