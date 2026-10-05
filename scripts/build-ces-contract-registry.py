@@ -35,8 +35,9 @@ says exactly which input moved. A monotonic revision would have to be
 remembered, and a remembered number is one that can be wrong.
 
 **Recording is not this script's job.** Shards are derived from a live 3-of-3
-quorum by `RealityEngine_CI/scripts/regression-ces-contracts.py`, driven in bulk
-by `RealityEngine_CI/scripts/record-ces-contract-shards.sh`. This repo owns the
+quorum by `RealityEngine_CI/scripts/record-ces-contracts.py` (the earlier
+`regression-ces-contracts.py` and `record-ces-contract-shards.sh` are retired,
+RealityEngine_CI#376). This repo owns the
 corpus and therefore owns the question of whether a recording still describes
 it; it does not own the runtimes and does not pretend to record anything. A
 scope with no shard on disk is registered as `unrecorded` — a named gap, not an
@@ -77,7 +78,7 @@ def _discover_ci_root() -> Path | None:
     machine -- the shards were simply unreachable, and unreachable was being
     read as absent.
     """
-    marker = Path("scripts") / "regression-ces-contracts.py"
+    marker = Path("scripts") / "record-ces-contracts.py"
     env = os.environ.get("REALITY_ENGINE_CI_DIR")
     if env:
         # Authoritative when set. Falling back to a probe would mean an explicit
@@ -354,7 +355,7 @@ def build() -> dict[str, Any]:
                     "with scripts/build-ces-contract-registry.py --write; do not edit by hand."),
         "derivedFrom": "3-of-3 agreement across the cpp, lsp and scala runtimes",
         "contract": "../RealityEngine_CI/docs/QUORUM_CONTRACT.md",
-        "recordedBy": "../RealityEngine_CI/scripts/regression-ces-contracts.py",
+        "recordedBy": "../RealityEngine_CI/scripts/record-ces-contracts.py",
         "fingerprintAlgorithm": fp.ALGORITHM,
         "scopeCount": len(entries),
         "statusCounts": dict(sorted(status_counts.items())),
@@ -392,6 +393,29 @@ def summarize(document: dict[str, Any]) -> None:
           f"{document['chainCountAcrossScopes']} chains across scopes (they overlap): "
           + ", ".join(f"{n} {s}" for s, n in document["statusCounts"].items()))
 
+
+
+def rerecord_commands(scopes) -> list[str]:
+    """How to re-record each scope, in RealityEngine_CI, with the current recorder.
+
+    A shard must be re-recorded under the stimulus it was recorded under: a
+    domain from a full-corpus universe (`--only`), a test-environment corpus
+    from a universe booted on that manifest (`--corpus`). The retired
+    `record-ces-contract-shards.sh` refuses to run, so it must never be the
+    advice a stale gate gives.
+    """
+    lines = []
+    for scope in sorted(scopes):
+        kind, _, name = scope.partition(":")
+        if kind == "domain":
+            lines.append(f"cd ../RealityEngine_CI && python3 scripts/record-ces-contracts.py --only {name} --write"
+                         f"   # {scope}: universe booted on the full corpus")
+        elif kind == "corpus":
+            lines.append(f"cd ../RealityEngine_CI && python3 scripts/record-ces-contracts.py --corpus {name} --write"
+                         f"   # {scope}: universe booted on config/{name}-corpus.txt")
+        else:
+            lines.append(f"# {scope}: no recorder mapping for scope kind {kind!r}")
+    return lines
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__,
@@ -466,8 +490,9 @@ def main() -> int:
             if unmet:
                 for scope, status in sorted(unmet.items()):
                     print(f"{status}: {scope}", file=sys.stderr)
-                print("re-record with: RealityEngine_CI/scripts/record-ces-contract-shards.sh",
-                      file=sys.stderr)
+                print("re-record against a live 3-of-3 universe:", file=sys.stderr)
+                for line in rerecord_commands(unmet):
+                    print(f"    {line}", file=sys.stderr)
                 return 1
         print(f"ces-contract-registry: verified — {document['scopeCount']} scopes, "
               + ", ".join(f"{n} {s}" for s, n in document["statusCounts"].items()))
