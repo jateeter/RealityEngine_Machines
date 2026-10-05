@@ -28,14 +28,18 @@ Every finding — from either half — becomes a named `re:SemanticGuardrailViol
 individual. M5's third criterion asks for a *named violation record*, not an exit
 code, because a run that fails should say which rule and which record.
 
-## The allowed-endpoint catalogue
+## Forbidden endpoint use is read from the PE's own decision
 
-M3 reported R2's workflow-class half as ungated because no `integrations.json`
-entry declares `allowedOperations`. It turns out the PE serves one:
-`GET /api/integrations/localai/catalog` returns `allowedEndpoints` with ids,
-methods and paths. This reads that when a PE URL is given, so forbidden-endpoint
-use is checkable against what the deployment actually permits rather than
-against a list maintained here.
+The PE decides which calls are allowed (method and path, query string ignored)
+and records the operation id on every allowed call; a refused call has none
+(SURFACE_SPEC.md, localAI invoke contract). An invocation with no operation id
+is therefore an attempt on a forbidden endpoint, with no path matching here to
+second-guess the PE. Owner rule, 2026-10-04: every such attempt is a violation
+except a contract probe (requestClass "contract-probe") the PE refused.
+
+With a PE URL, `GET /api/integrations/localai/catalog` (`allowedEndpoints`)
+adds a cross-check: an operation id the deployment's catalogue does not list is
+forbidden too.
 """
 
 from __future__ import annotations
@@ -278,12 +282,9 @@ def allowed_endpoints(pe_url: str | None) -> set[str] | None:
             cat = json.loads(r.read())
     except Exception:
         return None
-    eps = cat.get("allowedEndpoints") or []
-    out = set()
-    for e in eps:
-        for key in ("id", "path"):
-            if e.get(key):
-                out.add(str(e[key]))
+    # Operation ids only: the PE records the id of the operation an allowed
+    # call resolved to, and that id is what is cross-checked.
+    out = {str(e["id"]) for e in cat.get("allowedEndpoints") or [] if e.get("id")}
     return out or None
 
 
@@ -295,6 +296,22 @@ CONTRACT_PROBE = "contract-probe"
 
 
 def check_forbidden_endpoints(g, allowed: set[str] | None, result: Result) -> None:
+    """Forbidden endpoint use, read from the PE's own decision.
+
+    The PE decides what is allowed: it matches (method, path) against the
+    configured operations, ignores the query string, and records the
+    operation's id on every allowed call (SURFACE_SPEC.md, localAI invoke
+    contract). A refused call carries no operation id. So the validator does
+    not re-derive allowedness from paths, which would second-guess correct
+    refusals (a GET /graphql is refused because the PE never asks the LLM for
+    information back over GraphQL), and the check needs no catalogue to run:
+
+    - an invocation with no operation id is an attempt on a forbidden
+      endpoint, unless it is a contract probe the PE refused;
+    - with the deployment's catalogue (--pe-url), an operation id the
+      catalogue does not list is also forbidden: the PE labelled a call with
+      an operation nobody allowed.
+    """
     # An invocation that returned something has an re:MCPToolResult pointing at
     # it; a refused one never does. That is how a refused probe is told apart
     # from one the PE let through, without an outcome property in the ontology.
@@ -308,34 +325,30 @@ def check_forbidden_endpoints(g, allowed: set[str] | None, result: Result) -> No
         result.bump("invocations")
         ep = lit(props.get("integrationEndpoint"))
         op = lit(props.get("allowedOperationId"))
-        if allowed is None:
-            continue
-        if lit(props.get("requestClass")) == CONTRACT_PROBE and subj not in answered:
-            # The guard worked on a call made to test it. Listed, not counted
-            # against the run. A probe that was answered falls through to the
-            # check below: the PE let a forbidden call through.
-            result.bump("refusal probes observed (exempt)")
-            probes.append(f"{subj} ({ep})")
-            continue
-        for value, what in ((op, "operation"), (ep, "endpoint")):
-            if value is None:
+        if op is None:
+            if lit(props.get("requestClass")) == CONTRACT_PROBE and subj not in answered:
+                # The guard worked on a call made to test it. Listed, not
+                # counted against the run.
+                result.bump("refusal probes observed (exempt)")
+                probes.append(f"{subj} ({ep})")
                 continue
-            # The query string is not part of the match (SURFACE_SPEC.md, localAI
-            # invoke contract): /health?probe=1 is the allowed health operation.
-            value = value.split("?", 1)[0]
-            tail = value.rsplit("/", 1)[-1]
-            if value not in allowed and tail not in allowed and not any(
-                    value.endswith(a) for a in allowed):
-                result.add("CW", "forbidden-endpoint-use", "error", subj,
-                           f"{what} '{value}' is not in the deployment's allowed "
-                           f"catalogue ({len(allowed)} entries)")
+            how = ("and was answered: the PE let it through"
+                   if subj in answered else "and was refused")
+            result.add("CW", "forbidden-endpoint-use", "error", subj,
+                       f"endpoint '{ep}' resolved to no allowed operation {how}")
+            continue
+        if allowed is not None and op not in allowed:
+            result.add("CW", "forbidden-endpoint-use", "error", subj,
+                       f"operation '{op}' is not in the deployment's allowed "
+                       f"catalogue ({len(allowed)} entries)")
     if probes:
         result.note(f"refusal probes observed (exempt, requestClass {CONTRACT_PROBE!r}, "
                     f"refused): {', '.join(probes)}")
     if allowed is None:
-        result.gap("forbidden-endpoint check SKIPPED: no PE URL given, so the "
-                   "deployment's allowed-endpoint catalogue could not be read. "
-                   "Pass --pe-url to enable it.")
+        result.gap("forbidden-endpoint catalogue cross-check SKIPPED: no PE URL "
+                   "given, so operation ids were not checked against the "
+                   "deployment's allowed catalogue. Pass --pe-url to enable it. "
+                   "Invocations the PE resolved to no operation were still checked.")
 
 
 def check_run_grouping(g, result: Result) -> None:
