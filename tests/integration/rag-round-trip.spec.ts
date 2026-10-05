@@ -46,23 +46,29 @@ test.describe('RAG Round-Trip', () => {
     expect(count).toBeGreaterThanOrEqual(0);
   });
 
-  test('rag_corrective_cycle machine is registered in RE', async ({ request }) => {
-    const resp = await request.get(`${requireEngine(ep.re, 'RE')}/api/machines`, { ignoreHTTPSErrors: true });
-    expect(resp.ok()).toBeTruthy();
-    const body = await resp.json();
-    const machines: any[] = body.machines ?? [];
-    const ids = machines.map((m: any) => (m.id ?? '').toLowerCase());
-    const found = ids.some(id => id.includes('rag') && id.includes('corrective'));
-    expect(found).toBeTruthy();
-    console.log(`Total machines in RE: ${machines.length}`);
-  });
+  // localAIStack's own machines (localAIStack/data/machines), which it
+  // registers on every engine the instance registry lists (CI#518). Matched by
+  // exact name: ids are minted per engine (machine-<uuid v7>), so the earlier
+  // id substring match could never succeed and both tests failed everywhere.
+  const LOCALAI_MACHINES = [
+    'localai/rag_corrective_cycle',
+    'localai/session_rag_context',
+    'localai/session_agent_context',
+  ];
 
-  test('session machines are registered in RE', async ({ request }) => {
-    const resp = await request.get(`${requireEngine(ep.re, 'RE')}/api/machines`, { ignoreHTTPSErrors: true });
-    expect(resp.ok()).toBeTruthy();
-    const body = await resp.json();
-    const ids: string[] = (body.machines ?? []).map((m: any) => (m.id ?? '').toLowerCase());
-    expect(ids.some(id => id.includes('session') && id.includes('rag'))).toBeTruthy();
-    expect(ids.some(id => id.includes('session') && id.includes('agent'))).toBeTruthy();
+  test('localAIStack RAG and session machines are registered on every engine', async ({ request }) => {
+    requireService(ep.localai, 'localAIStack API');
+    const engines = ep.instances.length
+      ? ep.instances.map(i => ({ id: i.id, re: i.re_url }))
+      : [{ id: 'RE', re: requireEngine(ep.re, 'RE') }];
+    const missing: string[] = [];
+    for (const engine of engines) {
+      const resp = await request.get(`${engine.re}/api/machines`, { ignoreHTTPSErrors: true });
+      expect(resp.ok(), `${engine.id} GET /api/machines`).toBeTruthy();
+      const names = new Set(((await resp.json()).machines ?? []).map((m: { name?: string }) => m.name));
+      const absent = LOCALAI_MACHINES.filter(n => !names.has(n));
+      if (absent.length) missing.push(`${engine.id}: ${absent.join(', ')}`);
+    }
+    expect(missing, `localAIStack machines missing:\n  ${missing.join('\n  ')}`).toEqual([]);
   });
 });
