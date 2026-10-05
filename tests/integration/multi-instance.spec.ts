@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
 import type { APIRequestContext } from '@playwright/test';
 import { deployed, requireService } from '../support/deployed-endpoints.js';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 /**
  * Multi-instance integration tests.
@@ -122,21 +125,65 @@ test.describe('Multi-Engine Instance Tests', () => {
     }
   });
 
-  test('instances have independent machine state', async ({ request }) => {
-    const instances = await fetchRegistry(request);
-    test.skip(instances.length < 2, 'Need at least 2 instances for state isolation test');
+  test('instances of one runtime have independent machine state', async ({ request }) => {
+    // The pair is chosen by the registry's runtime field, never by position.
+    // Registry order is --engines= order, so `const [a, b] = instances` compared
+    // scala-1 with scala-2 under scala:2,lsp:1,cpp:1 and scala-1 with lsp-1
+    // under scala:1,lsp:1,cpp:2, and passed either way (RealityEngine_CI#274).
+    const running = (await fetchRegistry(request)).filter(i => i.status === 'running');
+    const byRuntime = new Map<string, EngineInstance[]>();
+    for (const inst of running) {
+      byRuntime.set(inst.runtime, [...(byRuntime.get(inst.runtime) ?? []), inst]);
+    }
+    const groups = [...byRuntime].filter(([, list]) => list.length >= 2)
+      .sort(([a], [b]) => a.localeCompare(b));
+    const composition = [...byRuntime].map(([rt, list]) => `${rt}:${list.length}`).sort().join(', ');
+    test.skip(groups.length === 0,
+      `no runtime has two instances (${composition || 'none'}): same-runtime isolation is not applicable`);
 
-    const [a, b] = instances;
-    const [respA, respB] = await Promise.all([
-      request.get(`${a.re_url}/api/machines`),
-      request.get(`${b.re_url}/api/machines`),
-    ]);
-    expect(respA.ok(), `Instance '${a.id}' /api/machines failed`).toBeTruthy();
-    expect(respB.ok(), `Instance '${b.id}' /api/machines failed`).toBeTruthy();
-    // Both respond independently — state may differ (different runtimes / seeds)
-    const bodyA = await respA.json() as { machines?: unknown[] };
-    const bodyB = await respB.json() as { machines?: unknown[] };
-    expect(Array.isArray(bodyA.machines ?? bodyA)).toBeTruthy();
-    expect(Array.isArray(bodyB.machines ?? bodyB)).toBeTruthy();
+    // A machine no deployment holds: a corpus machine renamed, with no
+    // perceptualMapping and no inputSequences, so it occupies no region and
+    // interns no PE test source (SURFACE_SPEC.md, "POST /api/machines always
+    // ingests"). DELETE frees the name and leaves the instance as it was.
+    const corpusFile = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'machines',
+      'domains', 'agriculture', 'AGX001_aquaculture-water-quality-stability.json');
+    const template = JSON.parse(readFileSync(corpusFile, 'utf8')) as { machine: Record<string, unknown> };
+
+    // Membership is read by id, not from the GET /api/machines list: C++
+    // lists from its running perceptual space, which a machine with no
+    // perceptualMapping never enters, so the list omits it there while LSP and
+    // Scala include it. GET /api/machines/:id answers for it on every runtime.
+    const holds = async (inst: EngineInstance, id: string): Promise<boolean> => {
+      const resp = await request.get(`${inst.re_url}/api/machines/${encodeURIComponent(id)}`);
+      expect([200, 404], `${inst.id} GET /api/machines/${id} answered ${resp.status()}`)
+        .toContain(resp.status());
+      return resp.status() === 200;
+    };
+
+    for (const [runtime, [probe, ...others]] of groups) {
+      test.info().annotations.push({ type: 'compared',
+        description: `${runtime}: ${probe.id} vs ${others.map(o => o.id).join(', ')}` });
+      const name = `zz-isolation-probe-${runtime}-${Date.now()}`;
+      const { perceptualMapping: _pm, inputSequences: _is, ...machine } = template.machine;
+      const created = await request.post(`${probe.re_url}/api/machines`,
+        { data: { ...template, machine: { ...machine, name } } });
+      expect(created.ok(), `${probe.id} POST /api/machines: ${created.status()} ${await created.text()}`).toBeTruthy();
+      const id = ((await created.json()) as { machine?: { id?: string } }).machine?.id;
+      expect(id, `${probe.id} POST /api/machines returned no machine id`).toBeTruthy();
+      try {
+        expect(await holds(probe, id!), `${probe.id} does not hold the machine it just ingested`).toBeTruthy();
+        // Ids are minted per instance, so with separate state no other instance
+        // can resolve this one; with shared state every one would.
+        for (const other of others) {
+          expect(await holds(other, id!),
+            `${runtime}: machine ${id} ingested on ${probe.id} resolves on ${other.id}; instances of one runtime share machine state`)
+            .toBeFalsy();
+        }
+      } finally {
+        const removed = await request.delete(`${probe.re_url}/api/machines/${encodeURIComponent(id!)}`);
+        expect(removed.ok(), `${probe.id} DELETE /api/machines/${id}`).toBeTruthy();
+      }
+      expect(await holds(probe, id!), `${probe.id} still holds the probe after DELETE`).toBeFalsy();
+    }
   });
 });
