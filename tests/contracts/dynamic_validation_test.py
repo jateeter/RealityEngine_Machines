@@ -117,14 +117,15 @@ class GuardrailFixtureTests(unittest.TestCase):
                           f"no fixture exercises {required}; M5 names that check "
                           f"explicitly and it has never been seen to fire")
 
-    def test_a_refused_contract_probe_is_listed_not_counted(self) -> None:
-        """Owner rule, 2026-10-04: an attempt on a forbidden endpoint is a
-        violation, except a deliberate contract probe the PE refused.
+    def test_forbidden_use_is_read_from_the_pes_own_resolution(self) -> None:
+        """The PE decides what is allowed and records the operation id on every
+        allowed call; a refused call has none (SURFACE_SPEC.md, localAI invoke
+        contract). Owner rule, 2026-10-04: every attempt the PE resolved to no
+        operation is a violation, except a contract probe the PE refused.
 
-        The quorum spec probes the refusal path on purpose, and every PE records
-        those refusals in its ledger. Counted as violations, they failed any
-        live validation run on a stack the spec had touched. The answered case
-        (the PE let a probe through) is the bad trace answered-contract-probe.ttl.
+        The quorum spec probes the refusal path on purpose and every PE records
+        those refusals in its ledger. The answered case (the PE let a probe
+        through) is the bad trace answered-contract-probe.ttl.
         """
         import importlib.util
 
@@ -133,30 +134,39 @@ class GuardrailFixtureTests(unittest.TestCase):
         assert spec.loader
         spec.loader.exec_module(mod)
 
+        def inv(name: str, endpoint: str, *extra: str) -> str:
+            return (f"t:{name}\n    a owl:NamedIndividual , re:MCPInvocation ;\n"
+                    f'    re:integrationEndpoint "{endpoint}"^^xsd:anyURI ;\n'
+                    + "".join(f"    {e} ;\n" for e in extra)
+                    + "    re:inTraceRun t:run .\n\n")
+
         g = mod.parse_ttl(
             "t:run\n    a owl:NamedIndividual , re:TraceRun .\n\n"
-            "t:probe\n    a owl:NamedIndividual , re:MCPInvocation ;\n"
-            '    re:integrationEndpoint "/v1/models"^^xsd:anyURI ;\n'
-            '    re:requestClass "contract-probe" ;\n'
-            "    re:inTraceRun t:run .\n\n"
-            "t:unlabelled\n    a owl:NamedIndividual , re:MCPInvocation ;\n"
-            '    re:integrationEndpoint "/admin/drop"^^xsd:anyURI ;\n'
-            "    re:inTraceRun t:run .\n\n"
-            # Allowed: the query string is not part of the match.
-            "t:health\n    a owl:NamedIndividual , re:MCPInvocation ;\n"
-            '    re:integrationEndpoint "/health?probe=1"^^xsd:anyURI ;\n'
-            "    re:inTraceRun t:run .\n")
+            # Refused contract probe: the guard working on a call made to test it.
+            + inv("probe", "/v1/models", 're:requestClass "contract-probe"')
+            # Refused, made by the run: a GET /graphql the PE correctly refused.
+            + inv("refused", "/graphql")
+            # Allowed calls carry the operation the PE resolved them to, query
+            # string or not.
+            + inv("health", "/health?probe=1", 're:allowedOperationId "health"')
+            + inv("graphql", "/graphql", 're:allowedOperationId "graphql"')
+            # An operation id the catalogue does not list.
+            + inv("unlisted", "/admin/drop", 're:allowedOperationId "admin_drop"'))
         r = mod.Result()
-        mod.check_forbidden_endpoints(g, {"health", "/health"}, r)
+        mod.check_forbidden_endpoints(g, {"health", "graphql"}, r)
 
-        flagged = [v.record for v in r.violations if v.kind == "forbidden-endpoint-use"]
-        self.assertEqual(flagged, ["t:unlabelled"],
-                         "only the unlabelled attempt is a violation: the refused "
-                         "contract probe is the guard working, and /health?probe=1 "
-                         "is the allowed health operation")
+        flagged = sorted(v.record for v in r.violations if v.kind == "forbidden-endpoint-use")
+        self.assertEqual(flagged, ["t:refused", "t:unlisted"])
         self.assertEqual(r.checked.get("refusal probes observed (exempt)"), 1)
         self.assertTrue(any("t:probe" in n for n in r.notes),
                         "an exempt probe must be listed by name, not dropped")
+
+        # The PE's own resolution needs no catalogue: without one, the refused
+        # attempt is still caught and only the id cross-check is skipped.
+        r = mod.Result()
+        mod.check_forbidden_endpoints(g, None, r)
+        self.assertEqual([v.record for v in r.violations], ["t:refused"])
+        self.assertTrue(any("cross-check SKIPPED" in u for u in r.ungated))
 
     def test_fixtures_are_not_merged_into_the_reasoned_graph(self) -> None:
         gate = (REPO_ROOT / "scripts" / "reason-owl.sh").read_text()
@@ -211,18 +221,18 @@ class LiveTraceValidationTests(unittest.TestCase):
             self.assertEqual(exported.returncode, 0,
                              f"export failed\n{exported.stdout}\n{exported.stderr}")
 
-            # --pe-url is what turns the forbidden-endpoint check on. Without it
-            # the check printed UNGATED and this test passed having checked no
-            # endpoint at all, on every stack.
+            # --pe-url adds the catalogue cross-check of operation ids. Before
+            # Machines#201 this test passed none, and the whole forbidden-endpoint
+            # check printed UNGATED on every stack.
             proc = run(VALIDATOR, "--trace", str(trace), "--pe-url", pe_url,
                        "--emit", str(violations))
             self.assertEqual(
                 proc.returncode, 0,
                 "a live run does not obey the semantics the corpus declares.\n"
                 + proc.stdout + proc.stderr)
-            self.assertNotIn("forbidden-endpoint check SKIPPED", proc.stdout,
+            self.assertNotIn("catalogue cross-check SKIPPED", proc.stdout,
                              f"the allowed-endpoint catalogue could not be read from "
-                             f"{pe_url}, so forbidden-endpoint use was not checked")
+                             f"{pe_url}, so operation ids were not cross-checked")
 
             # The sequence must actually have run, not been skipped into silence.
             for step in ("ROBOT merge", "ROBOT report", "ROBOT reason (HermiT)"):
