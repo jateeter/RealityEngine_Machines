@@ -81,6 +81,10 @@ EXCLUDED = {
     # artifact to keep current -- the corpus is the artifact. Holding it to
     # "is this output current" would assert something meaningless.
     "fix-lane-notation.py",
+    # A gate, not a generator: --check reads the corpus and writes nothing, so
+    # there is no artifact to keep current. Its baseline is hand-curated from
+    # --report, not generated (RealityEngine_Machines#165).
+    "check-input-sequence-contradictions.py",
 }
 
 
