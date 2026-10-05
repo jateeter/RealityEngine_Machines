@@ -111,6 +111,12 @@ python3 "$SCRIPT_DIR/check-generators.py" --check
 # that check-generators correctly excludes, so nothing was looking at it.
 python3 "$SCRIPT_DIR/check-command-refs.py" --check
 
+# A machine must not expect two different outputs from the same input: two
+# inputSequences with identical events and different expected outputs make one
+# declaration unsatisfiable by construction (RealityEngine_Machines#165). Known
+# cases await a per-machine decision (#164) and are baselined; a new one fails.
+python3 "$SCRIPT_DIR/check-input-sequence-contradictions.py" --check
+
 # JSON-Schema enforcement (machines + registries + trigger files vs schemas/).
 # Requires devDependencies (ajv); skip with a clear notice if not installed so
 # the Python audit still runs in minimal environments.
