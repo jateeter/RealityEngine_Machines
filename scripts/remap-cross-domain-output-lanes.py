@@ -46,7 +46,7 @@ generator's own `--check` was wired into nothing. Both the generator and the
 artifact were retired (RealityEngine_CI#327, RealityEngine_Machines#115).
 
 Cross-runtime CES contract recording now lives in
-`RealityEngine_CI/scripts/regression-ces-contracts.py`, which writes
+`RealityEngine_CI/scripts/record-ces-contracts.py`, which writes
 `RealityEngine_CI/config/ces-contracts.json` from 3-of-3 engine agreement and is
 gated by that repo's `run-all-tests.sh`.
 

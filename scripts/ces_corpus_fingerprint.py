@@ -6,7 +6,7 @@ machines. It stays true only while that set is unchanged, so every shard has to
 carry a description of the corpus it was recorded against, and something has to
 compare that description with the corpus as it stands now.
 
-Two places do the comparing — `RealityEngine_CI/scripts/regression-ces-contracts.py`
+Two places do the comparing — `RealityEngine_CI/scripts/record-ces-contracts.py`
 when it records, and `scripts/build-ces-contract-registry.py` when it reports
 staleness — and if they computed the fingerprint even slightly differently
 (sorted by a different key, hashing the parsed JSON rather than the bytes,

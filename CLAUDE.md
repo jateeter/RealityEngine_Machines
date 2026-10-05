@@ -72,6 +72,13 @@ Use JSON schema support for machine/config files, TypeScript language server for
 - Avoid changing generated/backfilled corpus data without documenting the reason.
 - When tests depend on live services, record which RE/PE endpoint source was used.
 
+## One CES, one regular expression (owner rule, 2026-10-05, without exception)
+
+- Each CES in a machine reflects exactly one regular expression of its own; no two CESs of one machine share a pattern.
+- Two CESs with the same pattern are competing regular expressions: one declared output becomes unreachable, and every engine agrees on the merge that wins instead, so the corpus defect reads as engine behaviour (#165 found seven).
+- The fix is always to give the competitor its own distinct pattern, consistent with the machine's own family scheme, and to update its input sequence to exercise it. It is never a merge, an exception or a baseline.
+- `scripts/check-one-ces-one-pattern.py --check`, run by `validate-corpus.sh`, enforces it. It also fails two input sequences that present the same events but expect different outputs.
+
 ## Standing rules — authoritative in `../RealityEngine_CI/docs/ENGINEERING_CONTRACT.md`
 
 These apply here and are **not** restated in this file. The table is an index

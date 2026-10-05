@@ -400,8 +400,7 @@ class CesContractRegistry(unittest.TestCase):
         self.fail(
             "the corpus moved under these recorded shards:\n" + "\n".join(lines)
             + "\n  re-record against a live 3-of-3 universe:\n"
-              "      RealityEngine_CI/scripts/record-ces-contract-shards.sh --only="
-            + ",".join(sorted(stale)))
+            + "\n".join(f"      {c}" for c in _builder.rerecord_commands(stale)))
 
     def test_stale_scopes_name_what_moved(self) -> None:
         """Staleness without attribution sends the reader back to the corpus to
