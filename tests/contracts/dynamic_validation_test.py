@@ -66,6 +66,19 @@ def universe_is_up() -> bool:
         return False
 
 
+def traced_instance() -> tuple[str, str]:
+    """The instance the trace is exported from, and its PE URL.
+
+    Named explicitly so the allowed-endpoint catalogue is read from the same PE
+    whose ledger the trace came from. The exporter's own default is the same
+    instance (first id in sorted order).
+    """
+    with urllib.request.urlopen(REGISTRY, timeout=5) as r:
+        instances = {i["id"]: i for i in json.loads(r.read()).get("instances", [])}
+    engine = sorted(instances)[0]
+    return engine, instances[engine]["pe_url"].rstrip("/")
+
+
 def run(script: Path, *args: str, timeout: int = 3600) -> subprocess.CompletedProcess[str]:
     return subprocess.run([sys.executable, str(script), *args],
                           cwd=REPO_ROOT, capture_output=True, text=True, timeout=timeout)
@@ -103,6 +116,47 @@ class GuardrailFixtureTests(unittest.TestCase):
             self.assertIn(required, expects,
                           f"no fixture exercises {required}; M5 names that check "
                           f"explicitly and it has never been seen to fire")
+
+    def test_a_refused_contract_probe_is_listed_not_counted(self) -> None:
+        """Owner rule, 2026-10-04: an attempt on a forbidden endpoint is a
+        violation, except a deliberate contract probe the PE refused.
+
+        The quorum spec probes the refusal path on purpose, and every PE records
+        those refusals in its ledger. Counted as violations, they failed any
+        live validation run on a stack the spec had touched. The answered case
+        (the PE let a probe through) is the bad trace answered-contract-probe.ttl.
+        """
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("validate_runtime_trace", VALIDATOR)
+        mod = importlib.util.module_from_spec(spec)
+        assert spec.loader
+        spec.loader.exec_module(mod)
+
+        g = mod.parse_ttl(
+            "t:run\n    a owl:NamedIndividual , re:TraceRun .\n\n"
+            "t:probe\n    a owl:NamedIndividual , re:MCPInvocation ;\n"
+            '    re:integrationEndpoint "/v1/models"^^xsd:anyURI ;\n'
+            '    re:requestClass "contract-probe" ;\n'
+            "    re:inTraceRun t:run .\n\n"
+            "t:unlabelled\n    a owl:NamedIndividual , re:MCPInvocation ;\n"
+            '    re:integrationEndpoint "/admin/drop"^^xsd:anyURI ;\n'
+            "    re:inTraceRun t:run .\n\n"
+            # Allowed: the query string is not part of the match.
+            "t:health\n    a owl:NamedIndividual , re:MCPInvocation ;\n"
+            '    re:integrationEndpoint "/health?probe=1"^^xsd:anyURI ;\n'
+            "    re:inTraceRun t:run .\n")
+        r = mod.Result()
+        mod.check_forbidden_endpoints(g, {"health", "/health"}, r)
+
+        flagged = [v.record for v in r.violations if v.kind == "forbidden-endpoint-use"]
+        self.assertEqual(flagged, ["t:unlabelled"],
+                         "only the unlabelled attempt is a violation: the refused "
+                         "contract probe is the guard working, and /health?probe=1 "
+                         "is the allowed health operation")
+        self.assertEqual(r.checked.get("refusal probes observed (exempt)"), 1)
+        self.assertTrue(any("t:probe" in n for n in r.notes),
+                        "an exempt probe must be listed by name, not dropped")
 
     def test_fixtures_are_not_merged_into_the_reasoned_graph(self) -> None:
         gate = (REPO_ROOT / "scripts" / "reason-owl.sh").read_text()
@@ -152,15 +206,23 @@ class LiveTraceValidationTests(unittest.TestCase):
             trace = Path(tmp) / "trace.ttl"
             violations = Path(tmp) / "violations.ttl"
 
-            exported = run(EXPORTER, "--push", "--out", str(trace))
+            engine, pe_url = traced_instance()
+            exported = run(EXPORTER, "--engine", engine, "--push", "--out", str(trace))
             self.assertEqual(exported.returncode, 0,
                              f"export failed\n{exported.stdout}\n{exported.stderr}")
 
-            proc = run(VALIDATOR, "--trace", str(trace), "--emit", str(violations))
+            # --pe-url is what turns the forbidden-endpoint check on. Without it
+            # the check printed UNGATED and this test passed having checked no
+            # endpoint at all, on every stack.
+            proc = run(VALIDATOR, "--trace", str(trace), "--pe-url", pe_url,
+                       "--emit", str(violations))
             self.assertEqual(
                 proc.returncode, 0,
                 "a live run does not obey the semantics the corpus declares.\n"
                 + proc.stdout + proc.stderr)
+            self.assertNotIn("forbidden-endpoint check SKIPPED", proc.stdout,
+                             f"the allowed-endpoint catalogue could not be read from "
+                             f"{pe_url}, so forbidden-endpoint use was not checked")
 
             # The sequence must actually have run, not been skipped into silence.
             for step in ("ROBOT merge", "ROBOT report", "ROBOT reason (HermiT)"):

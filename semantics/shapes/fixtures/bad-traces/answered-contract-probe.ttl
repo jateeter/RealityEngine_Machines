@@ -1,0 +1,26 @@
+# A contract probe the PE answered. Probes of the refusal path are exempt from
+# forbidden-endpoint-use only when the PE refused them (no re:MCPToolResult
+# points at the invocation). This one returned a result: the guard let a
+# forbidden call through, which is a violation however the call is labelled.
+@prefix re:   <https://realityengine.example.org/ontology/re-core#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix t:    <https://realityengine.example.org/runtime-trace/fixture#> .
+
+t:run
+    a owl:NamedIndividual , re:TraceRun ;
+    rdfs:label "fixture run" ;
+    re:runId "fixture-answered-contract-probe" .
+
+t:inv
+    a owl:NamedIndividual , re:MCPInvocation ;
+    rdfs:label "contract probe of an endpoint nobody allowed" ;
+    re:integrationEndpoint "/v1/models"^^xsd:anyURI ;
+    re:requestClass "contract-probe" ;
+    re:inTraceRun t:run .
+
+t:result
+    a owl:NamedIndividual , re:MCPToolResult ;
+    rdfs:label "result the PE should never have produced" ;
+    re:resultOfInvocation t:inv .

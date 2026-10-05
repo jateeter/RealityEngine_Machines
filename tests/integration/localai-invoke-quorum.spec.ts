@@ -78,7 +78,14 @@ test.describe('localAI invoke quorum', () => {
     test(`invoke: ${label}`, async ({ request }) => {
       const sigs = new Map<Runtime, string>();
       for (const rt of NATIVES) {
-        const r = await request.post(`${engines.get(rt)!.pe_url}/api/integrations/localai/invoke`, { data: body });
+        // Tagged so the runtime-trace validator lists these as deliberate probes
+        // of the refusal path rather than violations: each PE records its
+        // refusals in the ledger the trace is exported from (owner rule,
+        // 2026-10-04; scripts/validate-runtime-trace.py CONTRACT_PROBE).
+        // requestClass is carried into the ledger only, not the response, so
+        // the comparison below is unchanged.
+        const r = await request.post(`${engines.get(rt)!.pe_url}/api/integrations/localai/invoke`,
+          { data: { ...body, requestClass: 'contract-probe' } });
         const d = await r.json() as Record<string, unknown>;
         const reduced = Object.fromEntries(Object.entries(d).map(([k, v]) =>
           ['correlationId', 'invocationId', 'response'].includes(k) ? [k, '<present>'] : [k, v]));

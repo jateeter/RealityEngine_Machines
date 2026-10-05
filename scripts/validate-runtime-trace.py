@@ -88,6 +88,7 @@ class Result:
         self.violations: list[Violation] = []
         self.checked: dict[str, int] = {}
         self.ungated: list[str] = []
+        self.notes: list[str] = []
 
     def add(self, *a) -> None:
         self.violations.append(Violation(*a))
@@ -97,6 +98,9 @@ class Result:
 
     def gap(self, note: str) -> None:
         self.ungated.append(note)
+
+    def note(self, text: str) -> None:
+        self.notes.append(text)
 
 
 # ── Reading the trace ────────────────────────────────────────────────────────
@@ -283,7 +287,21 @@ def allowed_endpoints(pe_url: str | None) -> set[str] | None:
     return out or None
 
 
+# requestClass a contract test puts on a call it makes to probe the refusal
+# path on purpose (e.g. RealityEngine_Machines tests/integration/
+# localai-invoke-quorum.spec.ts). Owner rule, 2026-10-04: any attempt on a
+# forbidden endpoint is a violation, except a deliberate probe the PE refused.
+CONTRACT_PROBE = "contract-probe"
+
+
 def check_forbidden_endpoints(g, allowed: set[str] | None, result: Result) -> None:
+    # An invocation that returned something has an re:MCPToolResult pointing at
+    # it; a refused one never does. That is how a refused probe is told apart
+    # from one the PE let through, without an outcome property in the ontology.
+    answered = {target
+                for props in g.values() if "re:MCPToolResult" in props.get("a", [])
+                for target in props.get("resultOfInvocation") or []}
+    probes: list[str] = []
     for subj, props in g.items():
         if "re:MCPInvocation" not in props.get("a", []):
             continue
@@ -292,15 +310,28 @@ def check_forbidden_endpoints(g, allowed: set[str] | None, result: Result) -> No
         op = lit(props.get("allowedOperationId"))
         if allowed is None:
             continue
+        if lit(props.get("requestClass")) == CONTRACT_PROBE and subj not in answered:
+            # The guard worked on a call made to test it. Listed, not counted
+            # against the run. A probe that was answered falls through to the
+            # check below: the PE let a forbidden call through.
+            result.bump("refusal probes observed (exempt)")
+            probes.append(f"{subj} ({ep})")
+            continue
         for value, what in ((op, "operation"), (ep, "endpoint")):
             if value is None:
                 continue
+            # The query string is not part of the match (SURFACE_SPEC.md, localAI
+            # invoke contract): /health?probe=1 is the allowed health operation.
+            value = value.split("?", 1)[0]
             tail = value.rsplit("/", 1)[-1]
             if value not in allowed and tail not in allowed and not any(
                     value.endswith(a) for a in allowed):
                 result.add("CW", "forbidden-endpoint-use", "error", subj,
                            f"{what} '{value}' is not in the deployment's allowed "
                            f"catalogue ({len(allowed)} entries)")
+    if probes:
+        result.note(f"refusal probes observed (exempt, requestClass {CONTRACT_PROBE!r}, "
+                    f"refused): {', '.join(probes)}")
     if allowed is None:
         result.gap("forbidden-endpoint check SKIPPED: no PE URL given, so the "
                    "deployment's allowed-endpoint catalogue could not be read. "
@@ -428,6 +459,8 @@ def main() -> int:
         print(f"  checked  {k}: {result.checked[k]}")
     for note in result.ungated:
         print(f"  UNGATED  {note}")
+    for note in result.notes:
+        print(f"  NOTE     {note}")
     print()
     for v in result.violations:
         print(f"  {v}")
