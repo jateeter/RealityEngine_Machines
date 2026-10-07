@@ -105,7 +105,8 @@ Release under ELK + HermiT, not the ELK-only corpus default: a baseline should
 record a full-reasoner result. Commit the `.owl.gz` files only, in a PR of
 their own that names the corpus version they record (`1.0.0+corpus.<hash>`,
 which the files carry as their version IRI). Released at
-`1.0.0+corpus.08e9269cb38d`: about 9.6 MB in all, of which the corpus is 4.7 MB.
+`1.0.0+corpus.db2cbb45b46f` (2026-10-07, after #208): about 9.7 MB in all, of
+which the corpus is 4.7 MB.
 
 ## What OWL is not asked to check here
 
