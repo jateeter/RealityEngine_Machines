@@ -56,7 +56,9 @@ import urllib.request
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_REGISTRY = "http://127.0.0.1:5999/re-registry.json"
+from registry_url import registry_url  # noqa: E402
+
+DEFAULT_REGISTRY = registry_url()
 
 TRACE_NS = "https://realityengine.example.org/runtime-trace"
 ENGINE_NS = "https://realityengine.example.org/engines"

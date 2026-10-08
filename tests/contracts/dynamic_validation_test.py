@@ -47,7 +47,10 @@ WORKSPACE = REPO_ROOT.parent
 VALIDATOR = REPO_ROOT / "scripts" / "validate-runtime-trace.py"
 EXPORTER = REPO_ROOT / "scripts" / "export-runtime-trace.py"
 FIXTURES = REPO_ROOT / "semantics" / "shapes" / "fixtures" / "bad-traces"
-REGISTRY = os.environ.get("RE_REGISTRY_URL", "http://127.0.0.1:5999/re-registry.json")
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+from registry_url import registry_url  # noqa: E402
+
+REGISTRY = registry_url()
 
 # M5's validation sequence, from the roadmap. Named so a step silently dropped
 # from the validator fails here rather than shrinking what "validated" means.

@@ -1,4 +1,5 @@
 import { FullConfig } from '@playwright/test';
+import { registryUrl as resolveRegistryUrl } from '../support/registry-url.js';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
@@ -22,7 +23,7 @@ async function globalSetup(_config: FullConfig) {
 // neither there is nothing to wait for, and guessing ports would only make the
 // wait fail later against addresses nothing is bound to (RealityEngine_Machines#126).
 async function deployedServices(): Promise<Array<{ name: string; url: string }>> {
-  const registryUrl = process.env.RE_REGISTRY_URL ?? 'http://127.0.0.1:5999/re-registry.json';
+  const registryUrl = resolveRegistryUrl();
   let reg: any = {};
   try {
     const { stdout } = await execAsync(`curl -kfsS --max-time 5 "${registryUrl}"`);

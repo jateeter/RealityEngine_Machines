@@ -44,7 +44,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 WORKSPACE = REPO_ROOT.parent
 EXPORTER = REPO_ROOT / "scripts" / "export-runtime-trace.py"
 ONTOLOGY = REPO_ROOT / "semantics" / "ontology" / "re-core.ttl"
-REGISTRY = os.environ.get("RE_REGISTRY_URL", "http://127.0.0.1:5999/re-registry.json")
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+from registry_url import registry_url  # noqa: E402
+
+REGISTRY = registry_url()
 
 # The four runtimes that own a PE push path. ROBOT must never appear in any of
 # them; the reasoner runs out of band, over an exported trace.
