@@ -9,14 +9,16 @@
  * Resolution, in order — never a literal port:
  *   1. an explicit env override (RE_BASE_URL / PE_BASE_URL are the single-engine
  *      contract; LAS_BASE_URL, QD_BASE_URL, VIZ_BASE_URL for services);
- *   2. the instance registry (RE_REGISTRY_URL): the first instance for the
+ *   2. the instance registry (registry-url.ts: RE_REGISTRY_URL, else the
+ *      universe's recorded address): the first instance for the
  *      engine pair, and its `services` block for everything else, which
  *      startUniverse.sh publishes from what it actually brought up.
  * A service with neither is reported as not deployed.
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
+import { registryUrl } from './registry-url.js';
 
-export const REGISTRY_URL = process.env.RE_REGISTRY_URL ?? 'http://127.0.0.1:5999/re-registry.json';
+export const REGISTRY_URL = registryUrl();
 
 export interface Instance {
   id: string;
