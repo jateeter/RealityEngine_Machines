@@ -83,6 +83,9 @@ validateSet("region-allocation", [join(REPO, "domains/region-allocation.json")],
 validateSet("arbitration-registry", [join(REPO, "domains/arbitration-registry.json")], "arbitration-registry.schema.json");
 validateSet("lane-contracts", [join(REPO, "domains/lane-contracts.json")], "lane-contract.schema.json");
 
+const approvalsDir = join(REPO, "domains/approvals");
+validateSet("domain admission ledgers", existsSync(approvalsDir) ? walk(approvalsDir) : [], "domain-admission-ledger.schema.json");
+
 const trig = existsSync(join(REPO, "triggers")) ? readdirSync(join(REPO, "triggers")).filter((n) => n.endsWith(".json")) : [];
 const examples = trig.filter((n) => n.endsWith(".example.json")).map((n) => join(REPO, "triggers", n));
 const scenarios = trig.filter((n) => n.includes("scenario")).map((n) => join(REPO, "triggers", n));
