@@ -203,7 +203,13 @@ class SharedOutputPositionTests(unittest.TestCase):
         self.assertEqual((new, stale), ([], []), " | ".join(message))
 
     def test_multi_valued_machines_are_exactly_the_segregated_pair(self) -> None:
-        """Value-agreement is vacuous wherever the alphabet is {0,1}.
+        """Inventory Boolean alphabets by membership, not by an upper bound.
+
+        Bounded IFRS tokens {0, 0.5, 1} are not Boolean. The candidate IFRS
+        inventory is explicit; a new machine still requires inventory review.
+
+        Previous inventory rationale follows for the original corpus:
+        Value-agreement is vacuous wherever the alphabet is {0,1}.
 
         This is the check that keeps the gate above from being read as evidence
         the constructors upheld constraint A. They may have; the corpus cannot
@@ -215,19 +221,23 @@ class SharedOutputPositionTests(unittest.TestCase):
         """
         multi_valued = sorted(
             str(path.relative_to(REPO_ROOT)) for path, machine in self.corpus
-            if max(output_alphabet(machine) or {0}) > 1)
-        self.assertEqual(multi_valued, [
+            if not output_alphabet(machine).issubset({0, 1}))
+        declared_ifrs = json.loads((REPO_ROOT / "domains" / "ifrs-fold-declarations.json").read_text())
+        ifrs_files = sorted(declared_ifrs["machines"])
+        self.assertEqual(len(ifrs_files), 225)
+        expected_multi = sorted([
             "machines/domains/health-personal/FallDetection.json",
             "machines/domains/health-personal/FallSensorMotionPreaggregator.json",
-        ], "the multi-valued set has changed; constraint A has real force on these "
+        ] + ["machines/" + rel for rel in ifrs_files])
+        self.assertEqual(multi_valued, expected_multi, "the multi-valued set has changed; constraint A has real force on these "
            "machines and none on the binary rest, so this set is what the gate above "
            "actually measures")
 
         binary = [path.name for path, machine in self.corpus
-                  if max(output_alphabet(machine) or {0}) <= 1]
+                  if output_alphabet(machine).issubset({0, 1})]
         self.assertEqual(len(binary), 1325)
         for path, machine in self.corpus:
-            if max(output_alphabet(machine) or {0}) <= 1:
+            if output_alphabet(machine).issubset({0, 1}):
                 for index, contributors in shared_positions(machine).items():
                     self.assertEqual(
                         set().union(*contributors.values()), {1},
@@ -252,7 +262,7 @@ class SharedOutputPositionTests(unittest.TestCase):
             path.name for path, machine in self.corpus
             if isinstance((machine.get("perceptualMapping") or {}).get("bitsPerElement"), int)
             and (machine["perceptualMapping"]["bitsPerElement"]) > 1
-            and max(output_alphabet(machine) or {0}) <= 1
+            and output_alphabet(machine).issubset({0, 1})
             and shared_positions(machine))
         self.assertEqual(latent, [
             "AICapacityThrottler.json", "AICoolingRegulator.json",
@@ -304,8 +314,10 @@ class SharedOutputPositionTests(unittest.TestCase):
                           if machine.get("outputMergeTransformation") is not None)
         self.assertEqual(
             declared,
-            [("FallDetection.json", "join"),
-             ("FallSensorMotionPreaggregator.json", "join")],
+            sorted([("FallDetection.json", "join"),
+                    ("FallSensorMotionPreaggregator.json", "join")] + [
+                (Path(rel).name, "join") for rel in json.loads(
+                    (REPO_ROOT / "domains" / "ifrs-fold-declarations.json").read_text())["machines"]]),
             "the set of machines declaring an output merge transformation changed. "
             "Every declaration is a semantic decision about how a machine collapses "
             "concurrent completions, so it is pinned here rather than counted: "

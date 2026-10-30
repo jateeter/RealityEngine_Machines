@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:re:ifrs:standard-review-receipt:v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "taskId",
+    "unitId",
+    "sourceSHA256",
+    "artifactDigest",
+    "status",
+    "reviewerName",
+    "rationale",
+    "addressedAnchorIds",
+    "resolvedParagraphLabels",
+    "rag",
+    "atomicDispositions"
+  ],
+  "properties": {
+    "taskId": {
+      "type": "string"
+    },
+    "unitId": {
+      "type": "string"
+    },
+    "sourceSHA256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "artifactDigest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "status": {
+      "enum": [
+        "satisfied",
+        "not-applicable",
+        "non-normative",
+        "unresolved"
+      ]
+    },
+    "reviewerName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "addressedAnchorIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "resolvedParagraphLabels": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "rag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "interactionId",
+        "indexSnapshot",
+        "edition",
+        "query",
+        "unitIds",
+        "retrievedHashes",
+        "citationVerified",
+        "synthetic"
+      ],
+      "properties": {
+        "interactionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "indexSnapshot": {
+          "type": "string",
+          "minLength": 1
+        },
+        "edition": {
+          "const": "February 2025 third edition"
+        },
+        "query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unitIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "retrievedHashes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "citationVerified": {
+          "const": true
+        },
+        "synthetic": {
+          "const": false
+        }
+      }
+    },
+    "atomicDispositions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "requirementId",
+          "sourceLines",
+          "disposition",
+          "basis",
+          "implementationRefs",
+          "proofRefs"
+        ],
+        "properties": {
+          "requirementId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sourceLines": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "disposition": {
+            "enum": [
+              "satisfied",
+              "not-applicable",
+              "non-normative",
+              "unresolved"
+            ]
+          },
+          "basis": {
+            "type": "string",
+            "minLength": 1
+          },
+          "implementationRefs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "proofRefs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}
