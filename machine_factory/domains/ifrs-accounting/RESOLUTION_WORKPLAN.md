@@ -41,3 +41,11 @@ Live connector run 015 passes 24 synthetic cases, including all 17 foundation ca
 ## Description corrections applied
 
 The five foundation description corrections are now applied explicitly through `semantic-amendments.json`. The original admission-source manifest is unchanged. The contract restores only the enumerated description before-values and requires the original semantic hashes, preserving all native events, tokens, folds and state identifiers. The substance alternate legacy label is explicitly documented as an unresolved mismatch, not a permitted accounting choice. Generated OWL and agent descriptions are refreshed; independent accounting review, native parity/recordings and admission remain outstanding. Earlier connector receipts are retained against their original pinned machine hashes.
+
+## Expanded execution batches
+
+The machine-readable plan now splits all 53 findings into nine manageable workstreams: foundation, source/disclosure, nonfinancial assets, revenue/grants, financial pricing, leases, business interests, employee benefits, and remaining reporting. Foundation interfaces and source mappings precede downstream acceptance; source-backed local implementation may proceed to expose reviewable evidence. Independent review can begin on completed packets while other implementation proceeds.
+
+Six additional findings have controls and 37 synthetic cases: DEEP-S01-01, DEEP-S02-02, STD-03, STD-06, STD-07 and STD-08. `finding-coverage.json` distinguishes the 10 findings with development cases from 43 without mapped development cases. All 53 remain open for admission; development coverage does not certify closure.
+
+Policy-batch live run 019 passed all 61 cases, actual private gateway/model tool use and an owned eligibility draft with unchanged source fingerprints. Full contracts: 252 run, two live-runtime skips. Sidecar: 50 passed. Strict corpus/SHACL, 1,562 schemas, IFRS ELK/HermiT and 1,547-agent reproducibility passed. Evidence is in `docs/admission/ifrs-accounting/1.4.0/policy-batch/`. Next priority: STD-13 canonical compliance evidence, then STD-04/05 qualitative lease classification and SME measurement.

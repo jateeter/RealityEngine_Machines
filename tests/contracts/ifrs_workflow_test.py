@@ -99,7 +99,10 @@ class IFRSWorkflowTests(unittest.TestCase):
         findings = json.loads((ASSETS / "accounting-findings.json").read_text())["findings"]
         self.assertEqual({r["findingId"] for r in coverage["rows"]}, {f["id"] for f in findings})
         for row in coverage["rows"]:
-            self.assertFalse(row["admissionClosure"])
+            if row["admissionClosure"]:
+                finding = next(f for f in findings if f["id"] == row["findingId"])
+                self.assertEqual(finding["status"], "CLOSED_WITH_REVIEWED_CONNECTED_PROOF")
+                self.assertTrue(finding.get("closure", {}).get("independentReviewReference"))
             for ref in row["syntheticCases"]:
                 package = json.loads((ASSETS / "acceptance/synthetic" / ref["fixture"]).read_text())
                 case = next(c for c in package["cases"] if c["caseId"] == ref["caseId"])
