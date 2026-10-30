@@ -49,3 +49,7 @@ The machine-readable plan now splits all 53 findings into nine manageable workst
 Six additional findings have controls and 37 synthetic cases: DEEP-S01-01, DEEP-S02-02, STD-03, STD-06, STD-07 and STD-08. `finding-coverage.json` distinguishes the 10 findings with development cases from 43 without mapped development cases. All 53 remain open for admission; development coverage does not certify closure.
 
 Policy-batch live run 019 passed all 61 cases, actual private gateway/model tool use and an owned eligibility draft with unchanged source fingerprints. Full contracts: 252 run, two live-runtime skips. Sidecar: 50 passed. Strict corpus/SHACL, 1,562 schemas, IFRS ELK/HermiT and 1,547-agent reproducibility passed. Evidence is in `docs/admission/ifrs-accounting/1.4.0/policy-batch/`. Next priority: STD-13 canonical compliance evidence, then STD-04/05 qualitative lease classification and SME measurement.
+
+## Lease/compliance batch
+
+STD-04, STD-05 and STD-13 now have narrow controls, four description amendments and 18 added cases. Canonical compliance evaluates the full 595-control inventory against approved current evidence; it never trusts model-supplied approval flags. Live run 020 passed 79 cases, canonical compliance blocking, real gateway/model bound-tool use and the existing owned eligibility draft. The new lease/compliance paths still need owned downstream financial-document acceptance, reviewed judgments, native parity/CES and independent accounting review. Coverage is now 13 findings with development cases and 40 without; all 53 remain open.
