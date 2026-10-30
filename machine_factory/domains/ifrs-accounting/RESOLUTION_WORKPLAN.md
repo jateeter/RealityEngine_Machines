@@ -33,3 +33,7 @@ Reject malformed evidence references in deterministic controls and trial-balance
 ## Foundation batch implementation
 
 STD-14, STD-20 and DEEP-S02-03 now have narrow advisory controls, 17 synthetic cases and hashed source dispositions in `foundation-source-dispositions.json`. The OpenClaw calculation route accepts these controls only with a matching verified source section. Local tests cover successful and rejected paths; fixture RAG passages are explicitly synthetic. Live connector receipts, native machine description/state dispositions and independent accounting review remain required. All findings remain open.
+
+## Live foundation evidence
+
+Live connector run 015 passes 24 synthetic cases, including all 17 foundation cases and wrong-source-section rejection, with unchanged input fingerprints. Source bindings verify returned passage hashes and exact containment in the supplied hashed version-3 files. Paragraph interpretation remains independently unreviewed. Five explicit machine description/legacy-label proposals are recorded in `foundation-machine-dispositions.json`; they are not applied to the pinned corpus. See `docs/admission/ifrs-accounting/1.4.0/foundation-batch/`. Full gateway/model run 016 also passed, with an actual bound-tool call and a persisted owned draft on the first attempt.

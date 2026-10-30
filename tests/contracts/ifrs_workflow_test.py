@@ -70,6 +70,18 @@ class IFRSWorkflowTests(unittest.TestCase):
                 missing = dict(case["facts"], evidenceRefs=[])
                 self.assertEqual(controls.determine(case["control"], missing)["status"], "UNRESOLVED")
 
+    def test_foundation_correction_proposals_are_bound_to_current_machine_files(self):
+        import hashlib
+        proposals = json.loads((ASSETS / "foundation-machine-dispositions.json").read_text())
+        self.assertEqual(len(proposals["items"]), 5)
+        for item in proposals["items"]:
+            path = ROOT / "machines/domains/ifrs-accounting" / (item["machineId"] + ".json")
+            self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), item["machineFileSHA256"])
+            self.assertEqual(json.loads(path.read_text())["machine"]["description"], item["currentDescription"])
+            self.assertFalse(item["appliedToMachineCorpus"])
+            self.assertEqual(item["reviewStatus"], "INDEPENDENT_ACCOUNTING_REVIEW_REQUIRED")
+            self.assertNotEqual(item["currentDescription"], item["proposedDescription"])
+
     def test_money_is_not_a_token_or_float(self):
         for value in [.5, "NaN", "Infinity"]:
             with self.assertRaises(ValueError):
