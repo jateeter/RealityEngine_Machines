@@ -86,6 +86,7 @@ class IFRSWorkflowTests(unittest.TestCase):
         package = json.loads((ASSETS / "acceptance/synthetic/policy-cases.json").read_text())
         package["cases"].extend(json.loads((ASSETS / "acceptance/synthetic/lease-compliance-cases.json").read_text())["cases"])
         package["cases"].extend(json.loads((ASSETS / "acceptance/synthetic/source-disclosure-cases.json").read_text())["cases"])
+        package["cases"].extend(json.loads((ASSETS / "acceptance/synthetic/reporting-cases.json").read_text())["cases"])
         self.assertTrue(package["synthetic"])
         for case in package["cases"]:
             with self.subTest(case=case["caseId"]):
@@ -111,12 +112,37 @@ class IFRSWorkflowTests(unittest.TestCase):
                 self.assertIn(case["control"], row["controls"])
 
     def test_source_routing_is_pinned_independently_of_claimed_legacy_labels(self):
-        for name in ["foundation-cases.json", "policy-cases.json", "lease-compliance-cases.json", "source-disclosure-cases.json"]:
+        for name in ["foundation-cases.json", "policy-cases.json", "lease-compliance-cases.json", "source-disclosure-cases.json", "reporting-cases.json"]:
             for case in json.loads((ASSETS / "acceptance/synthetic" / name).read_text())["cases"]:
                 if "sourceSection" in case:
                     self.assertEqual(controls.source_section(case["control"], case["facts"]), case["sourceSection"], case["caseId"])
         self.assertIsNone(controls.source_section("source-reference-screen", {"machineId": "UNKNOWN"}))
         self.assertIsNone(controls.source_section("unsupported-control", {}))
+
+    def test_reporting_rendered_fields_are_complete_without_invented_placeholders(self):
+        spec = importlib.util.spec_from_file_location("reporting_lifecycle_rules", ASSETS / "tools/document_workflow.py")
+        rules = importlib.util.module_from_spec(spec); spec.loader.exec_module(rules)
+        catalog = {a["assetTypeId"]: a for a in json.loads((ASSETS / "document-asset-catalog.json").read_text())["assetTypes"]}
+        for case in json.loads((ASSETS / "acceptance/synthetic/reporting-cases.json").read_text())["cases"]:
+            if "expectedDraftAssetTypeId" not in case:
+                continue
+            with self.subTest(case=case["caseId"]):
+                result = controls.determine(case["control"], case["facts"])
+                for key in catalog[case["expectedDraftAssetTypeId"]]["requiredFields"]:
+                    self.assertIn(key, result["documentContent"])
+                    self.assertFalse(rules.unresolved(result["documentContent"][key]), key)
+
+    def test_financing_reconciliation_preserves_long_decimal_precision(self):
+        import copy
+        case = next(c for c in json.loads((ASSETS / "acceptance/synthetic/reporting-cases.json").read_text())["cases"] if c["control"] == "section-7-financing-reconciliation")
+        facts = copy.deepcopy(case["facts"])
+        facts["opening"]["amount"] = "123456789012345678901234567890.00"
+        facts["closing"]["amount"] = "123456789012345678901234567890.000000000000000000000000000001"
+        movement = copy.deepcopy(facts["movements"]["fx"][0]); movement["amount"] = "0.000000000000000000000000000001"
+        facts["movements"] = {k: [] for k in facts["movements"]}; facts["movements"]["fx"] = [movement]
+        result = controls.determine(case["control"], facts)
+        self.assertEqual(result["status"], "ADVISORY")
+        self.assertEqual(result["reconciledClosing"]["amount"], facts["closing"]["amount"])
 
     def test_money_is_not_a_token_or_float(self):
         for value in [.5, "NaN", "Infinity"]:

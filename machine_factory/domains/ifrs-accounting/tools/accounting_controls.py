@@ -7,12 +7,14 @@ arithmetic is decimal and never enters the nominal token lane.
 from decimal import Decimal, InvalidOperation
 from datetime import date
 import json
+import importlib.util
 from pathlib import Path
 
 
 # One authoritative source-scope map for server and live verifier. Legacy names
 # never override this mapping or select a source edition from caller text.
 SOURCE_SECTIONS = {
+    "section-6-dividend-note": "06", "section-7-financing-reconciliation": "07", "section-7-supplier-finance-note": "07", "section-8-note-structure-screen": "08",
     "trial-balance": "03", "section-1-eligibility": "01", "section-23-contract-cost": "23",
     "version-3-period-applicability": "A", "section-2-recognition-screen": "02", "section-2-substance-screen": "02",
     "section-1-fiduciary-screen": "01", "section-2-undue-cost-screen": "02", "section-12-bid-ask-screen": "12",
@@ -268,6 +270,10 @@ def determine(control, facts):
         else:
             return {"status": "UNRESOLVED", "reason": "A legacy residual-approach label is not blanket authority for a full-IFRS residual SSP method"}
         return {"status": "ADVISORY", "decision": decision, "sourceControl": "23.42; 23.47–23.48", "reviewRequired": True, "scope": "Allocation-basis screen; no monetary allocation, revenue recognition or unsupported residual-method approval"}
+    if control in {"section-6-dividend-note", "section-7-financing-reconciliation", "section-7-supplier-finance-note", "section-8-note-structure-screen"}:
+        spec = importlib.util.spec_from_file_location("ifrs_reporting_controls", Path(__file__).with_name("reporting_controls.py"))
+        module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+        return module.determine(control, facts)
     if control == "trial-balance":
         return {**reconcile_trial_balance(facts.get("rows")), "authorityClass": "supplemental-ledger-reconciliation", "reviewRequired": True}
     if control == "section-1-eligibility":
