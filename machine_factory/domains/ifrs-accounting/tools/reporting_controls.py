@@ -66,6 +66,8 @@ def dividend(f, evidence):
         ids.add(row["dividendId"])
         event = day(row.get("eventDate"))
         require(row.get("kind") in {"PROPOSED", "DECLARED"} and type(row.get("recognisedAsDistributionInPeriod")) is bool, "Dividend kind and recognition assessment required")
+        if row["recognisedAsDistributionInPeriod"]:
+            require(row["kind"] == "DECLARED" and start <= event <= end, "Recognition-in-period claim contradicts dividend event kind/date")
         money(row.get("dividendAmount"), evidence); money(row.get("perShare"), evidence)
         require(row["dividendAmount"]["currency"] == row["perShare"]["currency"] == currency and row["dividendAmount"]["asOf"] == row["perShare"]["asOf"] == row["eventDate"] and row.get("perShareBasisSupported") is True, "Amount/per-share scope and basis must agree")
         (declared if row["kind"] == "DECLARED" else proposed).append(row)
