@@ -32,4 +32,15 @@ class IFRSAssertionTests(unittest.TestCase):
  def test_precedence_preserves_rank_before_value(self):
   self.assertEqual(b.precedence_max([(1,1),(3,.5)]),(3,.5))
   self.assertEqual(b.precedence_max([(3,.5),(3,1)]),(3,1))
+ def test_ifrs_owl_preserves_categorical_cells_not_tier_confidence(self):
+  for path in (ROOT/'semantics/abox/ifrs-accounting').glob('*.ttl'):
+   text=path.read_text()
+   self.assertIn('re:OutputCellValue',text)
+   self.assertNotIn('re:outputTier ',text)
+   self.assertNotIn('re:outputConfidence ',text)
+   self.assertEqual(text.count('a owl:NamedIndividual , re:OutputCellValue'),8)
+ def test_fall_ordinal_semantics_remain_unchanged(self):
+  text=(ROOT/'semantics/abox/health-personal/FallDetection.ttl').read_text()
+  self.assertIn('re:outputTier ',text);self.assertIn('re:outputConfidence ',text)
+  self.assertNotIn('re:OutputCellValue',text)
 if __name__=='__main__':unittest.main()
