@@ -6,6 +6,33 @@ arithmetic is decimal and never enters the nominal token lane.
 """
 from decimal import Decimal, InvalidOperation
 from datetime import date
+import json
+from pathlib import Path
+
+
+# One authoritative source-scope map for server and live verifier. Legacy names
+# never override this mapping or select a source edition from caller text.
+SOURCE_SECTIONS = {
+    "trial-balance": "03", "section-1-eligibility": "01", "section-23-contract-cost": "23",
+    "version-3-period-applicability": "A", "section-2-recognition-screen": "02", "section-2-substance-screen": "02",
+    "section-1-fiduciary-screen": "01", "section-2-undue-cost-screen": "02", "section-12-bid-ask-screen": "12",
+    "section-18-useful-life-screen": "18", "section-19-goodwill-life-screen": "19", "section-28-actuarial-policy-screen": "28",
+    "section-3-compliance-evidence-screen": "03", "section-20-classification-screen": "20", "section-20-finance-initial-measurement": "20",
+    "section-8-policy-materiality-screen": "08", "section-8-supplemental-capital-screen": "08",
+    "section-29-pillar-two-screen": "29", "section-15-commitments-screen": "15", "section-23-allocation-basis-screen": "23",
+}
+
+
+def reference_mapping(facts):
+    data = json.loads((Path(__file__).resolve().parents[1] / "source-reference-map.json").read_text())
+    return next((m for m in data["machines"] if m["machineId"] == facts.get("machineId")), None)
+
+
+def source_section(control, facts):
+    if control == "source-reference-screen":
+        mapping = reference_mapping(facts)
+        return mapping["semanticSection"] if mapping else None
+    return SOURCE_SECTIONS.get(control)
 
 
 def amount(record):
@@ -174,6 +201,73 @@ def determine(control, facts):
         return {"status": "ADVISORY", "decision": "FINANCE_INITIAL_MEASUREMENT_SUBJECT_TO_REVIEW", "asset": format(base+c, "f"), "liability": format(base, "f"), "currency": fv["currency"],
                 "asOf": facts["commencementDate"], "sourceControl": "20.9–20.10", "reviewRequired": True, "postingPerformed": False,
                 "scope": "Supplied independently evidenced PV, not a cash-flow discounting engine; subsequent measurement and other-section adjustments assessed separately"}
+    if control == "source-reference-screen":
+        mapping = reference_mapping(facts)
+        if not mapping or facts.get("edition") != mapping["edition"]:
+            return {"status": "UNRESOLVED", "reason": "Known machine and pinned third edition required"}
+        refs = facts.get("claimedReferences")
+        if not isinstance(facts.get("claimedSection"), str) or not isinstance(refs, list) or not refs or any(not isinstance(r, str) for r in refs):
+            return {"status": "UNRESOLVED", "reason": "Explicit section and paragraph references required"}
+        matches = facts["claimedSection"] == mapping["semanticSection"] and set(refs) == set(mapping["requiredReferences"])
+        return {"status": "ADVISORY", "decision": "SOURCE_REFERENCE_MATCHES_PINNED_EDITION" if matches else "SOURCE_REFERENCE_MISMATCH",
+                "sourceControl": "; ".join(mapping["requiredReferences"]), "semanticSection": mapping["semanticSection"], "reviewRequired": True,
+                "scope": "Reference integrity only; does not determine derivative valuation or hedge eligibility/effectiveness"}
+    if control == "section-8-policy-materiality-screen":
+        if facts.get("consideredWithOtherStatementInformation") is not True or any(type(facts.get(k)) is not bool for k in ["couldInfluencePrimaryUserDecisions", "policyInformationDisclosed"]):
+            return {"status": "UNRESOLVED", "reason": "Materiality judgment in the complete financial-statement context and disclosure evidence required"}
+        decision = "NOT_REQUIRED_BY_8_5_SUBJECT_TO_OTHER_REQUIREMENTS"
+        if facts["couldInfluencePrimaryUserDecisions"]:
+            decision = "MATERIAL_POLICY_DISCLOSURE_SCREEN_PASSED" if facts["policyInformationDisclosed"] else "MATERIAL_POLICY_DISCLOSURE_MISSING"
+        return {"status": "ADVISORY", "decision": decision, "sourceControl": "8.5", "reviewRequired": True}
+    if control == "section-8-supplemental-capital-screen":
+        if facts.get("treatAsMandatorySMESection8Coverage") is not False:
+            return {"status": "UNRESOLVED", "reason": "No standalone Section 8 capital-management mandate identified; verify a specific basis before claiming mandatory coverage"}
+        if facts.get("labelledEntitySupplemental") is not True or facts.get("materialityAndOtherDisclosureRequirementsAssessed") is not True:
+            return {"status": "UNRESOLVED", "reason": "Label the supplemental control and separately assess applicable material information requirements"}
+        return {"status": "ADVISORY", "decision": "SUPPLEMENTAL_NOT_STANDALONE_SECTION_8_MANDATE", "sourceControl": "Section 8 attribution boundary; 8.5 assessed separately",
+                "authorityClass": "entity-supplemental", "reviewRequired": True}
+    if control == "section-29-pillar-two-screen":
+        if type(facts.get("withinScopeOfPillarTwoLegislation")) is not bool:
+            return {"status": "UNRESOLVED", "reason": "Enacted/substantively enacted legislation and entity-scope assessment required"}
+        if not facts["withinScopeOfPillarTwoLegislation"]:
+            return {"status": "ADVISORY", "decision": "OUTSIDE_THIS_PILLAR_TWO_SCREEN", "sourceControl": "29.3A", "reviewRequired": True}
+        keys = ["relatedDeferredTaxRecognised", "relatedDeferredTaxInformationDisclosed", "exceptionApplicationDisclosed", "relatedCurrentTaxSeparatelyDisclosed"]
+        if any(type(facts.get(k)) is not bool for k in keys):
+            return {"status": "UNRESOLVED", "reason": "Separate deferred-exception and current-tax disclosure evidence required"}
+        passed = not facts[keys[0]] and not facts[keys[1]] and facts[keys[2]] and facts[keys[3]]
+        return {"status": "ADVISORY", "decision": "PILLAR_TWO_EXCEPTION_AND_DISCLOSURES_SCREEN_PASSED" if passed else "PILLAR_TWO_EXCEPTION_OR_DISCLOSURE_GAP",
+                "sourceControl": "29.3A; 29.42–29.43", "reviewRequired": True, "scope": "Pillar Two scope only; no tax computation or exemption for other income taxes"}
+    if control == "section-15-commitments-screen":
+        if type(facts.get("jointControlOfJointlyControlledEntity")) is not bool:
+            return {"status": "UNRESOLVED", "reason": "Arrangement type and joint-control assessment required"}
+        if not facts["jointControlOfJointlyControlledEntity"]:
+            return {"status": "UNRESOLVED", "reason": "Assess the applicable other arrangement/investment model separately"}
+        if any(type(facts.get(k)) is not bool for k in ["aggregateCommitmentsDisclosed", "includesShareOfJointCommitments"]):
+            return {"status": "UNRESOLVED", "reason": "Aggregate commitments including jointly incurred share require disclosure evidence"}
+        try:
+            aggregate, share = facts["aggregateCommitments"], facts["jointCommitmentShare"]
+            a, b = amount(aggregate), amount(share)
+            if aggregate["currency"] != share["currency"] or aggregate["asOf"] != share["asOf"] or a < b:
+                raise ValueError("Commitment scope mismatch")
+        except (KeyError, TypeError, ValueError):
+            return {"status": "UNRESOLVED", "reason": "Consistent aggregate/share commitments required"}
+        passed = facts["aggregateCommitmentsDisclosed"] and facts["includesShareOfJointCommitments"]
+        return {"status": "ADVISORY", "decision": "OPERATIVE_COMMITMENTS_DISCLOSURE_SCREEN_PASSED" if passed else "OPERATIVE_COMMITMENTS_DISCLOSURE_MISSING",
+                "sourceControl": "15.19(d)", "reviewRequired": True, "sourceFidelityIssue": "Introduction summary does not erase the operative disclosure; independent source review required"}
+    if control == "section-23-allocation-basis-screen":
+        if facts.get("step4ScopeAssessed") is not True or facts.get("allocationExemptionApplies") is not False:
+            return {"status": "UNRESOLVED", "reason": "Assess 23.40/23.41 exemptions and applicable series-variable requirements separately"}
+        if facts.get("method") == "RELATIVE_SSP":
+            if facts.get("contractStartSSPsSupported") is not True or facts.get("noSubsequentSSPReallocation") is not True or facts.get("relativeBasisRepresentsEntitlement") is not True:
+                return {"status": "UNRESOLVED", "reason": "Supported contract-start SSPs, no subsequent SSP repricing and applicable entitlement assessment required"}
+            decision = "RELATIVE_SSP_BASIS_SCREEN_PASSED"
+        elif facts.get("method") == "ALTERNATIVE_DISCOUNT_VARIABLE":
+            if facts.get("discountOrVariableAmount") is not True or facts.get("relativeBasisRepresentsEntitlement") is not False or facts.get("alternativeRepresentsEntitlement") is not True or not isinstance(facts.get("alternativeMethodRationale"), str) or not facts["alternativeMethodRationale"].strip():
+                return {"status": "UNRESOLVED", "reason": "Alternative allocation requires supported discount/variable entitlement conditions under 23.47/23.48"}
+            decision = "DISCOUNT_VARIABLE_ALTERNATIVE_SCREEN_PASSED"
+        else:
+            return {"status": "UNRESOLVED", "reason": "A legacy residual-approach label is not blanket authority for a full-IFRS residual SSP method"}
+        return {"status": "ADVISORY", "decision": decision, "sourceControl": "23.42; 23.47–23.48", "reviewRequired": True, "scope": "Allocation-basis screen; no monetary allocation, revenue recognition or unsupported residual-method approval"}
     if control == "trial-balance":
         return {**reconcile_trial_balance(facts.get("rows")), "authorityClass": "supplemental-ledger-reconciliation", "reviewRequired": True}
     if control == "section-1-eligibility":

@@ -85,6 +85,7 @@ class IFRSWorkflowTests(unittest.TestCase):
     def test_policy_alternatives_boundaries_and_missing_evidence(self):
         package = json.loads((ASSETS / "acceptance/synthetic/policy-cases.json").read_text())
         package["cases"].extend(json.loads((ASSETS / "acceptance/synthetic/lease-compliance-cases.json").read_text())["cases"])
+        package["cases"].extend(json.loads((ASSETS / "acceptance/synthetic/source-disclosure-cases.json").read_text())["cases"])
         self.assertTrue(package["synthetic"])
         for case in package["cases"]:
             with self.subTest(case=case["caseId"]):
@@ -108,6 +109,14 @@ class IFRSWorkflowTests(unittest.TestCase):
                 package = json.loads((ASSETS / "acceptance/synthetic" / ref["fixture"]).read_text())
                 case = next(c for c in package["cases"] if c["caseId"] == ref["caseId"])
                 self.assertIn(case["control"], row["controls"])
+
+    def test_source_routing_is_pinned_independently_of_claimed_legacy_labels(self):
+        for name in ["foundation-cases.json", "policy-cases.json", "lease-compliance-cases.json", "source-disclosure-cases.json"]:
+            for case in json.loads((ASSETS / "acceptance/synthetic" / name).read_text())["cases"]:
+                if "sourceSection" in case:
+                    self.assertEqual(controls.source_section(case["control"], case["facts"]), case["sourceSection"], case["caseId"])
+        self.assertIsNone(controls.source_section("source-reference-screen", {"machineId": "UNKNOWN"}))
+        self.assertIsNone(controls.source_section("unsupported-control", {}))
 
     def test_money_is_not_a_token_or_float(self):
         for value in [.5, "NaN", "Infinity"]:
