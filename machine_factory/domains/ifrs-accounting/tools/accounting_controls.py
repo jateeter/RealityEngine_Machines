@@ -69,6 +69,82 @@ def determine(control, facts):
         if not facts["faithfulRepresentationAssessed"] or not facts["substanceRepresented"]:
             return {"status": "UNRESOLVED", "reason": "Resolve economic-substance representation; legal form alone is insufficient", "sourceControl": "2.14–2.18"}
         return {"status": "ADVISORY", "decision": "SUBSTANCE_SCREEN_PASSED_SUBJECT_TO_REVIEW", "sourceControl": "2.14–2.18", "reviewRequired": True}
+    if control == "section-1-fiduciary-screen":
+        keys = ["holdsFiduciaryAssets", "broadGroupOfOutsiders", "primaryBusiness", "incidentalToPrimaryBusiness"]
+        if any(type(facts.get(k)) is not bool for k in keys):
+            return {"status": "UNRESOLVED", "reason": "Business purpose and outsider facts required; amount is not the criterion"}
+        if facts["primaryBusiness"] and facts["incidentalToPrimaryBusiness"]:
+            return {"status": "UNRESOLVED", "reason": "Contradictory primary/incidental assessment"}
+        if facts["holdsFiduciaryAssets"] and facts["broadGroupOfOutsiders"]:
+            if facts["primaryBusiness"]:
+                decision = "FIDUCIARY_PUBLIC_ACCOUNTABILITY_CRITERION_MET"
+            elif facts["incidentalToPrimaryBusiness"]:
+                decision = "INCIDENTAL_ACTIVITY_DOES_NOT_ESTABLISH_PUBLIC_ACCOUNTABILITY"
+            else:
+                return {"status": "UNRESOLVED", "reason": "Primary-versus-incidental business assessment incomplete"}
+        else:
+            decision = "FIDUCIARY_PUBLIC_ACCOUNTABILITY_CRITERION_NOT_MET"
+        return {"status": "ADVISORY", "decision": decision, "sourceControl": "1.3(b)–1.4", "reviewRequired": True,
+                "scope": "Fiduciary criterion only; public-market status and full eligibility assessed separately"}
+    if control == "section-2-undue-cost-screen":
+        if type(facts.get("expressReliefApplies")) is not bool:
+            return {"status": "UNRESOLVED", "reason": "Identify an express exemption and its applicability"}
+        if not facts["expressReliefApplies"]:
+            return {"status": "ADVISORY", "decision": "RELIEF_NOT_AVAILABLE", "sourceControl": "2.28–2.31", "reviewRequired": True}
+        if facts.get("reliefParagraph") == "19.16":
+            return {"status": "UNRESOLVED", "reason": "Assess the specific 19.16 relief and 19.38 disclosure route separately"}
+        for key in ["reliefParagraph", "entitySpecificRationale", "userBenefitAssessment", "judgmentDate", "assessmentDate"]:
+            if not isinstance(facts.get(key), str) or not facts[key].strip():
+                return {"status": "UNRESOLVED", "reason": "Dated entity-specific cost/effort and user-benefit judgments required"}
+        try:
+            dated = date.fromisoformat(facts["judgmentDate"]) == date.fromisoformat(facts["assessmentDate"])
+        except ValueError:
+            dated = False
+        keys = ["incrementalCostEffortSubstantiallyExceedsBenefits", "disclosureFactAndReasonsProvided"]
+        if not dated or any(type(facts.get(k)) is not bool for k in keys):
+            return {"status": "UNRESOLVED", "reason": "Fresh assessment and explicit judgment/disclosure evidence required"}
+        if not facts["incrementalCostEffortSubstantiallyExceedsBenefits"]:
+            decision = "RELIEF_NOT_JUSTIFIED"
+        elif not facts["disclosureFactAndReasonsProvided"]:
+            return {"status": "UNRESOLVED", "reason": "Disclose relief use and reasons"}
+        else:
+            decision = "RELIEF_SCREEN_PASSED_SUBJECT_TO_SPECIFIC_PARAGRAPH_REVIEW"
+        return {"status": "ADVISORY", "decision": decision, "sourceControl": "2.28–2.31", "reviewRequired": True}
+    if control in {"section-18-useful-life-screen", "section-19-goodwill-life-screen"}:
+        if type(facts.get("lifeReliablyEstablished")) is not bool:
+            return {"status": "UNRESOLVED", "reason": "Reliability judgment required"}
+        raw = facts.get("estimatedYears")
+        if not isinstance(raw, str):
+            return {"status": "UNRESOLVED", "reason": "Explicit finite management estimate required; never default to ten"}
+        try:
+            years = Decimal(raw)
+        except InvalidOperation:
+            return {"status": "UNRESOLVED", "reason": "Invalid useful-life estimate"}
+        if not years.is_finite() or years <= 0:
+            return {"status": "UNRESOLVED", "reason": "Finite positive useful-life estimate required"}
+        decision = "FINITE_LIFE_SCREEN_PASSED_SUBJECT_TO_REVIEW" if facts["lifeReliablyEstablished"] or years <= 10 else "UNRELIABLE_LIFE_ESTIMATE_EXCEEDS_TEN_YEAR_CAP"
+        return {"status": "ADVISORY", "decision": decision, "estimatedYears": format(years, "f"), "reviewRequired": True,
+                "sourceControl": "18.19–18.20" if control.startswith("section-18") else "19.34; 18.19–18.24",
+                "scope": "Useful-life rule only; legal/contractual limits, amortisation and impairment assessed separately"}
+    if control == "section-28-actuarial-policy-screen":
+        if facts.get("policy") not in {"PROFIT_OR_LOSS", "OCI"}:
+            return {"status": "UNRESOLVED", "reason": "Document an explicit permitted actuarial policy election"}
+        if facts.get("appliedToAllPlansAndGainsLosses") is not True or facts.get("recognisedInPeriodOfOccurrence") is not True:
+            return {"status": "UNRESOLVED", "reason": "Current-period recognition and consistent all-plan application required"}
+        return {"status": "ADVISORY", "decision": "ACTUARIAL_" + facts["policy"] + "_POLICY_SCREEN_PASSED", "sourceControl": "28.24", "reviewRequired": True}
+    if control == "section-12-bid-ask-screen":
+        try:
+            records = [facts[k] for k in ["bid", "ask", "selectedPrice"]]
+            values = [amount(r) for r in records]
+        except (KeyError, TypeError, ValueError):
+            return {"status": "UNRESOLVED", "reason": "Typed bid, ask and selected-price records required"}
+        if len({r["currency"] for r in records}) != 1 or len({r["asOf"] for r in records}) != 1 or values[0] > values[1]:
+            return {"status": "UNRESOLVED", "reason": "Consistent quote currency/date and ordered spread required"}
+        if not values[0] <= values[2] <= values[1]:
+            return {"status": "ADVISORY", "decision": "PRICE_OUTSIDE_SPREAD", "sourceControl": "12.17", "reviewRequired": True}
+        if facts.get("mostRepresentativeJudgment") is not True or not isinstance(facts.get("pricingRationale"), str) or not facts["pricingRationale"].strip():
+            return {"status": "UNRESOLVED", "reason": "Representative-price judgment required; bid/ask is permitted, not mandatory"}
+        return {"status": "ADVISORY", "decision": "REPRESENTATIVE_PRICE_SCREEN_PASSED", "amount": format(values[2], "f"), "currency": records[2]["currency"], "asOf": records[2]["asOf"], "sourceControl": "12.17", "reviewRequired": True}
     if control == "trial-balance":
         return {**reconcile_trial_balance(facts.get("rows")), "authorityClass": "supplemental-ledger-reconciliation", "reviewRequired": True}
     if control == "section-1-eligibility":

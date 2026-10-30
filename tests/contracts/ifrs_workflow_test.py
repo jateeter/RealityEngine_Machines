@@ -82,6 +82,29 @@ class IFRSWorkflowTests(unittest.TestCase):
             self.assertEqual(item["reviewStatus"], "INDEPENDENT_ACCOUNTING_REVIEW_REQUIRED")
             self.assertNotEqual(item["currentDescription"], item["proposedDescription"])
 
+    def test_policy_alternatives_boundaries_and_missing_evidence(self):
+        package = json.loads((ASSETS / "acceptance/synthetic/policy-cases.json").read_text())
+        self.assertTrue(package["synthetic"])
+        for case in package["cases"]:
+            with self.subTest(case=case["caseId"]):
+                actual = controls.determine(case["control"], case["facts"])
+                for key, expected in case["expected"].items():
+                    self.assertEqual(actual[key], expected)
+                if actual["status"] == "ADVISORY":
+                    self.assertTrue(actual["reviewRequired"])
+                self.assertEqual(controls.determine(case["control"], dict(case["facts"], evidenceRefs=[]))["status"], "UNRESOLVED")
+
+    def test_finding_coverage_names_real_cases_and_preserves_review_gate(self):
+        coverage = json.loads((ASSETS / "finding-coverage.json").read_text())
+        findings = json.loads((ASSETS / "accounting-findings.json").read_text())["findings"]
+        self.assertEqual({r["findingId"] for r in coverage["rows"]}, {f["id"] for f in findings})
+        for row in coverage["rows"]:
+            self.assertFalse(row["admissionClosure"])
+            for ref in row["syntheticCases"]:
+                package = json.loads((ASSETS / "acceptance/synthetic" / ref["fixture"]).read_text())
+                case = next(c for c in package["cases"] if c["caseId"] == ref["caseId"])
+                self.assertIn(case["control"], row["controls"])
+
     def test_money_is_not_a_token_or_float(self):
         for value in [.5, "NaN", "Infinity"]:
             with self.assertRaises(ValueError):
