@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:re:ifrs:document-event:v1",
+  "type": "object",
+  "required": [
+    "type",
+    "entityId",
+    "period"
+  ],
+  "properties": {
+    "type": {
+      "enum": [
+        "period-opened",
+        "period-close-requested",
+        "facts-changed",
+        "upstream-revised",
+        "policy-changed",
+        "edition-changed",
+        "review-rejected",
+        "contradictory-evidence",
+        "source-citation-failed",
+        "authorisation-received",
+        "recognizer-observed"
+      ]
+    },
+    "entityId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "period": {
+      "type": "string",
+      "minLength": 1
+    },
+    "eventId": {
+      "type": "string"
+    },
+    "changedAssetTypeIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "SOURCE-REGISTER",
+          "RAG-RECEIPTS",
+          "EVIDENCE-REGISTER",
+          "ELIGIBILITY-MEMO",
+          "JUDGMENT-REGISTER",
+          "COST-EFFORT-MEMO",
+          "POLICY-REGISTER",
+          "GOING-CONCERN-MEMO",
+          "MATERIALITY-MEMO",
+          "COMPARATIVE-SCHEDULE",
+          "FINANCIAL-POSITION",
+          "PERFORMANCE-STATEMENTS",
+          "EQUITY-STATEMENT",
+          "DIVIDEND-REGISTER",
+          "CASH-FLOW-STATEMENT",
+          "CASH-CLASSIFICATION",
+          "FINANCING-RECONCILIATION",
+          "SUPPLIER-FINANCE-NOTE",
+          "NOTES-PACK",
+          "DISCLOSURE-CHECKLIST",
+          "CONTROL-MEMO",
+          "CONSOLIDATION-PACK",
+          "SEPARATE-FS-ELECTION",
+          "RESTATEMENT-PACK",
+          "INSTRUMENT-REGISTER",
+          "INSTRUMENT-SCHEDULE",
+          "HEDGE-PACK",
+          "VALUATION-PACK",
+          "FAIR-VALUE-NOTE",
+          "INVENTORY-SCHEDULE",
+          "INVESTMENT-SCHEDULE",
+          "JOINT-ARRANGEMENT-MEMO",
+          "PROPERTY-CLASSIFICATION",
+          "INVESTMENT-PROPERTY-SCHEDULE",
+          "PPE-SCHEDULE",
+          "RESTORATION-SCHEDULE",
+          "INTANGIBLE-SCHEDULE",
+          "ACQUISITION-MEMO",
+          "PURCHASE-ALLOCATION",
+          "GOODWILL-SCHEDULE",
+          "LEASE-REGISTER",
+          "LEASE-SCHEDULE",
+          "PROVISION-SCHEDULE",
+          "CAPITAL-SCHEDULE",
+          "CONTRACT-REGISTER",
+          "REVENUE-SCHEDULE",
+          "REVENUE-GUIDANCE-MEMO",
+          "GRANT-SCHEDULE",
+          "BORROWING-COST-SCHEDULE",
+          "SHARE-PAYMENT-SCHEDULE",
+          "IMPAIRMENT-SCHEDULE",
+          "BENEFITS-SCHEDULE",
+          "TAX-SCHEDULE",
+          "FX-SCHEDULE",
+          "HYPERINFLATION-SCHEDULE",
+          "SUBSEQUENT-EVENTS",
+          "AUTHORISATION-REGISTER",
+          "RELATED-PARTY-NOTE",
+          "AGRICULTURE-SCHEDULE",
+          "EXTRACTIVE-MEMO",
+          "CONCESSION-SCHEDULE",
+          "FIRST-ADOPTION-PACK",
+          "EDITION-TRANSITION-PACK",
+          "TERMINOLOGY-MAP",
+          "SEMANTIC-INTEGRITY-LOG",
+          "OCI-ROLLFORWARD",
+          "STATEMENT-BUNDLE",
+          "COMPLIANCE-REVIEW"
+        ]
+      }
+    },
+    "machineId": {
+      "type": "string"
+    },
+    "observationRef": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "recognizer-observed"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "machineId",
+          "observationRef"
+        ],
+        "properties": {
+          "changedAssetTypeIds": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

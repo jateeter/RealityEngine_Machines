@@ -1,0 +1,743 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.example.org/schemas/machine.schema.json",
+  "title": "RealityEngine Machine",
+  "description": "Compatibility-safe schema for canonical RealityEngine machine corpus files. It constrains the cross-engine contract surface while leaving domain-specific metadata extensible.",
+  "type": "object",
+  "required": [
+    "version",
+    "machine"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "machine": {
+      "$ref": "#/$defs/machine"
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "machine": {
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "metadata",
+        "arbiterRule",
+        "perceptualMapping",
+        "sequences"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        },
+        "arbiterRule": {
+          "type": "string",
+          "enum": [
+            "PASSTHROUGH"
+          ]
+        },
+        "matchAlgorithm": {
+          "type": "string",
+          "enum": [
+            "equals",
+            "gte"
+          ]
+        },
+        "outputMergeTransformation": {
+          "type": "string",
+          "enum": [
+            "or",
+            "and",
+            "xor",
+            "nor",
+            "nand",
+            "meet",
+            "join",
+            "strong-disjunction",
+            "strong-conjunction",
+            "discrete-median"
+          ],
+          "default": "or",
+          "description": "How the Reality Engine folds this machine's collection of potential outputs into the single output it presents to the Perception Engine. At the completion boundary of the atomic matching action a machine holds one potential output per completed Reality Event; this names the deterministic elementwise transformation applied over the output space vectors to combine them. Absent means \"or\". Read when the machine is interned and mutable between steps at runtime; it is a training variable, so it is declared on the machine rather than configured per deployment. Two domains: \"or\"/\"and\"/\"xor\"/\"nor\"/\"nand\" are Boolean gates over {0,1} and flatten every value above 1 to 1, which destroys a multi-valued machine's alphabet; \"meet\"/\"join\"/\"strong-disjunction\"/\"strong-conjunction\"/\"discrete-median\" are defined over an ordered chain {0..k} and preserve it. See the \"Output merge transformations\" block in semantics/ontology/re-core.ttl for the per-transformation definitions and properties. UNRESOLVED: \"strong-disjunction\" and \"strong-conjunction\" are parameterised by the chain top k, which is not declared anywhere in the corpus and is NOT derivable from bitsPerElement."
+        },
+        "perceptualMapping": {
+          "$ref": "#/$defs/perceptualMapping"
+        },
+        "sequences": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/sequence"
+          }
+        },
+        "inputSequences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/inputSequence"
+          }
+        }
+      },
+      "additionalProperties": true,
+      "allOf": [
+        {
+          "$comment": "strong-disjunction and strong-conjunction are undefined without a chain top: one clamps to k and the other's closure bound holds only while every value is <= k. A machine selecting either must declare perceptualMapping.outputAlphabetTop. Every other transformation ignores it, so no existing machine is affected.",
+          "if": {
+            "properties": {
+              "outputMergeTransformation": {
+                "enum": [
+                  "strong-disjunction",
+                  "strong-conjunction"
+                ]
+              }
+            },
+            "required": [
+              "outputMergeTransformation"
+            ]
+          },
+          "then": {
+            "properties": {
+              "perceptualMapping": {
+                "required": [
+                  "outputAlphabetTop"
+                ]
+              }
+            },
+            "required": [
+              "perceptualMapping"
+            ]
+          }
+        }
+      ]
+    },
+    "metadata": {
+      "type": "object",
+      "required": [
+        "governance",
+        "triggerConfig",
+        "machineClass"
+      ],
+      "properties": {
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "domain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "sequenceCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "machineClass": {
+          "$ref": "machine-class.schema.json"
+        },
+        "inputSemantics": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "sensorNormalization": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "governance": {
+          "$ref": "#/$defs/governance"
+        },
+        "triggerConfig": {
+          "$ref": "#/$defs/triggerConfig"
+        },
+        "tagging": {
+          "$ref": "#/$defs/tagging"
+        },
+        "agentBinding": {
+          "$ref": "agent-binding.schema.json"
+        },
+        "interconnections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/interconnection"
+          }
+        },
+        "publishedDomainBus": {
+          "$ref": "#/$defs/publishedDomainBus"
+        },
+        "domainLevelTag": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "perceptualMapping": {
+      "type": "object",
+      "required": [
+        "input",
+        "output",
+        "bitsPerElement"
+      ],
+      "properties": {
+        "input": {
+          "$ref": "#/$defs/region"
+        },
+        "output": {
+          "$ref": "#/$defs/region"
+        },
+        "bitsPerElement": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            4,
+            8
+          ]
+        },
+        "outputAlphabetTop": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "k, the top of the ordered chain {0..k} this machine's cells range over — absolute truth in the Lukasiewicz sense. Optional, and no machine in the corpus declares it today. Required only when outputMergeTransformation is strong-disjunction or strong-conjunction, which are undefined without it. Deliberately distinct from bitsPerElement, which gives the REPRESENTABLE range rather than the alphabet: FallDetection declares 4 bits (representable 0..15) and ranges over {0..4}, and folding that ladder at k=15 makes the truncated sum yield 14, outside the machine's alphabet entirely. The two are co-located because that is the point at which they are confused."
+        }
+      },
+      "additionalProperties": true
+    },
+    "region": {
+      "type": "object",
+      "required": [
+        "offset",
+        "length"
+      ],
+      "properties": {
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "length": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "sequence": {
+      "type": "object",
+      "required": [
+        "events"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schemaVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "events": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/vectorState"
+          }
+        }
+      },
+      "additionalProperties": true,
+      "not": {
+        "required": [
+          "vectors"
+        ]
+      }
+    },
+    "vectorState": {
+      "type": "object",
+      "required": [
+        "elements"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "isInitial": {
+          "type": "boolean"
+        },
+        "elements": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/vectorElement"
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "outputEvents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outputVector"
+          }
+        },
+        "nextEventIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": true,
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "outputVectors"
+            ]
+          },
+          {
+            "required": [
+              "nextVectorIds"
+            ]
+          }
+        ]
+      }
+    },
+    "vectorElement": {
+      "type": "object",
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "comparatorType": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "outputVector": {
+      "type": "object",
+      "required": [
+        "vector"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vector": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number"
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "inputSequence": {
+      "type": "object",
+      "required": [
+        "events"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "events": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "additionalProperties": true,
+      "not": {
+        "required": [
+          "vectors"
+        ]
+      }
+    },
+    "governance": {
+      "type": "object",
+      "required": [
+        "schemaVersion",
+        "ownerTeam",
+        "runbook",
+        "escalationPolicy",
+        "sla"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ownerTeam": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runbook": {
+          "type": "string",
+          "minLength": 1
+        },
+        "escalationPolicy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contact": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "sla": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "triggerConfig": {
+      "type": "object",
+      "required": [
+        "rules"
+      ],
+      "properties": {
+        "processId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "processName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "endpoint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "template": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dispatch": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "rules": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/triggerRule"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "triggerRule": {
+      "type": "object",
+      "required": [
+        "sequenceId",
+        "outputMatches",
+        "ragStatusCode"
+      ],
+      "properties": {
+        "sequenceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outputMatches": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "ragStatusCode": {
+          "type": "string",
+          "enum": [
+            "GREEN",
+            "AMBER",
+            "RED"
+          ]
+        },
+        "processStatus": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "governance": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "tagging": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "managedBy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "primaryDomain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "domainTags": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "family": {
+          "type": "string",
+          "minLength": 1
+        },
+        "machineCode": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capabilityTags": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "workflowTags": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "integrationTags": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "validationTags": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "allTags": {
+          "$ref": "#/$defs/stringArray"
+        }
+      },
+      "additionalProperties": true
+    },
+    "stringArray": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "interconnection": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "busId",
+        "busTag"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "busId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "busTag": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceOutputRegion": {
+          "$ref": "#/$defs/region"
+        },
+        "targetInputRegion": {
+          "$ref": "#/$defs/region"
+        },
+        "publishedOutputRegion": {
+          "$ref": "#/$defs/region"
+        },
+        "peCompositionRequired": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "publishedDomainBus": {
+      "type": "object",
+      "required": [
+        "id",
+        "tag",
+        "domain",
+        "inputRegion",
+        "outputRegion",
+        "inputComposition"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tag": {
+          "type": "string",
+          "minLength": 1
+        },
+        "domain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "inputRegion": {
+          "$ref": "#/$defs/region"
+        },
+        "outputRegion": {
+          "$ref": "#/$defs/region"
+        },
+        "inputComposition": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "role",
+              "sourceMachine",
+              "machineOutputRegion"
+            ],
+            "properties": {
+              "role": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sourceMachine": {
+                "type": "string",
+                "minLength": 1
+              },
+              "machineInputRegion": {
+                "$ref": "#/$defs/region"
+              },
+              "machineOutputRegion": {
+                "$ref": "#/$defs/region"
+              },
+              "composedInputElements": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "mapping": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "downstreamConsumers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "machine",
+              "inputRegion"
+            ],
+            "properties": {
+              "machine": {
+                "type": "string",
+                "minLength": 1
+              },
+              "inputRegion": {
+                "$ref": "#/$defs/region"
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "peContract": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

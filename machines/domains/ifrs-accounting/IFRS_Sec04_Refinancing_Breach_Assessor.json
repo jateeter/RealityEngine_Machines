@@ -1,0 +1,705 @@
+{
+  "version": "1.4.0",
+  "machine": {
+    "id": "IFRS_Sec04_Refinancing_Breach_Assessor",
+    "name": "IFRS_Sec04_Refinancing_Breach_Assessor",
+    "description": "Assesses debt covenant breaches and refinancing agreements at reporting date — recognizes an externally supplied assertion; does not compute the accounting determination.",
+    "metadata": {
+      "category": "ifrs-accounting",
+      "domain": "ifrs-accounting",
+      "machineClass": "signal-monitor",
+      "sequenceCount": 2,
+      "inputSemantics": [
+        "source token 1 at canonical 0.5; primary assertion",
+        "source token 2 at canonical 1.0; secondary assertion",
+        "reserved nonnegative bounded cell 2",
+        "reserved nonnegative bounded cell 3",
+        "reserved nonnegative bounded cell 4",
+        "reserved nonnegative bounded cell 5",
+        "reserved nonnegative bounded cell 6",
+        "reserved nonnegative bounded cell 7"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "primaryDomain": "ifrs-accounting",
+        "machineCode": "IFRS_Sec04_Refinancing_Breach_Assessor",
+        "family": "ifrs-sme-assertion-recognizers"
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "IFRS::Financial Reporting and Disclosure Lead",
+        "runbook": "urn:re:ifrs:runbook:reporting:v2",
+        "escalationPolicy": "IFRS::Financial Reporting and Disclosure Lead -> IFRS::Financial Controller -> IFRS::Technical Accounting and Adoption Lead; unresolved judgments block release; name-string routing; identity integration deferred",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Staffing represented by functional name strings; identity-management integration deferred and not a current acceptance gate.",
+        "runbookDescription": "For IFRS_Sec04_Refinancing_Breach_Assessor: review financial statement assembly, cash flows, notes, subsequent events, related parties and compliance assertion. Obtain approved trial balance, reconciliations, disclosure checklist, subsequent-event register and related-party declarations. Use RAG interactions to retrieve the supplied February 2025 third-edition text and reporting-period applicability; collect dated source evidence and an approved policy/judgment memo. Obtain upstream classification, measurement and reconciliation evidence before determining downstream recognition, presentation or disclosure. Record paragraph references, calculations, alternatives, reviewer and unresolved exceptions. Require independent controller review before release. For each finding and acceptance proof, retain the RAG query, interaction ID, corpus/index version, document and chunk IDs, edition and paragraph, retrieved text or content hash, generated answer, citation verification and reviewer disposition. Test correct retrieval, contradictory evidence, missing evidence and wrong-edition retrieval. Retrieval similarity alone cannot close a finding or prove accounting correctness. Retain source evidence and dependency lineage with each determination. Missing evidence means unresolved, not compliant. Do not post journals, release statements or infer accounting compliance from an assertion token. The current machines recognize supplied assertions only; the connected accounting workflow and evidence evaluators remain required before acceptance. Preserve nominal tokens 0, 0.5, 1 and their declared bands; these are not financial thresholds or confidence scores. Preserve HIGHEST_PRIORITY mapping exclusively to cellwise PRECEDENCE with explicit withinRank MAX; do not introduce branch priority or whole-vector selection. Apply a paragraph-level review; absence from the targeted findings does not certify conformance. Document stewardship: DISCLOSURE-CHECKLIST: Make each applicable disclosure fulfilled or explicitly unresolved rather than assuming completeness from note presence (supply-evidence-or-request-owner-action). EVIDENCE-REGISTER: Maintain an obtainable evidence trail without fabricating third-party facts (supply-evidence-or-request-owner-action). FINANCIAL-POSITION: Present a reconciled reporting-date position with supported classifications and material line items (contribute-and-maintain). POLICY-REGISTER: Keep policy choices consistent and distinguish retrospective corrections from prospective estimates (supply-evidence-or-request-owner-action). RAG-RECEIPTS: Make model interpretations challengeable and reproducible rather than trusting plausible answers (supply-evidence-or-request-owner-action). SOURCE-REGISTER: Keep every accounting interpretation bound to an applicable edition and verified passages (supply-evidence-or-request-owner-action). On changed facts, sources, policy or upstream versions, mark dependent drafts/approvals stale and request revision/review. Never create issuer evidence or release a statement from a token.",
+        "agentFamily": "ifrs_reporting_review_agent",
+        "reviewerTeam": "IFRS::Technical Accounting and Adoption Lead",
+        "previousRunbook": "urn:re:ifrs:runbook:reporting:v1",
+        "documentAssetDutyRefs": [
+          "DISCLOSURE-CHECKLIST",
+          "EVIDENCE-REGISTER",
+          "FINANCIAL-POSITION",
+          "POLICY-REGISTER",
+          "RAG-RECEIPTS",
+          "SOURCE-REGISTER"
+        ]
+      },
+      "triggerConfig": {
+        "processId": "IFRS_Sec04_Refinancing_Breach_Assessor",
+        "processName": "Assesses debt covenant breaches and refinancing agreements at reporting date",
+        "rules": [
+          {
+            "sequenceId": "ces_trigger_ifrs_sec04_refinancing_breach_assessor_primary",
+            "outputMatches": [
+              0.5,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "info",
+            "description": "Observed supplied assertion: BREACH_CURRENT_LIABILITY; accounting evidence not evaluated by this recognizer."
+          },
+          {
+            "sequenceId": "ces_trigger_ifrs_sec04_refinancing_breach_assessor_secondary",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "info",
+            "description": "Observed supplied assertion: REFINANCED_LONG_TERM; accounting evidence not evaluated by this recognizer."
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ifrs.document.IFRS_Sec04_Refinancing_Breach_Assessor.DISCLOSURE-CHECKLIST",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "IFRS_Sec04_Refinancing_Breach_Assessor",
+          "targetMachine": "IFRS_Sec03_ComparativeInfo_Enforcer",
+          "assetTypeId": "DISCLOSURE-CHECKLIST",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Submit scoped evidence/contribution to the accountable document steward; never infer a financial determination from recognizer tokens.",
+          "nativeVectorWrite": false
+        },
+        {
+          "id": "ifrs.document.IFRS_Sec04_Refinancing_Breach_Assessor.EVIDENCE-REGISTER",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "IFRS_Sec04_Refinancing_Breach_Assessor",
+          "targetMachine": "IFRS_Sec01_GeneralPurposeFS_Verifier",
+          "assetTypeId": "EVIDENCE-REGISTER",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Submit scoped evidence/contribution to the accountable document steward; never infer a financial determination from recognizer tokens.",
+          "nativeVectorWrite": false
+        },
+        {
+          "id": "ifrs.document.IFRS_Sec04_Refinancing_Breach_Assessor.FINANCIAL-POSITION",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "IFRS_Sec04_Refinancing_Breach_Assessor",
+          "targetMachine": "IFRS_Sec04_CurrentAsset_Classifier",
+          "assetTypeId": "FINANCIAL-POSITION",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Submit scoped evidence/contribution to the accountable document steward; never infer a financial determination from recognizer tokens.",
+          "nativeVectorWrite": false
+        },
+        {
+          "id": "ifrs.document.IFRS_Sec04_Refinancing_Breach_Assessor.POLICY-REGISTER",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "IFRS_Sec04_Refinancing_Breach_Assessor",
+          "targetMachine": "IFRS_Sec01_GeneralPurposeFS_Verifier",
+          "assetTypeId": "POLICY-REGISTER",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Submit scoped evidence/contribution to the accountable document steward; never infer a financial determination from recognizer tokens.",
+          "nativeVectorWrite": false
+        },
+        {
+          "id": "ifrs.document.IFRS_Sec04_Refinancing_Breach_Assessor.RAG-RECEIPTS",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "IFRS_Sec04_Refinancing_Breach_Assessor",
+          "targetMachine": "IFRS_Sec01_GeneralPurposeFS_Verifier",
+          "assetTypeId": "RAG-RECEIPTS",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Submit scoped evidence/contribution to the accountable document steward; never infer a financial determination from recognizer tokens.",
+          "nativeVectorWrite": false
+        },
+        {
+          "id": "ifrs.document.IFRS_Sec04_Refinancing_Breach_Assessor.SOURCE-REGISTER",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "IFRS_Sec04_Refinancing_Breach_Assessor",
+          "targetMachine": "IFRS_Sec01_GeneralPurposeFS_Verifier",
+          "assetTypeId": "SOURCE-REGISTER",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Submit scoped evidence/contribution to the accountable document steward; never infer a financial determination from recognizer tokens.",
+          "nativeVectorWrite": false
+        }
+      ],
+      "conversion": {
+        "sourceFile": "SME_IFRS_Accounting_Machines_Corpus.json",
+        "sourceSHA256": "7494e148bd320b91e713d2dee7fd2d8d40bafd019d5dc9a7fc32f7fca927aa5d",
+        "profile": "bounded-native-precedence",
+        "sourceStandard": "IFRS for SMEs Accounting Standard (Third Edition, February 2025)",
+        "sourceStates": [
+          "INIT",
+          "ASSESSING",
+          "BREACH_CURRENT_LIABILITY",
+          "REFINANCED_LONG_TERM"
+        ],
+        "sourceInitialState": "INIT",
+        "sourceSingleTransitionAssumption": {
+          "enabled": true,
+          "enforceStrict": true
+        },
+        "sourceOutputArbiter": {
+          "priority": 100,
+          "resolutionMode": "PRECEDENCE",
+          "declarations": [
+            {
+              "offset": 8284,
+              "length": 4,
+              "mode": "STATE_ASSERTION"
+            }
+          ],
+          "sourceResolutionMode": "HIGHEST_PRIORITY",
+          "priorityInterpretation": "Original machine priority 100 retained as provenance only; no CES or provider rank inferred."
+        },
+        "executionScope": "Stateless externally asserted token recognition; source state labels are descriptive, not enforced state transitions.",
+        "arbitrationDecision": "HIGHEST_PRIORITY maps exclusively to PRECEDENCE; withinRank MAX. No branch priorities or whole-vector winner. Machine-local deterministic specialization uses join.",
+        "sourceAlphabet": [
+          0,
+          1,
+          2
+        ],
+        "runtimeAlphabet": [
+          0,
+          0.5,
+          1
+        ],
+        "normalization": "source / 2, then bands canonicalize to 0, 0.5 or 1; see numeric-bands.json",
+        "isolationDecision": "Document-sidecar handoffs are explicit. Native vector regions and token semantics unchanged; connected financial acceptance still required."
+      },
+      "sensorNormalization": {
+        "range": [
+          0,
+          1
+        ],
+        "method": "native-divide-by-two-then-canonicalize-bands",
+        "nativeRange": [
+          0,
+          2
+        ],
+        "bandsReference": "contracts/numeric-bands.json",
+        "invalidPolicy": "no contribution; divert failed transformation to analysis"
+      },
+      "arbitrationPolicy": {
+        "sourceResolutionMode": "HIGHEST_PRIORITY",
+        "resolvedRule": "PRECEDENCE",
+        "withinRank": "MAX",
+        "machineLocalFold": "join",
+        "machineContributionDeterminism": "deterministic",
+        "machineContributionRank": 3,
+        "scope": "Cellwise PRECEDENCE; equal deterministic ranks specialize to join inside this machine."
+      },
+      "outputEncoding": "bounded-assertion-tokens",
+      "agentFamily": "ifrs_reporting_review_agent",
+      "standardReview": {
+        "edition": "February 2025 third edition",
+        "semanticSection": "04",
+        "legacyIdentifierRetained": false,
+        "targetedOpenFindings": [],
+        "status": "REQUIRES_IMPLEMENTATION_AND_EVIDENCE_REVIEW",
+        "coverageTaskIds": [
+          "REVIEW-IFRS25-04-L0006-0050",
+          "REVIEW-IFRS25-04-L0051-0095",
+          "REVIEW-IFRS25-04-L0096-0140",
+          "REVIEW-IFRS25-04-L0141-0166"
+        ],
+        "coverageContract": "urn:re:ifrs:full-standard-review:v1",
+        "documentWorkflowReview": "Document duties assembled from corrected deep-review control index; accounting implementation findings remain open."
+      },
+      "documentAssetWorkflow": {
+        "schemaVersion": "1.0.0",
+        "contractRef": "urn:re:ifrs:document-workflow:v1",
+        "familyId": "ifrs_reporting_review_agent",
+        "objective": "Proactively create, reconcile and maintain applicable accounting document assets with current evidence and independent review.",
+        "motivations": [
+          {
+            "assetTypeId": "DISCLOSURE-CHECKLIST",
+            "purpose": "Make each applicable disclosure fulfilled or explicitly unresolved rather than assuming completeness from note presence",
+            "priority": "evidence-correctness-before-apparent-completion"
+          },
+          {
+            "assetTypeId": "EVIDENCE-REGISTER",
+            "purpose": "Maintain an obtainable evidence trail without fabricating third-party facts",
+            "priority": "evidence-correctness-before-apparent-completion"
+          },
+          {
+            "assetTypeId": "FINANCIAL-POSITION",
+            "purpose": "Present a reconciled reporting-date position with supported classifications and material line items",
+            "priority": "evidence-correctness-before-apparent-completion"
+          },
+          {
+            "assetTypeId": "POLICY-REGISTER",
+            "purpose": "Keep policy choices consistent and distinguish retrospective corrections from prospective estimates",
+            "priority": "evidence-correctness-before-apparent-completion"
+          },
+          {
+            "assetTypeId": "RAG-RECEIPTS",
+            "purpose": "Make model interpretations challengeable and reproducible rather than trusting plausible answers",
+            "priority": "evidence-correctness-before-apparent-completion"
+          },
+          {
+            "assetTypeId": "SOURCE-REGISTER",
+            "purpose": "Keep every accounting interpretation bound to an applicable edition and verified passages",
+            "priority": "evidence-correctness-before-apparent-completion"
+          }
+        ],
+        "duties": [
+          {
+            "assetTypeId": "DISCLOSURE-CHECKLIST",
+            "responsibility": "supply-evidence-or-request-owner-action",
+            "assetOwnerName": "IFRS::Financial Reporting and Disclosure Lead",
+            "motivation": "Make each applicable disclosure fulfilled or explicitly unresolved rather than assuming completeness from note presence",
+            "contribution": "For IFRS_Sec04_Refinancing_Breach_Assessor: Consume evidenced accounting determination produced by connected typed evaluator; emit only bounded assertion projection after accounting evaluation and review. Current process name is not evidence of implementing that verb. Use 4.7(d) reporting-date unconditional right and Section32 subsequent-event logic; do not import full-IAS1 covenant amendments absent SME basis. Record the supported determination, evidence/calculation references, contrary evidence and document impact in Applicable disclosure requirement and evidence register. If evidence or applicability is unresolved, create an assigned work item instead of asserting completion.",
+            "triggers": [
+              "period-opened",
+              "period-close-requested",
+              "facts-changed",
+              "upstream-revised",
+              "policy-changed",
+              "edition-changed",
+              "review-rejected",
+              "contradictory-evidence",
+              "source-citation-failed",
+              "authorisation-received",
+              "recognizer-observed"
+            ],
+            "doneWhen": [
+              "Applicability resolved with basis and source evidence",
+              "All required fields populated or individually justified not applicable",
+              "Current source/evidence and upstream revision references",
+              "Reconciliations and calculation references inspected, not inferred from token values",
+              "No unresolved required inputs or contradictory evidence",
+              "Independent named review for this exact revision"
+            ],
+            "workflowContract": "urn:re:ifrs:document-workflow:v1"
+          },
+          {
+            "assetTypeId": "EVIDENCE-REGISTER",
+            "responsibility": "supply-evidence-or-request-owner-action",
+            "assetOwnerName": "IFRS::Technical Accounting and Adoption Lead",
+            "motivation": "Maintain an obtainable evidence trail without fabricating third-party facts",
+            "contribution": "For IFRS_Sec04_Refinancing_Breach_Assessor: Consume evidenced accounting determination produced by connected typed evaluator; emit only bounded assertion projection after accounting evaluation and review. Current process name is not evidence of implementing that verb. Use 4.7(d) reporting-date unconditional right and Section32 subsequent-event logic; do not import full-IAS1 covenant amendments absent SME basis. Record the supported determination, evidence/calculation references, contrary evidence and document impact in Entity accounting evidence register. If evidence or applicability is unresolved, create an assigned work item instead of asserting completion.",
+            "triggers": [
+              "period-opened",
+              "period-close-requested",
+              "facts-changed",
+              "upstream-revised",
+              "policy-changed",
+              "edition-changed",
+              "review-rejected",
+              "contradictory-evidence",
+              "source-citation-failed",
+              "authorisation-received",
+              "recognizer-observed"
+            ],
+            "doneWhen": [
+              "Applicability resolved with basis and source evidence",
+              "All required fields populated or individually justified not applicable",
+              "Current source/evidence and upstream revision references",
+              "Reconciliations and calculation references inspected, not inferred from token values",
+              "No unresolved required inputs or contradictory evidence",
+              "Independent named review for this exact revision"
+            ],
+            "workflowContract": "urn:re:ifrs:document-workflow:v1"
+          },
+          {
+            "assetTypeId": "FINANCIAL-POSITION",
+            "responsibility": "contribute-and-maintain",
+            "assetOwnerName": "IFRS::Financial Reporting and Disclosure Lead",
+            "motivation": "Present a reconciled reporting-date position with supported classifications and material line items",
+            "contribution": "For IFRS_Sec04_Refinancing_Breach_Assessor: Consume evidenced accounting determination produced by connected typed evaluator; emit only bounded assertion projection after accounting evaluation and review. Current process name is not evidence of implementing that verb. Use 4.7(d) reporting-date unconditional right and Section32 subsequent-event logic; do not import full-IAS1 covenant amendments absent SME basis. Record the supported determination, evidence/calculation references, contrary evidence and document impact in Statement of financial position. If evidence or applicability is unresolved, create an assigned work item instead of asserting completion.",
+            "triggers": [
+              "period-opened",
+              "period-close-requested",
+              "facts-changed",
+              "upstream-revised",
+              "policy-changed",
+              "edition-changed",
+              "review-rejected",
+              "contradictory-evidence",
+              "source-citation-failed",
+              "authorisation-received",
+              "recognizer-observed"
+            ],
+            "doneWhen": [
+              "Applicability resolved with basis and source evidence",
+              "All required fields populated or individually justified not applicable",
+              "Current source/evidence and upstream revision references",
+              "Reconciliations and calculation references inspected, not inferred from token values",
+              "No unresolved required inputs or contradictory evidence",
+              "Independent named review for this exact revision"
+            ],
+            "workflowContract": "urn:re:ifrs:document-workflow:v1"
+          },
+          {
+            "assetTypeId": "POLICY-REGISTER",
+            "responsibility": "supply-evidence-or-request-owner-action",
+            "assetOwnerName": "IFRS::Technical Accounting and Adoption Lead",
+            "motivation": "Keep policy choices consistent and distinguish retrospective corrections from prospective estimates",
+            "contribution": "For IFRS_Sec04_Refinancing_Breach_Assessor: Consume evidenced accounting determination produced by connected typed evaluator; emit only bounded assertion projection after accounting evaluation and review. Current process name is not evidence of implementing that verb. Use 4.7(d) reporting-date unconditional right and Section32 subsequent-event logic; do not import full-IAS1 covenant amendments absent SME basis. Record the supported determination, evidence/calculation references, contrary evidence and document impact in Accounting policy election estimate and error register. If evidence or applicability is unresolved, create an assigned work item instead of asserting completion.",
+            "triggers": [
+              "period-opened",
+              "period-close-requested",
+              "facts-changed",
+              "upstream-revised",
+              "policy-changed",
+              "edition-changed",
+              "review-rejected",
+              "contradictory-evidence",
+              "source-citation-failed",
+              "authorisation-received",
+              "recognizer-observed"
+            ],
+            "doneWhen": [
+              "Applicability resolved with basis and source evidence",
+              "All required fields populated or individually justified not applicable",
+              "Current source/evidence and upstream revision references",
+              "Reconciliations and calculation references inspected, not inferred from token values",
+              "No unresolved required inputs or contradictory evidence",
+              "Independent named review for this exact revision"
+            ],
+            "workflowContract": "urn:re:ifrs:document-workflow:v1"
+          },
+          {
+            "assetTypeId": "RAG-RECEIPTS",
+            "responsibility": "supply-evidence-or-request-owner-action",
+            "assetOwnerName": "IFRS::Technical Accounting and Adoption Lead",
+            "motivation": "Make model interpretations challengeable and reproducible rather than trusting plausible answers",
+            "contribution": "For IFRS_Sec04_Refinancing_Breach_Assessor: Consume evidenced accounting determination produced by connected typed evaluator; emit only bounded assertion projection after accounting evaluation and review. Current process name is not evidence of implementing that verb. Use 4.7(d) reporting-date unconditional right and Section32 subsequent-event logic; do not import full-IAS1 covenant amendments absent SME basis. Record the supported determination, evidence/calculation references, contrary evidence and document impact in Source retrieval and citation review register. If evidence or applicability is unresolved, create an assigned work item instead of asserting completion.",
+            "triggers": [
+              "period-opened",
+              "period-close-requested",
+              "facts-changed",
+              "upstream-revised",
+              "policy-changed",
+              "edition-changed",
+              "review-rejected",
+              "contradictory-evidence",
+              "source-citation-failed",
+              "authorisation-received",
+              "recognizer-observed"
+            ],
+            "doneWhen": [
+              "Applicability resolved with basis and source evidence",
+              "All required fields populated or individually justified not applicable",
+              "Current source/evidence and upstream revision references",
+              "Reconciliations and calculation references inspected, not inferred from token values",
+              "No unresolved required inputs or contradictory evidence",
+              "Independent named review for this exact revision"
+            ],
+            "workflowContract": "urn:re:ifrs:document-workflow:v1"
+          },
+          {
+            "assetTypeId": "SOURCE-REGISTER",
+            "responsibility": "supply-evidence-or-request-owner-action",
+            "assetOwnerName": "IFRS::Technical Accounting and Adoption Lead",
+            "motivation": "Keep every accounting interpretation bound to an applicable edition and verified passages",
+            "contribution": "For IFRS_Sec04_Refinancing_Breach_Assessor: Consume evidenced accounting determination produced by connected typed evaluator; emit only bounded assertion projection after accounting evaluation and review. Current process name is not evidence of implementing that verb. Use 4.7(d) reporting-date unconditional right and Section32 subsequent-event logic; do not import full-IAS1 covenant amendments absent SME basis. Record the supported determination, evidence/calculation references, contrary evidence and document impact in Edition and authority source register. If evidence or applicability is unresolved, create an assigned work item instead of asserting completion.",
+            "triggers": [
+              "period-opened",
+              "period-close-requested",
+              "facts-changed",
+              "upstream-revised",
+              "policy-changed",
+              "edition-changed",
+              "review-rejected",
+              "contradictory-evidence",
+              "source-citation-failed",
+              "authorisation-received",
+              "recognizer-observed"
+            ],
+            "doneWhen": [
+              "Applicability resolved with basis and source evidence",
+              "All required fields populated or individually justified not applicable",
+              "Current source/evidence and upstream revision references",
+              "Reconciliations and calculation references inspected, not inferred from token values",
+              "No unresolved required inputs or contradictory evidence",
+              "Independent named review for this exact revision"
+            ],
+            "workflowContract": "urn:re:ifrs:document-workflow:v1"
+          }
+        ],
+        "orchestration": {
+          "eventAdapter": "Reference observe_machine validates machine identity, known sequence, bounded nominal output and provider reference, then queues document-impact assessment only. Production dispatch must supply current entity/period/source context. Native observations never assert financial fact changes or document completion.",
+          "referenceImplementation": "tools/document_workflow.py",
+          "executionBoundary": "Local reference lifecycle/outbox is supplied; native engine dispatch, LLM generation and source/repository connectors require integration.",
+          "outputContract": "Versioned document draft/revision, lineage, unresolved work items, reconciliations and exact-revision reviewer disposition.",
+          "triggerPolicy": "React to period, fact, policy, source, review and upstream revision events; invalidate affected downstream assets and queue fresh review.",
+          "autonomy": "Draft, request evidence, reconcile and propose updates. No autonomous journal posting, external filing, signature, approval or financial-statement release.",
+          "concurrency": "Reference store uses local process locking, immutable revisions and compare-and-swap heads; distributed execution needs an equivalent atomic connector.",
+          "idempotency": "Coalesce work by entity, period, asset, action and input fingerprint."
+        },
+        "successCriteria": [
+          "Required applicable assets exist at current revisions with traceable source/evidence",
+          "Open deficits are visible, assigned and carried downstream",
+          "Approval is invalidated by relevant upstream/source/fact changes",
+          "No unsupported assertion of IFRS compliance or publication"
+        ],
+        "nativeProjectionPolicy": "The existing bounded nominal encoding and PRECEDENCE/MAX remain unchanged. Document amounts and decisions stay in typed records."
+      },
+      "documentStewardship": []
+    },
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "join",
+    "perceptualMapping": {
+      "input": {
+        "offset": 8276,
+        "length": 8
+      },
+      "output": {
+        "offset": 8284,
+        "length": 4
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ces_trigger_ifrs_sec04_refinancing_breach_assessor_primary",
+        "name": "Primary trigger for IFRS_Sec04_Refinancing_Breach_Assessor",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "INIT",
+          "sourceToState": "BREACH_CURRENT_LIABILITY",
+          "stateLabelsInformational": true
+        },
+        "events": [
+          {
+            "id": "ces_trigger_ifrs_sec04_refinancing_breach_assessor_primary-event",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "gte"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "gte"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "gte"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "gte"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "gte"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "gte"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "gte"
+              }
+            ],
+            "outputEvents": [
+              {
+                "id": "ces_trigger_ifrs_sec04_refinancing_breach_assessor_primary-output",
+                "vector": [
+                  0.5,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "nextEventIds": []
+          }
+        ]
+      },
+      {
+        "id": "ces_trigger_ifrs_sec04_refinancing_breach_assessor_secondary",
+        "name": "Secondary/Alternate trigger for IFRS_Sec04_Refinancing_Breach_Assessor",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "INIT",
+          "sourceToState": "REFINANCED_LONG_TERM",
+          "stateLabelsInformational": true
+        },
+        "events": [
+          {
+            "id": "ces_trigger_ifrs_sec04_refinancing_breach_assessor_secondary-event",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.0,
+                "comparatorType": "gte"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "gte"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "gte"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "gte"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "gte"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "gte"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "gte"
+              }
+            ],
+            "outputEvents": [
+              {
+                "id": "ces_trigger_ifrs_sec04_refinancing_breach_assessor_secondary-output",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "nextEventIds": []
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "ces_trigger_ifrs_sec04_refinancing_breach_assessor_primary-fixture",
+        "events": [
+          [
+            0.5,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedSequenceId": "ces_trigger_ifrs_sec04_refinancing_breach_assessor_primary",
+          "purpose": "synthetic recognizer fixture; not accounting evidence",
+          "expectedEvaluationScope": "Isolated reset evaluation; no emission does not mean clearing a previously held OSRE."
+        }
+      },
+      {
+        "name": "ces_trigger_ifrs_sec04_refinancing_breach_assessor_secondary-fixture",
+        "events": [
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "expectedSequenceId": "ces_trigger_ifrs_sec04_refinancing_breach_assessor_secondary",
+          "purpose": "synthetic recognizer fixture; not accounting evidence",
+          "expectedEvaluationScope": "Isolated reset evaluation; no emission does not mean clearing a previously held OSRE."
+        }
+      },
+      {
+        "name": "no-assertion",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedEvaluationScope": "Isolated reset evaluation; no emission does not mean clearing a previously held OSRE."
+        }
+      },
+      {
+        "name": "simultaneous-assertions",
+        "events": [
+          [
+            0.5,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.5,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "arbitrationBasis": "Equal deterministic class; per-cell PRECEDENCE withinRank MAX; independent primary/secondary assertion cells both survive.",
+          "expectedEvaluationScope": "Isolated reset evaluation; no emission does not mean clearing a previously held OSRE."
+        }
+      }
+    ]
+  }
+}

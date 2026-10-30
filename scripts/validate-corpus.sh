@@ -23,6 +23,7 @@ fi
 python3 "$SCRIPT_DIR/audit-corpus.py" "${ARGS[@]}" "$@"
 python3 "$SCRIPT_DIR/inventory-semantic-buses.py" --check --summary-only
 python3 "$SCRIPT_DIR/build-corpus-index.py" --check
+python3 "$SCRIPT_DIR/build-ifrs-workflow.py" --check
 python3 "$SCRIPT_DIR/build-region-allocation.py" --check
 
 # Arbitration gate (docs/ARBITER_CONTRACT.md §5): a universal-vector position

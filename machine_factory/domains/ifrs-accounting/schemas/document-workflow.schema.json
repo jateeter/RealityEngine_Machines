@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:re:ifrs:document-workflow:v1",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "contractRef",
+    "familyId",
+    "objective",
+    "motivations",
+    "duties",
+    "orchestration",
+    "successCriteria",
+    "nativeProjectionPolicy"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "contractRef": {
+      "const": "urn:re:ifrs:document-workflow:v1"
+    },
+    "familyId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 1
+    },
+    "motivations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "assetTypeId",
+          "purpose",
+          "priority"
+        ],
+        "properties": {
+          "assetTypeId": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "priority": {
+            "const": "evidence-correctness-before-apparent-completion"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "duties": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "assetTypeId",
+          "responsibility",
+          "assetOwnerName",
+          "motivation",
+          "contribution",
+          "triggers",
+          "doneWhen",
+          "workflowContract"
+        ],
+        "properties": {
+          "assetTypeId": {
+            "type": "string"
+          },
+          "responsibility": {
+            "enum": [
+              "contribute-and-maintain",
+              "supply-evidence-or-request-owner-action",
+              "assemble-and-reconcile-with-independent-review"
+            ]
+          },
+          "assetOwnerName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "motivation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "contribution": {
+            "type": "string",
+            "minLength": 1
+          },
+          "triggers": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "doneWhen": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "workflowContract": {
+            "const": "urn:re:ifrs:document-workflow:v1"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "orchestration": {
+      "type": "object",
+      "required": [
+        "eventAdapter",
+        "referenceImplementation",
+        "executionBoundary",
+        "outputContract",
+        "triggerPolicy",
+        "autonomy",
+        "concurrency",
+        "idempotency"
+      ]
+    },
+    "successCriteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "nativeProjectionPolicy": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}

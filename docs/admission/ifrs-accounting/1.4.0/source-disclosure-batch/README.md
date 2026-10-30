@@ -1,0 +1,9 @@
+# Source-mapping and disclosure evidence
+
+Six findings have explicit source-backed description corrections and 49 synthetic cases. The five legacy Sec12 instrument/hedge identities are retained, but their recognition/hedging source route is Section 11. Section 12 remains relevant to fair-value techniques under its own applicable controls; this mapping screen does not implement instrument valuation or hedge algorithms.
+
+Policy disclosure uses material information and primary-user decisions in financial-statement context. Generic capital-management information is supplemental unless a specific applicable basis is verified. Pillar Two scope distinguishes 29.3A deferred-tax treatment from 29.42/29.43 disclosures. Operative 15.19(d) commitments disclosure is preserved despite introductory-summary tension. Relative selling-price allocation cites 23.42; 23.40 is an exemption and 23.47/23.48 alternatives require their entitlement evidence. A legacy residual state is not blanket permission for a full-IFRS residual SSP method.
+
+The service and live verifier now use the same pinned source-routing function. All 128 live cases, actual gateway/model bound-tool use, the existing owned eligibility draft, canonical blocked-compliance proof and stale-evidence handling pass with unchanged input fingerprints. New source/disclosure controls were tested through authenticated calculate APIs; full owned accounting-document acceptance and financial algorithms beyond each declared scope are not implied.
+
+Source bindings verify hashes and exact containment in the user-supplied version-3 files. Paragraph interpretation remains independently unreviewed. Full normative text, vectors, credentials and model transcripts remain private. Nineteen findings now have mapped development cases; 34 do not. All 53 remain open for admission. No independent accounting review, native parity, live IFRS CES recording, accepted release or Manager publication is implied.

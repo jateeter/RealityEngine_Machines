@@ -1,0 +1,9 @@
+# Lease and canonical compliance evidence
+
+STD-04/05 have source-backed description corrections, qualitative lease classification and decimal SME finance-lease initial measurement controls. Ratio values do not determine classification. Liability is the lower of inception fair value and minimum-payment PV; qualifying initial direct costs are added to the asset. PV is supplied evidence, not computed by this narrow control. Operating leases use their separate model. Classification review references in these cases are explicitly synthetic development records; owned lease-document acceptance and independent review remain outstanding.
+
+STD-13 uses a server-derived canonical screen rather than caller statuses. It requires approved current eligibility, edition, statement and disclosure records, verifies immutable content hashes and exact independent review, and checks a complete unique 595-control inventory. Applicable requirements need matching current mapped evidence; independently reviewed non-applicability requires basis and evidence. The compliance obligation cannot be waived. The result can only be readiness for an independent conclusion, never certification or release.
+
+Live run 020 passed 79 synthetic cases, including the compliance scope correctly blocked despite caller approval claims. The real gateway/model/worker produced an owned eligibility draft on its first attempt. New lease/compliance paths were tested through authenticated live calculate APIs; they do not imply a full owned financial-document workflow. Source bindings verify hashes and exact source containment; paragraph interpretation remains independently unreviewed. Private source text, vectors, credentials and model transcripts remain outside Git.
+
+Thirteen findings now have mapped development cases; 40 have none. All 53 admission findings remain open. Native parity/live CES, independent review and approval remain outstanding.

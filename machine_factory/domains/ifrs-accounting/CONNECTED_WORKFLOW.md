@@ -1,0 +1,17 @@
+# IFRS accounting workflow and review boundary
+
+Design status: implementation candidate; independent accounting/architecture review is required before domain approval. Automated structural checks are not that review.
+
+The reporting outcome is a reconciled, source-grounded draft statement bundle for a named entity, period and applicable edition. The bundle carries immutable evidence, typed amounts, decisions, unresolved items and independent exact-revision reviews. A document approval does not authorize journal posting, filing, signing or financial-statement release.
+
+1. An operator opens the entity/period and pins source, fact, policy and index fingerprints. Missing authentic records create evidence requests. Applicability, including SME eligibility and edition transition, is reviewed before an accounting compliance claim.
+2. Manifest-owned ingestion separates standard transcription, derived reviews and procedural guidance. Retrieval returns exact text, spans, hashes, embedding identity and a durable interaction receipt. Source limitations remain visible; historical version 2-to-3 comparison material is outside admission scope per user direction. Detached labels are not inferred to identify paragraphs.
+3. The dispatcher uses `accounting-workflow-graph.json` to route each machine's declared document contribution to a representative machine in the catalog's accountable family. This representative is an address for work, not higher accounting authority. The 68-asset dependency DAG determines prerequisites and approval invalidation. Contributions retain their originating machine identity.
+4. The owning agent requests passages and authentic entity records, drafts only its owned document types, and submits other contributions to their owner. Native observations request impact assessment only. They cannot declare verified fact changes, approve assets, move money or fill absent evidence.
+5. Typed decimal/currency/date facts feed reviewed calculations and reconciliations. For example, obtaining-cost and fulfilment-cost cases require distinct applicable source controls; legacy machine labels suggesting generic capitalization are not an accounting oracle. Missing controls block the determination rather than selecting a branch by confidence.
+6. A distinct authorized reviewer checks the exact content hash, current upstream heads, source/index receipt, evidence and reconciliations. Approval is refused for unresolved requirements, self-review, stale heads or unverifiable citations. An LLM answer is advisory until independently reviewed.
+7. Verified upstream/fact/source/policy changes invalidate affected descendants and their current-evidence projection. Native observations alone do not invalidate approved documents. Tasks are deduplicated and obsolete tasks superseded; immutable revisions remain available.
+
+`metadata.interconnections` now describes document-sidecar handoffs. Those edges do not imply native output-to-input coupling. The sidecar dispatches structured work and has no native vector write. All existing PASSTHROUGH/join, nominal 0/0.5/1 bands, cellwise PRECEDENCE/withinRank MAX, and typed financial-value boundaries remain unchanged.
+
+Required acceptance evidence remains distinct: mechanical fixtures; deployed connector and live-model observations; authentic entity cases with independently reviewed expectations; three-engine parity and live CES records; independent design/current-head review; domain admission. No class substitutes for another. Synthetic cases must always identify themselves as synthetic.
