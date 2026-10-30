@@ -14,6 +14,15 @@ class EvidenceError(ValueError):pass
 def canonical(x):return json.dumps(x,sort_keys=True,separators=(',',':'),ensure_ascii=False)
 def hashed(x):return hashlib.sha256(canonical(x).encode()).hexdigest()
 def empty(v):return v is None or v=='' or v==[] or v=={}
+def unresolved(v):
+ if empty(v):return True
+ if isinstance(v,str):return v.strip().upper() in {'{}','[]','UNKNOWN','UNRESOLVED','TBD','TODO'} or v.strip().upper().startswith('UNRESOLVED ')
+ if isinstance(v,dict):
+  if str(v.get('status','')).upper().startswith('UNRESOLVED'):return True
+  if v.get('status')=='NOT_APPLICABLE':return False # separately checked below
+  return any(unresolved(x) for x in v.values())
+ if isinstance(v,list):return any(unresolved(x) for x in v)
+ return False
 
 def scope(context):
  for k in ['entityId','period','factsFingerprint','sourceFingerprint','policyFingerprint']:
@@ -22,7 +31,7 @@ def scope(context):
 
 def asset_key(context,asset_id):return hashed({'entityId':context['entityId'],'period':context['period'],'assetTypeId':asset_id})
 
-def input_fingerprint(context,upstream):return hashed({'scope':scope(context),'upstream':upstream})
+def input_fingerprint(context,upstream):return hashed({'scope':scope(context),'indexSnapshot':context.get('indexSnapshot'),'evidenceClass':context.get('evidenceClass'),'upstream':upstream})
 
 class Store:
  def __init__(self,path,catalog):
@@ -73,7 +82,7 @@ class Store:
   # Source document references are inputs; no synthetic issuer evidence is created.
   with self.locked():
    folder=self._path(context,aid);old=self.head(context,aid);up=self._upstream(context,aid);fingerprint=input_fingerprint(context,up)
-   revision_content={'assetTypeId':aid,'entityId':context['entityId'],'period':context['period'],'content':content,'evidenceRefs':evidence_refs,'upstreamRefs':up,'inputFingerprint':fingerprint}
+   revision_content={'assetTypeId':aid,'entityId':context['entityId'],'period':context['period'],'evidenceClass':context.get('evidenceClass','UNSPECIFIED'),'content':content,'evidenceRefs':evidence_refs,'upstreamRefs':up,'inputFingerprint':fingerprint}
    content_hash=hashed(revision_content)
    if old and old['contentHash']==content_hash:return old # Retry cannot clear STALE or approve.
    actual=old['revision'] if old else 0
@@ -112,10 +121,15 @@ class Store:
   if h['status']=='STALE':raise EvidenceError('Stale revision must be reassessed and revised')
   r=self.revision(context,aid,h['revision']);a=self.catalog[aid]
   for k in a['requiredFields']:
-   if k not in r['content'] or empty(r['content'][k]):raise EvidenceError('Unresolved required field '+k)
+   # An explicitly assessed absence of gaps/unresolved items is a valid empty
+   # list. It is distinct from a missing value, empty source/evidence inventory,
+   # or unknown content. Exact-revision independent review still applies.
+   known_none=k in {'sourceGaps','unresolved'} and r['content'].get(k)==[]
+   if k not in r['content'] or (unresolved(r['content'][k]) and not known_none):raise EvidenceError('Unresolved required field '+k)
    value=r['content'][k]
    if isinstance(value,dict) and value.get('status')=='NOT_APPLICABLE' and not all(value.get(x) for x in ['basis','reviewerName','evidenceRefs']):raise EvidenceError('Unsupported field non-applicability '+k)
   if not r['evidenceRefs']:raise EvidenceError('Authentic evidence references required')
+  if r['content'].get('unresolved',[])!=[]:raise EvidenceError('Unresolved document items block approval')
   if r['inputFingerprint']!=input_fingerprint(context,self._upstream(context,aid)):raise EvidenceError('Inputs or upstream heads changed')
   for dep in self._upstream(context,aid):
    if dep['status'] not in {'APPROVED','NOT_APPLICABLE'}:raise EvidenceError('Unapproved upstream dependency '+dep['assetTypeId'])
