@@ -76,9 +76,9 @@ class IFRSWorkflowTests(unittest.TestCase):
         self.assertEqual(len(proposals["items"]), 5)
         for item in proposals["items"]:
             path = ROOT / "machines/domains/ifrs-accounting" / (item["machineId"] + ".json")
-            self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), item["machineFileSHA256"])
-            self.assertEqual(json.loads(path.read_text())["machine"]["description"], item["currentDescription"])
-            self.assertFalse(item["appliedToMachineCorpus"])
+            self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), item["appliedMachineFileSHA256"])
+            self.assertEqual(json.loads(path.read_text())["machine"]["description"], item["appliedDescription"])
+            self.assertTrue(item["appliedToMachineCorpus"])
             self.assertEqual(item["reviewStatus"], "INDEPENDENT_ACCOUNTING_REVIEW_REQUIRED")
             self.assertNotEqual(item["currentDescription"], item["proposedDescription"])
 

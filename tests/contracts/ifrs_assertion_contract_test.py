@@ -5,11 +5,20 @@ ROOT=Path(__file__).resolve().parents[2]
 ASSETS=ROOT/'machine_factory/domains/ifrs-accounting'
 spec=importlib.util.spec_from_file_location('ifrs_boundary',ASSETS/'tools/bounded_assertions.py');b=importlib.util.module_from_spec(spec);spec.loader.exec_module(b)
 class IFRSAssertionTests(unittest.TestCase):
- def test_runtime_and_accounting_semantics_preserved_except_document_routing(self):
+ def test_semantics_preserved_except_routing_and_audited_description_corrections(self):
   manifest=json.loads((ASSETS/'admission-source-manifest.json').read_text())
   self.assertEqual(manifest['machineCount'],225)
+  amendments=json.loads((ASSETS/'semantic-amendments.json').read_text())['amendments']
+  self.assertEqual(len({a['machineId'] for a in amendments}),len(amendments))
   for item in manifest['files']:
    document=json.loads((ROOT/item['path']).read_text())
+   for amendment in amendments:
+    if amendment['machineId']==document['machine']['id']:
+     self.assertEqual(amendment['pointer'],'/machine/description')
+     self.assertFalse(amendment['nativeContractChanged'])
+     self.assertEqual(document['machine']['description'],amendment['after'])
+     self.assertEqual(amendment['reviewStatus'],'INDEPENDENT_ACCOUNTING_REVIEW_REQUIRED')
+     document['machine']['description']=amendment['before']
    meta=document['machine']['metadata'];meta.pop('interconnections',None);meta.pop('documentStewardship',None);meta['conversion'].pop('isolationDecision',None)
    self.assertEqual(hashlib.sha256(json.dumps(document,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest(),item['semanticsSHA256'])
  def test_declared_fold_inventory_is_exact_and_nonfabricating(self):

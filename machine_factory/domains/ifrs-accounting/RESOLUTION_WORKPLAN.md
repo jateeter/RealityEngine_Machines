@@ -37,3 +37,7 @@ STD-14, STD-20 and DEEP-S02-03 now have narrow advisory controls, 17 synthetic c
 ## Live foundation evidence
 
 Live connector run 015 passes 24 synthetic cases, including all 17 foundation cases and wrong-source-section rejection, with unchanged input fingerprints. Source bindings verify returned passage hashes and exact containment in the supplied hashed version-3 files. Paragraph interpretation remains independently unreviewed. Five explicit machine description/legacy-label proposals are recorded in `foundation-machine-dispositions.json`; they are not applied to the pinned corpus. See `docs/admission/ifrs-accounting/1.4.0/foundation-batch/`. Full gateway/model run 016 also passed, with an actual bound-tool call and a persisted owned draft on the first attempt.
+
+## Description corrections applied
+
+The five foundation description corrections are now applied explicitly through `semantic-amendments.json`. The original admission-source manifest is unchanged. The contract restores only the enumerated description before-values and requires the original semantic hashes, preserving all native events, tokens, folds and state identifiers. The substance alternate legacy label is explicitly documented as an unresolved mismatch, not a permitted accounting choice. Generated OWL and agent descriptions are refreshed; independent accounting review, native parity/recordings and admission remain outstanding. Earlier connector receipts are retained against their original pinned machine hashes.
