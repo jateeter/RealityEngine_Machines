@@ -53,3 +53,7 @@ Policy-batch live run 019 passed all 61 cases, actual private gateway/model tool
 ## Lease/compliance batch
 
 STD-04, STD-05 and STD-13 now have narrow controls, four description amendments and 18 added cases. Canonical compliance evaluates the full 595-control inventory against approved current evidence; it never trusts model-supplied approval flags. Live run 020 passed 79 cases, canonical compliance blocking, real gateway/model bound-tool use and the existing owned eligibility draft. The new lease/compliance paths still need owned downstream financial-document acceptance, reviewed judgments, native parity/CES and independent accounting review. Coverage is now 13 findings with development cases and 40 without; all 53 remain open.
+
+## Source/disclosure batch
+
+STD-01, STD-15, STD-16, DEEP-29-PILLAR_TWO_PARAGRAPH, DEEP-S15-19 and DEEP-23-SSP_REFERENCE_AND_ALTERNATIVE now have 49 synthetic source/disclosure cases and 10 description amendments. One pinned routing function is used by service and verifier. Live run 021 passed all 128 cases and the existing gateway/worker lifecycle with unchanged fingerprints. Coverage is 19 findings with mapped development cases and 34 without; all 53 remain open. Reference/basis screens do not establish hedge algorithms, monetary allocation or complete downstream accounting-document acceptance.
