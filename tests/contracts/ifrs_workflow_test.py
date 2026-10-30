@@ -36,6 +36,27 @@ class IFRSWorkflowTests(unittest.TestCase):
         package["trialBalance"][0]["amount"] = "92200.01"
         self.assertEqual(controls.reconcile_trial_balance(package["trialBalance"])["status"], "UNRESOLVED_IMBALANCE")
 
+    def test_malformed_evidence_cannot_produce_a_decision(self):
+        for refs in [None, [], "record-1", {"record": "1"}, [""], [" "], [1], ["record-1", None]]:
+            with self.subTest(refs=refs):
+                result = controls.determine("section-1-eligibility", {
+                    "evidenceRefs": refs, "publicAccountability": False,
+                    "generalPurposeStatements": True, "jurisdictionPermits": True})
+                self.assertEqual(result["status"], "UNRESOLVED")
+                self.assertNotIn("decision", result)
+                with self.assertRaises(ValueError):
+                    controls.reconcile_trial_balance([{"amount": "1.00", "currency": "USD",
+                        "asOf": "2027-12-31", "side": "debit", "evidenceRefs": refs}])
+        self.assertEqual(controls.determine("section-1-eligibility", None)["status"], "UNRESOLVED")
+
+    def test_plan_covers_every_finding_once(self):
+        plan = json.loads((ASSETS / "resolution-workplan.json").read_text())
+        findings = json.loads((ASSETS / "accounting-findings.json").read_text())["findings"]
+        ids = [item["findingId"] for wave in plan["waves"] for item in wave["items"]]
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertEqual(set(ids), {f["id"] for f in findings})
+        self.assertFalse(plan["policy"]["historicalComparisonRequired"])
+
     def test_money_is_not_a_token_or_float(self):
         for value in [.5, "NaN", "Infinity"]:
             with self.assertRaises(ValueError):

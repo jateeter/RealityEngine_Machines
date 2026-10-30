@@ -19,8 +19,15 @@ def amount(record):
     return value
 
 
+def valid_evidence_refs(refs):
+    """Reference shape only; the connector verifies provenance."""
+    return isinstance(refs, list) and bool(refs) and all(
+        isinstance(ref, str) and bool(ref.strip()) for ref in refs
+    )
+
+
 def determine(control, facts):
-    if not facts.get("evidenceRefs"):
+    if not isinstance(facts, dict) or not valid_evidence_refs(facts.get("evidenceRefs")):
         return {"status": "UNRESOLVED", "reason": "Missing evidence references"}
     if control == "trial-balance":
         return {**reconcile_trial_balance(facts.get("rows")), "authorityClass": "supplemental-ledger-reconciliation", "reviewRequired": True}
@@ -57,7 +64,7 @@ def reconcile_trial_balance(rows):
     dates = {row["asOf"] for row in rows}
     if len(currencies) != 1 or len(dates) != 1:
         raise ValueError("Separate currencies/dates before reconciliation")
-    if any(row.get("side") not in {"debit", "credit"} or not row.get("evidenceRefs") for row in rows):
+    if any(row.get("side") not in {"debit", "credit"} or not valid_evidence_refs(row.get("evidenceRefs")) for row in rows):
         raise ValueError("Each balance requires side and evidence")
     debits = sum((amount(row) for row in rows if row["side"] == "debit"), Decimal("0"))
     credits = sum((amount(row) for row in rows if row["side"] == "credit"), Decimal("0"))
