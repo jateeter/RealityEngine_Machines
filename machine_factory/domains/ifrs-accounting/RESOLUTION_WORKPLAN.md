@@ -57,3 +57,7 @@ STD-04, STD-05 and STD-13 now have narrow controls, four description amendments 
 ## Source/disclosure batch
 
 STD-01, STD-15, STD-16, DEEP-29-PILLAR_TWO_PARAGRAPH, DEEP-S15-19 and DEEP-23-SSP_REFERENCE_AND_ALTERNATIVE now have 49 synthetic source/disclosure cases and 10 description amendments. One pinned routing function is used by service and verifier. Live run 021 passed all 128 cases and the existing gateway/worker lifecycle with unchanged fingerprints. Coverage is 19 findings with mapped development cases and 34 without; all 53 remain open. Reference/basis screens do not establish hedge algorithms, monetary allocation or complete downstream accounting-document acceptance.
+
+## Typed reporting batch
+
+DEEP-S06-07, DEEP-S07-08 and DEEP-S08-09 now have 45 synthetic cases and typed dividend, financing and supplier-finance draft producers plus note-structure checks. Eleven owned draft cases and the real proactive reporting agent passed in live run 023 (173 cases total); source change made all three reporting types stale. Generic drafts cannot forge typed producer provenance. Development cases now map to 22 findings; 31 lack mapped cases. All 53 remain open for full acceptance and independent accounting review.

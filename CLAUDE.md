@@ -23,7 +23,7 @@ This repo is the canonical machine corpus and schema/test contract source for al
 - `tests/e2e/`: corpus-to-runtime workflows.
 - `scripts/`: validation, backfill, and maintenance tools.
 - `docs/`: corpus and operational documentation.
-- IFRS candidate: `machine_factory/domains/ifrs-accounting/` owns the document catalog, scoped synthetic accounting package, explicit document-handoff graph and accounting findings. `scripts/build-ifrs-workflow.py` reproduces routing metadata; document handoffs are a strict separate schema alternative to native buses and do not write vectors. `check-ifrs-accounting-readiness.py` enforces substantive admission separately from corpus validity. Version 2-to-3 comparison material is outside the user-approved version 3 admission scope.
+- IFRS candidate: `machine_factory/domains/ifrs-accounting/` owns the document catalog, scoped synthetic accounting package, explicit document-handoff graph and accounting findings. `scripts/build-ifrs-workflow.py` reproduces routing metadata; document handoffs are a strict separate schema alternative to native buses and do not write vectors. `check-ifrs-accounting-readiness.py` enforces substantive admission separately from corpus validity. `tools/reporting_controls.py` supplies typed dividend, financing-reconciliation and supplier-finance draft content plus note-structure checks, called through the advisory control entrypoint; these never post or approve. Version 2-to-3 comparison material is outside the user-approved version 3 admission scope.
 
 ## Key Commands
 
