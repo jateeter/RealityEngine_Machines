@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.example.org/schemas/domain-admission-ledger.schema.json",
+  "title": "Prepared domain admission ledger (approval remains pending GitHub review)",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "runId",
+    "domain",
+    "version",
+    "state",
+    "candidateCommit",
+    "ciEvidenceCommit",
+    "events",
+    "candidateMachines",
+    "evidenceArchiveSHA256",
+    "evidenceURL",
+    "machinesSnapshotSHA256",
+    "ciSnapshotSHA256"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "runId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "domain": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[A-Za-z0-9.-]+)?$"
+    },
+    "state": {
+      "const": "PREPARED_PENDING_GITHUB_REVIEW"
+    },
+    "candidateCommit": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40,64}$"
+    },
+    "ciEvidenceCommit": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40,64}$"
+    },
+    "candidateMachines": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      }
+    },
+    "evidenceArchiveSHA256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "evidenceURL": {
+      "type": "string",
+      "format": "uri"
+    },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "step",
+          "argv",
+          "startedAt",
+          "finishedAt",
+          "exitCode",
+          "log",
+          "logSHA256"
+        ],
+        "properties": {
+          "step": {
+            "type": "string",
+            "minLength": 1
+          },
+          "argv": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "exitCode": {
+            "const": 0
+          },
+          "log": {
+            "type": "string"
+          },
+          "logSHA256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    },
+    "machinesSnapshotSHA256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "ciSnapshotSHA256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}
