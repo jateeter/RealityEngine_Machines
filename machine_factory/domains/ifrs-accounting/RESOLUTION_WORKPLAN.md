@@ -29,3 +29,7 @@ After accounting closure: independent workflow review, CPP/LSP/Scala parity, liv
 ## Started implementation
 
 Reject malformed evidence references in deterministic controls and trial-balance rows. This fixes input validation only and closes no accounting finding. Next: source dispositions for foundation applicability and recognition, then connected synthetic cases.
+
+## Foundation batch implementation
+
+STD-14, STD-20 and DEEP-S02-03 now have narrow advisory controls, 17 synthetic cases and hashed source dispositions in `foundation-source-dispositions.json`. The OpenClaw calculation route accepts these controls only with a matching verified source section. Local tests cover successful and rejected paths; fixture RAG passages are explicitly synthetic. Live connector receipts, native machine description/state dispositions and independent accounting review remain required. All findings remain open.

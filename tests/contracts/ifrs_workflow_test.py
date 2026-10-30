@@ -57,6 +57,19 @@ class IFRSWorkflowTests(unittest.TestCase):
         self.assertEqual(set(ids), {f["id"] for f in findings})
         self.assertFalse(plan["policy"]["historicalComparisonRequired"])
 
+    def test_foundation_source_disposition_cases(self):
+        package = json.loads((ASSETS / "acceptance/synthetic/foundation-cases.json").read_text())
+        self.assertTrue(package["synthetic"])
+        for case in package["cases"]:
+            with self.subTest(case=case["caseId"]):
+                actual = controls.determine(case["control"], case["facts"])
+                for key, expected in case["expected"].items():
+                    self.assertEqual(actual[key], expected)
+                if actual["status"] == "ADVISORY":
+                    self.assertTrue(actual["reviewRequired"])
+                missing = dict(case["facts"], evidenceRefs=[])
+                self.assertEqual(controls.determine(case["control"], missing)["status"], "UNRESOLVED")
+
     def test_money_is_not_a_token_or_float(self):
         for value in [.5, "NaN", "Infinity"]:
             with self.assertRaises(ValueError):

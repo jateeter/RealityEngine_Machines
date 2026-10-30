@@ -5,6 +5,7 @@ independent review. This is not a general IFRS accounting engine. Monetary
 arithmetic is decimal and never enters the nominal token lane.
 """
 from decimal import Decimal, InvalidOperation
+from datetime import date
 
 
 def amount(record):
@@ -29,6 +30,45 @@ def valid_evidence_refs(refs):
 def determine(control, facts):
     if not isinstance(facts, dict) or not valid_evidence_refs(facts.get("evidenceRefs")):
         return {"status": "UNRESOLVED", "reason": "Missing evidence references"}
+    if control == "version-3-period-applicability":
+        if facts.get("edition") != "IFRS_FOR_SMES_2025_THIRD_EDITION" or facts.get("annualPeriod") is not True:
+            return {"status": "UNRESOLVED", "reason": "Third edition and annual reporting period must be explicit"}
+        try:
+            start = date.fromisoformat(facts["periodStart"])
+            end = date.fromisoformat(facts["periodEnd"])
+            if start > end:
+                raise ValueError("Reversed reporting period")
+        except (KeyError, TypeError, ValueError):
+            return {"status": "UNRESOLVED", "reason": "Valid reporting period dates required"}
+        if start < date(2027, 1, 1):
+            if type(facts.get("earlyApplication")) is not bool or type(facts.get("earlyApplicationDisclosed")) is not bool:
+                return {"status": "UNRESOLVED", "reason": "Early application election and disclosure evidence required"}
+            decision = "EARLY_APPLICATION_SUBJECT_TO_REVIEW" if facts["earlyApplication"] and facts["earlyApplicationDisclosed"] else "THIRD_EDITION_APPLICATION_NOT_ESTABLISHED"
+        else:
+            decision = "EFFECTIVE_PERIOD_SUBJECT_TO_REVIEW"
+        return {"status": "ADVISORY", "decision": decision, "sourceControl": "A1", "reviewRequired": True,
+                "scope": "Effective date only; transition, eligibility and full compliance remain separate"}
+    if control == "section-2-recognition-screen":
+        if facts.get("element") not in {"asset", "liability"}:
+            return {"status": "UNRESOLVED", "reason": "This screen covers assets and liabilities only"}
+        if type(facts.get("specificSectionApplies")) is not bool:
+            return {"status": "UNRESOLVED", "reason": "Specific-section applicability assessment required"}
+        if facts["specificSectionApplies"]:
+            return {"status": "UNRESOLVED", "reason": "Apply the identified specific-section requirements before a recognition determination", "sourceControl": "2.2"}
+        keys = ["definitionMet", "relevantInformation", "faithfulRepresentation", "uncertaintyAssessed"]
+        if any(type(facts.get(k)) is not bool for k in keys):
+            return {"status": "UNRESOLVED", "reason": "Definition, relevance, representation and uncertainty judgments required"}
+        if not facts["uncertaintyAssessed"]:
+            return {"status": "UNRESOLVED", "reason": "Assess existence and measurement uncertainty; uncertainty alone is not an automatic prohibition"}
+        decision = "GENERAL_RECOGNITION_SCREEN_PASSED_SUBJECT_TO_REVIEW" if all(facts[k] for k in keys) else "GENERAL_RECOGNITION_SCREEN_NOT_PASSED"
+        return {"status": "ADVISORY", "decision": decision, "sourceControl": "2.2; 2.68–2.73", "reviewRequired": True, "postingPerformed": False}
+    if control == "section-2-substance-screen":
+        keys = ["legalFormDiffersFromSubstance", "substanceRepresented", "faithfulRepresentationAssessed"]
+        if any(type(facts.get(k)) is not bool for k in keys):
+            return {"status": "UNRESOLVED", "reason": "Substance and representation evidence required"}
+        if not facts["faithfulRepresentationAssessed"] or not facts["substanceRepresented"]:
+            return {"status": "UNRESOLVED", "reason": "Resolve economic-substance representation; legal form alone is insufficient", "sourceControl": "2.14–2.18"}
+        return {"status": "ADVISORY", "decision": "SUBSTANCE_SCREEN_PASSED_SUBJECT_TO_REVIEW", "sourceControl": "2.14–2.18", "reviewRequired": True}
     if control == "trial-balance":
         return {**reconcile_trial_balance(facts.get("rows")), "authorityClass": "supplemental-ledger-reconciliation", "reviewRequired": True}
     if control == "section-1-eligibility":
