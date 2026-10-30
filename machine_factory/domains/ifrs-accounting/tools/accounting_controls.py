@@ -145,6 +145,35 @@ def determine(control, facts):
         if facts.get("mostRepresentativeJudgment") is not True or not isinstance(facts.get("pricingRationale"), str) or not facts["pricingRationale"].strip():
             return {"status": "UNRESOLVED", "reason": "Representative-price judgment required; bid/ask is permitted, not mandatory"}
         return {"status": "ADVISORY", "decision": "REPRESENTATIVE_PRICE_SCREEN_PASSED", "amount": format(values[2], "f"), "currency": records[2]["currency"], "asOf": records[2]["asOf"], "sourceControl": "12.17", "reviewRequired": True}
+    if control == "section-3-compliance-evidence-screen":
+        return {"status": "UNRESOLVED", "reason": "Canonical approved workflow records must be evaluated by the authenticated service, never caller-supplied statuses"}
+    if control == "section-20-classification-screen":
+        if facts.get("inceptionAssessmentComplete") is not True or not isinstance(facts.get("risksRewardsRationale"), str) or not facts["risksRewardsRationale"].strip():
+            return {"status": "UNRESOLVED", "reason": "Inception assessment of substance, indicators and countervailing features required"}
+        if type(facts.get("substantiallyAllRisksRewardsTransferred")) is not bool or facts.get("indicatorsAndCountervailingFeaturesAssessed") is not True:
+            return {"status": "UNRESOLVED", "reason": "Qualitative risks/rewards judgment required; 75% and 90% are not mandated cutoffs"}
+        return {"status": "ADVISORY", "decision": "FINANCE_LEASE" if facts["substantiallyAllRisksRewardsTransferred"] else "OPERATING_LEASE",
+                "sourceControl": "20.4–20.8", "reviewRequired": True, "scope": "Classification screen of explicit evidenced judgments, not inference from ratios"}
+    if control == "section-20-finance-initial-measurement":
+        if facts.get("partyRole") != "LESSEE" or facts.get("classification") != "FINANCE" or not isinstance(facts.get("classificationReviewRef"), str) or facts["classificationReviewRef"] not in facts["evidenceRefs"]:
+            return {"status": "UNRESOLVED", "reason": "Evidenced finance-lease lessee classification required; operating leases use their separate model"}
+        if type(facts.get("implicitRateDetermined")) is not bool:
+            return {"status": "UNRESOLVED", "reason": "Discount-rate evidence required"}
+        basis = "IMPLICIT" if facts["implicitRateDetermined"] else "INCREMENTAL_BORROWING"
+        if facts.get("discountRateBasis") != basis or facts.get("qualifyingInitialDirectCostsAssessed") is not True:
+            return {"status": "UNRESOLVED", "reason": "Use implicit rate when determinable, otherwise incremental borrowing rate; qualify direct costs"}
+        try:
+            fv, pv, costs = [facts[k] for k in ["fairValue", "minimumPaymentsPV", "initialDirectCosts"]]
+            f, v, c = [amount(x) for x in [fv, pv, costs]]
+            inception, commencement = date.fromisoformat(facts["inceptionDate"]), date.fromisoformat(facts["commencementDate"])
+            if inception > commencement or fv["asOf"] != facts["inceptionDate"] or pv["asOf"] != facts["inceptionDate"] or costs["asOf"] != facts["commencementDate"] or len({x["currency"] for x in [fv, pv, costs]}) != 1:
+                raise ValueError("Measurement date/currency mismatch")
+        except (KeyError, TypeError, ValueError):
+            return {"status": "UNRESOLVED", "reason": "Consistent typed inception values and commencement direct costs required"}
+        base = min(f, v)
+        return {"status": "ADVISORY", "decision": "FINANCE_INITIAL_MEASUREMENT_SUBJECT_TO_REVIEW", "asset": format(base+c, "f"), "liability": format(base, "f"), "currency": fv["currency"],
+                "asOf": facts["commencementDate"], "sourceControl": "20.9–20.10", "reviewRequired": True, "postingPerformed": False,
+                "scope": "Supplied independently evidenced PV, not a cash-flow discounting engine; subsequent measurement and other-section adjustments assessed separately"}
     if control == "trial-balance":
         return {**reconcile_trial_balance(facts.get("rows")), "authorityClass": "supplemental-ledger-reconciliation", "reviewRequired": True}
     if control == "section-1-eligibility":

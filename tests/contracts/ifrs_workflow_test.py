@@ -84,6 +84,7 @@ class IFRSWorkflowTests(unittest.TestCase):
 
     def test_policy_alternatives_boundaries_and_missing_evidence(self):
         package = json.loads((ASSETS / "acceptance/synthetic/policy-cases.json").read_text())
+        package["cases"].extend(json.loads((ASSETS / "acceptance/synthetic/lease-compliance-cases.json").read_text())["cases"])
         self.assertTrue(package["synthetic"])
         for case in package["cases"]:
             with self.subTest(case=case["caseId"]):
