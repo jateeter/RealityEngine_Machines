@@ -21,3 +21,9 @@ The 68 sample-document hash/reproduction checks still pass. Accounting readiness
 Use `reviewer-addendum-template.json` for exact-version decisions. Actual independent reviewer/role strings suffice; fictional HR names must not be promoted into sign-off. A blanket statement can reference a complete exact-hash decision inventory, but it cannot establish unexecuted native parity.
 
 Tracking: [issue #231](https://github.com/jateeter/RealityEngine_Machines/issues/231).
+
+## Reviewer response received on main
+
+`IFRS Issue #231 Reconciliation.pdf`, supplied in `f6d224b1`, has been checked. All nine named legacy/aggregate artifacts are absent from the current tracked candidate, so their declared hashes do not bind this implementation. Its ordinal finding groups do not match the actual STD-/DEEP- finding IDs. The response retains 2.0/3.0 native outputs, the unimplemented dual-key liquidation cascade and 29.38 Pillar Two reference. Its final conditional Phase 5 wording partially clarifies that native verification remains future work, but provides no execution receipts. `semantic-buses:write` is the JSON inventory command, not a cross-language binding generator.
+
+No canonical finding can be closed from this response. See `reconciliation-response-review.json` for the exact nine artifact names/hashes and review results. Use the actual 53-finding/68-document `reviewer-addendum-template.json`; the reviewers can inspect current canonical files and bind decisions to their exact hashes. The original PDFs are preserved unchanged.
