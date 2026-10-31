@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 ROOT=Path(__file__).resolve().parents[2]
 ASSETS=ROOT/'machine_factory/domains/ifrs-accounting'
 SAMPLES=ASSETS/'acceptance/synthetic/review-samples'
@@ -43,3 +44,18 @@ class ReviewSamplesTest(unittest.TestCase):
         ledger=json.loads((SAMPLES/'finding-dispositions.json').read_text())
         self.assertEqual(ledger['closedDevelopmentFindings'],53)
         self.assertEqual(ledger['closedAdmissionFindings'],0)
+
+    def test_attested_baseline_can_be_verified_without_git_history(self):
+        attestation=json.loads((SAMPLES/'operator-review-attestation.json').read_text())
+        with patch('subprocess.check_output',side_effect=AssertionError('Git history unavailable')):
+            self.assertEqual(len(module.reviewed_findings(attestation)),53)
+
+    def test_changed_retained_review_baseline_is_rejected(self):
+        with tempfile.TemporaryDirectory() as t:
+            p=Path(t);shutil.copytree(SAMPLES,p,dirs_exist_ok=True)
+            baseline=p/'reviewed-baseline/accounting-findings.json'
+            baseline.write_text('{}')
+            attestation=json.loads((p/'operator-review-attestation.json').read_text())
+            with patch.object(module,'SAMPLES',p):
+                with self.assertRaisesRegex(AssertionError,'Attested source baseline differs'):
+                    module.reviewed_findings(attestation)

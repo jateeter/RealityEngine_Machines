@@ -25,14 +25,16 @@ def module(name,path):
     spec=importlib.util.spec_from_file_location(name,path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
 
 def reviewed_findings(attestation):
-    rel='machine_factory/domains/ifrs-accounting/accounting-findings.json'
-    data=subprocess.check_output(['git','show',attestation['reviewedGitCommit']+':'+rel],cwd=REPO)
-    assert hashlib.sha256(data).hexdigest()==attestation['reviewedFileSHA256']['accounting-findings.json']
+    # GitHub checks out a shallow merge commit. Exact reviewed bytes are verified
+    # from unchanged current files or retained snapshots, not unavailable history.
+    verified={}
     for rel,expected in attestation['reviewedFileSHA256'].items():
-        path=rel if rel.startswith('machines/') else 'machine_factory/domains/ifrs-accounting/'+rel
-        blob=subprocess.check_output(['git','show',attestation['reviewedGitCommit']+':'+path],cwd=REPO)
-        assert hashlib.sha256(blob).hexdigest()==expected, 'Attested source baseline differs: '+path
-    return json.loads(data)['findings']
+        current=REPO/rel if rel.startswith('machines/') else ASSETS/rel
+        snapshot=SAMPLES/'reviewed-baseline'/rel
+        source=current if current.is_file() and sha(current)==expected else snapshot
+        assert source.is_file() and sha(source)==expected, 'Attested source baseline differs: '+rel
+        verified[rel]=source
+    return read(verified['accounting-findings.json'])['findings']
 
 def build(out):
     catalog=read(ASSETS/'document-asset-catalog.json')['assetTypes'];byid={a['assetTypeId']:a for a in catalog}
