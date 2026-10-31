@@ -519,10 +519,16 @@ class MachineProjector:
             self.qlabel(str(output_id)),
         ]
         vector = output.get("vector", [])
-        if len(vector) >= 1:
-            statements.append(f"re:outputTier {number(vector[0])}")
-        if len(vector) >= 2:
-            statements.append(f"re:outputConfidence {number(vector[1])}")
+        bounded_assertions = self.machine.get("metadata", {}).get("outputEncoding") == "bounded-assertion-tokens"
+        if bounded_assertions:
+            refs = " , ".join(f"m:out-{sanitize(output_id)}-cell-{i}" for i in range(len(vector)))
+            if refs:
+                statements.append(f"re:hasOutputCellValue {refs}")
+        else:
+            if len(vector) >= 1:
+                statements.append(f"re:outputTier {number(vector[0])}")
+            if len(vector) >= 2:
+                statements.append(f"re:outputConfidence {number(vector[1])}")
         if metadata.get("tier"):
             statements.append(f're:tierLabel "{escape(metadata["tier"])}"')
         if metadata.get("confidence"):
@@ -543,6 +549,14 @@ class MachineProjector:
         if metadata.get("rationale"):
             statements.append(f'rdfs:comment "{escape(metadata["rationale"])}"')
         self.block(f"m:out-{sanitize(output_id)}", statements)
+        if bounded_assertions:
+            for index, value in enumerate(vector):
+                self.block(f"m:out-{sanitize(output_id)}-cell-{index}", [
+                    "a owl:NamedIndividual , re:OutputCellValue",
+                    self.qlabel(f"{output_id} output cell {index}"),
+                    f"re:outputCellIndex {index}",
+                    f"re:outputCellLevel {number(value)}",
+                ])
 
     def emit_trigger_rules(self) -> None:
         trigger_config = self.machine.get("metadata", {}).get("triggerConfig", {})

@@ -1611,3 +1611,24 @@ re:OutputMergeTransformation rdfs:subClassOf prov:Entity .
 # class, rather than being listed here — they were written after this section
 # existed, and a second place to state a superclass is a second place for it to
 # go stale. re:IntegrationProvider is the only other prov:Agent besides re:Agent.
+
+# Bounded categorical assertion outputs: preserve cell meaning, not tier/confidence.
+re:OutputCellValue a owl:Class ;
+    rdfs:comment "An output position carrying a bounded categorical assertion token, with no inferred tier or confidence interpretation." ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "output cell value" ;
+    obo:IAO_0000115 "One indexed cell value of a determination's output vector, without imposing tier or confidence semantics." .
+re:hasOutputCellValue a owl:ObjectProperty ;
+    rdfs:label "has output cell value" ;
+    obo:IAO_0000115 "Relates a determination to an indexed value of its output vector." ;
+    rdfs:domain re:Determination ; rdfs:range re:OutputCellValue .
+re:outputCellIndex a owl:DatatypeProperty ;
+    rdfs:label "output cell index" ;
+    obo:IAO_0000115 "The zero-based position of a determination cell within its declared output region." ;
+    rdfs:domain re:OutputCellValue ; rdfs:range xsd:nonNegativeInteger .
+re:outputCellLevel a owl:DatatypeProperty ;
+    rdfs:label "output cell level" ;
+    obo:IAO_0000115 "The bounded numeric encoding of an assertion token at one output position; it asserts neither confidence nor consequence tier." ;
+    rdfs:domain re:OutputCellValue ;
+    rdfs:range [ a rdfs:Datatype ; owl:onDatatype xsd:decimal ;
+        owl:withRestrictions ( [ xsd:minInclusive 0.0 ] [ xsd:maxInclusive 1.0 ] ) ] .

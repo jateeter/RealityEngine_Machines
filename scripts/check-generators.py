@@ -148,7 +148,7 @@ def invocation_sites(script_name: str) -> tuple[list[str], list[str]]:
     """
     gated: list[str] = []
     defined: list[str] = []
-    candidates = list(SCRIPTS.glob("*.sh")) + list(REPO.glob("Makefile")) + [REPO / "package.json"]
+    candidates = list(SCRIPTS.glob("*.sh")) + list(REPO.glob("Makefile")) + [REPO / "package.json", SCRIPTS / "domain-approval/approval.py"]
     for candidate in candidates:
         if not candidate.is_file() or candidate.name == script_name:
             continue
@@ -159,7 +159,7 @@ def invocation_sites(script_name: str) -> tuple[list[str], list[str]]:
         if script_name not in text:
             continue
         rel = str(candidate.relative_to(REPO))
-        if candidate.name in GATE_FILES:
+        if candidate.name in GATE_FILES or rel == "scripts/domain-approval/approval.py":
             gated.append(rel)
         elif candidate.suffix == ".sh" and _reached_by_gate(candidate.name):
             # One level of indirection, and only through a shell wrapper that a

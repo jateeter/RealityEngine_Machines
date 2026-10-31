@@ -174,6 +174,14 @@ def prepare(args):
             if not source.exists():ttl.unlink()
         run.python('owl-generate','generate-owl.py','--all','--write','--strict-actions',repo=repo)
         run.python('owl-manifest','generate-owl.py','--manifest-write','--strict-actions',repo=repo)
+        # Structural admission precedes expensive/resetting live recordings.
+        # Do not run the CES freshness gate here: affected live shards can only
+        # be refreshed by the later parity stage, before the complete gate.
+        run.execute('preflight-schemas',['node',repo/'scripts/validate-schemas.mjs'],repo)
+        for test in ['machine_schema_test.py','name_uniqueness_test.py','domain_organization_test.py','fold_placement_test.py','interconnection_graph_test.py']:
+            run.execute('preflight-'+test[:-3],['python3','-m','unittest','discover','-s','tests/contracts','-p',test],repo)
+        if args.domain == 'ifrs-accounting':
+            run.execute('ifrs-accounting-readiness',['python3',repo/'scripts/check-ifrs-accounting-readiness.py','--check','--report',folder/'ifrs-accounting-readiness.json'],repo)
         run.execute('engine-build-provenance',['python3',ci/'scripts/verify-build-provenance.py','--no-fetch'],ci)
         # Runner is reviewed project-specific orchestration, never arbitrary eval.
         for scope in p['cesScopes']:

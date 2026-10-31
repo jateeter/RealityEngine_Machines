@@ -377,6 +377,37 @@
         "package.json"
       ],
       "gated_by": []
+    },
+    {
+      "script": "build-ifrs-workflow.py",
+      "modes": [
+        "--check",
+        "--write"
+      ],
+      "artifact": "machine_factory/domains/ifrs-accounting/accounting-workflow-graph.json and IFRS metadata document-sidecar handoffs",
+      "corpus": "ifrs-accounting",
+      "cadence": "on-demand",
+      "invoked_by": [
+        "scripts/validate-corpus.sh"
+      ],
+      "gated_by": [
+        "scripts/validate-corpus.sh"
+      ]
+    },
+    {
+      "script": "check-ifrs-accounting-readiness.py",
+      "modes": [
+        "--check"
+      ],
+      "artifact": "IFRS substantive admission decision report",
+      "corpus": "ifrs-accounting",
+      "cadence": "on-demand",
+      "invoked_by": [
+        "scripts/domain-approval/approval.py"
+      ],
+      "gated_by": [
+        "scripts/domain-approval/approval.py"
+      ]
     }
   ],
   "description": "Inventory of every corpus generator and verifier in this repo. Gated by scripts/check-generators.py so a new generator cannot be added without an entry, and an entry cannot claim coverage it does not have. `corpus` records which slice the process reads: full (all 1328 machines) or regression (the 20-machine subset in RealityEngine_CI/config/regression-corpus.txt)."

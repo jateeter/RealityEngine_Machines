@@ -249,7 +249,7 @@
     "sequence": {
       "type": "object",
       "required": [
-        "id"
+        "events"
       ],
       "properties": {
         "id": {
@@ -277,9 +277,6 @@
         }
       },
       "additionalProperties": true,
-      "required": [
-        "events"
-      ],
       "not": {
         "required": [
           "vectors"
@@ -386,7 +383,7 @@
     "inputSequence": {
       "type": "object",
       "required": [
-        "name"
+        "events"
       ],
       "properties": {
         "name": {
@@ -416,9 +413,6 @@
         }
       },
       "additionalProperties": true,
-      "required": [
-        "events"
-      ],
       "not": {
         "required": [
           "vectors"
@@ -599,48 +593,14 @@
       }
     },
     "interconnection": {
-      "type": "object",
-      "required": [
-        "id",
-        "type",
-        "busId",
-        "busTag"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
+      "oneOf": [
+        {
+          "$ref": "#/$defs/nativeBusInterconnection"
         },
-        "type": {
-          "type": "string",
-          "minLength": 1
-        },
-        "role": {
-          "type": "string",
-          "minLength": 1
-        },
-        "busId": {
-          "type": "string",
-          "minLength": 1
-        },
-        "busTag": {
-          "type": "string",
-          "minLength": 1
-        },
-        "sourceOutputRegion": {
-          "$ref": "#/$defs/region"
-        },
-        "targetInputRegion": {
-          "$ref": "#/$defs/region"
-        },
-        "publishedOutputRegion": {
-          "$ref": "#/$defs/region"
-        },
-        "peCompositionRequired": {
-          "type": "boolean"
+        {
+          "$ref": "#/$defs/documentWorkflowHandoff"
         }
-      },
-      "additionalProperties": true
+      ]
     },
     "publishedDomainBus": {
       "type": "object",
@@ -744,6 +704,105 @@
         }
       },
       "additionalProperties": true
+    },
+    "nativeBusInterconnection": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "busId",
+        "busTag"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "busId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "busTag": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceOutputRegion": {
+          "$ref": "#/$defs/region"
+        },
+        "targetInputRegion": {
+          "$ref": "#/$defs/region"
+        },
+        "publishedOutputRegion": {
+          "$ref": "#/$defs/region"
+        },
+        "peCompositionRequired": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true,
+      "not": {
+        "properties": {
+          "type": {
+            "const": "document-workflow-handoff"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      }
+    },
+    "documentWorkflowHandoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "sourceMachine",
+        "targetMachine",
+        "assetTypeId",
+        "compositionOwner",
+        "purpose",
+        "nativeVectorWrite"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceMachine": {
+          "type": "string",
+          "minLength": 1
+        },
+        "targetMachine": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assetTypeId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "document-workflow-handoff"
+        },
+        "compositionOwner": {
+          "const": "document-workflow-dispatcher"
+        },
+        "nativeVectorWrite": {
+          "const": false
+        }
+      }
     }
   }
 }
