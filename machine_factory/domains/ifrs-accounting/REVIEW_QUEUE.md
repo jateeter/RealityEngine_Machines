@@ -1,6 +1,6 @@
 # IFRS accounting independent review queue
 
-All 53 findings have mapped development cases. This queue does not assert accounting acceptance or authorize finding closure. Use complete version 3 and explicitly synthetic entity evidence.
+All 53 findings have scoped development closures recorded in `acceptance/synthetic/review-samples/finding-dispositions.json`. Admission closure remains pending independent accounting review and acceptance. The operator source-review attestation is recorded against the previous exact Git revision. Use complete version 3 and explicitly synthetic entity evidence.
 
 Review each source interpretation, corrected machine description and fixture expectation independently. Then inspect current connected receipts, exact document revisions and applicable native acceptance before recording the canonical closure fields. Open contributions are requests for steward action, not approved financial documents.
 
@@ -62,4 +62,4 @@ Review each source interpretation, corrected machine description and fixture exp
 
 Source/fact/case details and closure criteria: [completion-review-packet.json](completion-review-packet.json). Canonical finding status: [accounting-findings.json](accounting-findings.json). Development mapping: [finding-coverage.json](finding-coverage.json).
 
-No independent review reference has been supplied. Native parity, live CES, release review and accepted Manager catalog verification remain required gates.
+Follow-up independent review is tracked in [issue #231](https://github.com/jateeter/RealityEngine_Machines/issues/231). Sample HR identities do not constitute actual independent sign-off. Native parity, live CES, release review and accepted Manager catalog verification remain required gates.
