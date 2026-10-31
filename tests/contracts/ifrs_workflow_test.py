@@ -87,6 +87,7 @@ class IFRSWorkflowTests(unittest.TestCase):
         package["cases"].extend(json.loads((ASSETS / "acceptance/synthetic/lease-compliance-cases.json").read_text())["cases"])
         package["cases"].extend(json.loads((ASSETS / "acceptance/synthetic/source-disclosure-cases.json").read_text())["cases"])
         package["cases"].extend(json.loads((ASSETS / "acceptance/synthetic/reporting-cases.json").read_text())["cases"])
+        package["cases"].extend(json.loads((ASSETS / "acceptance/synthetic/remaining-cases.json").read_text())["cases"])
         self.assertTrue(package["synthetic"])
         for case in package["cases"]:
             with self.subTest(case=case["caseId"]):
@@ -112,7 +113,7 @@ class IFRSWorkflowTests(unittest.TestCase):
                 self.assertIn(case["control"], row["controls"])
 
     def test_source_routing_is_pinned_independently_of_claimed_legacy_labels(self):
-        for name in ["foundation-cases.json", "policy-cases.json", "lease-compliance-cases.json", "source-disclosure-cases.json", "reporting-cases.json"]:
+        for name in ["foundation-cases.json", "policy-cases.json", "lease-compliance-cases.json", "source-disclosure-cases.json", "reporting-cases.json", "remaining-cases.json"]:
             for case in json.loads((ASSETS / "acceptance/synthetic" / name).read_text())["cases"]:
                 if "sourceSection" in case:
                     self.assertEqual(controls.source_section(case["control"], case["facts"]), case["sourceSection"], case["caseId"])

@@ -34,6 +34,11 @@ def source_section(control, facts):
     if control == "source-reference-screen":
         mapping = reference_mapping(facts)
         return mapping["semanticSection"] if mapping else None
+    if control == "rem-asset-review" and facts.get("assetKind") == "INTANGIBLE":
+        return "18"
+    if isinstance(control, str) and control.startswith("rem-"):
+        data = json.loads((Path(__file__).resolve().parents[1] / "remaining-control-map.json").read_text())
+        return next((c["sourceSection"] for c in data["controls"] if c["control"] == control), None)
     return SOURCE_SECTIONS.get(control)
 
 
@@ -272,6 +277,10 @@ def determine(control, facts):
         return {"status": "ADVISORY", "decision": decision, "sourceControl": "23.42; 23.47–23.48", "reviewRequired": True, "scope": "Allocation-basis screen; no monetary allocation, revenue recognition or unsupported residual-method approval"}
     if control in {"section-6-dividend-note", "section-7-financing-reconciliation", "section-7-supplier-finance-note", "section-8-note-structure-screen"}:
         spec = importlib.util.spec_from_file_location("ifrs_reporting_controls", Path(__file__).with_name("reporting_controls.py"))
+        module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+        return module.determine(control, facts)
+    if isinstance(control, str) and control.startswith("rem-"):
+        spec = importlib.util.spec_from_file_location("ifrs_remaining_controls", Path(__file__).with_name("remaining_controls.py"))
         module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
         return module.determine(control, facts)
     if control == "trial-balance":

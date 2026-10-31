@@ -61,3 +61,7 @@ STD-01, STD-15, STD-16, DEEP-29-PILLAR_TWO_PARAGRAPH, DEEP-S15-19 and DEEP-23-SS
 ## Typed reporting batch
 
 DEEP-S06-07, DEEP-S07-08 and DEEP-S08-09 now have 45 synthetic cases and typed dividend, financing and supplier-finance draft producers plus note-structure checks. Eleven owned draft cases and the real proactive reporting agent passed in live run 023 (173 cases total); source change made all three reporting types stale. Generic drafts cannot forge typed producer provenance. Development cases now map to 22 findings; 31 lack mapped cases. All 53 remain open for full acceptance and independent accounting review.
+
+## Remaining finding implementation
+
+All 53 findings now have mapped development cases. The remaining 31 have 147 explicitly synthetic cases, source dispositions in `remaining-control-map.json`, and explicit description corrections in `semantic-amendments.json`. The sidecar requires verified dependent-section RAG receipts for advisory results. Calculations remain conditional advisory controls; steward contributions remain open and cannot substitute for completed financial documents, independent accounting review, native parity or admission. `completion-review-packet.json` identifies the review sequence. Connected evidence for this batch is pending. All 53 admission findings remain open.
