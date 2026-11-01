@@ -117,6 +117,8 @@ def run(args):
             requested=list(map(str,argv))
             if getattr(args,'fail_stage',None)==label:
                 return super().execute('FIXTURE-INTENTIONAL-FAILURE-'+label,[sys.executable,'-c','print("INTENTIONAL_WORKFLOW_TEST_FAILURE");raise SystemExit(7)'],cwd)
+            if label=='corpus-count-transition':
+                core.write(repo/'domains/corpus-contract.json',{'evidenceClass':'WORKFLOW_FIXTURE','approvalContext':'TEST_ONLY','productionApproval':False,'purpose':'Count reconciliation control flow only; not actual inventory validation'})
             if label.startswith('scope-'):
                 request=core.read(Path(requested[1]));scope_out=Path(requested[2]);scope=request['scope']
                 core.write(scope_out/'fixture-native.json',{'evidenceClass':'WORKFLOW_FIXTURE','nativeExecution':'NOT_RUN',

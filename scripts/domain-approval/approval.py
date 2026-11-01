@@ -14,6 +14,7 @@ GENERATORS=['build-corpus-index.py','build-region-allocation.py',
 DERIVED=['domains/corpus-index.json','domains/region-allocation.json',
          'domains/arbitration-registry.json','domains/semantic-bus-registry.json',
          'domains/lane-contracts.json','domains/ces-contract-registry.json',
+         'domains/corpus-contract.json','domains/corpus-contracts',
          'semantics/abox','semantics/abox-manifest.json','semantics/released']
 
 def ensure(ok,message):
@@ -97,6 +98,7 @@ def plan(repo,ci,domain,ver):
         if p.is_dir() and any(p.glob('*.json')):names.add('domain:'+p.name)
     return {'schemaVersion':'1.0.0','domain':domain,'version':ver,'candidateCommit':git(repo,'rev-parse','HEAD'),
             'candidateMachines':members,'machineCount':len(members),
+            'countReconciliation':'Verify immutable baseline + exact candidate-domain delta; stage the versioned corpus transition alongside affected machine registries and semantic shards',
             'refreshScope':'All known CES domain/corpus scopes conservatively: shared-space changes can affect peer commits',
             'cesScopes':sorted(names),'derivedArtifacts':DERIVED+['semantics/lanes/lane-graph.ttl','semantics/lanes/decision-table.json'],
             'authoredInputs':['domains/domain-manifest.json','domains/domain-registry.json','machine schemas, semantics, arbitration and regression profile selection'],
@@ -169,6 +171,9 @@ def prepare(args):
            'candidateMachines':p['candidateMachines'],'plan':p,'events':[]}
     write(folder/'state.json',state)
     try:
+        run.execute('corpus-count-transition',['python3',repo/'scripts/corpus_contract.py','--repo',repo,'prepare','--domain',args.domain,'--version',args.version,'--approval-context','PRODUCTION_CANDIDATE','--write'],repo)
+        state['corpusContractSHA256']=filehash(repo/'domains/corpus-contract.json')
+        write(folder/'state.json',state)
         for script in GENERATORS:run.python(script[:-3],script,'--write',repo=repo)
         # Remove only orphan ABoxes, never authored ontology/shapes/action maps.
         for ttl in (repo/'semantics/abox').glob('*/*.ttl'):
@@ -212,6 +217,8 @@ def prepare(args):
         run.execute('strict-corpus',[BASH,repo/'scripts/validate-corpus.sh'],repo,env)
         run.execute('explicit-schema',['node',repo/'scripts/validate-schemas.mjs'],repo)
         run.execute('contracts',['python3','-m','unittest','discover','-s','tests/contracts','-p','*_test.py'],repo)
+        run.execute('corpus-count-integrity',['python3',repo/'scripts/corpus_contract.py','--repo',repo,'check'],repo)
+        run.execute('dependent-corpus-counts',['python3',ci/'scripts/check-corpus-exit-criteria.py','--machines',repo,'--openclaw',ci.parent/'localOpenClawStack','--require-current-digest'],ci)
         run.execute('domain-reasoning',[BASH,repo/'scripts/reason-owl.sh',args.domain,'--reasoner','both'],repo)
         # Each release invocation reports/diffs the OLD semantic baseline before
         # publishing its refreshed candidate. Git review still decides admission.
@@ -223,6 +230,7 @@ def prepare(args):
             shutil.copyfile(repo/'semantics/lanes'/name,generated/name)
         ensure(input_snapshot(repo)==repo_inputs,'Authored Machines inputs changed during gates; restart approval with a new run')
         ensure(snapshot(ci,('config/ces-contracts/',))==ci_inputs,'CI inputs changed during gates; restart approval with a new run')
+        ensure(filehash(repo/'domains/corpus-contract.json')==state['corpusContractSHA256'],'Corpus transition changed during admission')
         manifest=read(repo/'domains/domain-manifest.json');entry=manifest['domains'][args.domain]
         ensure(entry['currentMachineCount']==len(p['candidateMachines']),'Author/review the manifest machine count before admission')
         entry['status']='accepted';write(repo/'domains/domain-manifest.json',manifest)
@@ -253,6 +261,9 @@ def verify_prepared(state,folder):
     for event in state['events']:
         ensure(event['exitCode']==0 and filehash(folder/event['log'])==event['logSHA256'],'Gate log changed or failed')
     for rel,sha in state['scopeEvidence'].items():ensure(filehash(folder/rel)==sha,'Scope evidence changed')
+    if state.get('corpusContractSHA256'):
+        ensure(filehash(Path(state['machinesRepo'])/'domains/corpus-contract.json')==state['corpusContractSHA256'],'Reviewed corpus transition changed')
+        require_production_context(read(Path(state['machinesRepo'])/'domains/corpus-contract.json'))
 
 def gh_json(repo,*argv):return json.loads(cmd(['gh',*argv],repo))
 def publish_commit(repo,paths,message):
@@ -334,6 +345,8 @@ def merged_pr(repo,url,expected_head):
 def validate_bound_state(ledger,state):
     for key in ['runId','domain','version','candidateCommit','candidateMachines','ciEvidenceCommit','ciPR','evidenceArchiveSHA256','evidenceURL']:
         ensure(ledger.get(key)==state.get(key),'Local state disagrees with the Git-reviewed ledger: '+key)
+    if 'corpusContractSHA256' in ledger or 'corpusContractSHA256' in state:
+        ensure(ledger.get('corpusContractSHA256')==state.get('corpusContractSHA256'),'Local corpus transition disagrees with the Git-reviewed ledger')
     for key in ['machinesSnapshot','ciSnapshot']:
         ensure(objecthash(state[key])==ledger.get(key+'SHA256'),'Local snapshot disagrees with the Git-reviewed ledger: '+key)
 
@@ -396,7 +409,16 @@ def main():
     test.add_argument("--repo",type=Path,default=MACHINES);test.add_argument("--domain",required=True,type=slug)
     test.add_argument("--fail-stage",choices=["ifrs-accounting-readiness","domain-reasoning"])
     test.add_argument("--waiver-file",type=Path,required=True);test.add_argument("--evidence",type=Path,required=True)
+    counts=sub.add_parser('reconcile-counts',help='Dry-run or stage a verified corpus-count transition; never approves a domain')
+    counts.add_argument('--repo',type=Path,default=MACHINES);counts.add_argument('--domain',required=True,type=slug)
+    counts.add_argument('--version',required=True,type=version);counts.add_argument('--baseline-ref')
+    counts.add_argument('--approval-context',required=True,choices=['TEST_ONLY','PRODUCTION_CANDIDATE']);counts.add_argument('--write',action='store_true')
     args=parser.parse_args()
+    if args.action=='reconcile-counts':
+        argv=['python3',MACHINES/'scripts/corpus_contract.py','--repo',args.repo,'prepare','--domain',args.domain,'--version',args.version,'--approval-context',args.approval_context]
+        if args.baseline_ref:argv+=['--baseline-ref',args.baseline_ref]
+        if args.write:argv+=['--write']
+        subprocess.run(list(map(str,argv)),check=True);return
     if args.action=="test-run":
         from rehearsal import run
         args.waiver=args.waiver_file

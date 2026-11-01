@@ -21,7 +21,9 @@ have been wrong by the end of it.
 The contract is split by **stability**, because not all of it is equally settled:
 
 - **§3 Settled** — pinned at `corpus-exit-v2.0`. Regenerate against it now. A
-  change here is a new major version of this document and will be announced.
+  core invariant change here is a new major version and will be announced.
+  Domain inventory growth follows versioned transitions; historical counts
+  are not silently rewritten.
 - **§4 Provisional** — known to be moving. Depend on it only if you must.
 - **§5 Open** — not settled, and not this corpus's to settle. Named so you do
   not mistake silence for agreement.
@@ -34,6 +36,15 @@ tag  corpus-exit-v2.0
 
 Regenerate against the tag, not against `main`. Record the tag in whatever
 artifact you generate, so a later mismatch is detectable rather than inferred.
+
+For later domain additions, updates or retirements, the tag supplies the
+historical baseline. The reviewed `domains/corpus-contract.json` transition
+supplies exact current membership and resulting counts. Admission verifies its
+content-addressed predecessor, declared additions/removals/modifications, full
+file hashes and dependent provenance. Expected growth passes; unexplained
+growth or same-count drift fails. Inventory transitions do not change core
+semantic invariants, domain admission status or production approval. See
+[Domain approval workflow](DOMAIN_APPROVAL_WORKFLOW.md).
 
 The tag is the ref, deliberately, rather than a commit SHA written into this
 file: the tag lands on the commit that merges this document, which cannot be

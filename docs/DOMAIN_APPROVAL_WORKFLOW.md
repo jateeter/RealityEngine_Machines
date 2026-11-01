@@ -133,3 +133,55 @@ Finalization network failures can leave a tag before a release exists. Keep the 
 ## Scope of validation for this implementation
 
 Local tests use synthetic repositories and forge responses to exercise rejection of missing parity/integration evidence, stale/self/dismissed reviews, active changes requests, changed PR heads, tampered logs, untracked derivative coverage and failed gates. No real domain is approved, no live engines reset and no approval tag/release created merely by installing or testing this workflow. A real approval requires executing the gates and human review above.
+
+## Corpus growth is part of approval
+
+Adding or updating a domain is expected to change corpus totals. Approval
+verifies **baseline + declared domain delta = resulting inventory**. Unexplained
+additions, removals, content changes or peer-domain changes fail.
+
+```bash
+# Dry run; no files change.
+/opt/homebrew/bin/bash scripts/approve-domain.sh reconcile-counts \
+  --domain ifrs-accounting --version 1.4.0 --approval-context TEST_ONLY
+
+# Stage the verified transition for Git review.
+/opt/homebrew/bin/bash scripts/approve-domain.sh reconcile-counts \
+  --domain ifrs-accounting --version 1.4.0 --approval-context TEST_ONLY --write
+```
+
+For the first transition only, `--baseline-ref COMMIT` selects the reviewed
+pre-addition baseline. IFRS uses `1baddcbaa1a52c6abca884ac4cdbf26dfe85f90a`:
+all 1,327 baseline files remain unchanged, with exactly 225 IFRS additions.
+Later versions use the existing transition as predecessor. Immutable snapshots
+are stored under `domains/corpus-contracts/`; the current transition is
+`domains/corpus-contract.json`. An unchanged repeat is idempotent.
+
+Each domain version follows this sequence:
+
+1. Freeze source commits, machine hashes, domain version, approval context and
+   applicable waiver. Verify the predecessor snapshot and history.
+2. Declare additions, removals and modifications within the domain. Derive
+   resulting machine, domain, expected agent, native binding and projection
+   counts. Check manifest counts and reject every undeclared change.
+3. Stage the transition with affected machine registries, the domain manifest,
+   arbitration registry, semantic-bus registry, lane projections, OWL ABoxes and
+   semantic shards. Regenerate derived artifacts; counts alone do not refresh
+   machine registries, CES evidence or semantic shards.
+4. Regenerate dependent agents when stale; verify exact joins, fixture
+   exclusions, semantic axes, egress-only bindings and current corpus provenance.
+   An already-current index is verified without unnecessary rewriting.
+5. Execute source/RAG/document and agent acceptance, native three-runtime parity,
+   affected CES scopes, strict corpus checks and semantic reasoning. `prepare`
+   now reconciles counts automatically and invokes the dependent count gate
+   with current-digest verification. Recheck the transition hash before submit.
+6. Review linked PRs at their exact heads. Record the transition hash, source
+   commits, delta, totals, evidence hashes, semantic changes and actual reviewer
+   or waiver disposition in the Git ledger. TEST_ONLY remains explicit.
+7. Merge reviewed artifacts, finalize through the existing domain version tag
+   and release ledger, and verify Manager loading from the resulting machine
+   catalog. Inventory reconciliation never grants domain approval.
+
+IFRS yields 1,552 machines, 13 domains and 1,547 expected agent specs. Native
+bindings remain 1,058 and projections 1,184. This transition is TEST_ONLY; the
+53 production findings remain open and IFRS admission status remains unchanged.
