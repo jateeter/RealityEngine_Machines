@@ -342,6 +342,59 @@ def merged_pr(repo,url,expected_head):
         ensure(c.get('conclusion') in ['SUCCESS','SKIPPED','NEUTRAL'] or c.get('state')=='SUCCESS','A published check is pending or failed')
     return dict(view,approvalReviews=approvals)
 
+def verify_deployment_approval(root,receipt):
+    slug(receipt['domain']);version(receipt['version'])
+    reviewed=merged_pr(root,receipt['machinesPR']['url'],receipt['machinesPR']['headRefOid'])
+    ensure(reviewed['mergeCommit']['oid']==receipt['mergeCommit'],'Approval merge differs')
+    expected=f'domain/{receipt["domain"]}/v{receipt["version"]}'
+    ensure(receipt.get('tag')==expected,'Approval tag namespace differs')
+    remote=cmd(['git','ls-remote','--tags','origin',f'refs/tags/{expected}^{{}}'],root).split()
+    ensure(remote and remote[0]==receipt['mergeCommit'],'Published approval tag does not name the approved merge')
+    git(root,'fetch','origin',receipt['mergeCommit'])
+    prefix=f'machines/domains/{receipt["domain"]}/'
+    actual={p for p in git(root,'ls-tree','-r','--name-only',receipt['mergeCommit'],'--',prefix).splitlines() if p.endswith('.json')}
+    expected={'machines/'+p for p in receipt['candidateMachines']}
+    ensure(actual==expected and actual,'Approval inventory omits or adds machines at the approved Git revision')
+    for rel,sha in receipt['candidateMachines'].items():
+        ensure(rel.startswith(f'domains/{receipt["domain"]}/') and '..' not in Path(rel).parts,'Invalid approved machine path')
+        ensure(digest(subprocess.check_output(['git','show',f'{receipt["mergeCommit"]}:machines/{rel}'],cwd=root))==sha,'Approval hashes do not match the approved Git revision')
+    approved_manifest=json.loads(subprocess.check_output(['git','show',f'{receipt["mergeCommit"]}:domains/domain-manifest.json'],cwd=root))
+    ensure(approved_manifest['domains'][receipt['domain']]['status']=='accepted','Approved Git revision does not admit this production domain')
+
+def publish_deployment(args):
+    import deployment
+    root=args.repo.resolve();clean(root)
+    git(root,'fetch','origin','main')
+    rel=f'domains/deployments/{args.domain}/{args.version}.json'
+    record_bytes=subprocess.check_output(['git','show',f'origin/main:{rel}'],cwd=root)
+    record=json.loads(record_bytes)
+    ensure(filehash(root/rel)==digest(record_bytes),'Local deployment receipt differs from main')
+    deployment.check_deployment(root,args.domain,args.version)
+    ensure(record.get('state')=='DEPLOYED_RUNTIME_COPY_VERIFIED','No completed runtime deployment in main')
+    ensure(record['domain']==args.domain and record['deploymentVersion']==args.version,'Deployment identity differs')
+    pointer=json.loads(subprocess.check_output(['git','show',f'origin/main:domains/deployments/{args.domain}/current.json'],cwd=root))
+    ensure(pointer['deploymentVersion']==args.version and pointer['receiptSHA256']==digest(record_bytes),'Deployment is not the current verified version in main')
+    # Bind publication to the reviewed introduction of this immutable receipt,
+    # not to an arbitrary later branch tip.
+    target=git(root,'log','-1','--diff-filter=A','--format=%H','origin/main','--',rel)
+    ensure(target,'Deployment receipt has no committed introduction')
+    ensure(digest(subprocess.check_output(['git','show',f'{target}:{rel}'],cwd=root))==digest(record_bytes),'Immutable deployment receipt changed after publication')
+    for path,sha in [(record['payloadManifest'],record['payloadManifestSHA256']),(record['approvalEvidence'],record['approvalEvidenceSHA256'])]+([(record['operatorWaiver'],record['operatorWaiverSHA256'])] if record.get('operatorWaiver') else []):
+        ensure(digest(subprocess.check_output(['git','show',f'{target}:{path}'],cwd=root))==sha,'Deployment provenance differs at the reviewed commit: '+path)
+    for name,sha in record['files'].items():
+        ensure(digest(subprocess.check_output(['git','show',f'{target}:{record["target"]}/{name}'],cwd=root))==sha,'Deployed runtime bytes differ at reviewed commit: '+name)
+    payload=root/record['payloadManifest'];manifest=deployment.validate_payload(root,payload)
+    ensure(filehash(payload)==record['payloadManifestSHA256'] and filehash(root/record['approvalEvidence'])==record['approvalEvidenceSHA256'],'Local deployment provenance differs from merged receipt')
+    ensure(deployment.machine_files(root/record['target'],args.domain)==record['files'],'Local deployed runtime differs from merged receipt')
+    deployment.verify_evidence(root,manifest,read(root/record['approvalEvidence']),read(root/record['operatorWaiver']) if record.get('operatorWaiver') else None,lambda r:verify_deployment_approval(root,r))
+    deployment.check_counts(root)
+    tag=f'deployment/{args.domain}/v{args.version}'
+    ensure(not cmd(['git','ls-remote','--tags','origin',f'refs/tags/{tag}'],root),'Deployment version tag already exists; never move it')
+    note=f'Runtime deployment {args.domain} {args.version}; {record["approvalContext"]}; productionApproval={record["productionApproval"]}; receipt={rel}; sha256={digest(record_bytes)}; factory=ACTIVE_FOR_FUTURE_EXTENSIONS'
+    git(root,'tag','-s' if args.sign_tag else '-a',tag,target,'-m',note)
+    git(root,'push','origin',f'refs/tags/{tag}')
+    print(f'https://github.com/{origin(root)}/tree/{tag}')
+
 def validate_bound_state(ledger,state):
     for key in ['runId','domain','version','candidateCommit','candidateMachines','ciEvidenceCommit','ciPR','evidenceArchiveSHA256','evidenceURL']:
         ensure(ledger.get(key)==state.get(key),'Local state disagrees with the Git-reviewed ledger: '+key)
@@ -413,7 +466,41 @@ def main():
     counts.add_argument('--repo',type=Path,default=MACHINES);counts.add_argument('--domain',required=True,type=slug)
     counts.add_argument('--version',required=True,type=version);counts.add_argument('--baseline-ref')
     counts.add_argument('--approval-context',required=True,choices=['TEST_ONLY','PRODUCTION_CANDIDATE']);counts.add_argument('--write',action='store_true')
+    for mode in ['package-deployment','deploy']:
+        p=sub.add_parser(mode,help='Freeze a factory runtime payload' if mode=='package-deployment' else 'Final verified runtime copy and immutable deployment version')
+        p.add_argument('--repo',type=Path,default=MACHINES);p.add_argument('--write',action='store_true')
+        if mode=='package-deployment':
+            p.add_argument('--domain',required=True,type=slug);p.add_argument('--version',required=True,type=version)
+            p.add_argument('--approval-context',required=True,choices=['TEST_ONLY','PRODUCTION']);p.add_argument('--source-dir',type=Path)
+        else:
+            p.add_argument('--payload-manifest',required=True,type=Path);p.add_argument('--approval-evidence',required=True,type=Path)
+            p.add_argument('--waiver-file',type=Path)
+    publish=sub.add_parser('publish-deployment',help='Tag a merged, verified deployment without changing machine contents')
+    publish.add_argument('--repo',type=Path,default=MACHINES);publish.add_argument('--domain',required=True,type=slug)
+    publish.add_argument('--version',required=True,type=version);publish.add_argument('--sign-tag',action='store_true')
+    check=sub.add_parser('check-deployment',help='Verify current deployment contents, version and retained factory payload')
+    check.add_argument('--repo',type=Path,default=MACHINES);check.add_argument('--domain',required=True,type=slug);check.add_argument('--version',required=True,type=version)
     args=parser.parse_args()
+    if args.action=='check-deployment':
+        import deployment
+        record=deployment.check_deployment(args.repo.resolve(),args.domain,args.version)
+        print(json.dumps({'state':'VERIFIED','domain':args.domain,'deploymentVersion':args.version,'machineCount':record['machineCount'],'approvalContext':record['approvalContext']},indent=2));return
+    if args.action=='publish-deployment':publish_deployment(args);return
+    if args.action in ['package-deployment','deploy']:
+        import deployment
+        root=args.repo.resolve()
+        gitdir=Path(git(root,'rev-parse','--absolute-git-dir'))
+        with (gitdir/'domain-approval.lock').open('w') as lock:
+            fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+            if args.action=='package-deployment':
+                path,result=deployment.package(root,args.domain,args.version,args.approval_context,
+                    args.source_dir.resolve() if args.source_dir else root/'machines/domains'/args.domain,args.write)
+                print(json.dumps({'payloadManifest':str(path),'machineCount':len(result['files']),'deploymentVersion':result['deploymentVersion'],'approvalContext':result['approvalContext'],'written':args.write},indent=2))
+            else:
+                result=deployment.deploy(root,args.payload_manifest.resolve(),args.approval_evidence.resolve(),
+                    args.waiver_file.resolve() if args.waiver_file else None,args.write,lambda r:verify_deployment_approval(root,r))
+                print(json.dumps({k:result[k] for k in ['state','domain','deploymentVersion','machineCount','approvalContext','productionApproval','target','factoryLifecycle']},indent=2))
+        return
     if args.action=='reconcile-counts':
         argv=['python3',MACHINES/'scripts/corpus_contract.py','--repo',args.repo,'prepare','--domain',args.domain,'--version',args.version,'--approval-context',args.approval_context]
         if args.baseline_ref:argv+=['--baseline-ref',args.baseline_ref]

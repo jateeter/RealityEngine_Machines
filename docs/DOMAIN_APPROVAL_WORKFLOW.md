@@ -1,6 +1,6 @@
 # Approve a versioned domain for corpus admission
 
-The executable entry point is `scripts/approve-domain.sh` (Homebrew Bash 5). It implements the existing admission contract in `RealityEngine_CI/MACHINE_CONCEPT.md` §9 and the engineering contract in `RealityEngine_CI/docs/ENGINEERING_CONTRACT.md`. It does not import candidate assets, invent domain semantics, approve itself, merge PRs, or deploy a production universe.
+The executable entry point is `scripts/approve-domain.sh` (Homebrew Bash 5). It implements the existing admission contract in `RealityEngine_CI/MACHINE_CONCEPT.md` §9 and the engineering contract in `RealityEngine_CI/docs/ENGINEERING_CONTRACT.md`. Its final deployment commands copy only a verified runtime payload and retain the factory assets. It does not invent domain semantics, approve itself, merge PRs, or bypass production admission.
 
 A version identifies a reviewed machine-file inventory and its exact hashes. It is recorded by an immutable-by-policy `domain/<domain>/v<version>` approval tag, not by adding unsupported version fields to runtime machine schemas. Revisions require a new version and run. Native mappings, temporal patterns, arbitration and permission semantics are authored/reviewed inputs, not inferred from a passing test.
 
@@ -185,3 +185,72 @@ Each domain version follows this sequence:
 IFRS yields 1,552 machines, 13 domains and 1,547 expected agent specs. Native
 bindings remain 1,058 and projections 1,184. This transition is TEST_ONLY; the
 53 production findings remain open and IFRS admission status remains unchanged.
+
+## Final runtime copy, deployment version and active factory
+
+The final deployment step copies **only the verified runtime machine JSON** into
+`machines/domains/<domain>/`. Tools, RAG guidance, templates, runbooks, agent
+candidates, acceptance evidence and other extension assets stay active under
+the existing `machine_factory/domains/<domain>/` path. Nothing is moved out of
+the factory, and deployment metadata is never placed in the runtime machine
+directory where loaders would count it as another machine.
+
+The source payload is frozen at
+`machine_factory/domains/<domain>/deployments/<deployment-version>/machines/`.
+Its `payload-manifest.json` records exact file hashes and the separate machine
+document version. Deployment versions do not rewrite IDs, sequences, vectors,
+descriptions or native runtime schemas. The first IFRS package snapshots the
+already-tested canonical machines; later extension packages can use
+`--source-dir` to select a reviewed runtime-candidate directory in this repo.
+
+After acceptance, perform the final copy with the Bash entrypoint. For the
+current explicitly authorized TEST_ONLY run:
+
+```bash
+./scripts/approve-domain.sh package-deployment \
+  --domain ifrs-accounting --version 1.4.0-test.1 \
+  --approval-context TEST_ONLY --write
+
+# Keep the sanitized approval/component receipt in the factory package so its
+# hash and provenance remain available in Git. Do not copy licensed passages.
+# Deploy is a dry run unless --write is supplied.
+./scripts/approve-domain.sh deploy \
+  --payload-manifest machine_factory/domains/ifrs-accounting/deployments/1.4.0-test.1/payload-manifest.json \
+  --approval-evidence machine_factory/domains/ifrs-accounting/deployments/1.4.0-test.1/approval-evidence.json \
+  --waiver-file machine_factory/domains/ifrs-accounting/acceptance/test-workflow/operator-waiver.json \
+  --write
+```
+
+The copy verifies the factory hashes, acceptance evidence, corpus transition and
+resulting runtime hashes. A failed post-copy gate restores the previous runtime
+files and current pointer. Unknown target files are refused rather than silently
+deleted. Repeating an unchanged deployment is idempotent; a changed payload or
+rollback needs a new deployment version. The factory remains
+`ACTIVE_FOR_FUTURE_EXTENSIONS`.
+
+Commit and review the frozen package and
+`domains/deployments/<domain>/<version>.json` receipt plus `current.json` pointer.
+After that PR is merged, publish the immutable deployment version:
+
+```bash
+./scripts/approve-domain.sh publish-deployment \
+  --domain ifrs-accounting --version 1.4.0-test.1
+```
+
+This tags the reviewed receipt's introduction commit as
+`deployment/ifrs-accounting/v1.4.0-test.1`, verifies the merged runtime bytes and
+evidence, and never moves an existing tag. `--sign-tag` requests a signed tag.
+The Git commit, receipt hashes, source payload and annotated tag form the
+deployment ledger. The existing `domain/<domain>/v<version>` approval tag is a
+separate record of domain acceptance.
+
+Use `./scripts/approve-domain.sh check-deployment --domain ifrs-accounting
+--version 1.4.0-test.1` to reverify the current runtime, immutable factory
+payload, evidence hashes and deployment pointer without changing files.
+
+For PRODUCTION, finalize normal independent domain approval first, package with
+`--approval-context PRODUCTION`, and supply its `approval.json` as the committed
+approval evidence. Deployment rechecks the live GitHub review/merge, published
+domain-approval tag, full machine inventory and exact bytes at that approved
+revision. TEST_ONLY evidence cannot authorize production deployment or replace
+an already accepted production domain.
