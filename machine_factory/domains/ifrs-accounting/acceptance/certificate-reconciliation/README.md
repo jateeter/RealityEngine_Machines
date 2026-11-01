@@ -33,3 +33,7 @@ No canonical finding can be closed from this response. See `reconciliation-respo
 `IFRS PR 232 Gate.pdf` (main commit `ad3ccf13`) correctly moves the liquidation/escrow features out of the active baseline and acknowledges native execution is pending. Those clarifications are recorded. The response still describes 128 machines and a different branch/path, supplies no full SHA-256 among its ten listed strings, invents 32 IDs and omits all 32 canonical DEEP IDs, and reassigns the meanings of the overlapping STD IDs. Binary-only assertions and native monetary floats would also change the preserved contract and are not applied.
 
 See `third-response-review.json`. To eliminate ambiguity, `actual-candidate-review-facts.json` now supplies all 225 machine hashes, actual schema/manifest hashes, all 53 canonical contexts and all 68 exact document revisions/content hashes. These are reviewer inputs, not generated acceptance decisions. The existing addendum template remains the decision form.
+
+## Fourth response completeness
+
+`IFRS Accounting PR #232.pdf` corrects the machine count and retains scope deferrals. Completeness review finds zero matching artifact hashes among 15 entries (14 syntactically valid SHA-256 strings and one 63-character value), 13 absent paths, 32 unknown/32 omitted finding IDs, no complete 68-document decision inventory and remaining native/capability contradictions. See `FOURTH_RESPONSE_REVIEW.md` and `fourth-response-review.json`. No closures or native actions applied.
