@@ -116,7 +116,9 @@ class Run:
         ensure(p.returncode==0,f'{label} failed ({p.returncode}); inspect {log}. No approval recorded.')
     def python(self,label,script,*args,repo=MACHINES):self.execute(label,['python3',repo/'scripts'/script,*args],repo)
 
-def validate_scope_receipt(receipt,domain,scope,members):
+def validate_scope_receipt(receipt,domain,scope,members,*,allow_workflow_fixture=False):
+    if receipt.get("evidenceClass")=="WORKFLOW_FIXTURE":
+        ensure(allow_workflow_fixture and receipt.get("productionApproval") is False,"Workflow-fixture receipts are not production native evidence")
     ensure(receipt.get('domain')==domain and receipt.get('scope')==scope,'Scope evidence bound to a different request')
     ensure(receipt.get('result')=='PASS','Integration/parity runner did not pass')
     ensure(receipt.get('testedMachines')==members,'Runner must fingerprint every requested machine, not just attest a domain name')
@@ -239,7 +241,12 @@ def prepare(args):
         state.update(state='FAILED_NOT_APPROVED',failedAt=now(),error=str(exc),events=run.events)
         write(folder/'state.json',state);raise
 
+def require_production_context(record):
+    ensure(record.get("approvalContext")!="TEST_ONLY" and record.get("evidenceClass")!="WORKFLOW_FIXTURE",
+           "Test-only rehearsal evidence cannot be submitted or finalized as production approval")
+
 def verify_prepared(state,folder):
+    require_production_context(state)
     ensure(state['state']=='PREPARED_PENDING_GITHUB_REVIEW','No successful prepared state')
     for key,root in [('machinesSnapshot',state['machinesRepo']),('ciSnapshot',state['ciRepo'])]:
         ensure(snapshot(Path(root))==state[key],'Tracked candidate changed since preparation: '+root)
@@ -332,6 +339,7 @@ def validate_bound_state(ledger,state):
 
 def finalize(args):
     folder=args.evidence.resolve();state=read(folder/'state.json')
+    require_production_context(state)
     ensure(state['state']=='SUBMITTED_PENDING_GITHUB_REVIEW','Finalize requires submitted evidence')
     repo=Path(state['machinesRepo']);ci=Path(state['ciRepo'])
     machines=merged_pr(repo,state['machinesPR'],state['machinesPRHead'])
@@ -384,7 +392,15 @@ def main():
         p=sub.add_parser(mode);p.add_argument('--evidence',required=True,type=Path)
         if mode=='finalize':p.add_argument('--sign-tag',action='store_true')
         else:p.add_argument('--evidence-reviewed',action='store_true')
+    test=sub.add_parser("test-run",help="TEST ONLY: disposable prepare/submit/finalize rehearsal, no production admission")
+    test.add_argument("--repo",type=Path,default=MACHINES);test.add_argument("--domain",required=True,type=slug)
+    test.add_argument("--fail-stage",choices=["ifrs-accounting-readiness","domain-reasoning"])
+    test.add_argument("--waiver-file",type=Path,required=True);test.add_argument("--evidence",type=Path,required=True)
     args=parser.parse_args()
+    if args.action=="test-run":
+        from rehearsal import run
+        args.waiver=args.waiver_file
+        run(args);return
     if args.action=='plan':print(json.dumps(plan(args.repo.resolve(),args.ci.resolve(),args.domain,args.version),indent=2))
     else:
         state=read(args.evidence.resolve()/'state.json') if args.action!='prepare' else None
