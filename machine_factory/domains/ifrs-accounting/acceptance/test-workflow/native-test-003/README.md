@@ -9,3 +9,5 @@ Authenticated sidecar handoffs created 1,459 uniquely tracked owner-scoped docum
 The connected test passed 320 explicitly synthetic accounting cases, 38 source-section retrievals, 11 typed reporting draft cases and stale propagation. Nine native integrity tests, four authenticated negative handoffs and 348 document service/worker tests passed. Exact evidence hashes, source pins and remaining work are in assessment-ledger.json. Private runtime credentials, raw model output and licensed passages remain outside Git.
 
 The original 53 production findings and 147 captured steward contributions remain open. Paragraph attribution remains unverified. Remaining work includes canonical assessment dispositions, affected CES scopes and strict semantic guardrails, isolated Manager loading, and final test-only admission evidence.
+
+Hosted merge status: CI PR #690 remains blocked by published corpus-exit-v2.0 counts versus current main (1,327/12/1,322 expected; 1,552/13/1,547 measured). The legacy-key census false positive is corrected with regression coverage. No gate is bypassed. The reviewed reconciliation plan is in the CI PR.
