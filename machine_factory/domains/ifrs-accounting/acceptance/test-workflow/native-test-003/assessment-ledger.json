@@ -120,6 +120,12 @@
     },
     "legacyKeyCensusRegression": {
       "passed": 9
+    },
+    "corpusTransitionGuards": {
+      "passed": 10
+    },
+    "dependentCorpusGates": {
+      "passed": 9
     }
   },
   "assessment": {
@@ -159,7 +165,11 @@
     "native-ifrs-test-003/native-integrity-tests.log": "092f3ef0c082b5e2a61888b77b1f68ffbd0afb7284e19601ea6250cb7141c478",
     "native-ifrs-test-003/build-provenance.log": "bf5708301c3e8046e887840e35e3c8fde7de5142a0241a073f8bc247434cab5e",
     "RealityEngine_CI/scripts/capture-ifrs-native-observations.py": "49c62ec877ae58cdb9dfccc01766fc044d67902664c1a068024b2fd7d7ecd03e",
-    "RealityEngine_CI/scripts/verify-ifrs-workflows.py": "91f57c7025f07ff78b4af38bdd8b13813b5c6fe1e8d5a2f08d4919e937cd82ac"
+    "RealityEngine_CI/scripts/verify-ifrs-workflows.py": "91f57c7025f07ff78b4af38bdd8b13813b5c6fe1e8d5a2f08d4919e937cd82ac",
+    "RealityEngine_Machines/domains/corpus-contract.json": "1f7c3c7a302172e2deb38a4a66a51c261227f0b30d0f1a99e5dff4e29cfb1018",
+    "RealityEngine_Machines/scripts/corpus_contract.py": "60d2147715d546eef089b6e031e6a423bdb312980afd74eee800532e764c2cbf",
+    "RealityEngine_Machines/docs/DOMAIN_APPROVAL_WORKFLOW.md": "72483d22b4c84a0cdf09499c23cbc7059b9022a40640611f7f9a8a70470f9ac8",
+    "localOpenClawStack/machine-behaviors/agents/INDEX.json": "4f3a1308042e641d7467e25133e0965bf63211090d56f6d2026477d620e902d2"
   },
   "integrationCommit": "be12ee5857f6ca91a2158ecc5c3097e264f635d7",
   "hostedReview": {
@@ -168,7 +178,7 @@
     "firstRun": 41347964828,
     "legacyKeyCensus": "False positive on rejection-only factory schema corrected; 9 regression checks and full nine-repository census pass locally",
     "censusFixCommit": "0ec176d",
-    "remainingMergeBlocker": "Published corpus-exit-v2.0 counts differ from current main including experimental IFRS extension",
+    "remainingMergeBlocker": "Companion transition and count-gate changes awaiting hosted verification; expected count growth is now reconciled locally",
     "countReconciliation": {
       "machines": {
         "expected": 1327,
@@ -185,5 +195,31 @@
     },
     "gateBypass": false,
     "contractPlan": "RealityEngine_CI/docs/IFRS_CORPUS_CONTRACT_RECONCILIATION.md"
+  },
+  "countReconciliation": {
+    "policy": "Expected corpus growth is reconciled inside domain approval: immutable baseline plus declared delta equals complete resulting inventory; unexplained drift fails.",
+    "approvalContext": "TEST_ONLY",
+    "productionApproval": false,
+    "transitionSHA256": "af3e311118df41ec6034476f1c998ed825d3e38e98faf68595056fe556f06b7a",
+    "baselineCommit": "1baddcbaa1a52c6abca884ac4cdbf26dfe85f90a",
+    "baselineMachinesUnchanged": 1327,
+    "countDelta": {
+      "agentBindings": 0,
+      "agents": 225,
+      "domains": 1,
+      "machines": 225,
+      "projections": 0
+    },
+    "counts": {
+      "agentBindings": 1058,
+      "agents": 1547,
+      "domains": 13,
+      "machines": 1552,
+      "projections": 1184
+    },
+    "dependentProvenance": "CURRENT_CORPUS_DIGEST_VERIFIED; NO_REGENERATION_NEEDED",
+    "currentDigest": "sha256:37d4a6aea71a2f64579ef11e479dab0d83effd6ce096ecabec87f31946bd6398",
+    "localCountGate": "PASS_WITH_REQUIRE_CURRENT_DIGEST",
+    "command": "/opt/homebrew/bin/bash scripts/approve-domain.sh reconcile-counts --domain ifrs-accounting --version 1.4.0 --approval-context TEST_ONLY --write"
   }
 }
