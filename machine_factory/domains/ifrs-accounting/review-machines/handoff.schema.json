@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:realityengine:design:review-machine-handoff:0.1.0",
+  "title": "Proposed asset Review Machine dispatch binding",
+  "$comment": "Design only. Not an accepted native machine or PE trigger-envelope schema. Authorization and referenced-resource integrity require trusted service checks.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "evidenceClass", "approvalContext", "bindingId", "case", "asset", "workflowClass", "execution", "action", "causation", "contextGrantRef"],
+  "properties": {
+    "schemaVersion": {"const": "0.1.0"},
+    "evidenceClass": {"enum": ["SYNTHETIC", "ACTUAL"]},
+    "approvalContext": {"enum": ["TEST_ONLY", "PRODUCTION"]},
+    "bindingId": {"$ref": "#/$defs/nonempty"},
+    "case": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "cycleId", "expectedVersion", "scopeRef"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonempty"},
+        "cycleId": {"$ref": "#/$defs/nonempty"},
+        "expectedVersion": {"type": "integer", "minimum": 1},
+        "scopeRef": {"type": "string", "format": "uri"}
+      }
+    },
+    "asset": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "podReference", "revision", "contentHash", "archiveVersionRef", "dependencySnapshotHash"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonempty"},
+        "podReference": {"type": "string", "format": "uri"},
+        "revision": {"type": "integer", "minimum": 1},
+        "contentHash": {"$ref": "#/$defs/hash"},
+        "archiveVersionRef": {"type": "string", "format": "uri"},
+        "dependencySnapshotHash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "workflowClass": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "version", "templateHash", "compilerVersion", "policyHash"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonempty"},
+        "version": {"$ref": "#/$defs/nonempty"},
+        "templateHash": {"$ref": "#/$defs/hash"},
+        "compilerVersion": {"$ref": "#/$defs/nonempty"},
+        "policyHash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "execution": {
+      "type": "object", "additionalProperties": false,
+      "required": ["machineInstanceId", "engineInstanceId", "generation", "deploymentManifestHash"],
+      "properties": {
+        "machineInstanceId": {"$ref": "#/$defs/nonempty"},
+        "engineInstanceId": {"$ref": "#/$defs/nonempty"},
+        "generation": {"type": "integer", "minimum": 1},
+        "deploymentManifestHash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "action": {
+      "type": "object", "additionalProperties": false,
+      "required": ["logicalId", "attemptId", "stage", "requestHash", "completionSourceMappingId", "predecessorReceiptRef"],
+      "properties": {
+        "logicalId": {"$ref": "#/$defs/nonempty"},
+        "attemptId": {"$ref": "#/$defs/nonempty"},
+        "stage": {"enum": ["INTAKE", "STRUCTURE", "PREPARE", "VERIFY", "FINDINGS", "DECISION", "PUBLISH", "CHANGE"]},
+        "requestHash": {"$ref": "#/$defs/hash"},
+        "completionSourceMappingId": {"$ref": "#/$defs/nonempty"},
+        "predecessorReceiptRef": {"type": "string", "format": "uri"}
+      }
+    },
+    "causation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["stepBindingReceiptRef", "inputSnapshotHash", "outputReceiptRef", "sequenceId", "dispatchId", "envelopeId"],
+      "properties": {
+        "stepBindingReceiptRef": {"type": "string", "format": "uri"},
+        "inputSnapshotHash": {"$ref": "#/$defs/hash"},
+        "outputReceiptRef": {"type": "string", "format": "uri"},
+        "sequenceId": {"$ref": "#/$defs/nonempty"},
+        "dispatchId": {"$ref": "#/$defs/nonempty"},
+        "envelopeId": {"$ref": "#/$defs/nonempty"}
+      }
+    },
+    "contextGrantRef": {"type": "string", "format": "uri"}
+  },
+  "$defs": {
+    "nonempty": {"type": "string", "minLength": 1},
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}
