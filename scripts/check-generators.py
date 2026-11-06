@@ -84,10 +84,9 @@ EXCLUDED = {
     # A gate, not a generator: --check reads the corpus and writes nothing, so
     # there is no artifact to keep current (RealityEngine_Machines#165).
     "check-one-ces-one-pattern.py",
-    # A gate and a shared library: --check reads the corpus and writes nothing.
-    # The clone pools it defines reach domains/region-allocation.json through
-    # build-region-allocation.py, which is the generator held to "is it
-    # current" (localAssetStorageStack#8).
+    # A gate and an author's report, not a generator: --check verifies
+    # domains/clone-space.json against its reserved range and writes nothing.
+    # Engines decide cloneability at load time (localAssetStorageStack#8).
     "cloneable_machines.py",
 }
 
