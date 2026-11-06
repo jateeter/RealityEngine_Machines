@@ -1,18 +1,38 @@
 {
   "schemaVersion": "1.0.0",
-  "purpose": "The clone space for cloneable machines (localAssetStorageStack#8). Engines recognise cloneable machines when they load the corpus, by the rule in RealityEngine_CI SURFACE_SPEC.md (RealityEngine_CI#713); nothing is written into machine files. An engine clones one of them once per dispatch envelope, into one block of this band, at the machine's initial state, and recycles the clone when its agentic action completes. scripts/cloneable_machines.py checks this file against the reserved range and reports which machines qualify.",
+  "purpose": "The clone space for cloneable machines (localAssetStorageStack#8). Engines recognise cloneable machines when they load the corpus, by the rule in RealityEngine_CI SURFACE_SPEC.md (RealityEngine_CI#713); nothing is written into machine files. An engine clones one of them once per dispatch envelope, into one 64-cell block of this band, at the machine's initial state, and recycles the clone when its agentic action completes. scripts/cloneable_machines.py checks this file against the reserved range and reports which machines qualify.",
   "block": {
-    "cells": 32,
-    "isreCells": 16,
-    "osreCells": 16,
-    "note": "Each clone owns one block: its ISRE half holds its input and its OSRE half its output, so no two clones share a cell (the contended-cell rule)."
+    "cells": 64,
+    "layout": [
+      {
+        "role": "input",
+        "offset": 0,
+        "length": 16
+      },
+      {
+        "role": "output",
+        "offset": 16,
+        "length": 16
+      },
+      {
+        "role": "fanout",
+        "offset": 32,
+        "length": 16
+      },
+      {
+        "role": "bus",
+        "offset": 48,
+        "length": 16
+      }
+    ],
+    "note": "The nest layout (owner, 2026-11-06): four uniform 16-cell quarters, the same in every block, so blocks are interchangeable. The clone's own input region starts the input quarter and its output region the output quarter; the cells its fanout folds into start the fanout quarter, in the template's edge order; its bus cells start the bus quarter. Offsets are relative to the block. Allocated when the clone is made and held unchanged until it is recycled."
   },
   "busCells": 4,
-  "slotRule": "A machine fits a block when its input length <= isreCells, its output length <= osreCells, and n = (cells its fanout folds into, over its published-domain-bus-producer edges) + busCells <= isreCells. Document-workflow handoffs carry the assetID and fold no cells. A machine may opt out with metadata.cloneable: false.",
+  "slotRule": "A machine fits a block when its input length <= the input quarter, its output length <= the output quarter, and the cells its fanout folds into (targetInputElements summed over its published-domain-bus-producer edges) <= the fanout quarter. Document-workflow handoffs carry the assetID and fold no cells. Its busCells always fit the bus quarter. n = folded fanout cells + busCells, as reported. A machine may opt out with metadata.cloneable: false.",
   "band": {
     "reservedRangeId": "engine-clone-space",
     "offset": 20480,
-    "length": 32768,
+    "length": 65536,
     "note": "1024 blocks per engine instance, above the corpus footprint. Blocks are allocated by the engine, lowest free first, so engines with identical corpora place identical clones identically."
   },
   "activeClones": {
