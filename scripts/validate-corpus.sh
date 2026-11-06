@@ -25,6 +25,7 @@ python3 "$SCRIPT_DIR/inventory-semantic-buses.py" --check --summary-only
 python3 "$SCRIPT_DIR/build-corpus-index.py" --check
 python3 "$SCRIPT_DIR/build-ifrs-workflow.py" --check
 python3 "$SCRIPT_DIR/build-region-allocation.py" --check
+python3 "$SCRIPT_DIR/cloneable_machines.py" --check
 if [ -f "$REPO_ROOT/domains/corpus-contract.json" ]; then
   python3 "$SCRIPT_DIR/corpus_contract.py" check
 fi
