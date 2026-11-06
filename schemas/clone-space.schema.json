@@ -25,22 +25,45 @@
       "type": "object",
       "required": [
         "cells",
-        "isreCells",
-        "osreCells"
+        "layout"
       ],
       "additionalProperties": false,
       "properties": {
         "cells": {
           "type": "integer",
-          "minimum": 2
+          "minimum": 4
         },
-        "isreCells": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "osreCells": {
-          "type": "integer",
-          "minimum": 1
+        "layout": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "required": [
+              "role",
+              "offset",
+              "length"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "role": {
+                "enum": [
+                  "input",
+                  "output",
+                  "fanout",
+                  "bus"
+                ]
+              },
+              "offset": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "length": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
         },
         "note": {
           "type": "string"

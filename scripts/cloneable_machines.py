@@ -8,9 +8,11 @@ written into machine files. This script applies the same rule so a corpus
 author can see the outcome before a run. It is a report, not the authority:
 the voting engines' 3-of-3 agreement in regression is.
 
-The clone space is domains/clone-space.json: every clone gets one block of
-32 cells, 16 ISRE and 16 OSRE, in the engine clone band (a reserved range in
-domains/domain-registry.json). A machine is cloneable when all hold:
+The clone space is domains/clone-space.json: every clone gets one 64-cell
+block in the engine clone band (a reserved range in
+domains/domain-registry.json), laid out as four uniform 16-cell quarters
+(the nest layout): input, output, fanout, bus. A machine is cloneable when
+all hold:
 
 1. It dispatches an agentic action: it has an agentBinding, or it is the
    source of a document-workflow handoff (the handoff carries the assetID).
@@ -20,9 +22,10 @@ domains/domain-registry.json). A machine is cloneable when all hold:
    publish into).
 4. It is not life-safety and not a fixture.
 5. It does not opt out with metadata.cloneable: false.
-6. It fits the block: input length <= 16, output length <= 16, and n =
-   (cells its fanout folds into, over its producer edges) + 4 bus cells
-   <= 16. Handoffs carry the assetID and fold no cells.
+6. It fits the block: input length <= 16, output length <= 16, and the
+   cells its fanout folds into (over its producer edges) <= 16. Its 4 bus
+   cells always fit the bus quarter; n = folded + 4 is reported. Handoffs
+   carry the assetID and fold no cells.
 
 Usage:
   python3 scripts/cloneable_machines.py --check    # clone space vs reserved range
@@ -96,20 +99,38 @@ def assess(path: Path, machine: dict[str, Any], targets: set[str], space: dict[s
     lout = as_dict(mapping.get("output")).get("length")
     folded = sum(len(as_list(e.get("targetInputElements"))) for e in producers)
     n = folded + space["busCells"]
-    if not isinstance(lin, int) or lin > block["isreCells"]:
-        return False, f"input length {lin} exceeds {block['isreCells']} ISRE cells"
-    if not isinstance(lout, int) or lout > block["osreCells"]:
-        return False, f"output length {lout} exceeds {block['osreCells']} OSRE cells"
-    if n > block["isreCells"]:
-        return False, f"n = {folded} folded + {space['busCells']} bus = {n} exceeds {block['isreCells']}"
+    room = quarters(space)
+    if not isinstance(lin, int) or lin > room["input"]:
+        return False, f"input length {lin} exceeds the {room['input']}-cell input quarter"
+    if not isinstance(lout, int) or lout > room["output"]:
+        return False, f"output length {lout} exceeds the {room['output']}-cell output quarter"
+    if folded > room["fanout"]:
+        return False, f"fanout folds into {folded} cells, more than the {room['fanout']}-cell fanout quarter"
     return True, f"n = {folded} folded + {space['busCells']} bus = {n}"
+
+
+def quarters(space: dict[str, Any]) -> dict[str, int]:
+    """Role -> length of that part of the block (the nest layout)."""
+    return {part["role"]: part["length"] for part in space["block"]["layout"]}
 
 
 def space_problems(space: dict[str, Any], registry_path: Path = DOMAIN_REGISTRY) -> list[str]:
     problems = []
     block = space["block"]
-    if block["cells"] != block["isreCells"] + block["osreCells"]:
-        problems.append(f"clone-space block {block['cells']} != ISRE {block['isreCells']} + OSRE {block['osreCells']}")
+    layout = sorted(block["layout"], key=lambda part: part["offset"])
+    if sorted(part["role"] for part in layout) != ["bus", "fanout", "input", "output"]:
+        problems.append("clone-space layout must have exactly one input, output, fanout and bus part")
+    cursor = 0
+    for part in layout:
+        if part["offset"] != cursor:
+            problems.append(f"clone-space layout: {part['role']} starts at {part['offset']}, expected {cursor} (parts must tile the block)")
+        cursor = part["offset"] + part["length"]
+    if cursor != block["cells"]:
+        problems.append(f"clone-space layout covers {cursor} cells, block is {block['cells']}")
+    if len({part["length"] for part in layout}) != 1:
+        problems.append("clone-space layout must be uniform: every part the same length")
+    if space["busCells"] > quarters(space).get("bus", 0):
+        problems.append(f"busCells {space['busCells']} exceed the bus quarter")
     band = space["band"]
     if band["length"] % block["cells"]:
         problems.append(f"clone band length {band['length']} is not a whole number of {block['cells']}-cell blocks")

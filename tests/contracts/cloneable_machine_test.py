@@ -78,18 +78,35 @@ class EligibilityTests(unittest.TestCase):
         self.assertEqual(assess(machine(lin=16, lout=16)), (True, "n = 3 folded + 4 bus = 7"))
         self.assertFalse(assess(machine(lin=17))[0])
         self.assertFalse(assess(machine(lout=17))[0])
-        self.assertEqual(assess(machine(edges=[producer(12)])), (True, "n = 12 folded + 4 bus = 16"))
-        self.assertEqual(assess(machine(edges=[producer(10), producer(3)])),
-                         (False, "n = 13 folded + 4 bus = 17 exceeds 16"))
+        # Nest layout: fanout has its own quarter, so 16 folded cells fit.
+        self.assertEqual(assess(machine(edges=[producer(16)])), (True, "n = 16 folded + 4 bus = 20"))
+        self.assertEqual(assess(machine(edges=[producer(10), producer(7)])),
+                         (False, "fanout folds into 17 cells, more than the 16-cell fanout quarter"))
 
 
 class CloneSpaceTests(unittest.TestCase):
     def test_space_matches_its_reserved_range(self) -> None:
         self.assertEqual(cm.space_problems(SPACE), [])
 
-    def test_block_is_32_cells_16_and_16(self) -> None:
-        self.assertEqual((SPACE["block"]["cells"], SPACE["block"]["isreCells"], SPACE["block"]["osreCells"]), (32, 16, 16))
+    def test_block_is_64_cells_in_four_uniform_quarters(self) -> None:
+        self.assertEqual(SPACE["block"]["cells"], 64)
+        self.assertEqual([(p["role"], p["offset"], p["length"]) for p in SPACE["block"]["layout"]],
+                         [("input", 0, 16), ("output", 16, 16), ("fanout", 32, 16), ("bus", 48, 16)])
         self.assertEqual(SPACE["busCells"], 4)
+        self.assertEqual(SPACE["band"]["length"] // 64, 1024)
+
+    def test_layout_must_tile_uniformly(self) -> None:
+        gap = copy.deepcopy(SPACE)
+        gap["block"]["layout"][3]["offset"] = 50
+        self.assertTrue(any("expected 48" in p for p in cm.space_problems(gap)))
+        lopsided = copy.deepcopy(SPACE)
+        lopsided["block"]["layout"][2]["length"] = 8
+        lopsided["block"]["layout"][3]["offset"] = 40
+        lopsided["block"]["layout"][3]["length"] = 24
+        self.assertTrue(any("uniform" in p for p in cm.space_problems(lopsided)))
+        missing = copy.deepcopy(SPACE)
+        missing["block"]["layout"][3]["role"] = "fanout"
+        self.assertTrue(any("exactly one" in p for p in cm.space_problems(missing)))
 
     def test_band_drift_is_reported(self) -> None:
         moved = copy.deepcopy(SPACE)
