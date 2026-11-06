@@ -1,6 +1,6 @@
 # RealityEngine_Machines Guidance
 
-Last reviewed: 2026-11-04
+Last reviewed: 2026-11-06
 
 See `/Users/johnt/workspace/GitHub/CLAUDE.md` for the integrated application map. Update both this file and the root map when corpus ownership, schema contracts, or runtime test expectations change.
 
@@ -45,6 +45,7 @@ npm run test:e2e
 - Single-engine tests should use explicit `RE_BASE_URL` and `PE_BASE_URL`.
 - Machine ID, schema, trigger, and PE source expectations are cross-repo contracts.
 - `domains/region-allocation.json` is the generated universal-vector region allocation (reserved provider bands, cross-service PE source lanes, inter-domain bus lanes, frozen output-overlap baseline); regenerate with `npm run region-allocation:write` and let `tests/contracts/region_allocation_test.py` gate drift.
+- **Cloneable machines** (localAssetStorageStack#8). A machine with a `cloneable` block is a template an engine clones, one clone per agentic action, recycled after it (the routes: `RealityEngine_CI/SURFACE_SPEC.md`, RealityEngine_CI#713). It reserves `maxClones` input slots and `maxClones` output slots (`inputPool`, `outputPool`), each the size of its own region; clone k uses slot k. Its own region sits outside the pools and has no writer, so the template never fires. `scripts/cloneable_machines.py --check` (in `validate-corpus.sh`) enforces the pool sizes, that nothing else occupies a pool, and the no-writer rule; the pools are listed under `clonePools` in `domains/region-allocation.json`.
 - On-disk machine addressing is path-aware: every engine's `GET /api/machines/json/list` enumerates the corpus recursively and reports `relFile` (path relative to the machines root); `GET /api/machines/json/:name` accepts a basename and falls back to a recursive search, so corpus filenames must stay globally unique (`tests/integration/machine-json-listing.spec.ts` enforces both).
 - Name uniqueness is scope-relative, and the scopes are the contract
   (`tests/contracts/name_uniqueness_test.py`, #68): every **CES name is unique

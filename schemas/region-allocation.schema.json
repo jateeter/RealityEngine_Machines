@@ -12,7 +12,8 @@
     "domains",
     "interDomainBuses",
     "externalWritebackSummary",
-    "sharedOutputLanes"
+    "sharedOutputLanes",
+    "clonePools"
   ],
   "additionalProperties": false,
   "$defs": {
@@ -125,6 +126,24 @@
           "owners": { "type": "array", "minItems": 2, "items": { "type": "string" } },
           "domains": { "type": "array", "minItems": 1, "items": { "type": "string" } },
           "crossDomain": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "clonePools": {
+      "type": "array",
+      "description": "ISRE/OSRE slot pools reserved by cloneable machines (machine.cloneable). Nothing else may occupy a pool.",
+      "items": {
+        "type": "object",
+        "required": ["machine", "domain", "maxClones", "slotInputLength", "slotOutputLength", "inputPool", "outputPool"],
+        "properties": {
+          "machine": { "type": "string", "minLength": 1 },
+          "domain": { "type": "string", "minLength": 1 },
+          "maxClones": { "type": "integer", "minimum": 1 },
+          "slotInputLength": { "type": "integer", "minimum": 1 },
+          "slotOutputLength": { "type": "integer", "minimum": 1 },
+          "inputPool": { "$ref": "#/$defs/region" },
+          "outputPool": { "$ref": "#/$defs/region" }
         },
         "additionalProperties": false
       }

@@ -78,6 +78,9 @@
         "perceptualMapping": {
           "$ref": "#/$defs/perceptualMapping"
         },
+        "cloneable": {
+          "$ref": "#/$defs/cloneable"
+        },
         "sequences": {
           "type": "array",
           "minItems": 1,
@@ -803,6 +806,31 @@
           "const": false
         }
       }
+    },
+    "cloneable": {
+      "type": "object",
+      "description": "Marks the machine as a template that an engine can clone (RealityEngine_CI SURFACE_SPEC.md, clone and recycle routes; localAssetStorageStack#8). A clone starts in the machine's initial state, never the state of the machine it was cloned from, and serves one agentic action before it is recycled. Clone k (0 <= k < maxClones) reads input slot k and writes output slot k: input cells [inputPool.offset + k*Lin, inputPool.offset + (k+1)*Lin), and the output likewise, where Lin and Lout are the lengths of the machine's own perceptualMapping regions. So inputPool.length = maxClones*Lin and outputPool.length = maxClones*Lout. The machine's own regions sit outside its pools and no corpus machine writes its input, so the template itself never fires. scripts/check-cloneable-machines.py enforces all of this.",
+      "required": [
+        "maxClones",
+        "inputPool",
+        "outputPool"
+      ],
+      "properties": {
+        "maxClones": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "n, the most clones of this machine that may exist at once on one engine instance."
+        },
+        "inputPool": {
+          "$ref": "#/$defs/region",
+          "description": "The ISRE pool: maxClones input slots, each the length of perceptualMapping.input."
+        },
+        "outputPool": {
+          "$ref": "#/$defs/region",
+          "description": "The OSRE pool: maxClones output slots, each the length of perceptualMapping.output."
+        }
+      },
+      "additionalProperties": false
     }
   }
 }
