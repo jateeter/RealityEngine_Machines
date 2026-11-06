@@ -20,9 +20,6 @@ The registry is the allocation map of the universal input event vector:
   overlaps, frozen as the reviewed baseline. New overlaps fail
   tests/contracts/region_allocation_test.py until they are either re-mapped
   or deliberately regenerated into this registry.
-- clonePools: the ISRE/OSRE slot pools each cloneable machine reserves
-  (machine.cloneable). scripts/cloneable_machines.py owns the contract and
-  checks that nothing else occupies a pool.
 
 Usage:
   python3 scripts/build-region-allocation.py --write
@@ -37,9 +34,6 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-import cloneable_machines  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MACHINES = REPO_ROOT / "machines"
@@ -110,16 +104,12 @@ def load_corpus() -> list[dict[str, Any]]:
 
 def build_registry() -> dict[str, Any]:
     corpus = load_corpus()
-    clone_pools = cloneable_machines.registry_pools(cloneable_machines.load_corpus(MACHINES))
 
     max_cell = 0
     for m in corpus:
         for r in (m["input"], m["output"]):
             if r:
                 max_cell = max(max_cell, r[0] + r[1])
-    for pool in clone_pools:
-        for key in ("inputPool", "outputPool"):
-            max_cell = max(max_cell, pool[key]["offset"] + pool[key]["length"])
 
     # per-domain spans
     domains: dict[str, dict[str, Any]] = {}
@@ -225,7 +215,6 @@ def build_registry() -> dict[str, Any]:
         "interDomainBuses": inter_domain_buses,
         "externalWritebackSummary": writeback_summary,
         "sharedOutputLanes": shared_output_lanes,
-        "clonePools": clone_pools,
     }
 
 
@@ -242,8 +231,7 @@ def main() -> int:
         f"{len(registry['sharedOutputLanes'])} shared output lanes "
         f"({sum(1 for g in registry['sharedOutputLanes'] if g['crossDomain'])} cross-domain), "
         f"{len(registry['interDomainBuses'])} buses, "
-        f"{registry['externalWritebackSummary']['count']} external write-backs, "
-        f"{len(registry['clonePools'])} clone pools"
+        f"{registry['externalWritebackSummary']['count']} external write-backs"
     )
 
     if args.write:

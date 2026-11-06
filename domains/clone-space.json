@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0.0",
+  "purpose": "The clone space for cloneable machines (localAssetStorageStack#8). An engine clones a machine tagged `cloneable` once per dispatch envelope, into one block of this clone band, at the machine's initial state, and recycles the clone when its agentic action completes. Routes: RealityEngine_CI SURFACE_SPEC.md (RealityEngine_CI#713). scripts/cloneable_machines.py applies the tag and checks this file against the reserved range.",
+  "tag": "cloneable",
+  "block": {
+    "cells": 32,
+    "isreCells": 16,
+    "osreCells": 16,
+    "note": "Each clone owns one block: its ISRE half holds its input and its OSRE half its output, so no two clones share a cell (the contended-cell rule)."
+  },
+  "busCells": 4,
+  "slotRule": "A machine fits a block when its input length <= isreCells, its output length <= osreCells, and n = (cells its fanout folds into, over its published-domain-bus-producer edges) + busCells <= isreCells. Document-workflow handoffs carry the assetID and fold no cells.",
+  "band": {
+    "reservedRangeId": "engine-clone-space",
+    "offset": 20480,
+    "length": 32768,
+    "note": "1024 blocks per engine instance, above the corpus footprint. Blocks are allocated by the engine, lowest free first, so engines with identical corpora place identical clones identically."
+  },
+  "activeClones": {
+    "defaultMaxPerTemplate": 8,
+    "control": "clone.maxActive",
+    "dynamic": true,
+    "note": "The upper bound on active clones of one template on one engine instance. It is configurable and managed at run time through /api/engine/config; the band bounds the total."
+  }
+}

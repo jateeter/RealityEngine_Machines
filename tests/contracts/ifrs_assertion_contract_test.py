@@ -20,6 +20,10 @@ class IFRSAssertionTests(unittest.TestCase):
      self.assertEqual(amendment['reviewStatus'],'INDEPENDENT_ACCOUNTING_REVIEW_REQUIRED')
      document['machine']['description']=amendment['before']
    meta=document['machine']['metadata'];meta.pop('interconnections',None);meta.pop('documentStewardship',None);meta['conversion'].pop('isolationDecision',None)
+   # The cloneable tag (localAssetStorageStack#8, scripts/cloneable_machines.py) is routing
+   # metadata for instantiation, not accounting semantics; it is generated after admission.
+   tagging=meta.get('tagging',{})
+   if tagging.get('capabilityTags')==['cloneable']:tagging.pop('capabilityTags')
    self.assertEqual(hashlib.sha256(json.dumps(document,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest(),item['semanticsSHA256'])
  def test_declared_fold_inventory_is_exact_and_nonfabricating(self):
   declarations=json.loads((ROOT/'domains/ifrs-fold-declarations.json').read_text())['machines']

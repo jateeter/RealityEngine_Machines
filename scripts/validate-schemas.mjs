@@ -7,6 +7,7 @@
  *   - domains/domain-manifest.json  -> domain-manifest.schema.json
  *   - domains/domain-registry.json  -> domain-registry.schema.json
  *   - domains/semantic-bus-registry.json -> semantic-bus-registry.schema.json
+ *   - domains/clone-space.json      -> clone-space.schema.json
  *   - domains/lane-contracts.json   -> lane-contract.schema.json
  *   - triggers/*.example.json       -> ai-trigger-envelope.schema.json
  *   - triggers/*scenario*.json      -> trigger-scenario.schema.json
@@ -80,6 +81,7 @@ validateSet("domain-manifest", [join(REPO, "domains/domain-manifest.json")], "do
 validateSet("domain-registry", [join(REPO, "domains/domain-registry.json")], "domain-registry.schema.json");
 validateSet("semantic-bus-registry", [join(REPO, "domains/semantic-bus-registry.json")], "semantic-bus-registry.schema.json");
 validateSet("region-allocation", [join(REPO, "domains/region-allocation.json")], "region-allocation.schema.json");
+validateSet("clone-space", [join(REPO, "domains/clone-space.json")], "clone-space.schema.json");
 validateSet("arbitration-registry", [join(REPO, "domains/arbitration-registry.json")], "arbitration-registry.schema.json");
 validateSet("lane-contracts", [join(REPO, "domains/lane-contracts.json")], "lane-contract.schema.json");
 

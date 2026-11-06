@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.example.org/schemas/clone-space.schema.json",
+  "title": "RealityEngine clone space for cloneable machines",
+  "type": "object",
+  "required": ["schemaVersion", "purpose", "tag", "block", "busCells", "slotRule", "band", "activeClones"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "purpose": { "type": "string", "minLength": 1 },
+    "tag": { "const": "cloneable" },
+    "block": {
+      "type": "object",
+      "required": ["cells", "isreCells", "osreCells"],
+      "additionalProperties": false,
+      "properties": {
+        "cells": { "type": "integer", "minimum": 2 },
+        "isreCells": { "type": "integer", "minimum": 1 },
+        "osreCells": { "type": "integer", "minimum": 1 },
+        "note": { "type": "string" }
+      }
+    },
+    "busCells": { "type": "integer", "minimum": 0 },
+    "slotRule": { "type": "string", "minLength": 1 },
+    "band": {
+      "type": "object",
+      "required": ["reservedRangeId", "offset", "length"],
+      "additionalProperties": false,
+      "properties": {
+        "reservedRangeId": { "type": "string", "minLength": 1 },
+        "offset": { "type": "integer", "minimum": 0 },
+        "length": { "type": "integer", "minimum": 1 },
+        "note": { "type": "string" }
+      }
+    },
+    "activeClones": {
+      "type": "object",
+      "required": ["defaultMaxPerTemplate", "control", "dynamic"],
+      "additionalProperties": false,
+      "properties": {
+        "defaultMaxPerTemplate": { "type": "integer", "minimum": 1 },
+        "control": { "type": "string", "minLength": 1 },
+        "dynamic": { "type": "boolean" },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}
