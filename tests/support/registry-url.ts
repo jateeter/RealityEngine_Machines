@@ -10,7 +10,8 @@ import path from 'node:path';
  *      address the running universe serves there; stopUniverse.sh removes it.
  *      The CI checkout is REALITY_ENGINE_CI_DIR, else the sibling directory
  *      (Playwright runs from this repo's root, as playwright.config.ts assumes).
- *   3. http://127.0.0.1:${RE_REGISTRY_PORT:-5999}/re-registry.json.
+ *   3. 127.0.0.1:${RE_REGISTRY_PORT:-5999}/re-registry.json, over https when
+ *      the lane is on (RE_TLS=on, RealityEngine_CI#668) and http otherwise.
  *
  * 5999 is the shim's port only with fixed ports; under --free-ports it is
  * OS-assigned, and a literal :5999 fallback looked where nothing listened.
@@ -27,5 +28,6 @@ export function registryUrl(): string {
   } catch {
     // No universe has recorded an address: fall through to the default.
   }
-  return `http://127.0.0.1:${process.env.RE_REGISTRY_PORT ?? '5999'}/re-registry.json`;
+  const scheme = (process.env.RE_TLS ?? 'off') === 'on' ? 'https' : 'http';
+  return `${scheme}://127.0.0.1:${process.env.RE_REGISTRY_PORT ?? '5999'}/re-registry.json`;
 }

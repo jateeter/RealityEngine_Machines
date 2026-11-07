@@ -5,7 +5,8 @@ scripts/lib/registry-url.sh:
   2. RealityEngine_CI/.universe-registry-url — startUniverse.sh writes the
      address the running universe serves there; stopUniverse.sh removes it.
      The CI checkout is REALITY_ENGINE_CI_DIR, else the sibling directory.
-  3. http://127.0.0.1:${RE_REGISTRY_PORT:-5999}/re-registry.json.
+  3. 127.0.0.1:${RE_REGISTRY_PORT:-5999}/re-registry.json, over https when the
+     lane is on (RE_TLS=on, RealityEngine_CI#668) and http otherwise.
 
 5999 is the shim's port only with fixed ports; under --free-ports it is
 OS-assigned, and a literal :5999 fallback looked where nothing listened.
@@ -27,4 +28,5 @@ def registry_url() -> str:
         first = ""
     if first:
         return first
-    return f"http://127.0.0.1:{os.environ.get('RE_REGISTRY_PORT', '5999')}/re-registry.json"
+    scheme = "https" if os.environ.get("RE_TLS", "off") == "on" else "http"
+    return f"{scheme}://127.0.0.1:{os.environ.get('RE_REGISTRY_PORT', '5999')}/re-registry.json"

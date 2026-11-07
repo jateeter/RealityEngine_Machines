@@ -3,7 +3,19 @@
 from __future__ import annotations
 import argparse, datetime as dt, fcntl, gzip, hashlib, json, os, re, shutil, subprocess, sys, tarfile, uuid
 from pathlib import Path
-from urllib.request import urlopen
+from urllib.request import urlopen as _plain_urlopen
+
+# The instance registry is read through engine_tls (scripts/), so with the lane
+# on (RE_TLS=on, RealityEngine_CI#668) it trusts the lane CA and presents the
+# harness certificate. Kept as the module's `urlopen` because rehearsal.py
+# replaces that name with a fixture.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from engine_tls import lane_context  # noqa: E402
+
+
+def urlopen(url, timeout):
+    ctx = lane_context()
+    return _plain_urlopen(url, timeout=timeout, context=ctx) if ctx is not None else _plain_urlopen(url, timeout=timeout)
 
 BASH='/opt/homebrew/bin/bash'
 MACHINES=Path(__file__).resolve().parents[2]
