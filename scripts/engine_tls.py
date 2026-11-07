@@ -22,6 +22,13 @@ cannot disagree about what "reached the engine" means:
 
 Where the CA is looked for: RE_CA_CERT, then CI_DIR/certs/ca.crt, then the
 sibling RealityEngine_CI checkout next to this repo.
+
+The lane CA (RealityEngine_CI#668, this repo's #245): with the lane on
+(RE_TLS=on), RealityEngine_CI's lane-tls.sh exports the lane CA and the
+harness's client certificate as RE_HARNESS_TLS_CA/CERT/KEY. Then this trusts
+the lane CA alone, speaks TLS 1.3 only, presents the harness certificate (the
+engines require one) and has no fallback: a missing file raises. The same rule
+as RealityEngine_CI/scripts/lib/re_tls.py.
 """
 from __future__ import annotations
 
@@ -62,11 +69,35 @@ def _warn(msg: str) -> None:
         _WARNED = True
 
 
+class LaneTlsError(RuntimeError):
+    """The lane is on and its CA or harness certificate cannot be used."""
+
+
+def lane_context() -> ssl.SSLContext | None:
+    """The lane's context when RE_TLS=on, else None."""
+    if os.environ.get("RE_TLS", "off") != "on":
+        return None
+    names = ("RE_HARNESS_TLS_CA", "RE_HARNESS_TLS_CERT", "RE_HARNESS_TLS_KEY")
+    missing = [n for n in names if not os.environ.get(n) or not os.path.isfile(os.environ[n])]
+    if missing:
+        raise LaneTlsError("RE_TLS=on but " + ", ".join(missing) + " is unset or not a file; run from "
+                           "RealityEngine_CI with the lane prepared (lane_tls_init). No unverified fallback.")
+    ctx = ssl.create_default_context(cafile=os.environ["RE_HARNESS_TLS_CA"])
+    ctx.minimum_version = ssl.TLSVersion.TLSv1_3
+    ctx.maximum_version = ssl.TLSVersion.TLSv1_3
+    ctx.load_cert_chain(os.environ["RE_HARNESS_TLS_CERT"], os.environ["RE_HARNESS_TLS_KEY"])
+    return ctx
+
+
 def tls_context() -> ssl.SSLContext:
     """The context every https call to an engine should use."""
     global _CTX
     if _CTX is not None:
         return _CTX
+    lane = lane_context()
+    if lane is not None:
+        _CTX = lane
+        return lane
     ctx = ssl.create_default_context()
     ca = ca_path()
     if ca and _ca_is_usable(ca):

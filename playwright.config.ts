@@ -1,4 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
+import { laneTlsUse } from './tests/support/lane-tls';
+import { registryUrl } from './tests/support/registry-url';
 
 const reuseServices = process.env.REUSE_SERVICES === 'true';
 const isCI = !!process.env.CI;
@@ -26,12 +28,20 @@ export default defineConfig({
     video: 'retain-on-failure',
     actionTimeout: 15000,
     navigationTimeout: 30000,
+    // Lane TLS (RealityEngine_CI#668, #245): with RE_TLS=on, verification on
+    // against the lane CA and the harness certificate for every origin the
+    // instance registry lists. With it off, nothing here changes.
+    ...laneTlsUse([registryUrl()]),
   },
 
   // Pass multi-engine env vars through to tests
   // (Playwright does not forward all env vars automatically in some runners)
   env: {
     RE_REGISTRY_URL:    process.env.RE_REGISTRY_URL    ?? '',
+    RE_TLS:             process.env.RE_TLS             ?? '',
+    RE_HARNESS_TLS_CA:  process.env.RE_HARNESS_TLS_CA  ?? '',
+    RE_HARNESS_TLS_CERT: process.env.RE_HARNESS_TLS_CERT ?? '',
+    RE_HARNESS_TLS_KEY: process.env.RE_HARNESS_TLS_KEY ?? '',
     RE_BASE_URL:        process.env.RE_BASE_URL         ?? '',
     PE_BASE_URL:        process.env.PE_BASE_URL         ?? '',
     VIZ_BASE_URL:       process.env.VIZ_BASE_URL        ?? '',
