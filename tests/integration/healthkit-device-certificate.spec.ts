@@ -1,6 +1,6 @@
 import { test, expect, request as playwrightRequest } from '@playwright/test';
 import type { APIRequestContext } from '@playwright/test';
-import { laneOn } from '../support/lane-tls';
+import { laneOn } from '../support/lane-tls.js';
 
 /**
  * Per-source client certificates on the PE's device routes (owner, 2026-11-12;
