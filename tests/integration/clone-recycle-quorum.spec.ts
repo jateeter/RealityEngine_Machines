@@ -3,7 +3,13 @@
  * machines"; RealityEngine_CI#713; localAssetStorageStack ROADMAP phase 7).
  *
  * What regression compares, per the specification:
- * - GET /api/machines/cloneable, byte-identical on the voting engines;
+ * - GET /api/machines/cloneable, identical on the voting engines once each
+ *   machine is named by its corpus name rather than its id. Ids are identity,
+ *   which a comparison never compares (SURFACE_SPEC.md, "The OSRE value is the
+ *   equality indicator across runtimes"): a machine loaded after boot gets an
+ *   id minted per engine, and a universe that has run the regression holds 18
+ *   of them, so a byte comparison failed on three agreeing engines
+ *   (RealityEngine_CI deployment gate, 2026-11-18);
  * - each clone response, except `engineInstance` and the instance segment of
  *   `cloneId`;
  * - the steps of a clone, compared like any other machine's.
@@ -67,22 +73,34 @@ test.describe('Clone and recycle (3-of-3)', () => {
     const missing = NATIVES.filter(rt => !engines.has(rt));
     test.skip(missing.length > 0, `not applicable: 3-of-3 needs cpp, lsp and scala; this deployment lacks ${missing.join(', ')}`);
 
-    // 1. The listing, byte for byte.
+    // 1. The listing, each machine by its corpus name (its id is identity).
     const listings = new Map<Runtime, string>();
+    const idOf = new Map<Runtime, Map<string, string>>(); // engine → name → its id
     for (const rt of NATIVES) {
-      const r = await request.get(`${engines.get(rt)!.re_url}/api/machines/cloneable`, { timeout: 60_000 });
+      const re = engines.get(rt)!.re_url;
+      const all = await request.get(`${re}/api/machines`, { timeout: 60_000 });
+      expect(all.ok(), `${rt} GET /api/machines → ${all.status()}`).toBe(true);
+      const names = new Map<string, string>();
+      for (const m of (await all.json() as { machines: Array<{ id: string; name: string }> }).machines) names.set(m.id, m.name);
+      idOf.set(rt, new Map([...names].map(([id, name]) => [name, id])));
+      const r = await request.get(`${re}/api/machines/cloneable`, { timeout: 60_000 });
       expect(r.ok(), `${rt} GET /api/machines/cloneable → ${r.status()}`).toBe(true);
-      listings.set(rt, await r.text());
+      const body = await r.json() as { machines: Array<Record<string, unknown> & { id: string }> };
+      const byName = body.machines.map(({ id, ...rest }) => ({ ...rest, name: names.get(id) ?? `<unlisted ${id}>` }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      listings.set(rt, canonical({ ...body, machines: byName }));
     }
     const listingReport = [...listings].map(([rt, t]) => `  ${rt.padEnd(5)} ${t.length} bytes: ${t.slice(0, 80)}…`).join('\n');
-    expect(new Set(listings.values()).size, `GET /api/machines/cloneable differs (byte-identical required)\n${listingReport}`).toBe(1);
+    expect(new Set(listings.values()).size, `GET /api/machines/cloneable differs (compared by corpus name)\n${listingReport}`).toBe(1);
 
-    const listed = (JSON.parse([...listings.values()][0]!) as { machines: Array<{ id: string; cloneable: boolean }> }).machines;
-    const template = listed.find(m => m.cloneable)?.id;
-    test.skip(!template, 'not applicable: the regression corpus holds no cloneable machine');
+    const listed = (JSON.parse([...listings.values()][0]!) as { machines: Array<{ name: string; cloneable: boolean }> }).machines;
+    const templateName = listed.find(m => m.cloneable)?.name;
+    test.skip(!templateName, 'not applicable: the regression corpus holds no cloneable machine');
+    // Each engine's own id for the template.
+    const templateOn = (rt: Runtime) => idOf.get(rt)!.get(templateName!)!;
 
     // The template's sequences, as the inputs that drive its clone.
-    const detail = await request.get(`${engines.get('cpp')!.re_url}/api/machines/${encodeURIComponent(template!)}`);
+    const detail = await request.get(`${engines.get('cpp')!.re_url}/api/machines/${encodeURIComponent(templateOn('cpp'))}`);
     const sequences = ((await detail.json()).machine.sequences ?? []) as Array<{ events?: Array<{ elements?: Array<{ value: number }> }> }>;
     const inputs = sequences.flatMap(s => (s.events ?? []).map(e => (e.elements ?? []).map(el => el.value)));
 
@@ -92,7 +110,7 @@ test.describe('Clone and recycle (3-of-3)', () => {
       for (const rt of NATIVES) {
         const inst = engines.get(rt)!;
         const re = inst.re_url;
-        const cloneUrl = `${re}/api/engine/clone/machine/${encodeURIComponent(template!)}?asset=${ASSET}&envelope=${ENVELOPE}`;
+        const cloneUrl = `${re}/api/engine/clone/machine/${encodeURIComponent(templateOn(rt))}?asset=${ASSET}&envelope=${ENVELOPE}`;
 
         // 2. Clone, then the same dispatch again.
         const first = await request.post(cloneUrl, { timeout: 60_000 });
@@ -124,7 +142,8 @@ test.describe('Clone and recycle (3-of-3)', () => {
         outcomes.set(rt, canonical({
           clone: withoutInstance(made, inst.id),
           retry: { status: again.status(), same: again.ok() && withoutInstance(await again.json(), inst.id) === withoutInstance(made, inst.id) },
-          listedAs: { cloneOf: m.cloneOf, assetId: m.assetId, envelopeId: m.envelopeId, perceptualMapping: m.perceptualMapping },
+          // cloneOf by the template's name: its id is this engine's own.
+          listedAs: { cloneOf: m.cloneOf === templateOn(rt) ? templateName : `<other ${m.cloneOf}>`, assetId: m.assetId, envelopeId: m.envelopeId, perceptualMapping: m.perceptualMapping },
           steps,
           active,
           stale: { status: stale.status(), generation: (await stale.json()).generation },
@@ -144,7 +163,7 @@ test.describe('Clone and recycle (3-of-3)', () => {
     // And what they agree on is the specified behaviour.
     const o = JSON.parse([...outcomes.values()][0]!);
     expect(o.retry, report).toEqual({ status: 200, same: true });
-    expect(o.listedAs.cloneOf, report).toBe(template);
+    expect(o.listedAs.cloneOf, report).toBe(templateName);
     expect(o.listedAs.assetId, report).toBe(ASSET);
     expect(o.stale.status, report).toBe(409);
     expect(o.recycle.status, report).toBe(200);

@@ -49,7 +49,15 @@ export function registryOrigins(file = process.env.RE_REGISTRY_FILE ?? '/tmp/re-
     for (const inst of doc.instances ?? []) for (const k of ['re_url', 'pe_url']) {
       if (typeof inst[k] === 'string') urls.push(inst[k] as string);
     }
-    for (const v of Object.values(doc.services ?? {})) if (typeof v === 'string') urls.push(v);
+    // The instance registry writes each service as {url, port}
+    // (RealityEngine_CI registry_add); a bare string is accepted too. Only
+    // strings were read, so no service origin got the harness certificate and
+    // the mTLS services (localAI, Qdrant) refused the smoke specs on the lane
+    // (RealityEngine_CI deployment gate, 2026-11-18).
+    for (const v of Object.values(doc.services ?? {})) {
+      if (typeof v === 'string') urls.push(v);
+      else if (v && typeof v === 'object' && typeof (v as { url?: unknown }).url === 'string') urls.push((v as { url: string }).url);
+    }
   } catch {
     // No registry file yet: only the extra origins.
   }
