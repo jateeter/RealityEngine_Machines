@@ -1,5 +1,11 @@
 # IFRS admission candidate
 
+Planned extension (2026-11-04): dokieli review integration, CSS as the primary
+IFRS process-facing integration point, and dynamically instantiated per-asset
+Review Machines with governed POD-reference handoffs. The accepted direction
+and pending implementation contracts are recorded in
+[review-machines/README.md](review-machines/README.md).
+
 Factory lifecycle: **ACTIVE_FOR_FUTURE_EXTENSIONS**. Versioned runtime deployment
 `1.4.0-test.1` copies the 225 tested definitions to the canonical runtime path
 and records a separate deployment receipt/current pointer. The factory's tools,

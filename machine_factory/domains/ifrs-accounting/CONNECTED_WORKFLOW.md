@@ -1,5 +1,15 @@
 # IFRS accounting workflow and review boundary
 
+Architecture direction recorded 2026-11-04: integrate dokieli and make Solid
+Community Server the primary process-facing integration point for IFRS
+document workflows. Dynamically instantiate asset-scoped Review Machines,
+triggers and sources from reviewed guardrail classes, carrying exact POD asset
+references in durable execution bindings across native recognition and scoped
+agentic actions. See [the decision](../../../docs/SOLID_DOKIELI_REVIEW_DECISION.md)
+and [the proposed Review Machine design](review-machines/README.md). This is a
+planned extension; the existing connector behavior described below has not
+been replaced or deployed by that decision.
+
 Design status: implementation candidate; independent accounting/architecture review is required before domain approval. Automated structural checks are not that review.
 
 The reporting outcome is a reconciled, source-grounded draft statement bundle for a named entity, period and applicable edition. The bundle carries immutable evidence, typed amounts, decisions, unresolved items and independent exact-revision reviews. A document approval does not authorize journal posting, filing, signing or financial-statement release.
