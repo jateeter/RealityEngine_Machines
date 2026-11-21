@@ -1,0 +1,227 @@
+{
+  "schemaVersion": "1.0.0",
+  "behaviorId": "aigov-dossier-preparer",
+  "role": "step-agent",
+  "agentId": "aigov-dossier-preparer",
+  "displayName": "Impact dossier preparer",
+  "domain": "ai-governance-regime",
+  "machine": {
+    "id": "GOV01_impact-dossier-lifecycle",
+    "file": "GOV01_impact-dossier-lifecycle.json",
+    "machineClass": "governance-escalator",
+    "inputRegion": {
+      "offset": 16960,
+      "length": 16
+    },
+    "outputRegion": {
+      "offset": 17232,
+      "length": 10
+    },
+    "cloneable": true
+  },
+  "dispatch": {
+    "mode": "frame-step",
+    "triggerSequenceIds": [
+      "ces_gov01_agent_requested"
+    ],
+    "frameScopes": [
+      "frame:read",
+      "pod:read",
+      "pod:write",
+      "frame:return"
+    ],
+    "workflow": "W1",
+    "humanApprovalRequired": true
+  },
+  "capabilities": [
+    "frame.read",
+    "pod.read",
+    "pod.write",
+    "frame.return.write",
+    "rag.query"
+  ],
+  "reasoning": {
+    "objective": "Draft the frame's ISO/IEC 42005 impact assessment and EU AI Act Art. 27 fundamental-rights impact assessment for the domain under admission, from its domain manifest, declared hazards and corpus, leaving unresolved what the evidence does not settle.",
+    "instructions": "You are the impact dossier preparer for the RealityEngine AI governance regime (M-GOV-01 ImpactDossierLifecycle, workflow W1).\n\nOBJECTIVE\nDraft the frame's ISO/IEC 42005 impact assessment and EU AI Act Art. 27 fundamental-rights impact assessment for the domain under admission, from its domain manifest, declared hazards and corpus, leaving unresolved what the evidence does not settle.\n\nYOU MAY\n- Draft the impact assessment and FRIA documents in the frame under the pinned ETag.\n- Mark every section the evidence does not settle as unresolved for the author.\n\nYOU MUST NOT\n- Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).\n- Never write vector values directly; your result reaches the engines only through your completion contract.\n- Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.\n- Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts.",
+    "outputContract": "Return one structured line per completion field as `<field>: 0|1` (prep_completed: the dossier draft is complete, prep_failed: the agent's step failed, sections_unresolved: sections left unresolved for the author), then `rationale: <one sentence>`. The machine, not you, decides what follows.",
+    "sequenceCatalog": [
+      {
+        "sequenceId": "ces_gov01_agent_requested",
+        "label": "S1_AgentRunning",
+        "rag": "AMBER",
+        "outputIndex": 8,
+        "action": "AGENT_REQUESTED"
+      },
+      {
+        "sequenceId": "ces_gov01_agent_failed",
+        "label": "S_err_StepFailed",
+        "rag": "RED",
+        "outputIndex": 4,
+        "action": "PARKED + REWORK"
+      },
+      {
+        "sequenceId": "ces_gov01_agent_incomplete",
+        "label": "S_err_Rework",
+        "rag": "AMBER",
+        "outputIndex": 7,
+        "action": "REWORK"
+      },
+      {
+        "sequenceId": "ces_gov01_parked",
+        "label": "S2_ParkedReview",
+        "rag": "AMBER",
+        "outputIndex": 4,
+        "action": "PARKED"
+      },
+      {
+        "sequenceId": "ces_gov01_approved",
+        "label": "S3_Approved",
+        "rag": "GREEN",
+        "outputIndex": 2,
+        "action": "PERMIT_DEPLOY"
+      },
+      {
+        "sequenceId": "ces_gov01_rework_re_pinned",
+        "label": "S_err_Rework",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION + REWORK"
+      },
+      {
+        "sequenceId": "ces_gov01_rework_stale",
+        "label": "S_err_Rework",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION + REWORK"
+      }
+    ],
+    "prohibitions": [
+      "Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).",
+      "Never write vector values directly; your result reaches the engines only through your completion contract.",
+      "Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.",
+      "Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts."
+    ]
+  },
+  "agentBinding": {
+    "agent": "aigov-dossier-preparer",
+    "mode": "supervised-act",
+    "trigger": "ces_gov01_agent_requested",
+    "allowedActions": [
+      "Draft the impact assessment and FRIA documents in the frame under the pinned ETag.",
+      "Mark every section the evidence does not settle as unresolved for the author."
+    ],
+    "writeBack": {
+      "type": "pe-sensor",
+      "provider": "asset-lifecycle",
+      "sensorId": "aigov.gov01.dossier-preparer.completion",
+      "name": "Impact dossier preparer completion (GOV01)",
+      "region": {
+        "offset": 16968,
+        "length": 3
+      },
+      "semantics": [
+        "prep_completed",
+        "prep_failed",
+        "sections_unresolved"
+      ],
+      "ttlMs": 300000,
+      "normalization": "already-normalized-0-1",
+      "ingest": {
+        "endpoint": "/api/integrations/completions",
+        "method": "POST",
+        "triggerPush": false,
+        "compactPush": true
+      },
+      "sourceMapping": {
+        "id": "aigov-gov01-dossier-preparer-completion",
+        "sensorId": "aigov.gov01.dossier-preparer.completion",
+        "name": "Impact dossier preparer completion (GOV01)",
+        "region": {
+          "offset": 16968,
+          "length": 3
+        },
+        "ttlMs": 300000
+      }
+    },
+    "riskControls": {
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "maxAutonomy": "supervised-act",
+      "blockedWhenRag": []
+    },
+    "autonomyPolicy": {
+      "mode": "supervised-act",
+      "stage": 2,
+      "writeBackType": "pe-sensor",
+      "canWriteBack": true,
+      "canStageActions": true,
+      "canExecuteActions": false,
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "blockedWhenRag": []
+    }
+  },
+  "responseMapping": {
+    "schemaVersion": "1.0.0",
+    "responseContract": "structured-keys",
+    "mode": "supervised-act",
+    "fields": [
+      {
+        "semantic": "prep_completed",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/prep_completed",
+          "responseKey": "prep_completed"
+        },
+        "target": {
+          "sensorId": "aigov.gov01.dossier-preparer.completion",
+          "region": {
+            "offset": 16968,
+            "length": 3
+          },
+          "index": 0
+        }
+      },
+      {
+        "semantic": "prep_failed",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/prep_failed",
+          "responseKey": "prep_failed"
+        },
+        "target": {
+          "sensorId": "aigov.gov01.dossier-preparer.completion",
+          "region": {
+            "offset": 16968,
+            "length": 3
+          },
+          "index": 1
+        }
+      },
+      {
+        "semantic": "sections_unresolved",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/sections_unresolved",
+          "responseKey": "sections_unresolved"
+        },
+        "target": {
+          "sensorId": "aigov.gov01.dossier-preparer.completion",
+          "region": {
+            "offset": 16968,
+            "length": 3
+          },
+          "index": 2
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "builder": "machine_factory/domains/ai-governance-regime/tools/build_machines.py",
+    "candidateVersion": "0.2.0",
+    "specRule": "SPECIFICATION.md 4.3 (1); HARDENING_TRANSITION_RULES.md section 1"
+  }
+}

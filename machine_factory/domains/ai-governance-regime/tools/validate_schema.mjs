@@ -32,4 +32,17 @@ for (const f of files) {
   }
 }
 console.log(`schema: ${files.length - bad} valid / ${bad} invalid (vs schemas/machine.schema.json)`);
-process.exit(bad ? 1 : 0);
+
+const vb = ajv.getSchema("https://realityengine.example.org/schemas/agent-behavior.schema.json");
+const adir = join(PKG, "agent-candidates", "ai-governance-regime");
+const afiles = readdirSync(adir).filter((n) => n.endsWith(".agent.json")).sort();
+let abad = 0;
+for (const f of afiles) {
+  const data = JSON.parse(readFileSync(join(adir, f), "utf8"));
+  if (!vb(data)) {
+    abad++;
+    for (const e of vb.errors.slice(0, 5)) console.log(`FAIL ${f}: ${e.instancePath || "(root)"} ${e.message}`);
+  }
+}
+console.log(`behaviors: ${afiles.length - abad} valid / ${abad} invalid (vs schemas/agent-behavior.schema.json)`);
+process.exit(bad || abad ? 1 : 0);

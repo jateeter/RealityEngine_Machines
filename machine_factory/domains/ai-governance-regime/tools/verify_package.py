@@ -28,6 +28,7 @@ AUTHORED = {
     "machine-import-manifest.json", "admission-source-manifest.json",
     "tools/verify_package.py", "tools/build_machines.py", "tools/verify_machines.py",
     "tools/validate_schema.mjs", "semantic-amendments.json", "CONNECTED_WORKFLOW.md",
+    "governance-sources.json", "agentic-workflow-contract.json",
 }
 
 
@@ -79,7 +80,7 @@ def main():
         elif sha256(p) != entry["sha256"]:
             errors.append(f"changed: {entry['path']} (received bytes must stay as received)")
     for rel in package_files():
-        if rel not in listed and rel not in AUTHORED and not rel.startswith("machines/"):
+        if rel not in listed and rel not in AUTHORED and not rel.startswith(("machines/", "agent-candidates/")):
             errors.append(f"unlisted: {rel} (add it to admission-source-manifest.json)")
         if rel.endswith(".json"):
             try:

@@ -1,0 +1,148 @@
+{
+  "schemaVersion": "1.0.0",
+  "behaviorId": "aigov-near-miss-triage",
+  "role": "watchdog-agent",
+  "agentId": "aigov-near-miss-triage",
+  "displayName": "Near-miss triage agent",
+  "domain": "ai-governance-regime",
+  "machine": {
+    "id": "GOV09_near-miss-backlog-enforcer",
+    "file": "GOV09_near-miss-backlog-enforcer.json",
+    "machineClass": "signal-monitor",
+    "inputRegion": {
+      "offset": 17088,
+      "length": 3
+    },
+    "outputRegion": {
+      "offset": 17312,
+      "length": 10
+    },
+    "cloneable": false
+  },
+  "dispatch": {
+    "mode": "ces-trigger",
+    "triggerSequenceIds": [
+      "ces_gov09_triage_requested"
+    ],
+    "workflow": "W3",
+    "humanApprovalRequired": false
+  },
+  "capabilities": [
+    "pe.completion.write",
+    "kline.read",
+    "rag.query"
+  ],
+  "reasoning": {
+    "objective": "Classify and resolve unresolved near-miss K-lines and draft candidate rules for the next rule-epoch promotion (W2); resolving K-lines lowers the backlog Source.",
+    "instructions": "You are the near-miss triage agent for the RealityEngine AI governance regime (M-GOV-09 NearMissBacklogEnforcer, workflow W3).\n\nOBJECTIVE\nClassify and resolve unresolved near-miss K-lines and draft candidate rules for the next rule-epoch promotion (W2); resolving K-lines lowers the backlog Source.\n\nYOU MAY\n- Classify near-miss K-lines.\n- Draft candidate rules for a W2 frame.\n\nYOU MUST NOT\n- Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).\n- Never write vector values directly; your result reaches the engines only through your completion contract.\n- Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.\n- Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts.",
+    "outputContract": "Return one structured line per completion field as `<field>: 0|1` (triage_completed: the triage pass is complete), then `rationale: <one sentence>`. The machine, not you, decides what follows.",
+    "sequenceCatalog": [
+      {
+        "sequenceId": "ces_gov09_triage_requested",
+        "label": "S1_BacklogThreshold",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION + LATCH + AGENT_REQUESTED"
+      },
+      {
+        "sequenceId": "ces_gov09_backlog_reset",
+        "label": "S0_Nominal",
+        "rag": "GREEN",
+        "outputIndex": 0,
+        "action": "release"
+      }
+    ],
+    "prohibitions": [
+      "Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).",
+      "Never write vector values directly; your result reaches the engines only through your completion contract.",
+      "Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.",
+      "Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts."
+    ]
+  },
+  "agentBinding": {
+    "agent": "aigov-near-miss-triage",
+    "mode": "advise",
+    "trigger": "ces_gov09_triage_requested",
+    "allowedActions": [
+      "Classify near-miss K-lines.",
+      "Draft candidate rules for a W2 frame."
+    ],
+    "writeBack": {
+      "type": "pe-sensor",
+      "provider": "agent-runtime",
+      "sensorId": "aigov.gov09.near-miss-triage.completion",
+      "name": "Near-miss triage agent completion (GOV09)",
+      "region": {
+        "offset": 17089,
+        "length": 1
+      },
+      "semantics": [
+        "triage_completed"
+      ],
+      "ttlMs": 300000,
+      "normalization": "already-normalized-0-1",
+      "ingest": {
+        "endpoint": "/api/integrations/completions",
+        "method": "POST",
+        "triggerPush": false,
+        "compactPush": true
+      },
+      "sourceMapping": {
+        "id": "aigov-gov09-near-miss-triage-completion",
+        "sensorId": "aigov.gov09.near-miss-triage.completion",
+        "name": "Near-miss triage agent completion (GOV09)",
+        "region": {
+          "offset": 17089,
+          "length": 1
+        },
+        "ttlMs": 300000
+      }
+    },
+    "riskControls": {
+      "requiresHumanApproval": false,
+      "requiresRunbook": true,
+      "maxAutonomy": "advise",
+      "blockedWhenRag": []
+    },
+    "autonomyPolicy": {
+      "mode": "advise",
+      "stage": 1,
+      "writeBackType": "pe-sensor",
+      "canWriteBack": true,
+      "canStageActions": false,
+      "canExecuteActions": false,
+      "requiresHumanApproval": false,
+      "requiresRunbook": true,
+      "blockedWhenRag": []
+    }
+  },
+  "responseMapping": {
+    "schemaVersion": "1.0.0",
+    "responseContract": "structured-keys",
+    "mode": "advise",
+    "fields": [
+      {
+        "semantic": "triage_completed",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/triage_completed",
+          "responseKey": "triage_completed"
+        },
+        "target": {
+          "sensorId": "aigov.gov09.near-miss-triage.completion",
+          "region": {
+            "offset": 17089,
+            "length": 1
+          },
+          "index": 0
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "builder": "machine_factory/domains/ai-governance-regime/tools/build_machines.py",
+    "candidateVersion": "0.2.0",
+    "specRule": "SPECIFICATION.md 4.3 (9)"
+  }
+}

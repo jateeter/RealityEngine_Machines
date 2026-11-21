@@ -1,0 +1,211 @@
+{
+  "schemaVersion": "1.0.0",
+  "behaviorId": "aigov-egress-provenance-tagger",
+  "role": "step-agent",
+  "agentId": "aigov-egress-provenance-tagger",
+  "displayName": "Egress provenance tagger",
+  "domain": "ai-governance-regime",
+  "machine": {
+    "id": "GOV10_synthetic-transparency-gate",
+    "file": "GOV10_synthetic-transparency-gate.json",
+    "machineClass": "safety-compliance-checker",
+    "inputRegion": {
+      "offset": 17104,
+      "length": 12
+    },
+    "outputRegion": {
+      "offset": 17322,
+      "length": 10
+    },
+    "cloneable": true
+  },
+  "dispatch": {
+    "mode": "frame-step",
+    "triggerSequenceIds": [
+      "ces_gov10_agent_requested"
+    ],
+    "frameScopes": [
+      "frame:read",
+      "pod:read",
+      "frame:return"
+    ],
+    "workflow": "W4",
+    "humanApprovalRequired": true
+  },
+  "capabilities": [
+    "frame.read",
+    "frame.return.write",
+    "egress.message.annotate",
+    "egress.message.hold"
+  ],
+  "reasoning": {
+    "objective": "Add machine-readable AI provenance (Art. 50, C2PA where applicable) to an outbound external message, or hold it when provenance cannot be asserted.",
+    "instructions": "You are the egress provenance tagger for the RealityEngine AI governance regime (M-GOV-10 SyntheticTransparencyGate, workflow W4).\n\nOBJECTIVE\nAdd machine-readable AI provenance (Art. 50, C2PA where applicable) to an outbound external message, or hold it when provenance cannot be asserted.\n\nYOU MAY\n- Annotate the message with provenance.\n- Hold a message whose provenance cannot be asserted.\n\nYOU MUST NOT\n- Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).\n- Never write vector values directly; your result reaches the engines only through your completion contract.\n- Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.\n- Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts.",
+    "outputContract": "Return one structured line per completion field as `<field>: 0|1` (tag_completed: the tagger finished, tag_failed: the agent's step failed, message_held: the tagger held the message), then `rationale: <one sentence>`. The machine, not you, decides what follows.",
+    "sequenceCatalog": [
+      {
+        "sequenceId": "ces_gov10_agent_requested",
+        "label": "S1_AgentRunning",
+        "rag": "AMBER",
+        "outputIndex": 8,
+        "action": "AGENT_REQUESTED"
+      },
+      {
+        "sequenceId": "ces_gov10_agent_failed",
+        "label": "S_err_StepFailed",
+        "rag": "RED",
+        "outputIndex": 4,
+        "action": "PARKED + REWORK"
+      },
+      {
+        "sequenceId": "ces_gov10_tagged",
+        "label": "S2_PassMarked",
+        "rag": "GREEN",
+        "outputIndex": 2,
+        "action": "PERMIT_DEPLOY"
+      },
+      {
+        "sequenceId": "ces_gov10_held",
+        "label": "S_fail_UnmarkedBlock",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION"
+      },
+      {
+        "sequenceId": "ces_gov10_unmarked_block",
+        "label": "S_fail_UnmarkedBlock",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION"
+      }
+    ],
+    "prohibitions": [
+      "Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).",
+      "Never write vector values directly; your result reaches the engines only through your completion contract.",
+      "Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.",
+      "Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts."
+    ]
+  },
+  "agentBinding": {
+    "agent": "aigov-egress-provenance-tagger",
+    "mode": "supervised-act",
+    "trigger": "ces_gov10_agent_requested",
+    "allowedActions": [
+      "Annotate the message with provenance.",
+      "Hold a message whose provenance cannot be asserted."
+    ],
+    "writeBack": {
+      "type": "pe-sensor",
+      "provider": "asset-lifecycle",
+      "sensorId": "aigov.gov10.egress-provenance-tagger.completion",
+      "name": "Egress provenance tagger completion (GOV10)",
+      "region": {
+        "offset": 17112,
+        "length": 3
+      },
+      "semantics": [
+        "tag_completed",
+        "tag_failed",
+        "message_held"
+      ],
+      "ttlMs": 300000,
+      "normalization": "already-normalized-0-1",
+      "ingest": {
+        "endpoint": "/api/integrations/completions",
+        "method": "POST",
+        "triggerPush": false,
+        "compactPush": true
+      },
+      "sourceMapping": {
+        "id": "aigov-gov10-egress-provenance-tagger-completion",
+        "sensorId": "aigov.gov10.egress-provenance-tagger.completion",
+        "name": "Egress provenance tagger completion (GOV10)",
+        "region": {
+          "offset": 17112,
+          "length": 3
+        },
+        "ttlMs": 300000
+      }
+    },
+    "riskControls": {
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "maxAutonomy": "supervised-act",
+      "blockedWhenRag": []
+    },
+    "autonomyPolicy": {
+      "mode": "supervised-act",
+      "stage": 2,
+      "writeBackType": "pe-sensor",
+      "canWriteBack": true,
+      "canStageActions": true,
+      "canExecuteActions": false,
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "blockedWhenRag": []
+    }
+  },
+  "responseMapping": {
+    "schemaVersion": "1.0.0",
+    "responseContract": "structured-keys",
+    "mode": "supervised-act",
+    "fields": [
+      {
+        "semantic": "tag_completed",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/tag_completed",
+          "responseKey": "tag_completed"
+        },
+        "target": {
+          "sensorId": "aigov.gov10.egress-provenance-tagger.completion",
+          "region": {
+            "offset": 17112,
+            "length": 3
+          },
+          "index": 0
+        }
+      },
+      {
+        "semantic": "tag_failed",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/tag_failed",
+          "responseKey": "tag_failed"
+        },
+        "target": {
+          "sensorId": "aigov.gov10.egress-provenance-tagger.completion",
+          "region": {
+            "offset": 17112,
+            "length": 3
+          },
+          "index": 1
+        }
+      },
+      {
+        "semantic": "message_held",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/message_held",
+          "responseKey": "message_held"
+        },
+        "target": {
+          "sensorId": "aigov.gov10.egress-provenance-tagger.completion",
+          "region": {
+            "offset": 17112,
+            "length": 3
+          },
+          "index": 2
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "builder": "machine_factory/domains/ai-governance-regime/tools/build_machines.py",
+    "candidateVersion": "0.2.0",
+    "specRule": "SPECIFICATION.md 4.3 (10)"
+  }
+}

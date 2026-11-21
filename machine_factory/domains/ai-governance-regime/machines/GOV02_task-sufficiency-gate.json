@@ -3,30 +3,299 @@
   "machine": {
     "id": "GOV02_task-sufficiency-gate",
     "name": "GOV02_task-sufficiency-gate",
-    "description": "Task-sufficiency gate on a domain admission: permits when every declared hazard is fiber-saturated or exposure-bounded, halts otherwise.",
+    "description": "Task-sufficiency gate on a domain admission: the hazard-sufficiency analyst runs, and the verdict follows its completed analysis: permit when every declared hazard is fiber-saturated or exposure-bounded, halt when gaps remain.",
     "arbiterRule": "PASSTHROUGH",
     "matchAlgorithm": "equals",
     "outputMergeTransformation": "or",
     "perceptualMapping": {
       "input": {
         "offset": 16976,
-        "length": 2
+        "length": 12
       },
       "output": {
-        "offset": 17240,
-        "length": 8
+        "offset": 17242,
+        "length": 10
       },
       "bitsPerElement": 1
     },
     "sequences": [
       {
-        "id": "ces_gov02_verified",
-        "name": "M-GOV-02 S0_Idle → S1_Verified",
+        "id": "ces_gov02_agent_requested",
+        "name": "M-GOV-02 S0_Init → S1_AgentRunning",
         "schemaVersion": "1.0",
         "metadata": {
-          "sourceFromState": "S0_Idle",
-          "sourceToState": "S1_Verified",
-          "regularExpression": "[req_domain_admit=1 ∧ gate_task_sufficiency=1]",
+          "sourceFromState": "S0_Init",
+          "sourceToState": "S1_AgentRunning",
+          "regularExpression": "[req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ analysis_completed=0]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (2)",
+          "semanticAmendments": [],
+          "asserts": [
+            "AGENT_REQUESTED"
+          ],
+          "dispatchesAgent": "aigov-hazard-sufficiency-analyst"
+        },
+        "events": [
+          {
+            "id": "ces_gov02_agent_requested-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov02_agent_requested-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov02_agent_failed",
+        "name": "M-GOV-02 S1_AgentRunning → S_err_StepFailed",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_AgentRunning",
+          "sourceToState": "S_err_StepFailed",
+          "regularExpression": "[req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ analysis_completed=0] · [analysis_failed=1]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (2)",
+          "semanticAmendments": [
+            "GOV-SA-13"
+          ],
+          "asserts": [
+            "PARKED",
+            "REWORK"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov02_agent_failed-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov02_agent_failed-e1"
+            ]
+          },
+          {
+            "id": "ces_gov02_agent_failed-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov02_agent_failed-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov02_verified",
+        "name": "M-GOV-02 S1_AgentRunning → S2_Verified",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_AgentRunning",
+          "sourceToState": "S2_Verified",
+          "regularExpression": "[req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ analysis_completed=0] · [analysis_completed=1 ∧ hazards_sufficient=1 ∧ hazard_gaps=0]",
+          "length": 2,
           "specRule": "SPECIFICATION.md 4.3 (2)",
           "semanticAmendments": [],
           "asserts": [
@@ -43,7 +312,121 @@
                 "comparatorType": "equals"
               },
               {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
                 "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov02_verified-e1"
+            ]
+          },
+          {
+            "id": "ces_gov02_verified-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
                 "comparatorType": "equals"
               }
             ],
@@ -59,6 +442,8 @@
                   0.0,
                   0.0,
                   0.0,
+                  0.0,
+                  0.0,
                   0.0
                 ]
               }
@@ -68,12 +453,13 @@
       },
       {
         "id": "ces_gov02_incomplete_hazard",
-        "name": "M-GOV-02 S0_Idle → S_fail_IncompleteHazard",
+        "name": "M-GOV-02 S1_AgentRunning → S_fail_IncompleteHazard",
         "schemaVersion": "1.0",
         "metadata": {
-          "sourceFromState": "S0_Idle",
+          "sourceFromState": "S1_AgentRunning",
           "sourceToState": "S_fail_IncompleteHazard",
-          "regularExpression": "[req_domain_admit=1 ∧ gate_task_sufficiency=0]",
+          "regularExpression": "[req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ analysis_completed=0] · [analysis_completed=1 ∧ hazard_gaps=1]",
+          "length": 2,
           "specRule": "SPECIFICATION.md 4.3 (2)",
           "semanticAmendments": [],
           "asserts": [
@@ -90,7 +476,122 @@
                 "comparatorType": "equals"
               },
               {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
                 "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov02_incomplete_hazard-e1"
+            ]
+          },
+          {
+            "id": "ces_gov02_incomplete_hazard-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
                 "comparatorType": "equals"
               }
             ],
@@ -100,6 +601,8 @@
                 "id": "ces_gov02_incomplete_hazard-out",
                 "vector": [
                   1.0,
+                  0.0,
+                  0.0,
                   0.0,
                   0.0,
                   0.0,
@@ -116,11 +619,161 @@
     ],
     "inputSequences": [
       {
+        "name": "gov02-agent-requested",
+        "events": [
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov02_agent_requested: [req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ analysis_completed=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov02_agent_requested"
+        }
+      },
+      {
+        "name": "gov02-agent-failed",
+        "events": [
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov02_agent_failed: [req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ analysis_completed=0] · [analysis_failed=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov02_agent_failed"
+        }
+      },
+      {
         "name": "gov02-verified",
         "events": [
           [
             1.0,
-            1.0
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0
           ]
         ],
         "metadata": {
@@ -132,9 +785,23 @@
             0.0,
             0.0,
             0.0,
+            0.0,
+            0.0,
             0.0
           ],
           "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
             [
               0.0,
               0.0,
@@ -143,11 +810,13 @@
               0.0,
               0.0,
               0.0,
+              0.0,
+              0.0,
               0.0
             ]
           ],
-          "purpose": "drives ces_gov02_verified: [req_domain_admit=1 ∧ gate_task_sufficiency=1]",
-          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "purpose": "drives ces_gov02_verified: [req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ analysis_completed=0] · [analysis_completed=1 ∧ hazards_sufficient=1 ∧ hazard_gaps=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
           "expectedSequenceId": "ces_gov02_verified"
         }
       },
@@ -156,7 +825,31 @@
         "events": [
           [
             1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
             0.0
+          ],
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0
           ]
         ],
         "metadata": {
@@ -168,11 +861,27 @@
             0.0,
             0.0,
             0.0,
+            0.0,
+            0.0,
             0.0
           ],
           "expectedOutputsByStep": [
             [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
               1.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
               0.0,
               0.0,
               0.0,
@@ -182,8 +891,8 @@
               0.0
             ]
           ],
-          "purpose": "drives ces_gov02_incomplete_hazard: [req_domain_admit=1 ∧ gate_task_sufficiency=0]",
-          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "purpose": "drives ces_gov02_incomplete_hazard: [req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ analysis_completed=0] · [analysis_completed=1 ∧ hazard_gaps=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
           "expectedSequenceId": "ces_gov02_incomplete_hazard"
         }
       },
@@ -191,6 +900,16 @@
         "name": "gov02-nominal",
         "events": [
           [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
             0.0,
             0.0
           ]
@@ -204,10 +923,14 @@
             0.0,
             0.0,
             0.0,
+            0.0,
+            0.0,
             0.0
           ],
           "expectedOutputsByStep": [
             [
+              0.0,
+              0.0,
               0.0,
               0.0,
               0.0,
@@ -219,7 +942,7 @@
             ]
           ],
           "purpose": "the quiet state",
-          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
         }
       }
     ],
@@ -227,10 +950,20 @@
       "category": "ai-governance-regime",
       "domain": "ai-governance-regime",
       "machineClass": "safety-compliance-checker",
-      "sequenceCount": 2,
+      "sequenceCount": 4,
       "inputSemantics": [
-        "req_domain_admit (binary; action request; specification cell 16984): proposal to admit a domain manifest",
-        "gate_task_sufficiency (binary; manifest; specification cell 16972): every declared hazard fiber-saturated or exposure-bounded"
+        "req_domain_admit (binary; fact: scripts/approve-domain.sh prepare (admission request); partial): a domain admission is requested",
+        "spare (binary; fact: none; exists): spare cell, always 0",
+        "reserved: lane_in_workflow (lifecycle frame lane 2; the asset is in its workflow)",
+        "reserved: lane_re_pinned (lifecycle frame lane 3; a frame document has been re-pinned (T16))",
+        "reserved: lane_approved (lifecycle frame lane 4; approved by a distinct human principal)",
+        "reserved: lane_rework (lifecycle frame lane 5; rework requested)",
+        "reserved: lane_step_running (lifecycle frame lane 6; a step is running)",
+        "reserved: lane_stale (lifecycle frame lane 7; the head is STALE (continuation TTL or lease expired))",
+        "analysis_completed (binary; aigov-hazard-sufficiency-analyst completion via aigov.gov02.hazard-sufficiency-analyst.completion): the analysis is complete",
+        "analysis_failed (binary; aigov-hazard-sufficiency-analyst completion via aigov.gov02.hazard-sufficiency-analyst.completion): the agent's step failed",
+        "hazards_sufficient (binary; aigov-hazard-sufficiency-analyst completion via aigov.gov02.hazard-sufficiency-analyst.completion): every declared hazard is fiber-saturated or exposure-bounded",
+        "hazard_gaps (binary; aigov-hazard-sufficiency-analyst completion via aigov.gov02.hazard-sufficiency-analyst.completion): at least one hazard is neither"
       ],
       "outputSemantics": [
         "0: HALT_PROMOTION",
@@ -240,12 +973,15 @@
         "4: PARKED",
         "5: APPROACH",
         "6: LATCH",
-        "7: REWORK"
+        "7: REWORK",
+        "8: AGENT_REQUESTED",
+        "9: OVERDUE"
       ],
       "tags": [
         "ai-governance-regime",
         "A-domain-onboarding-impact",
-        "M-GOV-02"
+        "M-GOV-02",
+        "W1"
       ],
       "tagging": {
         "schemaVersion": "1.0.0",
@@ -254,7 +990,8 @@
         "family": "A-domain-onboarding-impact",
         "machineCode": "GOV02",
         "workflowTags": [
-          "TaskSufficiencyGate"
+          "TaskSufficiencyGate",
+          "W1"
         ],
         "validationTags": [
           "candidate-not-admitted"
@@ -270,13 +1007,49 @@
           "info": null,
           "warning": null,
           "error": null
-        },
-        "notes": "Owner roles are functional name strings pending the domain's staffing decision; the runbook URN resolves when runbooks/ is written (PACKAGE_STATUS.md step 6)."
+        }
       },
       "triggerConfig": {
         "processId": "GOV02_task-sufficiency-gate",
         "processName": "M-GOV-02 TaskSufficiencyGate",
         "rules": [
+          {
+            "sequenceId": "ces_gov02_agent_requested",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "M-GOV-02 S0_Init → S1_AgentRunning: [req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ analysis_completed=0]",
+            "dispatchAgent": "aigov-hazard-sufficiency-analyst"
+          },
+          {
+            "sequenceId": "ces_gov02_agent_failed",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-02 S1_AgentRunning → S_err_StepFailed: [req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ analysis_completed=0] · [analysis_failed=1]"
+          },
           {
             "sequenceId": "ces_gov02_verified",
             "outputMatches": [
@@ -287,11 +1060,13 @@
               0.0,
               0.0,
               0.0,
+              0.0,
+              0.0,
               0.0
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "M-GOV-02 S0_Idle → S1_Verified: [req_domain_admit=1 ∧ gate_task_sufficiency=1]"
+            "description": "M-GOV-02 S1_AgentRunning → S2_Verified: [req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ analysis_completed=0] · [analysis_completed=1 ∧ hazards_sufficient=1 ∧ hazard_gaps=0]"
           },
           {
             "sequenceId": "ces_gov02_incomplete_hazard",
@@ -303,54 +1078,17 @@
               0.0,
               0.0,
               0.0,
+              0.0,
+              0.0,
               0.0
             ],
             "ragStatusCode": "RED",
             "processStatus": "error",
-            "description": "M-GOV-02 S0_Idle → S_fail_IncompleteHazard: [req_domain_admit=1 ∧ gate_task_sufficiency=0]"
+            "description": "M-GOV-02 S1_AgentRunning → S_fail_IncompleteHazard: [req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ analysis_completed=0] · [analysis_completed=1 ∧ hazard_gaps=1]"
           }
         ]
       },
       "interconnections": [
-        {
-          "id": "ai-governance-regime.verdicts.gov02",
-          "type": "published-domain-bus-producer",
-          "role": "TaskSufficiencyGate",
-          "sourceMachine": "GOV02_task-sufficiency-gate",
-          "sourceOutputRegion": {
-            "offset": 17240,
-            "length": 4
-          },
-          "targetInputElements": [
-            4,
-            5,
-            6,
-            7
-          ],
-          "normalizedElements": [
-            "M-GOV-02 HALT_PROMOTION",
-            "M-GOV-02 REVOKE_EPOCH",
-            "M-GOV-02 PERMIT_DEPLOY",
-            "M-GOV-02 TRIGGER_INCIDENT"
-          ],
-          "purpose": "Publish M-GOV-02's four verdict elements to the domain verdict aggregator.",
-          "busId": "ai-governance-regime.verdicts",
-          "busTag": "published-bus-ai-governance-regime-verdicts",
-          "targetMachine": "GOV00 Governance Verdict Aggregator",
-          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
-          "targetInputRegion": {
-            "offset": 17368,
-            "length": 68
-          },
-          "publishedOutputRegion": {
-            "offset": 17436,
-            "length": 4
-          },
-          "peCompositionRequired": true,
-          "compositionOwner": "perception-engine",
-          "dispatchMode": "asynchronous-no-wait",
-          "privacyBoundary": "PE composes normalized verdict bits only; governance documents, signatures and principals stay in the Solid asset frames."
-        },
         {
           "id": "ai-governance-regime.document.gov02.TaskSufficiencyAndImpactDossier",
           "type": "document-workflow-handoff",
@@ -358,7 +1096,7 @@
           "targetMachine": "GOV03_socio-technical-bias-audit",
           "assetTypeId": "TaskSufficiencyAndImpactDossier",
           "compositionOwner": "document-workflow-dispatcher",
-          "purpose": "Hand the frame's TaskSufficiencyAndImpactDossier to GOV03, its next consumer in the specification's evidence flow (SPECIFICATION.md sections 5-6); never infer a governance verdict from document content.",
+          "purpose": "Hand the frame's TaskSufficiencyAndImpactDossier to GOV03, its next consumer (agentic-workflow-contract.json W1); never infer a governance verdict from document content.",
           "nativeVectorWrite": false
         }
       ],
@@ -366,17 +1104,87 @@
         "machineCode": "M-GOV-02",
         "title": "TaskSufficiencyGate",
         "kind": "template",
+        "workflow": "W1",
         "specRule": "SPECIFICATION.md 4.3 (2)",
         "governedAssetType": "TaskSufficiencyAndImpactDossier",
         "governedTargetDomain": "carried by the asset frame",
         "agentCanResumeApproval": false
       },
       "conversion": {
-        "candidateVersion": "0.1.0",
+        "candidateVersion": "0.2.0",
         "builder": "tools/build_machines.py",
         "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
         "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
-        "intakeEquivalents": "intake/corpus-312.json and corpus-315.json machines are not carried over (GOV-R01, GOV-R02)"
+        "dwellSteps": 2,
+        "debounceSteps": 3
+      },
+      "agentBinding": {
+        "agent": "aigov-hazard-sufficiency-analyst",
+        "mode": "supervised-act",
+        "trigger": "ces_gov02_agent_requested",
+        "allowedActions": [
+          "Write the task-sufficiency analysis into the frame's dossier.",
+          "Report hazards_sufficient or hazard_gaps with citations."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "asset-lifecycle",
+          "sensorId": "aigov.gov02.hazard-sufficiency-analyst.completion",
+          "name": "Hazard-sufficiency analyst completion (GOV02)",
+          "region": {
+            "offset": 16984,
+            "length": 4
+          },
+          "semantics": [
+            "analysis_completed",
+            "analysis_failed",
+            "hazards_sufficient",
+            "hazard_gaps"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "aigov-gov02-hazard-sufficiency-analyst-completion",
+            "sensorId": "aigov.gov02.hazard-sufficiency-analyst.completion",
+            "name": "Hazard-sufficiency analyst completion (GOV02)",
+            "region": {
+              "offset": 16984,
+              "length": 4
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": []
+        }
+      },
+      "aiTrigger": "ces_gov02_agent_requested",
+      "dispatchableAgent": "aigov-hazard-sufficiency-analyst",
+      "agentBehavior": "agent-candidates/ai-governance-regime/aigov-hazard-sufficiency-analyst.agent.json",
+      "frameInputs": {
+        "lanes": "input cells 2-7, written by the lifecycle (reserved)",
+        "facts": "every other non-completion input, written into the clone's block by the lifecycle's frame source (GOV-R19)",
+        "completion": "input cells 8..11, the step agent's completion"
       }
     }
   }

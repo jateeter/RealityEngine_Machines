@@ -1,0 +1,345 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.example.org/schemas/agent-behavior.schema.json",
+  "title": "RealityEngine Agent Behavior (runtime-neutral)",
+  "description": "What an agent bound to a machine does, independent of the runtime that hosts it (OpenClaw today, ACP-hosted agents after OpenClaw's sunset in v0.0.3). A runtime adapter renders a behavior into its own artifact: localOpenClawStack/machine-behaviors/runtimes/openclaw.py into an OC agent, runtimes/acp.py into an ACP session plan. Nothing in a behavior names a runtime, a gateway, a session key or a tool implementation: tools are abstract capabilities, which each adapter maps to its own tools (for ACP, to the MCP servers it passes per session). The vector contract is the machine's agentBinding, unchanged: the PE completion Source the agent's result arrives through.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "behaviorId",
+    "role",
+    "agentId",
+    "displayName",
+    "machine",
+    "dispatch",
+    "capabilities",
+    "reasoning",
+    "agentBinding",
+    "responseMapping"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "behaviorId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+      "description": "Stable id of this behavior; renderers derive runtime ids from it."
+    },
+    "role": {
+      "enum": [
+        "input-analyst",
+        "output-actor",
+        "step-agent",
+        "watchdog-agent",
+        "deterministic-tool"
+      ],
+      "description": "input-analyst produces a machine's input vector from observations; output-actor acts on a CES output; step-agent runs one asset-workflow step on a clone (dispatched with the frame's capability); watchdog-agent is dispatched by a fixture's CES; deterministic-tool is a non-LLM step (for example a canonical diff renderer) that still answers through the same completion contract."
+    },
+    "agentId": {
+      "type": "string",
+      "pattern": "^[a-z0-9_][a-z0-9_-]{0,63}$",
+      "description": "Runtime-safe id (64 characters at most, the strictest limit any adapter has today)."
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "machine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "file",
+        "machineClass",
+        "inputRegion",
+        "outputRegion"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "file": {
+          "type": "string",
+          "pattern": "\\.json$",
+          "description": "The machine's corpus file name (its file stem is what cloneable rule 1 and document handoffs name)."
+        },
+        "machineClass": {
+          "$ref": "machine-class.schema.json"
+        },
+        "inputRegion": {
+          "$ref": "#/$defs/region"
+        },
+        "outputRegion": {
+          "$ref": "#/$defs/region"
+        },
+        "cloneable": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "dispatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "ces-trigger",
+            "frame-step",
+            "observation-request"
+          ],
+          "description": "ces-trigger: the PE dispatches when one of triggerSequenceIds asserts (triggerConfig rules); frame-step: the asset-workflow dispatcher dispatches when the frame's step clones this machine, handing the agent the assetID, the step's capability and its scopes, nothing else. observation-request: an input-analyst invoked when observations arrive or on request, to produce the machine's input vector; it names no CES."
+        },
+        "triggerSequenceIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "frameScopes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "frame:read",
+              "pod:read",
+              "pod:write",
+              "frame:return"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "workflow": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The agentic workflow (agentic-workflow-contract.json) this behavior serves."
+        },
+        "humanApprovalRequired": {
+          "type": "boolean",
+          "description": "True when the agent's work is followed by a human approval step it can never perform (T15)."
+        },
+        "trigger": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The named hook (agentBinding.trigger)."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "enum": [
+                  "ces-trigger",
+                  "frame-step"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "triggerSequenceIds"
+            ]
+          }
+        }
+      ]
+    },
+    "capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/capability"
+      },
+      "description": "Abstract tool grants. An adapter grants exactly these and nothing else; a capability an adapter cannot provide is a render failure, never a silent drop."
+    },
+    "reasoning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "objective",
+        "instructions",
+        "outputContract"
+      ],
+      "properties": {
+        "objective": {
+          "type": "string",
+          "minLength": 1
+        },
+        "instructions": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Runtime-neutral system instructions. They never name the hosting runtime; an adapter may prefix its own framing."
+        },
+        "outputContract": {
+          "type": "string",
+          "minLength": 1
+        },
+        "inputAxes": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "sequenceCatalog": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "prohibitions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "agentBinding": {
+      "$ref": "agent-binding.schema.json"
+    },
+    "responseMapping": {
+      "type": "object",
+      "required": [
+        "schemaVersion",
+        "responseContract",
+        "fields"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "type": "string"
+        },
+        "responseContract": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mode": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "semantic",
+              "valueType",
+              "extract",
+              "target"
+            ],
+            "properties": {
+              "semantic": {
+                "type": "string",
+                "minLength": 1
+              },
+              "valueType": {
+                "type": "string",
+                "minLength": 1
+              },
+              "normalization": {
+                "type": "string"
+              },
+              "extract": {
+                "type": "object"
+              },
+              "target": {
+                "type": "object",
+                "required": [
+                  "sensorId",
+                  "region",
+                  "index"
+                ],
+                "properties": {
+                  "sensorId": {
+                    "type": "string"
+                  },
+                  "region": {
+                    "$ref": "#/$defs/region"
+                  },
+                  "index": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "description": "How the agent's textual or structured answer becomes completion values: localOpenClawStack/machine-behaviors/RESPONSE_MAPPING.md, response-mapping.schema.json."
+    },
+    "documentWorkflowBinding": {
+      "type": "object"
+    },
+    "runtimeBindings": {
+      "type": "object",
+      "description": "Optional per-runtime overrides an adapter reads (model, timeouts, legacy ids). Keyed by runtime name; never required for a behavior to render.",
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "provenance": {
+      "type": "object"
+    },
+    "documentAssetWorkflow": {
+      "type": "object",
+      "description": "The machine's document-workflow duty (IFRS and other document domains), carried unchanged."
+    }
+  },
+  "$defs": {
+    "region": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "offset",
+        "length"
+      ],
+      "properties": {
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "length": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "capability": {
+      "enum": [
+        "frame.read",
+        "frame.return.write",
+        "pod.read",
+        "pod.write",
+        "pe.completion.write",
+        "pe.observations.read",
+        "kline.read",
+        "regression.report.read",
+        "registry.read",
+        "rag.query",
+        "pki.crl.read",
+        "lifecycle.frame.open",
+        "lifecycle.continuation.invalidate",
+        "egress.message.annotate",
+        "egress.message.hold",
+        "delegation.clamp",
+        "human.notify"
+      ],
+      "description": "frame.read/frame.return.write/pod.read/pod.write: the asset lifecycle through the step's capability (pod writes under the pinned ETag). pe.completion.write: answer through the agentBinding writeBack. pe.observations.read: the PE's current state and source observations. kline.read: engine K-line histories. regression.report.read: CI regression run reports. registry.read: the instance registry. rag.query: localAIStack retrieval. pki.crl.read: the lane PKI's revocation list. lifecycle.frame.open: open a new asset frame (no approval). lifecycle.continuation.invalidate: invalidate parked continuations signed by a revoked principal. egress.message.annotate/hold: add provenance to, or hold, an outbound ACP/MCP message. delegation.clamp: reduce A2A delegation depth. human.notify: route a request to named human roles."
+    }
+  }
+}

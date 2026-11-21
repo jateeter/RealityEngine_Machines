@@ -1,0 +1,180 @@
+{
+  "schemaVersion": "1.0.0",
+  "behaviorId": "aigov-bias-audit-preparer",
+  "role": "step-agent",
+  "agentId": "aigov-bias-audit-preparer",
+  "displayName": "Bias-audit preparer",
+  "domain": "ai-governance-regime",
+  "machine": {
+    "id": "GOV03_socio-technical-bias-audit",
+    "file": "GOV03_socio-technical-bias-audit.json",
+    "machineClass": "safety-compliance-checker",
+    "inputRegion": {
+      "offset": 16992,
+      "length": 11
+    },
+    "outputRegion": {
+      "offset": 17252,
+      "length": 10
+    },
+    "cloneable": true
+  },
+  "dispatch": {
+    "mode": "frame-step",
+    "triggerSequenceIds": [
+      "ces_gov03_agent_requested"
+    ],
+    "frameScopes": [
+      "frame:read",
+      "pod:read",
+      "pod:write",
+      "frame:return"
+    ],
+    "workflow": "W1",
+    "humanApprovalRequired": true
+  },
+  "capabilities": [
+    "frame.read",
+    "pod.read",
+    "pod.write",
+    "frame.return.write",
+    "rag.query"
+  ],
+  "reasoning": {
+    "objective": "Draft the data-lineage and bias audit (EU AI Act Art. 10, ISO/IEC 42001 A.7) for a high-risk domain under admission, from its training and evaluation lineage; the signature is a human's.",
+    "instructions": "You are the bias-audit preparer for the RealityEngine AI governance regime (M-GOV-03 SocioTechnicalBiasAudit, workflow W1).\n\nOBJECTIVE\nDraft the data-lineage and bias audit (EU AI Act Art. 10, ISO/IEC 42001 A.7) for a high-risk domain under admission, from its training and evaluation lineage; the signature is a human's.\n\nYOU MAY\n- Draft the bias and data-lineage audit document in the frame.\n\nYOU MUST NOT\n- Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).\n- Never write vector values directly; your result reaches the engines only through your completion contract.\n- Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.\n- Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts.",
+    "outputContract": "Return one structured line per completion field as `<field>: 0|1` (audit_drafted: the audit draft is complete, audit_failed: the agent's step failed), then `rationale: <one sentence>`. The machine, not you, decides what follows.",
+    "sequenceCatalog": [
+      {
+        "sequenceId": "ces_gov03_agent_requested",
+        "label": "S1_AgentRunning",
+        "rag": "AMBER",
+        "outputIndex": 8,
+        "action": "AGENT_REQUESTED"
+      },
+      {
+        "sequenceId": "ces_gov03_agent_failed",
+        "label": "S_err_StepFailed",
+        "rag": "RED",
+        "outputIndex": 4,
+        "action": "PARKED + REWORK"
+      },
+      {
+        "sequenceId": "ces_gov03_audited",
+        "label": "S2_Audited",
+        "rag": "GREEN",
+        "outputIndex": 2,
+        "action": "PERMIT_DEPLOY"
+      }
+    ],
+    "prohibitions": [
+      "Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).",
+      "Never write vector values directly; your result reaches the engines only through your completion contract.",
+      "Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.",
+      "Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts."
+    ]
+  },
+  "agentBinding": {
+    "agent": "aigov-bias-audit-preparer",
+    "mode": "supervised-act",
+    "trigger": "ces_gov03_agent_requested",
+    "allowedActions": [
+      "Draft the bias and data-lineage audit document in the frame."
+    ],
+    "writeBack": {
+      "type": "pe-sensor",
+      "provider": "asset-lifecycle",
+      "sensorId": "aigov.gov03.bias-audit-preparer.completion",
+      "name": "Bias-audit preparer completion (GOV03)",
+      "region": {
+        "offset": 17000,
+        "length": 2
+      },
+      "semantics": [
+        "audit_drafted",
+        "audit_failed"
+      ],
+      "ttlMs": 300000,
+      "normalization": "already-normalized-0-1",
+      "ingest": {
+        "endpoint": "/api/integrations/completions",
+        "method": "POST",
+        "triggerPush": false,
+        "compactPush": true
+      },
+      "sourceMapping": {
+        "id": "aigov-gov03-bias-audit-preparer-completion",
+        "sensorId": "aigov.gov03.bias-audit-preparer.completion",
+        "name": "Bias-audit preparer completion (GOV03)",
+        "region": {
+          "offset": 17000,
+          "length": 2
+        },
+        "ttlMs": 300000
+      }
+    },
+    "riskControls": {
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "maxAutonomy": "supervised-act",
+      "blockedWhenRag": []
+    },
+    "autonomyPolicy": {
+      "mode": "supervised-act",
+      "stage": 2,
+      "writeBackType": "pe-sensor",
+      "canWriteBack": true,
+      "canStageActions": true,
+      "canExecuteActions": false,
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "blockedWhenRag": []
+    }
+  },
+  "responseMapping": {
+    "schemaVersion": "1.0.0",
+    "responseContract": "structured-keys",
+    "mode": "supervised-act",
+    "fields": [
+      {
+        "semantic": "audit_drafted",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/audit_drafted",
+          "responseKey": "audit_drafted"
+        },
+        "target": {
+          "sensorId": "aigov.gov03.bias-audit-preparer.completion",
+          "region": {
+            "offset": 17000,
+            "length": 2
+          },
+          "index": 0
+        }
+      },
+      {
+        "semantic": "audit_failed",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/audit_failed",
+          "responseKey": "audit_failed"
+        },
+        "target": {
+          "sensorId": "aigov.gov03.bias-audit-preparer.completion",
+          "region": {
+            "offset": 17000,
+            "length": 2
+          },
+          "index": 1
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "builder": "machine_factory/domains/ai-governance-regime/tools/build_machines.py",
+    "candidateVersion": "0.2.0",
+    "specRule": "SPECIFICATION.md 4.3 (3)"
+  }
+}

@@ -1,0 +1,222 @@
+{
+  "schemaVersion": "1.0.0",
+  "behaviorId": "aigov-key-rotation-coordinator",
+  "role": "step-agent",
+  "agentId": "aigov-key-rotation-coordinator",
+  "displayName": "Key rotation coordinator",
+  "domain": "ai-governance-regime",
+  "machine": {
+    "id": "GOV17_quorum-key-revocation-lifecycle",
+    "file": "GOV17_quorum-key-revocation-lifecycle.json",
+    "machineClass": "governance-escalator",
+    "inputRegion": {
+      "offset": 17216,
+      "length": 12
+    },
+    "outputRegion": {
+      "offset": 17392,
+      "length": 10
+    },
+    "cloneable": true
+  },
+  "dispatch": {
+    "mode": "frame-step",
+    "triggerSequenceIds": [
+      "ces_gov17_agent_requested"
+    ],
+    "frameScopes": [
+      "frame:read",
+      "pod:read",
+      "pod:write",
+      "frame:return"
+    ],
+    "workflow": "W6",
+    "humanApprovalRequired": true
+  },
+  "capabilities": [
+    "frame.read",
+    "pod.read",
+    "pod.write",
+    "frame.return.write",
+    "pki.crl.read",
+    "lifecycle.continuation.invalidate",
+    "human.notify"
+  ],
+  "reasoning": {
+    "objective": "Invalidate every parked continuation signed by the revoked principal and prepare the rotated quorum keyring for approval; never approve the rotation.",
+    "instructions": "You are the key rotation coordinator for the RealityEngine AI governance regime (M-GOV-17 QuorumKeyRevocationLifecycle, workflow W6).\n\nOBJECTIVE\nInvalidate every parked continuation signed by the revoked principal and prepare the rotated quorum keyring for approval; never approve the rotation.\n\nYOU MAY\n- Invalidate continuations signed by the revoked principal.\n- Prepare the rotated keyring.\n\nYOU MUST NOT\n- Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).\n- Never write vector values directly; your result reaches the engines only through your completion contract.\n- Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.\n- Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts.",
+    "outputContract": "Return one structured line per completion field as `<field>: 0|1` (invalidation_done: every affected parked continuation is invalidated, keyring_ready: the rotated keyring is prepared, coordinator_failed: the agent's step failed), then `rationale: <one sentence>`. The machine, not you, decides what follows.",
+    "sequenceCatalog": [
+      {
+        "sequenceId": "ces_gov17_agent_requested",
+        "label": "S1_AgentRunning",
+        "rag": "AMBER",
+        "outputIndex": 8,
+        "action": "AGENT_REQUESTED + HALT_PROMOTION + REVOKE_EPOCH"
+      },
+      {
+        "sequenceId": "ces_gov17_agent_failed",
+        "label": "S_err_StepFailed",
+        "rag": "RED",
+        "outputIndex": 4,
+        "action": "PARKED + REWORK"
+      },
+      {
+        "sequenceId": "ces_gov17_rotation_parked",
+        "label": "S2_RotationParked",
+        "rag": "AMBER",
+        "outputIndex": 4,
+        "action": "PARKED + HALT_PROMOTION + REVOKE_EPOCH"
+      },
+      {
+        "sequenceId": "ces_gov17_keys_rotated",
+        "label": "S3_KeysRotated",
+        "rag": "GREEN",
+        "outputIndex": 2,
+        "action": "PERMIT_DEPLOY"
+      },
+      {
+        "sequenceId": "ces_gov17_rotation_unattested",
+        "label": "S2_RotationParked",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION + REVOKE_EPOCH"
+      },
+      {
+        "sequenceId": "ces_gov17_rotation_overdue",
+        "label": "S_err_Overdue",
+        "rag": "RED",
+        "outputIndex": 9,
+        "action": "OVERDUE + HALT_PROMOTION + REVOKE_EPOCH"
+      }
+    ],
+    "prohibitions": [
+      "Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).",
+      "Never write vector values directly; your result reaches the engines only through your completion contract.",
+      "Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.",
+      "Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts."
+    ]
+  },
+  "agentBinding": {
+    "agent": "aigov-key-rotation-coordinator",
+    "mode": "supervised-act",
+    "trigger": "ces_gov17_agent_requested",
+    "allowedActions": [
+      "Invalidate continuations signed by the revoked principal.",
+      "Prepare the rotated keyring."
+    ],
+    "writeBack": {
+      "type": "pe-sensor",
+      "provider": "asset-lifecycle",
+      "sensorId": "aigov.gov17.key-rotation-coordinator.completion",
+      "name": "Key rotation coordinator completion (GOV17)",
+      "region": {
+        "offset": 17224,
+        "length": 3
+      },
+      "semantics": [
+        "invalidation_done",
+        "keyring_ready",
+        "coordinator_failed"
+      ],
+      "ttlMs": 300000,
+      "normalization": "already-normalized-0-1",
+      "ingest": {
+        "endpoint": "/api/integrations/completions",
+        "method": "POST",
+        "triggerPush": false,
+        "compactPush": true
+      },
+      "sourceMapping": {
+        "id": "aigov-gov17-key-rotation-coordinator-completion",
+        "sensorId": "aigov.gov17.key-rotation-coordinator.completion",
+        "name": "Key rotation coordinator completion (GOV17)",
+        "region": {
+          "offset": 17224,
+          "length": 3
+        },
+        "ttlMs": 300000
+      }
+    },
+    "riskControls": {
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "maxAutonomy": "supervised-act",
+      "blockedWhenRag": []
+    },
+    "autonomyPolicy": {
+      "mode": "supervised-act",
+      "stage": 2,
+      "writeBackType": "pe-sensor",
+      "canWriteBack": true,
+      "canStageActions": true,
+      "canExecuteActions": false,
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "blockedWhenRag": []
+    }
+  },
+  "responseMapping": {
+    "schemaVersion": "1.0.0",
+    "responseContract": "structured-keys",
+    "mode": "supervised-act",
+    "fields": [
+      {
+        "semantic": "invalidation_done",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/invalidation_done",
+          "responseKey": "invalidation_done"
+        },
+        "target": {
+          "sensorId": "aigov.gov17.key-rotation-coordinator.completion",
+          "region": {
+            "offset": 17224,
+            "length": 3
+          },
+          "index": 0
+        }
+      },
+      {
+        "semantic": "keyring_ready",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/keyring_ready",
+          "responseKey": "keyring_ready"
+        },
+        "target": {
+          "sensorId": "aigov.gov17.key-rotation-coordinator.completion",
+          "region": {
+            "offset": 17224,
+            "length": 3
+          },
+          "index": 1
+        }
+      },
+      {
+        "semantic": "coordinator_failed",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/coordinator_failed",
+          "responseKey": "coordinator_failed"
+        },
+        "target": {
+          "sensorId": "aigov.gov17.key-rotation-coordinator.completion",
+          "region": {
+            "offset": 17224,
+            "length": 3
+          },
+          "index": 2
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "builder": "machine_factory/domains/ai-governance-regime/tools/build_machines.py",
+    "candidateVersion": "0.2.0",
+    "specRule": "HARDENING_TRANSITION_RULES.md section 2 (17)"
+  }
+}

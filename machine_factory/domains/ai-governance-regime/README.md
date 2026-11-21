@@ -1,6 +1,6 @@
 # AI governance regime (organizational wrapper)
 
-Canonical domain: `ai-governance-regime` · Package `0.1.0` · **CANDIDATES_BUILT_NOT_ADMITTED**
+Canonical domain: `ai-governance-regime` · Package `0.2.0` · **CANDIDATES_BUILT_NOT_ADMITTED**
 
 This domain is the organizational wrapper around the RealityEngine. It turns the
 obligations of the global AI-governance standards and frameworks into machines
@@ -29,8 +29,11 @@ settled before conversion.
 | [RESOLUTION_WORKPLAN.md](RESOLUTION_WORKPLAN.md) | The 8-week, 4-phase workplan closing the seven gaps |
 | [REVIEW_QUEUE.md](REVIEW_QUEUE.md) | Review findings and their dispositions |
 | [CONNECTED_WORKFLOW.md](CONNECTED_WORKFLOW.md) | Interconnectivity needs (lanes, buses, Sources, temporal order) and the seven agentic workflows the wrapper requires |
-| `machines/` | 18 candidate machines (GOV00–GOV17), schema-conformant, one regular expression per CES, with fixtures; built by `tools/build_machines.py` |
-| [semantic-amendments.json](semantic-amendments.json) | Where the machines resolve or refine the specification (GOV-SA-01–12) |
+| `machines/` | 18 candidate machines (GOV00–GOV17): schema-conformant, lifecycle lanes on templates, chained CESs (one regular expression each), agent bindings with completion Sources, fixtures |
+| `agent-candidates/ai-governance-regime/` | 16 runtime-neutral agent behaviors (`schemas/agent-behavior.schema.json`); localOpenClawStack renders them for OpenClaw and ACP |
+| [agentic-workflow-contract.json](agentic-workflow-contract.json) | Workflows W1–W7: frames, steps, agents, human steps, what each governs |
+| [governance-sources.json](governance-sources.json) | All 38 input Sources and 16 completion Sources, with status and consumers |
+| [semantic-amendments.json](semantic-amendments.json) | Where the machines resolve or refine the specification (GOV-SA-01–22) |
 | [PACKAGE_STATUS.md](PACKAGE_STATUS.md) | Lifecycle, the production steps done and still to do |
 | `schemas/governance-asset-shapes.shacl.ttl` + [`.md`](schemas/governance-asset-shapes.md) | SHACL shapes for the governance Solid-pod asset types, and their documentation |
 | [templates/ISO42001-STATEMENT-OF-APPLICABILITY.md](templates/ISO42001-STATEMENT-OF-APPLICABILITY.md) | ISO/IEC 42001 Annex A Statement of Applicability template |

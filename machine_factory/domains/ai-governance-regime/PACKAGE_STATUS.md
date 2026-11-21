@@ -1,6 +1,6 @@
 # AI governance regime package status
 
-Factory lifecycle: **CANDIDATES_BUILT_NOT_ADMITTED**. Package `0.1.0`. The 18
+Factory lifecycle: **CANDIDATES_BUILT_NOT_ADMITTED**. Package `0.2.0`. The 18
 candidate machines are in this package's `machines/`. Nothing is under the
 repository's `machines/domains/`, and no runtime file is changed.
 
@@ -17,8 +17,8 @@ same path. Directories appear when their step produces content
 | 3 | Sources: pin the baseline and each in-scope framework edition; extract controls | `source-requirements.json`, `source-reference-map.json` | open (R07, R08) |
 | 4 | Asset catalog: governance document types, fields, owners, dependencies | `document-asset-catalog.json`, `document-dependencies.json`, `templates/` | partly received (SHACL shapes, SoA template) |
 | 5 | Machine conversion: canonical candidate files | `machines/*.json` here, `machine-import-manifest.json`, `semantic-amendments.json` | **built** 2026-11-21; copied to `machines/domains/` at admission |
-| 6 | Families and runbooks: one accountable family per workflow | `families/`, `runbooks/` | open; seven families identified in `machine-import-manifest.json` |
-| 7 | Agent candidates and the workflow contract | `agent-candidates/`, `agentic-workflow-contract.json` | open |
+| 6 | Families and runbooks: one accountable family per workflow | `families/`, `runbooks/` | open; seven workflows in `agentic-workflow-contract.json` |
+| 7 | Agent candidates and the workflow contract | `agent-candidates/`, `agentic-workflow-contract.json`, `governance-sources.json` | **built** 2026-11-21: 16 neutral behaviors, W1–W7, 38 Sources |
 | 8 | Acceptance: synthetic cases, positive/negative/boundary | `acceptance/` | open |
 | 9 | Admission: `scripts/approve-domain.sh plan`, then `prepare` | `domains/approvals/ai-governance-regime/...` | open |
 | 10 | Deployment | `deployments/`, `DEPLOYMENT.md` | open |
@@ -75,3 +75,43 @@ same path. Directories appear when their step produces content
   - no 3-of-3 trajectory comparison (GOV-R12);
   - the multi-valued watchdogs need an extension corpus (GOV-R11);
   - the amendments need owner review (GOV-R14).
+
+## 0.2.0 record (connected rebuild)
+
+- **Consumed:** CONNECTED_WORKFLOW.md, and owner decisions GOV-SD-07 (every
+  workflow and Source in v1) and GOV-SD-08 (runtime-neutral agents).
+- **Produced** by `tools/build_machines.py`:
+  - 18 machines with 141 CESs: 79 of one event, 52 of two, 10 of three;
+  - 145 fixtures;
+  - 16 agent behaviors (`agent-candidates/ai-governance-regime/`);
+  - `governance-sources.json`;
+  - `agentic-workflow-contract.json`.
+
+  It also adds `schemas/agent-behavior.schema.json` at the repository root,
+  the runtime-neutral agent contract.
+- **What changed from 0.1.0:**
+  - templates reserve the lifecycle lanes in cells 2–7;
+  - every agent step is a chain: requested, then completed or failed;
+  - approvals need a dwell on a rendered diff;
+  - watchdogs trip on a sustained breach and release only after their
+    agent's triage;
+  - templates no longer publish on the bus, and GOV00 folds fixtures only;
+  - every template and five fixtures carry an `agentBinding` with a
+    completion Source;
+  - the band is `[16960:17429]`, with 10-element outputs, adding
+    AGENT_REQUESTED and OVERDUE.
+- **Verified:** `tools/verify_machines.py` passes:
+  - schema-valid machines and behaviors;
+  - one pattern per CES;
+  - 11 templates cloneable;
+  - lanes on every template, no template bus edges;
+  - every agent trigger is a real CES, and every completion lane is inside
+    its input;
+  - regions clear;
+  - a reproducible build;
+  - 145 fixtures replay.
+
+  In localOpenClawStack, `tests/run_runtime_tests.py` renders all 16
+  behaviors for OpenClaw (valid OC agent specs) and for ACP (session-scoped
+  frame servers).
+- **Not done:** GOV-R11, R12, R19, R20 and R21; no engine run.

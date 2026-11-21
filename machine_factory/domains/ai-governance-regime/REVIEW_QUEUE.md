@@ -19,12 +19,15 @@ step in [PACKAGE_STATUS.md](PACKAGE_STATUS.md) is redone. Findings marked
 | GOV-R10 | Generated-text residue and stale cross-references | documents | mechanical |
 | GOV-R11 | Continuous-input watchdogs are multi-valued machines | regression reach | **owner** (extension corpus) |
 | GOV-R12 | Latch feedback and verdict composition need live confirmation | engine/PE behavior | live 3-of-3 run |
-| GOV-R13 | GOV10 permits on every quiet step | specification | **owner** |
+| GOV-R13 | GOV10 permits on every quiet step | specification | **closed 2026-11-21**: GOV10 runs per message on `req_egress` (GOV-SA-08) |
 | GOV-R14 | The semantic amendments need owner review | specification | **owner** |
-| GOV-R15 | 91% of CESs are single events; the obligations are temporal | machines | rebuild (CONNECTED_WORKFLOW.md §1.4) |
-| GOV-R16 | Templates reserve no lifecycle lanes (cells 2–7) | frames | rebuild (§1.1); lifecycle issue for the missing observations |
-| GOV-R17 | Templates publish verdicts by bus, which clones may not | clone contract | rebuild (§1.2) |
-| GOV-R18 | No agent triggers or response Sources | agentic workflows | **owner** (which workflows and Sources are in v1, §1.3, §2) |
+| GOV-R15 | 91% of CESs are single events; the obligations are temporal | machines | **rebuilt 2026-11-21 (0.2.0)**: chains for every order in §1.4; 62 of 141 CESs are chains |
+| GOV-R16 | Templates reserve no lifecycle lanes (cells 2–7) | frames | **rebuilt**: every template reserves 2–7; the missing observations are GOV-R19 |
+| GOV-R17 | Templates publish verdicts by bus, which clones may not | clone contract | **rebuilt**: only fixtures publish; templates report by continuation and completion |
+| GOV-R18 | No agent triggers or response Sources | agentic workflows | **rebuilt**: 16 agents, each a neutral behavior with a completion Source; all in v1 (GOV-SD-07) |
+| GOV-R19 | A clone's non-lane inputs need a writer | lifecycle | localAssetStorageStack: frame facts and the step agent's completion into the clone's block |
+| GOV-R20 | 31 of the 38 Sources are partial or new | Sources | build per governance-sources.json; issues in each producing repository |
+| GOV-R21 | The ACP side of the runtime split | agent runtime | Manager ACP AgentDriver, the MCP servers behind the capabilities, the runtime choice (v0.0.3) |
 
 ## GOV-R01: neither corpus is in the canonical machine form
 
@@ -209,3 +212,37 @@ The review is in [CONNECTED_WORKFLOW.md](CONNECTED_WORKFLOW.md):
 The document lists every machine-to-machine edge, the external Sources and
 whether each exists today, the order each obligation needs, and seven agentic
 workflows (W1–W7).
+
+## GOV-R19: a clone's non-lane inputs need a writer
+
+Today the lifecycle writes cells 2–7 of a clone, and nothing else writes the
+clone's block. The templates' other inputs are frame facts (the request,
+gates, signatures, the GOV11 diff, GOV06's quorum) and the step agent's
+completion. They need one frame-scoped writer, and the lifecycle is the
+natural one: it already holds the frame, and the agent writes its result to
+the frame's `return`. The design is the lifecycle mapping the return through
+the behavior's `responseMapping` into the completion cells, and the frame's
+facts into the cells the template names. That keeps agents away from vectors
+and keeps one writer per block. It is localAssetStorageStack work.
+
+## GOV-R20: Sources to build
+
+`governance-sources.json` lists 38 input signals:
+- **7 exist:** the lifecycle lanes and the recertification TTL;
+- **16 are partial:** something close exists, such as CI parity reports, the
+  re_pki CRL, localAI drift, or the approval requests;
+- **15 are new:** for example the exposure budget, egress classification, the
+  lifecycle's principal-distinct observation and the operator console.
+
+The 16 agents' completion Sources are new as well. Each needs an issue in the
+repository that produces it.
+
+## GOV-R21: the ACP side of the runtime split
+
+The agents are runtime-neutral behaviors (GOV-SD-08), rendered by
+localOpenClawStack `machine-behaviors/runtimes/` for OpenClaw and for ACP.
+To run them on ACP, three things are still needed:
+- an ACP `AgentDriver` in RealityEngine_Manager's instantiation component;
+- the MCP servers behind the capabilities marked `implemented: false`, with
+  the frame-scoped lifecycle server first (#714);
+- a choice of runtime, with its protocol version pinned.

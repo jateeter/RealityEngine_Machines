@@ -33,7 +33,7 @@ from pathlib import Path
 PKG = Path(__file__).resolve().parent.parent
 REPO = PKG.parents[2]
 MACHINES = PKG / "machines"
-BAND = (16960, 17440)  # [16960:17439], scope-decisions.json GOV-SD-05
+BAND = (16960, 17430)  # [16960:17429], scope-decisions.json GOV-SD-05
 
 
 def load(name: str, path: Path):
@@ -51,7 +51,11 @@ def main() -> int:
     # schema
     r = subprocess.run(["node", str(PKG / "tools" / "validate_schema.mjs"), str(REPO)],
                        capture_output=True, text=True)
-    print(r.stdout.strip().splitlines()[-1] if r.stdout.strip() else r.stderr.strip())
+    for ln in r.stdout.strip().splitlines():
+        if ln.startswith(("schema:", "behaviors:")):
+            print(ln)
+    if not r.stdout.strip():
+        print(r.stderr.strip())
     if r.returncode:
         failures += [ln for ln in r.stdout.splitlines() if ln.startswith("FAIL")] or ["schema validation failed"]
 
@@ -95,6 +99,43 @@ def main() -> int:
             if any(len(ev) != lin for ev in f["events"]):
                 failures.append(f"{p.name}: fixture {f['name']} has an event of the wrong length")
     print("shape: checked")
+
+    # contracts: lanes, clone exit, agents
+    lengths = {}
+    behaviors = {p.name: json.loads(p.read_text())
+                 for p in (PKG / "agent-candidates" / "ai-governance-regime").glob("*.agent.json")}
+    for p, m in machines.items():
+        md = m["metadata"]
+        kind = (md.get("governanceSpec") or {}).get("kind", "aggregator")
+        for s in m["sequences"]:
+            lengths[len(s["events"])] = lengths.get(len(s["events"]), 0) + 1
+        reserved = [i for i, s in enumerate(md.get("inputSemantics", [])) if s.lower().startswith("reserved")]
+        if kind == "template" and reserved != [2, 3, 4, 5, 6, 7]:
+            failures.append(f"{p.name}: template reserves {reserved}, not the lifecycle lanes 2-7")
+        if kind != "template" and reserved:
+            failures.append(f"{p.name}: {kind} reserves cells {reserved}")
+        edges = md.get("interconnections", [])
+        if kind == "template" and any(e["type"] == "published-domain-bus-producer" for e in edges):
+            failures.append(f"{p.name}: a template publishes on a bus; a clone leaves only by continuation or termination")
+        ab = md.get("agentBinding")
+        if ab:
+            ids = {s["id"] for s in m["sequences"]}
+            if ab["trigger"] not in ids:
+                failures.append(f"{p.name}: agent trigger {ab['trigger']} is not a CES")
+            wr, ir = ab["writeBack"]["region"], m["perceptualMapping"]["input"]
+            if not (ir["offset"] <= wr["offset"] and wr["offset"] + wr["length"] <= ir["offset"] + ir["length"]):
+                failures.append(f"{p.name}: completion region is outside the input")
+            beh = behaviors.get(f"{ab['agent']}.agent.json")
+            if beh is None:
+                failures.append(f"{p.name}: no agent behavior for {ab['agent']}")
+            elif beh["agentBinding"] != ab:
+                failures.append(f"{p.name}: agent behavior's binding differs from the machine's")
+            elif not set(beh["dispatch"]["triggerSequenceIds"]) <= {s["id"] for s in m["sequences"]}:
+                failures.append(f"{p.name}: behavior dispatch names a CES the machine lacks")
+        elif kind != "aggregator" and p.name != "GOV08_latency-gate-sentinel.json":
+            failures.append(f"{p.name}: no agentBinding")
+    print("contracts: lanes 2-7 on templates, no template bus edges, agent triggers, completion lanes, behaviors")
+    print("ces lengths: " + ", ".join(f"{k}: {v}" for k, v in sorted(lengths.items())))
 
     # regions
     spans = []

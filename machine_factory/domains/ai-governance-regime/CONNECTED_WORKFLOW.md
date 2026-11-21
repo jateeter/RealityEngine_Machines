@@ -5,8 +5,10 @@ organizational wrapper has to do, 2026-11-21. It answers two questions:
 1. What does each machine need to be connected to?
 2. Which agentic workflows does the wrapper need?
 
-Nothing here changes a machine. It is the design input for the rebuild, and
-it opens findings GOV-R15 to GOV-R18 in [REVIEW_QUEUE.md](REVIEW_QUEUE.md).
+It was the design input for the 0.2.0 rebuild, and it opened findings GOV-R15
+to GOV-R18 in [REVIEW_QUEUE.md](REVIEW_QUEUE.md). **Status:** rebuilt to it on
+2026-11-21, with every workflow and Source in v1. Section 0 describes 0.1.0;
+the 0.2.0 record is in PACKAGE_STATUS.md.
 
 ## 0. What the candidates are today
 

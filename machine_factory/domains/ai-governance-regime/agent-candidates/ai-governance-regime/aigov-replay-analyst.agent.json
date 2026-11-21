@@ -1,0 +1,239 @@
+{
+  "schemaVersion": "1.0.0",
+  "behaviorId": "aigov-replay-analyst",
+  "role": "step-agent",
+  "agentId": "aigov-replay-analyst",
+  "displayName": "K-line replay analyst",
+  "domain": "ai-governance-regime",
+  "machine": {
+    "id": "GOV04_rule-epoch-promotion",
+    "file": "GOV04_rule-epoch-promotion.json",
+    "machineClass": "governance-escalator",
+    "inputRegion": {
+      "offset": 17008,
+      "length": 13
+    },
+    "outputRegion": {
+      "offset": 17262,
+      "length": 10
+    },
+    "cloneable": true
+  },
+  "dispatch": {
+    "mode": "frame-step",
+    "triggerSequenceIds": [
+      "ces_gov04_agent_requested"
+    ],
+    "frameScopes": [
+      "frame:read",
+      "pod:read",
+      "frame:return"
+    ],
+    "workflow": "W2",
+    "humanApprovalRequired": true
+  },
+  "capabilities": [
+    "frame.read",
+    "pod.read",
+    "frame.return.write",
+    "kline.read",
+    "regression.report.read"
+  ],
+  "reasoning": {
+    "objective": "Replay the candidate rule epoch on the near-miss K-lines in a sandbox universe and report whether it fires on every near miss and stays silent on nominal runs.",
+    "instructions": "You are the k-line replay analyst for the RealityEngine AI governance regime (M-GOV-04 RuleEpochPromotion, workflow W2).\n\nOBJECTIVE\nReplay the candidate rule epoch on the near-miss K-lines in a sandbox universe and report whether it fires on every near miss and stays silent on nominal runs.\n\nYOU MAY\n- Run the sandbox replay and write its report to the frame's return.\n\nYOU MUST NOT\n- Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).\n- Never write vector values directly; your result reaches the engines only through your completion contract.\n- Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.\n- Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts.",
+    "outputContract": "Return one structured line per completion field as `<field>: 0|1` (replay_completed: the replay is complete, replay_failed: the agent's step failed, replay_pass: candidate rules fire on near misses and stay silent on nominal runs), then `rationale: <one sentence>`. The machine, not you, decides what follows.",
+    "sequenceCatalog": [
+      {
+        "sequenceId": "ces_gov04_agent_requested",
+        "label": "S1_AgentRunning",
+        "rag": "AMBER",
+        "outputIndex": 8,
+        "action": "AGENT_REQUESTED"
+      },
+      {
+        "sequenceId": "ces_gov04_agent_failed",
+        "label": "S_err_StepFailed",
+        "rag": "RED",
+        "outputIndex": 4,
+        "action": "PARKED + REWORK"
+      },
+      {
+        "sequenceId": "ces_gov04_replay_rejected",
+        "label": "S_err_Rejected",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION + REWORK"
+      },
+      {
+        "sequenceId": "ces_gov04_parity_missing",
+        "label": "S_err_Rejected",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION"
+      },
+      {
+        "sequenceId": "ces_gov04_aibom_missing",
+        "label": "S_err_Rejected",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION"
+      },
+      {
+        "sequenceId": "ces_gov04_awaiting_quorum",
+        "label": "S2_AwaitingQuorum",
+        "rag": "AMBER",
+        "outputIndex": 4,
+        "action": "PARKED"
+      },
+      {
+        "sequenceId": "ces_gov04_promoted",
+        "label": "S3_Promoted",
+        "rag": "GREEN",
+        "outputIndex": 2,
+        "action": "PERMIT_DEPLOY"
+      },
+      {
+        "sequenceId": "ces_gov04_rejected_re_pinned",
+        "label": "S_err_Rejected",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION + REWORK"
+      },
+      {
+        "sequenceId": "ces_gov04_rejected_stale",
+        "label": "S_err_Rejected",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION + REWORK"
+      }
+    ],
+    "prohibitions": [
+      "Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).",
+      "Never write vector values directly; your result reaches the engines only through your completion contract.",
+      "Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.",
+      "Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts."
+    ]
+  },
+  "agentBinding": {
+    "agent": "aigov-replay-analyst",
+    "mode": "supervised-act",
+    "trigger": "ces_gov04_agent_requested",
+    "allowedActions": [
+      "Run the sandbox replay and write its report to the frame's return."
+    ],
+    "writeBack": {
+      "type": "pe-sensor",
+      "provider": "asset-lifecycle",
+      "sensorId": "aigov.gov04.replay-analyst.completion",
+      "name": "K-line replay analyst completion (GOV04)",
+      "region": {
+        "offset": 17016,
+        "length": 3
+      },
+      "semantics": [
+        "replay_completed",
+        "replay_failed",
+        "replay_pass"
+      ],
+      "ttlMs": 300000,
+      "normalization": "already-normalized-0-1",
+      "ingest": {
+        "endpoint": "/api/integrations/completions",
+        "method": "POST",
+        "triggerPush": false,
+        "compactPush": true
+      },
+      "sourceMapping": {
+        "id": "aigov-gov04-replay-analyst-completion",
+        "sensorId": "aigov.gov04.replay-analyst.completion",
+        "name": "K-line replay analyst completion (GOV04)",
+        "region": {
+          "offset": 17016,
+          "length": 3
+        },
+        "ttlMs": 300000
+      }
+    },
+    "riskControls": {
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "maxAutonomy": "supervised-act",
+      "blockedWhenRag": []
+    },
+    "autonomyPolicy": {
+      "mode": "supervised-act",
+      "stage": 2,
+      "writeBackType": "pe-sensor",
+      "canWriteBack": true,
+      "canStageActions": true,
+      "canExecuteActions": false,
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "blockedWhenRag": []
+    }
+  },
+  "responseMapping": {
+    "schemaVersion": "1.0.0",
+    "responseContract": "structured-keys",
+    "mode": "supervised-act",
+    "fields": [
+      {
+        "semantic": "replay_completed",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/replay_completed",
+          "responseKey": "replay_completed"
+        },
+        "target": {
+          "sensorId": "aigov.gov04.replay-analyst.completion",
+          "region": {
+            "offset": 17016,
+            "length": 3
+          },
+          "index": 0
+        }
+      },
+      {
+        "semantic": "replay_failed",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/replay_failed",
+          "responseKey": "replay_failed"
+        },
+        "target": {
+          "sensorId": "aigov.gov04.replay-analyst.completion",
+          "region": {
+            "offset": 17016,
+            "length": 3
+          },
+          "index": 1
+        }
+      },
+      {
+        "semantic": "replay_pass",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/replay_pass",
+          "responseKey": "replay_pass"
+        },
+        "target": {
+          "sensorId": "aigov.gov04.replay-analyst.completion",
+          "region": {
+            "offset": 17016,
+            "length": 3
+          },
+          "index": 2
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "builder": "machine_factory/domains/ai-governance-regime/tools/build_machines.py",
+    "candidateVersion": "0.2.0",
+    "specRule": "SPECIFICATION.md 4.3 (4)"
+  }
+}

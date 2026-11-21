@@ -3,32 +3,275 @@
   "machine": {
     "id": "GOV11_human-review-anti-bias-gate",
     "name": "GOV11_human-review-anti-bias-gate",
-    "description": "Human review gate: permits once the canonical diff is rendered to a distinct human principal, halts an approval given without a rendered diff.",
+    "description": "Human review gate: the diff renderer shows the canonical diff of the exact revision; an approval counts only after the reviewer has been shown it for the dwell, by a distinct human; approval without a diff, or in the same step as the diff, is blocked.",
     "arbiterRule": "PASSTHROUGH",
     "matchAlgorithm": "equals",
     "outputMergeTransformation": "or",
     "perceptualMapping": {
       "input": {
         "offset": 17120,
-        "length": 3
+        "length": 10
       },
       "output": {
-        "offset": 17312,
-        "length": 8
+        "offset": 17332,
+        "length": 10
       },
       "bitsPerElement": 1
     },
     "sequences": [
       {
-        "id": "ces_gov11_diff_verified",
-        "name": "M-GOV-11 S0_AwaitingDiff → S1_DiffVerified",
+        "id": "ces_gov11_agent_requested",
+        "name": "M-GOV-11 S0_Init → S1_AgentRunning",
         "schemaVersion": "1.0",
         "metadata": {
-          "sourceFromState": "S0_AwaitingDiff",
-          "sourceToState": "S1_DiffVerified",
-          "regularExpression": "[lane_diff_rendered=1 ∧ lane_principal_distinct=1]",
+          "sourceFromState": "S0_Init",
+          "sourceToState": "S1_AgentRunning",
+          "regularExpression": "[lane_in_workflow=1 ∧ lane_step_running=1 ∧ diff_rendered=0]",
+          "length": 1,
           "specRule": "SPECIFICATION.md 4.3 (11)",
           "semanticAmendments": [],
+          "asserts": [
+            "AGENT_REQUESTED"
+          ],
+          "dispatchesAgent": "aigov-diff-renderer"
+        },
+        "events": [
+          {
+            "id": "ces_gov11_agent_requested-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov11_agent_requested-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov11_agent_failed",
+        "name": "M-GOV-11 S1_AgentRunning → S_err_StepFailed",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_AgentRunning",
+          "sourceToState": "S_err_StepFailed",
+          "regularExpression": "[lane_in_workflow=1 ∧ lane_step_running=1 ∧ diff_rendered=0] · [render_failed=1]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (11)",
+          "semanticAmendments": [
+            "GOV-SA-13"
+          ],
+          "asserts": [
+            "PARKED",
+            "REWORK"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov11_agent_failed-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov11_agent_failed-e1"
+            ]
+          },
+          {
+            "id": "ces_gov11_agent_failed-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov11_agent_failed-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov11_diff_verified",
+        "name": "M-GOV-11 S1_DiffShown → S2_DiffVerified",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_DiffShown",
+          "sourceToState": "S2_DiffVerified",
+          "regularExpression": "[lane_in_workflow=1 ∧ lane_approved=0 ∧ diff_rendered=1]{2} · [lane_principal_distinct=1 ∧ lane_approved=1 ∧ diff_rendered=1]",
+          "length": 3,
+          "specRule": "SPECIFICATION.md 4.3 (11)",
+          "semanticAmendments": [
+            "GOV-SA-14"
+          ],
           "asserts": [
             "PERMIT_DEPLOY"
           ]
@@ -39,8 +282,154 @@
             "isInitial": true,
             "elements": [
               {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
                 "value": 1.0,
                 "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov11_diff_verified-e1"
+            ]
+          },
+          {
+            "id": "ces_gov11_diff_verified-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov11_diff_verified-e2"
+            ]
+          },
+          {
+            "id": "ces_gov11_diff_verified-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
               },
               {
                 "value": 1.0,
@@ -64,6 +453,8 @@
                   0.0,
                   0.0,
                   0.0,
+                  0.0,
+                  0.0,
                   0.0
                 ]
               }
@@ -78,7 +469,8 @@
         "metadata": {
           "sourceFromState": "S0_AwaitingDiff",
           "sourceToState": "S_fail_BlindApprovalBlock",
-          "regularExpression": "[lane_diff_rendered=0 ∧ lane_approved=1]",
+          "regularExpression": "[lane_in_workflow=1 ∧ lane_approved=0 ∧ diff_rendered=0] · [lane_approved=1 ∧ diff_rendered=0]",
+          "length": 2,
           "specRule": "SPECIFICATION.md 4.3 (11)",
           "semanticAmendments": [],
           "asserts": [
@@ -88,6 +480,300 @@
         "events": [
           {
             "id": "ces_gov11_blind_approval_block-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov11_blind_approval_block-e1"
+            ]
+          },
+          {
+            "id": "ces_gov11_blind_approval_block-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov11_blind_approval_block-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov11_rushed_approval_block",
+        "name": "M-GOV-11 S0_AwaitingDiff → S_fail_BlindApprovalBlock",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_AwaitingDiff",
+          "sourceToState": "S_fail_BlindApprovalBlock",
+          "regularExpression": "[lane_in_workflow=1 ∧ lane_approved=0 ∧ diff_rendered=0] · [lane_approved=1 ∧ diff_rendered=1]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (11)",
+          "semanticAmendments": [
+            "GOV-SA-14"
+          ],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov11_rushed_approval_block-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov11_rushed_approval_block-e1"
+            ]
+          },
+          {
+            "id": "ces_gov11_rushed_approval_block-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov11_rushed_approval_block-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov11_self_approval_block",
+        "name": "M-GOV-11 S0_AwaitingDiff → S_fail_BlindApprovalBlock",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_AwaitingDiff",
+          "sourceToState": "S_fail_BlindApprovalBlock",
+          "regularExpression": "[lane_principal_distinct=0 ∧ lane_in_workflow=1 ∧ lane_approved=1]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (11)",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov11_self_approval_block-e0",
             "isInitial": true,
             "elements": [
               {
@@ -102,14 +788,50 @@
               {
                 "value": 1.0,
                 "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
               }
             ],
             "nextEventIds": [],
             "outputEvents": [
               {
-                "id": "ces_gov11_blind_approval_block-out",
+                "id": "ces_gov11_self_approval_block-out",
                 "vector": [
                   1.0,
+                  0.0,
+                  0.0,
                   0.0,
                   0.0,
                   0.0,
@@ -126,10 +848,161 @@
     ],
     "inputSequences": [
       {
+        "name": "gov11-agent-requested",
+        "events": [
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov11_agent_requested: [lane_in_workflow=1 ∧ lane_step_running=1 ∧ diff_rendered=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov11_agent_requested"
+        }
+      },
+      {
+        "name": "gov11-agent-failed",
+        "events": [
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov11_agent_failed: [lane_in_workflow=1 ∧ lane_step_running=1 ∧ diff_rendered=0] · [render_failed=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov11_agent_failed"
+        }
+      },
+      {
         "name": "gov11-diff-verified",
         "events": [
           [
             1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
             1.0,
             0.0
           ]
@@ -143,9 +1016,35 @@
             0.0,
             0.0,
             0.0,
+            0.0,
+            0.0,
             0.0
           ],
           "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
             [
               0.0,
               0.0,
@@ -154,11 +1053,13 @@
               0.0,
               0.0,
               0.0,
+              0.0,
+              0.0,
               0.0
             ]
           ],
-          "purpose": "drives ces_gov11_diff_verified: [lane_diff_rendered=1 ∧ lane_principal_distinct=1]",
-          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "purpose": "drives ces_gov11_diff_verified: [lane_in_workflow=1 ∧ lane_approved=0 ∧ diff_rendered=1]{2} · [lane_principal_distinct=1 ∧ lane_approved=1 ∧ diff_rendered=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
           "expectedSequenceId": "ces_gov11_diff_verified"
         }
       },
@@ -166,14 +1067,167 @@
         "name": "gov11-blind-approval-block",
         "events": [
           [
+            1.0,
             0.0,
             1.0,
-            1.0
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
           ]
         ],
         "metadata": {
           "expectedOutputVector": [
             1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov11_blind_approval_block: [lane_in_workflow=1 ∧ lane_approved=0 ∧ diff_rendered=0] · [lane_approved=1 ∧ diff_rendered=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov11_blind_approval_block"
+        }
+      },
+      {
+        "name": "gov11-rushed-approval-block",
+        "events": [
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov11_rushed_approval_block: [lane_in_workflow=1 ∧ lane_approved=0 ∧ diff_rendered=0] · [lane_approved=1 ∧ diff_rendered=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov11_rushed_approval_block"
+        }
+      },
+      {
+        "name": "gov11-self-approval-block",
+        "events": [
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
             0.0,
             0.0,
             0.0,
@@ -191,25 +1245,48 @@
               0.0,
               0.0,
               0.0,
+              0.0,
+              0.0,
               0.0
             ]
           ],
-          "purpose": "drives ces_gov11_blind_approval_block: [lane_diff_rendered=0 ∧ lane_approved=1]",
-          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
-          "expectedSequenceId": "ces_gov11_blind_approval_block"
+          "purpose": "drives ces_gov11_self_approval_block: [lane_principal_distinct=0 ∧ lane_in_workflow=1 ∧ lane_approved=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov11_self_approval_block"
         }
       },
       {
-        "name": "gov11-blind-approval-with-diff",
+        "name": "gov11-approval-after-one-step",
         "events": [
           [
             1.0,
             0.0,
-            1.0
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
           ]
         ],
         "metadata": {
           "expectedOutputVector": [
+            0.0,
+            0.0,
             0.0,
             0.0,
             0.0,
@@ -228,19 +1305,40 @@
               0.0,
               0.0,
               0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
               0.0
             ]
           ],
-          "purpose": "an approval with a diff but by a non-distinct principal neither permits nor is a blind approval",
-          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+          "purpose": "an approval one step after the diff does not meet the dwell",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
         }
       },
       {
         "name": "gov11-nominal",
         "events": [
           [
-            0.0,
             1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
             0.0
           ]
         ],
@@ -253,10 +1351,14 @@
             0.0,
             0.0,
             0.0,
+            0.0,
+            0.0,
             0.0
           ],
           "expectedOutputsByStep": [
             [
+              0.0,
+              0.0,
               0.0,
               0.0,
               0.0,
@@ -268,7 +1370,7 @@
             ]
           ],
           "purpose": "the quiet state",
-          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
         }
       }
     ],
@@ -276,11 +1378,18 @@
       "category": "ai-governance-regime",
       "domain": "ai-governance-regime",
       "machineClass": "safety-compliance-checker",
-      "sequenceCount": 2,
+      "sequenceCount": 6,
       "inputSemantics": [
-        "lane_diff_rendered (binary; lifecycle; specification cell 16965): canonical diff rendered for the human reviewer",
-        "lane_principal_distinct (binary; lifecycle; specification cell 16966): approver != preparer and not an agent (T15)",
-        "lane_approved (binary; lifecycle; specification cell 16962): human continuation resumed with a valid DPoP token"
+        "lane_principal_distinct (binary; fact: lifecycle extension: approver != preparer and not an agent (T15); new): the acting principal is distinct from the preparer and human",
+        "spare (binary; fact: none; exists): spare cell, always 0",
+        "reserved: lane_in_workflow (lifecycle frame lane 2; the asset is in its workflow)",
+        "reserved: lane_re_pinned (lifecycle frame lane 3; a frame document has been re-pinned (T16))",
+        "reserved: lane_approved (lifecycle frame lane 4; approved by a distinct human principal)",
+        "reserved: lane_rework (lifecycle frame lane 5; rework requested)",
+        "reserved: lane_step_running (lifecycle frame lane 6; a step is running)",
+        "reserved: lane_stale (lifecycle frame lane 7; the head is STALE (continuation TTL or lease expired))",
+        "diff_rendered (binary; aigov-diff-renderer completion via aigov.gov11.diff-renderer.completion): the canonical diff was rendered and shown",
+        "render_failed (binary; aigov-diff-renderer completion via aigov.gov11.diff-renderer.completion): rendering failed"
       ],
       "outputSemantics": [
         "0: HALT_PROMOTION",
@@ -290,12 +1399,15 @@
         "4: PARKED",
         "5: APPROACH",
         "6: LATCH",
-        "7: REWORK"
+        "7: REWORK",
+        "8: AGENT_REQUESTED",
+        "9: OVERDUE"
       ],
       "tags": [
         "ai-governance-regime",
         "D-transparency-oversight",
-        "M-GOV-11"
+        "M-GOV-11",
+        "W4"
       ],
       "tagging": {
         "schemaVersion": "1.0.0",
@@ -304,7 +1416,8 @@
         "family": "D-transparency-oversight",
         "machineCode": "GOV11",
         "workflowTags": [
-          "HumanReviewAntiBiasGate"
+          "HumanReviewAntiBiasGate",
+          "W4"
         ],
         "validationTags": [
           "candidate-not-admitted"
@@ -320,13 +1433,49 @@
           "info": null,
           "warning": null,
           "error": null
-        },
-        "notes": "Owner roles are functional name strings pending the domain's staffing decision; the runbook URN resolves when runbooks/ is written (PACKAGE_STATUS.md step 6)."
+        }
       },
       "triggerConfig": {
         "processId": "GOV11_human-review-anti-bias-gate",
         "processName": "M-GOV-11 HumanReviewAntiBiasGate",
         "rules": [
+          {
+            "sequenceId": "ces_gov11_agent_requested",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "M-GOV-11 S0_Init → S1_AgentRunning: [lane_in_workflow=1 ∧ lane_step_running=1 ∧ diff_rendered=0]",
+            "dispatchAgent": "aigov-diff-renderer"
+          },
+          {
+            "sequenceId": "ces_gov11_agent_failed",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-11 S1_AgentRunning → S_err_StepFailed: [lane_in_workflow=1 ∧ lane_step_running=1 ∧ diff_rendered=0] · [render_failed=1]"
+          },
           {
             "sequenceId": "ces_gov11_diff_verified",
             "outputMatches": [
@@ -337,11 +1486,13 @@
               0.0,
               0.0,
               0.0,
+              0.0,
+              0.0,
               0.0
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "M-GOV-11 S0_AwaitingDiff → S1_DiffVerified: [lane_diff_rendered=1 ∧ lane_principal_distinct=1]"
+            "description": "M-GOV-11 S1_DiffShown → S2_DiffVerified: [lane_in_workflow=1 ∧ lane_approved=0 ∧ diff_rendered=1]{2} · [lane_principal_distinct=1 ∧ lane_approved=1 ∧ diff_rendered=1]"
           },
           {
             "sequenceId": "ces_gov11_blind_approval_block",
@@ -353,54 +1504,53 @@
               0.0,
               0.0,
               0.0,
+              0.0,
+              0.0,
               0.0
             ],
             "ragStatusCode": "RED",
             "processStatus": "error",
-            "description": "M-GOV-11 S0_AwaitingDiff → S_fail_BlindApprovalBlock: [lane_diff_rendered=0 ∧ lane_approved=1]"
+            "description": "M-GOV-11 S0_AwaitingDiff → S_fail_BlindApprovalBlock: [lane_in_workflow=1 ∧ lane_approved=0 ∧ diff_rendered=0] · [lane_approved=1 ∧ diff_rendered=0]"
+          },
+          {
+            "sequenceId": "ces_gov11_rushed_approval_block",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-11 S0_AwaitingDiff → S_fail_BlindApprovalBlock: [lane_in_workflow=1 ∧ lane_approved=0 ∧ diff_rendered=0] · [lane_approved=1 ∧ diff_rendered=1]"
+          },
+          {
+            "sequenceId": "ces_gov11_self_approval_block",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-11 S0_AwaitingDiff → S_fail_BlindApprovalBlock: [lane_principal_distinct=0 ∧ lane_in_workflow=1 ∧ lane_approved=1]"
           }
         ]
       },
       "interconnections": [
-        {
-          "id": "ai-governance-regime.verdicts.gov11",
-          "type": "published-domain-bus-producer",
-          "role": "HumanReviewAntiBiasGate",
-          "sourceMachine": "GOV11_human-review-anti-bias-gate",
-          "sourceOutputRegion": {
-            "offset": 17312,
-            "length": 4
-          },
-          "targetInputElements": [
-            40,
-            41,
-            42,
-            43
-          ],
-          "normalizedElements": [
-            "M-GOV-11 HALT_PROMOTION",
-            "M-GOV-11 REVOKE_EPOCH",
-            "M-GOV-11 PERMIT_DEPLOY",
-            "M-GOV-11 TRIGGER_INCIDENT"
-          ],
-          "purpose": "Publish M-GOV-11's four verdict elements to the domain verdict aggregator.",
-          "busId": "ai-governance-regime.verdicts",
-          "busTag": "published-bus-ai-governance-regime-verdicts",
-          "targetMachine": "GOV00 Governance Verdict Aggregator",
-          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
-          "targetInputRegion": {
-            "offset": 17368,
-            "length": 68
-          },
-          "publishedOutputRegion": {
-            "offset": 17436,
-            "length": 4
-          },
-          "peCompositionRequired": true,
-          "compositionOwner": "perception-engine",
-          "dispatchMode": "asynchronous-no-wait",
-          "privacyBoundary": "PE composes normalized verdict bits only; governance documents, signatures and principals stay in the Solid asset frames."
-        },
         {
           "id": "ai-governance-regime.document.gov11.GovernanceAssetFrame",
           "type": "document-workflow-handoff",
@@ -408,7 +1558,7 @@
           "targetMachine": "GOV13_control-crosswalk-assembler",
           "assetTypeId": "GovernanceAssetFrame",
           "compositionOwner": "document-workflow-dispatcher",
-          "purpose": "Hand the frame's GovernanceAssetFrame to GOV13, its next consumer in the specification's evidence flow (SPECIFICATION.md sections 5-6); never infer a governance verdict from document content.",
+          "purpose": "Hand the frame's GovernanceAssetFrame to GOV13, its next consumer (agentic-workflow-contract.json W4); never infer a governance verdict from document content.",
           "nativeVectorWrite": false
         }
       ],
@@ -416,17 +1566,84 @@
         "machineCode": "M-GOV-11",
         "title": "HumanReviewAntiBiasGate",
         "kind": "template",
+        "workflow": "W4",
         "specRule": "SPECIFICATION.md 4.3 (11)",
         "governedAssetType": "GovernanceAssetFrame",
         "governedTargetDomain": "carried by the asset frame",
         "agentCanResumeApproval": false
       },
       "conversion": {
-        "candidateVersion": "0.1.0",
+        "candidateVersion": "0.2.0",
         "builder": "tools/build_machines.py",
         "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
         "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
-        "intakeEquivalents": "intake/corpus-312.json and corpus-315.json machines are not carried over (GOV-R01, GOV-R02)"
+        "dwellSteps": 2,
+        "debounceSteps": 3
+      },
+      "agentBinding": {
+        "agent": "aigov-diff-renderer",
+        "mode": "advise",
+        "trigger": "ces_gov11_agent_requested",
+        "allowedActions": [
+          "Render and present the canonical diff of the pinned revision."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "asset-lifecycle",
+          "sensorId": "aigov.gov11.diff-renderer.completion",
+          "name": "Canonical diff renderer completion (GOV11)",
+          "region": {
+            "offset": 17128,
+            "length": 2
+          },
+          "semantics": [
+            "diff_rendered",
+            "render_failed"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "aigov-gov11-diff-renderer-completion",
+            "sensorId": "aigov.gov11.diff-renderer.completion",
+            "name": "Canonical diff renderer completion (GOV11)",
+            "region": {
+              "offset": 17128,
+              "length": 2
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": false,
+          "requiresRunbook": true,
+          "maxAutonomy": "advise",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "advise",
+          "stage": 1,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": false,
+          "canExecuteActions": false,
+          "requiresHumanApproval": false,
+          "requiresRunbook": true,
+          "blockedWhenRag": []
+        }
+      },
+      "aiTrigger": "ces_gov11_agent_requested",
+      "dispatchableAgent": "aigov-diff-renderer",
+      "agentBehavior": "agent-candidates/ai-governance-regime/aigov-diff-renderer.agent.json",
+      "frameInputs": {
+        "lanes": "input cells 2-7, written by the lifecycle (reserved)",
+        "facts": "every other non-completion input, written into the clone's block by the lifecycle's frame source (GOV-R19)",
+        "completion": "input cells 8..9, the step agent's completion"
       }
     }
   }

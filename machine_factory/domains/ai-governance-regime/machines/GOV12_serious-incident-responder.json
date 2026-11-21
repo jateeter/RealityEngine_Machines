@@ -3,18 +3,18 @@
   "machine": {
     "id": "GOV12_serious-incident-responder",
     "name": "GOV12_serious-incident-responder",
-    "description": "Serious-incident responder (EU AI Act Art. 73): contains on confirmed harm or a budget breach, parks the statutory notice, and closes only on a distinct human approval with no harm active.",
+    "description": "Serious-incident responder (EU AI Act Art. 73), per incident frame: contains while harm is active, the incident responder exports the K-line bundle and drafts the notice, the notice parks for a distinct human, and the frame closes on approval with no harm active; the statutory clock (the stale lane) running out first is overdue.",
     "arbiterRule": "PASSTHROUGH",
     "matchAlgorithm": "equals",
     "outputMergeTransformation": "or",
     "perceptualMapping": {
       "input": {
         "offset": 17136,
-        "length": 6
+        "length": 11
       },
       "output": {
-        "offset": 17320,
-        "length": 8
+        "offset": 17342,
+        "length": 10
       },
       "bitsPerElement": 8
     },
@@ -27,15 +27,14 @@
           "sourceFromState": "S0_Standby",
           "sourceToState": "S1_Contained",
           "regularExpression": "[mon_t13_incident_cnt∈[0.0001,1]]",
+          "length": 1,
           "specRule": "SPECIFICATION.md 4.3 (12)",
           "semanticAmendments": [
-            "GOV-SA-01",
-            "GOV-SA-06"
+            "GOV-SA-01"
           ],
           "asserts": [
             "REVOKE_EPOCH",
-            "TRIGGER_INCIDENT",
-            "LATCH"
+            "TRIGGER_INCIDENT"
           ]
         },
         "events": [
@@ -46,6 +45,31 @@
               {
                 "value": 0.50005,
                 "threshold": 0.49995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
                 "comparatorType": "threshold"
               },
               {
@@ -85,7 +109,9 @@
                   1.0,
                   0.0,
                   0.0,
-                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
                   0.0
                 ]
               }
@@ -94,27 +120,25 @@
         ]
       },
       {
-        "id": "ces_gov12_contain_budget",
-        "name": "M-GOV-12 S0_Standby → S1_Contained",
+        "id": "ces_gov12_agent_requested",
+        "name": "M-GOV-12 S0_Init → S1_AgentRunning",
         "schemaVersion": "1.0",
         "metadata": {
-          "sourceFromState": "S0_Standby",
-          "sourceToState": "S1_Contained",
-          "regularExpression": "[mon_mu_exhaust_rate∈[0.0501,1]]",
+          "sourceFromState": "S0_Init",
+          "sourceToState": "S1_AgentRunning",
+          "regularExpression": "[lane_in_workflow=1 ∧ lane_step_running=1 ∧ bundle_exported=0]",
+          "length": 1,
           "specRule": "SPECIFICATION.md 4.3 (12)",
-          "semanticAmendments": [
-            "GOV-SA-01",
-            "GOV-SA-06"
-          ],
+          "semanticAmendments": [],
           "asserts": [
-            "REVOKE_EPOCH",
-            "TRIGGER_INCIDENT",
-            "LATCH"
-          ]
+            "AGENT_REQUESTED",
+            "REVOKE_EPOCH"
+          ],
+          "dispatchesAgent": "aigov-incident-responder"
         },
         "events": [
           {
-            "id": "ces_gov12_contain_budget-e0",
+            "id": "ces_gov12_agent_requested-e0",
             "isInitial": true,
             "elements": [
               {
@@ -123,9 +147,13 @@
                 "comparatorType": "threshold"
               },
               {
-                "value": 0.52505,
-                "threshold": 0.47495,
+                "value": 0.5,
+                "threshold": 0.5,
                 "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
               },
               {
                 "value": 0.5,
@@ -143,57 +171,8 @@
                 "comparatorType": "threshold"
               },
               {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              }
-            ],
-            "nextEventIds": [],
-            "outputEvents": [
-              {
-                "id": "ces_gov12_contain_budget-out",
-                "vector": [
-                  0.0,
-                  1.0,
-                  0.0,
-                  1.0,
-                  0.0,
-                  0.0,
-                  1.0,
-                  0.0
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "ces_gov12_contained_hold",
-        "name": "M-GOV-12 S1_Contained → S1_Contained",
-        "schemaVersion": "1.0",
-        "metadata": {
-          "sourceFromState": "S1_Contained",
-          "sourceToState": "S1_Contained",
-          "regularExpression": "[lane_in_workflow=0 ∧ latch_q_prev=1]",
-          "specRule": "SPECIFICATION.md 4.3 (12)",
-          "semanticAmendments": [
-            "GOV-SA-06"
-          ],
-          "asserts": [
-            "REVOKE_EPOCH",
-            "TRIGGER_INCIDENT",
-            "LATCH"
-          ]
-        },
-        "events": [
-          {
-            "id": "ces_gov12_contained_hold-e0",
-            "isInitial": true,
-            "elements": [
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
+                "value": 1.0,
+                "comparatorType": "equals"
               },
               {
                 "value": 0.5,
@@ -213,6 +192,162 @@
                 "value": 0.5,
                 "threshold": 0.5,
                 "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov12_agent_requested-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov12_agent_failed",
+        "name": "M-GOV-12 S1_AgentRunning → S_err_StepFailed",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_AgentRunning",
+          "sourceToState": "S_err_StepFailed",
+          "regularExpression": "[lane_in_workflow=1 ∧ lane_step_running=1 ∧ bundle_exported=0] · [responder_failed=1]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (12)",
+          "semanticAmendments": [
+            "GOV-SA-13"
+          ],
+          "asserts": [
+            "PARKED",
+            "REWORK"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov12_agent_failed-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov12_agent_failed-e1"
+            ]
+          },
+          {
+            "id": "ces_gov12_agent_failed-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
               },
               {
                 "value": 1.0,
@@ -222,15 +357,17 @@
             "nextEventIds": [],
             "outputEvents": [
               {
-                "id": "ces_gov12_contained_hold-out",
+                "id": "ces_gov12_agent_failed-out",
                 "vector": [
                   0.0,
-                  1.0,
+                  0.0,
+                  0.0,
                   0.0,
                   1.0,
                   0.0,
                   0.0,
                   1.0,
+                  0.0,
                   0.0
                 ]
               }
@@ -245,16 +382,15 @@
         "metadata": {
           "sourceFromState": "S1_Contained",
           "sourceToState": "S2_NoticeParked",
-          "regularExpression": "[lane_in_workflow=1 ∧ lane_approved=0 ∧ latch_q_prev=1]",
+          "regularExpression": "[lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1]",
+          "length": 1,
           "specRule": "SPECIFICATION.md 4.3 (12)",
           "semanticAmendments": [
-            "GOV-SA-02",
-            "GOV-SA-06"
+            "GOV-SA-02"
           ],
           "asserts": [
-            "REVOKE_EPOCH",
             "PARKED",
-            "LATCH"
+            "REVOKE_EPOCH"
           ]
         },
         "events": [
@@ -277,6 +413,11 @@
                 "comparatorType": "equals"
               },
               {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
                 "value": 0.0,
                 "comparatorType": "equals"
               },
@@ -286,8 +427,26 @@
                 "comparatorType": "threshold"
               },
               {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
                 "value": 1.0,
                 "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
               }
             ],
             "nextEventIds": [],
@@ -301,148 +460,9 @@
                   0.0,
                   1.0,
                   0.0,
-                  1.0,
-                  0.0
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "ces_gov12_notice_hold_not_distinct",
-        "name": "M-GOV-12 S2_NoticeParked → S2_NoticeParked",
-        "schemaVersion": "1.0",
-        "metadata": {
-          "sourceFromState": "S2_NoticeParked",
-          "sourceToState": "S2_NoticeParked",
-          "regularExpression": "[lane_principal_distinct=0 ∧ latch_q_prev=1]",
-          "specRule": "SPECIFICATION.md 4.3 (12)",
-          "semanticAmendments": [
-            "GOV-SA-06"
-          ],
-          "asserts": [
-            "REVOKE_EPOCH",
-            "LATCH"
-          ]
-        },
-        "events": [
-          {
-            "id": "ces_gov12_notice_hold_not_distinct-e0",
-            "isInitial": true,
-            "elements": [
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.0,
-                "comparatorType": "equals"
-              },
-              {
-                "value": 1.0,
-                "comparatorType": "equals"
-              }
-            ],
-            "nextEventIds": [],
-            "outputEvents": [
-              {
-                "id": "ces_gov12_notice_hold_not_distinct-out",
-                "vector": [
-                  0.0,
-                  1.0,
                   0.0,
                   0.0,
                   0.0,
-                  0.0,
-                  1.0,
-                  0.0
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "ces_gov12_notice_hold_harm",
-        "name": "M-GOV-12 S2_NoticeParked → S2_NoticeParked",
-        "schemaVersion": "1.0",
-        "metadata": {
-          "sourceFromState": "S2_NoticeParked",
-          "sourceToState": "S2_NoticeParked",
-          "regularExpression": "[mon_t13_incident_cnt∈[0.0001,1] ∧ latch_q_prev=1]",
-          "specRule": "SPECIFICATION.md 4.3 (12)",
-          "semanticAmendments": [
-            "GOV-SA-06"
-          ],
-          "asserts": [
-            "REVOKE_EPOCH",
-            "LATCH"
-          ]
-        },
-        "events": [
-          {
-            "id": "ces_gov12_notice_hold_harm-e0",
-            "isInitial": true,
-            "elements": [
-              {
-                "value": 0.50005,
-                "threshold": 0.49995,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 1.0,
-                "comparatorType": "equals"
-              }
-            ],
-            "nextEventIds": [],
-            "outputEvents": [
-              {
-                "id": "ces_gov12_notice_hold_harm-out",
-                "vector": [
-                  0.0,
-                  1.0,
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0,
-                  1.0,
                   0.0
                 ]
               }
@@ -457,10 +477,11 @@
         "metadata": {
           "sourceFromState": "S2_NoticeParked",
           "sourceToState": "S3_Closed",
-          "regularExpression": "[mon_t13_incident_cnt=0 ∧ lane_in_workflow=1 ∧ lane_approved=1 ∧ lane_principal_distinct=1 ∧ latch_q_prev=1]",
+          "regularExpression": "[lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1] · [mon_t13_incident_cnt=0 ∧ lane_principal_distinct=1 ∧ lane_approved=1 ∧ lane_stale=0]",
+          "length": 2,
           "specRule": "SPECIFICATION.md 4.3 (12)",
           "semanticAmendments": [
-            "GOV-SA-06"
+            "GOV-SA-20"
           ],
           "asserts": [
             "none (explicit release)"
@@ -472,8 +493,9 @@
             "isInitial": true,
             "elements": [
               {
-                "value": 0.0,
-                "comparatorType": "equals"
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
               },
               {
                 "value": 0.5,
@@ -485,7 +507,26 @@
                 "comparatorType": "equals"
               },
               {
-                "value": 1.0,
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
                 "comparatorType": "equals"
               },
               {
@@ -495,6 +536,71 @@
               {
                 "value": 1.0,
                 "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov12_closed-e1"
+            ]
+          },
+          {
+            "id": "ces_gov12_closed-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
               }
             ],
             "nextEventIds": [],
@@ -509,7 +615,168 @@
                   0.0,
                   0.0,
                   0.0,
+                  0.0,
+                  0.0,
                   0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov12_notice_overdue",
+        "name": "M-GOV-12 S2_NoticeParked → S_err_Overdue",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_NoticeParked",
+          "sourceToState": "S_err_Overdue",
+          "regularExpression": "[lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1] · [lane_stale=1]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (12)",
+          "semanticAmendments": [
+            "GOV-SA-21"
+          ],
+          "asserts": [
+            "OVERDUE",
+            "TRIGGER_INCIDENT",
+            "REVOKE_EPOCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov12_notice_overdue-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov12_notice_overdue-e1"
+            ]
+          },
+          {
+            "id": "ces_gov12_notice_overdue-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov12_notice_overdue-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
                 ]
               }
             ]
@@ -523,10 +790,15 @@
         "events": [
           [
             0.5,
-            0.0,
-            0.0,
-            0.0,
             1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
             0.0
           ]
         ],
@@ -538,7 +810,9 @@
             1.0,
             0.0,
             0.0,
-            1.0,
+            0.0,
+            0.0,
+            0.0,
             0.0
           ],
           "expectedOutputsByStep": [
@@ -549,24 +823,31 @@
               1.0,
               0.0,
               0.0,
-              1.0,
+              0.0,
+              0.0,
+              0.0,
               0.0
             ]
           ],
           "purpose": "drives ces_gov12_contain_harm: [mon_t13_incident_cnt∈[0.0001,1]]",
-          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
           "expectedSequenceId": "ces_gov12_contain_harm"
         }
       },
       {
-        "name": "gov12-contain-budget",
+        "name": "gov12-agent-requested",
         "events": [
           [
             0.0,
-            0.5251,
+            1.0,
+            1.0,
+            0.0,
             0.0,
             0.0,
             1.0,
+            0.0,
+            0.0,
+            0.0,
             0.0
           ]
         ],
@@ -575,7 +856,9 @@
             0.0,
             1.0,
             0.0,
-            1.0,
+            0.0,
+            0.0,
+            0.0,
             0.0,
             0.0,
             1.0,
@@ -586,35 +869,47 @@
               0.0,
               1.0,
               0.0,
-              1.0,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               0.0,
               1.0,
               0.0
             ]
           ],
-          "purpose": "drives ces_gov12_contain_budget: [mon_mu_exhaust_rate∈[0.0501,1]]",
-          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
-          "expectedSequenceId": "ces_gov12_contain_budget"
+          "purpose": "drives ces_gov12_agent_requested: [lane_in_workflow=1 ∧ lane_step_running=1 ∧ bundle_exported=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov12_agent_requested"
         }
       },
       {
-        "name": "gov12-contained-hold",
+        "name": "gov12-agent-failed",
         "events": [
           [
-            0.5,
+            0.0,
+            1.0,
+            1.0,
             0.0,
             0.0,
             0.0,
             1.0,
+            0.0,
+            0.0,
+            0.0,
             0.0
           ],
           [
             0.0,
+            1.0,
+            1.0,
             0.0,
             0.0,
             0.0,
             1.0,
+            0.0,
+            0.0,
+            0.0,
             1.0
           ]
         ],
@@ -623,9 +918,11 @@
             0.0,
             1.0,
             0.0,
+            0.0,
             1.0,
             0.0,
             0.0,
+            1.0,
             1.0,
             0.0
           ],
@@ -634,7 +931,9 @@
               0.0,
               1.0,
               0.0,
-              1.0,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               0.0,
               1.0,
@@ -644,36 +943,35 @@
               0.0,
               1.0,
               0.0,
+              0.0,
               1.0,
               0.0,
               0.0,
+              1.0,
               1.0,
               0.0
             ]
           ],
-          "purpose": "drives ces_gov12_contained_hold: [lane_in_workflow=0 ∧ latch_q_prev=1]",
-          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
-          "expectedSequenceId": "ces_gov12_contained_hold"
+          "purpose": "drives ces_gov12_agent_failed: [lane_in_workflow=1 ∧ lane_step_running=1 ∧ bundle_exported=0] · [responder_failed=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov12_agent_failed"
         }
       },
       {
         "name": "gov12-notice-parked",
         "events": [
           [
-            0.5,
+            0.0,
+            1.0,
+            1.0,
             0.0,
             0.0,
             0.0,
+            0.0,
+            0.0,
+            1.0,
             1.0,
             0.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            1.0
           ]
         ],
         "metadata": {
@@ -684,7 +982,9 @@
             0.0,
             1.0,
             0.0,
-            1.0,
+            0.0,
+            0.0,
+            0.0,
             0.0
           ],
           "expectedOutputsByStep": [
@@ -692,166 +992,54 @@
               0.0,
               1.0,
               0.0,
-              1.0,
-              0.0,
-              0.0,
-              1.0,
-              0.0
-            ],
-            [
               0.0,
               1.0,
               0.0,
               0.0,
-              1.0,
               0.0,
-              1.0,
+              0.0,
               0.0
             ]
           ],
-          "purpose": "drives ces_gov12_notice_parked: [lane_in_workflow=1 ∧ lane_approved=0 ∧ latch_q_prev=1]",
-          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "purpose": "drives ces_gov12_notice_parked: [lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
           "expectedSequenceId": "ces_gov12_notice_parked"
-        }
-      },
-      {
-        "name": "gov12-notice-hold-not-distinct",
-        "events": [
-          [
-            0.5,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "metadata": {
-          "expectedOutputVector": [
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            0.0,
-            0.0,
-            1.0,
-            0.0
-          ],
-          "expectedOutputsByStep": [
-            [
-              0.0,
-              1.0,
-              0.0,
-              1.0,
-              0.0,
-              0.0,
-              1.0,
-              0.0
-            ],
-            [
-              0.0,
-              1.0,
-              0.0,
-              1.0,
-              0.0,
-              0.0,
-              1.0,
-              0.0
-            ]
-          ],
-          "purpose": "drives ces_gov12_notice_hold_not_distinct: [lane_principal_distinct=0 ∧ latch_q_prev=1]",
-          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
-          "expectedSequenceId": "ces_gov12_notice_hold_not_distinct"
-        }
-      },
-      {
-        "name": "gov12-notice-hold-harm",
-        "events": [
-          [
-            0.5,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
-            0.0
-          ],
-          [
-            0.5,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
-            1.0
-          ]
-        ],
-        "metadata": {
-          "expectedOutputVector": [
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            0.0,
-            0.0,
-            1.0,
-            0.0
-          ],
-          "expectedOutputsByStep": [
-            [
-              0.0,
-              1.0,
-              0.0,
-              1.0,
-              0.0,
-              0.0,
-              1.0,
-              0.0
-            ],
-            [
-              0.0,
-              1.0,
-              0.0,
-              1.0,
-              0.0,
-              0.0,
-              1.0,
-              0.0
-            ]
-          ],
-          "purpose": "drives ces_gov12_notice_hold_harm: [mon_t13_incident_cnt∈[0.0001,1] ∧ latch_q_prev=1]",
-          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
-          "expectedSequenceId": "ces_gov12_notice_hold_harm"
         }
       },
       {
         "name": "gov12-closed",
         "events": [
           [
-            0.5,
+            0.0,
+            1.0,
+            1.0,
             0.0,
             0.0,
             0.0,
+            0.0,
+            0.0,
+            1.0,
             1.0,
             0.0
           ],
           [
             0.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
             0.0,
             1.0,
             1.0,
-            1.0,
-            1.0
+            0.0
           ]
         ],
         "metadata": {
           "expectedOutputVector": [
+            0.0,
+            0.0,
             0.0,
             0.0,
             0.0,
@@ -866,10 +1054,12 @@
               0.0,
               1.0,
               0.0,
+              0.0,
               1.0,
               0.0,
               0.0,
-              1.0,
+              0.0,
+              0.0,
               0.0
             ],
             [
@@ -880,12 +1070,88 @@
               0.0,
               0.0,
               0.0,
+              0.0,
+              0.0,
               0.0
             ]
           ],
-          "purpose": "drives ces_gov12_closed: [mon_t13_incident_cnt=0 ∧ lane_in_workflow=1 ∧ lane_approved=1 ∧ lane_principal_distinct=1 ∧ latch_q_prev=1]",
-          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "purpose": "drives ces_gov12_closed: [lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1] · [mon_t13_incident_cnt=0 ∧ lane_principal_distinct=1 ∧ lane_approved=1 ∧ lane_stale=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
           "expectedSequenceId": "ces_gov12_closed"
+        }
+      },
+      {
+        "name": "gov12-notice-overdue",
+        "events": [
+          [
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "purpose": "drives ces_gov12_notice_overdue: [lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1] · [lane_stale=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov12_notice_overdue"
         }
       },
       {
@@ -893,10 +1159,15 @@
         "events": [
           [
             0.0,
-            0.0,
-            0.0,
-            0.0,
             1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
             0.0
           ]
         ],
@@ -909,10 +1180,14 @@
             0.0,
             0.0,
             0.0,
+            0.0,
+            0.0,
             0.0
           ],
           "expectedOutputsByStep": [
             [
+              0.0,
+              0.0,
               0.0,
               0.0,
               0.0,
@@ -924,7 +1199,7 @@
             ]
           ],
           "purpose": "the quiet state",
-          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
         }
       }
     ],
@@ -932,14 +1207,19 @@
       "category": "ai-governance-regime",
       "domain": "ai-governance-regime",
       "machineClass": "governance-escalator",
-      "sequenceCount": 7,
+      "sequenceCount": 6,
       "inputSemantics": [
-        "mon_t13_incident_cnt (continuous [0,1]; watchdog; specification cell 16980): normalized count of confirmed in-bounds harm",
-        "mon_mu_exhaust_rate (continuous [0,1]; watchdog; specification cell 16979): normalized rate of exposure-budget exhaustions",
-        "lane_in_workflow (binary; lifecycle; specification cell 16960): asset frame is active in workflow",
-        "lane_approved (binary; lifecycle; specification cell 16962): human continuation resumed with a valid DPoP token",
-        "lane_principal_distinct (binary; lifecycle; specification cell 16966): approver != preparer and not an agent (T15)",
-        "latch_q_prev (binary; PE feedback; PE feedback of output LATCH): this machine's LATCH output at the previous step"
+        "mon_t13_incident_cnt (continuous [0,1]; fact: incident triage completion (GOV07/GOV16 agents); new): normalized count of confirmed in-bounds harm",
+        "lane_principal_distinct (binary; fact: lifecycle extension: approver != preparer and not an agent (T15); new): the acting principal is distinct from the preparer and human",
+        "reserved: lane_in_workflow (lifecycle frame lane 2; the asset is in its workflow)",
+        "reserved: lane_re_pinned (lifecycle frame lane 3; a frame document has been re-pinned (T16))",
+        "reserved: lane_approved (lifecycle frame lane 4; approved by a distinct human principal)",
+        "reserved: lane_rework (lifecycle frame lane 5; rework requested)",
+        "reserved: lane_step_running (lifecycle frame lane 6; a step is running)",
+        "reserved: lane_stale (lifecycle frame lane 7; the head is STALE (continuation TTL or lease expired))",
+        "bundle_exported (binary; aigov-incident-responder completion via aigov.gov12.incident-responder.completion): the K-line bundle is exported",
+        "notice_drafted (binary; aigov-incident-responder completion via aigov.gov12.incident-responder.completion): the Art. 73 notice is drafted",
+        "responder_failed (binary; aigov-incident-responder completion via aigov.gov12.incident-responder.completion): the agent's step failed"
       ],
       "outputSemantics": [
         "0: HALT_PROMOTION",
@@ -949,12 +1229,15 @@
         "4: PARKED",
         "5: APPROACH",
         "6: LATCH",
-        "7: REWORK"
+        "7: REWORK",
+        "8: AGENT_REQUESTED",
+        "9: OVERDUE"
       ],
       "tags": [
         "ai-governance-regime",
         "E-incident-audit",
-        "M-GOV-12"
+        "M-GOV-12",
+        "W5"
       ],
       "tagging": {
         "schemaVersion": "1.0.0",
@@ -963,7 +1246,8 @@
         "family": "E-incident-audit",
         "machineCode": "GOV12",
         "workflowTags": [
-          "SeriousIncidentResponder"
+          "SeriousIncidentResponder",
+          "W5"
         ],
         "validationTags": [
           "candidate-not-admitted"
@@ -979,8 +1263,7 @@
           "info": null,
           "warning": null,
           "error": null
-        },
-        "notes": "Owner roles are functional name strings pending the domain's staffing decision; the runbook URN resolves when runbooks/ is written (PACKAGE_STATUS.md step 6)."
+        }
       },
       "triggerConfig": {
         "processId": "GOV12_serious-incident-responder",
@@ -995,7 +1278,9 @@
               1.0,
               0.0,
               0.0,
-              1.0,
+              0.0,
+              0.0,
+              0.0,
               0.0
             ],
             "ragStatusCode": "RED",
@@ -1003,36 +1288,41 @@
             "description": "M-GOV-12 S0_Standby → S1_Contained: [mon_t13_incident_cnt∈[0.0001,1]]"
           },
           {
-            "sequenceId": "ces_gov12_contain_budget",
+            "sequenceId": "ces_gov12_agent_requested",
             "outputMatches": [
               0.0,
               1.0,
               0.0,
-              1.0,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               0.0,
               1.0,
               0.0
             ],
-            "ragStatusCode": "RED",
-            "processStatus": "error",
-            "description": "M-GOV-12 S0_Standby → S1_Contained: [mon_mu_exhaust_rate∈[0.0501,1]]"
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "M-GOV-12 S0_Init → S1_AgentRunning: [lane_in_workflow=1 ∧ lane_step_running=1 ∧ bundle_exported=0]",
+            "dispatchAgent": "aigov-incident-responder"
           },
           {
-            "sequenceId": "ces_gov12_contained_hold",
+            "sequenceId": "ces_gov12_agent_failed",
             "outputMatches": [
               0.0,
-              1.0,
+              0.0,
+              0.0,
               0.0,
               1.0,
               0.0,
               0.0,
               1.0,
+              0.0,
               0.0
             ],
             "ragStatusCode": "RED",
             "processStatus": "error",
-            "description": "M-GOV-12 S1_Contained → S1_Contained: [lane_in_workflow=0 ∧ latch_q_prev=1]"
+            "description": "M-GOV-12 S1_AgentRunning → S_err_StepFailed: [lane_in_workflow=1 ∧ lane_step_running=1 ∧ bundle_exported=0] · [responder_failed=1]"
           },
           {
             "sequenceId": "ces_gov12_notice_parked",
@@ -1043,44 +1333,14 @@
               0.0,
               1.0,
               0.0,
-              1.0,
+              0.0,
+              0.0,
+              0.0,
               0.0
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "M-GOV-12 S1_Contained → S2_NoticeParked: [lane_in_workflow=1 ∧ lane_approved=0 ∧ latch_q_prev=1]"
-          },
-          {
-            "sequenceId": "ces_gov12_notice_hold_not_distinct",
-            "outputMatches": [
-              0.0,
-              1.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              1.0,
-              0.0
-            ],
-            "ragStatusCode": "RED",
-            "processStatus": "error",
-            "description": "M-GOV-12 S2_NoticeParked → S2_NoticeParked: [lane_principal_distinct=0 ∧ latch_q_prev=1]"
-          },
-          {
-            "sequenceId": "ces_gov12_notice_hold_harm",
-            "outputMatches": [
-              0.0,
-              1.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              1.0,
-              0.0
-            ],
-            "ragStatusCode": "RED",
-            "processStatus": "error",
-            "description": "M-GOV-12 S2_NoticeParked → S2_NoticeParked: [mon_t13_incident_cnt∈[0.0001,1] ∧ latch_q_prev=1]"
+            "description": "M-GOV-12 S1_Contained → S2_NoticeParked: [lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1]"
           },
           {
             "sequenceId": "ces_gov12_closed",
@@ -1092,54 +1352,35 @@
               0.0,
               0.0,
               0.0,
+              0.0,
+              0.0,
               0.0
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "M-GOV-12 S2_NoticeParked → S3_Closed: [mon_t13_incident_cnt=0 ∧ lane_in_workflow=1 ∧ lane_approved=1 ∧ lane_principal_distinct=1 ∧ latch_q_prev=1]"
+            "description": "M-GOV-12 S2_NoticeParked → S3_Closed: [lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1] · [mon_t13_incident_cnt=0 ∧ lane_principal_distinct=1 ∧ lane_approved=1 ∧ lane_stale=0]"
+          },
+          {
+            "sequenceId": "ces_gov12_notice_overdue",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-12 S2_NoticeParked → S_err_Overdue: [lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1] · [lane_stale=1]"
           }
         ]
       },
       "interconnections": [
-        {
-          "id": "ai-governance-regime.verdicts.gov12",
-          "type": "published-domain-bus-producer",
-          "role": "SeriousIncidentResponder",
-          "sourceMachine": "GOV12_serious-incident-responder",
-          "sourceOutputRegion": {
-            "offset": 17320,
-            "length": 4
-          },
-          "targetInputElements": [
-            44,
-            45,
-            46,
-            47
-          ],
-          "normalizedElements": [
-            "M-GOV-12 HALT_PROMOTION",
-            "M-GOV-12 REVOKE_EPOCH",
-            "M-GOV-12 PERMIT_DEPLOY",
-            "M-GOV-12 TRIGGER_INCIDENT"
-          ],
-          "purpose": "Publish M-GOV-12's four verdict elements to the domain verdict aggregator.",
-          "busId": "ai-governance-regime.verdicts",
-          "busTag": "published-bus-ai-governance-regime-verdicts",
-          "targetMachine": "GOV00 Governance Verdict Aggregator",
-          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
-          "targetInputRegion": {
-            "offset": 17368,
-            "length": 68
-          },
-          "publishedOutputRegion": {
-            "offset": 17436,
-            "length": 4
-          },
-          "peCompositionRequired": true,
-          "compositionOwner": "perception-engine",
-          "dispatchMode": "asynchronous-no-wait",
-          "privacyBoundary": "PE composes normalized verdict bits only; governance documents, signatures and principals stay in the Solid asset frames."
-        },
         {
           "id": "ai-governance-regime.document.gov12.KLineIncidentArchive",
           "type": "document-workflow-handoff",
@@ -1147,7 +1388,7 @@
           "targetMachine": "GOV13_control-crosswalk-assembler",
           "assetTypeId": "KLineIncidentArchive",
           "compositionOwner": "document-workflow-dispatcher",
-          "purpose": "Hand the frame's KLineIncidentArchive to GOV13, its next consumer in the specification's evidence flow (SPECIFICATION.md sections 5-6); never infer a governance verdict from document content.",
+          "purpose": "Hand the frame's KLineIncidentArchive to GOV13, its next consumer (agentic-workflow-contract.json W5); never infer a governance verdict from document content.",
           "nativeVectorWrite": false
         }
       ],
@@ -1155,24 +1396,86 @@
         "machineCode": "M-GOV-12",
         "title": "SeriousIncidentResponder",
         "kind": "template",
+        "workflow": "W5",
         "specRule": "SPECIFICATION.md 4.3 (12)",
         "governedAssetType": "KLineIncidentArchive",
         "governedTargetDomain": "carried by the asset frame",
         "agentCanResumeApproval": false
       },
       "conversion": {
-        "candidateVersion": "0.1.0",
+        "candidateVersion": "0.2.0",
         "builder": "tools/build_machines.py",
         "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
         "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
-        "intakeEquivalents": "intake/corpus-312.json and corpus-315.json machines are not carried over (GOV-R01, GOV-R02)"
+        "dwellSteps": 2,
+        "debounceSteps": 3
       },
-      "latchFeedback": {
-        "inputElement": 5,
-        "fromOutputElement": 6,
-        "compositionOwner": "perception-engine",
-        "peCompositionRequired": true,
-        "rule": "Q(k) = S(k) or (not R(k) and Q(k-1)); the PE writes this machine's previous LATCH output into input element 5 (an intra-machine bus cell, SURFACE_SPEC.md Cloneable machines). Needs live confirmation (GOV-R12)."
+      "agentBinding": {
+        "agent": "aigov-incident-responder",
+        "mode": "supervised-act",
+        "trigger": "ces_gov12_agent_requested",
+        "allowedActions": [
+          "Export the K-line bundle into the frame.",
+          "Draft the statutory notice."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "asset-lifecycle",
+          "sensorId": "aigov.gov12.incident-responder.completion",
+          "name": "Incident responder completion (GOV12)",
+          "region": {
+            "offset": 17144,
+            "length": 3
+          },
+          "semantics": [
+            "bundle_exported",
+            "notice_drafted",
+            "responder_failed"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "aigov-gov12-incident-responder-completion",
+            "sensorId": "aigov.gov12.incident-responder.completion",
+            "name": "Incident responder completion (GOV12)",
+            "region": {
+              "offset": 17144,
+              "length": 3
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": []
+        }
+      },
+      "aiTrigger": "ces_gov12_agent_requested",
+      "dispatchableAgent": "aigov-incident-responder",
+      "agentBehavior": "agent-candidates/ai-governance-regime/aigov-incident-responder.agent.json",
+      "frameInputs": {
+        "lanes": "input cells 2-7, written by the lifecycle (reserved)",
+        "facts": "every other non-completion input, written into the clone's block by the lifecycle's frame source (GOV-R19)",
+        "completion": "input cells 8..10, the step agent's completion"
       }
     }
   }

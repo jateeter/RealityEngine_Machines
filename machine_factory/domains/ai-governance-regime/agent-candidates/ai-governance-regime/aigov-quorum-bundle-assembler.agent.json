@@ -1,0 +1,267 @@
+{
+  "schemaVersion": "1.0.0",
+  "behaviorId": "aigov-quorum-bundle-assembler",
+  "role": "watchdog-agent",
+  "agentId": "aigov-quorum-bundle-assembler",
+  "displayName": "Quorum bundle assembler",
+  "domain": "ai-governance-regime",
+  "machine": {
+    "id": "GOV06_quorum-consensus-monitor",
+    "file": "GOV06_quorum-consensus-monitor.json",
+    "machineClass": "safety-compliance-checker",
+    "inputRegion": {
+      "offset": 17040,
+      "length": 9
+    },
+    "outputRegion": {
+      "offset": 17282,
+      "length": 10
+    },
+    "cloneable": false
+  },
+  "dispatch": {
+    "mode": "ces-trigger",
+    "triggerSequenceIds": [
+      "ces_gov06_bundle_requested"
+    ],
+    "workflow": "W2",
+    "humanApprovalRequired": true
+  },
+  "capabilities": [
+    "pe.completion.write",
+    "pe.observations.read",
+    "human.notify",
+    "pki.crl.read"
+  ],
+  "reasoning": {
+    "objective": "Canonicalize (RFC 8785) the epoch-swap approval bundle, route it to the required signers in Risk, Engineering and Legal, and report each signature's arrival; never sign.",
+    "instructions": "You are the quorum bundle assembler for the RealityEngine AI governance regime (M-GOV-06 QuorumConsensusMonitor, workflow W2).\n\nOBJECTIVE\nCanonicalize (RFC 8785) the epoch-swap approval bundle, route it to the required signers in Risk, Engineering and Legal, and report each signature's arrival; never sign.\n\nYOU MAY\n- Canonicalize and route the approval bundle.\n- Report signature arrivals by org unit.\n\nYOU MUST NOT\n- Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).\n- Never write vector values directly; your result reaches the engines only through your completion contract.\n- Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.\n- Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts.",
+    "outputContract": "Return one structured line per completion field as `<field>: 0|1` (bundle_ready: the canonical (JCS) bundle is ready and routed, bundle_failed: the agent failed, signed_risk: a Risk signature arrived, signed_engineering: an Engineering signature arrived, signed_legal: a Legal signature arrived, signer_is_preparer: a signer is the preparer), then `rationale: <one sentence>`. The machine, not you, decides what follows.",
+    "sequenceCatalog": [
+      {
+        "sequenceId": "ces_gov06_bundle_requested",
+        "label": "S1_Collecting",
+        "rag": "AMBER",
+        "outputIndex": 8,
+        "action": "AGENT_REQUESTED"
+      },
+      {
+        "sequenceId": "ces_gov06_bundle_failed",
+        "label": "S_fail_QuorumViolation",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION + REWORK"
+      },
+      {
+        "sequenceId": "ces_gov06_quorum_valid_after_risk",
+        "label": "S2_QuorumValid",
+        "rag": "GREEN",
+        "outputIndex": 2,
+        "action": "PERMIT_DEPLOY"
+      },
+      {
+        "sequenceId": "ces_gov06_quorum_valid_after_engineering",
+        "label": "S2_QuorumValid",
+        "rag": "GREEN",
+        "outputIndex": 2,
+        "action": "PERMIT_DEPLOY"
+      },
+      {
+        "sequenceId": "ces_gov06_quorum_valid_after_legal",
+        "label": "S2_QuorumValid",
+        "rag": "GREEN",
+        "outputIndex": 2,
+        "action": "PERMIT_DEPLOY"
+      },
+      {
+        "sequenceId": "ces_gov06_violation_self_signer",
+        "label": "S_fail_QuorumViolation",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION"
+      }
+    ],
+    "prohibitions": [
+      "Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).",
+      "Never write vector values directly; your result reaches the engines only through your completion contract.",
+      "Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.",
+      "Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts."
+    ]
+  },
+  "agentBinding": {
+    "agent": "aigov-quorum-bundle-assembler",
+    "mode": "supervised-act",
+    "trigger": "ces_gov06_bundle_requested",
+    "allowedActions": [
+      "Canonicalize and route the approval bundle.",
+      "Report signature arrivals by org unit."
+    ],
+    "writeBack": {
+      "type": "pe-sensor",
+      "provider": "agent-runtime",
+      "sensorId": "aigov.gov06.quorum-bundle-assembler.completion",
+      "name": "Quorum bundle assembler completion (GOV06)",
+      "region": {
+        "offset": 17043,
+        "length": 6
+      },
+      "semantics": [
+        "bundle_ready",
+        "bundle_failed",
+        "signed_risk",
+        "signed_engineering",
+        "signed_legal",
+        "signer_is_preparer"
+      ],
+      "ttlMs": 300000,
+      "normalization": "already-normalized-0-1",
+      "ingest": {
+        "endpoint": "/api/integrations/completions",
+        "method": "POST",
+        "triggerPush": false,
+        "compactPush": true
+      },
+      "sourceMapping": {
+        "id": "aigov-gov06-quorum-bundle-assembler-completion",
+        "sensorId": "aigov.gov06.quorum-bundle-assembler.completion",
+        "name": "Quorum bundle assembler completion (GOV06)",
+        "region": {
+          "offset": 17043,
+          "length": 6
+        },
+        "ttlMs": 300000
+      }
+    },
+    "riskControls": {
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "maxAutonomy": "supervised-act",
+      "blockedWhenRag": []
+    },
+    "autonomyPolicy": {
+      "mode": "supervised-act",
+      "stage": 2,
+      "writeBackType": "pe-sensor",
+      "canWriteBack": true,
+      "canStageActions": true,
+      "canExecuteActions": false,
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "blockedWhenRag": []
+    }
+  },
+  "responseMapping": {
+    "schemaVersion": "1.0.0",
+    "responseContract": "structured-keys",
+    "mode": "supervised-act",
+    "fields": [
+      {
+        "semantic": "bundle_ready",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/bundle_ready",
+          "responseKey": "bundle_ready"
+        },
+        "target": {
+          "sensorId": "aigov.gov06.quorum-bundle-assembler.completion",
+          "region": {
+            "offset": 17043,
+            "length": 6
+          },
+          "index": 0
+        }
+      },
+      {
+        "semantic": "bundle_failed",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/bundle_failed",
+          "responseKey": "bundle_failed"
+        },
+        "target": {
+          "sensorId": "aigov.gov06.quorum-bundle-assembler.completion",
+          "region": {
+            "offset": 17043,
+            "length": 6
+          },
+          "index": 1
+        }
+      },
+      {
+        "semantic": "signed_risk",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/signed_risk",
+          "responseKey": "signed_risk"
+        },
+        "target": {
+          "sensorId": "aigov.gov06.quorum-bundle-assembler.completion",
+          "region": {
+            "offset": 17043,
+            "length": 6
+          },
+          "index": 2
+        }
+      },
+      {
+        "semantic": "signed_engineering",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/signed_engineering",
+          "responseKey": "signed_engineering"
+        },
+        "target": {
+          "sensorId": "aigov.gov06.quorum-bundle-assembler.completion",
+          "region": {
+            "offset": 17043,
+            "length": 6
+          },
+          "index": 3
+        }
+      },
+      {
+        "semantic": "signed_legal",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/signed_legal",
+          "responseKey": "signed_legal"
+        },
+        "target": {
+          "sensorId": "aigov.gov06.quorum-bundle-assembler.completion",
+          "region": {
+            "offset": 17043,
+            "length": 6
+          },
+          "index": 4
+        }
+      },
+      {
+        "semantic": "signer_is_preparer",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/signer_is_preparer",
+          "responseKey": "signer_is_preparer"
+        },
+        "target": {
+          "sensorId": "aigov.gov06.quorum-bundle-assembler.completion",
+          "region": {
+            "offset": 17043,
+            "length": 6
+          },
+          "index": 5
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "builder": "machine_factory/domains/ai-governance-regime/tools/build_machines.py",
+    "candidateVersion": "0.2.0",
+    "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1"
+  }
+}

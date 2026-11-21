@@ -1,0 +1,218 @@
+{
+  "schemaVersion": "1.0.0",
+  "behaviorId": "aigov-break-glass-coordinator",
+  "role": "step-agent",
+  "agentId": "aigov-break-glass-coordinator",
+  "displayName": "Break-glass coordinator",
+  "domain": "ai-governance-regime",
+  "machine": {
+    "id": "GOV15_break-glass-emergency-override",
+    "file": "GOV15_break-glass-emergency-override.json",
+    "machineClass": "governance-escalator",
+    "inputRegion": {
+      "offset": 17184,
+      "length": 15
+    },
+    "outputRegion": {
+      "offset": 17372,
+      "length": 10
+    },
+    "cloneable": true
+  },
+  "dispatch": {
+    "mode": "frame-step",
+    "triggerSequenceIds": [
+      "ces_gov15_agent_requested"
+    ],
+    "frameScopes": [
+      "frame:read",
+      "pod:read",
+      "frame:return"
+    ],
+    "workflow": "W6",
+    "humanApprovalRequired": true
+  },
+  "capabilities": [
+    "frame.read",
+    "frame.return.write",
+    "lifecycle.frame.open",
+    "human.notify"
+  ],
+  "reasoning": {
+    "objective": "Open the emergency epoch after the two root-token holders have acted, start its lease, and queue the post-hoc ratification as a rule-epoch promotion frame (W2); never extend a lease.",
+    "instructions": "You are the break-glass coordinator for the RealityEngine AI governance regime (M-GOV-15 BreakGlassEmergencyOverride, workflow W6).\n\nOBJECTIVE\nOpen the emergency epoch after the two root-token holders have acted, start its lease, and queue the post-hoc ratification as a rule-epoch promotion frame (W2); never extend a lease.\n\nYOU MAY\n- Open the emergency epoch and start its lease.\n- Queue the ratification frame.\n\nYOU MUST NOT\n- Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).\n- Never write vector values directly; your result reaches the engines only through your completion contract.\n- Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.\n- Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts.",
+    "outputContract": "Return one structured line per completion field as `<field>: 0|1` (emergency_open: the emergency epoch is open and its lease started, ratification_queued: a W2 ratification frame is queued, coordinator_failed: the agent's step failed), then `rationale: <one sentence>`. The machine, not you, decides what follows.",
+    "sequenceCatalog": [
+      {
+        "sequenceId": "ces_gov15_agent_requested",
+        "label": "S1_AgentRunning",
+        "rag": "AMBER",
+        "outputIndex": 8,
+        "action": "AGENT_REQUESTED"
+      },
+      {
+        "sequenceId": "ces_gov15_agent_failed",
+        "label": "S_err_StepFailed",
+        "rag": "RED",
+        "outputIndex": 4,
+        "action": "PARKED + REWORK"
+      },
+      {
+        "sequenceId": "ces_gov15_emergency_active",
+        "label": "S2_EmergencyActive",
+        "rag": "AMBER",
+        "outputIndex": 2,
+        "action": "PERMIT_DEPLOY + TRIGGER_INCIDENT"
+      },
+      {
+        "sequenceId": "ces_gov15_ratified",
+        "label": "S3_Ratified",
+        "rag": "GREEN",
+        "outputIndex": 2,
+        "action": "PERMIT_DEPLOY"
+      },
+      {
+        "sequenceId": "ces_gov15_lease_expired",
+        "label": "S_err_ExpiredRevoked",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION + REVOKE_EPOCH + REWORK + OVERDUE"
+      },
+      {
+        "sequenceId": "ces_gov15_tamper_revoked",
+        "label": "S_err_ExpiredRevoked",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION + REVOKE_EPOCH + REWORK"
+      }
+    ],
+    "prohibitions": [
+      "Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).",
+      "Never write vector values directly; your result reaches the engines only through your completion contract.",
+      "Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.",
+      "Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts."
+    ]
+  },
+  "agentBinding": {
+    "agent": "aigov-break-glass-coordinator",
+    "mode": "supervised-act",
+    "trigger": "ces_gov15_agent_requested",
+    "allowedActions": [
+      "Open the emergency epoch and start its lease.",
+      "Queue the ratification frame."
+    ],
+    "writeBack": {
+      "type": "pe-sensor",
+      "provider": "asset-lifecycle",
+      "sensorId": "aigov.gov15.break-glass-coordinator.completion",
+      "name": "Break-glass coordinator completion (GOV15)",
+      "region": {
+        "offset": 17192,
+        "length": 3
+      },
+      "semantics": [
+        "emergency_open",
+        "ratification_queued",
+        "coordinator_failed"
+      ],
+      "ttlMs": 300000,
+      "normalization": "already-normalized-0-1",
+      "ingest": {
+        "endpoint": "/api/integrations/completions",
+        "method": "POST",
+        "triggerPush": false,
+        "compactPush": true
+      },
+      "sourceMapping": {
+        "id": "aigov-gov15-break-glass-coordinator-completion",
+        "sensorId": "aigov.gov15.break-glass-coordinator.completion",
+        "name": "Break-glass coordinator completion (GOV15)",
+        "region": {
+          "offset": 17192,
+          "length": 3
+        },
+        "ttlMs": 300000
+      }
+    },
+    "riskControls": {
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "maxAutonomy": "supervised-act",
+      "blockedWhenRag": []
+    },
+    "autonomyPolicy": {
+      "mode": "supervised-act",
+      "stage": 2,
+      "writeBackType": "pe-sensor",
+      "canWriteBack": true,
+      "canStageActions": true,
+      "canExecuteActions": false,
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "blockedWhenRag": []
+    }
+  },
+  "responseMapping": {
+    "schemaVersion": "1.0.0",
+    "responseContract": "structured-keys",
+    "mode": "supervised-act",
+    "fields": [
+      {
+        "semantic": "emergency_open",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/emergency_open",
+          "responseKey": "emergency_open"
+        },
+        "target": {
+          "sensorId": "aigov.gov15.break-glass-coordinator.completion",
+          "region": {
+            "offset": 17192,
+            "length": 3
+          },
+          "index": 0
+        }
+      },
+      {
+        "semantic": "ratification_queued",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/ratification_queued",
+          "responseKey": "ratification_queued"
+        },
+        "target": {
+          "sensorId": "aigov.gov15.break-glass-coordinator.completion",
+          "region": {
+            "offset": 17192,
+            "length": 3
+          },
+          "index": 1
+        }
+      },
+      {
+        "semantic": "coordinator_failed",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/coordinator_failed",
+          "responseKey": "coordinator_failed"
+        },
+        "target": {
+          "sensorId": "aigov.gov15.break-glass-coordinator.completion",
+          "region": {
+            "offset": 17192,
+            "length": 3
+          },
+          "index": 2
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "builder": "machine_factory/domains/ai-governance-regime/tools/build_machines.py",
+    "candidateVersion": "0.2.0",
+    "specRule": "HARDENING_TRANSITION_RULES.md section 2 (15)"
+  }
+}

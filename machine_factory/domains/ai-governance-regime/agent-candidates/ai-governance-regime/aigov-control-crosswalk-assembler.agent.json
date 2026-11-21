@@ -1,0 +1,228 @@
+{
+  "schemaVersion": "1.0.0",
+  "behaviorId": "aigov-control-crosswalk-assembler",
+  "role": "step-agent",
+  "agentId": "aigov-control-crosswalk-assembler",
+  "displayName": "Control crosswalk assembler",
+  "domain": "ai-governance-regime",
+  "machine": {
+    "id": "GOV13_control-crosswalk-assembler",
+    "file": "GOV13_control-crosswalk-assembler.json",
+    "machineClass": "evidence-archive",
+    "inputRegion": {
+      "offset": 17152,
+      "length": 15
+    },
+    "outputRegion": {
+      "offset": 17352,
+      "length": 10
+    },
+    "cloneable": true
+  },
+  "dispatch": {
+    "mode": "frame-step",
+    "triggerSequenceIds": [
+      "ces_gov13_agent_requested"
+    ],
+    "frameScopes": [
+      "frame:read",
+      "pod:read",
+      "pod:write",
+      "frame:return"
+    ],
+    "workflow": "W5",
+    "humanApprovalRequired": true
+  },
+  "capabilities": [
+    "frame.read",
+    "pod.read",
+    "pod.write",
+    "frame.return.write",
+    "regression.report.read",
+    "kline.read"
+  ],
+  "reasoning": {
+    "objective": "Collect the receipts (dossiers, AIBOM, parity certificate, WAL segments, egress log, incident archive) into the auditor evidence pack, mapped to ISO/IEC 42001 Annex A (the SoA template), NIST AI RMF and the EU AI Act; list missing receipts.",
+    "instructions": "You are the control crosswalk assembler for the RealityEngine AI governance regime (M-GOV-13 ControlCrosswalkAssembler, workflow W5).\n\nOBJECTIVE\nCollect the receipts (dossiers, AIBOM, parity certificate, WAL segments, egress log, incident archive) into the auditor evidence pack, mapped to ISO/IEC 42001 Annex A (the SoA template), NIST AI RMF and the EU AI Act; list missing receipts.\n\nYOU MAY\n- Assemble the evidence pack in the frame.\n- Report missing receipts.\n\nYOU MUST NOT\n- Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).\n- Never write vector values directly; your result reaches the engines only through your completion contract.\n- Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.\n- Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts.",
+    "outputContract": "Return one structured line per completion field as `<field>: 0|1` (pack_assembled: the pack is assembled, assembler_failed: the agent's step failed, missing_receipts: receipts are missing from the pack), then `rationale: <one sentence>`. The machine, not you, decides what follows.",
+    "sequenceCatalog": [
+      {
+        "sequenceId": "ces_gov13_agent_requested",
+        "label": "S1_AgentRunning",
+        "rag": "AMBER",
+        "outputIndex": 8,
+        "action": "AGENT_REQUESTED"
+      },
+      {
+        "sequenceId": "ces_gov13_agent_failed",
+        "label": "S_err_StepFailed",
+        "rag": "RED",
+        "outputIndex": 4,
+        "action": "PARKED + REWORK"
+      },
+      {
+        "sequenceId": "ces_gov13_missing_receipts",
+        "label": "S_err_Rework",
+        "rag": "AMBER",
+        "outputIndex": 7,
+        "action": "REWORK"
+      },
+      {
+        "sequenceId": "ces_gov13_parked",
+        "label": "S2_ParkedReview",
+        "rag": "AMBER",
+        "outputIndex": 4,
+        "action": "PARKED"
+      },
+      {
+        "sequenceId": "ces_gov13_approved",
+        "label": "S3_Approved",
+        "rag": "GREEN",
+        "outputIndex": 2,
+        "action": "PERMIT_DEPLOY"
+      },
+      {
+        "sequenceId": "ces_gov13_rework_re_pinned",
+        "label": "S_err_Rework",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION + REWORK"
+      },
+      {
+        "sequenceId": "ces_gov13_rework_stale",
+        "label": "S_err_Rework",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION + REWORK"
+      }
+    ],
+    "prohibitions": [
+      "Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).",
+      "Never write vector values directly; your result reaches the engines only through your completion contract.",
+      "Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.",
+      "Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts."
+    ]
+  },
+  "agentBinding": {
+    "agent": "aigov-control-crosswalk-assembler",
+    "mode": "supervised-act",
+    "trigger": "ces_gov13_agent_requested",
+    "allowedActions": [
+      "Assemble the evidence pack in the frame.",
+      "Report missing receipts."
+    ],
+    "writeBack": {
+      "type": "pe-sensor",
+      "provider": "asset-lifecycle",
+      "sensorId": "aigov.gov13.control-crosswalk-assembler.completion",
+      "name": "Control crosswalk assembler completion (GOV13)",
+      "region": {
+        "offset": 17160,
+        "length": 3
+      },
+      "semantics": [
+        "pack_assembled",
+        "assembler_failed",
+        "missing_receipts"
+      ],
+      "ttlMs": 300000,
+      "normalization": "already-normalized-0-1",
+      "ingest": {
+        "endpoint": "/api/integrations/completions",
+        "method": "POST",
+        "triggerPush": false,
+        "compactPush": true
+      },
+      "sourceMapping": {
+        "id": "aigov-gov13-control-crosswalk-assembler-completion",
+        "sensorId": "aigov.gov13.control-crosswalk-assembler.completion",
+        "name": "Control crosswalk assembler completion (GOV13)",
+        "region": {
+          "offset": 17160,
+          "length": 3
+        },
+        "ttlMs": 300000
+      }
+    },
+    "riskControls": {
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "maxAutonomy": "supervised-act",
+      "blockedWhenRag": []
+    },
+    "autonomyPolicy": {
+      "mode": "supervised-act",
+      "stage": 2,
+      "writeBackType": "pe-sensor",
+      "canWriteBack": true,
+      "canStageActions": true,
+      "canExecuteActions": false,
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "blockedWhenRag": []
+    }
+  },
+  "responseMapping": {
+    "schemaVersion": "1.0.0",
+    "responseContract": "structured-keys",
+    "mode": "supervised-act",
+    "fields": [
+      {
+        "semantic": "pack_assembled",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/pack_assembled",
+          "responseKey": "pack_assembled"
+        },
+        "target": {
+          "sensorId": "aigov.gov13.control-crosswalk-assembler.completion",
+          "region": {
+            "offset": 17160,
+            "length": 3
+          },
+          "index": 0
+        }
+      },
+      {
+        "semantic": "assembler_failed",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/assembler_failed",
+          "responseKey": "assembler_failed"
+        },
+        "target": {
+          "sensorId": "aigov.gov13.control-crosswalk-assembler.completion",
+          "region": {
+            "offset": 17160,
+            "length": 3
+          },
+          "index": 1
+        }
+      },
+      {
+        "semantic": "missing_receipts",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/missing_receipts",
+          "responseKey": "missing_receipts"
+        },
+        "target": {
+          "sensorId": "aigov.gov13.control-crosswalk-assembler.completion",
+          "region": {
+            "offset": 17160,
+            "length": 3
+          },
+          "index": 2
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "builder": "machine_factory/domains/ai-governance-regime/tools/build_machines.py",
+    "candidateVersion": "0.2.0",
+    "specRule": "SPECIFICATION.md 4.3 (13)"
+  }
+}
