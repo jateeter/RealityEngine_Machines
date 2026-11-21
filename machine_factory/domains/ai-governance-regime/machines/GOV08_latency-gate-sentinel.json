@@ -1,0 +1,481 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV08_latency-gate-sentinel",
+    "name": "GOV08_latency-gate-sentinel",
+    "description": "Latency gate sentinel: halts while the TO-1 gate fails or p99 drift exceeds 0.10, permits while both are within their gate.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17072,
+        "length": 2
+      },
+      "output": {
+        "offset": 17288,
+        "length": 8
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ces_gov08_drift_gate_failed",
+        "name": "M-GOV-08 S0_WithinSLA → S1_LatencyDrift",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_WithinSLA",
+          "sourceToState": "S1_LatencyDrift",
+          "regularExpression": "[gate_kperf_to1=0]",
+          "specRule": "SPECIFICATION.md 4.3 (8)",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov08_drift_gate_failed-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov08_drift_gate_failed-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov08_drift_latency",
+        "name": "M-GOV-08 S0_WithinSLA → S1_LatencyDrift",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_WithinSLA",
+          "sourceToState": "S1_LatencyDrift",
+          "regularExpression": "[mon_latency_drift∈[0.1001,1]]",
+          "specRule": "SPECIFICATION.md 4.3 (8)",
+          "semanticAmendments": [
+            "GOV-SA-01"
+          ],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov08_drift_latency-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.55005,
+                "threshold": 0.44995,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov08_drift_latency-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov08_within_sla",
+        "name": "M-GOV-08 S1_LatencyDrift → S0_WithinSLA",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_LatencyDrift",
+          "sourceToState": "S0_WithinSLA",
+          "regularExpression": "[gate_kperf_to1=1 ∧ mon_latency_drift∈[0,0.1]]",
+          "specRule": "SPECIFICATION.md 4.3 (8)",
+          "semanticAmendments": [
+            "GOV-SA-07"
+          ],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov08_within_sla-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.05,
+                "threshold": 0.05,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov08_within_sla-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov08-drift-gate-failed",
+        "events": [
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov08_drift_gate_failed: [gate_kperf_to1=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov08_drift_gate_failed"
+        }
+      },
+      {
+        "name": "gov08-drift-latency",
+        "events": [
+          [
+            1.0,
+            0.5501
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov08_drift_latency: [mon_latency_drift∈[0.1001,1]]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov08_drift_latency"
+        }
+      },
+      {
+        "name": "gov08-within-sla",
+        "events": [
+          [
+            1.0,
+            0.05
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov08_within_sla: [gate_kperf_to1=1 ∧ mon_latency_drift∈[0,0.1]]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov08_within_sla"
+        }
+      },
+      {
+        "name": "gov08-nominal",
+        "events": [
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "signal-monitor",
+      "sequenceCount": 3,
+      "inputSemantics": [
+        "gate_kperf_to1 (binary; timing; specification cell 16969): TO-1 p99 latency within its gate",
+        "mon_latency_drift (continuous [0,1]; watchdog; specification cell 16982): relative p99 drift above the gated baseline"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "C-runtime-assurance",
+        "M-GOV-08",
+        "fixture"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "C-runtime-assurance",
+        "machineCode": "GOV08",
+        "workflowTags": [
+          "LatencyGateSentinel"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:C-runtime-assurance:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Owner roles are functional name strings pending the domain's staffing decision; the runbook URN resolves when runbooks/ is written (PACKAGE_STATUS.md step 6)."
+      },
+      "triggerConfig": {
+        "processId": "GOV08_latency-gate-sentinel",
+        "processName": "M-GOV-08 LatencyGateSentinel",
+        "rules": [
+          {
+            "sequenceId": "ces_gov08_drift_gate_failed",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-08 S0_WithinSLA → S1_LatencyDrift: [gate_kperf_to1=0]"
+          },
+          {
+            "sequenceId": "ces_gov08_drift_latency",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-08 S0_WithinSLA → S1_LatencyDrift: [mon_latency_drift∈[0.1001,1]]"
+          },
+          {
+            "sequenceId": "ces_gov08_within_sla",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-08 S1_LatencyDrift → S0_WithinSLA: [gate_kperf_to1=1 ∧ mon_latency_drift∈[0,0.1]]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.verdicts.gov08",
+          "type": "published-domain-bus-producer",
+          "role": "LatencyGateSentinel",
+          "sourceMachine": "GOV08_latency-gate-sentinel",
+          "sourceOutputRegion": {
+            "offset": 17288,
+            "length": 4
+          },
+          "targetInputElements": [
+            28,
+            29,
+            30,
+            31
+          ],
+          "normalizedElements": [
+            "M-GOV-08 HALT_PROMOTION",
+            "M-GOV-08 REVOKE_EPOCH",
+            "M-GOV-08 PERMIT_DEPLOY",
+            "M-GOV-08 TRIGGER_INCIDENT"
+          ],
+          "purpose": "Publish M-GOV-08's four verdict elements to the domain verdict aggregator.",
+          "busId": "ai-governance-regime.verdicts",
+          "busTag": "published-bus-ai-governance-regime-verdicts",
+          "targetMachine": "GOV00 Governance Verdict Aggregator",
+          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
+          "targetInputRegion": {
+            "offset": 17368,
+            "length": 68
+          },
+          "publishedOutputRegion": {
+            "offset": 17436,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized verdict bits only; governance documents, signatures and principals stay in the Solid asset frames."
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-08",
+        "title": "LatencyGateSentinel",
+        "kind": "fixture",
+        "specRule": "SPECIFICATION.md 4.3 (8)",
+        "governedAssetType": null,
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "intakeEquivalents": "intake/corpus-312.json and corpus-315.json machines are not carried over (GOV-R01, GOV-R02)"
+      }
+    }
+  }
+}

@@ -7,16 +7,20 @@ step in [PACKAGE_STATUS.md](PACKAGE_STATUS.md) is redone. Findings marked
 
 | Finding | Subject | Blocks | Needs |
 |---|---|---|---|
-| GOV-R01 | Neither corpus is in the canonical machine form | conversion | mechanical, after R02/R04 |
-| GOV-R02 | Machine identity: base templates against corpus ids | conversion | **owner** |
-| GOV-R03 | Machine and corpus counts disagree across documents | conversion | mechanical |
-| GOV-R04 | The region-allocation patch does not apply | allocation | **owner** (band), then mechanical |
-| GOV-R05 | Corpus-315 declares itself `accepted` | admission | mechanical |
+| GOV-R01 | Neither corpus is in the canonical machine form | conversion | **closed 2026-11-21**: built from the spec (GOV-SD-06) |
+| GOV-R02 | Machine identity: base templates against corpus ids | conversion | **closed 2026-11-21**: 17 base machines (GOV-SD-04) |
+| GOV-R03 | Machine and corpus counts disagree across documents | documents | count is 18 (17 + GOV00); documents still to be revised |
+| GOV-R04 | The region-allocation patch does not apply | allocation | layout decided (GOV-SD-05); allocation through the admission workflow |
+| GOV-R05 | Corpus-315 declares itself `accepted` | admission | **closed 2026-11-21**: candidates are `candidate-not-admitted` |
 | GOV-R06 | Two meanings of "quorum" | specification | **owner** |
 | GOV-R07 | Framework alignment has no pinned sources | every alignment claim | **owner** (which editions) |
 | GOV-R08 | The authoritative baseline (V0.18) is not in the workspace | every citation | **owner** |
 | GOV-R09 | Designed mechanisms are described as if they exist | workplan, specification | **owner** (scope per release) |
 | GOV-R10 | Generated-text residue and stale cross-references | documents | mechanical |
+| GOV-R11 | Continuous-input watchdogs are multi-valued machines | regression reach | **owner** (extension corpus) |
+| GOV-R12 | Latch feedback and verdict composition need live confirmation | engine/PE behavior | live 3-of-3 run |
+| GOV-R13 | GOV10 permits on every quiet step | specification | **owner** |
+| GOV-R14 | The semantic amendments need owner review | specification | **owner** |
 
 ## GOV-R01: neither corpus is in the canonical machine form
 
@@ -151,3 +155,39 @@ tested against interned test sequences.
 
 These are fixed when the documents are next revised. The intake copies stay as
 received.
+
+## GOV-R11: continuous-input watchdogs are multi-valued machines (owner)
+
+GOV07, GOV08, GOV09, GOV12, GOV14 and GOV16 read continuous signals
+(exposure rate, latency drift, backlog, harm count, TTL, canary drift), so they
+declare `bitsPerElement: 8`. MACHINE_CONCEPT.md §9.3 says the engines do not yet
+claim to agree about multi-valued machines and the corpus parity sweep sets
+them aside. These machines therefore need a named extension corpus, or a
+binarized source per signal (one bit per threshold the rules use), before the
+parity gate can reach them.
+
+## GOV-R12: latch feedback and verdict composition need live confirmation
+
+Six machines read their previous `LATCH` output through `latch_q_prev`, and
+GOV00 reads every machine's verdicts. Both are declared PE compositions
+(`metadata.latchFeedback`, the `ai-governance-regime.verdicts` bus). The
+fixtures were replayed only by the package's authoring evaluator, which
+implements SURFACE_SPEC's transition rule. The engines and the PE have to show
+the same trajectories 3-of-3 before any of this counts. For a clone, the
+feedback cell belongs in the block's bus quarter; whether the engines
+already support intra-machine bus cells there has to be checked.
+
+## GOV-R13: GOV10 permits on every quiet step (owner)
+
+The specification's `S_0 → S_1` for M-GOV-10 needs only
+`egress_external_comm = 0`, so GOV10 asserts `PERMIT_DEPLOY` whenever no
+external egress is in flight, with no request signal (GOV-SA-08). Under GOV00's
+fold, that permit is enough to make the domain permit while nothing halts.
+Decide whether egress gets a request signal, or whether GOV00 counts only
+permits that answer a request.
+
+## GOV-R14: the semantic amendments need owner review (owner)
+
+`semantic-amendments.json` lists 12 places (GOV-SA-01 to GOV-SA-12) where the
+machines resolve a choice or a nondeterminism the specification leaves open.
+Each CES cites the amendments it carries.

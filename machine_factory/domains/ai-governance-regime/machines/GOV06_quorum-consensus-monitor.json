@@ -1,0 +1,768 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV06_quorum-consensus-monitor",
+    "name": "GOV06_quorum-consensus-monitor",
+    "description": "Approval-quorum monitor on an epoch swap: permits only with the approval quorum met, a distinct principal, clean signer keys and attested sources; halts on any one missing.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17040,
+        "length": 5
+      },
+      "output": {
+        "offset": 17272,
+        "length": 8
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "ces_gov06_quorum_valid",
+        "name": "M-GOV-06 S0_Standby → S1_QuorumValid",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Standby",
+          "sourceToState": "S1_QuorumValid",
+          "regularExpression": "[req_epoch_swap=1 ∧ lane_quorum_met=1 ∧ lane_principal_distinct=1 ∧ lane_quorum_integrity_ok=1 ∧ gate_source_slsa_attested=1]",
+          "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov06_quorum_valid-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov06_quorum_valid-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov06_violation_quorum",
+        "name": "M-GOV-06 S0_Standby → S_fail_QuorumViolation",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Standby",
+          "sourceToState": "S_fail_QuorumViolation",
+          "regularExpression": "[req_epoch_swap=1 ∧ lane_quorum_met=0]",
+          "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov06_violation_quorum-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov06_violation_quorum-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov06_violation_self_approval",
+        "name": "M-GOV-06 S0_Standby → S_fail_QuorumViolation",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Standby",
+          "sourceToState": "S_fail_QuorumViolation",
+          "regularExpression": "[req_epoch_swap=1 ∧ lane_principal_distinct=0]",
+          "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov06_violation_self_approval-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov06_violation_self_approval-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov06_violation_key_integrity",
+        "name": "M-GOV-06 S0_Standby → S_fail_QuorumViolation",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Standby",
+          "sourceToState": "S_fail_QuorumViolation",
+          "regularExpression": "[req_epoch_swap=1 ∧ lane_quorum_integrity_ok=0]",
+          "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [
+            "GOV-SA-05"
+          ],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov06_violation_key_integrity-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov06_violation_key_integrity-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov06_violation_unattested",
+        "name": "M-GOV-06 S0_Standby → S_fail_QuorumViolation",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Standby",
+          "sourceToState": "S_fail_QuorumViolation",
+          "regularExpression": "[req_epoch_swap=1 ∧ gate_source_slsa_attested=0]",
+          "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [
+            "GOV-SA-05"
+          ],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov06_violation_unattested-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov06_violation_unattested-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov06-quorum-valid",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov06_quorum_valid: [req_epoch_swap=1 ∧ lane_quorum_met=1 ∧ lane_principal_distinct=1 ∧ lane_quorum_integrity_ok=1 ∧ gate_source_slsa_attested=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov06_quorum_valid"
+        }
+      },
+      {
+        "name": "gov06-violation-quorum",
+        "events": [
+          [
+            1.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov06_violation_quorum: [req_epoch_swap=1 ∧ lane_quorum_met=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov06_violation_quorum"
+        }
+      },
+      {
+        "name": "gov06-violation-self-approval",
+        "events": [
+          [
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov06_violation_self_approval: [req_epoch_swap=1 ∧ lane_principal_distinct=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov06_violation_self_approval"
+        }
+      },
+      {
+        "name": "gov06-violation-key-integrity",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov06_violation_key_integrity: [req_epoch_swap=1 ∧ lane_quorum_integrity_ok=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov06_violation_key_integrity"
+        }
+      },
+      {
+        "name": "gov06-violation-unattested",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov06_violation_unattested: [req_epoch_swap=1 ∧ gate_source_slsa_attested=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov06_violation_unattested"
+        }
+      },
+      {
+        "name": "gov06-nominal",
+        "events": [
+          [
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "safety-compliance-checker",
+      "sequenceCount": 5,
+      "inputSemantics": [
+        "req_epoch_swap (binary; action request; specification cell 16985): proposal to swap the rule epoch",
+        "lane_quorum_met (binary; quorum monitor; specification cell 16967): valid approval-quorum signatures >= q over the canonical bundle",
+        "lane_principal_distinct (binary; lifecycle; specification cell 16966): approver != preparer and not an agent (T15)",
+        "lane_quorum_integrity_ok (binary; quorum and CRL; specification cell 16991): signers clean on CRL/OCSP, diverse, dwell met",
+        "gate_source_slsa_attested (binary; attestation; specification cell 16988): source identity and provenance attested"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "B-rule-epoch-aibom",
+        "M-GOV-06",
+        "fixture"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "B-rule-epoch-aibom",
+        "machineCode": "GOV06",
+        "workflowTags": [
+          "QuorumConsensusMonitor"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:B-rule-epoch-aibom:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Owner roles are functional name strings pending the domain's staffing decision; the runbook URN resolves when runbooks/ is written (PACKAGE_STATUS.md step 6)."
+      },
+      "triggerConfig": {
+        "processId": "GOV06_quorum-consensus-monitor",
+        "processName": "M-GOV-06 QuorumConsensusMonitor",
+        "rules": [
+          {
+            "sequenceId": "ces_gov06_quorum_valid",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-06 S0_Standby → S1_QuorumValid: [req_epoch_swap=1 ∧ lane_quorum_met=1 ∧ lane_principal_distinct=1 ∧ lane_quorum_integrity_ok=1 ∧ gate_source_slsa_attested=1]"
+          },
+          {
+            "sequenceId": "ces_gov06_violation_quorum",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-06 S0_Standby → S_fail_QuorumViolation: [req_epoch_swap=1 ∧ lane_quorum_met=0]"
+          },
+          {
+            "sequenceId": "ces_gov06_violation_self_approval",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-06 S0_Standby → S_fail_QuorumViolation: [req_epoch_swap=1 ∧ lane_principal_distinct=0]"
+          },
+          {
+            "sequenceId": "ces_gov06_violation_key_integrity",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-06 S0_Standby → S_fail_QuorumViolation: [req_epoch_swap=1 ∧ lane_quorum_integrity_ok=0]"
+          },
+          {
+            "sequenceId": "ces_gov06_violation_unattested",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-06 S0_Standby → S_fail_QuorumViolation: [req_epoch_swap=1 ∧ gate_source_slsa_attested=0]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.verdicts.gov06",
+          "type": "published-domain-bus-producer",
+          "role": "QuorumConsensusMonitor",
+          "sourceMachine": "GOV06_quorum-consensus-monitor",
+          "sourceOutputRegion": {
+            "offset": 17272,
+            "length": 4
+          },
+          "targetInputElements": [
+            20,
+            21,
+            22,
+            23
+          ],
+          "normalizedElements": [
+            "M-GOV-06 HALT_PROMOTION",
+            "M-GOV-06 REVOKE_EPOCH",
+            "M-GOV-06 PERMIT_DEPLOY",
+            "M-GOV-06 TRIGGER_INCIDENT"
+          ],
+          "purpose": "Publish M-GOV-06's four verdict elements to the domain verdict aggregator.",
+          "busId": "ai-governance-regime.verdicts",
+          "busTag": "published-bus-ai-governance-regime-verdicts",
+          "targetMachine": "GOV00 Governance Verdict Aggregator",
+          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
+          "targetInputRegion": {
+            "offset": 17368,
+            "length": 68
+          },
+          "publishedOutputRegion": {
+            "offset": 17436,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized verdict bits only; governance documents, signatures and principals stay in the Solid asset frames."
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-06",
+        "title": "QuorumConsensusMonitor",
+        "kind": "fixture",
+        "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1",
+        "governedAssetType": "GovernanceAssetFrame",
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "intakeEquivalents": "intake/corpus-312.json and corpus-315.json machines are not carried over (GOV-R01, GOV-R02)"
+      }
+    }
+  }
+}

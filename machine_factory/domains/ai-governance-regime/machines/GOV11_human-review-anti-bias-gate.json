@@ -1,0 +1,433 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV11_human-review-anti-bias-gate",
+    "name": "GOV11_human-review-anti-bias-gate",
+    "description": "Human review gate: permits once the canonical diff is rendered to a distinct human principal, halts an approval given without a rendered diff.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17120,
+        "length": 3
+      },
+      "output": {
+        "offset": 17312,
+        "length": 8
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "ces_gov11_diff_verified",
+        "name": "M-GOV-11 S0_AwaitingDiff → S1_DiffVerified",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_AwaitingDiff",
+          "sourceToState": "S1_DiffVerified",
+          "regularExpression": "[lane_diff_rendered=1 ∧ lane_principal_distinct=1]",
+          "specRule": "SPECIFICATION.md 4.3 (11)",
+          "semanticAmendments": [],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov11_diff_verified-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov11_diff_verified-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov11_blind_approval_block",
+        "name": "M-GOV-11 S0_AwaitingDiff → S_fail_BlindApprovalBlock",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_AwaitingDiff",
+          "sourceToState": "S_fail_BlindApprovalBlock",
+          "regularExpression": "[lane_diff_rendered=0 ∧ lane_approved=1]",
+          "specRule": "SPECIFICATION.md 4.3 (11)",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov11_blind_approval_block-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov11_blind_approval_block-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov11-diff-verified",
+        "events": [
+          [
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov11_diff_verified: [lane_diff_rendered=1 ∧ lane_principal_distinct=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov11_diff_verified"
+        }
+      },
+      {
+        "name": "gov11-blind-approval-block",
+        "events": [
+          [
+            0.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov11_blind_approval_block: [lane_diff_rendered=0 ∧ lane_approved=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov11_blind_approval_block"
+        }
+      },
+      {
+        "name": "gov11-blind-approval-with-diff",
+        "events": [
+          [
+            1.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "an approval with a diff but by a non-distinct principal neither permits nor is a blind approval",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      },
+      {
+        "name": "gov11-nominal",
+        "events": [
+          [
+            0.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "safety-compliance-checker",
+      "sequenceCount": 2,
+      "inputSemantics": [
+        "lane_diff_rendered (binary; lifecycle; specification cell 16965): canonical diff rendered for the human reviewer",
+        "lane_principal_distinct (binary; lifecycle; specification cell 16966): approver != preparer and not an agent (T15)",
+        "lane_approved (binary; lifecycle; specification cell 16962): human continuation resumed with a valid DPoP token"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "D-transparency-oversight",
+        "M-GOV-11"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "D-transparency-oversight",
+        "machineCode": "GOV11",
+        "workflowTags": [
+          "HumanReviewAntiBiasGate"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:D-transparency-oversight:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Owner roles are functional name strings pending the domain's staffing decision; the runbook URN resolves when runbooks/ is written (PACKAGE_STATUS.md step 6)."
+      },
+      "triggerConfig": {
+        "processId": "GOV11_human-review-anti-bias-gate",
+        "processName": "M-GOV-11 HumanReviewAntiBiasGate",
+        "rules": [
+          {
+            "sequenceId": "ces_gov11_diff_verified",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-11 S0_AwaitingDiff → S1_DiffVerified: [lane_diff_rendered=1 ∧ lane_principal_distinct=1]"
+          },
+          {
+            "sequenceId": "ces_gov11_blind_approval_block",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-11 S0_AwaitingDiff → S_fail_BlindApprovalBlock: [lane_diff_rendered=0 ∧ lane_approved=1]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.verdicts.gov11",
+          "type": "published-domain-bus-producer",
+          "role": "HumanReviewAntiBiasGate",
+          "sourceMachine": "GOV11_human-review-anti-bias-gate",
+          "sourceOutputRegion": {
+            "offset": 17312,
+            "length": 4
+          },
+          "targetInputElements": [
+            40,
+            41,
+            42,
+            43
+          ],
+          "normalizedElements": [
+            "M-GOV-11 HALT_PROMOTION",
+            "M-GOV-11 REVOKE_EPOCH",
+            "M-GOV-11 PERMIT_DEPLOY",
+            "M-GOV-11 TRIGGER_INCIDENT"
+          ],
+          "purpose": "Publish M-GOV-11's four verdict elements to the domain verdict aggregator.",
+          "busId": "ai-governance-regime.verdicts",
+          "busTag": "published-bus-ai-governance-regime-verdicts",
+          "targetMachine": "GOV00 Governance Verdict Aggregator",
+          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
+          "targetInputRegion": {
+            "offset": 17368,
+            "length": 68
+          },
+          "publishedOutputRegion": {
+            "offset": 17436,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized verdict bits only; governance documents, signatures and principals stay in the Solid asset frames."
+        },
+        {
+          "id": "ai-governance-regime.document.gov11.GovernanceAssetFrame",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "GOV11_human-review-anti-bias-gate",
+          "targetMachine": "GOV13_control-crosswalk-assembler",
+          "assetTypeId": "GovernanceAssetFrame",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Hand the frame's GovernanceAssetFrame to GOV13, its next consumer in the specification's evidence flow (SPECIFICATION.md sections 5-6); never infer a governance verdict from document content.",
+          "nativeVectorWrite": false
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-11",
+        "title": "HumanReviewAntiBiasGate",
+        "kind": "template",
+        "specRule": "SPECIFICATION.md 4.3 (11)",
+        "governedAssetType": "GovernanceAssetFrame",
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "intakeEquivalents": "intake/corpus-312.json and corpus-315.json machines are not carried over (GOV-R01, GOV-R02)"
+      }
+    }
+  }
+}

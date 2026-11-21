@@ -1,0 +1,1076 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV07_exposure-budget-watchdog",
+    "name": "GOV07_exposure-budget-watchdog",
+    "description": "Exposure-budget watchdog with an SR latch: reports the approach band, latches a revoke and an incident when the exhaustion rate breaches, and releases only on a distinct human approval with the rate back in band.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17056,
+        "length": 4
+      },
+      "output": {
+        "offset": 17280,
+        "length": 8
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ces_gov07_approach",
+        "name": "M-GOV-07 S0_Nominal → S1_Warning",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Nominal",
+          "sourceToState": "S1_Warning",
+          "regularExpression": "[mon_mu_exhaust_rate∈[0.0201,0.05] ∧ latch_q_prev=0]",
+          "specRule": "SPECIFICATION.md 4.3 (7)",
+          "semanticAmendments": [
+            "GOV-SA-01"
+          ],
+          "asserts": [
+            "APPROACH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov07_approach-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.03505,
+                "threshold": 0.01495,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov07_approach-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov07_breach_set",
+        "name": "M-GOV-07 S0_Nominal|S1_Warning → S2_BreachLatch",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Nominal|S1_Warning",
+          "sourceToState": "S2_BreachLatch",
+          "regularExpression": "[mon_mu_exhaust_rate∈[0.0501,1]]",
+          "specRule": "SPECIFICATION.md 4.3 (7)",
+          "semanticAmendments": [
+            "GOV-SA-01",
+            "GOV-SA-06"
+          ],
+          "asserts": [
+            "REVOKE_EPOCH",
+            "TRIGGER_INCIDENT",
+            "LATCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov07_breach_set-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.52505,
+                "threshold": 0.47495,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov07_breach_set-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov07_breach_hold_unapproved",
+        "name": "M-GOV-07 S2_BreachLatch → S2_BreachLatch",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_BreachLatch",
+          "sourceToState": "S2_BreachLatch",
+          "regularExpression": "[lane_approved=0 ∧ latch_q_prev=1]",
+          "specRule": "SPECIFICATION.md 4.3 (7)",
+          "semanticAmendments": [
+            "GOV-SA-06"
+          ],
+          "asserts": [
+            "REVOKE_EPOCH",
+            "LATCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov07_breach_hold_unapproved-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov07_breach_hold_unapproved-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov07_breach_hold_not_distinct",
+        "name": "M-GOV-07 S2_BreachLatch → S2_BreachLatch",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_BreachLatch",
+          "sourceToState": "S2_BreachLatch",
+          "regularExpression": "[lane_principal_distinct=0 ∧ latch_q_prev=1]",
+          "specRule": "SPECIFICATION.md 4.3 (7)",
+          "semanticAmendments": [
+            "GOV-SA-06"
+          ],
+          "asserts": [
+            "REVOKE_EPOCH",
+            "LATCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov07_breach_hold_not_distinct-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov07_breach_hold_not_distinct-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov07_breach_hold_rate",
+        "name": "M-GOV-07 S2_BreachLatch → S2_BreachLatch",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_BreachLatch",
+          "sourceToState": "S2_BreachLatch",
+          "regularExpression": "[mon_mu_exhaust_rate∈[0.0201,1] ∧ latch_q_prev=1]",
+          "specRule": "SPECIFICATION.md 4.3 (7)",
+          "semanticAmendments": [
+            "GOV-SA-06"
+          ],
+          "asserts": [
+            "REVOKE_EPOCH",
+            "LATCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov07_breach_hold_rate-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.51005,
+                "threshold": 0.48995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov07_breach_hold_rate-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov07_breach_reset",
+        "name": "M-GOV-07 S2_BreachLatch → S0_Nominal",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_BreachLatch",
+          "sourceToState": "S0_Nominal",
+          "regularExpression": "[mon_mu_exhaust_rate∈[0,0.02] ∧ lane_approved=1 ∧ lane_principal_distinct=1 ∧ latch_q_prev=1]",
+          "specRule": "SPECIFICATION.md 4.3 (7)",
+          "semanticAmendments": [
+            "GOV-SA-06"
+          ],
+          "asserts": [
+            "none (explicit release)"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov07_breach_reset-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.01,
+                "threshold": 0.01,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov07_breach_reset-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov07-approach",
+        "events": [
+          [
+            0.035,
+            0.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov07_approach: [mon_mu_exhaust_rate∈[0.0201,0.05] ∧ latch_q_prev=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov07_approach"
+        }
+      },
+      {
+        "name": "gov07-breach-set",
+        "events": [
+          [
+            0.5251,
+            0.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov07_breach_set: [mon_mu_exhaust_rate∈[0.0501,1]]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov07_breach_set"
+        }
+      },
+      {
+        "name": "gov07-breach-hold-unapproved",
+        "events": [
+          [
+            0.5251,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov07_breach_hold_unapproved: [lane_approved=0 ∧ latch_q_prev=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov07_breach_hold_unapproved"
+        }
+      },
+      {
+        "name": "gov07-breach-hold-not-distinct",
+        "events": [
+          [
+            0.5251,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov07_breach_hold_not_distinct: [lane_principal_distinct=0 ∧ latch_q_prev=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov07_breach_hold_not_distinct"
+        }
+      },
+      {
+        "name": "gov07-breach-hold-rate",
+        "events": [
+          [
+            0.5251,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.03,
+            0.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov07_breach_hold_rate: [mon_mu_exhaust_rate∈[0.0201,1] ∧ latch_q_prev=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov07_breach_hold_rate"
+        }
+      },
+      {
+        "name": "gov07-breach-reset",
+        "events": [
+          [
+            0.5251,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.01,
+            1.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov07_breach_reset: [mon_mu_exhaust_rate∈[0,0.02] ∧ lane_approved=1 ∧ lane_principal_distinct=1 ∧ latch_q_prev=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov07_breach_reset"
+        }
+      },
+      {
+        "name": "gov07-latch-holds-in-band",
+        "events": [
+          [
+            0.5,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.01,
+            0.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "the breach latch holds after the rate falls, until a distinct human approves",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      },
+      {
+        "name": "gov07-latch-released",
+        "events": [
+          [
+            0.5,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.01,
+            0.0,
+            1.0,
+            1.0
+          ],
+          [
+            0.01,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            0.01,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the latch releases on approval with the rate in band, and stays released",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      },
+      {
+        "name": "gov07-nominal",
+        "events": [
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "signal-monitor",
+      "sequenceCount": 6,
+      "inputSemantics": [
+        "mon_mu_exhaust_rate (continuous [0,1]; watchdog; specification cell 16979): normalized rate of exposure-budget exhaustions",
+        "lane_approved (binary; lifecycle; specification cell 16962): human continuation resumed with a valid DPoP token",
+        "lane_principal_distinct (binary; lifecycle; specification cell 16966): approver != preparer and not an agent (T15)",
+        "latch_q_prev (binary; PE feedback; PE feedback of output LATCH): this machine's LATCH output at the previous step"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "C-runtime-assurance",
+        "M-GOV-07",
+        "fixture"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "C-runtime-assurance",
+        "machineCode": "GOV07",
+        "workflowTags": [
+          "ExposureBudgetWatchdog"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:C-runtime-assurance:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Owner roles are functional name strings pending the domain's staffing decision; the runbook URN resolves when runbooks/ is written (PACKAGE_STATUS.md step 6)."
+      },
+      "triggerConfig": {
+        "processId": "GOV07_exposure-budget-watchdog",
+        "processName": "M-GOV-07 ExposureBudgetWatchdog",
+        "rules": [
+          {
+            "sequenceId": "ces_gov07_approach",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "M-GOV-07 S0_Nominal → S1_Warning: [mon_mu_exhaust_rate∈[0.0201,0.05] ∧ latch_q_prev=0]"
+          },
+          {
+            "sequenceId": "ces_gov07_breach_set",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-07 S0_Nominal|S1_Warning → S2_BreachLatch: [mon_mu_exhaust_rate∈[0.0501,1]]"
+          },
+          {
+            "sequenceId": "ces_gov07_breach_hold_unapproved",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-07 S2_BreachLatch → S2_BreachLatch: [lane_approved=0 ∧ latch_q_prev=1]"
+          },
+          {
+            "sequenceId": "ces_gov07_breach_hold_not_distinct",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-07 S2_BreachLatch → S2_BreachLatch: [lane_principal_distinct=0 ∧ latch_q_prev=1]"
+          },
+          {
+            "sequenceId": "ces_gov07_breach_hold_rate",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-07 S2_BreachLatch → S2_BreachLatch: [mon_mu_exhaust_rate∈[0.0201,1] ∧ latch_q_prev=1]"
+          },
+          {
+            "sequenceId": "ces_gov07_breach_reset",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-07 S2_BreachLatch → S0_Nominal: [mon_mu_exhaust_rate∈[0,0.02] ∧ lane_approved=1 ∧ lane_principal_distinct=1 ∧ latch_q_prev=1]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.verdicts.gov07",
+          "type": "published-domain-bus-producer",
+          "role": "ExposureBudgetWatchdog",
+          "sourceMachine": "GOV07_exposure-budget-watchdog",
+          "sourceOutputRegion": {
+            "offset": 17280,
+            "length": 4
+          },
+          "targetInputElements": [
+            24,
+            25,
+            26,
+            27
+          ],
+          "normalizedElements": [
+            "M-GOV-07 HALT_PROMOTION",
+            "M-GOV-07 REVOKE_EPOCH",
+            "M-GOV-07 PERMIT_DEPLOY",
+            "M-GOV-07 TRIGGER_INCIDENT"
+          ],
+          "purpose": "Publish M-GOV-07's four verdict elements to the domain verdict aggregator.",
+          "busId": "ai-governance-regime.verdicts",
+          "busTag": "published-bus-ai-governance-regime-verdicts",
+          "targetMachine": "GOV00 Governance Verdict Aggregator",
+          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
+          "targetInputRegion": {
+            "offset": 17368,
+            "length": 68
+          },
+          "publishedOutputRegion": {
+            "offset": 17436,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized verdict bits only; governance documents, signatures and principals stay in the Solid asset frames."
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-07",
+        "title": "ExposureBudgetWatchdog",
+        "kind": "fixture",
+        "specRule": "SPECIFICATION.md 4.3 (7)",
+        "governedAssetType": null,
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "intakeEquivalents": "intake/corpus-312.json and corpus-315.json machines are not carried over (GOV-R01, GOV-R02)"
+      },
+      "latchFeedback": {
+        "inputElement": 3,
+        "fromOutputElement": 6,
+        "compositionOwner": "perception-engine",
+        "peCompositionRequired": true,
+        "rule": "Q(k) = S(k) or (not R(k) and Q(k-1)); the PE writes this machine's previous LATCH output into input element 3 (an intra-machine bus cell, SURFACE_SPEC.md Cloneable machines). Needs live confirmation (GOV-R12)."
+      }
+    }
+  }
+}

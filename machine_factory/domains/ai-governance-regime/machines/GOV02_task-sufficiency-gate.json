@@ -1,0 +1,383 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV02_task-sufficiency-gate",
+    "name": "GOV02_task-sufficiency-gate",
+    "description": "Task-sufficiency gate on a domain admission: permits when every declared hazard is fiber-saturated or exposure-bounded, halts otherwise.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 16976,
+        "length": 2
+      },
+      "output": {
+        "offset": 17240,
+        "length": 8
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "ces_gov02_verified",
+        "name": "M-GOV-02 S0_Idle → S1_Verified",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Idle",
+          "sourceToState": "S1_Verified",
+          "regularExpression": "[req_domain_admit=1 ∧ gate_task_sufficiency=1]",
+          "specRule": "SPECIFICATION.md 4.3 (2)",
+          "semanticAmendments": [],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov02_verified-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov02_verified-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov02_incomplete_hazard",
+        "name": "M-GOV-02 S0_Idle → S_fail_IncompleteHazard",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Idle",
+          "sourceToState": "S_fail_IncompleteHazard",
+          "regularExpression": "[req_domain_admit=1 ∧ gate_task_sufficiency=0]",
+          "specRule": "SPECIFICATION.md 4.3 (2)",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov02_incomplete_hazard-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov02_incomplete_hazard-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov02-verified",
+        "events": [
+          [
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov02_verified: [req_domain_admit=1 ∧ gate_task_sufficiency=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov02_verified"
+        }
+      },
+      {
+        "name": "gov02-incomplete-hazard",
+        "events": [
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov02_incomplete_hazard: [req_domain_admit=1 ∧ gate_task_sufficiency=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov02_incomplete_hazard"
+        }
+      },
+      {
+        "name": "gov02-nominal",
+        "events": [
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "safety-compliance-checker",
+      "sequenceCount": 2,
+      "inputSemantics": [
+        "req_domain_admit (binary; action request; specification cell 16984): proposal to admit a domain manifest",
+        "gate_task_sufficiency (binary; manifest; specification cell 16972): every declared hazard fiber-saturated or exposure-bounded"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "A-domain-onboarding-impact",
+        "M-GOV-02"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "A-domain-onboarding-impact",
+        "machineCode": "GOV02",
+        "workflowTags": [
+          "TaskSufficiencyGate"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:A-domain-onboarding-impact:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Owner roles are functional name strings pending the domain's staffing decision; the runbook URN resolves when runbooks/ is written (PACKAGE_STATUS.md step 6)."
+      },
+      "triggerConfig": {
+        "processId": "GOV02_task-sufficiency-gate",
+        "processName": "M-GOV-02 TaskSufficiencyGate",
+        "rules": [
+          {
+            "sequenceId": "ces_gov02_verified",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-02 S0_Idle → S1_Verified: [req_domain_admit=1 ∧ gate_task_sufficiency=1]"
+          },
+          {
+            "sequenceId": "ces_gov02_incomplete_hazard",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-02 S0_Idle → S_fail_IncompleteHazard: [req_domain_admit=1 ∧ gate_task_sufficiency=0]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.verdicts.gov02",
+          "type": "published-domain-bus-producer",
+          "role": "TaskSufficiencyGate",
+          "sourceMachine": "GOV02_task-sufficiency-gate",
+          "sourceOutputRegion": {
+            "offset": 17240,
+            "length": 4
+          },
+          "targetInputElements": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "normalizedElements": [
+            "M-GOV-02 HALT_PROMOTION",
+            "M-GOV-02 REVOKE_EPOCH",
+            "M-GOV-02 PERMIT_DEPLOY",
+            "M-GOV-02 TRIGGER_INCIDENT"
+          ],
+          "purpose": "Publish M-GOV-02's four verdict elements to the domain verdict aggregator.",
+          "busId": "ai-governance-regime.verdicts",
+          "busTag": "published-bus-ai-governance-regime-verdicts",
+          "targetMachine": "GOV00 Governance Verdict Aggregator",
+          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
+          "targetInputRegion": {
+            "offset": 17368,
+            "length": 68
+          },
+          "publishedOutputRegion": {
+            "offset": 17436,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized verdict bits only; governance documents, signatures and principals stay in the Solid asset frames."
+        },
+        {
+          "id": "ai-governance-regime.document.gov02.TaskSufficiencyAndImpactDossier",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "GOV02_task-sufficiency-gate",
+          "targetMachine": "GOV03_socio-technical-bias-audit",
+          "assetTypeId": "TaskSufficiencyAndImpactDossier",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Hand the frame's TaskSufficiencyAndImpactDossier to GOV03, its next consumer in the specification's evidence flow (SPECIFICATION.md sections 5-6); never infer a governance verdict from document content.",
+          "nativeVectorWrite": false
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-02",
+        "title": "TaskSufficiencyGate",
+        "kind": "template",
+        "specRule": "SPECIFICATION.md 4.3 (2)",
+        "governedAssetType": "TaskSufficiencyAndImpactDossier",
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "intakeEquivalents": "intake/corpus-312.json and corpus-315.json machines are not carried over (GOV-R01, GOV-R02)"
+      }
+    }
+  }
+}

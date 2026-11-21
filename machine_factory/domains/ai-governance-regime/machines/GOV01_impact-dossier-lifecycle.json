@@ -1,0 +1,1523 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV01_impact-dossier-lifecycle",
+    "name": "GOV01_impact-dossier-lifecycle",
+    "description": "Impact dossier lifecycle for a domain admission: ISO/IEC 42005 and Art. 27 FRIA signed, red-team and source attestation passed, parked for human review, then approved by a distinct human principal or escaped to rework.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 16960,
+        "length": 10
+      },
+      "output": {
+        "offset": 17232,
+        "length": 8
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "ces_gov01_parked",
+        "name": "M-GOV-01 S1_Drafting → S2_ParkedReview",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_Drafting",
+          "sourceToState": "S2_ParkedReview",
+          "regularExpression": "[lane_in_workflow=1 ∧ req_domain_admit=1] · [comp_iso42005_signed=1 ∧ comp_eu_fria_signed=1 ∧ gate_redteam_pass=1 ∧ gate_source_slsa_attested=1 ∧ lane_approved=0 ∧ lane_re_pinned=0 ∧ lane_stale=0]",
+          "specRule": "SPECIFICATION.md 4.3 (1); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [
+            "GOV-SA-02"
+          ],
+          "asserts": [
+            "PARKED"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov01_parked-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov01_parked-e1"
+            ]
+          },
+          {
+            "id": "ces_gov01_parked-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov01_parked-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov01_approved",
+        "name": "M-GOV-01 S2_ParkedReview → S3_Approved",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_ParkedReview",
+          "sourceToState": "S3_Approved",
+          "regularExpression": "[lane_in_workflow=1 ∧ req_domain_admit=1] · [comp_iso42005_signed=1 ∧ comp_eu_fria_signed=1 ∧ gate_redteam_pass=1 ∧ gate_source_slsa_attested=1 ∧ lane_approved=0 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_approved=1 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0]",
+          "specRule": "SPECIFICATION.md 4.3 (1); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [
+            "GOV-SA-03"
+          ],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov01_approved-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov01_approved-e1"
+            ]
+          },
+          {
+            "id": "ces_gov01_approved-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov01_approved-e2"
+            ]
+          },
+          {
+            "id": "ces_gov01_approved-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov01_approved-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov01_rework_re_pinned",
+        "name": "M-GOV-01 S2_ParkedReview → S_err_Rework",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_ParkedReview",
+          "sourceToState": "S_err_Rework",
+          "regularExpression": "[lane_in_workflow=1 ∧ req_domain_admit=1] · [comp_iso42005_signed=1 ∧ comp_eu_fria_signed=1 ∧ gate_redteam_pass=1 ∧ gate_source_slsa_attested=1 ∧ lane_approved=0 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_re_pinned=1]",
+          "specRule": "SPECIFICATION.md 4.3 (1); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION",
+            "REWORK"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov01_rework_re_pinned-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov01_rework_re_pinned-e1"
+            ]
+          },
+          {
+            "id": "ces_gov01_rework_re_pinned-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov01_rework_re_pinned-e2"
+            ]
+          },
+          {
+            "id": "ces_gov01_rework_re_pinned-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov01_rework_re_pinned-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov01_rework_stale",
+        "name": "M-GOV-01 S2_ParkedReview → S_err_Rework",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_ParkedReview",
+          "sourceToState": "S_err_Rework",
+          "regularExpression": "[lane_in_workflow=1 ∧ req_domain_admit=1] · [comp_iso42005_signed=1 ∧ comp_eu_fria_signed=1 ∧ gate_redteam_pass=1 ∧ gate_source_slsa_attested=1 ∧ lane_approved=0 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_stale=1]",
+          "specRule": "SPECIFICATION.md 4.3 (1); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION",
+            "REWORK"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov01_rework_stale-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov01_rework_stale-e1"
+            ]
+          },
+          {
+            "id": "ces_gov01_rework_stale-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov01_rework_stale-e2"
+            ]
+          },
+          {
+            "id": "ces_gov01_rework_stale-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov01_rework_stale-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov01-parked",
+        "events": [
+          [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov01_parked: [lane_in_workflow=1 ∧ req_domain_admit=1] · [comp_iso42005_signed=1 ∧ comp_eu_fria_signed=1 ∧ gate_redteam_pass=1 ∧ gate_source_slsa_attested=1 ∧ lane_approved=0 ∧ lane_re_pinned=0 ∧ lane_stale=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov01_parked"
+        }
+      },
+      {
+        "name": "gov01-approved",
+        "events": [
+          [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov01_approved: [lane_in_workflow=1 ∧ req_domain_admit=1] · [comp_iso42005_signed=1 ∧ comp_eu_fria_signed=1 ∧ gate_redteam_pass=1 ∧ gate_source_slsa_attested=1 ∧ lane_approved=0 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_approved=1 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov01_approved"
+        }
+      },
+      {
+        "name": "gov01-rework-re-pinned",
+        "events": [
+          [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "purpose": "drives ces_gov01_rework_re_pinned: [lane_in_workflow=1 ∧ req_domain_admit=1] · [comp_iso42005_signed=1 ∧ comp_eu_fria_signed=1 ∧ gate_redteam_pass=1 ∧ gate_source_slsa_attested=1 ∧ lane_approved=0 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_re_pinned=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov01_rework_re_pinned"
+        }
+      },
+      {
+        "name": "gov01-rework-stale",
+        "events": [
+          [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "purpose": "drives ces_gov01_rework_stale: [lane_in_workflow=1 ∧ req_domain_admit=1] · [comp_iso42005_signed=1 ∧ comp_eu_fria_signed=1 ∧ gate_redteam_pass=1 ∧ gate_source_slsa_attested=1 ∧ lane_approved=0 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_stale=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov01_rework_stale"
+        }
+      },
+      {
+        "name": "gov01-approval-without-review",
+        "events": [
+          [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "approval before the dossier is signed and parked does not permit",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      },
+      {
+        "name": "gov01-self-approval",
+        "events": [
+          [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "an approval by the preparer or an agent (T15) does not permit",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      },
+      {
+        "name": "gov01-red-team-missing",
+        "events": [
+          [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the dossier does not park without the red-team gate (hardening)",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      },
+      {
+        "name": "gov01-nominal",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "governance-escalator",
+      "sequenceCount": 4,
+      "inputSemantics": [
+        "lane_in_workflow (binary; lifecycle; specification cell 16960): asset frame is active in workflow",
+        "req_domain_admit (binary; action request; specification cell 16984): proposal to admit a domain manifest",
+        "comp_iso42005_signed (binary; compliance; specification cell 16973): ISO/IEC 42005 impact assessment signed",
+        "comp_eu_fria_signed (binary; compliance; specification cell 16974): EU AI Act Art. 27 FRIA signed",
+        "gate_redteam_pass (binary; adversarial eval; specification cell 16987): red-team suite passed, no unmitigated T13 bypass",
+        "gate_source_slsa_attested (binary; attestation; specification cell 16988): source identity and provenance attested",
+        "lane_approved (binary; lifecycle; specification cell 16962): human continuation resumed with a valid DPoP token",
+        "lane_principal_distinct (binary; lifecycle; specification cell 16966): approver != preparer and not an agent (T15)",
+        "lane_re_pinned (binary; lifecycle; specification cell 16961): upstream document SHA-256 changed (T16)",
+        "lane_stale (binary; lifecycle; specification cell 16964): continuation TTL or lease expired"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "A-domain-onboarding-impact",
+        "M-GOV-01"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "A-domain-onboarding-impact",
+        "machineCode": "GOV01",
+        "workflowTags": [
+          "ImpactDossierLifecycle"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:A-domain-onboarding-impact:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Owner roles are functional name strings pending the domain's staffing decision; the runbook URN resolves when runbooks/ is written (PACKAGE_STATUS.md step 6)."
+      },
+      "triggerConfig": {
+        "processId": "GOV01_impact-dossier-lifecycle",
+        "processName": "M-GOV-01 ImpactDossierLifecycle",
+        "rules": [
+          {
+            "sequenceId": "ces_gov01_parked",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "M-GOV-01 S1_Drafting → S2_ParkedReview: [lane_in_workflow=1 ∧ req_domain_admit=1] · [comp_iso42005_signed=1 ∧ comp_eu_fria_signed=1 ∧ gate_redteam_pass=1 ∧ gate_source_slsa_attested=1 ∧ lane_approved=0 ∧ lane_re_pinned=0 ∧ lane_stale=0]"
+          },
+          {
+            "sequenceId": "ces_gov01_approved",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-01 S2_ParkedReview → S3_Approved: [lane_in_workflow=1 ∧ req_domain_admit=1] · [comp_iso42005_signed=1 ∧ comp_eu_fria_signed=1 ∧ gate_redteam_pass=1 ∧ gate_source_slsa_attested=1 ∧ lane_approved=0 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_approved=1 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0]"
+          },
+          {
+            "sequenceId": "ces_gov01_rework_re_pinned",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-01 S2_ParkedReview → S_err_Rework: [lane_in_workflow=1 ∧ req_domain_admit=1] · [comp_iso42005_signed=1 ∧ comp_eu_fria_signed=1 ∧ gate_redteam_pass=1 ∧ gate_source_slsa_attested=1 ∧ lane_approved=0 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_re_pinned=1]"
+          },
+          {
+            "sequenceId": "ces_gov01_rework_stale",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-01 S2_ParkedReview → S_err_Rework: [lane_in_workflow=1 ∧ req_domain_admit=1] · [comp_iso42005_signed=1 ∧ comp_eu_fria_signed=1 ∧ gate_redteam_pass=1 ∧ gate_source_slsa_attested=1 ∧ lane_approved=0 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_stale=1]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.verdicts.gov01",
+          "type": "published-domain-bus-producer",
+          "role": "ImpactDossierLifecycle",
+          "sourceMachine": "GOV01_impact-dossier-lifecycle",
+          "sourceOutputRegion": {
+            "offset": 17232,
+            "length": 4
+          },
+          "targetInputElements": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "normalizedElements": [
+            "M-GOV-01 HALT_PROMOTION",
+            "M-GOV-01 REVOKE_EPOCH",
+            "M-GOV-01 PERMIT_DEPLOY",
+            "M-GOV-01 TRIGGER_INCIDENT"
+          ],
+          "purpose": "Publish M-GOV-01's four verdict elements to the domain verdict aggregator.",
+          "busId": "ai-governance-regime.verdicts",
+          "busTag": "published-bus-ai-governance-regime-verdicts",
+          "targetMachine": "GOV00 Governance Verdict Aggregator",
+          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
+          "targetInputRegion": {
+            "offset": 17368,
+            "length": 68
+          },
+          "publishedOutputRegion": {
+            "offset": 17436,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized verdict bits only; governance documents, signatures and principals stay in the Solid asset frames."
+        },
+        {
+          "id": "ai-governance-regime.document.gov01.TaskSufficiencyAndImpactDossier",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "GOV01_impact-dossier-lifecycle",
+          "targetMachine": "GOV02_task-sufficiency-gate",
+          "assetTypeId": "TaskSufficiencyAndImpactDossier",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Hand the frame's TaskSufficiencyAndImpactDossier to GOV02, its next consumer in the specification's evidence flow (SPECIFICATION.md sections 5-6); never infer a governance verdict from document content.",
+          "nativeVectorWrite": false
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-01",
+        "title": "ImpactDossierLifecycle",
+        "kind": "template",
+        "specRule": "SPECIFICATION.md 4.3 (1); HARDENING_TRANSITION_RULES.md section 1",
+        "governedAssetType": "TaskSufficiencyAndImpactDossier",
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "intakeEquivalents": "intake/corpus-312.json and corpus-315.json machines are not carried over (GOV-R01, GOV-R02)"
+      }
+    }
+  }
+}

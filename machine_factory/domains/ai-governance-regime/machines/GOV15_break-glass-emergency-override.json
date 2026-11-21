@@ -1,0 +1,927 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV15_break-glass-emergency-override",
+    "name": "GOV15_break-glass-emergency-override",
+    "description": "Break-glass emergency override: an attested, distinct principal with clean keys may permit an emergency epoch under a mandatory incident trail; post-hoc quorum and parity ratify it, and lease expiry or tamper revokes it.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17184,
+        "length": 8
+      },
+      "output": {
+        "offset": 17344,
+        "length": 8
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "ces_gov15_emergency_active",
+        "name": "M-GOV-15 S0_Standby → S1_EmergencyActive",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Standby",
+          "sourceToState": "S1_EmergencyActive",
+          "regularExpression": "[req_epoch_swap=1 ∧ gate_source_slsa_attested=1 ∧ lane_quorum_integrity_ok=1 ∧ lane_principal_distinct=1 ∧ lane_stale=0 ∧ lane_re_pinned=0 ∧ lane_quorum_met=0]",
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (15)",
+          "semanticAmendments": [
+            "GOV-SA-09",
+            "GOV-SA-10"
+          ],
+          "asserts": [
+            "PERMIT_DEPLOY",
+            "TRIGGER_INCIDENT"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov15_emergency_active-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov15_emergency_active-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov15_ratified",
+        "name": "M-GOV-15 S1_EmergencyActive → S2_Ratified",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_EmergencyActive",
+          "sourceToState": "S2_Ratified",
+          "regularExpression": "[req_epoch_swap=1 ∧ gate_source_slsa_attested=1 ∧ lane_quorum_integrity_ok=1 ∧ lane_principal_distinct=1 ∧ lane_stale=0 ∧ lane_re_pinned=0 ∧ lane_quorum_met=0] · [lane_stale=0 ∧ lane_quorum_met=1 ∧ gate_3of3_parity=1]",
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (15)",
+          "semanticAmendments": [],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov15_ratified-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov15_ratified-e1"
+            ]
+          },
+          {
+            "id": "ces_gov15_ratified-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov15_ratified-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov15_expired_revoked",
+        "name": "M-GOV-15 S1_EmergencyActive → S_err_ExpiredRevoked",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_EmergencyActive",
+          "sourceToState": "S_err_ExpiredRevoked",
+          "regularExpression": "[req_epoch_swap=1 ∧ gate_source_slsa_attested=1 ∧ lane_quorum_integrity_ok=1 ∧ lane_principal_distinct=1 ∧ lane_stale=0 ∧ lane_re_pinned=0 ∧ lane_quorum_met=0] · [lane_stale=1]",
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (15)",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION",
+            "REVOKE_EPOCH",
+            "REWORK"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov15_expired_revoked-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov15_expired_revoked-e1"
+            ]
+          },
+          {
+            "id": "ces_gov15_expired_revoked-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov15_expired_revoked-out",
+                "vector": [
+                  1.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov15_tamper_revoked",
+        "name": "M-GOV-15 S1_EmergencyActive → S_err_ExpiredRevoked",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_EmergencyActive",
+          "sourceToState": "S_err_ExpiredRevoked",
+          "regularExpression": "[req_epoch_swap=1 ∧ gate_source_slsa_attested=1 ∧ lane_quorum_integrity_ok=1 ∧ lane_principal_distinct=1 ∧ lane_stale=0 ∧ lane_re_pinned=0 ∧ lane_quorum_met=0] · [lane_re_pinned=1]",
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (15)",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION",
+            "REVOKE_EPOCH",
+            "REWORK"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov15_tamper_revoked-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov15_tamper_revoked-e1"
+            ]
+          },
+          {
+            "id": "ces_gov15_tamper_revoked-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov15_tamper_revoked-out",
+                "vector": [
+                  1.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov15-emergency-active",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov15_emergency_active: [req_epoch_swap=1 ∧ gate_source_slsa_attested=1 ∧ lane_quorum_integrity_ok=1 ∧ lane_principal_distinct=1 ∧ lane_stale=0 ∧ lane_re_pinned=0 ∧ lane_quorum_met=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov15_emergency_active"
+        }
+      },
+      {
+        "name": "gov15-ratified",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov15_ratified: [req_epoch_swap=1 ∧ gate_source_slsa_attested=1 ∧ lane_quorum_integrity_ok=1 ∧ lane_principal_distinct=1 ∧ lane_stale=0 ∧ lane_re_pinned=0 ∧ lane_quorum_met=0] · [lane_stale=0 ∧ lane_quorum_met=1 ∧ gate_3of3_parity=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov15_ratified"
+        }
+      },
+      {
+        "name": "gov15-expired-revoked",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "purpose": "drives ces_gov15_expired_revoked: [req_epoch_swap=1 ∧ gate_source_slsa_attested=1 ∧ lane_quorum_integrity_ok=1 ∧ lane_principal_distinct=1 ∧ lane_stale=0 ∧ lane_re_pinned=0 ∧ lane_quorum_met=0] · [lane_stale=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov15_expired_revoked"
+        }
+      },
+      {
+        "name": "gov15-tamper-revoked",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "purpose": "drives ces_gov15_tamper_revoked: [req_epoch_swap=1 ∧ gate_source_slsa_attested=1 ∧ lane_quorum_integrity_ok=1 ∧ lane_principal_distinct=1 ∧ lane_stale=0 ∧ lane_re_pinned=0 ∧ lane_quorum_met=0] · [lane_re_pinned=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov15_tamper_revoked"
+        }
+      },
+      {
+        "name": "gov15-nominal",
+        "events": [
+          [
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "governance-escalator",
+      "sequenceCount": 4,
+      "inputSemantics": [
+        "req_epoch_swap (binary; action request; specification cell 16985): proposal to swap the rule epoch",
+        "gate_source_slsa_attested (binary; attestation; specification cell 16988): source identity and provenance attested",
+        "lane_quorum_integrity_ok (binary; quorum and CRL; specification cell 16991): signers clean on CRL/OCSP, diverse, dwell met",
+        "lane_principal_distinct (binary; lifecycle; specification cell 16966): approver != preparer and not an agent (T15)",
+        "lane_stale (binary; lifecycle; specification cell 16964): continuation TTL or lease expired",
+        "lane_re_pinned (binary; lifecycle; specification cell 16961): upstream document SHA-256 changed (T16)",
+        "lane_quorum_met (binary; quorum monitor; specification cell 16967): valid approval-quorum signatures >= q over the canonical bundle",
+        "gate_3of3_parity (binary; CI; specification cell 16968): C++, Scala and Lisp voting engines agree (3-of-3)"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "H-hardening",
+        "M-GOV-15"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "H-hardening",
+        "machineCode": "GOV15",
+        "workflowTags": [
+          "BreakGlassEmergencyOverride"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:H-hardening:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Owner roles are functional name strings pending the domain's staffing decision; the runbook URN resolves when runbooks/ is written (PACKAGE_STATUS.md step 6)."
+      },
+      "triggerConfig": {
+        "processId": "GOV15_break-glass-emergency-override",
+        "processName": "M-GOV-15 BreakGlassEmergencyOverride",
+        "rules": [
+          {
+            "sequenceId": "ces_gov15_emergency_active",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "M-GOV-15 S0_Standby → S1_EmergencyActive: [req_epoch_swap=1 ∧ gate_source_slsa_attested=1 ∧ lane_quorum_integrity_ok=1 ∧ lane_principal_distinct=1 ∧ lane_stale=0 ∧ lane_re_pinned=0 ∧ lane_quorum_met=0]"
+          },
+          {
+            "sequenceId": "ces_gov15_ratified",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-15 S1_EmergencyActive → S2_Ratified: [req_epoch_swap=1 ∧ gate_source_slsa_attested=1 ∧ lane_quorum_integrity_ok=1 ∧ lane_principal_distinct=1 ∧ lane_stale=0 ∧ lane_re_pinned=0 ∧ lane_quorum_met=0] · [lane_stale=0 ∧ lane_quorum_met=1 ∧ gate_3of3_parity=1]"
+          },
+          {
+            "sequenceId": "ces_gov15_expired_revoked",
+            "outputMatches": [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-15 S1_EmergencyActive → S_err_ExpiredRevoked: [req_epoch_swap=1 ∧ gate_source_slsa_attested=1 ∧ lane_quorum_integrity_ok=1 ∧ lane_principal_distinct=1 ∧ lane_stale=0 ∧ lane_re_pinned=0 ∧ lane_quorum_met=0] · [lane_stale=1]"
+          },
+          {
+            "sequenceId": "ces_gov15_tamper_revoked",
+            "outputMatches": [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-15 S1_EmergencyActive → S_err_ExpiredRevoked: [req_epoch_swap=1 ∧ gate_source_slsa_attested=1 ∧ lane_quorum_integrity_ok=1 ∧ lane_principal_distinct=1 ∧ lane_stale=0 ∧ lane_re_pinned=0 ∧ lane_quorum_met=0] · [lane_re_pinned=1]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.verdicts.gov15",
+          "type": "published-domain-bus-producer",
+          "role": "BreakGlassEmergencyOverride",
+          "sourceMachine": "GOV15_break-glass-emergency-override",
+          "sourceOutputRegion": {
+            "offset": 17344,
+            "length": 4
+          },
+          "targetInputElements": [
+            56,
+            57,
+            58,
+            59
+          ],
+          "normalizedElements": [
+            "M-GOV-15 HALT_PROMOTION",
+            "M-GOV-15 REVOKE_EPOCH",
+            "M-GOV-15 PERMIT_DEPLOY",
+            "M-GOV-15 TRIGGER_INCIDENT"
+          ],
+          "purpose": "Publish M-GOV-15's four verdict elements to the domain verdict aggregator.",
+          "busId": "ai-governance-regime.verdicts",
+          "busTag": "published-bus-ai-governance-regime-verdicts",
+          "targetMachine": "GOV00 Governance Verdict Aggregator",
+          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
+          "targetInputRegion": {
+            "offset": 17368,
+            "length": 68
+          },
+          "publishedOutputRegion": {
+            "offset": 17436,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized verdict bits only; governance documents, signatures and principals stay in the Solid asset frames."
+        },
+        {
+          "id": "ai-governance-regime.document.gov15.EmergencyEpochOverrideFrame",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "GOV15_break-glass-emergency-override",
+          "targetMachine": "GOV04_rule-epoch-promotion",
+          "assetTypeId": "EmergencyEpochOverrideFrame",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Hand the frame's EmergencyEpochOverrideFrame to GOV04, its next consumer in the specification's evidence flow (SPECIFICATION.md sections 5-6); never infer a governance verdict from document content.",
+          "nativeVectorWrite": false
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-15",
+        "title": "BreakGlassEmergencyOverride",
+        "kind": "template",
+        "specRule": "HARDENING_TRANSITION_RULES.md section 2 (15)",
+        "governedAssetType": "EmergencyEpochOverrideFrame",
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "intakeEquivalents": "intake/corpus-312.json and corpus-315.json machines are not carried over (GOV-R01, GOV-R02)"
+      }
+    }
+  }
+}

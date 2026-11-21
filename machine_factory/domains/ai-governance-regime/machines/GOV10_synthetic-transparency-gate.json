@@ -1,0 +1,450 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV10_synthetic-transparency-gate",
+    "name": "GOV10_synthetic-transparency-gate",
+    "description": "Synthetic-content transparency gate (EU AI Act Art. 50): permits internal traffic and marked external traffic, halts unmarked external traffic.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17104,
+        "length": 2
+      },
+      "output": {
+        "offset": 17304,
+        "length": 8
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "ces_gov10_pass_internal",
+        "name": "M-GOV-10 S0_Idle → S1_PassInternal",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Idle",
+          "sourceToState": "S1_PassInternal",
+          "regularExpression": "[egress_external_comm=0]",
+          "specRule": "SPECIFICATION.md 4.3 (10)",
+          "semanticAmendments": [
+            "GOV-SA-08"
+          ],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov10_pass_internal-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov10_pass_internal-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov10_pass_marked",
+        "name": "M-GOV-10 S0_Idle → S2_PassMarked",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Idle",
+          "sourceToState": "S2_PassMarked",
+          "regularExpression": "[egress_external_comm=1 ∧ egress_art50_marked=1]",
+          "specRule": "SPECIFICATION.md 4.3 (10)",
+          "semanticAmendments": [],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov10_pass_marked-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov10_pass_marked-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov10_unmarked_block",
+        "name": "M-GOV-10 S0_Idle → S_fail_UnmarkedBlock",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Idle",
+          "sourceToState": "S_fail_UnmarkedBlock",
+          "regularExpression": "[egress_external_comm=1 ∧ egress_art50_marked=0]",
+          "specRule": "SPECIFICATION.md 4.3 (10)",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov10_unmarked_block-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov10_unmarked_block-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov10-pass-internal",
+        "events": [
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov10_pass_internal: [egress_external_comm=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov10_pass_internal"
+        }
+      },
+      {
+        "name": "gov10-pass-marked",
+        "events": [
+          [
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov10_pass_marked: [egress_external_comm=1 ∧ egress_art50_marked=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov10_pass_marked"
+        }
+      },
+      {
+        "name": "gov10-unmarked-block",
+        "events": [
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov10_unmarked_block: [egress_external_comm=1 ∧ egress_art50_marked=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov10_unmarked_block"
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "safety-compliance-checker",
+      "sequenceCount": 3,
+      "inputSemantics": [
+        "egress_external_comm (binary; boundary; specification cell 16977): outbound ACP/MCP payload targets an external party",
+        "egress_art50_marked (binary; boundary; specification cell 16978): machine-readable AI provenance present (Art. 50)"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "D-transparency-oversight",
+        "M-GOV-10"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "D-transparency-oversight",
+        "machineCode": "GOV10",
+        "workflowTags": [
+          "SyntheticTransparencyGate"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:D-transparency-oversight:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Owner roles are functional name strings pending the domain's staffing decision; the runbook URN resolves when runbooks/ is written (PACKAGE_STATUS.md step 6)."
+      },
+      "triggerConfig": {
+        "processId": "GOV10_synthetic-transparency-gate",
+        "processName": "M-GOV-10 SyntheticTransparencyGate",
+        "rules": [
+          {
+            "sequenceId": "ces_gov10_pass_internal",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-10 S0_Idle → S1_PassInternal: [egress_external_comm=0]"
+          },
+          {
+            "sequenceId": "ces_gov10_pass_marked",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-10 S0_Idle → S2_PassMarked: [egress_external_comm=1 ∧ egress_art50_marked=1]"
+          },
+          {
+            "sequenceId": "ces_gov10_unmarked_block",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-10 S0_Idle → S_fail_UnmarkedBlock: [egress_external_comm=1 ∧ egress_art50_marked=0]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.verdicts.gov10",
+          "type": "published-domain-bus-producer",
+          "role": "SyntheticTransparencyGate",
+          "sourceMachine": "GOV10_synthetic-transparency-gate",
+          "sourceOutputRegion": {
+            "offset": 17304,
+            "length": 4
+          },
+          "targetInputElements": [
+            36,
+            37,
+            38,
+            39
+          ],
+          "normalizedElements": [
+            "M-GOV-10 HALT_PROMOTION",
+            "M-GOV-10 REVOKE_EPOCH",
+            "M-GOV-10 PERMIT_DEPLOY",
+            "M-GOV-10 TRIGGER_INCIDENT"
+          ],
+          "purpose": "Publish M-GOV-10's four verdict elements to the domain verdict aggregator.",
+          "busId": "ai-governance-regime.verdicts",
+          "busTag": "published-bus-ai-governance-regime-verdicts",
+          "targetMachine": "GOV00 Governance Verdict Aggregator",
+          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
+          "targetInputRegion": {
+            "offset": 17368,
+            "length": 68
+          },
+          "publishedOutputRegion": {
+            "offset": 17436,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized verdict bits only; governance documents, signatures and principals stay in the Solid asset frames."
+        },
+        {
+          "id": "ai-governance-regime.document.gov10.EgressArt50Log",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "GOV10_synthetic-transparency-gate",
+          "targetMachine": "GOV13_control-crosswalk-assembler",
+          "assetTypeId": "EgressArt50Log",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Hand the frame's EgressArt50Log to GOV13, its next consumer in the specification's evidence flow (SPECIFICATION.md sections 5-6); never infer a governance verdict from document content.",
+          "nativeVectorWrite": false
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-10",
+        "title": "SyntheticTransparencyGate",
+        "kind": "template",
+        "specRule": "SPECIFICATION.md 4.3 (10)",
+        "governedAssetType": "EgressArt50Log",
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "intakeEquivalents": "intake/corpus-312.json and corpus-315.json machines are not carried over (GOV-R01, GOV-R02)"
+      }
+    }
+  }
+}

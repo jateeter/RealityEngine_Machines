@@ -1,0 +1,500 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV03_socio-technical-bias-audit",
+    "name": "GOV03_socio-technical-bias-audit",
+    "description": "Bias and data-lineage audit on a domain admission: exempt when the target domain is not high-risk, permits a high-risk domain only with a signed audit.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 16992,
+        "length": 3
+      },
+      "output": {
+        "offset": 17248,
+        "length": 8
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "ces_gov03_exempt",
+        "name": "M-GOV-03 S0_Idle → S1_Exempt",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Idle",
+          "sourceToState": "S1_Exempt",
+          "regularExpression": "[req_domain_admit=1 ∧ comp_high_risk_domain=0]",
+          "specRule": "SPECIFICATION.md 4.3 (3)",
+          "semanticAmendments": [],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov03_exempt-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov03_exempt-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov03_audited",
+        "name": "M-GOV-03 S0_Idle → S2_Audited",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Idle",
+          "sourceToState": "S2_Audited",
+          "regularExpression": "[req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ comp_bias_audit_signed=1]",
+          "specRule": "SPECIFICATION.md 4.3 (3)",
+          "semanticAmendments": [],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov03_audited-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov03_audited-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov03_bias_block",
+        "name": "M-GOV-03 S0_Idle → S_fail_BiasBlock",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Idle",
+          "sourceToState": "S_fail_BiasBlock",
+          "regularExpression": "[req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ comp_bias_audit_signed=0]",
+          "specRule": "SPECIFICATION.md 4.3 (3)",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov03_bias_block-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov03_bias_block-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov03-exempt",
+        "events": [
+          [
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov03_exempt: [req_domain_admit=1 ∧ comp_high_risk_domain=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov03_exempt"
+        }
+      },
+      {
+        "name": "gov03-audited",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov03_audited: [req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ comp_bias_audit_signed=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov03_audited"
+        }
+      },
+      {
+        "name": "gov03-bias-block",
+        "events": [
+          [
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov03_bias_block: [req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ comp_bias_audit_signed=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov03_bias_block"
+        }
+      },
+      {
+        "name": "gov03-nominal",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "safety-compliance-checker",
+      "sequenceCount": 3,
+      "inputSemantics": [
+        "req_domain_admit (binary; action request; specification cell 16984): proposal to admit a domain manifest",
+        "comp_high_risk_domain (binary; manifest; specification cell 16976): target domain classified high-risk",
+        "comp_bias_audit_signed (binary; compliance; specification cell 16975): bias and data-lineage audit signed (Art. 10, ISO A.7)"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "A-domain-onboarding-impact",
+        "M-GOV-03"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "A-domain-onboarding-impact",
+        "machineCode": "GOV03",
+        "workflowTags": [
+          "SocioTechnicalBiasAudit"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:A-domain-onboarding-impact:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Owner roles are functional name strings pending the domain's staffing decision; the runbook URN resolves when runbooks/ is written (PACKAGE_STATUS.md step 6)."
+      },
+      "triggerConfig": {
+        "processId": "GOV03_socio-technical-bias-audit",
+        "processName": "M-GOV-03 SocioTechnicalBiasAudit",
+        "rules": [
+          {
+            "sequenceId": "ces_gov03_exempt",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-03 S0_Idle → S1_Exempt: [req_domain_admit=1 ∧ comp_high_risk_domain=0]"
+          },
+          {
+            "sequenceId": "ces_gov03_audited",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-03 S0_Idle → S2_Audited: [req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ comp_bias_audit_signed=1]"
+          },
+          {
+            "sequenceId": "ces_gov03_bias_block",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-03 S0_Idle → S_fail_BiasBlock: [req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ comp_bias_audit_signed=0]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.verdicts.gov03",
+          "type": "published-domain-bus-producer",
+          "role": "SocioTechnicalBiasAudit",
+          "sourceMachine": "GOV03_socio-technical-bias-audit",
+          "sourceOutputRegion": {
+            "offset": 17248,
+            "length": 4
+          },
+          "targetInputElements": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "normalizedElements": [
+            "M-GOV-03 HALT_PROMOTION",
+            "M-GOV-03 REVOKE_EPOCH",
+            "M-GOV-03 PERMIT_DEPLOY",
+            "M-GOV-03 TRIGGER_INCIDENT"
+          ],
+          "purpose": "Publish M-GOV-03's four verdict elements to the domain verdict aggregator.",
+          "busId": "ai-governance-regime.verdicts",
+          "busTag": "published-bus-ai-governance-regime-verdicts",
+          "targetMachine": "GOV00 Governance Verdict Aggregator",
+          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
+          "targetInputRegion": {
+            "offset": 17368,
+            "length": 68
+          },
+          "publishedOutputRegion": {
+            "offset": 17436,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized verdict bits only; governance documents, signatures and principals stay in the Solid asset frames."
+        },
+        {
+          "id": "ai-governance-regime.document.gov03.TaskSufficiencyAndImpactDossier",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "GOV03_socio-technical-bias-audit",
+          "targetMachine": "GOV13_control-crosswalk-assembler",
+          "assetTypeId": "TaskSufficiencyAndImpactDossier",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Hand the frame's TaskSufficiencyAndImpactDossier to GOV13, its next consumer in the specification's evidence flow (SPECIFICATION.md sections 5-6); never infer a governance verdict from document content.",
+          "nativeVectorWrite": false
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-03",
+        "title": "SocioTechnicalBiasAudit",
+        "kind": "template",
+        "specRule": "SPECIFICATION.md 4.3 (3)",
+        "governedAssetType": "TaskSufficiencyAndImpactDossier",
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "intakeEquivalents": "intake/corpus-312.json and corpus-315.json machines are not carried over (GOV-R01, GOV-R02)"
+      }
+    }
+  }
+}

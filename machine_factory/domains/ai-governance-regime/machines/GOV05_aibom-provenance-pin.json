@@ -1,0 +1,615 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV05_aibom-provenance-pin",
+    "name": "GOV05_aibom-provenance-pin",
+    "description": "AIBOM provenance pin on a domain admission or epoch swap: permits only when every model, quantization, tap and dictionary digest is pinned.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17024,
+        "length": 3
+      },
+      "output": {
+        "offset": 17264,
+        "length": 8
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "ces_gov05_pinned_admit",
+        "name": "M-GOV-05 S0_Idle → S1_Pinned",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Idle",
+          "sourceToState": "S1_Pinned",
+          "regularExpression": "[req_domain_admit=1 ∧ gate_aibom_pinned=1]",
+          "specRule": "SPECIFICATION.md 4.3 (5)",
+          "semanticAmendments": [
+            "GOV-SA-04"
+          ],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov05_pinned_admit-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov05_pinned_admit-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov05_pinned_epoch",
+        "name": "M-GOV-05 S0_Idle → S1_Pinned",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Idle",
+          "sourceToState": "S1_Pinned",
+          "regularExpression": "[req_epoch_swap=1 ∧ gate_aibom_pinned=1]",
+          "specRule": "SPECIFICATION.md 4.3 (5)",
+          "semanticAmendments": [
+            "GOV-SA-04"
+          ],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov05_pinned_epoch-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov05_pinned_epoch-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov05_unpinned_admit",
+        "name": "M-GOV-05 S0_Idle → S_fail_UnpinnedModel",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Idle",
+          "sourceToState": "S_fail_UnpinnedModel",
+          "regularExpression": "[req_domain_admit=1 ∧ gate_aibom_pinned=0]",
+          "specRule": "SPECIFICATION.md 4.3 (5)",
+          "semanticAmendments": [
+            "GOV-SA-04"
+          ],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov05_unpinned_admit-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov05_unpinned_admit-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov05_unpinned_epoch",
+        "name": "M-GOV-05 S0_Idle → S_fail_UnpinnedModel",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Idle",
+          "sourceToState": "S_fail_UnpinnedModel",
+          "regularExpression": "[req_epoch_swap=1 ∧ gate_aibom_pinned=0]",
+          "specRule": "SPECIFICATION.md 4.3 (5)",
+          "semanticAmendments": [
+            "GOV-SA-04"
+          ],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov05_unpinned_epoch-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov05_unpinned_epoch-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov05-pinned-admit",
+        "events": [
+          [
+            1.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov05_pinned_admit: [req_domain_admit=1 ∧ gate_aibom_pinned=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov05_pinned_admit"
+        }
+      },
+      {
+        "name": "gov05-pinned-epoch",
+        "events": [
+          [
+            0.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov05_pinned_epoch: [req_epoch_swap=1 ∧ gate_aibom_pinned=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov05_pinned_epoch"
+        }
+      },
+      {
+        "name": "gov05-unpinned-admit",
+        "events": [
+          [
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov05_unpinned_admit: [req_domain_admit=1 ∧ gate_aibom_pinned=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov05_unpinned_admit"
+        }
+      },
+      {
+        "name": "gov05-unpinned-epoch",
+        "events": [
+          [
+            0.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov05_unpinned_epoch: [req_epoch_swap=1 ∧ gate_aibom_pinned=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov05_unpinned_epoch"
+        }
+      },
+      {
+        "name": "gov05-nominal",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "safety-compliance-checker",
+      "sequenceCount": 4,
+      "inputSemantics": [
+        "req_domain_admit (binary; action request; specification cell 16984): proposal to admit a domain manifest",
+        "req_epoch_swap (binary; action request; specification cell 16985): proposal to swap the rule epoch",
+        "gate_aibom_pinned (binary; AIBOM; specification cell 16971): model, quantization, tap and dictionary digests pinned"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "B-rule-epoch-aibom",
+        "M-GOV-05"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "B-rule-epoch-aibom",
+        "machineCode": "GOV05",
+        "workflowTags": [
+          "AIBOMProvenancePin"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:B-rule-epoch-aibom:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Owner roles are functional name strings pending the domain's staffing decision; the runbook URN resolves when runbooks/ is written (PACKAGE_STATUS.md step 6)."
+      },
+      "triggerConfig": {
+        "processId": "GOV05_aibom-provenance-pin",
+        "processName": "M-GOV-05 AIBOMProvenancePin",
+        "rules": [
+          {
+            "sequenceId": "ces_gov05_pinned_admit",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-05 S0_Idle → S1_Pinned: [req_domain_admit=1 ∧ gate_aibom_pinned=1]"
+          },
+          {
+            "sequenceId": "ces_gov05_pinned_epoch",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-05 S0_Idle → S1_Pinned: [req_epoch_swap=1 ∧ gate_aibom_pinned=1]"
+          },
+          {
+            "sequenceId": "ces_gov05_unpinned_admit",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-05 S0_Idle → S_fail_UnpinnedModel: [req_domain_admit=1 ∧ gate_aibom_pinned=0]"
+          },
+          {
+            "sequenceId": "ces_gov05_unpinned_epoch",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-05 S0_Idle → S_fail_UnpinnedModel: [req_epoch_swap=1 ∧ gate_aibom_pinned=0]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.verdicts.gov05",
+          "type": "published-domain-bus-producer",
+          "role": "AIBOMProvenancePin",
+          "sourceMachine": "GOV05_aibom-provenance-pin",
+          "sourceOutputRegion": {
+            "offset": 17264,
+            "length": 4
+          },
+          "targetInputElements": [
+            16,
+            17,
+            18,
+            19
+          ],
+          "normalizedElements": [
+            "M-GOV-05 HALT_PROMOTION",
+            "M-GOV-05 REVOKE_EPOCH",
+            "M-GOV-05 PERMIT_DEPLOY",
+            "M-GOV-05 TRIGGER_INCIDENT"
+          ],
+          "purpose": "Publish M-GOV-05's four verdict elements to the domain verdict aggregator.",
+          "busId": "ai-governance-regime.verdicts",
+          "busTag": "published-bus-ai-governance-regime-verdicts",
+          "targetMachine": "GOV00 Governance Verdict Aggregator",
+          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
+          "targetInputRegion": {
+            "offset": 17368,
+            "length": 68
+          },
+          "publishedOutputRegion": {
+            "offset": 17436,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized verdict bits only; governance documents, signatures and principals stay in the Solid asset frames."
+        },
+        {
+          "id": "ai-governance-regime.document.gov05.AIBOMManifest",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "GOV05_aibom-provenance-pin",
+          "targetMachine": "GOV13_control-crosswalk-assembler",
+          "assetTypeId": "AIBOMManifest",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Hand the frame's AIBOMManifest to GOV13, its next consumer in the specification's evidence flow (SPECIFICATION.md sections 5-6); never infer a governance verdict from document content.",
+          "nativeVectorWrite": false
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-05",
+        "title": "AIBOMProvenancePin",
+        "kind": "template",
+        "specRule": "SPECIFICATION.md 4.3 (5)",
+        "governedAssetType": "AIBOMManifest",
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "intakeEquivalents": "intake/corpus-312.json and corpus-315.json machines are not carried over (GOV-R01, GOV-R02)"
+      }
+    }
+  }
+}

@@ -26,7 +26,8 @@ MANIFEST = PKG / "admission-source-manifest.json"
 AUTHORED = {
     "README.md", "PACKAGE_STATUS.md", "REVIEW_QUEUE.md", "scope-decisions.json",
     "machine-import-manifest.json", "admission-source-manifest.json",
-    "tools/verify_package.py",
+    "tools/verify_package.py", "tools/build_machines.py", "tools/verify_machines.py",
+    "tools/validate_schema.mjs", "semantic-amendments.json",
 }
 
 
@@ -78,7 +79,7 @@ def main():
         elif sha256(p) != entry["sha256"]:
             errors.append(f"changed: {entry['path']} (received bytes must stay as received)")
     for rel in package_files():
-        if rel not in listed and rel not in AUTHORED:
+        if rel not in listed and rel not in AUTHORED and not rel.startswith("machines/"):
             errors.append(f"unlisted: {rel} (add it to admission-source-manifest.json)")
         if rel.endswith(".json"):
             try:

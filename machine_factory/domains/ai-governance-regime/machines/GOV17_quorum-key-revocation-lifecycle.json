@@ -1,0 +1,1124 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV17_quorum-key-revocation-lifecycle",
+    "name": "GOV17_quorum-key-revocation-lifecycle",
+    "description": "Quorum key revocation lifecycle: on a compromised or non-diverse signer key it halts, revokes and raises an incident, parks the key rotation, and restores the permit only once rotation is approved by a distinct human with clean keys and attested sources.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17216,
+        "length": 6
+      },
+      "output": {
+        "offset": 17360,
+        "length": 8
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "ces_gov17_revocation_triggered",
+        "name": "M-GOV-17 S0_KeysValid → S1_RevocationTriggered",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_KeysValid",
+          "sourceToState": "S1_RevocationTriggered",
+          "regularExpression": "[lane_quorum_integrity_ok=0]",
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (17)",
+          "semanticAmendments": [
+            "GOV-SA-06"
+          ],
+          "asserts": [
+            "HALT_PROMOTION",
+            "REVOKE_EPOCH",
+            "TRIGGER_INCIDENT",
+            "LATCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov17_revocation_triggered-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov17_revocation_triggered-out",
+                "vector": [
+                  1.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov17_revocation_hold",
+        "name": "M-GOV-17 S1_RevocationTriggered → S1_RevocationTriggered",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_RevocationTriggered",
+          "sourceToState": "S1_RevocationTriggered",
+          "regularExpression": "[lane_in_workflow=0 ∧ latch_q_prev=1]",
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (17)",
+          "semanticAmendments": [
+            "GOV-SA-06"
+          ],
+          "asserts": [
+            "HALT_PROMOTION",
+            "REVOKE_EPOCH",
+            "LATCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov17_revocation_hold-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov17_revocation_hold-out",
+                "vector": [
+                  1.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov17_rotation_parked",
+        "name": "M-GOV-17 S1_RevocationTriggered → S2_RotationParked",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_RevocationTriggered",
+          "sourceToState": "S2_RotationParked",
+          "regularExpression": "[lane_in_workflow=1 ∧ lane_approved=0 ∧ latch_q_prev=1]",
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (17)",
+          "semanticAmendments": [
+            "GOV-SA-02",
+            "GOV-SA-06"
+          ],
+          "asserts": [
+            "HALT_PROMOTION",
+            "REVOKE_EPOCH",
+            "PARKED",
+            "LATCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov17_rotation_parked-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov17_rotation_parked-out",
+                "vector": [
+                  1.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov17_rotation_hold_not_distinct",
+        "name": "M-GOV-17 S2_RotationParked → S2_RotationParked",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_RotationParked",
+          "sourceToState": "S2_RotationParked",
+          "regularExpression": "[lane_principal_distinct=0 ∧ latch_q_prev=1]",
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (17)",
+          "semanticAmendments": [
+            "GOV-SA-06"
+          ],
+          "asserts": [
+            "HALT_PROMOTION",
+            "REVOKE_EPOCH",
+            "LATCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov17_rotation_hold_not_distinct-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov17_rotation_hold_not_distinct-out",
+                "vector": [
+                  1.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov17_rotation_hold_unattested",
+        "name": "M-GOV-17 S2_RotationParked → S2_RotationParked",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_RotationParked",
+          "sourceToState": "S2_RotationParked",
+          "regularExpression": "[gate_source_slsa_attested=0 ∧ latch_q_prev=1]",
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (17)",
+          "semanticAmendments": [
+            "GOV-SA-06"
+          ],
+          "asserts": [
+            "HALT_PROMOTION",
+            "REVOKE_EPOCH",
+            "LATCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov17_rotation_hold_unattested-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov17_rotation_hold_unattested-out",
+                "vector": [
+                  1.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov17_keys_rotated",
+        "name": "M-GOV-17 S2_RotationParked → S3_KeysRotated",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_RotationParked",
+          "sourceToState": "S3_KeysRotated",
+          "regularExpression": "[lane_quorum_integrity_ok=1 ∧ lane_in_workflow=1 ∧ lane_approved=1 ∧ lane_principal_distinct=1 ∧ gate_source_slsa_attested=1 ∧ latch_q_prev=1]",
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (17)",
+          "semanticAmendments": [
+            "GOV-SA-06"
+          ],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov17_keys_rotated-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov17_keys_rotated-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov17-revocation-triggered",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov17_revocation_triggered: [lane_quorum_integrity_ok=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov17_revocation_triggered"
+        }
+      },
+      {
+        "name": "gov17-revocation-hold",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov17_revocation_hold: [lane_in_workflow=0 ∧ latch_q_prev=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov17_revocation_hold"
+        }
+      },
+      {
+        "name": "gov17-rotation-parked",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov17_rotation_parked: [lane_in_workflow=1 ∧ lane_approved=0 ∧ latch_q_prev=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov17_rotation_parked"
+        }
+      },
+      {
+        "name": "gov17-rotation-hold-not-distinct",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov17_rotation_hold_not_distinct: [lane_principal_distinct=0 ∧ latch_q_prev=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov17_rotation_hold_not_distinct"
+        }
+      },
+      {
+        "name": "gov17-rotation-hold-unattested",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov17_rotation_hold_unattested: [gate_source_slsa_attested=0 ∧ latch_q_prev=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov17_rotation_hold_unattested"
+        }
+      },
+      {
+        "name": "gov17-keys-rotated",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov17_keys_rotated: [lane_quorum_integrity_ok=1 ∧ lane_in_workflow=1 ∧ lane_approved=1 ∧ lane_principal_distinct=1 ∧ gate_source_slsa_attested=1 ∧ latch_q_prev=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov17_keys_rotated"
+        }
+      },
+      {
+        "name": "gov17-rotation-without-approval",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "clean keys alone do not restore the permit; the rotation stays parked",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      },
+      {
+        "name": "gov17-nominal",
+        "events": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "governance-escalator",
+      "sequenceCount": 6,
+      "inputSemantics": [
+        "lane_quorum_integrity_ok (binary; quorum and CRL; specification cell 16991): signers clean on CRL/OCSP, diverse, dwell met",
+        "lane_in_workflow (binary; lifecycle; specification cell 16960): asset frame is active in workflow",
+        "lane_approved (binary; lifecycle; specification cell 16962): human continuation resumed with a valid DPoP token",
+        "lane_principal_distinct (binary; lifecycle; specification cell 16966): approver != preparer and not an agent (T15)",
+        "gate_source_slsa_attested (binary; attestation; specification cell 16988): source identity and provenance attested",
+        "latch_q_prev (binary; PE feedback; PE feedback of output LATCH): this machine's LATCH output at the previous step"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "H-hardening",
+        "M-GOV-17"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "H-hardening",
+        "machineCode": "GOV17",
+        "workflowTags": [
+          "QuorumKeyRevocationLifecycle"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:H-hardening:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Owner roles are functional name strings pending the domain's staffing decision; the runbook URN resolves when runbooks/ is written (PACKAGE_STATUS.md step 6)."
+      },
+      "triggerConfig": {
+        "processId": "GOV17_quorum-key-revocation-lifecycle",
+        "processName": "M-GOV-17 QuorumKeyRevocationLifecycle",
+        "rules": [
+          {
+            "sequenceId": "ces_gov17_revocation_triggered",
+            "outputMatches": [
+              1.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-17 S0_KeysValid → S1_RevocationTriggered: [lane_quorum_integrity_ok=0]"
+          },
+          {
+            "sequenceId": "ces_gov17_revocation_hold",
+            "outputMatches": [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-17 S1_RevocationTriggered → S1_RevocationTriggered: [lane_in_workflow=0 ∧ latch_q_prev=1]"
+          },
+          {
+            "sequenceId": "ces_gov17_rotation_parked",
+            "outputMatches": [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "M-GOV-17 S1_RevocationTriggered → S2_RotationParked: [lane_in_workflow=1 ∧ lane_approved=0 ∧ latch_q_prev=1]"
+          },
+          {
+            "sequenceId": "ces_gov17_rotation_hold_not_distinct",
+            "outputMatches": [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-17 S2_RotationParked → S2_RotationParked: [lane_principal_distinct=0 ∧ latch_q_prev=1]"
+          },
+          {
+            "sequenceId": "ces_gov17_rotation_hold_unattested",
+            "outputMatches": [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-17 S2_RotationParked → S2_RotationParked: [gate_source_slsa_attested=0 ∧ latch_q_prev=1]"
+          },
+          {
+            "sequenceId": "ces_gov17_keys_rotated",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-17 S2_RotationParked → S3_KeysRotated: [lane_quorum_integrity_ok=1 ∧ lane_in_workflow=1 ∧ lane_approved=1 ∧ lane_principal_distinct=1 ∧ gate_source_slsa_attested=1 ∧ latch_q_prev=1]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.verdicts.gov17",
+          "type": "published-domain-bus-producer",
+          "role": "QuorumKeyRevocationLifecycle",
+          "sourceMachine": "GOV17_quorum-key-revocation-lifecycle",
+          "sourceOutputRegion": {
+            "offset": 17360,
+            "length": 4
+          },
+          "targetInputElements": [
+            64,
+            65,
+            66,
+            67
+          ],
+          "normalizedElements": [
+            "M-GOV-17 HALT_PROMOTION",
+            "M-GOV-17 REVOKE_EPOCH",
+            "M-GOV-17 PERMIT_DEPLOY",
+            "M-GOV-17 TRIGGER_INCIDENT"
+          ],
+          "purpose": "Publish M-GOV-17's four verdict elements to the domain verdict aggregator.",
+          "busId": "ai-governance-regime.verdicts",
+          "busTag": "published-bus-ai-governance-regime-verdicts",
+          "targetMachine": "GOV00 Governance Verdict Aggregator",
+          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
+          "targetInputRegion": {
+            "offset": 17368,
+            "length": 68
+          },
+          "publishedOutputRegion": {
+            "offset": 17436,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized verdict bits only; governance documents, signatures and principals stay in the Solid asset frames."
+        },
+        {
+          "id": "ai-governance-regime.document.gov17.QuorumKeyring",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "GOV17_quorum-key-revocation-lifecycle",
+          "targetMachine": "GOV06_quorum-consensus-monitor",
+          "assetTypeId": "QuorumKeyring",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Hand the frame's QuorumKeyring to GOV06, its next consumer in the specification's evidence flow (SPECIFICATION.md sections 5-6); never infer a governance verdict from document content.",
+          "nativeVectorWrite": false
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-17",
+        "title": "QuorumKeyRevocationLifecycle",
+        "kind": "template",
+        "specRule": "HARDENING_TRANSITION_RULES.md section 2 (17)",
+        "governedAssetType": "QuorumKeyring",
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "intakeEquivalents": "intake/corpus-312.json and corpus-315.json machines are not carried over (GOV-R01, GOV-R02)"
+      },
+      "latchFeedback": {
+        "inputElement": 5,
+        "fromOutputElement": 6,
+        "compositionOwner": "perception-engine",
+        "peCompositionRequired": true,
+        "rule": "Q(k) = S(k) or (not R(k) and Q(k-1)); the PE writes this machine's previous LATCH output into input element 5 (an intra-machine bus cell, SURFACE_SPEC.md Cloneable machines). Needs live confirmation (GOV-R12)."
+      }
+    }
+  }
+}

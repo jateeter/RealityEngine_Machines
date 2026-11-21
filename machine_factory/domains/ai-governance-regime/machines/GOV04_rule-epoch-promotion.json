@@ -1,0 +1,1544 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV04_rule-epoch-promotion",
+    "name": "GOV04_rule-epoch-promotion",
+    "description": "Rule-epoch promotion: 3-of-3 engine parity and K-line replay verified, AIBOM pinned, parked for the approval quorum, then promoted or rejected.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17008,
+        "length": 8
+      },
+      "output": {
+        "offset": 17256,
+        "length": 8
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "ces_gov04_awaiting_quorum",
+        "name": "M-GOV-04 S1_ReplayVerified → S2_AwaitingQuorum",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_ReplayVerified",
+          "sourceToState": "S2_AwaitingQuorum",
+          "regularExpression": "[req_epoch_swap=1 ∧ gate_3of3_parity=1 ∧ gate_kline_replay=1] · [gate_aibom_pinned=1 ∧ lane_quorum_met=0 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0]",
+          "specRule": "SPECIFICATION.md 4.3 (4)",
+          "semanticAmendments": [
+            "GOV-SA-02"
+          ],
+          "asserts": [
+            "PARKED"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov04_awaiting_quorum-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov04_awaiting_quorum-e1"
+            ]
+          },
+          {
+            "id": "ces_gov04_awaiting_quorum-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov04_awaiting_quorum-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov04_promoted",
+        "name": "M-GOV-04 S2_AwaitingQuorum → S3_Promoted",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_AwaitingQuorum",
+          "sourceToState": "S3_Promoted",
+          "regularExpression": "[req_epoch_swap=1 ∧ gate_3of3_parity=1 ∧ gate_kline_replay=1] · [gate_aibom_pinned=1 ∧ lane_quorum_met=0 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_quorum_met=1 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0]",
+          "specRule": "SPECIFICATION.md 4.3 (4)",
+          "semanticAmendments": [
+            "GOV-SA-03"
+          ],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov04_promoted-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov04_promoted-e1"
+            ]
+          },
+          {
+            "id": "ces_gov04_promoted-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov04_promoted-e2"
+            ]
+          },
+          {
+            "id": "ces_gov04_promoted-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov04_promoted-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov04_rejected_re_pinned",
+        "name": "M-GOV-04 S2_AwaitingQuorum → S_err_Rejected",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_AwaitingQuorum",
+          "sourceToState": "S_err_Rejected",
+          "regularExpression": "[req_epoch_swap=1 ∧ gate_3of3_parity=1 ∧ gate_kline_replay=1] · [gate_aibom_pinned=1 ∧ lane_quorum_met=0 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_re_pinned=1]",
+          "specRule": "SPECIFICATION.md 4.3 (4)",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION",
+            "REWORK"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov04_rejected_re_pinned-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov04_rejected_re_pinned-e1"
+            ]
+          },
+          {
+            "id": "ces_gov04_rejected_re_pinned-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov04_rejected_re_pinned-e2"
+            ]
+          },
+          {
+            "id": "ces_gov04_rejected_re_pinned-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov04_rejected_re_pinned-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov04_rejected_stale",
+        "name": "M-GOV-04 S2_AwaitingQuorum → S_err_Rejected",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_AwaitingQuorum",
+          "sourceToState": "S_err_Rejected",
+          "regularExpression": "[req_epoch_swap=1 ∧ gate_3of3_parity=1 ∧ gate_kline_replay=1] · [gate_aibom_pinned=1 ∧ lane_quorum_met=0 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_stale=1]",
+          "specRule": "SPECIFICATION.md 4.3 (4)",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION",
+            "REWORK"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov04_rejected_stale-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov04_rejected_stale-e1"
+            ]
+          },
+          {
+            "id": "ces_gov04_rejected_stale-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov04_rejected_stale-e2"
+            ]
+          },
+          {
+            "id": "ces_gov04_rejected_stale-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov04_rejected_stale-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov04_rejected_self_approval",
+        "name": "M-GOV-04 S2_AwaitingQuorum → S_err_Rejected",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_AwaitingQuorum",
+          "sourceToState": "S_err_Rejected",
+          "regularExpression": "[req_epoch_swap=1 ∧ gate_3of3_parity=1 ∧ gate_kline_replay=1] · [gate_aibom_pinned=1 ∧ lane_quorum_met=0 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_principal_distinct=0]",
+          "specRule": "SPECIFICATION.md 4.3 (4)",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION",
+            "REWORK"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov04_rejected_self_approval-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov04_rejected_self_approval-e1"
+            ]
+          },
+          {
+            "id": "ces_gov04_rejected_self_approval-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov04_rejected_self_approval-e2"
+            ]
+          },
+          {
+            "id": "ces_gov04_rejected_self_approval-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov04_rejected_self_approval-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov04-awaiting-quorum",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov04_awaiting_quorum: [req_epoch_swap=1 ∧ gate_3of3_parity=1 ∧ gate_kline_replay=1] · [gate_aibom_pinned=1 ∧ lane_quorum_met=0 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov04_awaiting_quorum"
+        }
+      },
+      {
+        "name": "gov04-promoted",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov04_promoted: [req_epoch_swap=1 ∧ gate_3of3_parity=1 ∧ gate_kline_replay=1] · [gate_aibom_pinned=1 ∧ lane_quorum_met=0 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_quorum_met=1 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov04_promoted"
+        }
+      },
+      {
+        "name": "gov04-rejected-re-pinned",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "purpose": "drives ces_gov04_rejected_re_pinned: [req_epoch_swap=1 ∧ gate_3of3_parity=1 ∧ gate_kline_replay=1] · [gate_aibom_pinned=1 ∧ lane_quorum_met=0 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_re_pinned=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov04_rejected_re_pinned"
+        }
+      },
+      {
+        "name": "gov04-rejected-stale",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "purpose": "drives ces_gov04_rejected_stale: [req_epoch_swap=1 ∧ gate_3of3_parity=1 ∧ gate_kline_replay=1] · [gate_aibom_pinned=1 ∧ lane_quorum_met=0 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_stale=1]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov04_rejected_stale"
+        }
+      },
+      {
+        "name": "gov04-rejected-self-approval",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "purpose": "drives ces_gov04_rejected_self_approval: [req_epoch_swap=1 ∧ gate_3of3_parity=1 ∧ gate_kline_replay=1] · [gate_aibom_pinned=1 ∧ lane_quorum_met=0 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_principal_distinct=0]",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov04_rejected_self_approval"
+        }
+      },
+      {
+        "name": "gov04-promotion-without-replay",
+        "events": [
+          [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "no promotion without the K-line replay gate",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      },
+      {
+        "name": "gov04-nominal",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Isolated from reset; the expected outputs are computed by the package's authoring evaluator from SURFACE_SPEC's transition rule and must be confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "governance-escalator",
+      "sequenceCount": 5,
+      "inputSemantics": [
+        "req_epoch_swap (binary; action request; specification cell 16985): proposal to swap the rule epoch",
+        "gate_3of3_parity (binary; CI; specification cell 16968): C++, Scala and Lisp voting engines agree (3-of-3)",
+        "gate_kline_replay (binary; sandbox; specification cell 16970): candidate rules fire on near misses, silent on nominal runs",
+        "gate_aibom_pinned (binary; AIBOM; specification cell 16971): model, quantization, tap and dictionary digests pinned",
+        "lane_quorum_met (binary; quorum monitor; specification cell 16967): valid approval-quorum signatures >= q over the canonical bundle",
+        "lane_principal_distinct (binary; lifecycle; specification cell 16966): approver != preparer and not an agent (T15)",
+        "lane_re_pinned (binary; lifecycle; specification cell 16961): upstream document SHA-256 changed (T16)",
+        "lane_stale (binary; lifecycle; specification cell 16964): continuation TTL or lease expired"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "B-rule-epoch-aibom",
+        "M-GOV-04"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "B-rule-epoch-aibom",
+        "machineCode": "GOV04",
+        "workflowTags": [
+          "RuleEpochPromotion"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:B-rule-epoch-aibom:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        },
+        "notes": "Owner roles are functional name strings pending the domain's staffing decision; the runbook URN resolves when runbooks/ is written (PACKAGE_STATUS.md step 6)."
+      },
+      "triggerConfig": {
+        "processId": "GOV04_rule-epoch-promotion",
+        "processName": "M-GOV-04 RuleEpochPromotion",
+        "rules": [
+          {
+            "sequenceId": "ces_gov04_awaiting_quorum",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "M-GOV-04 S1_ReplayVerified → S2_AwaitingQuorum: [req_epoch_swap=1 ∧ gate_3of3_parity=1 ∧ gate_kline_replay=1] · [gate_aibom_pinned=1 ∧ lane_quorum_met=0 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0]"
+          },
+          {
+            "sequenceId": "ces_gov04_promoted",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-04 S2_AwaitingQuorum → S3_Promoted: [req_epoch_swap=1 ∧ gate_3of3_parity=1 ∧ gate_kline_replay=1] · [gate_aibom_pinned=1 ∧ lane_quorum_met=0 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_quorum_met=1 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0]"
+          },
+          {
+            "sequenceId": "ces_gov04_rejected_re_pinned",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-04 S2_AwaitingQuorum → S_err_Rejected: [req_epoch_swap=1 ∧ gate_3of3_parity=1 ∧ gate_kline_replay=1] · [gate_aibom_pinned=1 ∧ lane_quorum_met=0 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_re_pinned=1]"
+          },
+          {
+            "sequenceId": "ces_gov04_rejected_stale",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-04 S2_AwaitingQuorum → S_err_Rejected: [req_epoch_swap=1 ∧ gate_3of3_parity=1 ∧ gate_kline_replay=1] · [gate_aibom_pinned=1 ∧ lane_quorum_met=0 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_stale=1]"
+          },
+          {
+            "sequenceId": "ces_gov04_rejected_self_approval",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-04 S2_AwaitingQuorum → S_err_Rejected: [req_epoch_swap=1 ∧ gate_3of3_parity=1 ∧ gate_kline_replay=1] · [gate_aibom_pinned=1 ∧ lane_quorum_met=0 ∧ lane_principal_distinct=1 ∧ lane_re_pinned=0 ∧ lane_stale=0] · [lane_principal_distinct=0]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.verdicts.gov04",
+          "type": "published-domain-bus-producer",
+          "role": "RuleEpochPromotion",
+          "sourceMachine": "GOV04_rule-epoch-promotion",
+          "sourceOutputRegion": {
+            "offset": 17256,
+            "length": 4
+          },
+          "targetInputElements": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "normalizedElements": [
+            "M-GOV-04 HALT_PROMOTION",
+            "M-GOV-04 REVOKE_EPOCH",
+            "M-GOV-04 PERMIT_DEPLOY",
+            "M-GOV-04 TRIGGER_INCIDENT"
+          ],
+          "purpose": "Publish M-GOV-04's four verdict elements to the domain verdict aggregator.",
+          "busId": "ai-governance-regime.verdicts",
+          "busTag": "published-bus-ai-governance-regime-verdicts",
+          "targetMachine": "GOV00 Governance Verdict Aggregator",
+          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
+          "targetInputRegion": {
+            "offset": 17368,
+            "length": 68
+          },
+          "publishedOutputRegion": {
+            "offset": 17436,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized verdict bits only; governance documents, signatures and principals stay in the Solid asset frames."
+        },
+        {
+          "id": "ai-governance-regime.document.gov04.GovernanceAssetFrame",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "GOV04_rule-epoch-promotion",
+          "targetMachine": "GOV06_quorum-consensus-monitor",
+          "assetTypeId": "GovernanceAssetFrame",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Hand the frame's GovernanceAssetFrame to GOV06, its next consumer in the specification's evidence flow (SPECIFICATION.md sections 5-6); never infer a governance verdict from document content.",
+          "nativeVectorWrite": false
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-04",
+        "title": "RuleEpochPromotion",
+        "kind": "template",
+        "specRule": "SPECIFICATION.md 4.3 (4)",
+        "governedAssetType": "GovernanceAssetFrame",
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "intakeEquivalents": "intake/corpus-312.json and corpus-315.json machines are not carried over (GOV-R01, GOV-R02)"
+      }
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1.0.0",
+  "domain": "ai-governance-regime",
+  "scope": "Where the candidate machines resolve or refine SPECIFICATION.md 4.3 and HARDENING_TRANSITION_RULES.md. Each amendment is cited from the CESs that carry it (sequences[].metadata.semanticAmendments). None is approved; each is for owner review.",
+  "amendments": [
+    {
+      "id": "GOV-SA-01",
+      "applies": "all machines with continuous inputs",
+      "change": "Open interval bounds are written closed, 0.0001 inside the open end: (0.05, 1.0] becomes [0.0501, 1.0], [0.0, 0.50) becomes [0.0, 0.4999].",
+      "reason": "The threshold comparator accepts a closed interval |value - input| <= t; it has no open bound."
+    },
+    {
+      "id": "GOV-SA-02",
+      "applies": "GOV01, GOV04, GOV12, GOV13, GOV17 (PARKED); GOV07, GOV14, GOV16 (APPROACH)",
+      "change": "A status the specification states as a state (ParkedReview, AwaitingQuorum, Assembling, NoticeParked, RotationParked, Warning, RenewalWindow, DelegationThrottle) is an output element, and its symbol carries the conditions that end it (no approval yet, not re-pinned, not stale, not latched).",
+      "reason": "A final Reality Event asserts for as long as it keeps matching (SURFACE_SPEC.md), so a status without its ending conditions would assert beside the state that replaced it."
+    },
+    {
+      "id": "GOV-SA-03",
+      "applies": "GOV01 approved, GOV04 promoted",
+      "change": "The approval symbol also requires lane_stale = 0.",
+      "reason": "As written, S2 -> S3 does not exclude a stale continuation while S2 -> S_err fires on one, so both transitions are enabled at once; fail-safe resolution, the escape wins."
+    },
+    {
+      "id": "GOV-SA-04",
+      "applies": "GOV05",
+      "change": "The guard (req_domain_admit or req_epoch_swap) and aibom is split into one CES per request.",
+      "reason": "One CES is one regular expression with no alternation (owner rule 2026-10-05)."
+    },
+    {
+      "id": "GOV-SA-05",
+      "applies": "GOV06",
+      "change": "The hardened permit preconditions (lane_quorum_integrity_ok, gate_source_slsa_attested) each get their own HALT path.",
+      "reason": "HARDENING_TRANSITION_RULES.md section 1 adds them to the permit only; without a fail path a missing attestation would leave the monitor silent instead of halting."
+    },
+    {
+      "id": "GOV-SA-06",
+      "applies": "GOV07, GOV09, GOV12, GOV14, GOV16, GOV17",
+      "change": "An SR latch Q(k) = S(k) or (not R(k) and Q(k-1)) is built from a feedback input element (latch_q_prev, the machine's previous LATCH output, composed by the PE), one set CES per set disjunct, one hold CES per negated literal of R, and an explicit release CES. Held states assert REVOKE_EPOCH (and HALT_PROMOTION for GOV17) for as long as they are held; TRIGGER_INCIDENT asserts while the set condition holds.",
+      "reason": "The engines keep no state a CES can test across steps except active events, and a final event asserts only while it matches; the release is explicit so the latch never depends on whether an unwritten cell keeps its value."
+    },
+    {
+      "id": "GOV-SA-07",
+      "applies": "GOV08",
+      "change": "Stateless: HALT while the gate fails or drift > 0.10, PERMIT while both are within the gate.",
+      "reason": "The specification's S1 -> S0 condition is the exact complement of S0 -> S1, so no state is needed."
+    },
+    {
+      "id": "GOV-SA-08",
+      "applies": "GOV10",
+      "change": "pass-internal asserts PERMIT_DEPLOY whenever egress_external_comm = 0, with no request cell, as the specification writes it.",
+      "reason": "Recorded because it makes GOV10 permit on every quiet step; whether egress needs a request signal is an owner question (REVIEW_QUEUE.md GOV-R13)."
+    },
+    {
+      "id": "GOV-SA-09",
+      "applies": "GOV15",
+      "change": "Emergency activation also requires lane_re_pinned = 0.",
+      "reason": "Otherwise a tampered frame would assert PERMIT_DEPLOY and HALT_PROMOTION together."
+    },
+    {
+      "id": "GOV-SA-10",
+      "applies": "GOV15",
+      "change": "The emergency prefix requires lane_quorum_met = 0, so the emergency state and its incident trail end at post-hoc ratification.",
+      "reason": "As written, EmergencyActive's guard still holds after ratification and would keep asserting the incident."
+    },
+    {
+      "id": "GOV-SA-11",
+      "applies": "GOV00 and every producer",
+      "change": "The four shared verdict cells (17056..17059) are GOV00's output. Each machine writes its own eight-element output; '17058 := 0.0' is that machine's PERMIT_DEPLOY element left 0 in the vector that halts or revokes. GOV00 asserts HALT, REVOKE and INCIDENT when any machine does (max), and PERMIT only while some machine permits and none halts or revokes (min).",
+      "reason": "Owner decision GOV-SD-05 (per-machine regions); a min monoid over all seventeen machines would veto every permit with any machine that has nothing to say."
+    },
+    {
+      "id": "GOV-SA-12",
+      "applies": "templates",
+      "change": "Each template hands its governed asset to the next consumer in the specification's evidence flow (document-workflow-handoff); the governed target domain is carried by the asset frame, not by a machine copy.",
+      "reason": "Cloneable rule 1 needs an agentic action; owner decision GOV-SD-04 (17 machines)."
+    }
+  ]
+}
