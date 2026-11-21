@@ -1,0 +1,7 @@
+# LifeBalance candidate review
+
+PR #226 landed the daily-outcome and reusable RAG guidance. The historical build and finalization scripts informed those assets. Use the current [factory package](../../machine_factory/domains/life-balance/README.md), manifests and [acceptance scenarios](../../machine_factory/domains/life-balance/acceptance/ACCEPTANCE.md) to prepare the next candidate. Pin its version and revision in the admission plan.
+
+The retained machine, agentic and validation reviews covered 110 machines. They identified address and alphabet mismatches in the declared composition and gaps in inventory discovery coverage. The reviewed runtime path reached dispatch recording or handoff. The historical CES shard and static contracts cover engine behavior within their test scope. Live provider execution and downstream completion still need evidence.
+
+For the next admission run, trace a synthetic source observation through PE mapping, machine recognition, authorized agent execution, correlated completion and downstream transition. Verify the sequence with the instance registry and record each boundary. Include rejected mismatched completions and recovery after a retry. Record exact addresses and response vocabularies from current contracts before writing the fixture. Bind the results and independent approval decision to the candidate revision in issue [#258](https://github.com/jateeter/RealityEngine_Machines/issues/258).
