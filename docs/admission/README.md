@@ -1,0 +1,7 @@
+# Domain version evidence
+
+Use the [domain approval workflow](../DOMAIN_APPROVAL_WORKFLOW.md) to prepare, verify, submit and finalize each candidate. Record the domain, version and exact candidate commit before collecting evidence. Keep design decisions, authored inputs, derived artifacts, corpus and CES scope refresh results, integration evidence, independent review and the final receipt linked to that revision. Record a superseding candidate separately so earlier evidence retains its provenance.
+
+The October 28 domain-approval delivery contained the workflow driver, ledger schema and contract tests now represented by PR #228 and the current workflow. PR #237 adds runtime deployment handling. Use the current commands in the workflow guide. The retained post-merge plan describes 43 Personal Health machines at commit `1baddcbaa1a52c6abca884ac4cdbf26dfe85f90a`, version `1.0.0`, with state `PLAN_ONLY_NOT_APPROVED`. It proposed refreshing all known CES scopes because shared-space changes can affect peers. Generate a current plan before treating any of those details as applicable to a new candidate.
+
+Follow the current review and decision records in issues [#258](https://github.com/jateeter/RealityEngine_Machines/issues/258) for LifeBalance and [#259](https://github.com/jateeter/RealityEngine_Machines/issues/259) for Personal Health. Keep live results and receipts with the exact candidate as they become available.
