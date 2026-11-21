@@ -21,6 +21,10 @@ step in [PACKAGE_STATUS.md](PACKAGE_STATUS.md) is redone. Findings marked
 | GOV-R12 | Latch feedback and verdict composition need live confirmation | engine/PE behavior | live 3-of-3 run |
 | GOV-R13 | GOV10 permits on every quiet step | specification | **owner** |
 | GOV-R14 | The semantic amendments need owner review | specification | **owner** |
+| GOV-R15 | 91% of CESs are single events; the obligations are temporal | machines | rebuild (CONNECTED_WORKFLOW.md §1.4) |
+| GOV-R16 | Templates reserve no lifecycle lanes (cells 2–7) | frames | rebuild (§1.1); lifecycle issue for the missing observations |
+| GOV-R17 | Templates publish verdicts by bus, which clones may not | clone contract | rebuild (§1.2) |
+| GOV-R18 | No agent triggers or response Sources | agentic workflows | **owner** (which workflows and Sources are in v1, §1.3, §2) |
 
 ## GOV-R01: neither corpus is in the canonical machine form
 
@@ -191,3 +195,17 @@ permits that answer a request.
 `semantic-amendments.json` lists 12 places (GOV-SA-01 to GOV-SA-12) where the
 machines resolve a choice or a nondeterminism the specification leaves open.
 Each CES cites the amendments it carries.
+
+## GOV-R15 to GOV-R18: interconnectivity and agentic workflows
+
+The review is in [CONNECTED_WORKFLOW.md](CONNECTED_WORKFLOW.md):
+- **GOV-R15:** 130 of 143 CESs are one event, so they recognize no order.
+- **GOV-R16:** no template reserves the lifecycle's lanes, so a frame cannot
+  drive any of them.
+- **GOV-R17:** the templates' verdict bus contradicts the rule that a clone
+  leaves only by continuation or termination.
+- **GOV-R18:** no machine dispatches an agent or reads an agent's result.
+
+The document lists every machine-to-machine edge, the external Sources and
+whether each exists today, the order each obligation needs, and seven agentic
+workflows (W1–W7).

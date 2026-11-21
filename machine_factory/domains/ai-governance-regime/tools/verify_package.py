@@ -27,7 +27,7 @@ AUTHORED = {
     "README.md", "PACKAGE_STATUS.md", "REVIEW_QUEUE.md", "scope-decisions.json",
     "machine-import-manifest.json", "admission-source-manifest.json",
     "tools/verify_package.py", "tools/build_machines.py", "tools/verify_machines.py",
-    "tools/validate_schema.mjs", "semantic-amendments.json",
+    "tools/validate_schema.mjs", "semantic-amendments.json", "CONNECTED_WORKFLOW.md",
 }
 
 

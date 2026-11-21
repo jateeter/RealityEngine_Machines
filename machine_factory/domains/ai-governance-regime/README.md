@@ -28,6 +28,7 @@ settled before conversion.
 | [HARDENING_TRANSITION_RULES.md](HARDENING_TRANSITION_RULES.md) | Input cells `16987`–`16991` and the transition rules for `M-GOV-15`–`17` |
 | [RESOLUTION_WORKPLAN.md](RESOLUTION_WORKPLAN.md) | The 8-week, 4-phase workplan closing the seven gaps |
 | [REVIEW_QUEUE.md](REVIEW_QUEUE.md) | Review findings and their dispositions |
+| [CONNECTED_WORKFLOW.md](CONNECTED_WORKFLOW.md) | Interconnectivity needs (lanes, buses, Sources, temporal order) and the seven agentic workflows the wrapper requires |
 | `machines/` | 18 candidate machines (GOV00–GOV17), schema-conformant, one regular expression per CES, with fixtures; built by `tools/build_machines.py` |
 | [semantic-amendments.json](semantic-amendments.json) | Where the machines resolve or refine the specification (GOV-SA-01–12) |
 | [PACKAGE_STATUS.md](PACKAGE_STATUS.md) | Lifecycle, the production steps done and still to do |
