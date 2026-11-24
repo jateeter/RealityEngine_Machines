@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 import sys
 from urllib.parse import unquote, urlsplit
+from verify_reference_scope import validate as validate_reference_scope
 
 EXCLUDED = {'asset-manifest.json', 'verification-summary.json'}
 EXPECTED_COUNTS = {'standards': 46, 'implementations': 29, 'sources': 18,
@@ -43,6 +44,8 @@ def check(root: Path) -> dict:
                 'implementation-inventory.json','rag-source-manifest.json','risk-register.json',
                 'acceptance/cases.json','acceptance/workplan.json','machine-import-manifest.json',
                 'acceptance/issues.json','acceptance/scope.json','acceptance/coverage-requirements.json',
+                'acceptance/progress.json','examples/reference-microgrids.json',
+                'documents/workflow/reference-microgrids.md',
                 'intake/NIST.SP.1108r4_1.pdf','templates/interoperability-profile.json',
                 'templates/command-proposal.json','templates/rag-source-record.json',
                 'examples/der-supervisory-profile.json','asset-manifest.json']
@@ -197,6 +200,17 @@ def check(root: Path) -> dict:
     for row in hardware_rows:
         require(row['ownerIssueId']=='EI18' and row['assetMode']=='GENERIC_OR_TEMPLATE_ALLOWED' and row['assetClassSource']=='ASSOCIATED_STANDARDS' and row['fulfillmentReceipt'] is None,'Fabricated/misowned hardware coverage')
         require(row['rule']=='EVERY_REQUIRED_HARDWARE_DEPENDENCY_REQUIRES_VERSIONED_SIMULATED_COUNTERPART','Weakened simulated-hardware coverage')
+    reference_errors=validate_reference_scope(read('examples/reference-microgrids.json'),ids['standards'],ids['cases'])
+    require(not reference_errors,'Reference scope specification invalid')
+    for error in reference_errors:
+        require(False,'Reference scope: '+error)
+    progress=read('acceptance/progress.json')
+    require(progress['domain']=='energyInfrastructure','Wrong source-progress domain')
+    require(len({e['id'] for e in progress['events']})==len(progress['events']),'Duplicate source-progress event')
+    for event in progress['events']:
+        require(event['issueId'] in issue_ids,'Unknown progress workstream')
+    baseline=next(e for e in progress['events'] if e['id']=='EI01_BASELINE_MERGED')
+    require(baseline['event']=='MERGED' and baseline['mergeSHA']=='eae885ea2f9ed8204bbe6c9c0a0de6fc2baa78c8' and baseline['issueStateReadBack']=='closed','Unverified EI01 merge receipt')
     for rel in ['templates/interoperability-profile.json','examples/der-supervisory-profile.json']:
         d=read(rel)
         require(set(d['standardIds'])<=ids['standards'] and set(d['caseIds'])<=ids['cases'],f'Profile reference mismatch: {rel}')
@@ -217,7 +231,8 @@ def check(root: Path) -> dict:
             'collectedSources':1,'behavioralCasesRun':0,'runtimeTestsRun':0,'domainAdmission':'NOT_PERFORMED',
             'publishedIssuesVerified':25,'templateAndSimulatorCoverage':'REQUIREMENTS_ONLY_NOT_FULFILLED',
             'assetManifestSHA256':digest(root/'asset-manifest.json'),'errors':errors,
-            'limitations':['No runtime/model/adapter or RAG execution','No simulated-hardware behavior/protocol or physical conformance evidence','No standards compliance or security assurance claim','No domain admission/deployment; source package not committed or published','Issue body readback is recorded publication evidence, not an ongoing live GitHub check','Asset-class templates and simulator catalog remain EI04/EI18 deliverables']}
+            'referenceScope':'THREE_GENERIC_SCENARIOS_SPECIFICATION_ONLY',
+            'limitations':['No runtime/model/adapter or RAG execution','No simulated-hardware behavior/protocol or physical conformance evidence','No standards compliance or security assurance claim','No domain admission/deployment; EI01 baseline source was published in PR289','Issue body readback and progress events are recorded evidence, not ongoing live GitHub checks','Asset-class templates and simulator catalog remain EI04/EI18 deliverables']}
 
 def main() -> int:
     parser=argparse.ArgumentParser(description=__doc__)

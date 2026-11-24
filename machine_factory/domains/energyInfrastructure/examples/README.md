@@ -1,3 +1,3 @@
-# Documentary examples
+# Reference examples
 
-[The DER supervisory profile](der-supervisory-profile.json) illustrates a native IEEE 2030.5 utility interface. It is synthetic, non-executable and unapproved, with timing/limits explicitly SITE_PROFILE_REQUIRED. Specialize the [profile template](../templates/interoperability-profile.json) for each actual peer and test it against approved engineering and utility criteria before use.
+[Generic microgrids](reference-microgrids.json) and [scope guidance](../documents/workflow/reference-microgrids.md) define EI03 scenarios, authority, roles and standards applicability. They do not implement simulators or standards-defined asset classes. [DER profile](der-supervisory-profile.json) remains a documentary EI05 specialization starting point.

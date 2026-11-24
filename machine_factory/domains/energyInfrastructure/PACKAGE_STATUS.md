@@ -8,7 +8,7 @@ As of 24 November 2026: **DESIGN_PACKAGE_NOT_ADMITTED**, version 0.2.0.
 
 Implemented package assets are the unchanged 187-definition clone, NIST PDF receipt, research-backed standards/public-implementation/RAG inventories, proposed lifecycle/security/agent/carbon contracts, documentary templates, 20 risk scenarios, 43 unexecuted acceptance cases and a ten-phase workplan. Actual offline integrity results are in [verification-summary.json](verification-summary.json). Its PASS applies only to package consistency and provenance.
 
-Not performed: machine adaptation/new identity or allocation, source/service bootstrap, protocol/model/agent installation or integration, approved RAG extraction/indexing, current wire probes, native regression/reasoning, software/simulated-hardware tests, accredited conformance, site commissioning, production risk acceptance, domain admission, deployment, Git commit or source-package publication. The GitHub issue backlog is published; source-package documentation remains local pending EI01.
+Not performed: machine adaptation/new identity or allocation, source/service bootstrap, protocol/model/agent installation or integration, approved RAG extraction/indexing, current wire probes, native regression/reasoning, software/simulated-hardware tests, accredited conformance, site commissioning, production risk acceptance, domain admission, deployment, domain-specific release or deployment. The baseline source package and GitHub issue backlog are published; EI03 reference-scope additions proceed through their own PR.
 
 ## Blocking design decisions and evidence
 
@@ -31,8 +31,14 @@ Source inspection anchors: CI `c985c0d7b592013d4d830b079d5af1663d407b6c`; localA
 
 ## Backlog publication
 
-The current detailed backlog is [acceptance/issues.json](acceptance/issues.json). Publication status and actual GitHub URLs are recorded there. All 24 implementation workstreams remain PLANNED and all 43 behavioral cases remain NOT_RUN. EI04 template/class coverage and EI18 simulated-hardware coverage are required future deliverables, not claims that templates or models have been built.
+The current detailed backlog is [acceptance/issues.json](acceptance/issues.json). Publication status and actual GitHub URLs are recorded there. The original published issue snapshot records all 24 workstreams as PLANNED; current source progress is tracked separately and all 43 behavioral cases remain NOT_RUN. EI04 template/class coverage and EI18 simulated-hardware coverage are required future deliverables, not claims that templates or models have been built.
 
 ## Published issue backlog
 
 [Umbrella #264](https://github.com/jateeter/RealityEngine_Machines/issues/264) tracks the 24 workstreams [#265–#288](https://github.com/jateeter/RealityEngine_Machines/issues?q=is%3Aissue%20%22energyInfrastructure%22). [Issue index](acceptance/issues.json) records exact bodies, dependencies, primary case ownership and successful readback of all 25 published issues. [Coverage requirements](acceptance/coverage-requirements.json) enumerate obligations for all 46 standard entries and 43 cases; template/class and simulated-hardware fulfillment remain future work. No cases have run and the domain remains unadmitted.
+
+## Source implementation progress
+
+EI01 baseline is merged in [PR #289](https://github.com/jateeter/RealityEngine_Machines/pull/289), commit `eae885ea2f9ed8204bbe6c9c0a0de6fc2baa78c8`; its working branches were deleted. [Source-progress events](acceptance/progress.json) distinguish merged work from the original issue and phase planning snapshots.
+
+EI03 now has [generic reference microgrids and authority](documents/workflow/reference-microgrids.md) and a [machine-readable scope](examples/reference-microgrids.json). These are scope specifications, not executed acceptance cases. EI02 identity/migration decisions and EI04 standards-defined class templates remain open.
