@@ -1,0 +1,581 @@
+{
+  "schemaVersion": "1.0.0",
+  "domain": "energyInfrastructure",
+  "canonicalDomainProposal": "energy-infrastructure",
+  "asOf": "2026-11-24",
+  "status": "DESIGN_PACKAGE_NOT_ADMITTED",
+  "assessmentMethod": "Qualitative scenario-based SP800-30/IEC62443 tailoring; no calibrated numerical score or residual-risk acceptance claimed.",
+  "decisionAuthority": "Named authorized human risk owner; LLM rationale is advisory.",
+  "risks": [
+    {
+      "id": "RK01",
+      "scenario": "False but authenticated DER/SOC observation",
+      "consequence": "Compromised device or sensor biases reserve and dispatch.",
+      "controlRequirement": "Independent metering/BMS consistency; producer identity; range/quality/time checks; conflicting evidence blocks dependent discretionary actions.",
+      "accountableRole": "OT security and controls engineer",
+      "fallback": "Preserve BMS and critical reserve; use reviewed degraded-observability plan.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC07",
+        "AC09"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK02",
+      "scenario": "Replay, stale or reordered telemetry",
+      "consequence": "Old values appear fresh; incorrect control and recovery state.",
+      "controlRequirement": "Sequence and replay window; event/receipt age; clock quality; bounded last-known value; explicit unknown state.",
+      "accountableRole": "PE adapter owner",
+      "fallback": "Hold dependent new commands, continue engineered local control.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC07",
+        "AC10"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK03",
+      "scenario": "Time synchronization compromise",
+      "consequence": "GNSS/PTP/NTP drift corrupts event order or synchronization decisions.",
+      "controlRequirement": "Independent clock comparison; holdover alarm; declared uncertainty and loss-of-trust criteria.",
+      "accountableRole": "Protection engineer",
+      "fallback": "No remote resynchronization with invalid time/measurement quality.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC05",
+        "AC07",
+        "AC11"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK04",
+      "scenario": "Rogue master or privileged insider",
+      "consequence": "Authorized channel carries unauthorized or unsafe operation.",
+      "controlRequirement": "Subject-action-asset policy; separation of duties; scoped expiring capabilities; deterministic electrical gate.",
+      "accountableRole": "Operations authority and OT security",
+      "fallback": "Deny operation before adapter; retain independent protection.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC12"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK05",
+      "scenario": "Wrong units, sign or asset mapping",
+      "consequence": "Typed command reaches wrong asset or reverses power flow.",
+      "controlRequirement": "Canonical asset IDs; units/scales/sign; bounds; schema rejects unknown fields; profile round-trip tests.",
+      "accountableRole": "Adapter owner",
+      "fallback": "Reject command and require corrected proposal.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC06",
+        "AC13"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK06",
+      "scenario": "State changes between approval and execution",
+      "consequence": "Topology/reserve/locks/policy revision invalidates approved plan.",
+      "controlRequirement": "Just-in-time precondition checks; action-hash approval; fencing and transactional lock; expiration.",
+      "accountableRole": "Command-gateway owner",
+      "fallback": "Reject stale approval and replan.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC14"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK07",
+      "scenario": "Unsafe aggregate flexible-load or storage dispatch",
+      "consequence": "Individually valid actions violate feeder/ramp/reserve limits together.",
+      "controlRequirement": "Deterministic aggregate feasibility, network constraints, critical-load priority and reservations.",
+      "accountableRole": "Grid engineer",
+      "fallback": "Deny aggregate plan; no carbon/economic bypass.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC01",
+        "AC15"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK08",
+      "scenario": "Credential compromise or trust failure",
+      "consequence": "Impersonation, revoked key or expired trust still permits operation.",
+      "controlRequirement": "Pinned identity/trust; revocation/rotation; outage handling; secure-channel evidence and owner disposition.",
+      "accountableRole": "PKI/identity owner",
+      "fallback": "Revoke affected capability; reviewed local safe route.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC16",
+        "AC40"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK09",
+      "scenario": "Firmware, configuration or protection drift",
+      "consequence": "Unreviewed update changes behavior, settings or attack surface.",
+      "controlRequirement": "Signed baseline and allowlisted artifacts; SBOM/VEX; maintenance permits; independent engineering review.",
+      "accountableRole": "Asset and protection owners",
+      "fallback": "Hold remote changes and preserve known-good local settings.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC17",
+        "AC43"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK10",
+      "scenario": "Loss of AI or cyber alarm during islanding",
+      "consequence": "Automation depends on inference or threat classification for urgent control.",
+      "controlRequirement": "Independent local primary/protection control; bounded timeouts; pre-engineered island behavior.",
+      "accountableRole": "Controller owner",
+      "fallback": "Continue deterministic operation; hold new model-dependent proposals.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC03",
+        "AC08",
+        "AC18",
+        "AC38"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK11",
+      "scenario": "Unknown or duplicated physical completion",
+      "consequence": "ACK/network timeout leads blind retry or false recovery.",
+      "controlRequirement": "Dispatch ID; logical idempotency; ACK separate from readback; completionUnknown; reconcile first.",
+      "accountableRole": "Execution-service owner",
+      "fallback": "No blind repeat of non-idempotent action; current-state assessed compensation.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC19",
+        "AC43"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK12",
+      "scenario": "Forged or synthetic completion",
+      "consequence": "Model confidence or simulated callback clears real action.",
+      "controlRequirement": "Authenticated completion source; dispatch binding; synthetic segregation; independent readback.",
+      "accountableRole": "PE and assurance owners",
+      "fallback": "Reject completion; case remains unresolved.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC20"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK13",
+      "scenario": "Prompt injection or poisoned retrieval/tool content",
+      "consequence": "Document or tool output changes goal, extracts secrets or requests actuation.",
+      "controlRequirement": "Source quarantine/review; untrusted-data boundary; scoped retrieval; no actuator tools for model; typed output validation.",
+      "accountableRole": "RAG and AI security owners",
+      "fallback": "No new permission; block unsafe tool proposal; retain audit.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC21",
+        "AC37",
+        "AC38"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK14",
+      "scenario": "Software/model supply-chain compromise",
+      "consequence": "Untrusted build, weight, tokenizer, plugin or dependency enters control plane.",
+      "controlRequirement": "Pinned digests/signers; SBOM; rights review; offline scan; representative behavior/evaluation gates.",
+      "accountableRole": "Release and model owners",
+      "fallback": "Reject unapproved artifact and restore approved version.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC22",
+        "AC39"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK15",
+      "scenario": "Resource exhaustion or alert flood",
+      "consequence": "Queues/logs/model load starve essential controls or security visibility.",
+      "controlRequirement": "Per-source budgets; quotas; bounded queues; backpressure; disk health; separated resource pools.",
+      "accountableRole": "Platform operations",
+      "fallback": "Shed optional analytics before essential control capacity.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC08",
+        "AC23",
+        "AC38"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK16",
+      "scenario": "Cross-site or licensed-data disclosure",
+      "consequence": "RAG similarity or traces leak topology, records or protected text.",
+      "controlRequirement": "Pre-retrieval tenant/site/role/license filters; credential-free context; egress/retention controls; disclosure tests.",
+      "accountableRole": "Data and privacy owners",
+      "fallback": "Deny retrieval; isolate collection; incident process.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC24",
+        "AC36"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK17",
+      "scenario": "Electrical/fire hazard or bad mode transition",
+      "consequence": "Unsafe energization, inadvertent island, out-of-sync close, thermal event or loss of critical load.",
+      "controlRequirement": "Utility/OEM settings; relay/interlocks; coordination/stability/hazard studies; calibrated sensors; simulated hardware and simulated commissioning.",
+      "accountableRole": "Protection/safety engineer and utility",
+      "fallback": "Local protection and approved emergency procedure; no generic cyber isolation.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC02",
+        "AC03",
+        "AC04",
+        "AC05",
+        "AC08",
+        "AC25",
+        "AC43"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK18",
+      "scenario": "Misleading carbon optimization/accounting",
+      "consequence": "Wrong scope/region/basis, storage/export double credit or missed fossil backup biases decisions.",
+      "controlRequirement": "Typed energy/carbon ledger; weighting; reserve-first feasibility; method/rights/freshness; counterfactual for impact.",
+      "accountableRole": "Carbon-accounting and grid owners",
+      "fallback": "Mark undefined/stale; hold unsupported carbon objective; safety continues.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC26",
+        "AC27",
+        "AC28",
+        "AC29",
+        "AC30",
+        "AC31",
+        "AC32",
+        "AC33",
+        "AC34",
+        "AC35"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK19",
+      "scenario": "Unreviewed learning or stale policy/source revisions",
+      "consequence": "Agent writes its own answer into trusted knowledge or reused model evades evaluation.",
+      "controlRequirement": "Immutable independently approved source/policy/model revisions; dependency staleness; no self-approval.",
+      "accountableRole": "Assurance and RAG owners",
+      "fallback": "Invalidate affected conclusions and rerun reviewed evaluations.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC37",
+        "AC39",
+        "AC43"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    },
+    {
+      "id": "RK20",
+      "scenario": "False acceptance or scope substitution",
+      "consequence": "Static pass/test-only/synthetic receipts presented as deployed safe domain.",
+      "controlRequirement": "Exact fingerprints; genuine native receipts; independent review; TEST_ONLY rejection; separate field certification.",
+      "accountableRole": "CI and release authority",
+      "fallback": "Reject admission or promotion; preserve audit and previous version.",
+      "initialRisk": "UNASSESSED_REFERENCE_SCENARIO_REQUIRED",
+      "residualRisk": "NOT_ACCEPTED",
+      "evidenceState": "MISSING_EXECUTION_EVIDENCE",
+      "likelihoodRationale": null,
+      "consequenceAssessment": null,
+      "confidence": null,
+      "assessmentExpires": null,
+      "reassessmentTriggers": [
+        "Relevant threat/KEV/VEX event",
+        "Topology/mode/firmware/settings change",
+        "Credential/model/policy/RAG revision",
+        "Evidence timeout or loss of time quality",
+        "Incident or scheduled review"
+      ],
+      "acceptanceCaseIds": [
+        "AC41",
+        "AC42",
+        "AC43"
+      ],
+      "assessmentScope": "Generic reference scenario with standards-derived assets and simulated required hardware; not a real-site risk acceptance."
+    }
+  ],
+  "acceptancePolicy": {
+    "hardwareMode": "SIMULATED_REQUIRED_HARDWARE",
+    "genericAssetsAllowedForAllCases": true,
+    "assetClassesDefinedByAssociatedStandards": true,
+    "physicalHardwareRequired": false,
+    "physicalCommissioningRequiredForAdmission": false,
+    "softwareExecutionMustBeGenuine": true,
+    "authenticAdmissionEvidenceRequired": true,
+    "assetTemplateDeliveryIssue": "EI04",
+    "simulatedHardwareCoverageIssue": "EI18",
+    "templateCoverageStatus": "PLANNED_NOT_IMPLEMENTED",
+    "simulatorCoverageStatus": "PLANNED_NOT_IMPLEMENTED"
+  }
+}
