@@ -20,3 +20,12 @@ python3 tools/verify_package.py --write-summary
 ```
 
 Sealing records bytes only; it cannot approve behavior, source rights, security, risk or domain admission. The summary and manifest exclude themselves as documented in the manifest; OS/cache files are excluded. Actual behavioral results, templates and simulator catalogs remain unimplemented until their issues are completed with genuine evidence.
+
+## Generic reference-scope specification
+
+```bash
+python3 tools/verify_reference_scope.py
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tools -p 'test_*.py'
+```
+
+The additional ten scope tests reject missing case/standard coverage, unknown roles or topology, generic admission authority, physical hardware prerequisites, normative taxonomy overclaims, untraceable nominal values and fabricated execution. Twenty tests cover package integrity and reference-scope consistency in total. They do not run the 43 behavioral acceptance cases.
