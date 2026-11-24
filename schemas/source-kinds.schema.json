@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.example.org/schemas/source-kinds.schema.json",
+  "title": "RealityEngine source-kind taxonomy (re-source-kinds/<N>)",
+  "description": "The versioned vocabulary a Perception Engine records, per committed step, for the source that won each input cell (RealityEngine_CI SURFACE_SPEC.md, 'The PE half: ISRE composition'). A version is never edited: a change is a new version, which carries a mapping from the previous one.",
+  "type": "object",
+  "required": ["format", "version", "purpose", "classes", "providerMapping", "kinds", "unknownProvider", "mappingFromPrevious"],
+  "additionalProperties": false,
+  "properties": {
+    "format": { "const": "re-source-kinds" },
+    "version": { "type": "integer", "minimum": 1 },
+    "purpose": { "type": "string", "minLength": 1 },
+    "classes": {
+      "description": "The determinism classes, as RealityEngine_CI docs/ARBITER_CONTRACT.md defines them, in rank order (most reproducible first).",
+      "type": "array",
+      "items": { "enum": ["deterministic", "measured", "generated"] },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "providerMapping": {
+      "description": "A source's origin, mapped to the provider it is recorded under. An origin not listed is its own provider.",
+      "type": "object",
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
+    "kinds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["kind", "meaning"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "meaning": { "type": "string", "minLength": 1 },
+          "class": {
+            "description": "The kind's class when it has no providers.",
+            "enum": ["deterministic", "measured", "generated", null]
+          },
+          "providers": {
+            "description": "For a kind recorded with a provider: each provider and its class.",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["provider", "class"],
+              "additionalProperties": false,
+              "properties": {
+                "provider": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+                "class": { "enum": ["deterministic", "measured", "generated"] }
+              }
+            }
+          }
+        },
+        "oneOf": [
+          { "required": ["class"], "not": { "required": ["providers"] } },
+          { "required": ["providers"], "not": { "required": ["class"] } }
+        ]
+      }
+    },
+    "unknownProvider": {
+      "description": "How a provider-bearing kind records a provider this version does not list, or none at all.",
+      "type": "object",
+      "required": ["provider", "class"],
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "type": "string", "minLength": 1 },
+        "class": { "enum": ["generated"] }
+      }
+    },
+    "mappingFromPrevious": {
+      "description": "null for version 1. For every later version, how each (kind, provider) of version N-1 reads in this version.",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["from", "to"],
+            "additionalProperties": false,
+            "properties": {
+              "from": { "$ref": "#/$defs/kindRef" },
+              "to": { "$ref": "#/$defs/kindRef" }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "kindRef": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "type": "string" },
+        "provider": { "type": "string" }
+      }
+    }
+  }
+}

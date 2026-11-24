@@ -9,6 +9,7 @@
  *   - domains/semantic-bus-registry.json -> semantic-bus-registry.schema.json
  *   - domains/clone-space.json      -> clone-space.schema.json
  *   - domains/lane-contracts.json   -> lane-contract.schema.json
+ *   - schemas/source-kinds/*.json   -> source-kinds.schema.json
  *   - triggers/*.example.json       -> ai-trigger-envelope.schema.json
  *   - triggers/*scenario*.json      -> trigger-scenario.schema.json
  *   (triggers/*.template.json is a documentation scaffold and is skipped.)
@@ -84,6 +85,10 @@ validateSet("region-allocation", [join(REPO, "domains/region-allocation.json")],
 validateSet("clone-space", [join(REPO, "domains/clone-space.json")], "clone-space.schema.json");
 validateSet("arbitration-registry", [join(REPO, "domains/arbitration-registry.json")], "arbitration-registry.schema.json");
 validateSet("lane-contracts", [join(REPO, "domains/lane-contracts.json")], "lane-contract.schema.json");
+// The source-kind taxonomy versions (RealityEngine_CI SURFACE_SPEC.md, "The PE
+// half: ISRE composition"). A PE refuses to boot without its version.
+const sourceKindsDir = join(SCHEMA_DIR, "source-kinds");
+validateSet("source-kind taxonomy", existsSync(sourceKindsDir) ? walk(sourceKindsDir) : [], "source-kinds.schema.json");
 
 const approvalsDir = join(REPO, "domains/approvals");
 validateSet("domain admission ledgers", existsSync(approvalsDir) ? walk(approvalsDir) : [], "domain-admission-ledger.schema.json");
