@@ -6,7 +6,7 @@ The [owner-approved acceptance scope](acceptance/scope.json) governs this active
 
 Version 0.2.0 · 24 November 2026 · **DESIGN_PACKAGE_NOT_ADMITTED**
 
-This package defines the standards, security, model/RAG integration and evidence work needed to develop an integrated microgrid domain from the unchanged energy clone. Read [the report](<reports/Secure microgrid interoperability.md>), then [the admission workplan](WORKPLAN.md). The exact requested factory directory is `energyInfrastructure`; `energy-infrastructure` is only a proposed canonical slug pending an identity/tooling decision.
+This package defines the standards, security, model/RAG integration and evidence work needed to develop an integrated microgrid domain from the unchanged energy clone. Read [the report](<reports/Secure microgrid interoperability.md>), then [the admission workplan](WORKPLAN.md). The exact requested factory directory is `energyInfrastructure`; `energy-infrastructure` is the selected canonical slug under [the EI02 identity decision](identity-decision.json); folder mapping is explicit and grants no admission.
 
 ## Design and evidence map
 
@@ -49,4 +49,8 @@ The verifier checks checksums, JSON structure/identities/references, clone prese
 
 EI01 baseline is merged in [PR #289](https://github.com/jateeter/RealityEngine_Machines/pull/289), commit `eae885ea2f9ed8204bbe6c9c0a0de6fc2baa78c8`; its working branches were deleted. [Source-progress events](acceptance/progress.json) distinguish merged work from the original issue and phase planning snapshots.
 
-EI03 now has [generic reference microgrids and authority](documents/workflow/reference-microgrids.md) and a [machine-readable scope](examples/reference-microgrids.json). These are scope specifications, not executed acceptance cases. EI02 identity/migration decisions and EI04 standards-defined class templates remain open.
+EI03 now has [generic reference microgrids and authority](documents/workflow/reference-microgrids.md) and a [machine-readable scope](examples/reference-microgrids.json). These are scope specifications, not executed acceptance cases. EI02 now records [identity/coexistence](documents/workflow/identity-and-coexistence.md), [187 dispositions](machine-dispositions.json) and factory-path support. EI04 standards-defined class templates remain future work.
+
+## EI02 identity implementation
+
+[The identity decision](identity-decision.json) selects `energy-infrastructure`, preserves `energyInfrastructure`, and coexists with accepted energy. [Dispositions](machine-dispositions.json) cover all 187 originals with new ENI identities and a collision-checked nonactive native plan. [Identity guidance](documents/workflow/identity-and-coexistence.md) documents mapping, rewiring and compatibility. Candidate machines, registered domain ranges and behavioral acceptance remain unimplemented.

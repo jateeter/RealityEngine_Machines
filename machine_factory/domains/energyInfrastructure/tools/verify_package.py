@@ -9,6 +9,7 @@ import re
 import sys
 from urllib.parse import unquote, urlsplit
 from verify_reference_scope import validate as validate_reference_scope
+from build_identity_plan import build as build_identity_plan, validate as validate_identity_plan
 
 EXCLUDED = {'asset-manifest.json', 'verification-summary.json'}
 EXPECTED_COUNTS = {'standards': 46, 'implementations': 29, 'sources': 18,
@@ -46,6 +47,8 @@ def check(root: Path) -> dict:
                 'acceptance/issues.json','acceptance/scope.json','acceptance/coverage-requirements.json',
                 'acceptance/progress.json','examples/reference-microgrids.json',
                 'documents/workflow/reference-microgrids.md',
+                'identity-decision.json','machine-dispositions.json',
+                'documents/workflow/identity-and-coexistence.md',
                 'intake/NIST.SP.1108r4_1.pdf','templates/interoperability-profile.json',
                 'templates/command-proposal.json','templates/rag-source-record.json',
                 'examples/der-supervisory-profile.json','asset-manifest.json']
@@ -204,6 +207,13 @@ def check(root: Path) -> dict:
     require(not reference_errors,'Reference scope specification invalid')
     for error in reference_errors:
         require(False,'Reference scope: '+error)
+    decision=read('identity-decision.json')
+    identity_plan=read('machine-dispositions.json')
+    require(identity_plan==build_identity_plan(root),'Identity plan reproducibility/provenance mismatch')
+    identity_errors=validate_identity_plan(identity_plan,decision,imports)
+    require(not identity_errors,'Identity plan specification invalid')
+    for error in identity_errors:
+        require(False,'Identity plan: '+error)
     progress=read('acceptance/progress.json')
     require(progress['domain']=='energyInfrastructure','Wrong source-progress domain')
     require(len({e['id'] for e in progress['events']})==len(progress['events']),'Duplicate source-progress event')
@@ -232,6 +242,7 @@ def check(root: Path) -> dict:
             'publishedIssuesVerified':25,'templateAndSimulatorCoverage':'REQUIREMENTS_ONLY_NOT_FULFILLED',
             'assetManifestSHA256':digest(root/'asset-manifest.json'),'errors':errors,
             'referenceScope':'THREE_GENERIC_SCENARIOS_SPECIFICATION_ONLY',
+            'identityPlan':'187_DISPOSITIONS_NOT_RUNTIME_PAYLOAD',
             'limitations':['No runtime/model/adapter or RAG execution','No simulated-hardware behavior/protocol or physical conformance evidence','No standards compliance or security assurance claim','No domain admission/deployment; EI01 baseline source was published in PR289','Issue body readback and progress events are recorded evidence, not ongoing live GitHub checks','Asset-class templates and simulator catalog remain EI04/EI18 deliverables']}
 
 def main() -> int:

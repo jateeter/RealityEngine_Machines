@@ -11,6 +11,7 @@ from urllib.request import urlopen as _plain_urlopen
 # replaces that name with a fixture.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from engine_tls import lane_context  # noqa: E402
+from factory_paths import factory_directory  # noqa: E402
 
 
 def urlopen(url, timeout):
@@ -109,11 +110,12 @@ def plan(repo,ci,domain,ver):
     for p in (repo/'machines/domains').iterdir():
         if p.is_dir() and any(p.glob('*.json')):names.add('domain:'+p.name)
     return {'schemaVersion':'1.0.0','domain':domain,'version':ver,'candidateCommit':git(repo,'rev-parse','HEAD'),
+            'factoryDirectory':factory_directory(repo,domain).relative_to(repo).as_posix(),
             'candidateMachines':members,'machineCount':len(members),
             'countReconciliation':'Verify immutable baseline + exact candidate-domain delta; stage the versioned corpus transition alongside affected machine registries and semantic shards',
             'refreshScope':'All known CES domain/corpus scopes conservatively: shared-space changes can affect peer commits',
             'cesScopes':sorted(names),'derivedArtifacts':DERIVED+['semantics/lanes/lane-graph.ttl','semantics/lanes/decision-table.json'],
-            'authoredInputs':['domains/domain-manifest.json','domains/domain-registry.json','machine schemas, semantics, arbitration and regression profile selection'],
+            'authoredInputs':['domains/domain-manifest.json','domains/domain-registry.json','domains/factory-domain-paths.json','machine schemas, semantics, arbitration and regression profile selection'],
             'protocol':'RealityEngine_CI/MACHINE_CONCEPT.md section 9; RealityEngine_CI/docs/ENGINEERING_CONTRACT.md',
             'state':'PLAN_ONLY_NOT_APPROVED'}
 

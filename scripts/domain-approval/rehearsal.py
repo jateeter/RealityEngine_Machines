@@ -53,7 +53,7 @@ def run(args):
         git_at(path,'remote','add','origin',bare)
     for rel in candidate:
         src=source/'machines'/rel;dst=repo/'machines'/rel;dst.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(src,dst)
-    assets=source/'machine_factory/domains'/domain
+    assets=core.factory_directory(source,domain)
     catalog=core.read(assets/'document-asset-catalog.json')
     findings=core.read(assets/'accounting-findings.json')['findings']
     core.write(out/'test-acceptance-decisions.json',{
