@@ -58,6 +58,15 @@ TTL_MS = 300000
 
 LANES = ["lane_in_workflow", "lane_re_pinned", "lane_approved", "lane_rework", "lane_step_running", "lane_stale"]
 
+# Signals produced by a peer domain rather than by a service (GOV-SD-11, observe vs
+# decide): threat-dynamics observes, this domain decides. Emitted as producerDomain
+# in governance-sources.json only; the machines' inputSemantics are unchanged.
+PRODUCER_DOMAIN = {
+    "gate_redteam_pass": "threat-dynamics",
+    "mon_canary_drift_score": "threat-dynamics",
+    "mon_xdomain_mu_agg": "threat-dynamics",
+}
+
 # signal: (kind b/c, delivery, producer, status, meaning)
 # delivery: lane (lifecycle frame lane), fact (frame fact the lifecycle writes into a
 # clone), sensor (a PE Source on a fixture), feedback (PE-composed own output).
@@ -1171,8 +1180,11 @@ def sources_manifest():
     for n, (k, delivery, producer, status, meaning) in SIGNALS.items():
         if n not in uses:
             continue
-        sigs.append({"signal": n, "kind": "binary" if k == "b" else "continuous", "delivery": delivery,
-                     "producer": producer, "status": status, "meaning": meaning, "consumers": uses[n]})
+        sig = {"signal": n, "kind": "binary" if k == "b" else "continuous", "delivery": delivery,
+               "producer": producer, "status": status, "meaning": meaning, "consumers": uses[n]}
+        if n in PRODUCER_DOMAIN:
+            sig["producerDomain"] = PRODUCER_DOMAIN[n]
+        sigs.append(sig)
     comps = [{"sensorId": sensor_id(m), "agent": m["agent"]["id"], "machine": m["stem"],
               "provider": write_back(m)["provider"], "region": write_back(m)["region"],
               "fields": [f for f, _ in m["completion"]], "status": "new"} for m in MACHINES if m.get("agent")]

@@ -13,7 +13,7 @@ same path. Directories appear when their step produces content
 | # | Step | Produces (ifrs-accounting equivalent) | State |
 |---|---|---|---|
 | 1 | Intake: receive, preserve, index, review | `intake/`, `admission-source-manifest.json`, `REVIEW_QUEUE.md`, `tools/verify_package.py` | **done** 2026-11-20 |
-| 2 | Scope: owner decisions on R02, R04, R06–R09 | `scope-decisions.json` entries | R02 and the layout decided (GOV-SD-04/05); R06–R09 open |
+| 2 | Scope: owner decisions on R02, R04, R06–R09 | `scope-decisions.json` entries | R02, the layout, the scope, the threat-dynamics split and the extension corpus decided (GOV-SD-04/05, 09–12); R06–R09 open |
 | 3 | Sources: pin the baseline and each in-scope framework edition; extract controls | `source-requirements.json`, `source-reference-map.json` | open (R07, R08) |
 | 4 | Asset catalog: governance document types, fields, owners, dependencies | `document-asset-catalog.json`, `document-dependencies.json`, `templates/` | partly received (SHACL shapes, SoA template) |
 | 5 | Machine conversion: canonical candidate files | `machines/*.json` here, `machine-import-manifest.json`, `semantic-amendments.json` | **built** 2026-11-21; copied to `machines/domains/` at admission |
@@ -115,3 +115,41 @@ same path. Directories appear when their step produces content
   behaviors for OpenClaw (valid OC agent specs) and for ACP (session-scoped
   frame servers).
 - **Not done:** GOV-R11, R12, R19, R20 and R21; no engine run.
+
+## Step 2 record (scope, 2026-11-25)
+
+- **Consumed:** the owner's review of the received hardening workplan against
+  NIST SP 2400-102e2026 (initial public draft), and a second received document,
+  `organizational-wrapper-governance-machine.md`.
+- **Decided:**
+  - GOV-SD-09: the scope stays the 18 machines;
+  - GOV-SD-10: threat classification and observation are a peer domain,
+    threat-dynamics;
+  - GOV-SD-11: observe vs decide; three Sources come from threat-dynamics;
+  - GOV-SD-12: one shared extension corpus for both domains.
+- **Produced:**
+  - the wrapper document intaken byte-for-byte as
+    `intake/ORGANIZATIONAL-WRAPPER-MACHINE.md` (GOV-R22);
+  - `producerDomain: threat-dynamics` on `gate_redteam_pass`,
+    `mon_canary_drift_score` and `mon_xdomain_mu_agg` in
+    `governance-sources.json` (GOV-R23);
+  - GOV-SD-05's band corrected to `[16960:17429]`;
+  - GOV-R03 closed, GOV-R11 decided, GOV-R14's count corrected to 22.
+- **The received workplan against this scope.** RESOLUTION_WORKPLAN.md stays
+  as received. Read it with this mapping:
+
+  | Workplan says | In this package |
+  |---|---|
+  | 315 machines, M-GOV-01..315; 1,867 corpus machines | 18 machines, GOV00–GOV17 (GOV-SD-04, GOV-SD-09) |
+  | band `[16960:17087]`, hardened cells 16987–16991 | per-machine regions in `[16960:17429]`; the cell numbers are `inputSemantics` labels (GOV-SD-05) |
+  | M-GOV-15 / 16 / 17 | GOV15 break-glass, GOV16 cross-domain delegation cap, GOV17 quorum key revocation |
+  | outputs at 17056–17059 | each machine's 10-element output; the domain verdicts are GOV00's output |
+  | "C++, Scala, and Lisp voting runtimes" | the quorum contract's C++, LSP and Scala, 3-of-3 |
+  | AgentDojo gate, canary probe, cross-domain μ aggregate | produced by threat-dynamics, consumed here (GOV-SD-11) |
+  | 100% pass-set equality, `p99 <= 820 ns` | designed, not measured (GOV-R09) |
+  | weeks 1–8 | no calendar; the order of the gaps is kept |
+
+- **Verified:** `python3 tools/verify_package.py` and
+  `python3 tools/verify_machines.py` pass (see the PR).
+- **Not done:** the threat-dynamics package itself; R06–R09 and R14 (owner);
+  R10 and R22 wait for the next document revision.
