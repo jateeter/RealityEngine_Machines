@@ -1,0 +1,259 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.local/energyInfrastructure/asset-instance.schema.json",
+  "title": "Synthetic generic energy asset fixture bundle; not execution evidence",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "synthetic": {
+      "const": true
+    },
+    "hardwareMode": {
+      "const": "SIMULATED_REQUIRED_HARDWARE"
+    },
+    "requireAllGenericTemplates": {
+      "type": "boolean"
+    },
+    "caseIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "templateId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "roleId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "topologyLinks": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+            },
+            "uniqueItems": true
+          },
+          "authorityRoleIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+            },
+            "uniqueItems": true
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                },
+                "value": {
+                  "type": [
+                    "number",
+                    "string",
+                    "boolean"
+                  ]
+                },
+                "unit": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "provenance": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "GENERIC_ASSUMPTION"
+                    },
+                    "reference": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "reference"
+                  ],
+                  "additionalProperties": false
+                },
+                "sourcePoint": {
+                  "type": "object",
+                  "properties": {
+                    "templateId": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "pointer": {
+                      "type": "string",
+                      "pattern": "^/group/(groups/[0-9]+/)*points/[0-9]+$"
+                    }
+                  },
+                  "required": [
+                    "templateId",
+                    "pointer"
+                  ],
+                  "additionalProperties": false
+                },
+                "valueEncoding": {
+                  "const": "RAW_REGISTER"
+                }
+              },
+              "required": [
+                "name",
+                "value",
+                "unit",
+                "provenance"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "commandDecision": {
+            "const": "DENY"
+          },
+          "simulation": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "const": "NOT_IMPLEMENTED"
+              },
+              "version": {
+                "type": "null"
+              }
+            },
+            "required": [
+              "status",
+              "version"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "templateId",
+          "roleId",
+          "topologyLinks",
+          "authorityRoleIds",
+          "properties",
+          "commandDecision",
+          "simulation"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "templateId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "assetRefs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+            },
+            "uniqueItems": true
+          },
+          "fields": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean",
+                    "array",
+                    "object",
+                    "null"
+                  ]
+                },
+                "provenance": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "GENERIC_ASSUMPTION"
+                    },
+                    "reference": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "reference"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "value",
+                "provenance"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "synthetic": {
+            "const": true
+          },
+          "authenticEvidence": {
+            "const": false
+          },
+          "status": {
+            "const": "DRAFT_NOT_EXECUTION_EVIDENCE"
+          }
+        },
+        "required": [
+          "id",
+          "templateId",
+          "assetRefs",
+          "fields",
+          "synthetic",
+          "authenticEvidence",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "synthetic",
+    "hardwareMode",
+    "requireAllGenericTemplates",
+    "caseIds",
+    "assets",
+    "documents"
+  ],
+  "additionalProperties": false
+}
