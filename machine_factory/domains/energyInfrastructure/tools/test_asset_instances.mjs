@@ -39,3 +39,31 @@ const negatives=[
  ['unproven provenance',d=>inverter(d).properties[0].provenance.kind='NORMATIVE_REQUIREMENT']
 ];
 for(const [name,mutate] of negatives)test(`rejects ${name}`,()=>{const d=structuredClone(fixture);mutate(d);assert.ok(validateInstances(d).length);});
+
+const referenceNames=['ref01_connected','ref02_island_restore','ref03_flex_ev'];
+const referenceFixtures=referenceNames.map(name=>JSON.parse(readFileSync(new URL(`../assets/reference-instances/${name}.json`,import.meta.url),'utf8')));
+const topology=d=>d.documents.find(x=>x.templateId==='generic-document-topology');
+for(const f of referenceFixtures)test(`validates ${f.referenceScenarioId} topology`,()=>assert.deepEqual(validateInstances(f),[]));
+for(const f of referenceFixtures)test(`accepts reordered undirected edges for ${f.referenceScenarioId}`,()=>{
+  const d=structuredClone(f);
+  topology(d).fields.connections.value=topology(d).fields.connections.value.reverse().map(e=>({from:e.to,to:e.from}));
+  assert.deepEqual(validateInstances(d),[]);
+});
+const topologyNegatives=[
+ ['missing expected edge',d=>topology(d).fields.connections.value.pop()],
+ ['duplicate reversed edge',d=>{const e=topology(d).fields.connections.value[0];topology(d).fields.connections.value.push({from:e.to,to:e.from});}],
+ ['orphan edge endpoint',d=>topology(d).fields.connections.value[0].to='absent'],
+ ['self edge',d=>{const e=topology(d).fields.connections.value[0];e.to=e.from;}],
+ ['missing bus',d=>topology(d).fields.nodes.value.pop()],
+ ['extra asset role',d=>{const a=structuredClone(d.assets[0]);a.id='extra';d.assets.push(a);}],
+ ['wrong voltage assumption',d=>topology(d).fields.voltageBases.value['bus.local-ac-bus'].value=240],
+ ['false normative voltage',d=>topology(d).fields.voltageBases.value['bus.local-ac-bus'].basis='NORMATIVE'],
+ ['invented grounding',d=>topology(d).fields.grounding.value='approved'],
+ ['invented normative mapping',d=>topology(d).fields.sourceClassMappings.value={fake:'class'}],
+ ['missing topology document',d=>d.documents=d.documents.filter(x=>x.templateId!=='generic-document-topology')],
+ ['wrong scenario case scope',d=>d.caseIds.push('AC43')],
+ ['duplicate topology document',d=>{const doc=structuredClone(topology(d));doc.id='extra.topology';d.documents.push(doc);}],
+ ['nonarray connections',d=>topology(d).fields.connections.value=null],
+ ['reordered duplicate source binding',d=>{const a=inverter(d);const p=structuredClone(a.properties[0]);p.name='reordered';p.sourcePoint={pointer:p.sourcePoint.pointer,templateId:p.sourcePoint.templateId};a.properties.push(p);}]
+];
+for(const [name,mutate] of topologyNegatives)test(`rejects ${name}`,()=>{const d=structuredClone(referenceFixtures[0]);mutate(d);assert.ok(validateInstances(d).length);});

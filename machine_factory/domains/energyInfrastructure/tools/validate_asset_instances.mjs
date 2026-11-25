@@ -26,6 +26,15 @@ export function validateInstances(bundle,root=ROOT) {
     require(!ids.has(item.id),`Duplicate instance identity: ${item.id}`);ids.add(item.id);
   }
   const assetIds=new Set(bundle.assets.map(a=>a.id));
+  const scenario=bundle.referenceScenarioId?scope.scenarios.find(s=>s.id===bundle.referenceScenarioId):null;
+  if(bundle.referenceScenarioId) {
+    require(!!scenario,`Unknown reference scenario: ${bundle.referenceScenarioId}`);
+    if(scenario) {
+      require(bundle.assets.length===scenario.assetRoleIds.length&&new Set(bundle.assets.map(a=>a.roleId)).size===bundle.assets.length&&scenario.assetRoleIds.every(id=>bundle.assets.some(a=>a.roleId===id)),'Reference scenario role coverage mismatch');
+      require(bundle.caseIds.length===scenario.caseIds.length&&scenario.caseIds.every(id=>bundle.caseIds.includes(id)),'Reference scenario case coverage mismatch');
+      require(bundle.documents.filter(d=>d.templateId==='generic-document-topology').length===1,'Reference scenario requires exactly one topology document');
+    }
+  }
   for(const c of bundle.caseIds) require(cases.has(c),`Unknown case: ${c}`);
   for(const asset of bundle.assets) {
     const t=roles.get(asset.templateId);
@@ -39,7 +48,7 @@ export function validateInstances(bundle,root=ROOT) {
       require(!names.has(p.name),`Duplicate property: ${asset.id}/${p.name}`);names.add(p.name);
       require(typeof p.value!=='number'||Number.isFinite(p.value),`Nonfinite property: ${p.name}`);
       if(!p.sourcePoint)continue;
-      const binding=JSON.stringify(p.sourcePoint);
+      const binding=JSON.stringify([p.sourcePoint.templateId,p.sourcePoint.pointer]);
       require(!pointBindings.has(binding),`Duplicate source-point binding: ${asset.id}/${p.name}`);pointBindings.add(binding);
       require(p.valueEncoding==='RAW_REGISTER',`Explicit raw-register encoding required: ${p.name}`);
       const model=models.get(p.sourcePoint.templateId);
@@ -77,7 +86,26 @@ export function validateInstances(bundle,root=ROOT) {
     for(const ref of doc.assetRefs)require(assetIds.has(ref),`Unknown document asset: ${ref}`);
     if(doc.templateId==='generic-document-topology') {
       const nodes=doc.fields.nodes?.value;
-      require(Array.isArray(nodes)&&nodes.length===new Set(nodes).size&&nodes.every(id=>assetIds.has(id)),`Invalid topology document nodes: ${doc.id}`);
+      const buses=new Set((scenario?.electricalConnectivity.busIds??[]).map(id=>'bus.'+id));
+      require(Array.isArray(nodes)&&nodes.length===new Set(nodes).size&&nodes.every(id=>assetIds.has(id)||buses.has(id)),`Invalid topology document nodes: ${doc.id}`);
+      const connections=doc.fields.connections?.value;
+      const nodeSet=new Set(Array.isArray(nodes)?nodes:[]);
+      const validEdges=Array.isArray(connections)&&connections.every(e=>e&&typeof e==='object'&&!Array.isArray(e)&&Object.keys(e).sort().join(',')==='from,to'&&typeof e.from==='string'&&typeof e.to==='string'&&e.from!==e.to&&nodeSet.has(e.from)&&nodeSet.has(e.to));
+      require(validEdges,`Invalid topology connections: ${doc.id}`);
+      const key=e=>JSON.stringify([e.from,e.to].sort());
+      if(validEdges)require(new Set(connections.map(key)).size===connections.length,`Duplicate topology connection: ${doc.id}`);
+      if(scenario) {
+        const byRole=new Map(bundle.assets.map(a=>[a.roleId,a.id]));
+        const endpoint=id=>byRole.get(id)??'bus.'+id;
+        const expected=scenario.electricalConnectivity.edges.map(([from,to])=>key({from:endpoint(from),to:endpoint(to)})).sort();
+        require(validEdges&&JSON.stringify(connections.map(key).sort())===JSON.stringify(expected),'Reference scenario connection mismatch');
+        require(Array.isArray(nodes)&&nodes.length===assetIds.size+buses.size&&[...assetIds,...buses].every(id=>nodeSet.has(id)),'Reference scenario node coverage mismatch');
+        const voltages=Object.fromEntries([...buses].map(id=>[id,scenario.nominalReference.localVoltage]));
+        const actual=doc.fields.voltageBases?.value;
+        require(actual&&typeof actual==='object'&&!Array.isArray(actual)&&Object.keys(actual).length===buses.size&&[...buses].every(id=>actual[id]?.value===voltages[id].value&&actual[id]?.unit===voltages[id].unit&&actual[id]?.basis===voltages[id].basis),'Reference scenario voltage assumption mismatch');
+        require(doc.fields.grounding?.value===null,'Grounding engineering review remains unresolved');
+        require(doc.fields.sourceClassMappings?.value===null,'Normative class mappings remain unresolved');
+      }
     }
     if(doc.templateId==='generic-document-evidence-record') {
       require(bundle.caseIds.includes(doc.fields.caseId?.value),`Evidence case outside bundle scope: ${doc.id}`);

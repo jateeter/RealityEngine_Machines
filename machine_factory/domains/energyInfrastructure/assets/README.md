@@ -38,3 +38,18 @@ node --test tools/test_asset_instances.mjs
 ```
 
 Hosted corpus checks run the instance contract tests. Neither a schema-valid draft nor a successful validation result can authorize operations, populate simulation receipts or satisfy behavioral admission cases. Normative class coverage, complete reviewed operational-instance validation, protocol conformance and simulator linkage remain open in EI04 and downstream workstreams.
+
+## Reference topology instances
+
+[REF01 connected](reference-instances/ref01_connected.json), [REF02 island/restoration](reference-instances/ref02_island_restore.json) and [REF03 flexibility/EV](reference-instances/ref03_flex_ev.json) now instantiate the electrical connectivity already declared in the reference microgrid scope. Each includes exactly its scenario's role set and case scope, one local AC bus, and nine, nine or eleven undirected connections respectively. Selected point examples remain raw synthetic fixture values, not simulated device observations.
+
+The instance validator requires exactly one topology document per reference scenario, complete asset/bus node coverage and exact expected connections. It rejects duplicate/reversed edges, self-edges, orphan endpoints, missing nodes, role/case drift and changed voltage assumptions. The 480 V line-to-line RMS base remains a chosen generic reference, not a normative limit. Grounding and normative class mappings remain unresolved/null. No impedance, phase detail, power-flow feasibility, protection coordination, operating approval or energized state is inferred from an edge.
+
+```bash
+python3 tools/build_reference_instances.py --write
+python3 tools/build_reference_instances.py
+node tools/validate_asset_instances.mjs assets/reference-instances/ref01_connected.json
+node --test tools/test_asset_instances.mjs
+```
+
+The generator uses only the current checked-in scenario scope and generic fixture; package verification checks exact reproduction. Behavioral cases remain NOT_RUN. EI04, EI05 profile selection, EI06 safety envelopes and EI18 simulator linkage remain open as applicable.

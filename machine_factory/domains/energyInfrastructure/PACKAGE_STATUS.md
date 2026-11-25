@@ -56,3 +56,8 @@ EI03 now has [generic reference microgrids and authority](documents/workflow/ref
 ### EI04 synthetic instance contracts
 
 [Generic instance schemas, fixtures and validation](assets/README.md#generic-instance-validation) now cover all 19 functional role templates and seven document templates, plus selected raw SunSpec point bindings. Hosted tests reject invalid units/references and fabricated execution/approval claims. Draft instance validation does not establish complete normative classes, complete device profiles, safety review or simulation execution; EI04 remains open.
+
+
+### EI04 reference topology instances
+
+[Three reference topology fixtures](assets/README.md#reference-topology-instances) now reproduce the declared microgrid role, bus, connection and voltage assumptions. Validation rejects orphan/duplicate connections and scenario drift. These are topology contracts only; normative class coverage, engineering review, solver execution and behavioral acceptance remain pending.

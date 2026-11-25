@@ -11,6 +11,7 @@ from urllib.parse import unquote, urlsplit
 from verify_reference_scope import validate as validate_reference_scope
 from build_identity_plan import build as build_identity_plan, validate as validate_identity_plan
 from build_asset_templates import check as check_asset_templates
+from build_reference_instances import check as check_reference_instances
 
 EXCLUDED = {'asset-manifest.json', 'verification-summary.json'}
 EXPECTED_COUNTS = {'standards': 46, 'implementations': 29, 'sources': 18,
@@ -35,6 +36,7 @@ def check(root: Path) -> dict:
     def read(rel: str):
         return json.loads((root / rel).read_text())
     require(not check_asset_templates(root), 'Public-model template/source coverage mismatch')
+    require(not check_reference_instances(root), 'Reference topology fixture/source mismatch')
     def safe(rel: str) -> Path:
         p = root / rel
         if Path(rel).is_absolute() or not p.resolve().is_relative_to(root):
