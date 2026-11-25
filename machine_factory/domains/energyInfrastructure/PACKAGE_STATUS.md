@@ -14,8 +14,8 @@ Not performed: machine adaptation/new identity or allocation, source/service boo
 
 | Decision/evidence | Accountable role | Closure needed |
 |---|---|---|
-| Canonical identity and camelCase factory mapping | Domain/corpus owner | Approve slug/mapping or package arrangement; current tools require lowercase kebab-case |
-| Coexistence or replacement of original energy domain | Domain/corpus owner | Approve 187-machine dispositions, unique identities/codes, nonoverlapping lanes or migration/retirement |
+| Canonical identity and factory mapping | Domain/corpus owner | EI02 selects energy-infrastructure → energyInfrastructure with tested resolver support; no active domain admission |
+| Coexistence and native plan | Domain/corpus owner | EI02 records 170 adaptations/17 replacements, ENI identities and nonactive [86016,102400) windows; EI08 must author behavior and recheck/register candidate ranges |
 | Generic reference scope, utility roles, voltage and device cohort | Grid/protection owner | Reviewed generic scenarios and applicable standards/profile editions; actual site agreements/certificates optional for corpus acceptance |
 | Reference settings, sensing/time budgets and critical-load plan | Grid/protection reviewer | Reviewed generic parameters with explicit units, provenance and simulation validity; no claim they are universal normative limits |
 | Normative source and provider rights | Standards/RAG/data owners | Lawful acquisition, embedding/retrieval/redistribution scope and current source approvals |
@@ -41,4 +41,8 @@ The current detailed backlog is [acceptance/issues.json](acceptance/issues.json)
 
 EI01 baseline is merged in [PR #289](https://github.com/jateeter/RealityEngine_Machines/pull/289), commit `eae885ea2f9ed8204bbe6c9c0a0de6fc2baa78c8`; its working branches were deleted. [Source-progress events](acceptance/progress.json) distinguish merged work from the original issue and phase planning snapshots.
 
-EI03 now has [generic reference microgrids and authority](documents/workflow/reference-microgrids.md) and a [machine-readable scope](examples/reference-microgrids.json). These are scope specifications, not executed acceptance cases. EI02 identity/migration decisions and EI04 standards-defined class templates remain open.
+EI03 now has [generic reference microgrids and authority](documents/workflow/reference-microgrids.md) and a [machine-readable scope](examples/reference-microgrids.json). These are scope specifications, not executed acceptance cases. EI02 now records [identity/coexistence](documents/workflow/identity-and-coexistence.md), [187 dispositions](machine-dispositions.json) and factory-path support. EI04 standards-defined class templates remain future work.
+
+## EI02 identity implementation
+
+[The identity decision](identity-decision.json) selects `energy-infrastructure`, preserves `energyInfrastructure`, and coexists with accepted energy. [Dispositions](machine-dispositions.json) cover all 187 originals with new ENI identities and a collision-checked nonactive native plan. [Identity guidance](documents/workflow/identity-and-coexistence.md) documents mapping, rewiring and compatibility. Candidate machines, registered domain ranges and behavioral acceptance remain unimplemented.

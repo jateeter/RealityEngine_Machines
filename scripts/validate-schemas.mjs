@@ -5,6 +5,7 @@
  * Loads every schema in schemas/ into Ajv (draft 2020-12) and validates:
  *   - machines/**.json              -> machine.schema.json
  *   - domains/domain-manifest.json  -> domain-manifest.schema.json
+ *   - domains/factory-domain-paths.json -> factory-domain-paths.schema.json
  *   - domains/domain-registry.json  -> domain-registry.schema.json
  *   - domains/semantic-bus-registry.json -> semantic-bus-registry.schema.json
  *   - domains/clone-space.json      -> clone-space.schema.json
@@ -79,6 +80,7 @@ function validateSet(label, files, schemaFile) {
 const machines = existsSync(join(REPO, "machines")) ? walk(join(REPO, "machines")) : [];
 validateSet(`machines (${machines.length})`, machines, "machine.schema.json");
 validateSet("domain-manifest", [join(REPO, "domains/domain-manifest.json")], "domain-manifest.schema.json");
+validateSet("factory-domain paths", [join(REPO, "domains/factory-domain-paths.json")], "factory-domain-paths.schema.json");
 validateSet("domain-registry", [join(REPO, "domains/domain-registry.json")], "domain-registry.schema.json");
 validateSet("semantic-bus-registry", [join(REPO, "domains/semantic-bus-registry.json")], "semantic-bus-registry.schema.json");
 validateSet("region-allocation", [join(REPO, "domains/region-allocation.json")], "region-allocation.schema.json");

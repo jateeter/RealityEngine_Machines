@@ -6,7 +6,11 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import sys
 import uuid
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from factory_paths import factory_directory
 
 
 def require(ok, message):
@@ -66,7 +70,7 @@ def json_bytes(value): return (json.dumps(value, sort_keys=True, indent=2) + '\n
 def package(repo, domain, version, context, source, write=False):
     identity(domain, version, context); inside(repo, source)
     members = machine_files(source, domain)
-    folder = repo / 'machine_factory/domains' / domain / 'deployments' / version
+    folder = factory_directory(repo, domain) / 'deployments' / version
     inside(repo, folder)
     manifest_path = folder / 'payload-manifest.json'
     if manifest_path.exists():
@@ -93,7 +97,7 @@ def validate_payload(repo, path):
     inside(repo, path); manifest = read(path)
     domain, version, context = (manifest[k] for k in ['domain', 'deploymentVersion', 'approvalContext'])
     identity(domain, version, context)
-    folder = repo / 'machine_factory/domains' / domain / 'deployments' / version
+    folder = factory_directory(repo, domain) / 'deployments' / version
     require(path.resolve() == (folder / 'payload-manifest.json').resolve(), 'Unexpected factory payload location')
     require(manifest['payloadRoot'] == str((folder / 'machines').relative_to(repo)), 'Payload root changed')
     inside(repo, folder / 'machines')
