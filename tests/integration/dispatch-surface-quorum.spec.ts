@@ -30,7 +30,7 @@ const LEDGER_KEYS = ['enabled', 'mode', 'records'];
 const RECORD_KEYS = [
   'id', 'envelopeId', 'correlationId', 'status', 'mode', 'target', 'machineId', 'sequenceIds',
   'ragStatusCode', 'processStatus', 'attempts', 'createdAt', 'updatedAt', 'providerReceipt',
-  'envelope', 'error', 'semantics', 'replayOf',
+  'envelope', 'error', 'semantics', 'replayOf', 'clock',
 ].sort();
 
 interface Instance { id: string; runtime: string; pe_url: string; status: string }
@@ -149,8 +149,15 @@ test.describe('dispatch surface quorum', () => {
 
     // Conformance holds for every runtime that takes part, quorum or not.
     for (const rt of active) {
+      // The PE's own clock (RealityEngine_CI#600): every record it stores
+      // carries {instance, lamport} under the PE's participant UUID.
+      const peClock = await (await request.get(`${engines.get(rt)!.pe_url}/api/clock`)).json() as { instance?: string };
       for (const r of created.get(rt)!) {
         expect(Object.keys(r).sort(), `${rt} record ${r.id} key set`).toEqual(RECORD_KEYS);
+        const clock = r.clock as { instance?: unknown; lamport?: unknown } | null;
+        expect(clock?.instance, `${rt} record ${r.id} clock.instance is the PE's`).toBe(peClock.instance);
+        expect(Number.isInteger(clock?.lamport) && (clock!.lamport as number) > 0,
+          `${rt} record ${r.id} clock.lamport ${String(clock?.lamport)} is a positive integer`).toBe(true);
       }
     }
 
@@ -201,6 +208,31 @@ test.describe('dispatch surface quorum', () => {
       }));
     }
     expectUnanimous('PATCH /api/dispatch/records/:id', patched);
+
+    // A completion names its dispatch (RealityEngine_CI#600): causedBy is the
+    // record's clock, and the completion carries a clock of its own, later.
+    const completions = new Map<Runtime, string>();
+    for (const rt of NATIVES) {
+      const inst = engines.get(rt)!;
+      const record = created.get(rt)![0]!;
+      const sensorId = `quorum.causedby.${rt}`;
+      const resp = await request.post(`${inst.pe_url}/api/integrations/completions`, {
+        data: { provider: 'quorum', agent: 'causedby', sensorId, region: { offset: 4200, length: 1 },
+                values: [1], ttlMs: 60000, dispatchId: record.id },
+      });
+      await request.delete(`${inst.pe_url}/api/sources/${encodeURIComponent(sensorId)}`);
+      const completion = ((await resp.json()) as { completion?: Record<string, any> }).completion ?? {};
+      const rc = record.clock as { instance?: string; lamport?: number };
+      completions.set(rt, JSON.stringify({
+        http: resp.status(),
+        causedByIsDispatch: JSON.stringify(completion.causedBy) === JSON.stringify({ instance: rc.instance, lamport: rc.lamport }),
+        clockLater: completion.clock?.instance === rc.instance && completion.clock?.lamport > (rc.lamport ?? Infinity),
+      }));
+    }
+    expectUnanimous('completion causedBy', completions);
+    for (const [rt, sig] of completions) {
+      expect(JSON.parse(sig), `${rt}: completion causedBy names its dispatch`).toEqual({ http: 200, causedByIsDispatch: true, clockLater: true });
+    }
   });
 
   test('replay: POST /api/dispatch/records/:id/replay agrees', async ({ request }, info) => {
@@ -231,6 +263,8 @@ test.describe('dispatch surface quorum', () => {
           http: plain.status, keys: Object.keys(plain.body).sort(), recordKeys: Object.keys(a).sort(),
           mode: a.mode, status: a.status, attempts: a.attempts, providerReceipt: a.providerReceipt, error: a.error,
           replayOf: a.replayOf === original.id, newId: a.id !== original.id,
+          // A replay is a new stored message: a clock of its own, later (#600).
+          newClock: a.clock?.instance === (original as any).clock?.instance && a.clock?.lamport > (original as any).clock?.lamport,
           keptIds: a.envelopeId === original.envelopeId && a.correlationId === original.correlationId,
           carried: ['target', 'machineId', 'sequenceIds', 'ragStatusCode', 'processStatus', 'semantics']
             .every(k => JSON.stringify(a[k]) === JSON.stringify((original as any)[k])),
