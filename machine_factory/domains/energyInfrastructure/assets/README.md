@@ -53,3 +53,7 @@ node --test tools/test_asset_instances.mjs
 ```
 
 The generator uses only the current checked-in scenario scope and generic fixture; package verification checks exact reproduction. Behavioral cases remain NOT_RUN. EI04, EI05 profile selection, EI06 safety envelopes and EI18 simulator linkage remain open as applicable.
+
+## Threat information class templates
+
+[SC16 threat information classes](threat-classes.md) add a pinned, licensed OASIS schema snapshot, 57 templates, 43 top-level object/container clause mappings and an offline synthetic bundle validator. STIX schemas are explicitly non-normative; TAXII and full normative coverage remain pending. No operational threat feed or control action executes.

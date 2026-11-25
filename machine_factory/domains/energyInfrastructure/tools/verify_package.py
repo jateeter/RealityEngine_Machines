@@ -12,6 +12,7 @@ from verify_reference_scope import validate as validate_reference_scope
 from build_identity_plan import build as build_identity_plan, validate as validate_identity_plan
 from build_asset_templates import check as check_asset_templates
 from build_reference_instances import check as check_reference_instances
+from build_threat_templates import check as check_threat_templates
 
 EXCLUDED = {'asset-manifest.json', 'verification-summary.json'}
 EXPECTED_COUNTS = {'standards': 46, 'implementations': 29, 'sources': 18,
@@ -37,6 +38,7 @@ def check(root: Path) -> dict:
         return json.loads((root / rel).read_text())
     require(not check_asset_templates(root), 'Public-model template/source coverage mismatch')
     require(not check_reference_instances(root), 'Reference topology fixture/source mismatch')
+    require(not check_threat_templates(root), 'Threat class catalog/source mismatch')
     def safe(rel: str) -> Path:
         p = root / rel
         if Path(rel).is_absolute() or not p.resolve().is_relative_to(root):
@@ -200,7 +202,10 @@ def check(root: Path) -> dict:
     class_rows=coverage['standardClassCoverage']
     require(len(class_rows)==46 and {r['standardId'] for r in class_rows}==ids['standards'],'Missing standard asset-class coverage obligation')
     for row in class_rows:
-        require(row['ownerIssueId']=='EI04' and row['taxonomyDisposition']=='NOT_REVIEWED' and row['fulfillmentReceipt'] is None,'Fabricated/misowned template coverage')
+        expected_disposition='PARTIAL_STIX_OBJECT_SCHEMA_REVIEW_TAXII_PENDING' if row['standardId']=='SC16' else 'NOT_REVIEWED'
+        require(row['ownerIssueId']=='EI04' and row['taxonomyDisposition']==expected_disposition and row['fulfillmentReceipt'] is None,'Fabricated/misowned template coverage')
+        if row['standardId']=='SC16':
+            require(row.get('supportingCatalog')=='assets/threat-class-catalog.json','Missing SC16 source-backed class catalog')
         require(row['rule']=='EVERY_DEFINED_CLASS_OF_ASSOCIATED_APPLICABLE_STANDARD_REQUIRES_TEMPLATE','Weakened asset-class template coverage')
     hardware_rows=coverage['hardwareCoverage']
     require(len(hardware_rows)==43 and {r['caseId'] for r in hardware_rows}==ids['cases'],'Missing simulated-hardware coverage obligation')
@@ -243,7 +248,8 @@ def check(root: Path) -> dict:
             'result':'FAIL' if errors else 'PASS','checks':checks,'assetFiles':len(recorded),
             'inventoryCounts':{k:len(v) for k,v in datasets.items()},'cloneMachinesVerified':187,
             'collectedSources':1,'behavioralCasesRun':0,'runtimeTestsRun':0,'domainAdmission':'NOT_PERFORMED',
-            'supplementalPublicModelSnapshots':1,'publicModelTemplates':112,
+            'supplementalPublicModelSnapshots':2,'publicModelTemplates':112,
+            'threatSchemaTemplates':57,'stixTopLevelObjectAndContainerTemplates':43,
             'genericRoleTemplates':19,'genericDocumentTemplates':7,'normativeClassCoverageComplete':False,
             'publishedIssuesVerified':25,'templateAndSimulatorCoverage':'REQUIREMENTS_ONLY_NOT_FULFILLED',
             'assetManifestSHA256':digest(root/'asset-manifest.json'),'errors':errors,
