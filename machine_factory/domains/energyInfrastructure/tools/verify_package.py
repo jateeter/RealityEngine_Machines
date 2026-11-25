@@ -10,6 +10,7 @@ import sys
 from urllib.parse import unquote, urlsplit
 from verify_reference_scope import validate as validate_reference_scope
 from build_identity_plan import build as build_identity_plan, validate as validate_identity_plan
+from build_asset_templates import check as check_asset_templates
 
 EXCLUDED = {'asset-manifest.json', 'verification-summary.json'}
 EXPECTED_COUNTS = {'standards': 46, 'implementations': 29, 'sources': 18,
@@ -33,6 +34,7 @@ def check(root: Path) -> dict:
             errors.append(message)
     def read(rel: str):
         return json.loads((root / rel).read_text())
+    require(not check_asset_templates(root), 'Public-model template/source coverage mismatch')
     def safe(rel: str) -> Path:
         p = root / rel
         if Path(rel).is_absolute() or not p.resolve().is_relative_to(root):
@@ -239,11 +241,13 @@ def check(root: Path) -> dict:
             'result':'FAIL' if errors else 'PASS','checks':checks,'assetFiles':len(recorded),
             'inventoryCounts':{k:len(v) for k,v in datasets.items()},'cloneMachinesVerified':187,
             'collectedSources':1,'behavioralCasesRun':0,'runtimeTestsRun':0,'domainAdmission':'NOT_PERFORMED',
+            'supplementalPublicModelSnapshots':1,'publicModelTemplates':112,
+            'genericRoleTemplates':19,'genericDocumentTemplates':7,'normativeClassCoverageComplete':False,
             'publishedIssuesVerified':25,'templateAndSimulatorCoverage':'REQUIREMENTS_ONLY_NOT_FULFILLED',
             'assetManifestSHA256':digest(root/'asset-manifest.json'),'errors':errors,
             'referenceScope':'THREE_GENERIC_SCENARIOS_SPECIFICATION_ONLY',
             'identityPlan':'187_DISPOSITIONS_NOT_RUNTIME_PAYLOAD',
-            'limitations':['No runtime/model/adapter or RAG execution','No simulated-hardware behavior/protocol or physical conformance evidence','No standards compliance or security assurance claim','No domain admission/deployment; EI01 baseline source was published in PR289','Issue body readback and progress events are recorded evidence, not ongoing live GitHub checks','Asset-class templates and simulator catalog remain EI04/EI18 deliverables']}
+            'limitations':['No runtime/model/adapter or RAG execution','No simulated-hardware behavior/protocol or physical conformance evidence','No standards compliance or security assurance claim','No domain admission/deployment; EI01 baseline source was published in PR289','Issue body readback and progress events are recorded evidence, not ongoing live GitHub checks','Full normative class coverage and simulator catalog remain EI04/EI18 deliverables; supplemental partial templates are separately counted','collectedSources counts original RAG family receipts; supplemental public-model snapshot is separately recorded']}
 
 def main() -> int:
     parser=argparse.ArgumentParser(description=__doc__)

@@ -38,3 +38,6 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tools -p 'test_identit
 ```
 
 The identity checker verifies all 187 dispositions and current repository name/prefix/window collisions. It plans static windows only; no runtime machine, domain entry, agent, Source or admission evidence is authored. Use explicit `--write` only after reviewing decision/source changes, then reseal the package. The package verifier itself checks local plan reproducibility/consistency; current occupancy scanning requires the command above.
+
+
+`build_asset_templates.py --write` reproduces the supplemental EI04 catalog from the pinned, hashed public SunSpec JSON snapshot and generic reference roles. Without `--write` it rejects drift, missing models, unsupported normative completion and fabricated simulator/evidence bindings. `test_asset_templates.py` exercises those rejection paths. This does not validate populated operational instances or execute simulations.
