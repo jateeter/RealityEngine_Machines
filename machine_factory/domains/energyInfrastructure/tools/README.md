@@ -41,3 +41,5 @@ The identity checker verifies all 187 dispositions and current repository name/p
 
 
 `build_asset_templates.py --write` reproduces the supplemental EI04 catalog from the pinned, hashed public SunSpec JSON snapshot and generic reference roles. Without `--write` it rejects drift, missing models, unsupported normative completion and fabricated simulator/evidence bindings. `test_asset_templates.py` exercises those rejection paths. This does not validate populated operational instances or execute simulations.
+
+`validate_asset_instances.mjs <fixture.json>` validates synthetic generic asset/document bundles against `assets/asset-instance.schema.json` and catalog/reference semantics. Install the repository's locked Node dependencies with the established repository workflow; the validator uses existing Ajv. `node --test tools/test_asset_instances.mjs` from the domain folder exercises structural and semantic rejection paths. The CLI returns nonzero on invalid input. Validation is not simulation execution, engineering review or admission evidence.

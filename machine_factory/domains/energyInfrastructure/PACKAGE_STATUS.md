@@ -51,3 +51,8 @@ EI03 now has [generic reference microgrids and authority](documents/workflow/ref
 ## EI04 partial source-backed templates
 
 [The public-model library](assets/README.md) now supplies 112 reproducible SunSpec templates, exact source hashes, retained license and 46 explicit coverage gaps. Complete normative class coverage and simulator bindings remain pending; EI04 stays open. Existing complete-delivery planning flags do not describe this supplemental partial library.
+
+
+### EI04 synthetic instance contracts
+
+[Generic instance schemas, fixtures and validation](assets/README.md#generic-instance-validation) now cover all 19 functional role templates and seven document templates, plus selected raw SunSpec point bindings. Hosted tests reject invalid units/references and fabricated execution/approval claims. Draft instance validation does not establish complete normative classes, complete device profiles, safety review or simulation execution; EI04 remains open.
