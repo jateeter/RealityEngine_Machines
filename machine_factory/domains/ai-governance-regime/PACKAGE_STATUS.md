@@ -13,8 +13,8 @@ same path. Directories appear when their step produces content
 | # | Step | Produces (ifrs-accounting equivalent) | State |
 |---|---|---|---|
 | 1 | Intake: receive, preserve, index, review | `intake/`, `admission-source-manifest.json`, `REVIEW_QUEUE.md`, `tools/verify_package.py` | **done** 2026-11-20 |
-| 2 | Scope: owner decisions on R02, R04, R06–R09 | `scope-decisions.json` entries | R02, the layout, the scope, the threat-dynamics split and the extension corpus decided (GOV-SD-04/05, 09–12); R06–R09 open |
-| 3 | Sources: pin the baseline and each in-scope framework edition; extract controls | `source-requirements.json`, `source-reference-map.json` | open (R07, R08) |
+| 2 | Scope: owner decisions on R02, R04, R06–R09 | `scope-decisions.json` entries | **decided** 2026-11-25 (GOV-SD-04/05, 09–16); R14, the amendments, still with the owner |
+| 3 | Sources: pin the baseline and each in-scope framework edition; extract controls | `source-requirements.json`, `source-reference-map.json`, milestone scope | baseline pinned (GOV-SD-15); per-milestone framework scope and producer staging open (GOV-SD-14, 16) |
 | 4 | Asset catalog: governance document types, fields, owners, dependencies | `document-asset-catalog.json`, `document-dependencies.json`, `templates/` | partly received (SHACL shapes, SoA template) |
 | 5 | Machine conversion: canonical candidate files | `machines/*.json` here, `machine-import-manifest.json`, `semantic-amendments.json` | **built** 2026-11-21; copied to `machines/domains/` at admission |
 | 6 | Families and runbooks: one accountable family per workflow | `families/`, `runbooks/` | open; seven workflows in `agentic-workflow-contract.json` |
@@ -126,7 +126,13 @@ same path. Directories appear when their step produces content
   - GOV-SD-10: threat classification and observation are a peer domain,
     threat-dynamics;
   - GOV-SD-11: observe vs decide; three Sources come from threat-dynamics;
-  - GOV-SD-12: one shared extension corpus for both domains.
+  - GOV-SD-12: one shared extension corpus for both domains;
+  - GOV-SD-13: approval quorum vs engine quorum (closes R06);
+  - GOV-SD-14: framework alignment on the ifrs pattern, scoped per milestone
+    (R07);
+  - GOV-SD-15: the baseline is V0.18, NIST terminology revision (closes R08);
+  - GOV-SD-16: inputs are simulated Sources through the ISRE until producers
+    exist; producers are staged by milestone (R09).
 - **Produced:**
   - the wrapper document intaken byte-for-byte as
     `intake/ORGANIZATIONAL-WRAPPER-MACHINE.md` (GOV-R22);
@@ -151,5 +157,9 @@ same path. Directories appear when their step produces content
 
 - **Verified:** `python3 tools/verify_package.py` and
   `python3 tools/verify_machines.py` pass (see the PR).
-- **Not done:** the threat-dynamics package itself; R06–R09 and R14 (owner);
-  R10 and R22 wait for the next document revision.
+- **Also produced:** the baseline intaken byte-for-byte as
+  `intake/BASELINE-V0.18-NIST.pdf`; the 19 November edition the received
+  documents cite is recorded by sha256 only.
+- **Not done:** the threat-dynamics package itself; the milestone scope and the
+  simulated-Source definitions (step 3); R14 (owner); R10 and R22 wait for the
+  next document revision.

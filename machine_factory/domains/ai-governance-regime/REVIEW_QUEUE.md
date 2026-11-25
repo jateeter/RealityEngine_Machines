@@ -12,10 +12,10 @@ step in [PACKAGE_STATUS.md](PACKAGE_STATUS.md) is redone. Findings marked
 | GOV-R03 | Machine and corpus counts disagree across documents | documents | **closed 2026-11-25**: the count is 18 (GOV-SD-09); received documents keep their counts as received, mapped in PACKAGE_STATUS.md |
 | GOV-R04 | The region-allocation patch does not apply | allocation | layout decided (GOV-SD-05); allocation through the admission workflow |
 | GOV-R05 | Corpus-315 declares itself `accepted` | admission | **closed 2026-11-21**: candidates are `candidate-not-admitted` |
-| GOV-R06 | Two meanings of "quorum" | specification | **owner** |
-| GOV-R07 | Framework alignment has no pinned sources | every alignment claim | **owner** (which editions) |
-| GOV-R08 | The authoritative baseline (V0.18) is not in the workspace | every citation | **owner** |
-| GOV-R09 | Designed mechanisms are described as if they exist | workplan, specification | **owner** (scope per release) |
+| GOV-R06 | Two meanings of "quorum" | specification | **closed 2026-11-25**: approval quorum vs engine quorum (GOV-SD-13) |
+| GOV-R07 | Framework alignment has no pinned sources | every alignment claim | **decided 2026-11-25**: ifrs pattern, scope per milestone (GOV-SD-14); `source-requirements.json` is step 3 work |
+| GOV-R08 | The authoritative baseline (V0.18) is not in the workspace | every citation | **closed 2026-11-25**: pinned at `intake/BASELINE-V0.18-NIST.pdf` (GOV-SD-15) |
+| GOV-R09 | Designed mechanisms are described as if they exist | workplan, specification | **decided 2026-11-25**: simulated Sources until producers exist, producers staged by milestone (GOV-SD-16) |
 | GOV-R10 | Generated-text residue and stale cross-references | documents | mechanical |
 | GOV-R11 | Continuous-input watchdogs are multi-valued machines | regression reach | **decided 2026-11-25**: shared extension corpus (GOV-SD-12); open until that corpus exists in RealityEngine_CI |
 | GOV-R12 | Latch feedback and verdict composition need live confirmation | engine/PE behavior | live 3-of-3 run |
