@@ -1,0 +1,1482 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV12_serious-incident-responder",
+    "name": "GOV12_serious-incident-responder",
+    "description": "Serious-incident responder (EU AI Act Art. 73), per incident frame: contains while harm is active, the incident responder exports the K-line bundle and drafts the notice, the notice parks for a distinct human, and the frame closes on approval with no harm active; the statutory clock (the stale lane) running out first is overdue.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17136,
+        "length": 11
+      },
+      "output": {
+        "offset": 17342,
+        "length": 10
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ces_gov12_contain_harm",
+        "name": "M-GOV-12 S0_Standby → S1_Contained",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Standby",
+          "sourceToState": "S1_Contained",
+          "regularExpression": "[mon_t13_incident_cnt∈[0.0001,1]]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (12)",
+          "semanticAmendments": [
+            "GOV-SA-01"
+          ],
+          "asserts": [
+            "REVOKE_EPOCH",
+            "TRIGGER_INCIDENT"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov12_contain_harm-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.50005,
+                "threshold": 0.49995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov12_contain_harm-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov12_agent_requested",
+        "name": "M-GOV-12 S0_Init → S1_AgentRunning",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Init",
+          "sourceToState": "S1_AgentRunning",
+          "regularExpression": "[lane_in_workflow=1 ∧ lane_step_running=1 ∧ bundle_exported=0]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (12)",
+          "semanticAmendments": [],
+          "asserts": [
+            "AGENT_REQUESTED",
+            "REVOKE_EPOCH"
+          ],
+          "dispatchesAgent": "aigov-incident-responder"
+        },
+        "events": [
+          {
+            "id": "ces_gov12_agent_requested-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov12_agent_requested-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov12_agent_failed",
+        "name": "M-GOV-12 S1_AgentRunning → S_err_StepFailed",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_AgentRunning",
+          "sourceToState": "S_err_StepFailed",
+          "regularExpression": "[lane_in_workflow=1 ∧ lane_step_running=1 ∧ bundle_exported=0] · [responder_failed=1]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (12)",
+          "semanticAmendments": [
+            "GOV-SA-13"
+          ],
+          "asserts": [
+            "PARKED",
+            "REWORK"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov12_agent_failed-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov12_agent_failed-e1"
+            ]
+          },
+          {
+            "id": "ces_gov12_agent_failed-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov12_agent_failed-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov12_notice_parked",
+        "name": "M-GOV-12 S1_Contained → S2_NoticeParked",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_Contained",
+          "sourceToState": "S2_NoticeParked",
+          "regularExpression": "[lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (12)",
+          "semanticAmendments": [
+            "GOV-SA-02"
+          ],
+          "asserts": [
+            "PARKED",
+            "REVOKE_EPOCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov12_notice_parked-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov12_notice_parked-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov12_closed",
+        "name": "M-GOV-12 S2_NoticeParked → S3_Closed",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_NoticeParked",
+          "sourceToState": "S3_Closed",
+          "regularExpression": "[lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1] · [mon_t13_incident_cnt=0 ∧ lane_principal_distinct=1 ∧ lane_approved=1 ∧ lane_stale=0]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (12)",
+          "semanticAmendments": [
+            "GOV-SA-20"
+          ],
+          "asserts": [
+            "none (explicit release)"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov12_closed-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov12_closed-e1"
+            ]
+          },
+          {
+            "id": "ces_gov12_closed-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov12_closed-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov12_notice_overdue",
+        "name": "M-GOV-12 S2_NoticeParked → S_err_Overdue",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_NoticeParked",
+          "sourceToState": "S_err_Overdue",
+          "regularExpression": "[lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1] · [lane_stale=1]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (12)",
+          "semanticAmendments": [
+            "GOV-SA-21"
+          ],
+          "asserts": [
+            "OVERDUE",
+            "TRIGGER_INCIDENT",
+            "REVOKE_EPOCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov12_notice_overdue-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov12_notice_overdue-e1"
+            ]
+          },
+          {
+            "id": "ces_gov12_notice_overdue-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov12_notice_overdue-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov12-contain-harm",
+        "events": [
+          [
+            0.5,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov12_contain_harm: [mon_t13_incident_cnt∈[0.0001,1]]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov12_contain_harm"
+        }
+      },
+      {
+        "name": "gov12-agent-requested",
+        "events": [
+          [
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov12_agent_requested: [lane_in_workflow=1 ∧ lane_step_running=1 ∧ bundle_exported=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov12_agent_requested"
+        }
+      },
+      {
+        "name": "gov12-agent-failed",
+        "events": [
+          [
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov12_agent_failed: [lane_in_workflow=1 ∧ lane_step_running=1 ∧ bundle_exported=0] · [responder_failed=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov12_agent_failed"
+        }
+      },
+      {
+        "name": "gov12-notice-parked",
+        "events": [
+          [
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov12_notice_parked: [lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov12_notice_parked"
+        }
+      },
+      {
+        "name": "gov12-closed",
+        "events": [
+          [
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov12_closed: [lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1] · [mon_t13_incident_cnt=0 ∧ lane_principal_distinct=1 ∧ lane_approved=1 ∧ lane_stale=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov12_closed"
+        }
+      },
+      {
+        "name": "gov12-notice-overdue",
+        "events": [
+          [
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "purpose": "drives ces_gov12_notice_overdue: [lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1] · [lane_stale=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov12_notice_overdue"
+        }
+      },
+      {
+        "name": "gov12-nominal",
+        "events": [
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "governance-escalator",
+      "sequenceCount": 6,
+      "inputSemantics": [
+        "mon_t13_incident_cnt (continuous [0,1]; fact: incident triage completion (GOV07/GOV16 agents); new): normalized count of confirmed in-bounds harm",
+        "lane_principal_distinct (binary; fact: lifecycle extension: approver != preparer and not an agent (T15); new): the acting principal is distinct from the preparer and human",
+        "reserved: lane_in_workflow (lifecycle frame lane 2; the asset is in its workflow)",
+        "reserved: lane_re_pinned (lifecycle frame lane 3; a frame document has been re-pinned (T16))",
+        "reserved: lane_approved (lifecycle frame lane 4; approved by a distinct human principal)",
+        "reserved: lane_rework (lifecycle frame lane 5; rework requested)",
+        "reserved: lane_step_running (lifecycle frame lane 6; a step is running)",
+        "reserved: lane_stale (lifecycle frame lane 7; the head is STALE (continuation TTL or lease expired))",
+        "bundle_exported (binary; aigov-incident-responder completion via aigov.gov12.incident-responder.completion): the K-line bundle is exported",
+        "notice_drafted (binary; aigov-incident-responder completion via aigov.gov12.incident-responder.completion): the Art. 73 notice is drafted",
+        "responder_failed (binary; aigov-incident-responder completion via aigov.gov12.incident-responder.completion): the agent's step failed"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK",
+        "8: AGENT_REQUESTED",
+        "9: OVERDUE"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "E-incident-audit",
+        "M-GOV-12",
+        "W5"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "E-incident-audit",
+        "machineCode": "GOV12",
+        "workflowTags": [
+          "SeriousIncidentResponder",
+          "W5"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:E-incident-audit:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        }
+      },
+      "triggerConfig": {
+        "processId": "GOV12_serious-incident-responder",
+        "processName": "M-GOV-12 SeriousIncidentResponder",
+        "rules": [
+          {
+            "sequenceId": "ces_gov12_contain_harm",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-12 S0_Standby → S1_Contained: [mon_t13_incident_cnt∈[0.0001,1]]"
+          },
+          {
+            "sequenceId": "ces_gov12_agent_requested",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "M-GOV-12 S0_Init → S1_AgentRunning: [lane_in_workflow=1 ∧ lane_step_running=1 ∧ bundle_exported=0]",
+            "dispatchAgent": "aigov-incident-responder"
+          },
+          {
+            "sequenceId": "ces_gov12_agent_failed",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-12 S1_AgentRunning → S_err_StepFailed: [lane_in_workflow=1 ∧ lane_step_running=1 ∧ bundle_exported=0] · [responder_failed=1]"
+          },
+          {
+            "sequenceId": "ces_gov12_notice_parked",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "M-GOV-12 S1_Contained → S2_NoticeParked: [lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1]"
+          },
+          {
+            "sequenceId": "ces_gov12_closed",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-12 S2_NoticeParked → S3_Closed: [lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1] · [mon_t13_incident_cnt=0 ∧ lane_principal_distinct=1 ∧ lane_approved=1 ∧ lane_stale=0]"
+          },
+          {
+            "sequenceId": "ces_gov12_notice_overdue",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-12 S2_NoticeParked → S_err_Overdue: [lane_in_workflow=1 ∧ lane_approved=0 ∧ lane_stale=0 ∧ bundle_exported=1 ∧ notice_drafted=1] · [lane_stale=1]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.document.gov12.KLineIncidentArchive",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "GOV12_serious-incident-responder",
+          "targetMachine": "GOV13_control-crosswalk-assembler",
+          "assetTypeId": "KLineIncidentArchive",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Hand the frame's KLineIncidentArchive to GOV13, its next consumer (agentic-workflow-contract.json W5); never infer a governance verdict from document content.",
+          "nativeVectorWrite": false
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-12",
+        "title": "SeriousIncidentResponder",
+        "kind": "template",
+        "workflow": "W5",
+        "specRule": "SPECIFICATION.md 4.3 (12)",
+        "governedAssetType": "KLineIncidentArchive",
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.2.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "dwellSteps": 2,
+        "debounceSteps": 3
+      },
+      "agentBinding": {
+        "agent": "aigov-incident-responder",
+        "mode": "supervised-act",
+        "trigger": "ces_gov12_agent_requested",
+        "allowedActions": [
+          "Export the K-line bundle into the frame.",
+          "Draft the statutory notice."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "asset-lifecycle",
+          "sensorId": "aigov.gov12.incident-responder.completion",
+          "name": "Incident responder completion (GOV12)",
+          "region": {
+            "offset": 17144,
+            "length": 3
+          },
+          "semantics": [
+            "bundle_exported",
+            "notice_drafted",
+            "responder_failed"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "aigov-gov12-incident-responder-completion",
+            "sensorId": "aigov.gov12.incident-responder.completion",
+            "name": "Incident responder completion (GOV12)",
+            "region": {
+              "offset": 17144,
+              "length": 3
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": []
+        }
+      },
+      "aiTrigger": "ces_gov12_agent_requested",
+      "dispatchableAgent": "aigov-incident-responder",
+      "agentBehavior": "agent-candidates/ai-governance-regime/aigov-incident-responder.agent.json",
+      "frameInputs": {
+        "lanes": "input cells 2-7, written by the lifecycle (reserved)",
+        "facts": "every other non-completion input, written into the clone's block by the lifecycle's frame source (GOV-R19)",
+        "completion": "input cells 8..10, the step agent's completion"
+      }
+    }
+  }
+}

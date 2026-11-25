@@ -1,0 +1,214 @@
+{
+  "schemaVersion": "1.0.0",
+  "behaviorId": "aigov-incident-responder",
+  "role": "step-agent",
+  "agentId": "aigov-incident-responder",
+  "displayName": "Incident responder",
+  "domain": "ai-governance-regime",
+  "machine": {
+    "id": "GOV12_serious-incident-responder",
+    "file": "GOV12_serious-incident-responder.json",
+    "machineClass": "governance-escalator",
+    "inputRegion": {
+      "offset": 17136,
+      "length": 11
+    },
+    "outputRegion": {
+      "offset": 17342,
+      "length": 10
+    },
+    "cloneable": true
+  },
+  "dispatch": {
+    "mode": "frame-step",
+    "triggerSequenceIds": [
+      "ces_gov12_agent_requested"
+    ],
+    "frameScopes": [
+      "frame:read",
+      "pod:read",
+      "pod:write",
+      "frame:return"
+    ],
+    "workflow": "W5",
+    "humanApprovalRequired": true
+  },
+  "capabilities": [
+    "frame.read",
+    "pod.read",
+    "pod.write",
+    "frame.return.write",
+    "kline.read",
+    "pe.observations.read"
+  ],
+  "reasoning": {
+    "objective": "For the incident frame: export the self-verifying K-line bundle around the incident, draft the Art. 73 notice with its timeline, and keep the statutory clock visible; the notice is filed by a human.",
+    "instructions": "You are the incident responder for the RealityEngine AI governance regime (M-GOV-12 SeriousIncidentResponder, workflow W5).\n\nOBJECTIVE\nFor the incident frame: export the self-verifying K-line bundle around the incident, draft the Art. 73 notice with its timeline, and keep the statutory clock visible; the notice is filed by a human.\n\nYOU MAY\n- Export the K-line bundle into the frame.\n- Draft the statutory notice.\n\nYOU MUST NOT\n- Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).\n- Never write vector values directly; your result reaches the engines only through your completion contract.\n- Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.\n- Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts.",
+    "outputContract": "Return one structured line per completion field as `<field>: 0|1` (bundle_exported: the K-line bundle is exported, notice_drafted: the Art. 73 notice is drafted, responder_failed: the agent's step failed), then `rationale: <one sentence>`. The machine, not you, decides what follows.",
+    "sequenceCatalog": [
+      {
+        "sequenceId": "ces_gov12_agent_requested",
+        "label": "S1_AgentRunning",
+        "rag": "AMBER",
+        "outputIndex": 8,
+        "action": "AGENT_REQUESTED + REVOKE_EPOCH"
+      },
+      {
+        "sequenceId": "ces_gov12_agent_failed",
+        "label": "S_err_StepFailed",
+        "rag": "RED",
+        "outputIndex": 4,
+        "action": "PARKED + REWORK"
+      },
+      {
+        "sequenceId": "ces_gov12_notice_parked",
+        "label": "S2_NoticeParked",
+        "rag": "AMBER",
+        "outputIndex": 4,
+        "action": "PARKED + REVOKE_EPOCH"
+      },
+      {
+        "sequenceId": "ces_gov12_closed",
+        "label": "S3_Closed",
+        "rag": "GREEN",
+        "outputIndex": 0,
+        "action": "release"
+      },
+      {
+        "sequenceId": "ces_gov12_notice_overdue",
+        "label": "S_err_Overdue",
+        "rag": "RED",
+        "outputIndex": 9,
+        "action": "OVERDUE + TRIGGER_INCIDENT + REVOKE_EPOCH"
+      }
+    ],
+    "prohibitions": [
+      "Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).",
+      "Never write vector values directly; your result reaches the engines only through your completion contract.",
+      "Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.",
+      "Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts."
+    ]
+  },
+  "agentBinding": {
+    "agent": "aigov-incident-responder",
+    "mode": "supervised-act",
+    "trigger": "ces_gov12_agent_requested",
+    "allowedActions": [
+      "Export the K-line bundle into the frame.",
+      "Draft the statutory notice."
+    ],
+    "writeBack": {
+      "type": "pe-sensor",
+      "provider": "asset-lifecycle",
+      "sensorId": "aigov.gov12.incident-responder.completion",
+      "name": "Incident responder completion (GOV12)",
+      "region": {
+        "offset": 17144,
+        "length": 3
+      },
+      "semantics": [
+        "bundle_exported",
+        "notice_drafted",
+        "responder_failed"
+      ],
+      "ttlMs": 300000,
+      "normalization": "already-normalized-0-1",
+      "ingest": {
+        "endpoint": "/api/integrations/completions",
+        "method": "POST",
+        "triggerPush": false,
+        "compactPush": true
+      },
+      "sourceMapping": {
+        "id": "aigov-gov12-incident-responder-completion",
+        "sensorId": "aigov.gov12.incident-responder.completion",
+        "name": "Incident responder completion (GOV12)",
+        "region": {
+          "offset": 17144,
+          "length": 3
+        },
+        "ttlMs": 300000
+      }
+    },
+    "riskControls": {
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "maxAutonomy": "supervised-act",
+      "blockedWhenRag": []
+    },
+    "autonomyPolicy": {
+      "mode": "supervised-act",
+      "stage": 2,
+      "writeBackType": "pe-sensor",
+      "canWriteBack": true,
+      "canStageActions": true,
+      "canExecuteActions": false,
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "blockedWhenRag": []
+    }
+  },
+  "responseMapping": {
+    "schemaVersion": "1.0.0",
+    "responseContract": "structured-keys",
+    "mode": "supervised-act",
+    "fields": [
+      {
+        "semantic": "bundle_exported",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/bundle_exported",
+          "responseKey": "bundle_exported"
+        },
+        "target": {
+          "sensorId": "aigov.gov12.incident-responder.completion",
+          "region": {
+            "offset": 17144,
+            "length": 3
+          },
+          "index": 0
+        }
+      },
+      {
+        "semantic": "notice_drafted",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/notice_drafted",
+          "responseKey": "notice_drafted"
+        },
+        "target": {
+          "sensorId": "aigov.gov12.incident-responder.completion",
+          "region": {
+            "offset": 17144,
+            "length": 3
+          },
+          "index": 1
+        }
+      },
+      {
+        "semantic": "responder_failed",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/responder_failed",
+          "responseKey": "responder_failed"
+        },
+        "target": {
+          "sensorId": "aigov.gov12.incident-responder.completion",
+          "region": {
+            "offset": 17144,
+            "length": 3
+          },
+          "index": 2
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "builder": "machine_factory/domains/ai-governance-regime/tools/build_machines.py",
+    "candidateVersion": "0.2.0",
+    "specRule": "SPECIFICATION.md 4.3 (12)"
+  }
+}

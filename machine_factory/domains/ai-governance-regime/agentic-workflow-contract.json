@@ -1,0 +1,204 @@
+{
+  "schemaVersion": "1.0.0",
+  "domain": "ai-governance-regime",
+  "candidateVersion": "0.2.0",
+  "scope": "Every workflow and Source in v1 (owner, 2026-11-21; scope-decisions.json GOV-SD-07).",
+  "rules": [
+    "Agents prepare; distinct humans approve (T15).",
+    "A template's result leaves its clone only through the frame's continuation or the agent's completion.",
+    "Each agent is a runtime-neutral behavior (schemas/agent-behavior.schema.json); runtimes render it.",
+    "The integration hooks into approve-domain.sh, deployments and cut-release.sh are changes to those repositories, for the owner to approve."
+  ],
+  "workflows": [
+    {
+      "id": "W1",
+      "title": "Domain admission",
+      "frame": "one frame per domain admission or renewal",
+      "openedBy": "an admission request (req_domain_admit) or a W7 renewal",
+      "steps": [
+        {
+          "template": "GOV02_task-sufficiency-gate.json",
+          "agent": "aigov-hazard-sufficiency-analyst",
+          "humanStep": true
+        },
+        {
+          "template": "GOV03_socio-technical-bias-audit.json",
+          "agent": "aigov-bias-audit-preparer",
+          "humanStep": true
+        },
+        {
+          "template": "GOV05_aibom-provenance-pin.json",
+          "agent": "aigov-aibom-assembler",
+          "humanStep": true
+        },
+        {
+          "template": "GOV01_impact-dossier-lifecycle.json",
+          "agent": "aigov-dossier-preparer",
+          "humanStep": true
+        },
+        {
+          "template": "GOV11_human-review-anti-bias-gate.json",
+          "agent": "aigov-diff-renderer",
+          "humanStep": false
+        }
+      ],
+      "fixtures": [],
+      "agents": [
+        "aigov-aibom-assembler",
+        "aigov-bias-audit-preparer",
+        "aigov-dossier-preparer",
+        "aigov-hazard-sufficiency-analyst"
+      ],
+      "governs": "scripts/approve-domain.sh prepare / finalize",
+      "gate": "approve-domain.sh admits only on the frame's closed, approved state"
+    },
+    {
+      "id": "W2",
+      "title": "Rule-epoch promotion",
+      "frame": "one frame per rule epoch",
+      "openedBy": "an epoch-swap request (req_epoch_swap), a W3 near-miss rule draft, or a W6 ratification",
+      "steps": [
+        {
+          "template": "GOV05_aibom-provenance-pin.json",
+          "agent": "aigov-aibom-assembler",
+          "humanStep": true
+        },
+        {
+          "template": "GOV04_rule-epoch-promotion.json",
+          "agent": "aigov-replay-analyst",
+          "humanStep": true
+        },
+        {
+          "template": "GOV11_human-review-anti-bias-gate.json",
+          "agent": "aigov-diff-renderer",
+          "humanStep": false
+        }
+      ],
+      "fixtures": [
+        "GOV06_quorum-consensus-monitor.json"
+      ],
+      "agents": [
+        "aigov-aibom-assembler",
+        "aigov-quorum-bundle-assembler",
+        "aigov-replay-analyst"
+      ],
+      "governs": "scripts/approve-domain.sh deploy / domains/deployments",
+      "gate": "a deployment proceeds only on the frame's promoted state and GOV06's quorum verdict"
+    },
+    {
+      "id": "W3",
+      "title": "Runtime assurance",
+      "frame": "no frame; watchdog fixtures GOV07, GOV08, GOV09, GOV16",
+      "openedBy": "the fixtures' Sources",
+      "steps": [],
+      "fixtures": [
+        "GOV07_exposure-budget-watchdog.json",
+        "GOV08_latency-gate-sentinel.json",
+        "GOV09_near-miss-backlog-enforcer.json",
+        "GOV16_cross-domain-delegation-cap.json"
+      ],
+      "agents": [
+        "aigov-delegation-clamp",
+        "aigov-incident-triage",
+        "aigov-near-miss-triage"
+      ],
+      "governs": "the live engines' exposure budget, latency and delegation",
+      "gate": "GOV00 halts or revokes; agents advise, the delegation clamp acts after approval"
+    },
+    {
+      "id": "W4",
+      "title": "Egress transparency",
+      "frame": "one frame per outbound external message; GOV11 as the review step of every approving workflow",
+      "openedBy": "an outbound message (req_egress)",
+      "steps": [
+        {
+          "template": "GOV10_synthetic-transparency-gate.json",
+          "agent": "aigov-egress-provenance-tagger",
+          "humanStep": true
+        }
+      ],
+      "fixtures": [],
+      "agents": [
+        "aigov-diff-renderer",
+        "aigov-egress-provenance-tagger"
+      ],
+      "governs": "the ACP/MCP boundary",
+      "gate": "an unmarked external message is held"
+    },
+    {
+      "id": "W5",
+      "title": "Incident and audit",
+      "frame": "an incident frame; an audit-pack frame per release or audit",
+      "openedBy": "GOV00 TRIGGER_INCIDENT, a release, or an audit request",
+      "steps": [
+        {
+          "template": "GOV12_serious-incident-responder.json",
+          "agent": "aigov-incident-responder",
+          "humanStep": true
+        },
+        {
+          "template": "GOV13_control-crosswalk-assembler.json",
+          "agent": "aigov-control-crosswalk-assembler",
+          "humanStep": true
+        },
+        {
+          "template": "GOV11_human-review-anti-bias-gate.json",
+          "agent": "aigov-diff-renderer",
+          "humanStep": false
+        }
+      ],
+      "fixtures": [],
+      "agents": [
+        "aigov-control-crosswalk-assembler",
+        "aigov-incident-responder"
+      ],
+      "governs": "Art. 73 notices; cut-release.sh and release-manifest.py",
+      "gate": "a release is cut only with a sealed evidence pack"
+    },
+    {
+      "id": "W6",
+      "title": "Hardening",
+      "frame": "an emergency frame; a key-rotation frame",
+      "openedBy": "a break-glass request; a keyring revocation (the CRL Source)",
+      "steps": [
+        {
+          "template": "GOV15_break-glass-emergency-override.json",
+          "agent": "aigov-break-glass-coordinator",
+          "humanStep": true
+        },
+        {
+          "template": "GOV17_quorum-key-revocation-lifecycle.json",
+          "agent": "aigov-key-rotation-coordinator",
+          "humanStep": true
+        },
+        {
+          "template": "GOV11_human-review-anti-bias-gate.json",
+          "agent": "aigov-diff-renderer",
+          "humanStep": false
+        }
+      ],
+      "fixtures": [],
+      "agents": [
+        "aigov-break-glass-coordinator",
+        "aigov-key-rotation-coordinator"
+      ],
+      "governs": "emergency deployments; approval-quorum keys",
+      "gate": "an emergency epoch lives only for its lease unless W2 ratifies it"
+    },
+    {
+      "id": "W7",
+      "title": "Recertification",
+      "frame": "opens a W1 renewal frame",
+      "openedBy": "GOV14's renewal window",
+      "steps": [],
+      "fixtures": [
+        "GOV14_periodic-recertification-timer.json"
+      ],
+      "agents": [
+        "aigov-renewal-scheduler"
+      ],
+      "governs": "every admitted domain's annual recertification",
+      "gate": "an expired domain's epoch is revoked until re-admitted"
+    }
+  ]
+}

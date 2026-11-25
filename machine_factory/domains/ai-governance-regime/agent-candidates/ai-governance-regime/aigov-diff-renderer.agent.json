@@ -1,0 +1,191 @@
+{
+  "schemaVersion": "1.0.0",
+  "behaviorId": "aigov-diff-renderer",
+  "role": "deterministic-tool",
+  "agentId": "aigov-diff-renderer",
+  "displayName": "Canonical diff renderer",
+  "domain": "ai-governance-regime",
+  "machine": {
+    "id": "GOV11_human-review-anti-bias-gate",
+    "file": "GOV11_human-review-anti-bias-gate.json",
+    "machineClass": "safety-compliance-checker",
+    "inputRegion": {
+      "offset": 17120,
+      "length": 10
+    },
+    "outputRegion": {
+      "offset": 17332,
+      "length": 10
+    },
+    "cloneable": true
+  },
+  "dispatch": {
+    "mode": "frame-step",
+    "triggerSequenceIds": [
+      "ces_gov11_agent_requested"
+    ],
+    "frameScopes": [
+      "frame:read",
+      "pod:read",
+      "frame:return"
+    ],
+    "workflow": "W4",
+    "humanApprovalRequired": false
+  },
+  "capabilities": [
+    "frame.read",
+    "pod.read",
+    "frame.return.write"
+  ],
+  "reasoning": {
+    "objective": "Render the canonical (RFC 8785) diff of the exact pinned revision under review and present it to the reviewer; deterministic, no model.",
+    "instructions": "You are the canonical diff renderer for the RealityEngine AI governance regime (M-GOV-11 HumanReviewAntiBiasGate, workflow W4).\n\nOBJECTIVE\nRender the canonical (RFC 8785) diff of the exact pinned revision under review and present it to the reviewer; deterministic, no model.\n\nYOU MAY\n- Render and present the canonical diff of the pinned revision.\n\nYOU MUST NOT\n- Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).\n- Never write vector values directly; your result reaches the engines only through your completion contract.\n- Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.\n- Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts.",
+    "outputContract": "Return one structured line per completion field as `<field>: 0|1` (diff_rendered: the canonical diff was rendered and shown, render_failed: rendering failed), then `rationale: <one sentence>`. The machine, not you, decides what follows.",
+    "sequenceCatalog": [
+      {
+        "sequenceId": "ces_gov11_agent_requested",
+        "label": "S1_AgentRunning",
+        "rag": "AMBER",
+        "outputIndex": 8,
+        "action": "AGENT_REQUESTED"
+      },
+      {
+        "sequenceId": "ces_gov11_agent_failed",
+        "label": "S_err_StepFailed",
+        "rag": "RED",
+        "outputIndex": 4,
+        "action": "PARKED + REWORK"
+      },
+      {
+        "sequenceId": "ces_gov11_diff_verified",
+        "label": "S2_DiffVerified",
+        "rag": "GREEN",
+        "outputIndex": 2,
+        "action": "PERMIT_DEPLOY"
+      },
+      {
+        "sequenceId": "ces_gov11_blind_approval_block",
+        "label": "S_fail_BlindApprovalBlock",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION"
+      },
+      {
+        "sequenceId": "ces_gov11_rushed_approval_block",
+        "label": "S_fail_BlindApprovalBlock",
+        "rag": "RED",
+        "outputIndex": 0,
+        "action": "HALT_PROMOTION"
+      }
+    ],
+    "prohibitions": [
+      "Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).",
+      "Never write vector values directly; your result reaches the engines only through your completion contract.",
+      "Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.",
+      "Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts."
+    ]
+  },
+  "agentBinding": {
+    "agent": "aigov-diff-renderer",
+    "mode": "advise",
+    "trigger": "ces_gov11_agent_requested",
+    "allowedActions": [
+      "Render and present the canonical diff of the pinned revision."
+    ],
+    "writeBack": {
+      "type": "pe-sensor",
+      "provider": "asset-lifecycle",
+      "sensorId": "aigov.gov11.diff-renderer.completion",
+      "name": "Canonical diff renderer completion (GOV11)",
+      "region": {
+        "offset": 17128,
+        "length": 2
+      },
+      "semantics": [
+        "diff_rendered",
+        "render_failed"
+      ],
+      "ttlMs": 300000,
+      "normalization": "already-normalized-0-1",
+      "ingest": {
+        "endpoint": "/api/integrations/completions",
+        "method": "POST",
+        "triggerPush": false,
+        "compactPush": true
+      },
+      "sourceMapping": {
+        "id": "aigov-gov11-diff-renderer-completion",
+        "sensorId": "aigov.gov11.diff-renderer.completion",
+        "name": "Canonical diff renderer completion (GOV11)",
+        "region": {
+          "offset": 17128,
+          "length": 2
+        },
+        "ttlMs": 300000
+      }
+    },
+    "riskControls": {
+      "requiresHumanApproval": false,
+      "requiresRunbook": true,
+      "maxAutonomy": "advise",
+      "blockedWhenRag": []
+    },
+    "autonomyPolicy": {
+      "mode": "advise",
+      "stage": 1,
+      "writeBackType": "pe-sensor",
+      "canWriteBack": true,
+      "canStageActions": false,
+      "canExecuteActions": false,
+      "requiresHumanApproval": false,
+      "requiresRunbook": true,
+      "blockedWhenRag": []
+    }
+  },
+  "responseMapping": {
+    "schemaVersion": "1.0.0",
+    "responseContract": "structured-keys",
+    "mode": "advise",
+    "fields": [
+      {
+        "semantic": "diff_rendered",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/diff_rendered",
+          "responseKey": "diff_rendered"
+        },
+        "target": {
+          "sensorId": "aigov.gov11.diff-renderer.completion",
+          "region": {
+            "offset": 17128,
+            "length": 2
+          },
+          "index": 0
+        }
+      },
+      {
+        "semantic": "render_failed",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/render_failed",
+          "responseKey": "render_failed"
+        },
+        "target": {
+          "sensorId": "aigov.gov11.diff-renderer.completion",
+          "region": {
+            "offset": 17128,
+            "length": 2
+          },
+          "index": 1
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "builder": "machine_factory/domains/ai-governance-regime/tools/build_machines.py",
+    "candidateVersion": "0.2.0",
+    "specRule": "SPECIFICATION.md 4.3 (11)"
+  }
+}

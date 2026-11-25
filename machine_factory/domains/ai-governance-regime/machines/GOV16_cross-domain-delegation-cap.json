@@ -1,0 +1,2064 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV16_cross-domain-delegation-cap",
+    "name": "GOV16_cross-domain-delegation-cap",
+    "description": "Cross-domain delegation cap with an SR latch: in the approach band it dispatches the delegation clamp; a sustained exposure or canary breach trips a revoke and an incident, released on a distinct operator's approval with both back in band.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17200,
+        "length": 6
+      },
+      "output": {
+        "offset": 17382,
+        "length": 10
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ces_gov16_delegation_throttle",
+        "name": "M-GOV-16 S0_Nominal → S1_DelegationThrottle",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Nominal",
+          "sourceToState": "S1_DelegationThrottle",
+          "regularExpression": "[mon_xdomain_mu_agg∈[0.7001,0.9] ∧ mon_canary_drift_score∈[0,0.15] ∧ delegation_clamped=0 ∧ latch_q_prev=0]",
+          "length": 1,
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (16)",
+          "semanticAmendments": [
+            "GOV-SA-01"
+          ],
+          "asserts": [
+            "APPROACH",
+            "AGENT_REQUESTED"
+          ],
+          "dispatchesAgent": "aigov-delegation-clamp"
+        },
+        "events": [
+          {
+            "id": "ces_gov16_delegation_throttle-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.80005,
+                "threshold": 0.09995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.075,
+                "threshold": 0.075,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov16_delegation_throttle-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov16_delegation_clamped",
+        "name": "M-GOV-16 S1_DelegationThrottle → S1_DelegationThrottle",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_DelegationThrottle",
+          "sourceToState": "S1_DelegationThrottle",
+          "regularExpression": "[mon_xdomain_mu_agg∈[0.7001,0.9] ∧ delegation_clamped=1 ∧ latch_q_prev=0]",
+          "length": 1,
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (16)",
+          "semanticAmendments": [
+            "GOV-SA-01"
+          ],
+          "asserts": [
+            "APPROACH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov16_delegation_clamped-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.80005,
+                "threshold": 0.09995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov16_delegation_clamped-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov16_breach_exposure",
+        "name": "M-GOV-16 S0_Nominal|S1_DelegationThrottle → S2_CrossDomainBreachLatch",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Nominal|S1_DelegationThrottle",
+          "sourceToState": "S2_CrossDomainBreachLatch",
+          "regularExpression": "[mon_xdomain_mu_agg∈[0.9001,1]]{3}",
+          "length": 3,
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (16)",
+          "semanticAmendments": [
+            "GOV-SA-01",
+            "GOV-SA-06",
+            "GOV-SA-19"
+          ],
+          "asserts": [
+            "REVOKE_EPOCH",
+            "TRIGGER_INCIDENT",
+            "LATCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov16_breach_exposure-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.95005,
+                "threshold": 0.04995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov16_breach_exposure-e1"
+            ]
+          },
+          {
+            "id": "ces_gov16_breach_exposure-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.95005,
+                "threshold": 0.04995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov16_breach_exposure-e2"
+            ]
+          },
+          {
+            "id": "ces_gov16_breach_exposure-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.95005,
+                "threshold": 0.04995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov16_breach_exposure-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov16_breach_canary",
+        "name": "M-GOV-16 S0_Nominal|S1_DelegationThrottle → S2_CrossDomainBreachLatch",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Nominal|S1_DelegationThrottle",
+          "sourceToState": "S2_CrossDomainBreachLatch",
+          "regularExpression": "[mon_canary_drift_score∈[0.1501,1]]{3}",
+          "length": 3,
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (16)",
+          "semanticAmendments": [
+            "GOV-SA-01",
+            "GOV-SA-06",
+            "GOV-SA-19"
+          ],
+          "asserts": [
+            "REVOKE_EPOCH",
+            "TRIGGER_INCIDENT",
+            "LATCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov16_breach_canary-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.57505,
+                "threshold": 0.42495,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov16_breach_canary-e1"
+            ]
+          },
+          {
+            "id": "ces_gov16_breach_canary-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.57505,
+                "threshold": 0.42495,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov16_breach_canary-e2"
+            ]
+          },
+          {
+            "id": "ces_gov16_breach_canary-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.57505,
+                "threshold": 0.42495,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov16_breach_canary-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov16_hold_unapproved",
+        "name": "M-GOV-16 S_Latched → S_Latched",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S_Latched",
+          "sourceToState": "S_Latched",
+          "regularExpression": "[operator_approved=0 ∧ latch_q_prev=1]",
+          "length": 1,
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (16)",
+          "semanticAmendments": [
+            "GOV-SA-06"
+          ],
+          "asserts": [
+            "REVOKE_EPOCH",
+            "LATCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov16_hold_unapproved-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov16_hold_unapproved-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov16_hold_not_distinct",
+        "name": "M-GOV-16 S_Latched → S_Latched",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S_Latched",
+          "sourceToState": "S_Latched",
+          "regularExpression": "[operator_distinct=0 ∧ latch_q_prev=1]",
+          "length": 1,
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (16)",
+          "semanticAmendments": [
+            "GOV-SA-06"
+          ],
+          "asserts": [
+            "REVOKE_EPOCH",
+            "LATCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov16_hold_not_distinct-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov16_hold_not_distinct-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov16_hold_exposure",
+        "name": "M-GOV-16 S_Latched → S_Latched",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S_Latched",
+          "sourceToState": "S_Latched",
+          "regularExpression": "[mon_xdomain_mu_agg∈[0.5001,1] ∧ latch_q_prev=1]",
+          "length": 1,
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (16)",
+          "semanticAmendments": [
+            "GOV-SA-06"
+          ],
+          "asserts": [
+            "REVOKE_EPOCH",
+            "LATCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov16_hold_exposure-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.75005,
+                "threshold": 0.24995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov16_hold_exposure-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov16_hold_canary",
+        "name": "M-GOV-16 S_Latched → S_Latched",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S_Latched",
+          "sourceToState": "S_Latched",
+          "regularExpression": "[mon_canary_drift_score∈[0.1001,1] ∧ latch_q_prev=1]",
+          "length": 1,
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (16)",
+          "semanticAmendments": [
+            "GOV-SA-06"
+          ],
+          "asserts": [
+            "REVOKE_EPOCH",
+            "LATCH"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov16_hold_canary-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.55005,
+                "threshold": 0.44995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov16_hold_canary-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov16_breach_reset",
+        "name": "M-GOV-16 S2_CrossDomainBreachLatch → S0_Nominal",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S2_CrossDomainBreachLatch",
+          "sourceToState": "S0_Nominal",
+          "regularExpression": "[mon_xdomain_mu_agg∈[0,0.5] ∧ mon_canary_drift_score∈[0,0.1] ∧ operator_approved=1 ∧ operator_distinct=1 ∧ latch_q_prev=1]",
+          "length": 1,
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (16)",
+          "semanticAmendments": [
+            "GOV-SA-06"
+          ],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov16_breach_reset-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.25,
+                "threshold": 0.25,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.05,
+                "threshold": 0.05,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov16_breach_reset-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov16-delegation-throttle",
+        "events": [
+          [
+            0.8,
+            0.075,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov16_delegation_throttle: [mon_xdomain_mu_agg∈[0.7001,0.9] ∧ mon_canary_drift_score∈[0,0.15] ∧ delegation_clamped=0 ∧ latch_q_prev=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov16_delegation_throttle"
+        }
+      },
+      {
+        "name": "gov16-delegation-clamped",
+        "events": [
+          [
+            0.8,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov16_delegation_clamped: [mon_xdomain_mu_agg∈[0.7001,0.9] ∧ delegation_clamped=1 ∧ latch_q_prev=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov16_delegation_clamped"
+        }
+      },
+      {
+        "name": "gov16-breach-exposure",
+        "events": [
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov16_breach_exposure: [mon_xdomain_mu_agg∈[0.9001,1]]{3}",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov16_breach_exposure"
+        }
+      },
+      {
+        "name": "gov16-breach-canary",
+        "events": [
+          [
+            0.0,
+            0.5751,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.5751,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.5751,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov16_breach_canary: [mon_canary_drift_score∈[0.1501,1]]{3}",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov16_breach_canary"
+        }
+      },
+      {
+        "name": "gov16-hold-unapproved",
+        "events": [
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov16_hold_unapproved: [operator_approved=0 ∧ latch_q_prev=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov16_hold_unapproved"
+        }
+      },
+      {
+        "name": "gov16-hold-not-distinct",
+        "events": [
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov16_hold_not_distinct: [operator_distinct=0 ∧ latch_q_prev=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov16_hold_not_distinct"
+        }
+      },
+      {
+        "name": "gov16-hold-exposure",
+        "events": [
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.6,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov16_hold_exposure: [mon_xdomain_mu_agg∈[0.5001,1] ∧ latch_q_prev=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov16_hold_exposure"
+        }
+      },
+      {
+        "name": "gov16-hold-canary",
+        "events": [
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.12,
+            0.0,
+            1.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov16_hold_canary: [mon_canary_drift_score∈[0.1001,1] ∧ latch_q_prev=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov16_hold_canary"
+        }
+      },
+      {
+        "name": "gov16-breach-reset",
+        "events": [
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.9501,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.05,
+            1.0,
+            1.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov16_breach_reset: [mon_xdomain_mu_agg∈[0,0.5] ∧ mon_canary_drift_score∈[0,0.1] ∧ operator_approved=1 ∧ operator_distinct=1 ∧ latch_q_prev=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov16_breach_reset"
+        }
+      },
+      {
+        "name": "gov16-single-canary-spike",
+        "events": [
+          [
+            0.0,
+            0.5,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "one canary spike does not trip",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
+        }
+      },
+      {
+        "name": "gov16-nominal",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "signal-monitor",
+      "sequenceCount": 9,
+      "inputSemantics": [
+        "mon_xdomain_mu_agg (continuous [0,1]; sensor: aggregate cross-domain exposure; new): aggregate cross-domain exposure consumed",
+        "mon_canary_drift_score (continuous [0,1]; sensor: canary prompts (localAIStack /observations/drift records drift today); partial): behavioral drift on canary prompts",
+        "operator_approved (binary; sensor: governance console: operator release approval; new): a distinct human operator approved the release of a latched watchdog",
+        "operator_distinct (binary; sensor: governance console: operator identity check; new): the approving operator is distinct and human",
+        "delegation_clamped (binary; aigov-delegation-clamp completion via aigov.gov16.delegation-clamp.completion): delegation depth was clamped",
+        "latch_q_prev (binary; feedback: PE: this machine's LATCH output at the previous step; new): previous LATCH output"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK",
+        "8: AGENT_REQUESTED",
+        "9: OVERDUE"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "H-hardening",
+        "M-GOV-16",
+        "W3",
+        "fixture"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "H-hardening",
+        "machineCode": "GOV16",
+        "workflowTags": [
+          "CrossDomainDelegationCap",
+          "W3"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:H-hardening:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        }
+      },
+      "triggerConfig": {
+        "processId": "GOV16_cross-domain-delegation-cap",
+        "processName": "M-GOV-16 CrossDomainDelegationCap",
+        "rules": [
+          {
+            "sequenceId": "ces_gov16_delegation_throttle",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "M-GOV-16 S0_Nominal → S1_DelegationThrottle: [mon_xdomain_mu_agg∈[0.7001,0.9] ∧ mon_canary_drift_score∈[0,0.15] ∧ delegation_clamped=0 ∧ latch_q_prev=0]",
+            "dispatchAgent": "aigov-delegation-clamp"
+          },
+          {
+            "sequenceId": "ces_gov16_delegation_clamped",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "M-GOV-16 S1_DelegationThrottle → S1_DelegationThrottle: [mon_xdomain_mu_agg∈[0.7001,0.9] ∧ delegation_clamped=1 ∧ latch_q_prev=0]"
+          },
+          {
+            "sequenceId": "ces_gov16_breach_exposure",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-16 S0_Nominal|S1_DelegationThrottle → S2_CrossDomainBreachLatch: [mon_xdomain_mu_agg∈[0.9001,1]]{3}"
+          },
+          {
+            "sequenceId": "ces_gov16_breach_canary",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-16 S0_Nominal|S1_DelegationThrottle → S2_CrossDomainBreachLatch: [mon_canary_drift_score∈[0.1501,1]]{3}"
+          },
+          {
+            "sequenceId": "ces_gov16_hold_unapproved",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-16 S_Latched → S_Latched: [operator_approved=0 ∧ latch_q_prev=1]"
+          },
+          {
+            "sequenceId": "ces_gov16_hold_not_distinct",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-16 S_Latched → S_Latched: [operator_distinct=0 ∧ latch_q_prev=1]"
+          },
+          {
+            "sequenceId": "ces_gov16_hold_exposure",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-16 S_Latched → S_Latched: [mon_xdomain_mu_agg∈[0.5001,1] ∧ latch_q_prev=1]"
+          },
+          {
+            "sequenceId": "ces_gov16_hold_canary",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-16 S_Latched → S_Latched: [mon_canary_drift_score∈[0.1001,1] ∧ latch_q_prev=1]"
+          },
+          {
+            "sequenceId": "ces_gov16_breach_reset",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-16 S2_CrossDomainBreachLatch → S0_Nominal: [mon_xdomain_mu_agg∈[0,0.5] ∧ mon_canary_drift_score∈[0,0.1] ∧ operator_approved=1 ∧ operator_distinct=1 ∧ latch_q_prev=1]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.verdicts.gov16",
+          "type": "published-domain-bus-producer",
+          "role": "CrossDomainDelegationCap",
+          "sourceMachine": "GOV16_cross-domain-delegation-cap",
+          "sourceOutputRegion": {
+            "offset": 17382,
+            "length": 4
+          },
+          "targetInputElements": [
+            20,
+            21,
+            22,
+            23
+          ],
+          "normalizedElements": [
+            "M-GOV-16 HALT_PROMOTION",
+            "M-GOV-16 REVOKE_EPOCH",
+            "M-GOV-16 PERMIT_DEPLOY",
+            "M-GOV-16 TRIGGER_INCIDENT"
+          ],
+          "purpose": "Publish M-GOV-16's verdicts to the domain verdict aggregator.",
+          "busId": "ai-governance-regime.verdicts",
+          "busTag": "published-bus-ai-governance-regime-verdicts",
+          "targetMachine": "GOV00 Governance Verdict Aggregator",
+          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
+          "targetInputRegion": {
+            "offset": 17402,
+            "length": 24
+          },
+          "publishedOutputRegion": {
+            "offset": 17426,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized verdict bits only."
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-16",
+        "title": "CrossDomainDelegationCap",
+        "kind": "fixture",
+        "workflow": "W3",
+        "specRule": "HARDENING_TRANSITION_RULES.md section 2 (16)",
+        "governedAssetType": null,
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.2.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "dwellSteps": 2,
+        "debounceSteps": 3
+      },
+      "agentBinding": {
+        "agent": "aigov-delegation-clamp",
+        "mode": "supervised-act",
+        "trigger": "ces_gov16_delegation_throttle",
+        "allowedActions": [
+          "Clamp A2A delegation depth on the offending chains."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "agent-runtime",
+          "sensorId": "aigov.gov16.delegation-clamp.completion",
+          "name": "Delegation clamp agent completion (GOV16)",
+          "region": {
+            "offset": 17204,
+            "length": 1
+          },
+          "semantics": [
+            "delegation_clamped"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "aigov-gov16-delegation-clamp-completion",
+            "sensorId": "aigov.gov16.delegation-clamp.completion",
+            "name": "Delegation clamp agent completion (GOV16)",
+            "region": {
+              "offset": 17204,
+              "length": 1
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": []
+        }
+      },
+      "aiTrigger": "ces_gov16_delegation_throttle",
+      "dispatchableAgent": "aigov-delegation-clamp",
+      "agentBehavior": "agent-candidates/ai-governance-regime/aigov-delegation-clamp.agent.json",
+      "latchFeedback": {
+        "inputElement": 5,
+        "fromOutputElement": 6,
+        "compositionOwner": "perception-engine",
+        "peCompositionRequired": true,
+        "rule": "Q(k) = S(k) or (not R(k) and Q(k-1)); the PE writes this machine's previous LATCH output into this element (GOV-R12)."
+      }
+    }
+  }
+}

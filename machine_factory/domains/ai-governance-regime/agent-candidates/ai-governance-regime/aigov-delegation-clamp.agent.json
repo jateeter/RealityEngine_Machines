@@ -1,0 +1,148 @@
+{
+  "schemaVersion": "1.0.0",
+  "behaviorId": "aigov-delegation-clamp",
+  "role": "watchdog-agent",
+  "agentId": "aigov-delegation-clamp",
+  "displayName": "Delegation clamp agent",
+  "domain": "ai-governance-regime",
+  "machine": {
+    "id": "GOV16_cross-domain-delegation-cap",
+    "file": "GOV16_cross-domain-delegation-cap.json",
+    "machineClass": "signal-monitor",
+    "inputRegion": {
+      "offset": 17200,
+      "length": 6
+    },
+    "outputRegion": {
+      "offset": 17382,
+      "length": 10
+    },
+    "cloneable": false
+  },
+  "dispatch": {
+    "mode": "ces-trigger",
+    "triggerSequenceIds": [
+      "ces_gov16_delegation_throttle"
+    ],
+    "workflow": "W3",
+    "humanApprovalRequired": true
+  },
+  "capabilities": [
+    "pe.completion.write",
+    "pe.observations.read",
+    "delegation.clamp",
+    "human.notify"
+  ],
+  "reasoning": {
+    "objective": "Reduce the delegation depth of the A2A chains driving cross-domain exposure into the approach band, after the operator's approval; report what was clamped.",
+    "instructions": "You are the delegation clamp agent for the RealityEngine AI governance regime (M-GOV-16 CrossDomainDelegationCap, workflow W3).\n\nOBJECTIVE\nReduce the delegation depth of the A2A chains driving cross-domain exposure into the approach band, after the operator's approval; report what was clamped.\n\nYOU MAY\n- Clamp A2A delegation depth on the offending chains.\n\nYOU MUST NOT\n- Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).\n- Never write vector values directly; your result reaches the engines only through your completion contract.\n- Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.\n- Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts.",
+    "outputContract": "Return one structured line per completion field as `<field>: 0|1` (delegation_clamped: delegation depth was clamped), then `rationale: <one sentence>`. The machine, not you, decides what follows.",
+    "sequenceCatalog": [
+      {
+        "sequenceId": "ces_gov16_delegation_throttle",
+        "label": "S1_DelegationThrottle",
+        "rag": "AMBER",
+        "outputIndex": 5,
+        "action": "APPROACH + AGENT_REQUESTED"
+      },
+      {
+        "sequenceId": "ces_gov16_delegation_clamped",
+        "label": "S1_DelegationThrottle",
+        "rag": "AMBER",
+        "outputIndex": 5,
+        "action": "APPROACH"
+      }
+    ],
+    "prohibitions": [
+      "Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).",
+      "Never write vector values directly; your result reaches the engines only through your completion contract.",
+      "Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.",
+      "Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts."
+    ]
+  },
+  "agentBinding": {
+    "agent": "aigov-delegation-clamp",
+    "mode": "supervised-act",
+    "trigger": "ces_gov16_delegation_throttle",
+    "allowedActions": [
+      "Clamp A2A delegation depth on the offending chains."
+    ],
+    "writeBack": {
+      "type": "pe-sensor",
+      "provider": "agent-runtime",
+      "sensorId": "aigov.gov16.delegation-clamp.completion",
+      "name": "Delegation clamp agent completion (GOV16)",
+      "region": {
+        "offset": 17204,
+        "length": 1
+      },
+      "semantics": [
+        "delegation_clamped"
+      ],
+      "ttlMs": 300000,
+      "normalization": "already-normalized-0-1",
+      "ingest": {
+        "endpoint": "/api/integrations/completions",
+        "method": "POST",
+        "triggerPush": false,
+        "compactPush": true
+      },
+      "sourceMapping": {
+        "id": "aigov-gov16-delegation-clamp-completion",
+        "sensorId": "aigov.gov16.delegation-clamp.completion",
+        "name": "Delegation clamp agent completion (GOV16)",
+        "region": {
+          "offset": 17204,
+          "length": 1
+        },
+        "ttlMs": 300000
+      }
+    },
+    "riskControls": {
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "maxAutonomy": "supervised-act",
+      "blockedWhenRag": []
+    },
+    "autonomyPolicy": {
+      "mode": "supervised-act",
+      "stage": 2,
+      "writeBackType": "pe-sensor",
+      "canWriteBack": true,
+      "canStageActions": true,
+      "canExecuteActions": false,
+      "requiresHumanApproval": true,
+      "requiresRunbook": true,
+      "blockedWhenRag": []
+    }
+  },
+  "responseMapping": {
+    "schemaVersion": "1.0.0",
+    "responseContract": "structured-keys",
+    "mode": "supervised-act",
+    "fields": [
+      {
+        "semantic": "delegation_clamped",
+        "valueType": "binary",
+        "normalization": "binary",
+        "extract": {
+          "jsonPointer": "/delegation_clamped",
+          "responseKey": "delegation_clamped"
+        },
+        "target": {
+          "sensorId": "aigov.gov16.delegation-clamp.completion",
+          "region": {
+            "offset": 17204,
+            "length": 1
+          },
+          "index": 0
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "builder": "machine_factory/domains/ai-governance-regime/tools/build_machines.py",
+    "candidateVersion": "0.2.0",
+    "specRule": "HARDENING_TRANSITION_RULES.md section 2 (16)"
+  }
+}

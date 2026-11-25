@@ -1,0 +1,1773 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV10_synthetic-transparency-gate",
+    "name": "GOV10_synthetic-transparency-gate",
+    "description": "Synthetic-content transparency gate (EU AI Act Art. 50), per outbound message: permits internal and marked external messages; for an unmarked external message the provenance tagger marks it or holds it.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17104,
+        "length": 12
+      },
+      "output": {
+        "offset": 17322,
+        "length": 10
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "ces_gov10_pass_internal",
+        "name": "M-GOV-10 S0_Idle → S1_PassInternal",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Idle",
+          "sourceToState": "S1_PassInternal",
+          "regularExpression": "[req_egress=1 ∧ egress_external_comm=0 ∧ lane_in_workflow=1]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (10)",
+          "semanticAmendments": [
+            "GOV-SA-08"
+          ],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov10_pass_internal-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov10_pass_internal-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov10_pass_marked",
+        "name": "M-GOV-10 S0_Idle → S2_PassMarked",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Idle",
+          "sourceToState": "S2_PassMarked",
+          "regularExpression": "[req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ egress_art50_marked=1]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (10)",
+          "semanticAmendments": [],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov10_pass_marked-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov10_pass_marked-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov10_agent_requested",
+        "name": "M-GOV-10 S0_Init → S1_AgentRunning",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Init",
+          "sourceToState": "S1_AgentRunning",
+          "regularExpression": "[req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ tag_completed=0 ∧ egress_art50_marked=0]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (10)",
+          "semanticAmendments": [],
+          "asserts": [
+            "AGENT_REQUESTED"
+          ],
+          "dispatchesAgent": "aigov-egress-provenance-tagger"
+        },
+        "events": [
+          {
+            "id": "ces_gov10_agent_requested-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov10_agent_requested-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov10_agent_failed",
+        "name": "M-GOV-10 S1_AgentRunning → S_err_StepFailed",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_AgentRunning",
+          "sourceToState": "S_err_StepFailed",
+          "regularExpression": "[req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ tag_completed=0 ∧ egress_art50_marked=0] · [tag_failed=1]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (10)",
+          "semanticAmendments": [
+            "GOV-SA-13"
+          ],
+          "asserts": [
+            "PARKED",
+            "REWORK"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov10_agent_failed-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov10_agent_failed-e1"
+            ]
+          },
+          {
+            "id": "ces_gov10_agent_failed-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov10_agent_failed-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov10_tagged",
+        "name": "M-GOV-10 S1_AgentRunning → S2_PassMarked",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_AgentRunning",
+          "sourceToState": "S2_PassMarked",
+          "regularExpression": "[req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ tag_completed=0 ∧ egress_art50_marked=0] · [tag_completed=1 ∧ message_held=0 ∧ egress_art50_marked=1]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (10)",
+          "semanticAmendments": [],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov10_tagged-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov10_tagged-e1"
+            ]
+          },
+          {
+            "id": "ces_gov10_tagged-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov10_tagged-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov10_held",
+        "name": "M-GOV-10 S1_AgentRunning → S_fail_UnmarkedBlock",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_AgentRunning",
+          "sourceToState": "S_fail_UnmarkedBlock",
+          "regularExpression": "[req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ tag_completed=0 ∧ egress_art50_marked=0] · [tag_completed=1 ∧ message_held=1]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (10)",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov10_held-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov10_held-e1"
+            ]
+          },
+          {
+            "id": "ces_gov10_held-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov10_held-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov10_unmarked_block",
+        "name": "M-GOV-10 S1_AgentRunning → S_fail_UnmarkedBlock",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_AgentRunning",
+          "sourceToState": "S_fail_UnmarkedBlock",
+          "regularExpression": "[req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ tag_completed=0 ∧ egress_art50_marked=0] · [tag_completed=1 ∧ message_held=0 ∧ egress_art50_marked=0]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (10)",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov10_unmarked_block-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov10_unmarked_block-e1"
+            ]
+          },
+          {
+            "id": "ces_gov10_unmarked_block-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov10_unmarked_block-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov10-pass-internal",
+        "events": [
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov10_pass_internal: [req_egress=1 ∧ egress_external_comm=0 ∧ lane_in_workflow=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov10_pass_internal"
+        }
+      },
+      {
+        "name": "gov10-pass-marked",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov10_pass_marked: [req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ egress_art50_marked=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov10_pass_marked"
+        }
+      },
+      {
+        "name": "gov10-agent-requested",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov10_agent_requested: [req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ tag_completed=0 ∧ egress_art50_marked=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov10_agent_requested"
+        }
+      },
+      {
+        "name": "gov10-agent-failed",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov10_agent_failed: [req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ tag_completed=0 ∧ egress_art50_marked=0] · [tag_failed=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov10_agent_failed"
+        }
+      },
+      {
+        "name": "gov10-tagged",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov10_tagged: [req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ tag_completed=0 ∧ egress_art50_marked=0] · [tag_completed=1 ∧ message_held=0 ∧ egress_art50_marked=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov10_tagged"
+        }
+      },
+      {
+        "name": "gov10-held",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov10_held: [req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ tag_completed=0 ∧ egress_art50_marked=0] · [tag_completed=1 ∧ message_held=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov10_held"
+        }
+      },
+      {
+        "name": "gov10-unmarked-block",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov10_unmarked_block: [req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ tag_completed=0 ∧ egress_art50_marked=0] · [tag_completed=1 ∧ message_held=0 ∧ egress_art50_marked=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov10_unmarked_block"
+        }
+      },
+      {
+        "name": "gov10-nominal",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "safety-compliance-checker",
+      "sequenceCount": 7,
+      "inputSemantics": [
+        "req_egress (binary; fact: ACP/MCP boundary: an outbound message is pending (GOV-R13); new): an outbound message awaits the transparency gate",
+        "egress_external_comm (binary; fact: ACP/MCP boundary classifier; new): the message targets an external party",
+        "reserved: lane_in_workflow (lifecycle frame lane 2; the asset is in its workflow)",
+        "reserved: lane_re_pinned (lifecycle frame lane 3; a frame document has been re-pinned (T16))",
+        "reserved: lane_approved (lifecycle frame lane 4; approved by a distinct human principal)",
+        "reserved: lane_rework (lifecycle frame lane 5; rework requested)",
+        "reserved: lane_step_running (lifecycle frame lane 6; a step is running)",
+        "reserved: lane_stale (lifecycle frame lane 7; the head is STALE (continuation TTL or lease expired))",
+        "tag_completed (binary; aigov-egress-provenance-tagger completion via aigov.gov10.egress-provenance-tagger.completion): the tagger finished",
+        "tag_failed (binary; aigov-egress-provenance-tagger completion via aigov.gov10.egress-provenance-tagger.completion): the agent's step failed",
+        "message_held (binary; aigov-egress-provenance-tagger completion via aigov.gov10.egress-provenance-tagger.completion): the tagger held the message",
+        "egress_art50_marked (binary; fact: ACP/MCP boundary: provenance header check; new): machine-readable AI provenance is present (Art. 50)"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK",
+        "8: AGENT_REQUESTED",
+        "9: OVERDUE"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "D-transparency-oversight",
+        "M-GOV-10",
+        "W4"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "D-transparency-oversight",
+        "machineCode": "GOV10",
+        "workflowTags": [
+          "SyntheticTransparencyGate",
+          "W4"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:D-transparency-oversight:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        }
+      },
+      "triggerConfig": {
+        "processId": "GOV10_synthetic-transparency-gate",
+        "processName": "M-GOV-10 SyntheticTransparencyGate",
+        "rules": [
+          {
+            "sequenceId": "ces_gov10_pass_internal",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-10 S0_Idle → S1_PassInternal: [req_egress=1 ∧ egress_external_comm=0 ∧ lane_in_workflow=1]"
+          },
+          {
+            "sequenceId": "ces_gov10_pass_marked",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-10 S0_Idle → S2_PassMarked: [req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ egress_art50_marked=1]"
+          },
+          {
+            "sequenceId": "ces_gov10_agent_requested",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "M-GOV-10 S0_Init → S1_AgentRunning: [req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ tag_completed=0 ∧ egress_art50_marked=0]",
+            "dispatchAgent": "aigov-egress-provenance-tagger"
+          },
+          {
+            "sequenceId": "ces_gov10_agent_failed",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-10 S1_AgentRunning → S_err_StepFailed: [req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ tag_completed=0 ∧ egress_art50_marked=0] · [tag_failed=1]"
+          },
+          {
+            "sequenceId": "ces_gov10_tagged",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-10 S1_AgentRunning → S2_PassMarked: [req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ tag_completed=0 ∧ egress_art50_marked=0] · [tag_completed=1 ∧ message_held=0 ∧ egress_art50_marked=1]"
+          },
+          {
+            "sequenceId": "ces_gov10_held",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-10 S1_AgentRunning → S_fail_UnmarkedBlock: [req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ tag_completed=0 ∧ egress_art50_marked=0] · [tag_completed=1 ∧ message_held=1]"
+          },
+          {
+            "sequenceId": "ces_gov10_unmarked_block",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-10 S1_AgentRunning → S_fail_UnmarkedBlock: [req_egress=1 ∧ egress_external_comm=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ tag_completed=0 ∧ egress_art50_marked=0] · [tag_completed=1 ∧ message_held=0 ∧ egress_art50_marked=0]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.document.gov10.EgressArt50Log",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "GOV10_synthetic-transparency-gate",
+          "targetMachine": "GOV13_control-crosswalk-assembler",
+          "assetTypeId": "EgressArt50Log",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Hand the frame's EgressArt50Log to GOV13, its next consumer (agentic-workflow-contract.json W4); never infer a governance verdict from document content.",
+          "nativeVectorWrite": false
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-10",
+        "title": "SyntheticTransparencyGate",
+        "kind": "template",
+        "workflow": "W4",
+        "specRule": "SPECIFICATION.md 4.3 (10)",
+        "governedAssetType": "EgressArt50Log",
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.2.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "dwellSteps": 2,
+        "debounceSteps": 3
+      },
+      "agentBinding": {
+        "agent": "aigov-egress-provenance-tagger",
+        "mode": "supervised-act",
+        "trigger": "ces_gov10_agent_requested",
+        "allowedActions": [
+          "Annotate the message with provenance.",
+          "Hold a message whose provenance cannot be asserted."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "asset-lifecycle",
+          "sensorId": "aigov.gov10.egress-provenance-tagger.completion",
+          "name": "Egress provenance tagger completion (GOV10)",
+          "region": {
+            "offset": 17112,
+            "length": 3
+          },
+          "semantics": [
+            "tag_completed",
+            "tag_failed",
+            "message_held"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "aigov-gov10-egress-provenance-tagger-completion",
+            "sensorId": "aigov.gov10.egress-provenance-tagger.completion",
+            "name": "Egress provenance tagger completion (GOV10)",
+            "region": {
+              "offset": 17112,
+              "length": 3
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": []
+        }
+      },
+      "aiTrigger": "ces_gov10_agent_requested",
+      "dispatchableAgent": "aigov-egress-provenance-tagger",
+      "agentBehavior": "agent-candidates/ai-governance-regime/aigov-egress-provenance-tagger.agent.json",
+      "frameInputs": {
+        "lanes": "input cells 2-7, written by the lifecycle (reserved)",
+        "facts": "every other non-completion input, written into the clone's block by the lifecycle's frame source (GOV-R19)",
+        "completion": "input cells 8..10, the step agent's completion"
+      }
+    }
+  }
+}

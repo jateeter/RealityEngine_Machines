@@ -1,0 +1,1669 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV06_quorum-consensus-monitor",
+    "name": "GOV06_quorum-consensus-monitor",
+    "description": "Approval-quorum monitor on an epoch swap: dispatches the quorum bundle assembler, then permits only when, after the bundle is ready, signatures from Risk, Engineering and Legal have all arrived with no preparer among the signers, clean signer keys and attested Sources.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17040,
+        "length": 9
+      },
+      "output": {
+        "offset": 17282,
+        "length": 10
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "ces_gov06_bundle_requested",
+        "name": "M-GOV-06 S0_Standby → S1_Collecting",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Standby",
+          "sourceToState": "S1_Collecting",
+          "regularExpression": "[src_req_epoch_swap=1 ∧ bundle_ready=0]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [],
+          "asserts": [
+            "AGENT_REQUESTED"
+          ],
+          "dispatchesAgent": "aigov-quorum-bundle-assembler"
+        },
+        "events": [
+          {
+            "id": "ces_gov06_bundle_requested-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov06_bundle_requested-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov06_bundle_failed",
+        "name": "M-GOV-06 S0_Standby → S_fail_QuorumViolation",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Standby",
+          "sourceToState": "S_fail_QuorumViolation",
+          "regularExpression": "[src_req_epoch_swap=1 ∧ bundle_ready=0] · [bundle_failed=1]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION",
+            "REWORK"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov06_bundle_failed-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov06_bundle_failed-e1"
+            ]
+          },
+          {
+            "id": "ces_gov06_bundle_failed-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov06_bundle_failed-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov06_quorum_valid_after_risk",
+        "name": "M-GOV-06 S1_Collecting → S2_QuorumValid",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_Collecting",
+          "sourceToState": "S2_QuorumValid",
+          "regularExpression": "[src_req_epoch_swap=1 ∧ bundle_ready=1 ∧ signed_risk=0] · [src_quorum_integrity_ok=1 ∧ src_slsa_attested=1 ∧ signed_risk=1 ∧ signed_engineering=1 ∧ signed_legal=1 ∧ signer_is_preparer=0]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [
+            "GOV-SA-18"
+          ],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov06_quorum_valid_after_risk-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov06_quorum_valid_after_risk-e1"
+            ]
+          },
+          {
+            "id": "ces_gov06_quorum_valid_after_risk-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov06_quorum_valid_after_risk-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov06_quorum_valid_after_engineering",
+        "name": "M-GOV-06 S1_Collecting → S2_QuorumValid",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_Collecting",
+          "sourceToState": "S2_QuorumValid",
+          "regularExpression": "[src_req_epoch_swap=1 ∧ bundle_ready=1 ∧ signed_engineering=0] · [src_quorum_integrity_ok=1 ∧ src_slsa_attested=1 ∧ signed_risk=1 ∧ signed_engineering=1 ∧ signed_legal=1 ∧ signer_is_preparer=0]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [
+            "GOV-SA-18"
+          ],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov06_quorum_valid_after_engineering-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov06_quorum_valid_after_engineering-e1"
+            ]
+          },
+          {
+            "id": "ces_gov06_quorum_valid_after_engineering-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov06_quorum_valid_after_engineering-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov06_quorum_valid_after_legal",
+        "name": "M-GOV-06 S1_Collecting → S2_QuorumValid",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_Collecting",
+          "sourceToState": "S2_QuorumValid",
+          "regularExpression": "[src_req_epoch_swap=1 ∧ bundle_ready=1 ∧ signed_legal=0] · [src_quorum_integrity_ok=1 ∧ src_slsa_attested=1 ∧ signed_risk=1 ∧ signed_engineering=1 ∧ signed_legal=1 ∧ signer_is_preparer=0]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [
+            "GOV-SA-18"
+          ],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov06_quorum_valid_after_legal-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov06_quorum_valid_after_legal-e1"
+            ]
+          },
+          {
+            "id": "ces_gov06_quorum_valid_after_legal-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov06_quorum_valid_after_legal-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov06_violation_self_signer",
+        "name": "M-GOV-06 S1_Collecting → S_fail_QuorumViolation",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_Collecting",
+          "sourceToState": "S_fail_QuorumViolation",
+          "regularExpression": "[src_req_epoch_swap=1 ∧ signer_is_preparer=1]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov06_violation_self_signer-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov06_violation_self_signer-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov06_violation_key_integrity",
+        "name": "M-GOV-06 S1_Collecting → S_fail_QuorumViolation",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_Collecting",
+          "sourceToState": "S_fail_QuorumViolation",
+          "regularExpression": "[src_req_epoch_swap=1 ∧ src_quorum_integrity_ok=0]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [
+            "GOV-SA-05"
+          ],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov06_violation_key_integrity-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov06_violation_key_integrity-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov06_violation_unattested",
+        "name": "M-GOV-06 S1_Collecting → S_fail_QuorumViolation",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_Collecting",
+          "sourceToState": "S_fail_QuorumViolation",
+          "regularExpression": "[src_req_epoch_swap=1 ∧ src_slsa_attested=0]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [
+            "GOV-SA-05"
+          ],
+          "asserts": [
+            "HALT_PROMOTION"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov06_violation_unattested-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov06_violation_unattested-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov06-bundle-requested",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov06_bundle_requested: [src_req_epoch_swap=1 ∧ bundle_ready=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov06_bundle_requested"
+        }
+      },
+      {
+        "name": "gov06-bundle-failed",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov06_bundle_failed: [src_req_epoch_swap=1 ∧ bundle_ready=0] · [bundle_failed=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov06_bundle_failed"
+        }
+      },
+      {
+        "name": "gov06-quorum-valid-after-risk",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov06_quorum_valid_after_risk: [src_req_epoch_swap=1 ∧ bundle_ready=1 ∧ signed_risk=0] · [src_quorum_integrity_ok=1 ∧ src_slsa_attested=1 ∧ signed_risk=1 ∧ signed_engineering=1 ∧ signed_legal=1 ∧ signer_is_preparer=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov06_quorum_valid_after_risk"
+        }
+      },
+      {
+        "name": "gov06-violation-self-signer",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov06_violation_self_signer: [src_req_epoch_swap=1 ∧ signer_is_preparer=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov06_violation_self_signer"
+        }
+      },
+      {
+        "name": "gov06-violation-key-integrity",
+        "events": [
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov06_violation_key_integrity: [src_req_epoch_swap=1 ∧ src_quorum_integrity_ok=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov06_violation_key_integrity"
+        }
+      },
+      {
+        "name": "gov06-violation-unattested",
+        "events": [
+          [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov06_violation_unattested: [src_req_epoch_swap=1 ∧ src_slsa_attested=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov06_violation_unattested"
+        }
+      },
+      {
+        "name": "gov06-signatures-before-bundle",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "signatures that arrive before the bundle is ready do not make a quorum",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
+        }
+      },
+      {
+        "name": "gov06-nominal",
+        "events": [
+          [
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "safety-compliance-checker",
+      "sequenceCount": 8,
+      "inputSemantics": [
+        "src_req_epoch_swap (binary; sensor: scripts/approve-domain.sh deploy (epoch request); partial): a rule-epoch swap is requested",
+        "src_quorum_integrity_ok (binary; sensor: keyring Source: re_pki CRL plus signer keys, org units, dwell; partial): signer keys clean, diverse, dwell met",
+        "src_slsa_attested (binary; sensor: provenance attestation; partial): Sources and builds are attested",
+        "bundle_ready (binary; aigov-quorum-bundle-assembler completion via aigov.gov06.quorum-bundle-assembler.completion): the canonical (JCS) bundle is ready and routed",
+        "bundle_failed (binary; aigov-quorum-bundle-assembler completion via aigov.gov06.quorum-bundle-assembler.completion): the agent failed",
+        "signed_risk (binary; aigov-quorum-bundle-assembler completion via aigov.gov06.quorum-bundle-assembler.completion): a Risk signature arrived",
+        "signed_engineering (binary; aigov-quorum-bundle-assembler completion via aigov.gov06.quorum-bundle-assembler.completion): an Engineering signature arrived",
+        "signed_legal (binary; aigov-quorum-bundle-assembler completion via aigov.gov06.quorum-bundle-assembler.completion): a Legal signature arrived",
+        "signer_is_preparer (binary; aigov-quorum-bundle-assembler completion via aigov.gov06.quorum-bundle-assembler.completion): a signer is the preparer"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK",
+        "8: AGENT_REQUESTED",
+        "9: OVERDUE"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "B-rule-epoch-aibom",
+        "M-GOV-06",
+        "W2",
+        "fixture"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "B-rule-epoch-aibom",
+        "machineCode": "GOV06",
+        "workflowTags": [
+          "QuorumConsensusMonitor",
+          "W2"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:B-rule-epoch-aibom:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        }
+      },
+      "triggerConfig": {
+        "processId": "GOV06_quorum-consensus-monitor",
+        "processName": "M-GOV-06 QuorumConsensusMonitor",
+        "rules": [
+          {
+            "sequenceId": "ces_gov06_bundle_requested",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "M-GOV-06 S0_Standby → S1_Collecting: [src_req_epoch_swap=1 ∧ bundle_ready=0]",
+            "dispatchAgent": "aigov-quorum-bundle-assembler"
+          },
+          {
+            "sequenceId": "ces_gov06_bundle_failed",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-06 S0_Standby → S_fail_QuorumViolation: [src_req_epoch_swap=1 ∧ bundle_ready=0] · [bundle_failed=1]"
+          },
+          {
+            "sequenceId": "ces_gov06_quorum_valid_after_risk",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-06 S1_Collecting → S2_QuorumValid: [src_req_epoch_swap=1 ∧ bundle_ready=1 ∧ signed_risk=0] · [src_quorum_integrity_ok=1 ∧ src_slsa_attested=1 ∧ signed_risk=1 ∧ signed_engineering=1 ∧ signed_legal=1 ∧ signer_is_preparer=0]"
+          },
+          {
+            "sequenceId": "ces_gov06_quorum_valid_after_engineering",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-06 S1_Collecting → S2_QuorumValid: [src_req_epoch_swap=1 ∧ bundle_ready=1 ∧ signed_engineering=0] · [src_quorum_integrity_ok=1 ∧ src_slsa_attested=1 ∧ signed_risk=1 ∧ signed_engineering=1 ∧ signed_legal=1 ∧ signer_is_preparer=0]"
+          },
+          {
+            "sequenceId": "ces_gov06_quorum_valid_after_legal",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-06 S1_Collecting → S2_QuorumValid: [src_req_epoch_swap=1 ∧ bundle_ready=1 ∧ signed_legal=0] · [src_quorum_integrity_ok=1 ∧ src_slsa_attested=1 ∧ signed_risk=1 ∧ signed_engineering=1 ∧ signed_legal=1 ∧ signer_is_preparer=0]"
+          },
+          {
+            "sequenceId": "ces_gov06_violation_self_signer",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-06 S1_Collecting → S_fail_QuorumViolation: [src_req_epoch_swap=1 ∧ signer_is_preparer=1]"
+          },
+          {
+            "sequenceId": "ces_gov06_violation_key_integrity",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-06 S1_Collecting → S_fail_QuorumViolation: [src_req_epoch_swap=1 ∧ src_quorum_integrity_ok=0]"
+          },
+          {
+            "sequenceId": "ces_gov06_violation_unattested",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-06 S1_Collecting → S_fail_QuorumViolation: [src_req_epoch_swap=1 ∧ src_slsa_attested=0]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.verdicts.gov06",
+          "type": "published-domain-bus-producer",
+          "role": "QuorumConsensusMonitor",
+          "sourceMachine": "GOV06_quorum-consensus-monitor",
+          "sourceOutputRegion": {
+            "offset": 17282,
+            "length": 4
+          },
+          "targetInputElements": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "normalizedElements": [
+            "M-GOV-06 HALT_PROMOTION",
+            "M-GOV-06 REVOKE_EPOCH",
+            "M-GOV-06 PERMIT_DEPLOY",
+            "M-GOV-06 TRIGGER_INCIDENT"
+          ],
+          "purpose": "Publish M-GOV-06's verdicts to the domain verdict aggregator.",
+          "busId": "ai-governance-regime.verdicts",
+          "busTag": "published-bus-ai-governance-regime-verdicts",
+          "targetMachine": "GOV00 Governance Verdict Aggregator",
+          "targetMachineFile": "GOV00_governance-verdict-aggregator.json",
+          "targetInputRegion": {
+            "offset": 17402,
+            "length": 24
+          },
+          "publishedOutputRegion": {
+            "offset": 17426,
+            "length": 4
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized verdict bits only."
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-06",
+        "title": "QuorumConsensusMonitor",
+        "kind": "fixture",
+        "workflow": "W2",
+        "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1",
+        "governedAssetType": null,
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.2.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "dwellSteps": 2,
+        "debounceSteps": 3
+      },
+      "agentBinding": {
+        "agent": "aigov-quorum-bundle-assembler",
+        "mode": "supervised-act",
+        "trigger": "ces_gov06_bundle_requested",
+        "allowedActions": [
+          "Canonicalize and route the approval bundle.",
+          "Report signature arrivals by org unit."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "agent-runtime",
+          "sensorId": "aigov.gov06.quorum-bundle-assembler.completion",
+          "name": "Quorum bundle assembler completion (GOV06)",
+          "region": {
+            "offset": 17043,
+            "length": 6
+          },
+          "semantics": [
+            "bundle_ready",
+            "bundle_failed",
+            "signed_risk",
+            "signed_engineering",
+            "signed_legal",
+            "signer_is_preparer"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "aigov-gov06-quorum-bundle-assembler-completion",
+            "sensorId": "aigov.gov06.quorum-bundle-assembler.completion",
+            "name": "Quorum bundle assembler completion (GOV06)",
+            "region": {
+              "offset": 17043,
+              "length": 6
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": []
+        }
+      },
+      "aiTrigger": "ces_gov06_bundle_requested",
+      "dispatchableAgent": "aigov-quorum-bundle-assembler",
+      "agentBehavior": "agent-candidates/ai-governance-regime/aigov-quorum-bundle-assembler.agent.json"
+    }
+  }
+}

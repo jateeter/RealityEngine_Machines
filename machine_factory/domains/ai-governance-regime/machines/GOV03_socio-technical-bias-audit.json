@@ -1,0 +1,1305 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "GOV03_socio-technical-bias-audit",
+    "name": "GOV03_socio-technical-bias-audit",
+    "description": "Bias and data-lineage audit on a domain admission: a domain that is not high-risk is exempt; for a high-risk domain the bias-audit preparer drafts the audit, a human signs it, and an unsigned audit at lease expiry blocks the admission.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 16992,
+        "length": 11
+      },
+      "output": {
+        "offset": 17252,
+        "length": 10
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "ces_gov03_exempt",
+        "name": "M-GOV-03 S0_Idle → S1_Exempt",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Idle",
+          "sourceToState": "S1_Exempt",
+          "regularExpression": "[req_domain_admit=1 ∧ comp_high_risk_domain=0 ∧ lane_in_workflow=1]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (3)",
+          "semanticAmendments": [],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov03_exempt-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov03_exempt-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov03_agent_requested",
+        "name": "M-GOV-03 S0_Init → S1_AgentRunning",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S0_Init",
+          "sourceToState": "S1_AgentRunning",
+          "regularExpression": "[req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ audit_drafted=0]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (3)",
+          "semanticAmendments": [],
+          "asserts": [
+            "AGENT_REQUESTED"
+          ],
+          "dispatchesAgent": "aigov-bias-audit-preparer"
+        },
+        "events": [
+          {
+            "id": "ces_gov03_agent_requested-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov03_agent_requested-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov03_agent_failed",
+        "name": "M-GOV-03 S1_AgentRunning → S_err_StepFailed",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_AgentRunning",
+          "sourceToState": "S_err_StepFailed",
+          "regularExpression": "[req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ audit_drafted=0] · [audit_failed=1]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (3)",
+          "semanticAmendments": [
+            "GOV-SA-13"
+          ],
+          "asserts": [
+            "PARKED",
+            "REWORK"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov03_agent_failed-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov03_agent_failed-e1"
+            ]
+          },
+          {
+            "id": "ces_gov03_agent_failed-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov03_agent_failed-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov03_audited",
+        "name": "M-GOV-03 S1_Drafted → S2_Audited",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_Drafted",
+          "sourceToState": "S2_Audited",
+          "regularExpression": "[req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ lane_in_workflow=1 ∧ audit_drafted=1 ∧ comp_bias_audit_signed=0] · [lane_re_pinned=0 ∧ comp_bias_audit_signed=1]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (3)",
+          "semanticAmendments": [],
+          "asserts": [
+            "PERMIT_DEPLOY"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov03_audited-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov03_audited-e1"
+            ]
+          },
+          {
+            "id": "ces_gov03_audited-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov03_audited-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_gov03_bias_block",
+        "name": "M-GOV-03 S1_Drafted → S_fail_BiasBlock",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "S1_Drafted",
+          "sourceToState": "S_fail_BiasBlock",
+          "regularExpression": "[req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ lane_in_workflow=1 ∧ lane_stale=0 ∧ comp_bias_audit_signed=0] · [lane_stale=1 ∧ comp_bias_audit_signed=0]",
+          "length": 2,
+          "specRule": "SPECIFICATION.md 4.3 (3)",
+          "semanticAmendments": [
+            "GOV-SA-16"
+          ],
+          "asserts": [
+            "HALT_PROMOTION",
+            "REWORK"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov03_bias_block-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov03_bias_block-e1"
+            ]
+          },
+          {
+            "id": "ces_gov03_bias_block-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov03_bias_block-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "gov03-exempt",
+        "events": [
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov03_exempt: [req_domain_admit=1 ∧ comp_high_risk_domain=0 ∧ lane_in_workflow=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov03_exempt"
+        }
+      },
+      {
+        "name": "gov03-agent-requested",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov03_agent_requested: [req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ audit_drafted=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov03_agent_requested"
+        }
+      },
+      {
+        "name": "gov03-agent-failed",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov03_agent_failed: [req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ audit_drafted=0] · [audit_failed=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov03_agent_failed"
+        }
+      },
+      {
+        "name": "gov03-audited",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov03_audited: [req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ lane_in_workflow=1 ∧ audit_drafted=1 ∧ comp_bias_audit_signed=0] · [lane_re_pinned=0 ∧ comp_bias_audit_signed=1]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov03_audited"
+        }
+      },
+      {
+        "name": "gov03-bias-block",
+        "events": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov03_bias_block: [req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ lane_in_workflow=1 ∧ lane_stale=0 ∧ comp_bias_audit_signed=0] · [lane_stale=1 ∧ comp_bias_audit_signed=0]",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov03_bias_block"
+        }
+      },
+      {
+        "name": "gov03-nominal",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "ai-governance-regime",
+      "domain": "ai-governance-regime",
+      "machineClass": "safety-compliance-checker",
+      "sequenceCount": 5,
+      "inputSemantics": [
+        "req_domain_admit (binary; fact: scripts/approve-domain.sh prepare (admission request); partial): a domain admission is requested",
+        "comp_high_risk_domain (binary; fact: domain-manifest.json classification (new attribute); new): the target domain is high-risk",
+        "reserved: lane_in_workflow (lifecycle frame lane 2; the asset is in its workflow)",
+        "reserved: lane_re_pinned (lifecycle frame lane 3; a frame document has been re-pinned (T16))",
+        "reserved: lane_approved (lifecycle frame lane 4; approved by a distinct human principal)",
+        "reserved: lane_rework (lifecycle frame lane 5; rework requested)",
+        "reserved: lane_step_running (lifecycle frame lane 6; a step is running)",
+        "reserved: lane_stale (lifecycle frame lane 7; the head is STALE (continuation TTL or lease expired))",
+        "audit_drafted (binary; aigov-bias-audit-preparer completion via aigov.gov03.bias-audit-preparer.completion): the audit draft is complete",
+        "audit_failed (binary; aigov-bias-audit-preparer completion via aigov.gov03.bias-audit-preparer.completion): the agent's step failed",
+        "comp_bias_audit_signed (binary; fact: document-workflow close of the frame's bias audit; partial): bias and data-lineage audit signed"
+      ],
+      "outputSemantics": [
+        "0: HALT_PROMOTION",
+        "1: REVOKE_EPOCH",
+        "2: PERMIT_DEPLOY",
+        "3: TRIGGER_INCIDENT",
+        "4: PARKED",
+        "5: APPROACH",
+        "6: LATCH",
+        "7: REWORK",
+        "8: AGENT_REQUESTED",
+        "9: OVERDUE"
+      ],
+      "tags": [
+        "ai-governance-regime",
+        "A-domain-onboarding-impact",
+        "M-GOV-03",
+        "W1"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/ai-governance-regime",
+        "primaryDomain": "ai-governance-regime",
+        "family": "A-domain-onboarding-impact",
+        "machineCode": "GOV03",
+        "workflowTags": [
+          "SocioTechnicalBiasAudit",
+          "W1"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "AIGOV::Governance Steward",
+        "runbook": "urn:re:aigov:runbook:A-domain-onboarding-impact:v1",
+        "escalationPolicy": "AIGOV::Governance Steward -> AIGOV::Approval Quorum; agents never resume an approval continuation (T15)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        }
+      },
+      "triggerConfig": {
+        "processId": "GOV03_socio-technical-bias-audit",
+        "processName": "M-GOV-03 SocioTechnicalBiasAudit",
+        "rules": [
+          {
+            "sequenceId": "ces_gov03_exempt",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-03 S0_Idle → S1_Exempt: [req_domain_admit=1 ∧ comp_high_risk_domain=0 ∧ lane_in_workflow=1]"
+          },
+          {
+            "sequenceId": "ces_gov03_agent_requested",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "M-GOV-03 S0_Init → S1_AgentRunning: [req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ audit_drafted=0]",
+            "dispatchAgent": "aigov-bias-audit-preparer"
+          },
+          {
+            "sequenceId": "ces_gov03_agent_failed",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-03 S1_AgentRunning → S_err_StepFailed: [req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ audit_drafted=0] · [audit_failed=1]"
+          },
+          {
+            "sequenceId": "ces_gov03_audited",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-03 S1_Drafted → S2_Audited: [req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ lane_in_workflow=1 ∧ audit_drafted=1 ∧ comp_bias_audit_signed=0] · [lane_re_pinned=0 ∧ comp_bias_audit_signed=1]"
+          },
+          {
+            "sequenceId": "ces_gov03_bias_block",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "M-GOV-03 S1_Drafted → S_fail_BiasBlock: [req_domain_admit=1 ∧ comp_high_risk_domain=1 ∧ lane_in_workflow=1 ∧ lane_stale=0 ∧ comp_bias_audit_signed=0] · [lane_stale=1 ∧ comp_bias_audit_signed=0]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "ai-governance-regime.document.gov03.TaskSufficiencyAndImpactDossier",
+          "type": "document-workflow-handoff",
+          "sourceMachine": "GOV03_socio-technical-bias-audit",
+          "targetMachine": "GOV05_aibom-provenance-pin",
+          "assetTypeId": "TaskSufficiencyAndImpactDossier",
+          "compositionOwner": "document-workflow-dispatcher",
+          "purpose": "Hand the frame's TaskSufficiencyAndImpactDossier to GOV05, its next consumer (agentic-workflow-contract.json W1); never infer a governance verdict from document content.",
+          "nativeVectorWrite": false
+        }
+      ],
+      "governanceSpec": {
+        "machineCode": "M-GOV-03",
+        "title": "SocioTechnicalBiasAudit",
+        "kind": "template",
+        "workflow": "W1",
+        "specRule": "SPECIFICATION.md 4.3 (3)",
+        "governedAssetType": "TaskSufficiencyAndImpactDossier",
+        "governedTargetDomain": "carried by the asset frame",
+        "agentCanResumeApproval": false
+      },
+      "conversion": {
+        "candidateVersion": "0.2.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "dwellSteps": 2,
+        "debounceSteps": 3
+      },
+      "agentBinding": {
+        "agent": "aigov-bias-audit-preparer",
+        "mode": "supervised-act",
+        "trigger": "ces_gov03_agent_requested",
+        "allowedActions": [
+          "Draft the bias and data-lineage audit document in the frame."
+        ],
+        "writeBack": {
+          "type": "pe-sensor",
+          "provider": "asset-lifecycle",
+          "sensorId": "aigov.gov03.bias-audit-preparer.completion",
+          "name": "Bias-audit preparer completion (GOV03)",
+          "region": {
+            "offset": 17000,
+            "length": 2
+          },
+          "semantics": [
+            "audit_drafted",
+            "audit_failed"
+          ],
+          "ttlMs": 300000,
+          "normalization": "already-normalized-0-1",
+          "ingest": {
+            "endpoint": "/api/integrations/completions",
+            "method": "POST",
+            "triggerPush": false,
+            "compactPush": true
+          },
+          "sourceMapping": {
+            "id": "aigov-gov03-bias-audit-preparer-completion",
+            "sensorId": "aigov.gov03.bias-audit-preparer.completion",
+            "name": "Bias-audit preparer completion (GOV03)",
+            "region": {
+              "offset": 17000,
+              "length": 2
+            },
+            "ttlMs": 300000
+          }
+        },
+        "riskControls": {
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "maxAutonomy": "supervised-act",
+          "blockedWhenRag": []
+        },
+        "autonomyPolicy": {
+          "mode": "supervised-act",
+          "stage": 2,
+          "writeBackType": "pe-sensor",
+          "canWriteBack": true,
+          "canStageActions": true,
+          "canExecuteActions": false,
+          "requiresHumanApproval": true,
+          "requiresRunbook": true,
+          "blockedWhenRag": []
+        }
+      },
+      "aiTrigger": "ces_gov03_agent_requested",
+      "dispatchableAgent": "aigov-bias-audit-preparer",
+      "agentBehavior": "agent-candidates/ai-governance-regime/aigov-bias-audit-preparer.agent.json",
+      "frameInputs": {
+        "lanes": "input cells 2-7, written by the lifecycle (reserved)",
+        "facts": "every other non-completion input, written into the clone's block by the lifecycle's frame source (GOV-R19)",
+        "completion": "input cells 8..9, the step agent's completion"
+      }
+    }
+  }
+}
