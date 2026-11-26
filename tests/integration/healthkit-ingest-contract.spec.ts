@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import type { APIRequestContext } from '@playwright/test';
+import { randomUUID } from 'node:crypto';
 
 /**
  * Integration: HealthKit ingest contract parity.
@@ -15,6 +16,10 @@ import type { APIRequestContext } from '@playwright/test';
  *     OR an equivalent "Authorization: Bearer <token>" header
  *   - response: { success, bridgeId, resolved[], unmapped[] } with HTTP
  *     200 (all resolved) / 207 (partial) / 400 (all unmapped)
+ *   - clock (RealityEngine_CI#600, the contract's "Clock"): the bridge stamps
+ *     `RE-Clock: instance=<uuid>; lamport=<n>` and may carry a body `clock`;
+ *     every PE accepts both, stamps its response, applies the receive rule,
+ *     and refuses a malformed header with 400 before the token check
  *
  * Resolution depends on the engine's configured source mappings, so this
  * suite asserts cross-engine parity of status codes and resolution counts
@@ -29,6 +34,8 @@ const PE_URL = process.env.PE_BASE_URL ?? '';
 const BRIDGE_TOKEN = process.env.HEALTHKIT_BRIDGE_TOKEN ?? '';
 
 const INGEST_PATH = '/api/integrations/healthkit/ingest';
+const CLOCK_PATH = '/api/clock';
+const CLOCK_HEADER = /^instance=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}; ?lamport=(0|[1-9][0-9]*)$/;
 const STATUS_PATH = '/api/integrations/healthkit/status';
 
 interface EngineInstance {
@@ -136,6 +143,45 @@ test.describe('HealthKit Ingest Contract Parity', () => {
       expect(r.resolved, `${r.id} resolved count vs ${first.id}`).toBe(first.resolved);
       expect(r.unmapped, `${r.id} unmapped count vs ${first.id}`).toBe(first.unmapped);
       expect(r.success, `${r.id} success vs ${first.id}`).toBe(first.success);
+    }
+  });
+
+  test('the bridge clock: a body clock changes nothing, the PE stamps and moves past the bridge', async ({ request }) => {
+    const engines = await fetchEngines(request);
+    expect(engines.length, 'no running PE instances found').toBeGreaterThan(0);
+    const bridge = randomUUID();
+    const auth = BRIDGE_TOKEN ? { bridgeToken: BRIDGE_TOKEN } : {};
+
+    for (const engine of engines) {
+      const plain = await request.post(`${engine.pe_url}${INGEST_PATH}`, { data: batchBody(auth) });
+      const plainBody = await plain.json();
+
+      const before = await request.get(`${engine.pe_url}${CLOCK_PATH}`);
+      expect(before.status(), `${engine.id} ${CLOCK_PATH}`).toBe(200);
+      const peLamport = Number((await before.json()).lamport);
+      // A bridge whose clock is well ahead of the PE's.
+      const sent = peLamport + 100_000;
+      const stamped = await request.post(`${engine.pe_url}${INGEST_PATH}`, {
+        data: batchBody({ ...auth, clock: { instance: bridge, lamport: sent - 1 } }),
+        headers: { 'RE-Clock': `instance=${bridge}; lamport=${sent}` },
+      });
+      expect(stamped.status(), `${engine.id} status with a clock vs without`).toBe(plain.status());
+      const stampedBody = await stamped.json();
+      expect(stampedBody.resolved.length, `${engine.id} resolved with a clock`).toBe(plainBody.resolved.length);
+      expect(stampedBody.unmapped.length, `${engine.id} unmapped with a clock`).toBe(plainBody.unmapped.length);
+
+      const header = stamped.headers()['re-clock'] ?? '';
+      const match = CLOCK_HEADER.exec(header);
+      expect(match, `${engine.id} response RE-Clock "${header}"`).not.toBeNull();
+      expect(Number(match![1]), `${engine.id} response lamport past the bridge's`).toBeGreaterThan(sent);
+
+      const malformed = await request.post(`${engine.pe_url}${INGEST_PATH}`, {
+        data: batchBody(),
+        headers: { 'RE-Clock': `instance=${bridge.toUpperCase()}; lamport=1` },
+      });
+      expect(malformed.status(), `${engine.id} malformed RE-Clock, before the token check`).toBe(400);
+      expect((await malformed.json()).error, `${engine.id} malformed error`).toBe('malformed RE-Clock header');
+      expect(malformed.headers()['re-clock'] ?? '', `${engine.id} the 400 is stamped`).toMatch(CLOCK_HEADER);
     }
   });
 
