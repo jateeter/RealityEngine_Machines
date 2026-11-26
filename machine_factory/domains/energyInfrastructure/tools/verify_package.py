@@ -22,6 +22,7 @@ from build_sunspec_power import check as check_sunspec_power
 from build_meter_intervals import check as check_meter_intervals
 from build_carbon_ledger import check as check_carbon_ledger
 from build_storage_carbon import check as check_storage_carbon
+from build_carbon_trajectories import check as check_carbon_trajectories
 
 EXCLUDED = {'asset-manifest.json', 'verification-summary.json'}
 EXPECTED_COUNTS = {'standards': 47, 'implementations': 29, 'sources': 19,
@@ -57,6 +58,7 @@ def check(root: Path) -> dict:
     require(not check_meter_intervals(root), 'Meter energy profile/interval source mismatch')
     require(not check_carbon_ledger(root), 'Synthetic carbon ledger source/input mismatch')
     require(not check_storage_carbon(root), 'Synthetic storage allocation source/input mismatch')
+    require(not check_carbon_trajectories(root), 'Synthetic carbon trajectory source/input mismatch')
     def safe(rel: str) -> Path:
         p = root / rel
         if Path(rel).is_absolute() or not p.resolve().is_relative_to(root):
@@ -278,6 +280,7 @@ def check(root: Path) -> dict:
             'offlineMeterEnergyModels':1,
             'syntheticImportCarbonLedgers':1,
             'syntheticStorageAllocations':1,
+            'syntheticTrajectoryArchives':1,
             'threatSchemaTemplates':57,'stixTopLevelObjectAndContainerTemplates':43,
             'supplementalNormativeStandardSnapshots':1,'taxiiResourceTemplates':9,'taxiiSupportingRecordTemplates':2,
             'genericRoleTemplates':19,'genericDocumentTemplates':7,'normativeClassCoverageComplete':False,

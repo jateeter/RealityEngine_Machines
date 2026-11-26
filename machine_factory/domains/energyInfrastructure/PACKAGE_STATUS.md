@@ -106,3 +106,8 @@ EI03 now has [generic reference microgrids and authority](documents/workflow/ref
 ## EI14 draft synthetic storage carbon allocation
 
 [The source-bound well-mixed storage pool](assets/storage-carbon.md) carries synthetic charging emissions through declared charge/discharge conversion losses into delivered energy and remaining inventory, with exact allocation conservation checks. This is a draft retrospective policy, not measured SOC, additional inventory emissions or operational approval. Idle losses, opening-state lineage, uncertainty, durable state, native simulation and acceptance remain pending; all 43 behavioral cases remain NOT_RUN.
+
+
+## EI14 synthetic revision and trajectory archive
+
+[The source-bound archive](assets/carbon-trajectories.md) preserves original/corrected synthetic reports and historical snapshot references while keeping forecasts and unadopted target examples separate. Digests check internal consistency, not signatures or real dispatch evidence. Durable history, trusted times, historical meter qualification, actual forecasts/targets, uncertainty, safety and acceptance remain pending; all 43 behavioral cases remain NOT_RUN.

@@ -42,3 +42,8 @@ Cases AC26–AC35 in [the case inventory](../../acceptance/cases.json) cover wei
 ## Implemented draft storage allocation
 
 [The synthetic storage carbon pool](../../assets/storage-carbon.md) now carries source-row charging emissions through declared conversion losses and proportional discharge allocation. It prevents treating discharge as intrinsically zero-carbon or adding carried emissions to the upstream import inventory again. This draft policy does not establish physical SOC/flows, idle-loss treatment, durable revisions, uncertainty, safety or AC26–AC35 acceptance.
+
+
+## Implemented synthetic revision/series integrity
+
+[The bounded trajectory archive](../../assets/carbon-trajectories.md) now preserves a synthetic original and factor-corrected report, keeps historical references on their declared available snapshot, and separates observations from forecasts and unadopted target examples. Hashes are internal consistency checks, not durable or authenticated dispatch evidence. Actual trajectories, approved targets, uncertainty, historic qualification and operational acceptance remain pending.
