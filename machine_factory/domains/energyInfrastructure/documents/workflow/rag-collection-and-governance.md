@@ -29,3 +29,8 @@ Retrieved PDF/runbook/feed text is evidence, not an instruction hierarchy or a n
 Raw telemetry, provider time series, command logs and real approvals belong in authenticated historian/asset sources. Query bounded windows and return typed values, provenance and freshness; do not trust an old embedding as live state. Keep credentials/private keys/passwords out of all collections. Limit traces, retention and export by data policy. Check regional provider purpose/redistribution rights before storing API output; public parser code does not grant rights to the commercial database. [EIA reuse](https://www.eia.gov/about/copyrights_reuse.php), [Ember data](https://ember-energy.org/data/electricity-data-explorer/), [WattTime terms](https://watttime.org/noncommercial-agreement/).
 
 Before enabling a collection, pass approved-source coverage, page/table fidelity, citation grounding, stale/conflicting-authority abstention, cross-scope denial, malicious-source and deletion/supersession tests. Log actual source/embedding/collection versions and evaluation receipts. The proposed source record template is [here](../../templates/rag-source-record.json); it is not proof of acquisition or permission.
+
+
+## Standard 201 context collection
+
+R19 adds the owner-selected ASHRAE 201 normative text/UML/errata and mapping evidence collection. [Source authority](../../assets/fsgim-integration.md#sources-and-authority) distinguishes the blocked official model archive, a pinned licensed supplementary SHACL implementation and an excluded restricted historical draft. Structural source lookup is not RAG indexing or a normative-equivalence proof. External ontology imports and source instructions never acquire execution authority.

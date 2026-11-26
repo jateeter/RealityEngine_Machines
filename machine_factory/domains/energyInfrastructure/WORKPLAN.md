@@ -123,3 +123,8 @@ EI03 now has [generic reference microgrids and authority](documents/workflow/ref
 ### EI04 TAXII resource taxonomy
 
 [SC16 TAXII resource coverage](assets/taxii-resources.md) now includes nine resources and two supporting records, an unchanged official source snapshot with Notices, generated project schemas and offline synthetic fixtures. This is resource-table coverage only; full prose/errata, secure peer behavior, normative completion and behavioral acceptance remain pending.
+
+
+## Owner-selected FSGIM integration context
+
+[ASHRAE Standard 201](assets/fsgim-integration.md), recorded as OP23, now governs the asset integration context. The current inventory has 47 standards/framework entries and 19 RAG source families. Crosswalks cover 19 reference roles, 112 SunSpec models and 58 OPC UA DI types. The original published backlog remains a historical snapshot; current context and source progress are explicit additions. Normative UML collection/equivalence, exact property/conformance mappings, reviewed operational instances and actual peer/simulator integration remain pending.

@@ -61,3 +61,8 @@ The generator uses only the current checked-in scenario scope and generic fixtur
 ## TAXII resource class templates
 
 [SC16 TAXII resources](taxii-resources.md) now include the official unchanged standard HTML and rights/source receipt, nine resource templates, two supporting record templates, project schemas and a complete synthetic resource fixture set. This advances resource-table coverage; full protocol/prose review, peer integration and normative completion remain pending.
+
+
+## Primary energy-asset integration context
+
+[ASHRAE 201 FSGIM](fsgim-integration.md) is now the owner-selected context for appropriate energy assets. [OPC UA DI](device-types.md) adds 58 formal type templates and 447 source declarations, using the exact required core model. Context crosswalks preserve native semantics and cover all 19 roles and 170 SunSpec/DI type/model templates. The source and normative-equivalence gaps remain explicit.

@@ -68,8 +68,8 @@ def render(root):
             'limitation':'A generic fixture cannot substitute for actual software execution, reviewer identity or admission approval.'}
             for kind,fields in documents.items()],
         'standardCoverage':[{'standardId':s['id'],'reference':s['reference'],
-            'disposition':'PUBLIC_MODEL_SNAPSHOT_COVERED_NORMATIVE_REVIEW_PENDING' if s['id']=='OP08' else ('PARTIAL_STIX_TAXII_CLASS_REVIEW_INTEGRATION_PENDING' if s['id']=='SC16' else 'NORMATIVE_CLASS_REVIEW_PENDING'),
-            'relatedClassCatalog':'assets/threat-class-catalog.json' if s['id']=='SC16' else None,
+            'disposition':{'OP08':'PUBLIC_MODEL_SNAPSHOT_COVERED_NORMATIVE_REVIEW_PENDING','SC16':'PARTIAL_STIX_TAXII_CLASS_REVIEW_INTEGRATION_PENDING','OP17':'PARTIAL_OPCUA_DI_TYPES_CORE_MQTT_PENDING','OP23':'OWNER_SELECTED_FSGIM_CONTEXT_NORMATIVE_MAPPING_PENDING'}.get(s['id'],'NORMATIVE_CLASS_REVIEW_PENDING'),
+            'relatedClassCatalog':{'SC16':'assets/threat-class-catalog.json','OP17':'assets/device-class-catalog.json','OP23':'assets/fsgim-integration-context.json'}.get(s['id']),
             **({'relatedResourceCatalog':'assets/taxii-resource-catalog.json'} if s['id']=='SC16' else {}),
             'primarySources':s['primarySources'],'requiredNextStep':'Freeze lawful exact edition/profile; enumerate classes with clause locators or substantiate no taxonomy; map every applicable class to template.',
             'fulfillmentReceipt':None} for s in standards]}

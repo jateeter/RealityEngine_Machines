@@ -67,3 +67,13 @@ const topologyNegatives=[
  ['reordered duplicate source binding',d=>{const a=inverter(d);const p=structuredClone(a.properties[0]);p.name='reordered';p.sourcePoint={pointer:p.sourcePoint.pointer,templateId:p.sourcePoint.templateId};a.properties.push(p);}]
 ];
 for(const [name,mutate] of topologyNegatives)test(`rejects ${name}`,()=>{const d=structuredClone(referenceFixtures[0]);mutate(d);assert.ok(validateInstances(d).length);});
+
+test('rejects a substituted primary integration context',()=>{
+  const d=structuredClone(fixture);d.integrationContextStandardId='OP17';assert.ok(validateInstances(d).length);
+});
+test('rejects missing FSGIM context linkage',()=>{
+  const d=structuredClone(fixture);delete d.integrationContextArtifact;assert.ok(validateInstances(d).length);
+});
+test('rejects the older context-free fixture revision',()=>{
+  const d=structuredClone(fixture);d.schemaVersion='1.0.0';assert.ok(validateInstances(d).length);
+});

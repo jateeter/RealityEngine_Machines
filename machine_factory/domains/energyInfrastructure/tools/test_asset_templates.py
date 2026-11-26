@@ -23,7 +23,7 @@ class AssetTemplateTests(unittest.TestCase):
         self.assertEqual(check(ROOT),[])
         catalog=render(ROOT)
         self.assertEqual(len(catalog['templates']),112)
-        self.assertEqual(len(catalog['standardCoverage']),46)
+        self.assertEqual(len(catalog['standardCoverage']),47)
         self.assertEqual(len(catalog['genericRoleTemplates']),19)
         self.assertEqual(len(catalog['genericDocumentTemplates']),7)
         self.assertTrue(all(len(d['genericAllowedCaseIds'])==43 for d in catalog['genericDocumentTemplates']))
