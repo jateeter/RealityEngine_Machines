@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.example.org/schemas/kline-defs.schema.json",
+  "title": "Shared definitions for the K-line records",
+  "description": "The pieces re-kline/1, re-kline-event/1 and re-isre-composition/1 share (RealityEngine_CI SURFACE_SPEC.md, 'K-lines and runtime snapshots', 'The instance clock').",
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "A participant UUID in canonical lower-case hex."
+    },
+    "lamport": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "clock": {
+      "description": "An instance clock {instance, lamport, commit, step} (RealityEngine_CI#600). lamport >= commit.",
+      "type": "object",
+      "required": [
+        "instance",
+        "lamport",
+        "commit",
+        "step"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "instance": {
+          "$ref": "#/$defs/uuid"
+        },
+        "lamport": {
+          "$ref": "#/$defs/lamport"
+        },
+        "commit": {
+          "$ref": "#/$defs/lamport"
+        },
+        "step": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "peClock": {
+      "description": "A PE's own clock when it recorded a step.",
+      "type": "object",
+      "required": [
+        "instance",
+        "lamport"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "instance": {
+          "$ref": "#/$defs/uuid"
+        },
+        "lamport": {
+          "$ref": "#/$defs/lamport"
+        }
+      }
+    },
+    "stamp": {
+      "description": "An RE-Clock value {instance, lamport}: a causing event.",
+      "type": "object",
+      "required": [
+        "instance",
+        "lamport"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "instance": {
+          "$ref": "#/$defs/uuid"
+        },
+        "lamport": {
+          "$ref": "#/$defs/lamport"
+        }
+      }
+    },
+    "klineId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(0|[1-9][0-9]*)$",
+      "description": "<instance>:<lamport at open>."
+    },
+    "cellRange": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "integer",
+          "minimum": 0
+        }
+      ],
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "[first, last] cell, inclusive, absolute input-space indices."
+    },
+    "entry": {
+      "description": "The trajectory entry shape: stepNumber, length (dense width), nonZero ascending by index.",
+      "type": "object",
+      "required": [
+        "stepNumber",
+        "length",
+        "nonZero"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "stepNumber": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "length": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "nonZero": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "index",
+              "value"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "value": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "active": {
+      "description": "An active entry: corpus names and ids only, never minted machine ids.",
+      "type": "object",
+      "required": [
+        "machine",
+        "sequence",
+        "event",
+        "justMatched"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "machine": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sequence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event": {
+          "type": "string",
+          "minLength": 1
+        },
+        "justMatched": {
+          "type": "boolean"
+        }
+      }
+    },
+    "contribution": {
+      "description": "OSRE(m): one machine's own output at a step, before cell arbitration, as the step's mergeBatch carries it.",
+      "type": "object",
+      "required": [
+        "machine",
+        "region",
+        "values"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "machine": {
+          "type": "string",
+          "minLength": 1
+        },
+        "region": {
+          "type": "object",
+          "required": [
+            "offset",
+            "length"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "length": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "pair": {
+      "type": "object",
+      "required": [
+        "stepNumber",
+        "isre",
+        "osre",
+        "contributions"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "stepNumber": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "isre": {
+          "$ref": "#/$defs/entry"
+        },
+        "osre": {
+          "$ref": "#/$defs/entry"
+        },
+        "contributions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/contribution"
+          }
+        }
+      }
+    },
+    "corpus": {
+      "type": "object",
+      "required": [
+        "algorithm",
+        "fingerprint"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256/resident-declared-v1"
+        },
+        "fingerprint": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}
