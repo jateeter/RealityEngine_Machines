@@ -68,7 +68,8 @@ def render(root):
             'limitation':'A generic fixture cannot substitute for actual software execution, reviewer identity or admission approval.'}
             for kind,fields in documents.items()],
         'standardCoverage':[{'standardId':s['id'],'reference':s['reference'],
-            'disposition':'PUBLIC_MODEL_SNAPSHOT_COVERED_NORMATIVE_REVIEW_PENDING' if s['id']=='OP08' else 'NORMATIVE_CLASS_REVIEW_PENDING',
+            'disposition':'PUBLIC_MODEL_SNAPSHOT_COVERED_NORMATIVE_REVIEW_PENDING' if s['id']=='OP08' else ('PARTIAL_STIX_OBJECT_SCHEMA_REVIEW_TAXII_PENDING' if s['id']=='SC16' else 'NORMATIVE_CLASS_REVIEW_PENDING'),
+            'relatedClassCatalog':'assets/threat-class-catalog.json' if s['id']=='SC16' else None,
             'primarySources':s['primarySources'],'requiredNextStep':'Freeze lawful exact edition/profile; enumerate classes with clause locators or substantiate no taxonomy; map every applicable class to template.',
             'fulfillmentReceipt':None} for s in standards]}
 
