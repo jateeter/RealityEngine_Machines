@@ -101,6 +101,11 @@ CI_ROOT = _discover_ci_root()
 CI_DIR = CI_ROOT or (REPO_ROOT.parent / "RealityEngine_CI")
 SHARD_DIR = CI_DIR / "config" / "ces-contracts"
 LOCAL_AI_MACHINES = REPO_ROOT.parent / "localAIStack" / "data" / "machines"
+# Machine-factory candidates: not admitted, so not under machines/, but a
+# test-environment selection may name them (RealityEngine_CI
+# config/extension-corpus.txt). Only each package's machines/ directory is a
+# root; its manifests, Sources and agent candidates are not machines.
+FACTORY_DOMAINS = REPO_ROOT / "machine_factory" / "domains"
 
 # The regression corpus once had a shard of its own outside the directory,
 # config/ces-contracts.json, written by the retired recorder. record-ces-contracts.py
@@ -140,10 +145,21 @@ def corpus_roots() -> list[Path]:
     return [MACHINES, LOCAL_AI_MACHINES]
 
 
+def factory_machine_dirs() -> list[Path]:
+    """Each factory package's machines/ directory, in name order."""
+    if not FACTORY_DOMAINS.is_dir():
+        return []
+    return sorted(d / "machines" for d in FACTORY_DOMAINS.iterdir() if (d / "machines").is_dir())
+
+
 def corpus_files() -> dict[str, Path]:
-    """Basename → path across every root. Corpus filenames are globally unique."""
+    """Basename → path across every root. Corpus filenames are globally unique.
+
+    The corpus and localAIStack come first, so an admitted machine always wins
+    over a factory candidate of the same name.
+    """
     out: dict[str, Path] = {}
-    for root in corpus_roots():
+    for root in corpus_roots() + factory_machine_dirs():
         if root.is_dir():
             for f in sorted(root.rglob("*.json")):
                 out.setdefault(f.name, f)
