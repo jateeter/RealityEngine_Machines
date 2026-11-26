@@ -35,7 +35,7 @@ step in [PACKAGE_STATUS.md](PACKAGE_STATUS.md) is redone. Findings marked
 | GOV-R26 | GOV13's evidence pack reads the lifecycle's hash-chained log; the engine's own record is Design | lifecycle, engines | GOV13's producer reads the lifecycle log (implemented); the engine-side hash chain is staged with GOV13 |
 | GOV-R27 | An agent must never resume an approval continuation (T15) | agent runtime | an explicit check in the A2A work: agents hold task-scoped capabilities only |
 | GOV-R28 | The ISO 42001 / EU AI Act crosswalk needs re-deriving | alignment | step 3 `source-requirements.json`, per milestone (GOV-SD-14) |
-| GOV-R29 | The V0.18 baseline lags the v0.0.3 implementation | every citation | **owner 2026-11-25**: a new baseline from v0.0.3 progress. Draft V0.19 (sha256 `5c60c2cf…`, heads of 25 November 2026) is with the owner; it is intaken and pinned like V0.18 (GOV-SD-15) once accepted |
+| GOV-R29 | The V0.18 baseline lags the v0.0.3 implementation | every citation | **owner 2026-11-25**: a new baseline from v0.0.3 progress. **provisionally closed 2026-11-25**: V0.19 (heads of 25 November 2026) is provisionally accepted and pinned at `intake/BASELINE-V0.19-NIST.md` (GOV-SD-18); final acceptance pending |
 
 ## GOV-R01: neither corpus is in the canonical machine form
 
