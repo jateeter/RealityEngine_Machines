@@ -73,3 +73,8 @@ The identity checker verifies all 187 dispositions and current repository name/p
 ## EI14 synthetic imported-electricity carbon ledger
 
 [The bounded retrospective ledger](../assets/import-carbon-ledger.md) now computes exact energy-weighted imported-electricity emissions/intensity from compatible synthetic meter intervals and factors. Imports/exports remain separate; incompatible, missing or stale inputs cannot become zero intensity. Real providers, uncertainty, storage allocation, trajectories, safety/behavioral acceptance and corpus admission remain pending. All 43 behavioral cases remain NOT_RUN.
+
+
+## EI14 draft synthetic storage carbon allocation
+
+[The source-bound well-mixed storage pool](../assets/storage-carbon.md) carries synthetic charging emissions through declared charge/discharge conversion losses into delivered energy and remaining inventory, with exact allocation conservation checks. This is a draft retrospective policy, not measured SOC, additional inventory emissions or operational approval. Idle losses, opening-state lineage, uncertainty, durable state, native simulation and acceptance remain pending; all 43 behavioral cases remain NOT_RUN.
