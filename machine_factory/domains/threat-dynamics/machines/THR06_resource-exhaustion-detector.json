@@ -1,0 +1,957 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "THR06_resource-exhaustion-detector",
+    "name": "THR06_resource-exhaustion-detector",
+    "description": "Resource exhaustion (NISTAML.066): a tool-call budget in its approach band is suspected; a sustained action loop, budget exhaustion or runaway reasoning trace is confirmed.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17520,
+        "length": 3
+      },
+      "output": {
+        "offset": 17640,
+        "length": 8
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ces_thr06_clear",
+        "name": "THR06 clear",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "CLEAR"
+          ],
+          "regularExpression": "[obs_action_loop_rate∈[0,0.5] ∧ obs_tool_budget_used∈[0,0.7] ∧ obs_reasoning_len∈[0,0.7]]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.1.2 (Availability Violations)",
+          "attackClass": "NISTAML.066",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr06_clear-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.25,
+                "threshold": 0.25,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.35,
+                "threshold": 0.35,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.35,
+                "threshold": 0.35,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr06_clear-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr06_budget_approach",
+        "name": "THR06 budget-approach",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_SUSPECTED",
+            "STAGE_EXECUTION"
+          ],
+          "regularExpression": "[obs_action_loop_rate∈[0,0.8] ∧ obs_tool_budget_used∈[0.7001,0.9]]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.1.2 (Availability Violations)",
+          "attackClass": "NISTAML.066",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr06_budget_approach-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.4,
+                "threshold": 0.4,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.80005,
+                "threshold": 0.09995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr06_budget_approach-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr06_action_loop",
+        "name": "THR06 action-loop",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_CONFIRMED",
+            "STAGE_EXECUTION"
+          ],
+          "regularExpression": "[obs_action_loop_rate∈[0.8001,1]]{3}",
+          "length": 3,
+          "specRule": "SP 2400-102e2026 ipd 4.1.2 (Availability Violations)",
+          "attackClass": "NISTAML.066",
+          "semanticAmendments": [
+            "TD-SA-02"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_thr06_action_loop-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.90005,
+                "threshold": 0.09995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr06_action_loop-e1"
+            ]
+          },
+          {
+            "id": "ces_thr06_action_loop-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.90005,
+                "threshold": 0.09995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr06_action_loop-e2"
+            ]
+          },
+          {
+            "id": "ces_thr06_action_loop-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.90005,
+                "threshold": 0.09995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr06_action_loop-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr06_budget_exhausted",
+        "name": "THR06 budget-exhausted",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_CONFIRMED",
+            "STAGE_EXECUTION"
+          ],
+          "regularExpression": "[obs_tool_budget_used∈[0.9001,1]]{3}",
+          "length": 3,
+          "specRule": "SP 2400-102e2026 ipd 4.1.2 (Availability Violations)",
+          "attackClass": "NISTAML.066",
+          "semanticAmendments": [
+            "TD-SA-02"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_thr06_budget_exhausted-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.95005,
+                "threshold": 0.04995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr06_budget_exhausted-e1"
+            ]
+          },
+          {
+            "id": "ces_thr06_budget_exhausted-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.95005,
+                "threshold": 0.04995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr06_budget_exhausted-e2"
+            ]
+          },
+          {
+            "id": "ces_thr06_budget_exhausted-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.95005,
+                "threshold": 0.04995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr06_budget_exhausted-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr06_reasoning_runaway",
+        "name": "THR06 reasoning-runaway",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_CONFIRMED",
+            "STAGE_PLANNING"
+          ],
+          "regularExpression": "[obs_reasoning_len∈[0.9001,1]]{3}",
+          "length": 3,
+          "specRule": "SP 2400-102e2026 ipd 4.1.2 (Availability Violations)",
+          "attackClass": "NISTAML.066",
+          "semanticAmendments": [
+            "TD-SA-02"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_thr06_reasoning_runaway-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.95005,
+                "threshold": 0.04995,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr06_reasoning_runaway-e1"
+            ]
+          },
+          {
+            "id": "ces_thr06_reasoning_runaway-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.95005,
+                "threshold": 0.04995,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr06_reasoning_runaway-e2"
+            ]
+          },
+          {
+            "id": "ces_thr06_reasoning_runaway-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.95005,
+                "threshold": 0.04995,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr06_reasoning_runaway-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "thr06-clear",
+        "events": [
+          [
+            0.25,
+            0.35,
+            0.35
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr06_clear: [obs_action_loop_rate∈[0,0.5] ∧ obs_tool_budget_used∈[0,0.7] ∧ obs_reasoning_len∈[0,0.7]]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr06_clear"
+        }
+      },
+      {
+        "name": "thr06-budget-approach",
+        "events": [
+          [
+            0.4,
+            0.8,
+            0.2
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr06_budget_approach: [obs_action_loop_rate∈[0,0.8] ∧ obs_tool_budget_used∈[0.7001,0.9]]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr06_budget_approach"
+        }
+      },
+      {
+        "name": "thr06-action-loop",
+        "events": [
+          [
+            0.9001,
+            0.2,
+            0.2
+          ],
+          [
+            0.9001,
+            0.2,
+            0.2
+          ],
+          [
+            0.9001,
+            0.2,
+            0.2
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr06_action_loop: [obs_action_loop_rate∈[0.8001,1]]{3}",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr06_action_loop"
+        }
+      },
+      {
+        "name": "thr06-budget-exhausted",
+        "events": [
+          [
+            0.1,
+            0.9501,
+            0.2
+          ],
+          [
+            0.1,
+            0.9501,
+            0.2
+          ],
+          [
+            0.1,
+            0.9501,
+            0.2
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr06_budget_exhausted: [obs_tool_budget_used∈[0.9001,1]]{3}",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr06_budget_exhausted"
+        }
+      },
+      {
+        "name": "thr06-reasoning-runaway",
+        "events": [
+          [
+            0.1,
+            0.2,
+            0.9501
+          ],
+          [
+            0.1,
+            0.2,
+            0.9501
+          ],
+          [
+            0.1,
+            0.2,
+            0.9501
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr06_reasoning_runaway: [obs_reasoning_len∈[0.9001,1]]{3}",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr06_reasoning_runaway"
+        }
+      },
+      {
+        "name": "thr06-nominal",
+        "events": [
+          [
+            0.1,
+            0.2,
+            0.2
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "threat-dynamics",
+      "domain": "threat-dynamics",
+      "machineClass": "signal-monitor",
+      "sequenceCount": 5,
+      "inputSemantics": [
+        "obs_action_loop_rate (continuous [0,1]; sensor: agent-trace observer on the A2A runtime (localLangChainStack, CI#841); new; simulated until staged): rate of repeated identical actions",
+        "obs_tool_budget_used (continuous [0,1]; sensor: agent-trace observer on the A2A runtime (localLangChainStack, CI#841); new; simulated until staged): fraction of the task's tool-call budget used",
+        "obs_reasoning_len (continuous [0,1]; sensor: agent-trace observer on the A2A runtime (localLangChainStack, CI#841); new; simulated until staged): reasoning-trace length relative to its budget"
+      ],
+      "outputSemantics": [
+        "0: THREAT_SUSPECTED",
+        "1: THREAT_CONFIRMED",
+        "2: CLEAR",
+        "3: STAGE_PLANNING",
+        "4: STAGE_EXECUTION",
+        "5: STAGE_OBSERVATION",
+        "6: GATE_PASS",
+        "7: GATE_FAIL"
+      ],
+      "tags": [
+        "threat-dynamics",
+        "availability",
+        "NISTAML.066",
+        "fixture",
+        "observe-only"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/threat-dynamics",
+        "primaryDomain": "threat-dynamics",
+        "family": "availability",
+        "machineCode": "THR06",
+        "workflowTags": [
+          "ResourceExhaustionDetector",
+          "NISTAML.066"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "THREAT::Threat Observer",
+        "runbook": "urn:re:threat:runbook:availability:v1",
+        "escalationPolicy": "THREAT::Threat Observer publishes; ai-governance-regime decides (TD-SD-02)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        }
+      },
+      "triggerConfig": {
+        "processId": "THR06_resource-exhaustion-detector",
+        "processName": "THR06 ResourceExhaustionDetector",
+        "rules": [
+          {
+            "sequenceId": "ces_thr06_clear",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "THR06 CLEAR: [obs_action_loop_rate∈[0,0.5] ∧ obs_tool_budget_used∈[0,0.7] ∧ obs_reasoning_len∈[0,0.7]]"
+          },
+          {
+            "sequenceId": "ces_thr06_budget_approach",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "THR06 THREAT_SUSPECTED + STAGE_EXECUTION: [obs_action_loop_rate∈[0,0.8] ∧ obs_tool_budget_used∈[0.7001,0.9]]"
+          },
+          {
+            "sequenceId": "ces_thr06_action_loop",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THR06 THREAT_CONFIRMED + STAGE_EXECUTION: [obs_action_loop_rate∈[0.8001,1]]{3}"
+          },
+          {
+            "sequenceId": "ces_thr06_budget_exhausted",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THR06 THREAT_CONFIRMED + STAGE_EXECUTION: [obs_tool_budget_used∈[0.9001,1]]{3}"
+          },
+          {
+            "sequenceId": "ces_thr06_reasoning_runaway",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THR06 THREAT_CONFIRMED + STAGE_PLANNING: [obs_reasoning_len∈[0.9001,1]]{3}"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "threat-dynamics.levels.thr06",
+          "type": "published-domain-bus-producer",
+          "role": "ResourceExhaustionDetector",
+          "sourceMachine": "THR06_resource-exhaustion-detector",
+          "sourceOutputRegion": {
+            "offset": 17640,
+            "length": 3
+          },
+          "targetInputElements": [
+            15,
+            16,
+            17
+          ],
+          "normalizedElements": [
+            "THR06 THREAT_SUSPECTED",
+            "THR06 THREAT_CONFIRMED",
+            "THR06 CLEAR"
+          ],
+          "purpose": "Publish THR06's observation level to the threat roll-up.",
+          "busId": "threat-dynamics.levels",
+          "busTag": "published-bus-threat-dynamics-levels",
+          "targetMachine": "THR00 Threat Level Rollup",
+          "targetMachineFile": "THR00_threat-level-rollup.json",
+          "targetInputRegion": {
+            "offset": 17680,
+            "length": 27
+          },
+          "publishedOutputRegion": {
+            "offset": 17707,
+            "length": 3
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized observation bits only."
+        }
+      ],
+      "threatSpec": {
+        "attackClass": "NISTAML.066",
+        "title": "ResourceExhaustionDetector",
+        "reference": "SP 2400-102e2026 ipd 4.1.2 (Availability Violations)",
+        "specEdition": "NIST SP 2400-102e2026 ipd",
+        "observeOnly": true,
+        "decides": false,
+        "stages": "SP 2400-102e2026 ipd 4.1.1: planning, execution, observation"
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "debounceSteps": 3,
+        "testPath": "threat-sources.json simulations (simulated Sources through the ISRE)"
+      }
+    }
+  }
+}

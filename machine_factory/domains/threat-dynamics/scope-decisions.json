@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0.0",
+  "domain": "threat-dynamics",
+  "date": "2026-11-25",
+  "authority": "Owner directions in this development task",
+  "decisions": [
+    {
+      "id": "TD-SD-01",
+      "decision": "threat-dynamics is a peer domain of ai-governance-regime holding threat classification and dynamic, reactive threat observability. Its specification is NIST SP 2400-102e2026 ipd (Adversarial Machine Learning: A Taxonomy and Terminology of Attacks and Mitigations, initial public draft), section 4, the agentic attack classes NISTAML.061-.067.",
+      "source": "ai-governance-regime GOV-SD-10 (owner, 2026-11-25)",
+      "constraints": [
+        "SP 2400-102 is an attack taxonomy, not a control framework: its identifiers name attack classes here and never governance controls.",
+        "The edition is an initial public draft (comments due 2026-12-18). Re-pin at the final edition and re-check every quoted identifier; the draft writes 'SI' where earlier editions wrote 'AI', so identifiers and section titles are quoted exactly.",
+        "Out of scope, as in SP 2400-102: traditional cybersecurity and non-adversarial inaccuracy."
+      ]
+    },
+    {
+      "id": "TD-SD-02",
+      "decision": "Observe, never decide. threat-dynamics publishes observations (CLEAR, THREAT_SUSPECTED, THREAT_CONFIRMED, the SP 2400-102 4.1.1 stage, and the red-team GATE_PASS / GATE_FAIL) and Sources; ai-governance-regime consumes them and decides. No machine here halts, revokes, permits, raises an incident or latches, and none dispatches an agent.",
+      "source": "ai-governance-regime GOV-SD-11 (owner, 2026-11-25)",
+      "constraints": [
+        "The two domains are coupled only through the published lanes in threat-sources.json.",
+        "Triage and response agents stay in ai-governance-regime (GOV07, GOV16)."
+      ]
+    },
+    {
+      "id": "TD-SD-03",
+      "decision": "The candidate machines are 11: THR01-THR07, one detector per class NISTAML.061-.067; THR08 the red-team result gate (governance gap 3); THR09 vendor canary drift (gap 6); THR10 cross-domain exposure (gap 5); THR00 the worst-wins threat roll-up over the observers (THR08 excluded: a gate is not a live threat level).",
+      "constraints": [
+        "Each detector has adversarial and benign near-miss simulations (SP 2400-102 5.1.3); every confirming and gate CES is fired by a simulation."
+      ]
+    },
+    {
+      "id": "TD-SD-04",
+      "decision": "Every input is a Source through the ISRE. Until a milestone stages its producer, each input cell is a simulated Source with SURFACE_SPEC.md Sources & Sensors semantics (create body: type simulated, region, pattern, frequency, amplitude, dcOffset), composed by the PE. The simulations in threat-sources.json are the test path; the machines' inputSequences are machine-granularity authoring fixtures and are not a substitute.",
+      "source": "ai-governance-regime GOV-SD-16 (owner, 2026-11-25)",
+      "constraints": [
+        "Only patterns deterministic in globalStep: binary, constant, square, linear-ramp. sine is excluded for rounding, random-walk and gaussian-noise for nondeterminism.",
+        "Each simulation resets both halves (POST {re}/api/engine/reset, POST {pe}/api/reset) before it runs.",
+        "Producers are staged per milestone (GOV-SD-14); a staged producer replaces the simulated Source for its cell, with the same region and semantics."
+      ]
+    },
+    {
+      "id": "TD-SD-05",
+      "decision": "Band [17440:17759], directly above ai-governance-regime [16960:17429]: inputs 16 cells per machine from 17440, outputs 8 per machine from 17600, the roll-up input [17680:17706] and output [17707:17709]. Code prefix THR.",
+      "constraints": [
+        "Above the corpus vector budget (16944): the domain runs in the shared extension corpus with ai-governance-regime (GOV-SD-12, MACHINE_CONCEPT 9.3); the standard budget is unchanged.",
+        "Below the clone space (20480)."
+      ]
+    },
+    {
+      "id": "TD-SD-06",
+      "decision": "Admission order: threat-dynamics is admitted before ai-governance-regime, the producer before its consumer.",
+      "source": "ai-governance-regime roadmap, Phase 5"
+    },
+    {
+      "id": "TD-SD-07",
+      "decision": "The semantic amendments TD-SA-01..06 are approved as proposed, with the suggested resolutions of the open review items (owner, 2026-11-25): THR08 passes at an attack success rate of 0.05 or less (TD-SA-05); a 3-step debounce confirms a continuous breach (TD-SA-02); THR09 and THR10 keep GOV16's bands (TD-SA-06); the simulated-Source sample formula is added to SURFACE_SPEC (TD-R04).",
+      "source": "owner: \"use your suggestions and i approve all of them\"; closes TD-R03"
+    }
+  ]
+}

@@ -1,0 +1,874 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "THR05_malicious-agent-detector",
+    "name": "THR05_malicious-agent-detector",
+    "description": "Malicious agents (NISTAML.065): a tampered inter-agent message or a spreading injection is suspected; a sustained self-replicating injection, or sustained context overflow from peers, is confirmed.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17504,
+        "length": 3
+      },
+      "output": {
+        "offset": 17632,
+        "length": 8
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ces_thr05_clear",
+        "name": "THR05 clear",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "CLEAR"
+          ],
+          "regularExpression": "[obs_peer_msg_unauth=0 ∧ obs_injection_spread∈[0,0.1] ∧ obs_peer_ctx_share∈[0,0.6]]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.6 (attacks from malicious agents)",
+          "attackClass": "NISTAML.065",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr05_clear-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.05,
+                "threshold": 0.05,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.3,
+                "threshold": 0.3,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr05_clear-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr05_tampered_message",
+        "name": "THR05 tampered-message",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_SUSPECTED",
+            "STAGE_OBSERVATION"
+          ],
+          "regularExpression": "[obs_peer_msg_unauth=1 ∧ obs_injection_spread∈[0,0.3]]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.6 (attacks from malicious agents)",
+          "attackClass": "NISTAML.065",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr05_tampered_message-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.15,
+                "threshold": 0.15,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr05_tampered_message-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr05_spread_rising",
+        "name": "THR05 spread-rising",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_SUSPECTED",
+            "STAGE_OBSERVATION"
+          ],
+          "regularExpression": "[obs_peer_msg_unauth=0 ∧ obs_injection_spread∈[0.1001,0.3]]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.6 (attacks from malicious agents)",
+          "attackClass": "NISTAML.065",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr05_spread_rising-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.20005,
+                "threshold": 0.09995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr05_spread_rising-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr05_self_replicating",
+        "name": "THR05 self-replicating",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_CONFIRMED",
+            "STAGE_EXECUTION"
+          ],
+          "regularExpression": "[obs_injection_spread∈[0.3001,1]]{3}",
+          "length": 3,
+          "specRule": "SP 2400-102e2026 ipd 4.6 (attacks from malicious agents)",
+          "attackClass": "NISTAML.065",
+          "semanticAmendments": [
+            "TD-SA-02"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_thr05_self_replicating-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.65005,
+                "threshold": 0.34995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr05_self_replicating-e1"
+            ]
+          },
+          {
+            "id": "ces_thr05_self_replicating-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.65005,
+                "threshold": 0.34995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr05_self_replicating-e2"
+            ]
+          },
+          {
+            "id": "ces_thr05_self_replicating-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.65005,
+                "threshold": 0.34995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr05_self_replicating-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr05_context_overflow",
+        "name": "THR05 context-overflow",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_CONFIRMED",
+            "STAGE_EXECUTION"
+          ],
+          "regularExpression": "[obs_peer_ctx_share∈[0.8501,1]]{3}",
+          "length": 3,
+          "specRule": "SP 2400-102e2026 ipd 4.6 (attacks from malicious agents)",
+          "attackClass": "NISTAML.065",
+          "semanticAmendments": [
+            "TD-SA-02"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_thr05_context_overflow-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.92505,
+                "threshold": 0.07495,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr05_context_overflow-e1"
+            ]
+          },
+          {
+            "id": "ces_thr05_context_overflow-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.92505,
+                "threshold": 0.07495,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr05_context_overflow-e2"
+            ]
+          },
+          {
+            "id": "ces_thr05_context_overflow-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.92505,
+                "threshold": 0.07495,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr05_context_overflow-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "thr05-clear",
+        "events": [
+          [
+            0.0,
+            0.05,
+            0.3
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr05_clear: [obs_peer_msg_unauth=0 ∧ obs_injection_spread∈[0,0.1] ∧ obs_peer_ctx_share∈[0,0.6]]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr05_clear"
+        }
+      },
+      {
+        "name": "thr05-tampered-message",
+        "events": [
+          [
+            1.0,
+            0.15,
+            0.2
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr05_tampered_message: [obs_peer_msg_unauth=1 ∧ obs_injection_spread∈[0,0.3]]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr05_tampered_message"
+        }
+      },
+      {
+        "name": "thr05-spread-rising",
+        "events": [
+          [
+            0.0,
+            0.2001,
+            0.2
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr05_spread_rising: [obs_peer_msg_unauth=0 ∧ obs_injection_spread∈[0.1001,0.3]]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr05_spread_rising"
+        }
+      },
+      {
+        "name": "thr05-self-replicating",
+        "events": [
+          [
+            0.0,
+            0.6501,
+            0.2
+          ],
+          [
+            0.0,
+            0.6501,
+            0.2
+          ],
+          [
+            0.0,
+            0.6501,
+            0.2
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr05_self_replicating: [obs_injection_spread∈[0.3001,1]]{3}",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr05_self_replicating"
+        }
+      },
+      {
+        "name": "thr05-context-overflow",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.925
+          ],
+          [
+            0.0,
+            0.0,
+            0.925
+          ],
+          [
+            0.0,
+            0.0,
+            0.925
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr05_context_overflow: [obs_peer_ctx_share∈[0.8501,1]]{3}",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr05_context_overflow"
+        }
+      },
+      {
+        "name": "thr05-nominal",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.2
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "threat-dynamics",
+      "domain": "threat-dynamics",
+      "machineClass": "signal-monitor",
+      "sequenceCount": 5,
+      "inputSemantics": [
+        "obs_peer_msg_unauth (binary; sensor: A2A message integrity check (localLangChainStack); new; simulated until staged): an inter-agent message failed authentication or integrity",
+        "obs_injection_spread (continuous [0,1]; sensor: agent-trace observer on the A2A runtime (localLangChainStack, CI#841); new; simulated until staged): fraction of agents whose context carries the same injected instruction",
+        "obs_peer_ctx_share (continuous [0,1]; sensor: agent-trace observer on the A2A runtime (localLangChainStack, CI#841); new; simulated until staged): share of an agent's context consumed by peer messages"
+      ],
+      "outputSemantics": [
+        "0: THREAT_SUSPECTED",
+        "1: THREAT_CONFIRMED",
+        "2: CLEAR",
+        "3: STAGE_PLANNING",
+        "4: STAGE_EXECUTION",
+        "5: STAGE_OBSERVATION",
+        "6: GATE_PASS",
+        "7: GATE_FAIL"
+      ],
+      "tags": [
+        "threat-dynamics",
+        "multi-agent",
+        "NISTAML.065",
+        "fixture",
+        "observe-only"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/threat-dynamics",
+        "primaryDomain": "threat-dynamics",
+        "family": "multi-agent",
+        "machineCode": "THR05",
+        "workflowTags": [
+          "MaliciousAgentDetector",
+          "NISTAML.065"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "THREAT::Threat Observer",
+        "runbook": "urn:re:threat:runbook:multi-agent:v1",
+        "escalationPolicy": "THREAT::Threat Observer publishes; ai-governance-regime decides (TD-SD-02)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        }
+      },
+      "triggerConfig": {
+        "processId": "THR05_malicious-agent-detector",
+        "processName": "THR05 MaliciousAgentDetector",
+        "rules": [
+          {
+            "sequenceId": "ces_thr05_clear",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "THR05 CLEAR: [obs_peer_msg_unauth=0 ∧ obs_injection_spread∈[0,0.1] ∧ obs_peer_ctx_share∈[0,0.6]]"
+          },
+          {
+            "sequenceId": "ces_thr05_tampered_message",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "THR05 THREAT_SUSPECTED + STAGE_OBSERVATION: [obs_peer_msg_unauth=1 ∧ obs_injection_spread∈[0,0.3]]"
+          },
+          {
+            "sequenceId": "ces_thr05_spread_rising",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "THR05 THREAT_SUSPECTED + STAGE_OBSERVATION: [obs_peer_msg_unauth=0 ∧ obs_injection_spread∈[0.1001,0.3]]"
+          },
+          {
+            "sequenceId": "ces_thr05_self_replicating",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THR05 THREAT_CONFIRMED + STAGE_EXECUTION: [obs_injection_spread∈[0.3001,1]]{3}"
+          },
+          {
+            "sequenceId": "ces_thr05_context_overflow",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THR05 THREAT_CONFIRMED + STAGE_EXECUTION: [obs_peer_ctx_share∈[0.8501,1]]{3}"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "threat-dynamics.levels.thr05",
+          "type": "published-domain-bus-producer",
+          "role": "MaliciousAgentDetector",
+          "sourceMachine": "THR05_malicious-agent-detector",
+          "sourceOutputRegion": {
+            "offset": 17632,
+            "length": 3
+          },
+          "targetInputElements": [
+            12,
+            13,
+            14
+          ],
+          "normalizedElements": [
+            "THR05 THREAT_SUSPECTED",
+            "THR05 THREAT_CONFIRMED",
+            "THR05 CLEAR"
+          ],
+          "purpose": "Publish THR05's observation level to the threat roll-up.",
+          "busId": "threat-dynamics.levels",
+          "busTag": "published-bus-threat-dynamics-levels",
+          "targetMachine": "THR00 Threat Level Rollup",
+          "targetMachineFile": "THR00_threat-level-rollup.json",
+          "targetInputRegion": {
+            "offset": 17680,
+            "length": 27
+          },
+          "publishedOutputRegion": {
+            "offset": 17707,
+            "length": 3
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized observation bits only."
+        }
+      ],
+      "threatSpec": {
+        "attackClass": "NISTAML.065",
+        "title": "MaliciousAgentDetector",
+        "reference": "SP 2400-102e2026 ipd 4.6 (attacks from malicious agents)",
+        "specEdition": "NIST SP 2400-102e2026 ipd",
+        "observeOnly": true,
+        "decides": false,
+        "stages": "SP 2400-102e2026 ipd 4.1.1: planning, execution, observation"
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "debounceSteps": 3,
+        "testPath": "threat-sources.json simulations (simulated Sources through the ISRE)"
+      }
+    }
+  }
+}

@@ -1,0 +1,878 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "THR10_cross-domain-exposure",
+    "name": "THR10_cross-domain-exposure",
+    "description": "Cross-domain exposure: aggregate exposure in its approach band, or a delegation hop without metadata, is suspected; exposure above 0.90 or delegation depth above 0.80, sustained, is confirmed. The exposure bands mirror GOV16's.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17584,
+        "length": 3
+      },
+      "output": {
+        "offset": 17672,
+        "length": 8
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ces_thr10_clear",
+        "name": "THR10 clear",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "CLEAR"
+          ],
+          "regularExpression": "[mon_xdomain_mu_agg∈[0,0.7] ∧ obs_delegation_depth∈[0,0.6] ∧ obs_a2a_meta_missing=0]",
+          "length": 1,
+          "specRule": "ai-governance-regime gap 5 (GOV-SD-11); SP 2400-102e2026 ipd 4.6, 4.7",
+          "attackClass": "TD-EXPOSURE",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr10_clear-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.35,
+                "threshold": 0.35,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.3,
+                "threshold": 0.3,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr10_clear-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr10_exposure_approach",
+        "name": "THR10 exposure-approach",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_SUSPECTED",
+            "STAGE_EXECUTION"
+          ],
+          "regularExpression": "[mon_xdomain_mu_agg∈[0.7001,0.9]]",
+          "length": 1,
+          "specRule": "ai-governance-regime gap 5 (GOV-SD-11); SP 2400-102e2026 ipd 4.6, 4.7",
+          "attackClass": "TD-EXPOSURE",
+          "semanticAmendments": [
+            "TD-SA-06"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_thr10_exposure_approach-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.80005,
+                "threshold": 0.09995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr10_exposure_approach-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr10_metadata_missing",
+        "name": "THR10 metadata-missing",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_SUSPECTED",
+            "STAGE_OBSERVATION"
+          ],
+          "regularExpression": "[mon_xdomain_mu_agg∈[0,0.9] ∧ obs_a2a_meta_missing=1]",
+          "length": 1,
+          "specRule": "ai-governance-regime gap 5 (GOV-SD-11); SP 2400-102e2026 ipd 4.6, 4.7",
+          "attackClass": "TD-EXPOSURE",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr10_metadata_missing-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.45,
+                "threshold": 0.45,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr10_metadata_missing-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr10_exposure_breach",
+        "name": "THR10 exposure-breach",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_CONFIRMED",
+            "STAGE_EXECUTION"
+          ],
+          "regularExpression": "[mon_xdomain_mu_agg∈[0.9001,1]]{3}",
+          "length": 3,
+          "specRule": "ai-governance-regime gap 5 (GOV-SD-11); SP 2400-102e2026 ipd 4.6, 4.7",
+          "attackClass": "TD-EXPOSURE",
+          "semanticAmendments": [
+            "TD-SA-02",
+            "TD-SA-06"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_thr10_exposure_breach-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.95005,
+                "threshold": 0.04995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr10_exposure_breach-e1"
+            ]
+          },
+          {
+            "id": "ces_thr10_exposure_breach-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.95005,
+                "threshold": 0.04995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr10_exposure_breach-e2"
+            ]
+          },
+          {
+            "id": "ces_thr10_exposure_breach-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.95005,
+                "threshold": 0.04995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr10_exposure_breach-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr10_deep_delegation",
+        "name": "THR10 deep-delegation",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_CONFIRMED",
+            "STAGE_PLANNING"
+          ],
+          "regularExpression": "[obs_delegation_depth∈[0.8001,1]]{3}",
+          "length": 3,
+          "specRule": "ai-governance-regime gap 5 (GOV-SD-11); SP 2400-102e2026 ipd 4.6, 4.7",
+          "attackClass": "TD-EXPOSURE",
+          "semanticAmendments": [
+            "TD-SA-02"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_thr10_deep_delegation-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.90005,
+                "threshold": 0.09995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr10_deep_delegation-e1"
+            ]
+          },
+          {
+            "id": "ces_thr10_deep_delegation-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.90005,
+                "threshold": 0.09995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr10_deep_delegation-e2"
+            ]
+          },
+          {
+            "id": "ces_thr10_deep_delegation-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.90005,
+                "threshold": 0.09995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr10_deep_delegation-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "thr10-clear",
+        "events": [
+          [
+            0.35,
+            0.3,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr10_clear: [mon_xdomain_mu_agg∈[0,0.7] ∧ obs_delegation_depth∈[0,0.6] ∧ obs_a2a_meta_missing=0]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr10_clear"
+        }
+      },
+      {
+        "name": "thr10-exposure-approach",
+        "events": [
+          [
+            0.8,
+            0.2,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr10_exposure_approach: [mon_xdomain_mu_agg∈[0.7001,0.9]]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr10_exposure_approach"
+        }
+      },
+      {
+        "name": "thr10-metadata-missing",
+        "events": [
+          [
+            0.45,
+            0.2,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr10_metadata_missing: [mon_xdomain_mu_agg∈[0,0.9] ∧ obs_a2a_meta_missing=1]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr10_metadata_missing"
+        }
+      },
+      {
+        "name": "thr10-exposure-breach",
+        "events": [
+          [
+            0.9501,
+            0.2,
+            0.0
+          ],
+          [
+            0.9501,
+            0.2,
+            0.0
+          ],
+          [
+            0.9501,
+            0.2,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr10_exposure_breach: [mon_xdomain_mu_agg∈[0.9001,1]]{3}",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr10_exposure_breach"
+        }
+      },
+      {
+        "name": "thr10-deep-delegation",
+        "events": [
+          [
+            0.2,
+            0.9001,
+            0.0
+          ],
+          [
+            0.2,
+            0.9001,
+            0.0
+          ],
+          [
+            0.2,
+            0.9001,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr10_deep_delegation: [obs_delegation_depth∈[0.8001,1]]{3}",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr10_deep_delegation"
+        }
+      },
+      {
+        "name": "thr10-nominal",
+        "events": [
+          [
+            0.2,
+            0.2,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "threat-dynamics",
+      "domain": "threat-dynamics",
+      "machineClass": "signal-monitor",
+      "sequenceCount": 5,
+      "inputSemantics": [
+        "mon_xdomain_mu_agg (continuous [0,1]; sensor: exposure aggregator over the engines' budgets (V0.18 Design); new; simulated until staged): aggregate cross-domain exposure consumed",
+        "obs_delegation_depth (continuous [0,1]; sensor: A2A delegation metadata (localLangChainStack); new; simulated until staged): normalized delegation depth of the longest chain",
+        "obs_a2a_meta_missing (binary; sensor: A2A delegation metadata; new; simulated until staged): a delegation hop carries no delegation metadata"
+      ],
+      "outputSemantics": [
+        "0: THREAT_SUSPECTED",
+        "1: THREAT_CONFIRMED",
+        "2: CLEAR",
+        "3: STAGE_PLANNING",
+        "4: STAGE_EXECUTION",
+        "5: STAGE_OBSERVATION",
+        "6: GATE_PASS",
+        "7: GATE_FAIL"
+      ],
+      "tags": [
+        "threat-dynamics",
+        "multi-agent",
+        "TD-EXPOSURE",
+        "fixture",
+        "observe-only"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/threat-dynamics",
+        "primaryDomain": "threat-dynamics",
+        "family": "multi-agent",
+        "machineCode": "THR10",
+        "workflowTags": [
+          "CrossDomainExposure",
+          "TD-EXPOSURE"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "THREAT::Threat Observer",
+        "runbook": "urn:re:threat:runbook:multi-agent:v1",
+        "escalationPolicy": "THREAT::Threat Observer publishes; ai-governance-regime decides (TD-SD-02)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        }
+      },
+      "triggerConfig": {
+        "processId": "THR10_cross-domain-exposure",
+        "processName": "THR10 CrossDomainExposure",
+        "rules": [
+          {
+            "sequenceId": "ces_thr10_clear",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "THR10 CLEAR: [mon_xdomain_mu_agg∈[0,0.7] ∧ obs_delegation_depth∈[0,0.6] ∧ obs_a2a_meta_missing=0]"
+          },
+          {
+            "sequenceId": "ces_thr10_exposure_approach",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "THR10 THREAT_SUSPECTED + STAGE_EXECUTION: [mon_xdomain_mu_agg∈[0.7001,0.9]]"
+          },
+          {
+            "sequenceId": "ces_thr10_metadata_missing",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "THR10 THREAT_SUSPECTED + STAGE_OBSERVATION: [mon_xdomain_mu_agg∈[0,0.9] ∧ obs_a2a_meta_missing=1]"
+          },
+          {
+            "sequenceId": "ces_thr10_exposure_breach",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THR10 THREAT_CONFIRMED + STAGE_EXECUTION: [mon_xdomain_mu_agg∈[0.9001,1]]{3}"
+          },
+          {
+            "sequenceId": "ces_thr10_deep_delegation",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THR10 THREAT_CONFIRMED + STAGE_PLANNING: [obs_delegation_depth∈[0.8001,1]]{3}"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "threat-dynamics.levels.thr10",
+          "type": "published-domain-bus-producer",
+          "role": "CrossDomainExposure",
+          "sourceMachine": "THR10_cross-domain-exposure",
+          "sourceOutputRegion": {
+            "offset": 17672,
+            "length": 3
+          },
+          "targetInputElements": [
+            24,
+            25,
+            26
+          ],
+          "normalizedElements": [
+            "THR10 THREAT_SUSPECTED",
+            "THR10 THREAT_CONFIRMED",
+            "THR10 CLEAR"
+          ],
+          "purpose": "Publish THR10's observation level to the threat roll-up.",
+          "busId": "threat-dynamics.levels",
+          "busTag": "published-bus-threat-dynamics-levels",
+          "targetMachine": "THR00 Threat Level Rollup",
+          "targetMachineFile": "THR00_threat-level-rollup.json",
+          "targetInputRegion": {
+            "offset": 17680,
+            "length": 27
+          },
+          "publishedOutputRegion": {
+            "offset": 17707,
+            "length": 3
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized observation bits only."
+        }
+      ],
+      "threatSpec": {
+        "attackClass": "TD-EXPOSURE",
+        "title": "CrossDomainExposure",
+        "reference": "ai-governance-regime gap 5 (GOV-SD-11); SP 2400-102e2026 ipd 4.6, 4.7",
+        "specEdition": "NIST SP 2400-102e2026 ipd",
+        "observeOnly": true,
+        "decides": false,
+        "stages": "SP 2400-102e2026 ipd 4.1.1: planning, execution, observation"
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "debounceSteps": 3,
+        "testPath": "threat-sources.json simulations (simulated Sources through the ISRE)"
+      }
+    }
+  }
+}

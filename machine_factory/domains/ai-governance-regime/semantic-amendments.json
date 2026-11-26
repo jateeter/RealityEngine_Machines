@@ -1,139 +1,184 @@
 {
   "schemaVersion": "1.0.0",
   "domain": "ai-governance-regime",
-  "scope": "Where the candidate machines resolve or refine SPECIFICATION.md 4.3 and HARDENING_TRANSITION_RULES.md. Each amendment is cited from the CESs that carry it (sequences[].metadata.semanticAmendments). None is approved; each is for owner review.",
+  "scope": "Where the candidate machines resolve or refine SPECIFICATION.md 4.3 and HARDENING_TRANSITION_RULES.md. Each amendment is cited from the CESs that carry it (sequences[].metadata.semanticAmendments). All 22 approved by the owner as proposed, 2026-11-25 (GOV-SD-17, closes GOV-R14).",
   "amendments": [
     {
       "id": "GOV-SA-01",
       "applies": "all machines with continuous inputs",
       "change": "Open interval bounds are written closed, 0.0001 inside the open end: (0.05, 1.0] becomes [0.0501, 1.0], [0.0, 0.50) becomes [0.0, 0.4999].",
-      "reason": "The threshold comparator accepts a closed interval |value - input| <= t; it has no open bound."
+      "reason": "The threshold comparator accepts a closed interval |value - input| <= t; it has no open bound.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-02",
       "applies": "GOV01, GOV04, GOV12, GOV13, GOV17 (PARKED); GOV07, GOV14, GOV16 (APPROACH)",
       "change": "A status the specification states as a state (ParkedReview, AwaitingQuorum, Assembling, NoticeParked, RotationParked, Warning, RenewalWindow, DelegationThrottle) is an output element, and its symbol carries the conditions that end it (no approval yet, not re-pinned, not stale, not latched).",
-      "reason": "A final Reality Event asserts for as long as it keeps matching (SURFACE_SPEC.md), so a status without its ending conditions would assert beside the state that replaced it."
+      "reason": "A final Reality Event asserts for as long as it keeps matching (SURFACE_SPEC.md), so a status without its ending conditions would assert beside the state that replaced it.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-03",
       "applies": "GOV01 approved, GOV04 promoted",
       "change": "The approval symbol also requires lane_stale = 0.",
-      "reason": "As written, S2 -> S3 does not exclude a stale continuation while S2 -> S_err fires on one, so both transitions are enabled at once; fail-safe resolution, the escape wins."
+      "reason": "As written, S2 -> S3 does not exclude a stale continuation while S2 -> S_err fires on one, so both transitions are enabled at once; fail-safe resolution, the escape wins.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-04",
       "applies": "GOV05",
       "change": "The guard (req_domain_admit or req_epoch_swap) and aibom is split into one CES per request.",
-      "reason": "One CES is one regular expression with no alternation (owner rule 2026-10-05)."
+      "reason": "One CES is one regular expression with no alternation (owner rule 2026-10-05).",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-05",
       "applies": "GOV06",
       "change": "The hardened permit preconditions (lane_quorum_integrity_ok, gate_source_slsa_attested) each get their own HALT path.",
-      "reason": "HARDENING_TRANSITION_RULES.md section 1 adds them to the permit only; without a fail path a missing attestation would leave the monitor silent instead of halting."
+      "reason": "HARDENING_TRANSITION_RULES.md section 1 adds them to the permit only; without a fail path a missing attestation would leave the monitor silent instead of halting.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-06",
       "applies": "GOV07, GOV09, GOV12, GOV14, GOV16, GOV17",
       "change": "An SR latch on a fixture Q(k) = S(k) or (not R(k) and Q(k-1)) is built from a feedback input element (latch_q_prev, composed by the PE), one set CES per set disjunct (debounced, GOV-SA-19), one hold CES per negated literal of R, and an explicit release CES. Where a watchdog dispatches an agent, the release also requires the agent's completion (triage before release). Templates hold no latch: the frame's lanes carry their state.",
-      "reason": "The engines keep no state a CES can test across steps except active events, and a final event asserts only while it matches; the release is explicit so the latch never depends on whether an unwritten cell keeps its value."
+      "reason": "The engines keep no state a CES can test across steps except active events, and a final event asserts only while it matches; the release is explicit so the latch never depends on whether an unwritten cell keeps its value.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-07",
       "applies": "GOV08",
       "change": "Stateless: HALT while the gate fails or drift > 0.10, PERMIT while both are within the gate.",
-      "reason": "The specification's S1 -> S0 condition is the exact complement of S0 -> S1, so no state is needed."
+      "reason": "The specification's S1 -> S0 condition is the exact complement of S0 -> S1, so no state is needed.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-08",
       "applies": "GOV10",
       "change": "GOV10 runs per outbound message: every path requires req_egress, so it never permits on a quiet step. This closes GOV-R13.",
-      "reason": "Owner decision GOV-SD-07 (every Source in v1) adds the boundary's pending-message signal."
+      "reason": "Owner decision GOV-SD-07 (every Source in v1) adds the boundary's pending-message signal.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-09",
       "applies": "GOV15",
       "change": "Emergency activation also requires lane_re_pinned = 0.",
-      "reason": "Otherwise a tampered frame would assert PERMIT_DEPLOY and HALT_PROMOTION together."
+      "reason": "Otherwise a tampered frame would assert PERMIT_DEPLOY and HALT_PROMOTION together.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-10",
       "applies": "GOV15",
       "change": "The emergency prefix requires lane_quorum_met = 0, so the emergency state and its incident trail end at post-hoc ratification.",
-      "reason": "As written, EmergencyActive's guard still holds after ratification and would keep asserting the incident."
+      "reason": "As written, EmergencyActive's guard still holds after ratification and would keep asserting the incident.",
+      "status": "approved",
+      "approved": "2026-11-25",
+      "erratum": "2026-11-25 (GOV-R24): lane_quorum_met is the specification's name. The 0.2.0 build replaced it with quorum_valid, GOV06's verdict carried by the frame, and GOV15 reads quorum_valid = 0. The approved change is unaltered."
     },
     {
       "id": "GOV-SA-11",
       "applies": "GOV00 and every producer",
       "change": "GOV00 folds the fixtures' verdicts only (GOV06, 07, 08, 09, 14, 16): halt, revoke and incident by max; permit only while some fixture permits and none halts or revokes. Templates report through their continuation and their agent's completion, never by bus.",
-      "reason": "A clone leaves only by continuation or termination (CONTINUATIONS_APPROVAL_CHAIN.md); GOV-R17."
+      "reason": "A clone leaves only by continuation or termination (CONTINUATIONS_APPROVAL_CHAIN.md); GOV-R17.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-12",
       "applies": "templates",
       "change": "Each template hands its governed asset to the next consumer in the specification's evidence flow (document-workflow-handoff); the governed target domain is carried by the asset frame, not by a machine copy.",
-      "reason": "Cloneable rule 1 needs an agentic action; owner decision GOV-SD-04 (17 machines)."
+      "reason": "Cloneable rule 1 needs an agentic action; owner decision GOV-SD-04 (17 machines).",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-13",
       "applies": "every step agent",
       "change": "A failed agent step asserts PARKED and REWORK: it parks for the case's author, with no escape or restart of its own.",
-      "reason": "Owner rule 2026-11-14 (failed step parks; Manager#346): the dispatcher retries within the step, then the lifecycle parks a re-run for the author."
+      "reason": "Owner rule 2026-11-14 (failed step parks; Manager#346): the dispatcher retries within the step, then the lifecycle parks a re-run for the author.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-14",
       "applies": "GOV01, 04, 11, 13, 17",
       "change": "An approval counts only after the parked, diff-shown state has held for DWELL (2) consecutive steps; an approval with no diff, or in the same step as the diff, halts.",
-      "reason": "ASI09 approver fatigue and the hardening workplan's dwell requirement; the dwell is a step count, and a wall-clock dwell needs a timer Source."
+      "reason": "ASI09 approver fatigue and the hardening workplan's dwell requirement; the dwell is a step count, and a wall-clock dwell needs a timer Source.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-15",
       "applies": "GOV01, GOV13",
       "change": "A re-pin after approval halts and sends the frame to rework.",
-      "reason": "T16 (approval of a changed document): the specification guards re-pin only before approval."
+      "reason": "T16 (approval of a changed document): the specification guards re-pin only before approval.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-16",
       "applies": "GOV03",
       "change": "For a high-risk domain the audit blocks only when the review lease expires unsigned; awaiting the signature is not a failure.",
-      "reason": "With an agent drafting the audit, 'not yet signed' is the parked state, not the specification's S_fail."
+      "reason": "With an agent drafting the audit, 'not yet signed' is the parked state, not the specification's S_fail.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-17",
       "applies": "GOV05",
       "change": "When the assembler reports nothing unpinned but the AIBOM verifier disagrees, the gate halts.",
-      "reason": "The agent prepares; the verifier decides."
+      "reason": "The agent prepares; the verifier decides.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-18",
       "applies": "GOV06",
       "change": "The approval quorum is valid only when the bundle was ready before the last signature arrived, with signatures from Risk, Engineering and Legal and no preparer among the signers; one CES per org unit whose signature arrives last.",
-      "reason": "RESOLUTION_WORKPLAN.md 1.3 (cross-departmental quorum) and T15; the order replaces the specification's single quorum bit."
+      "reason": "RESOLUTION_WORKPLAN.md 1.3 (cross-departmental quorum) and T15; the order replaces the specification's single quorum bit.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-19",
       "applies": "GOV07, 08, 09, 16",
       "change": "A watchdog trips on DEBOUNCE (3) consecutive breach observations (GOV09: 2), and GOV08 recovers on 2 consecutive in-gate observations.",
-      "reason": "A single sample must not revoke an epoch; the specification's trips are single-sample."
+      "reason": "A single sample must not revoke an epoch; the specification's trips are single-sample.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-20",
       "applies": "GOV12",
       "change": "Closing an incident frame asserts an explicit all-zero vector.",
-      "reason": "The close is observable as a release rather than as silence."
+      "reason": "The close is observable as a release rather than as silence.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-21",
       "applies": "GOV12",
       "change": "A parked notice whose stale lane fires (the statutory clock, carried by the lifecycle's lease) is OVERDUE and re-raises the incident.",
-      "reason": "EU AI Act Art. 73 deadlines; the engines count steps, so the clock is the lifecycle's."
+      "reason": "EU AI Act Art. 73 deadlines; the engines count steps, so the clock is the lifecycle's.",
+      "status": "approved",
+      "approved": "2026-11-25"
     },
     {
       "id": "GOV-SA-22",
       "applies": "GOV14",
       "change": "Reaching expiry without a renewal window first asserts OVERDUE beside the revoke.",
-      "reason": "CONNECTED_WORKFLOW.md 1.4: a missed window is its own finding."
+      "reason": "CONNECTED_WORKFLOW.md 1.4: a missed window is its own finding.",
+      "status": "approved",
+      "approved": "2026-11-25"
     }
   ]
 }
