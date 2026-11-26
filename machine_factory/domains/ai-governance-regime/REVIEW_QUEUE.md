@@ -27,9 +27,15 @@ step in [PACKAGE_STATUS.md](PACKAGE_STATUS.md) is redone. Findings marked
 | GOV-R18 | No agent triggers or response Sources | agentic workflows | **rebuilt**: 16 agents, each a neutral behavior with a completion Source; all in v1 (GOV-SD-07) |
 | GOV-R19 | A clone's non-lane inputs need a writer | lifecycle | localAssetStorageStack: frame facts and the step agent's completion into the clone's block |
 | GOV-R20 | 31 of the 38 Sources are partial or new | Sources | build per governance-sources.json; issues in each producing repository |
-| GOV-R21 | The ACP side of the runtime split | agent runtime | Manager ACP AgentDriver, the MCP servers behind the capabilities, the runtime choice (v0.0.3) |
-| GOV-R22 | The received wrapper-machine document diverges from the package | documents | fixed when the documents are next revised; intake copy stays as received |
+| GOV-R21 | The agent-runtime side of the split: A2A, not ACP, in v0.0.3 | agent runtime, GOV10 egress | Manager A2A AgentDriver (localLangChainStack), the MCP servers behind the capabilities; GOV10's egress Sources at the A2A/MCP boundary |
+| GOV-R22 | The received wrapper-machine document diverges from the package | documents | full review 2026-11-25 (below); settled in the new baseline (GOV-R29); intake copy stays as received |
 | GOV-R23 | Three Sources move to the peer domain threat-dynamics | Sources, admission order | threat-dynamics package and its published-lane contract (GOV-SD-10, GOV-SD-11) |
+| GOV-R24 | GOV-SA-10 names `lane_quorum_met`; the build reads `quorum_valid` | amendments | **closed 2026-11-25**: erratum recorded on the amendment |
+| GOV-R25 | GOV12 containment drives engines to a domain fail-safe vector | engine/arbiter, Phase 2 | confirm s_safe in the implementation; if absent, an engine feature on the three voters |
+| GOV-R26 | GOV13's evidence pack needs a signed, append-only frame log | lifecycle | localAssetStorageStack signed log and dokieli notifications (lass#14), staged with GOV13 |
+| GOV-R27 | An agent must never resume an approval continuation (T15) | agent runtime | an explicit check in the A2A work: agents hold task-scoped capabilities only |
+| GOV-R28 | The ISO 42001 / EU AI Act crosswalk needs re-deriving | alignment | step 3 `source-requirements.json`, per milestone (GOV-SD-14) |
+| GOV-R29 | The V0.18 baseline lags the v0.0.3 implementation | every citation | **owner 2026-11-25**: a new baseline from v0.0.3 progress; design-only judgements made from V0.18 are re-checked against it |
 
 ## GOV-R01: neither corpus is in the canonical machine form
 
@@ -244,11 +250,17 @@ and keeps one writer per block. It is localAssetStorageStack work.
 The 16 agents' completion Sources are new as well. Each needs an issue in the
 repository that produces it.
 
-## GOV-R21: the ACP side of the runtime split
+## GOV-R21: the agent-runtime side of the split
+
+Widened 2026-11-25. localLangChainStack (LangGraph agents over A2A) replaces
+localOpenClawStack in v0.0.3, so the runtime is A2A, not ACP. The same holds
+for GOV10: its egress Sources (`req_egress`, `egress_external_comm`,
+`egress_art50_marked`) are read at the A2A/MCP boundary, and the builder now
+says so.
 
 The agents are runtime-neutral behaviors (GOV-SD-08), rendered by
 localOpenClawStack `machine-behaviors/runtimes/` for OpenClaw and for ACP.
-To run them on ACP, three things are still needed:
+To run them on ACP (now A2A), three things are still needed:
 - an ACP `AgentDriver` in RealityEngine_Manager's instantiation component;
 - the MCP servers behind the capabilities marked `implemented: false`, with
   the frame-scoped lifecycle server first (#714);
@@ -271,6 +283,62 @@ SPECIFICATION.md §3–4 and differs from the package in four places:
   quorum contract names C++, LSP and Scala, unanimous.
 
 These are fixed when the documents are next revised, as with GOV-R10.
+
+### Full review (2026-11-25)
+
+The owner re-submitted the document (byte-identical, sha256 `4c35a365…`). A
+full read against the package, the approved amendments (GOV-SD-17) and the
+V0.18 baseline adds these. The baseline lags the implementation (GOV-R29), so
+the "status" findings are to be confirmed against v0.0.3, not taken from V0.18.
+
+**Corrections**
+- **C1–C2:** the four points above (14 machines, the band, verdict cells,
+  runtime names).
+- **C3:** frame lanes at cells 16960–16966. The lifecycle writes reserved cells
+  2–7 of each clone (GOV-R16).
+- **C4:** `lane_quorum_met`, `gate_kline_replay` and `gate_task_sufficiency`
+  are not Sources here. The quorum is `quorum_valid`, GOV06's verdict carried
+  by the frame. K-line replay and task sufficiency are agent completions:
+  GOV04's replay analyst and GOV02's hazard-sufficiency analyst.
+- **C5:** "Byzantine quorum". The approval quorum is a human q-of-n; the engine
+  quorum is 3-of-3 unanimous (GOV-SD-13). Rust and Go are non-voting followers.
+- **C6:** the signers (CRO, Lead AI Architect, General Counsel, CISO). GOV-SA-18
+  requires Risk, Engineering and Legal, with no preparer among the signers.
+- **C7:** "sub-microsecond cycles". In V0.18 this is objective TO-1 (p99 ≤ 820
+  ns), unmeasured (GOV-R09).
+- **C8:** Proposition 1 is paraphrased as "a projection tangent to the
+  boundary makes enforcement complete". The proposition gives ker π ⊆ T_cΣ as
+  a consequence of task sufficiency, not a test for it. Corollary 1 reads
+  "RealityEngine is not complete".
+- **C9:** GOV10 inspects "ACP or MCP". In v0.0.3 it is A2A/MCP (GOV-R21).
+- **C10:** Art. 50 requires machine-readable marking. C2PA is one technique,
+  not the requirement.
+
+**Status claims to confirm against v0.0.3**
+- The domain fail-safe vector s_safe (GOV-R25). V0.18 says it exists in no
+  domain.
+- In-bounds harm, T13. V0.18 lists it as open. Gap 3, the red-team gate, now
+  comes from threat-dynamics.
+- T4, T20 and T21. V0.18 lists them as Design.
+- Verified Source channels, which is Gap 2 (SLSA attestation).
+- The signed append-only log, Linked Data Notifications and ActivityStreams
+  (GOV-R26).
+- Clones deallocated while parked.
+- Agents without WebIDs, holding EdDSA capabilities only (GOV-R27).
+
+**Omissions**
+- GOV00, GOV15, GOV16 and GOV17.
+- The seven wrapper gaps.
+- The threat-dynamics peer domain and its three Sources (GOV-R23).
+- 14 of the 38 signals.
+- The approved amendments: dwell and debounce (SA-14, SA-19), feedback-cell
+  latches (SA-06) and the Art. 73 overdue rule (SA-21).
+- Simulated Sources as the test path (GOV-SD-16).
+- Per-milestone framework scope (GOV-SD-14), and NIST AI 600-1.
+- Per-source TLS.
+- The crosswalk files separation of duties and human review under ISO 42001
+  A.6. Roles are A.3.2 and use and oversight are A.9; A.6.2.8 is event logs
+  (GOV-R28).
 
 ## GOV-R23: three Sources move to the peer domain threat-dynamics
 
