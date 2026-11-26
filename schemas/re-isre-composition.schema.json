@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.example.org/schemas/re-isre-composition.schema.json",
+  "title": "re-isre-composition/1: one committed step's ISRE composition, the PE half",
+  "description": "Which source won each input cell at one committed step, and of what kind, as a PE stores it in $RE_INSTANCE_STATE_DIR/isre/<pe_uuid>/ (RealityEngine_CI SURFACE_SPEC.md, 'The PE half: ISRE composition'). Joined to the RE's K-lines on re.instance and re.commit.",
+  "type": "object",
+  "required": [
+    "format",
+    "taxonomy",
+    "re",
+    "pe",
+    "sources",
+    "folds",
+    "delta"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "re-isre-composition/1"
+    },
+    "taxonomy": {
+      "type": "string",
+      "pattern": "^re-source-kinds/[1-9][0-9]*$"
+    },
+    "re": {
+      "$ref": "kline-defs.schema.json#/$defs/clock"
+    },
+    "pe": {
+      "$ref": "kline-defs.schema.json#/$defs/peClock"
+    },
+    "sources": {
+      "type": "array",
+      "description": "Runs of consecutive cells with one winner, ascending by cells[0]. Cells nobody wrote are kind none by omission, so none never appears.",
+      "items": {
+        "type": "object",
+        "required": [
+          "cells",
+          "kind",
+          "class",
+          "causedBy"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "cells": {
+            "$ref": "kline-defs.schema.json#/$defs/cellRange"
+          },
+          "kind": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "not": {
+              "const": "none"
+            }
+          },
+          "provider": {
+            "type": "string",
+            "minLength": 1
+          },
+          "class": {
+            "enum": [
+              "deterministic",
+              "measured",
+              "generated"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "causedBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "kline-defs.schema.json#/$defs/stamp"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "folds": {
+      "type": "array",
+      "description": "The step's Source-vs-OSRE fold records (docs/ARBITER_CONTRACT.md \u00a74.4b OsreFold), ascending cell.",
+      "items": {
+        "type": "object",
+        "required": [
+          "cell",
+          "resolution",
+          "osre",
+          "source",
+          "resolved",
+          "kept"
+        ],
+        "properties": {
+          "cell": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "resolution": {
+            "enum": [
+              "declared-rule",
+              "osre-fold"
+            ]
+          },
+          "rule": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "declaredRule": {
+            "type": "string"
+          },
+          "review": {
+            "const": "provider-unranked"
+          },
+          "osre": {
+            "type": "object",
+            "required": [
+              "machine",
+              "provider",
+              "value"
+            ],
+            "properties": {
+              "machine": {
+                "type": "string"
+              },
+              "provider": {
+                "const": "machine"
+              },
+              "value": {
+                "type": "number"
+              }
+            }
+          },
+          "source": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "kind",
+              "provider",
+              "value"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string"
+              },
+              "provider": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              }
+            }
+          },
+          "resolved": {
+            "type": "number"
+          },
+          "kept": {
+            "enum": [
+              "osre",
+              "source",
+              "both",
+              "combined"
+            ]
+          }
+        }
+      }
+    },
+    "delta": {
+      "type": "boolean"
+    }
+  }
+}
