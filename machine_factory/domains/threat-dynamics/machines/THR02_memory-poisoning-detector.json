@@ -1,0 +1,641 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "THR02_memory-poisoning-detector",
+    "name": "THR02_memory-poisoning-detector",
+    "description": "Memory poisoning (NISTAML.062): a store holding a record of untrusted provenance is suspected; a retrieval of it followed by divergent behavior is confirmed, however long the payload lay dormant.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17456,
+        "length": 3
+      },
+      "output": {
+        "offset": 17608,
+        "length": 8
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ces_thr02_clear",
+        "name": "THR02 clear",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "CLEAR"
+          ],
+          "regularExpression": "[obs_mem_tainted=0 ∧ obs_tainted_retrieval=0 ∧ obs_post_retrieval_divergence∈[0,0.3]]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.4 (memory poisoning)",
+          "attackClass": "NISTAML.062",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr02_clear-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.15,
+                "threshold": 0.15,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr02_clear-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr02_tainted_store",
+        "name": "THR02 tainted-store",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_SUSPECTED",
+            "STAGE_EXECUTION"
+          ],
+          "regularExpression": "[obs_mem_tainted=1 ∧ obs_tainted_retrieval=0]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.4 (memory poisoning)",
+          "attackClass": "NISTAML.062",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr02_tainted_store-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr02_tainted_store-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr02_tainted_retrieval",
+        "name": "THR02 tainted-retrieval",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_SUSPECTED",
+            "STAGE_OBSERVATION"
+          ],
+          "regularExpression": "[obs_mem_tainted=1 ∧ obs_tainted_retrieval=1 ∧ obs_post_retrieval_divergence∈[0,0.6]]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.4 (memory poisoning)",
+          "attackClass": "NISTAML.062",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr02_tainted_retrieval-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.3,
+                "threshold": 0.3,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr02_tainted_retrieval-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr02_dormant_activated",
+        "name": "THR02 dormant-activated",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_CONFIRMED",
+            "STAGE_OBSERVATION"
+          ],
+          "regularExpression": "[obs_mem_tainted=1 ∧ obs_tainted_retrieval=1] · [obs_mem_tainted=1 ∧ obs_post_retrieval_divergence∈[0.6001,1]]",
+          "length": 2,
+          "specRule": "SP 2400-102e2026 ipd 4.4 (memory poisoning)",
+          "attackClass": "NISTAML.062",
+          "semanticAmendments": [
+            "TD-SA-04"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_thr02_dormant_activated-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr02_dormant_activated-e1"
+            ]
+          },
+          {
+            "id": "ces_thr02_dormant_activated-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.80005,
+                "threshold": 0.19995,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr02_dormant_activated-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "thr02-clear",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.15
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr02_clear: [obs_mem_tainted=0 ∧ obs_tainted_retrieval=0 ∧ obs_post_retrieval_divergence∈[0,0.3]]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr02_clear"
+        }
+      },
+      {
+        "name": "thr02-tainted-store",
+        "events": [
+          [
+            1.0,
+            0.0,
+            0.1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr02_tainted_store: [obs_mem_tainted=1 ∧ obs_tainted_retrieval=0]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr02_tainted_store"
+        }
+      },
+      {
+        "name": "thr02-tainted-retrieval",
+        "events": [
+          [
+            1.0,
+            1.0,
+            0.3
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr02_tainted_retrieval: [obs_mem_tainted=1 ∧ obs_tainted_retrieval=1 ∧ obs_post_retrieval_divergence∈[0,0.6]]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr02_tainted_retrieval"
+        }
+      },
+      {
+        "name": "thr02-dormant-activated",
+        "events": [
+          [
+            1.0,
+            1.0,
+            0.1
+          ],
+          [
+            1.0,
+            1.0,
+            0.8
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr02_dormant_activated: [obs_mem_tainted=1 ∧ obs_tainted_retrieval=1] · [obs_mem_tainted=1 ∧ obs_post_retrieval_divergence∈[0.6001,1]]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr02_dormant_activated"
+        }
+      },
+      {
+        "name": "thr02-nominal",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "threat-dynamics",
+      "domain": "threat-dynamics",
+      "machineClass": "signal-monitor",
+      "sequenceCount": 4,
+      "inputSemantics": [
+        "obs_mem_tainted (binary; sensor: memory/RAG provenance tracker (localAIStack ingest + agent memory); new; simulated until staged): the store holds a record written from an untrusted tool call",
+        "obs_tainted_retrieval (binary; sensor: memory/RAG provenance tracker; new; simulated until staged): a retrieval returned a record of untrusted provenance",
+        "obs_post_retrieval_divergence (continuous [0,1]; sensor: agent-trace observer on the A2A runtime (localLangChainStack, CI#841); new; simulated until staged): behavioral divergence after the retrieval"
+      ],
+      "outputSemantics": [
+        "0: THREAT_SUSPECTED",
+        "1: THREAT_CONFIRMED",
+        "2: CLEAR",
+        "3: STAGE_PLANNING",
+        "4: STAGE_EXECUTION",
+        "5: STAGE_OBSERVATION",
+        "6: GATE_PASS",
+        "7: GATE_FAIL"
+      ],
+      "tags": [
+        "threat-dynamics",
+        "integrity",
+        "NISTAML.062",
+        "fixture",
+        "observe-only"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/threat-dynamics",
+        "primaryDomain": "threat-dynamics",
+        "family": "integrity",
+        "machineCode": "THR02",
+        "workflowTags": [
+          "MemoryPoisoningDetector",
+          "NISTAML.062"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "THREAT::Threat Observer",
+        "runbook": "urn:re:threat:runbook:integrity:v1",
+        "escalationPolicy": "THREAT::Threat Observer publishes; ai-governance-regime decides (TD-SD-02)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        }
+      },
+      "triggerConfig": {
+        "processId": "THR02_memory-poisoning-detector",
+        "processName": "THR02 MemoryPoisoningDetector",
+        "rules": [
+          {
+            "sequenceId": "ces_thr02_clear",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "THR02 CLEAR: [obs_mem_tainted=0 ∧ obs_tainted_retrieval=0 ∧ obs_post_retrieval_divergence∈[0,0.3]]"
+          },
+          {
+            "sequenceId": "ces_thr02_tainted_store",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "THR02 THREAT_SUSPECTED + STAGE_EXECUTION: [obs_mem_tainted=1 ∧ obs_tainted_retrieval=0]"
+          },
+          {
+            "sequenceId": "ces_thr02_tainted_retrieval",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "THR02 THREAT_SUSPECTED + STAGE_OBSERVATION: [obs_mem_tainted=1 ∧ obs_tainted_retrieval=1 ∧ obs_post_retrieval_divergence∈[0,0.6]]"
+          },
+          {
+            "sequenceId": "ces_thr02_dormant_activated",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THR02 THREAT_CONFIRMED + STAGE_OBSERVATION: [obs_mem_tainted=1 ∧ obs_tainted_retrieval=1] · [obs_mem_tainted=1 ∧ obs_post_retrieval_divergence∈[0.6001,1]]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "threat-dynamics.levels.thr02",
+          "type": "published-domain-bus-producer",
+          "role": "MemoryPoisoningDetector",
+          "sourceMachine": "THR02_memory-poisoning-detector",
+          "sourceOutputRegion": {
+            "offset": 17608,
+            "length": 3
+          },
+          "targetInputElements": [
+            3,
+            4,
+            5
+          ],
+          "normalizedElements": [
+            "THR02 THREAT_SUSPECTED",
+            "THR02 THREAT_CONFIRMED",
+            "THR02 CLEAR"
+          ],
+          "purpose": "Publish THR02's observation level to the threat roll-up.",
+          "busId": "threat-dynamics.levels",
+          "busTag": "published-bus-threat-dynamics-levels",
+          "targetMachine": "THR00 Threat Level Rollup",
+          "targetMachineFile": "THR00_threat-level-rollup.json",
+          "targetInputRegion": {
+            "offset": 17680,
+            "length": 27
+          },
+          "publishedOutputRegion": {
+            "offset": 17707,
+            "length": 3
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized observation bits only."
+        }
+      ],
+      "threatSpec": {
+        "attackClass": "NISTAML.062",
+        "title": "MemoryPoisoningDetector",
+        "reference": "SP 2400-102e2026 ipd 4.4 (memory poisoning)",
+        "specEdition": "NIST SP 2400-102e2026 ipd",
+        "observeOnly": true,
+        "decides": false,
+        "stages": "SP 2400-102e2026 ipd 4.1.1: planning, execution, observation"
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "debounceSteps": 3,
+        "testPath": "threat-sources.json simulations (simulated Sources through the ISRE)"
+      }
+    }
+  }
+}

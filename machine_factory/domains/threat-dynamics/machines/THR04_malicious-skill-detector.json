@@ -1,0 +1,745 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "THR04_malicious-skill-detector",
+    "name": "THR04_malicious-skill-detector",
+    "description": "Malicious skills (NISTAML.064): an unreviewed skill, persistent or not, is suspected; an unreviewed skill running its script followed by a credential read is confirmed.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17488,
+        "length": 4
+      },
+      "output": {
+        "offset": 17624,
+        "length": 8
+      },
+      "bitsPerElement": 1
+    },
+    "sequences": [
+      {
+        "id": "ces_thr04_clear",
+        "name": "THR04 clear",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "CLEAR"
+          ],
+          "regularExpression": "[obs_skill_unreviewed=0 ∧ obs_skill_cred_access=0]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.5 (malicious skills)",
+          "attackClass": "NISTAML.064",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr04_clear-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr04_clear-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr04_unreviewed_skill",
+        "name": "THR04 unreviewed-skill",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_SUSPECTED",
+            "STAGE_PLANNING"
+          ],
+          "regularExpression": "[obs_skill_unreviewed=1 ∧ obs_skill_script_exec=0 ∧ obs_skill_cred_access=0 ∧ obs_skill_persisted=0]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.5 (malicious skills)",
+          "attackClass": "NISTAML.064",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr04_unreviewed_skill-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr04_unreviewed_skill-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr04_persisted_unreviewed",
+        "name": "THR04 persisted-unreviewed",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_SUSPECTED",
+            "STAGE_PLANNING"
+          ],
+          "regularExpression": "[obs_skill_unreviewed=1 ∧ obs_skill_cred_access=0 ∧ obs_skill_persisted=1]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.5 (malicious skills)",
+          "attackClass": "NISTAML.064",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr04_persisted_unreviewed-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr04_persisted_unreviewed-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr04_credential_theft",
+        "name": "THR04 credential-theft",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_CONFIRMED",
+            "STAGE_EXECUTION"
+          ],
+          "regularExpression": "[obs_skill_unreviewed=1 ∧ obs_skill_script_exec=1] · [obs_skill_cred_access=1]",
+          "length": 2,
+          "specRule": "SP 2400-102e2026 ipd 4.5 (malicious skills)",
+          "attackClass": "NISTAML.064",
+          "semanticAmendments": [
+            "TD-SA-03"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_thr04_credential_theft-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr04_credential_theft-e1"
+            ]
+          },
+          {
+            "id": "ces_thr04_credential_theft-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr04_credential_theft-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr04_credential_access",
+        "name": "THR04 credential-access",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_SUSPECTED",
+            "STAGE_EXECUTION"
+          ],
+          "regularExpression": "[obs_skill_unreviewed=0 ∧ obs_skill_cred_access=1]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.5 (malicious skills)",
+          "attackClass": "NISTAML.064",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr04_credential_access-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr04_credential_access-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "thr04-clear",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr04_clear: [obs_skill_unreviewed=0 ∧ obs_skill_cred_access=0]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr04_clear"
+        }
+      },
+      {
+        "name": "thr04-unreviewed-skill",
+        "events": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr04_unreviewed_skill: [obs_skill_unreviewed=1 ∧ obs_skill_script_exec=0 ∧ obs_skill_cred_access=0 ∧ obs_skill_persisted=0]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr04_unreviewed_skill"
+        }
+      },
+      {
+        "name": "thr04-persisted-unreviewed",
+        "events": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr04_persisted_unreviewed: [obs_skill_unreviewed=1 ∧ obs_skill_cred_access=0 ∧ obs_skill_persisted=1]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr04_persisted_unreviewed"
+        }
+      },
+      {
+        "name": "thr04-credential-theft",
+        "events": [
+          [
+            1.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr04_credential_theft: [obs_skill_unreviewed=1 ∧ obs_skill_script_exec=1] · [obs_skill_cred_access=1]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr04_credential_theft"
+        }
+      },
+      {
+        "name": "thr04-credential-access",
+        "events": [
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr04_credential_access: [obs_skill_unreviewed=0 ∧ obs_skill_cred_access=1]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr04_credential_access"
+        }
+      }
+    ],
+    "metadata": {
+      "category": "threat-dynamics",
+      "domain": "threat-dynamics",
+      "machineClass": "signal-monitor",
+      "sequenceCount": 5,
+      "inputSemantics": [
+        "obs_skill_unreviewed (binary; sensor: skill-registry verifier; new; simulated until staged): a loaded skill has no review or signature",
+        "obs_skill_script_exec (binary; sensor: agent-trace observer on the A2A runtime (localLangChainStack, CI#841); new; simulated until staged): a skill executed one of its bundled scripts",
+        "obs_skill_cred_access (binary; sensor: credential-store audit; new; simulated until staged): the credential store was read during a skill",
+        "obs_skill_persisted (binary; sensor: skill-registry verifier; new; simulated until staged): the skill persists across sessions"
+      ],
+      "outputSemantics": [
+        "0: THREAT_SUSPECTED",
+        "1: THREAT_CONFIRMED",
+        "2: CLEAR",
+        "3: STAGE_PLANNING",
+        "4: STAGE_EXECUTION",
+        "5: STAGE_OBSERVATION",
+        "6: GATE_PASS",
+        "7: GATE_FAIL"
+      ],
+      "tags": [
+        "threat-dynamics",
+        "supply-chain",
+        "NISTAML.064",
+        "fixture",
+        "observe-only"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/threat-dynamics",
+        "primaryDomain": "threat-dynamics",
+        "family": "supply-chain",
+        "machineCode": "THR04",
+        "workflowTags": [
+          "MaliciousSkillDetector",
+          "NISTAML.064"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "THREAT::Threat Observer",
+        "runbook": "urn:re:threat:runbook:supply-chain:v1",
+        "escalationPolicy": "THREAT::Threat Observer publishes; ai-governance-regime decides (TD-SD-02)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        }
+      },
+      "triggerConfig": {
+        "processId": "THR04_malicious-skill-detector",
+        "processName": "THR04 MaliciousSkillDetector",
+        "rules": [
+          {
+            "sequenceId": "ces_thr04_clear",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "THR04 CLEAR: [obs_skill_unreviewed=0 ∧ obs_skill_cred_access=0]"
+          },
+          {
+            "sequenceId": "ces_thr04_unreviewed_skill",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "THR04 THREAT_SUSPECTED + STAGE_PLANNING: [obs_skill_unreviewed=1 ∧ obs_skill_script_exec=0 ∧ obs_skill_cred_access=0 ∧ obs_skill_persisted=0]"
+          },
+          {
+            "sequenceId": "ces_thr04_persisted_unreviewed",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "THR04 THREAT_SUSPECTED + STAGE_PLANNING: [obs_skill_unreviewed=1 ∧ obs_skill_cred_access=0 ∧ obs_skill_persisted=1]"
+          },
+          {
+            "sequenceId": "ces_thr04_credential_theft",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THR04 THREAT_CONFIRMED + STAGE_EXECUTION: [obs_skill_unreviewed=1 ∧ obs_skill_script_exec=1] · [obs_skill_cred_access=1]"
+          },
+          {
+            "sequenceId": "ces_thr04_credential_access",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "THR04 THREAT_SUSPECTED + STAGE_EXECUTION: [obs_skill_unreviewed=0 ∧ obs_skill_cred_access=1]"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "threat-dynamics.levels.thr04",
+          "type": "published-domain-bus-producer",
+          "role": "MaliciousSkillDetector",
+          "sourceMachine": "THR04_malicious-skill-detector",
+          "sourceOutputRegion": {
+            "offset": 17624,
+            "length": 3
+          },
+          "targetInputElements": [
+            9,
+            10,
+            11
+          ],
+          "normalizedElements": [
+            "THR04 THREAT_SUSPECTED",
+            "THR04 THREAT_CONFIRMED",
+            "THR04 CLEAR"
+          ],
+          "purpose": "Publish THR04's observation level to the threat roll-up.",
+          "busId": "threat-dynamics.levels",
+          "busTag": "published-bus-threat-dynamics-levels",
+          "targetMachine": "THR00 Threat Level Rollup",
+          "targetMachineFile": "THR00_threat-level-rollup.json",
+          "targetInputRegion": {
+            "offset": 17680,
+            "length": 27
+          },
+          "publishedOutputRegion": {
+            "offset": 17707,
+            "length": 3
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized observation bits only."
+        }
+      ],
+      "threatSpec": {
+        "attackClass": "NISTAML.064",
+        "title": "MaliciousSkillDetector",
+        "reference": "SP 2400-102e2026 ipd 4.5 (malicious skills)",
+        "specEdition": "NIST SP 2400-102e2026 ipd",
+        "observeOnly": true,
+        "decides": false,
+        "stages": "SP 2400-102e2026 ipd 4.1.1: planning, execution, observation"
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "debounceSteps": 3,
+        "testPath": "threat-sources.json simulations (simulated Sources through the ISRE)"
+      }
+    }
+  }
+}

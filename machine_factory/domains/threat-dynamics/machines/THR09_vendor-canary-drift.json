@@ -1,0 +1,649 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "THR09_vendor-canary-drift",
+    "name": "THR09_vendor-canary-drift",
+    "description": "Vendor canary drift: drift above 0.10 or a stale canary run is suspected; drift above 0.15 for three consecutive runs is confirmed. The bands mirror GOV16's release and trip, so the observer and the decider read the same Source alike.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17568,
+        "length": 2
+      },
+      "output": {
+        "offset": 17664,
+        "length": 8
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ces_thr09_clear",
+        "name": "THR09 clear",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "CLEAR"
+          ],
+          "regularExpression": "[mon_canary_drift_score∈[0,0.1] ∧ canary_run_fresh=1]",
+          "length": 1,
+          "specRule": "ai-governance-regime gap 6 (GOV-SD-11); SP 2400-102e2026 ipd 4.3 (model supply chain)",
+          "attackClass": "TD-CANARY",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr09_clear-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.05,
+                "threshold": 0.05,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr09_clear-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr09_drift_elevated",
+        "name": "THR09 drift-elevated",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_SUSPECTED",
+            "STAGE_OBSERVATION"
+          ],
+          "regularExpression": "[mon_canary_drift_score∈[0.1001,0.15] ∧ canary_run_fresh=1]",
+          "length": 1,
+          "specRule": "ai-governance-regime gap 6 (GOV-SD-11); SP 2400-102e2026 ipd 4.3 (model supply chain)",
+          "attackClass": "TD-CANARY",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr09_drift_elevated-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.12505,
+                "threshold": 0.02495,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr09_drift_elevated-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr09_canary_stale",
+        "name": "THR09 canary-stale",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_SUSPECTED",
+            "STAGE_OBSERVATION"
+          ],
+          "regularExpression": "[canary_run_fresh=0]",
+          "length": 1,
+          "specRule": "ai-governance-regime gap 6 (GOV-SD-11); SP 2400-102e2026 ipd 4.3 (model supply chain)",
+          "attackClass": "TD-CANARY",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr09_canary_stale-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr09_canary_stale-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr09_drift_breach",
+        "name": "THR09 drift-breach",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_CONFIRMED",
+            "STAGE_OBSERVATION"
+          ],
+          "regularExpression": "[mon_canary_drift_score∈[0.1501,1]]{3}",
+          "length": 3,
+          "specRule": "ai-governance-regime gap 6 (GOV-SD-11); SP 2400-102e2026 ipd 4.3 (model supply chain)",
+          "attackClass": "TD-CANARY",
+          "semanticAmendments": [
+            "TD-SA-02",
+            "TD-SA-06"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_thr09_drift_breach-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.57505,
+                "threshold": 0.42495,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr09_drift_breach-e1"
+            ]
+          },
+          {
+            "id": "ces_thr09_drift_breach-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.57505,
+                "threshold": 0.42495,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr09_drift_breach-e2"
+            ]
+          },
+          {
+            "id": "ces_thr09_drift_breach-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.57505,
+                "threshold": 0.42495,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr09_drift_breach-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "thr09-clear",
+        "events": [
+          [
+            0.05,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr09_clear: [mon_canary_drift_score∈[0,0.1] ∧ canary_run_fresh=1]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr09_clear"
+        }
+      },
+      {
+        "name": "thr09-drift-elevated",
+        "events": [
+          [
+            0.125,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr09_drift_elevated: [mon_canary_drift_score∈[0.1001,0.15] ∧ canary_run_fresh=1]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr09_drift_elevated"
+        }
+      },
+      {
+        "name": "thr09-canary-stale",
+        "events": [
+          [
+            0.02,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr09_canary_stale: [canary_run_fresh=0]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr09_canary_stale"
+        }
+      },
+      {
+        "name": "thr09-drift-breach",
+        "events": [
+          [
+            0.5751,
+            1.0
+          ],
+          [
+            0.5751,
+            1.0
+          ],
+          [
+            0.5751,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr09_drift_breach: [mon_canary_drift_score∈[0.1501,1]]{3}",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr09_drift_breach"
+        }
+      },
+      {
+        "name": "thr09-nominal",
+        "events": [
+          [
+            0.02,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "threat-dynamics",
+      "domain": "threat-dynamics",
+      "machineClass": "signal-monitor",
+      "sequenceCount": 4,
+      "inputSemantics": [
+        "mon_canary_drift_score (continuous [0,1]; sensor: canary harness (localAIStack /observations/drift records drift today); partial; simulated until staged): behavioral drift on canary prompts",
+        "canary_run_fresh (binary; sensor: canary harness schedule; partial; simulated until staged): the last scheduled canary run is inside its window"
+      ],
+      "outputSemantics": [
+        "0: THREAT_SUSPECTED",
+        "1: THREAT_CONFIRMED",
+        "2: CLEAR",
+        "3: STAGE_PLANNING",
+        "4: STAGE_EXECUTION",
+        "5: STAGE_OBSERVATION",
+        "6: GATE_PASS",
+        "7: GATE_FAIL"
+      ],
+      "tags": [
+        "threat-dynamics",
+        "drift",
+        "TD-CANARY",
+        "fixture",
+        "observe-only"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/threat-dynamics",
+        "primaryDomain": "threat-dynamics",
+        "family": "drift",
+        "machineCode": "THR09",
+        "workflowTags": [
+          "VendorCanaryDrift",
+          "TD-CANARY"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "THREAT::Threat Observer",
+        "runbook": "urn:re:threat:runbook:drift:v1",
+        "escalationPolicy": "THREAT::Threat Observer publishes; ai-governance-regime decides (TD-SD-02)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        }
+      },
+      "triggerConfig": {
+        "processId": "THR09_vendor-canary-drift",
+        "processName": "THR09 VendorCanaryDrift",
+        "rules": [
+          {
+            "sequenceId": "ces_thr09_clear",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "THR09 CLEAR: [mon_canary_drift_score∈[0,0.1] ∧ canary_run_fresh=1]"
+          },
+          {
+            "sequenceId": "ces_thr09_drift_elevated",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "THR09 THREAT_SUSPECTED + STAGE_OBSERVATION: [mon_canary_drift_score∈[0.1001,0.15] ∧ canary_run_fresh=1]"
+          },
+          {
+            "sequenceId": "ces_thr09_canary_stale",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "THR09 THREAT_SUSPECTED + STAGE_OBSERVATION: [canary_run_fresh=0]"
+          },
+          {
+            "sequenceId": "ces_thr09_drift_breach",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THR09 THREAT_CONFIRMED + STAGE_OBSERVATION: [mon_canary_drift_score∈[0.1501,1]]{3}"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "threat-dynamics.levels.thr09",
+          "type": "published-domain-bus-producer",
+          "role": "VendorCanaryDrift",
+          "sourceMachine": "THR09_vendor-canary-drift",
+          "sourceOutputRegion": {
+            "offset": 17664,
+            "length": 3
+          },
+          "targetInputElements": [
+            21,
+            22,
+            23
+          ],
+          "normalizedElements": [
+            "THR09 THREAT_SUSPECTED",
+            "THR09 THREAT_CONFIRMED",
+            "THR09 CLEAR"
+          ],
+          "purpose": "Publish THR09's observation level to the threat roll-up.",
+          "busId": "threat-dynamics.levels",
+          "busTag": "published-bus-threat-dynamics-levels",
+          "targetMachine": "THR00 Threat Level Rollup",
+          "targetMachineFile": "THR00_threat-level-rollup.json",
+          "targetInputRegion": {
+            "offset": 17680,
+            "length": 27
+          },
+          "publishedOutputRegion": {
+            "offset": 17707,
+            "length": 3
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized observation bits only."
+        }
+      ],
+      "threatSpec": {
+        "attackClass": "TD-CANARY",
+        "title": "VendorCanaryDrift",
+        "reference": "ai-governance-regime gap 6 (GOV-SD-11); SP 2400-102e2026 ipd 4.3 (model supply chain)",
+        "specEdition": "NIST SP 2400-102e2026 ipd",
+        "observeOnly": true,
+        "decides": false,
+        "stages": "SP 2400-102e2026 ipd 4.1.1: planning, execution, observation"
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "debounceSteps": 3,
+        "testPath": "threat-sources.json simulations (simulated Sources through the ISRE)"
+      }
+    }
+  }
+}

@@ -1,0 +1,829 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "THR07_decomposition-detector",
+    "name": "THR07_decomposition-detector",
+    "description": "Decomposition attacks (NISTAML.067), reasoned over the session rather than the request: subtasks that each pass the filter but compose toward harm, or are split across models, are suspected; a composition that escalates into harm, or stays harmful, is confirmed.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17536,
+        "length": 3
+      },
+      "output": {
+        "offset": 17648,
+        "length": 8
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ces_thr07_clear",
+        "name": "THR07 clear",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "CLEAR"
+          ],
+          "regularExpression": "[obs_composite_harm∈[0,0.3] ∧ obs_cross_model_split=0]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.1.2 (Misuse Enablement, decomposition attack)",
+          "attackClass": "NISTAML.067",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr07_clear-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.15,
+                "threshold": 0.15,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr07_clear-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr07_model_split",
+        "name": "THR07 model-split",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_SUSPECTED",
+            "STAGE_PLANNING"
+          ],
+          "regularExpression": "[obs_subtask_benign=1 ∧ obs_composite_harm∈[0,0.6] ∧ obs_cross_model_split=1]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.1.2 (Misuse Enablement, decomposition attack)",
+          "attackClass": "NISTAML.067",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr07_model_split-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.3,
+                "threshold": 0.3,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr07_model_split-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr07_composite_rising",
+        "name": "THR07 composite-rising",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_SUSPECTED",
+            "STAGE_PLANNING"
+          ],
+          "regularExpression": "[obs_subtask_benign=1 ∧ obs_composite_harm∈[0.3001,0.6]]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.1.2 (Misuse Enablement, decomposition attack)",
+          "attackClass": "NISTAML.067",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr07_composite_rising-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.45005,
+                "threshold": 0.14995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr07_composite_rising-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr07_escalating",
+        "name": "THR07 escalating",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_CONFIRMED",
+            "STAGE_EXECUTION"
+          ],
+          "regularExpression": "[obs_subtask_benign=1 ∧ obs_composite_harm∈[0.3001,0.6]] · [obs_subtask_benign=1 ∧ obs_composite_harm∈[0.6001,1]]",
+          "length": 2,
+          "specRule": "SP 2400-102e2026 ipd 4.1.2 (Misuse Enablement, decomposition attack)",
+          "attackClass": "NISTAML.067",
+          "semanticAmendments": [
+            "TD-SA-03"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_thr07_escalating-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.45005,
+                "threshold": 0.14995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr07_escalating-e1"
+            ]
+          },
+          {
+            "id": "ces_thr07_escalating-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.80005,
+                "threshold": 0.19995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr07_escalating-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr07_decomposed_harm",
+        "name": "THR07 decomposed-harm",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_CONFIRMED",
+            "STAGE_PLANNING"
+          ],
+          "regularExpression": "[obs_subtask_benign=1 ∧ obs_composite_harm∈[0.6001,1]]{3}",
+          "length": 3,
+          "specRule": "SP 2400-102e2026 ipd 4.1.2 (Misuse Enablement, decomposition attack)",
+          "attackClass": "NISTAML.067",
+          "semanticAmendments": [
+            "TD-SA-02"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_thr07_decomposed_harm-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.80005,
+                "threshold": 0.19995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr07_decomposed_harm-e1"
+            ]
+          },
+          {
+            "id": "ces_thr07_decomposed_harm-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.80005,
+                "threshold": 0.19995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr07_decomposed_harm-e2"
+            ]
+          },
+          {
+            "id": "ces_thr07_decomposed_harm-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.80005,
+                "threshold": 0.19995,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr07_decomposed_harm-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "thr07-clear",
+        "events": [
+          [
+            1.0,
+            0.15,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr07_clear: [obs_composite_harm∈[0,0.3] ∧ obs_cross_model_split=0]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr07_clear"
+        }
+      },
+      {
+        "name": "thr07-model-split",
+        "events": [
+          [
+            1.0,
+            0.3,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr07_model_split: [obs_subtask_benign=1 ∧ obs_composite_harm∈[0,0.6] ∧ obs_cross_model_split=1]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr07_model_split"
+        }
+      },
+      {
+        "name": "thr07-composite-rising",
+        "events": [
+          [
+            1.0,
+            0.45,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr07_composite_rising: [obs_subtask_benign=1 ∧ obs_composite_harm∈[0.3001,0.6]]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr07_composite_rising"
+        }
+      },
+      {
+        "name": "thr07-escalating",
+        "events": [
+          [
+            1.0,
+            0.45,
+            0.0
+          ],
+          [
+            1.0,
+            0.8,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr07_escalating: [obs_subtask_benign=1 ∧ obs_composite_harm∈[0.3001,0.6]] · [obs_subtask_benign=1 ∧ obs_composite_harm∈[0.6001,1]]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr07_escalating"
+        }
+      },
+      {
+        "name": "thr07-decomposed-harm",
+        "events": [
+          [
+            1.0,
+            0.8,
+            0.0
+          ],
+          [
+            1.0,
+            0.8,
+            0.0
+          ],
+          [
+            1.0,
+            0.8,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr07_decomposed_harm: [obs_subtask_benign=1 ∧ obs_composite_harm∈[0.6001,1]]{3}",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr07_decomposed_harm"
+        }
+      },
+      {
+        "name": "thr07-nominal",
+        "events": [
+          [
+            1.0,
+            0.05,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "threat-dynamics",
+      "domain": "threat-dynamics",
+      "machineClass": "signal-monitor",
+      "sequenceCount": 5,
+      "inputSemantics": [
+        "obs_subtask_benign (binary; sensor: per-request content filter verdict; partial; simulated until staged): the current subtask passes the per-request filter",
+        "obs_composite_harm (continuous [0,1]; sensor: session-level composition classifier; new; simulated until staged): harm score of the session's subtasks composed",
+        "obs_cross_model_split (binary; sensor: model router audit; new; simulated until staged): subtasks are routed across models with different safeguards"
+      ],
+      "outputSemantics": [
+        "0: THREAT_SUSPECTED",
+        "1: THREAT_CONFIRMED",
+        "2: CLEAR",
+        "3: STAGE_PLANNING",
+        "4: STAGE_EXECUTION",
+        "5: STAGE_OBSERVATION",
+        "6: GATE_PASS",
+        "7: GATE_FAIL"
+      ],
+      "tags": [
+        "threat-dynamics",
+        "misuse",
+        "NISTAML.067",
+        "fixture",
+        "observe-only"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/threat-dynamics",
+        "primaryDomain": "threat-dynamics",
+        "family": "misuse",
+        "machineCode": "THR07",
+        "workflowTags": [
+          "DecompositionDetector",
+          "NISTAML.067"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "THREAT::Threat Observer",
+        "runbook": "urn:re:threat:runbook:misuse:v1",
+        "escalationPolicy": "THREAT::Threat Observer publishes; ai-governance-regime decides (TD-SD-02)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        }
+      },
+      "triggerConfig": {
+        "processId": "THR07_decomposition-detector",
+        "processName": "THR07 DecompositionDetector",
+        "rules": [
+          {
+            "sequenceId": "ces_thr07_clear",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "THR07 CLEAR: [obs_composite_harm∈[0,0.3] ∧ obs_cross_model_split=0]"
+          },
+          {
+            "sequenceId": "ces_thr07_model_split",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "THR07 THREAT_SUSPECTED + STAGE_PLANNING: [obs_subtask_benign=1 ∧ obs_composite_harm∈[0,0.6] ∧ obs_cross_model_split=1]"
+          },
+          {
+            "sequenceId": "ces_thr07_composite_rising",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "THR07 THREAT_SUSPECTED + STAGE_PLANNING: [obs_subtask_benign=1 ∧ obs_composite_harm∈[0.3001,0.6]]"
+          },
+          {
+            "sequenceId": "ces_thr07_escalating",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THR07 THREAT_CONFIRMED + STAGE_EXECUTION: [obs_subtask_benign=1 ∧ obs_composite_harm∈[0.3001,0.6]] · [obs_subtask_benign=1 ∧ obs_composite_harm∈[0.6001,1]]"
+          },
+          {
+            "sequenceId": "ces_thr07_decomposed_harm",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THR07 THREAT_CONFIRMED + STAGE_PLANNING: [obs_subtask_benign=1 ∧ obs_composite_harm∈[0.6001,1]]{3}"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "threat-dynamics.levels.thr07",
+          "type": "published-domain-bus-producer",
+          "role": "DecompositionDetector",
+          "sourceMachine": "THR07_decomposition-detector",
+          "sourceOutputRegion": {
+            "offset": 17648,
+            "length": 3
+          },
+          "targetInputElements": [
+            18,
+            19,
+            20
+          ],
+          "normalizedElements": [
+            "THR07 THREAT_SUSPECTED",
+            "THR07 THREAT_CONFIRMED",
+            "THR07 CLEAR"
+          ],
+          "purpose": "Publish THR07's observation level to the threat roll-up.",
+          "busId": "threat-dynamics.levels",
+          "busTag": "published-bus-threat-dynamics-levels",
+          "targetMachine": "THR00 Threat Level Rollup",
+          "targetMachineFile": "THR00_threat-level-rollup.json",
+          "targetInputRegion": {
+            "offset": 17680,
+            "length": 27
+          },
+          "publishedOutputRegion": {
+            "offset": 17707,
+            "length": 3
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized observation bits only."
+        }
+      ],
+      "threatSpec": {
+        "attackClass": "NISTAML.067",
+        "title": "DecompositionDetector",
+        "reference": "SP 2400-102e2026 ipd 4.1.2 (Misuse Enablement, decomposition attack)",
+        "specEdition": "NIST SP 2400-102e2026 ipd",
+        "observeOnly": true,
+        "decides": false,
+        "stages": "SP 2400-102e2026 ipd 4.1.1: planning, execution, observation"
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "debounceSteps": 3,
+        "testPath": "threat-sources.json simulations (simulated Sources through the ISRE)"
+      }
+    }
+  }
+}

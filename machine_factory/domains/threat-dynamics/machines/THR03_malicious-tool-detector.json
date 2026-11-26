@@ -1,0 +1,1217 @@
+{
+  "version": "1.0.0",
+  "machine": {
+    "id": "THR03_malicious-tool-detector",
+    "name": "THR03_malicious-tool-detector",
+    "description": "Malicious tools (NISTAML.063): an unsigned tool definition in context or instructions in a tool's return are suspected; a description changed after approval (rug pull), exfiltration to an unlisted endpoint, and a sustained stall are confirmed.",
+    "arbiterRule": "PASSTHROUGH",
+    "matchAlgorithm": "equals",
+    "outputMergeTransformation": "or",
+    "perceptualMapping": {
+      "input": {
+        "offset": 17472,
+        "length": 5
+      },
+      "output": {
+        "offset": 17616,
+        "length": 8
+      },
+      "bitsPerElement": 8
+    },
+    "sequences": [
+      {
+        "id": "ces_thr03_clear",
+        "name": "THR03 clear",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "CLEAR"
+          ],
+          "regularExpression": "[obs_tool_def_unsigned=0 ∧ obs_tool_def_changed=0 ∧ obs_tool_return_instr=0 ∧ obs_tool_egress_unlisted=0 ∧ obs_tool_stall∈[0,0.5]]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.5 (planning attacks, execution attacks, rogue MCP servers)",
+          "attackClass": "NISTAML.063",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr03_clear-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.25,
+                "threshold": 0.25,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr03_clear-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr03_tool_poisoning",
+        "name": "THR03 tool-poisoning",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_SUSPECTED",
+            "STAGE_PLANNING"
+          ],
+          "regularExpression": "[obs_tool_def_unsigned=1 ∧ obs_tool_def_changed=0]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.5 (planning attacks, execution attacks, rogue MCP servers)",
+          "attackClass": "NISTAML.063",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr03_tool_poisoning-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr03_tool_poisoning-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr03_rug_pull",
+        "name": "THR03 rug-pull",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_CONFIRMED",
+            "STAGE_PLANNING"
+          ],
+          "regularExpression": "[obs_tool_def_changed=0] · [obs_tool_def_changed=1]",
+          "length": 2,
+          "specRule": "SP 2400-102e2026 ipd 4.5 (planning attacks, execution attacks, rogue MCP servers)",
+          "attackClass": "NISTAML.063",
+          "semanticAmendments": [
+            "TD-SA-03"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_thr03_rug_pull-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr03_rug_pull-e1"
+            ]
+          },
+          {
+            "id": "ces_thr03_rug_pull-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr03_rug_pull-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr03_return_injection",
+        "name": "THR03 return-injection",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_SUSPECTED",
+            "STAGE_OBSERVATION"
+          ],
+          "regularExpression": "[obs_tool_return_instr=1 ∧ obs_tool_egress_unlisted=0]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.5 (planning attacks, execution attacks, rogue MCP servers)",
+          "attackClass": "NISTAML.063",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr03_return_injection-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr03_return_injection-out",
+                "vector": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr03_injected_exfiltration",
+        "name": "THR03 injected-exfiltration",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_CONFIRMED",
+            "STAGE_EXECUTION"
+          ],
+          "regularExpression": "[obs_tool_return_instr=1] · [obs_tool_egress_unlisted=1]",
+          "length": 2,
+          "specRule": "SP 2400-102e2026 ipd 4.5 (planning attacks, execution attacks, rogue MCP servers)",
+          "attackClass": "NISTAML.063",
+          "semanticAmendments": [
+            "TD-SA-03"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_thr03_injected_exfiltration-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr03_injected_exfiltration-e1"
+            ]
+          },
+          {
+            "id": "ces_thr03_injected_exfiltration-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr03_injected_exfiltration-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr03_exfiltration",
+        "name": "THR03 exfiltration",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_CONFIRMED",
+            "STAGE_EXECUTION"
+          ],
+          "regularExpression": "[obs_tool_return_instr=0 ∧ obs_tool_egress_unlisted=1]",
+          "length": 1,
+          "specRule": "SP 2400-102e2026 ipd 4.5 (planning attacks, execution attacks, rogue MCP servers)",
+          "attackClass": "NISTAML.063",
+          "semanticAmendments": []
+        },
+        "events": [
+          {
+            "id": "ces_thr03_exfiltration-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr03_exfiltration-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ces_thr03_tool_stall",
+        "name": "THR03 tool-stall",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "observation": [
+            "THREAT_CONFIRMED",
+            "STAGE_EXECUTION"
+          ],
+          "regularExpression": "[obs_tool_stall∈[0.8001,1]]{3}",
+          "length": 3,
+          "specRule": "SP 2400-102e2026 ipd 4.5 (planning attacks, execution attacks, rogue MCP servers)",
+          "attackClass": "NISTAML.063",
+          "semanticAmendments": [
+            "TD-SA-02"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_thr03_tool_stall-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.90005,
+                "threshold": 0.09995,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr03_tool_stall-e1"
+            ]
+          },
+          {
+            "id": "ces_thr03_tool_stall-e1",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.90005,
+                "threshold": 0.09995,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_thr03_tool_stall-e2"
+            ]
+          },
+          {
+            "id": "ces_thr03_tool_stall-e2",
+            "isInitial": false,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.90005,
+                "threshold": 0.09995,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_thr03_tool_stall-out",
+                "vector": [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "inputSequences": [
+      {
+        "name": "thr03-clear",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.25
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr03_clear: [obs_tool_def_unsigned=0 ∧ obs_tool_def_changed=0 ∧ obs_tool_return_instr=0 ∧ obs_tool_egress_unlisted=0 ∧ obs_tool_stall∈[0,0.5]]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr03_clear"
+        }
+      },
+      {
+        "name": "thr03-tool-poisoning",
+        "events": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr03_tool_poisoning: [obs_tool_def_unsigned=1 ∧ obs_tool_def_changed=0]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr03_tool_poisoning"
+        }
+      },
+      {
+        "name": "thr03-rug-pull",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.1
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr03_rug_pull: [obs_tool_def_changed=0] · [obs_tool_def_changed=1]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr03_rug_pull"
+        }
+      },
+      {
+        "name": "thr03-return-injection",
+        "events": [
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr03_return_injection: [obs_tool_return_instr=1 ∧ obs_tool_egress_unlisted=0]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr03_return_injection"
+        }
+      },
+      {
+        "name": "thr03-injected-exfiltration",
+        "events": [
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.1
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr03_injected_exfiltration: [obs_tool_return_instr=1] · [obs_tool_egress_unlisted=1]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr03_injected_exfiltration"
+        }
+      },
+      {
+        "name": "thr03-exfiltration",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr03_exfiltration: [obs_tool_return_instr=0 ∧ obs_tool_egress_unlisted=1]",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr03_exfiltration"
+        }
+      },
+      {
+        "name": "thr03-tool-stall",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.9001
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.9001
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.9001
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_thr03_tool_stall: [obs_tool_stall∈[0.8001,1]]{3}",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_thr03_tool_stall"
+        }
+      },
+      {
+        "name": "thr03-nominal",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.1
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "the quiet state",
+          "expectedEvaluationScope": "Machine-granularity authoring fixture, isolated from reset; the test path is the package's simulated Sources (threat-sources.json, TD-SD-04), confirmed 3-of-3 on the engines."
+        }
+      }
+    ],
+    "metadata": {
+      "category": "threat-dynamics",
+      "domain": "threat-dynamics",
+      "machineClass": "signal-monitor",
+      "sequenceCount": 7,
+      "inputSemantics": [
+        "obs_tool_def_unsigned (binary; sensor: tool-registry verifier (MCP definitions: signature, immutable version); new; simulated until staged): a tool definition in context is unsigned or unversioned",
+        "obs_tool_def_changed (binary; sensor: tool-registry verifier; new; simulated until staged): a tool's description changed since it was approved (rug pull)",
+        "obs_tool_return_instr (binary; sensor: agent-trace observer on the A2A runtime (localLangChainStack, CI#841); new; simulated until staged): a tool's return value carries instructions",
+        "obs_tool_egress_unlisted (binary; sensor: egress observer at the ACP/MCP/A2A boundary; new; simulated until staged): a tool sent data to an endpoint outside its allow-list",
+        "obs_tool_stall (continuous [0,1]; sensor: agent-trace observer on the A2A runtime (localLangChainStack, CI#841); new; simulated until staged): tool latency or blocking relative to its budget"
+      ],
+      "outputSemantics": [
+        "0: THREAT_SUSPECTED",
+        "1: THREAT_CONFIRMED",
+        "2: CLEAR",
+        "3: STAGE_PLANNING",
+        "4: STAGE_EXECUTION",
+        "5: STAGE_OBSERVATION",
+        "6: GATE_PASS",
+        "7: GATE_FAIL"
+      ],
+      "tags": [
+        "threat-dynamics",
+        "integrity",
+        "NISTAML.063",
+        "fixture",
+        "observe-only"
+      ],
+      "tagging": {
+        "schemaVersion": "1.0.0",
+        "managedBy": "machine_factory/domains/threat-dynamics",
+        "primaryDomain": "threat-dynamics",
+        "family": "integrity",
+        "machineCode": "THR03",
+        "workflowTags": [
+          "MaliciousToolDetector",
+          "NISTAML.063"
+        ],
+        "validationTags": [
+          "candidate-not-admitted"
+        ]
+      },
+      "governance": {
+        "schemaVersion": "1.0.0",
+        "ownerTeam": "THREAT::Threat Observer",
+        "runbook": "urn:re:threat:runbook:integrity:v1",
+        "escalationPolicy": "THREAT::Threat Observer publishes; ai-governance-regime decides (TD-SD-02)",
+        "sla": {
+          "ok": null,
+          "info": null,
+          "warning": null,
+          "error": null
+        }
+      },
+      "triggerConfig": {
+        "processId": "THR03_malicious-tool-detector",
+        "processName": "THR03 MaliciousToolDetector",
+        "rules": [
+          {
+            "sequenceId": "ces_thr03_clear",
+            "outputMatches": [
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "THR03 CLEAR: [obs_tool_def_unsigned=0 ∧ obs_tool_def_changed=0 ∧ obs_tool_return_instr=0 ∧ obs_tool_egress_unlisted=0 ∧ obs_tool_stall∈[0,0.5]]"
+          },
+          {
+            "sequenceId": "ces_thr03_tool_poisoning",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "THR03 THREAT_SUSPECTED + STAGE_PLANNING: [obs_tool_def_unsigned=1 ∧ obs_tool_def_changed=0]"
+          },
+          {
+            "sequenceId": "ces_thr03_rug_pull",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THR03 THREAT_CONFIRMED + STAGE_PLANNING: [obs_tool_def_changed=0] · [obs_tool_def_changed=1]"
+          },
+          {
+            "sequenceId": "ces_thr03_return_injection",
+            "outputMatches": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "AMBER",
+            "processStatus": "warning",
+            "description": "THR03 THREAT_SUSPECTED + STAGE_OBSERVATION: [obs_tool_return_instr=1 ∧ obs_tool_egress_unlisted=0]"
+          },
+          {
+            "sequenceId": "ces_thr03_injected_exfiltration",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THR03 THREAT_CONFIRMED + STAGE_EXECUTION: [obs_tool_return_instr=1] · [obs_tool_egress_unlisted=1]"
+          },
+          {
+            "sequenceId": "ces_thr03_exfiltration",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THR03 THREAT_CONFIRMED + STAGE_EXECUTION: [obs_tool_return_instr=0 ∧ obs_tool_egress_unlisted=1]"
+          },
+          {
+            "sequenceId": "ces_thr03_tool_stall",
+            "outputMatches": [
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "RED",
+            "processStatus": "error",
+            "description": "THR03 THREAT_CONFIRMED + STAGE_EXECUTION: [obs_tool_stall∈[0.8001,1]]{3}"
+          }
+        ]
+      },
+      "interconnections": [
+        {
+          "id": "threat-dynamics.levels.thr03",
+          "type": "published-domain-bus-producer",
+          "role": "MaliciousToolDetector",
+          "sourceMachine": "THR03_malicious-tool-detector",
+          "sourceOutputRegion": {
+            "offset": 17616,
+            "length": 3
+          },
+          "targetInputElements": [
+            6,
+            7,
+            8
+          ],
+          "normalizedElements": [
+            "THR03 THREAT_SUSPECTED",
+            "THR03 THREAT_CONFIRMED",
+            "THR03 CLEAR"
+          ],
+          "purpose": "Publish THR03's observation level to the threat roll-up.",
+          "busId": "threat-dynamics.levels",
+          "busTag": "published-bus-threat-dynamics-levels",
+          "targetMachine": "THR00 Threat Level Rollup",
+          "targetMachineFile": "THR00_threat-level-rollup.json",
+          "targetInputRegion": {
+            "offset": 17680,
+            "length": 27
+          },
+          "publishedOutputRegion": {
+            "offset": 17707,
+            "length": 3
+          },
+          "peCompositionRequired": true,
+          "compositionOwner": "perception-engine",
+          "dispatchMode": "asynchronous-no-wait",
+          "privacyBoundary": "PE composes normalized observation bits only."
+        }
+      ],
+      "threatSpec": {
+        "attackClass": "NISTAML.063",
+        "title": "MaliciousToolDetector",
+        "reference": "SP 2400-102e2026 ipd 4.5 (planning attacks, execution attacks, rogue MCP servers)",
+        "specEdition": "NIST SP 2400-102e2026 ipd",
+        "observeOnly": true,
+        "decides": false,
+        "stages": "SP 2400-102e2026 ipd 4.1.1: planning, execution, observation"
+      },
+      "conversion": {
+        "candidateVersion": "0.1.0",
+        "builder": "tools/build_machines.py",
+        "transitionRule": "SURFACE_SPEC.md, Boundaries: where a K-line starts and ends",
+        "elementEncoding": "binary: equals; interval [lo,hi]: threshold, value (lo+hi)/2, threshold (hi-lo)/2; unconstrained: threshold 0.5 +/- 0.5",
+        "debounceSteps": 3,
+        "testPath": "threat-sources.json simulations (simulated Sources through the ISRE)"
+      }
+    }
+  }
+}
