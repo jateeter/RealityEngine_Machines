@@ -158,7 +158,7 @@ same path. Directories appear when their step produces content
 - **Verified:** `python3 tools/verify_package.py` and
   `python3 tools/verify_machines.py` pass (see the PR).
 - **Also produced:** the baseline intaken byte-for-byte as
-  `intake/BASELINE-V0.18-NIST.pdf`; the 19 November edition the received
+  `intake/BASELINE-V0.18-NIST.md`; the 19 November edition the received
   documents cite is recorded by sha256 only.
 - **Not done:** the threat-dynamics package itself; the milestone scope and the
   simulated-Source definitions (step 3); R14 (owner); R10 and R22 wait for the
