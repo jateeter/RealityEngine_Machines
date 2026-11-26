@@ -32,3 +32,8 @@ Cases AC26–AC35 in [the case inventory](../../acceptance/cases.json) cover wei
 ## Implemented interval-energy prerequisite
 
 [The offline meter interval contract](../../assets/meter-energy.md) now decodes selected pinned SunSpec model 203 import/export accumulators and derives separate exact synthetic Wh/kWh differences. Its quality/continuity/time checks exclude unusable intervals rather than filling missing values with zero. No compatible emissions factor, storage ledger, actual provider or carbon-intensity calculation is implemented by this step; AC26–AC35 remain NOT_RUN.
+
+
+## Implemented synthetic import ledger
+
+[The exact retrospective import ledger](../../assets/import-carbon-ledger.md) now exercises energy-weighted emissions/intensity, zero-denominator handling and strict compatibility/time/continuity checks using synthetic factors. It keeps exports separate without credits. This bounded arithmetic does not establish real provider rights/methods, uncertainty, storage allocation, trajectories, operational safety or AC26–AC35 acceptance; all remain pending.
