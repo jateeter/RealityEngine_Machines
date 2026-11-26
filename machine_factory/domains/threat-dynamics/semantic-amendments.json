@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0.0",
+  "domain": "threat-dynamics",
+  "scope": "Where the candidate machines choose what NIST SP 2400-102e2026 ipd leaves open: the taxonomy names attack classes and stages, not observable thresholds or orders. Each amendment is cited from the CESs that carry it (sequences[].metadata.semanticAmendments). None is approved; each is for owner review (TD-R03).",
+  "amendments": [
+    {
+      "id": "TD-SA-01",
+      "applies": "every continuous input",
+      "change": "Open interval bounds are written closed, 0.0001 inside the open end: > 0.6 becomes [0.6001, 1.0], (0.3, 0.6] becomes [0.3001, 0.6].",
+      "reason": "The threshold comparator accepts a closed interval |value - input| <= t (as ai-governance-regime GOV-SA-01)."
+    },
+    {
+      "id": "TD-SA-02",
+      "applies": "every continuous breach that confirms (THR01, 03, 05, 06, 07, 09, 10)",
+      "change": "A continuous breach is CONFIRMED only after DEBOUNCE (3) consecutive observations; a shorter burst is not confirmed, and the near-miss simulations exercise that.",
+      "reason": "One sample must not confirm a threat; the same count as ai-governance-regime's watchdogs (GOV-SA-19), so observer and decider agree on what is sustained."
+    },
+    {
+      "id": "TD-SA-03",
+      "applies": "THR01 hijacked-action, THR03 rug-pull and injected-exfiltration, THR04 credential-theft, THR07 escalating",
+      "change": "An attack the taxonomy describes as a cause and its effect is a two-event chain: the cause in one step, the effect in the next (injected content, then an unauthorized call; an approved description, then a changed one; an unreviewed skill's script, then a credential read; a rising composition, then a harmful one).",
+      "reason": "The order is the evidence; the effect alone is only suspected (or, for exfiltration, confirmed on its own CES)."
+    },
+    {
+      "id": "TD-SA-04",
+      "applies": "THR02 dormant-activated",
+      "change": "A dormant memory payload is observed through a persistent taint fact (obs_mem_tainted) carried by the provenance tracker, not by a CES waiting across the dormant interval: retrieval of a tainted record, then divergence, while the store stays tainted.",
+      "reason": "SP 2400-102 4.4: injection and exploitation are decoupled in time. A CES waits only on an initial or final event that keeps matching (SURFACE_SPEC Boundaries), so the gap is carried by the Source."
+    },
+    {
+      "id": "TD-SA-05",
+      "applies": "THR08",
+      "change": "GATE_PASS requires a completed suite covering NISTAML.061-.067, an attack success rate at or under 0.05 and no unmitigated V0.18 T13 case; an incomplete suite asserts nothing, so gate_redteam_pass stays 0.",
+      "reason": "Governance gap 3 needs a pass/fail; the 0.05 rate is a design choice for owner review, not a measured result."
+    },
+    {
+      "id": "TD-SA-06",
+      "applies": "THR09, THR10",
+      "change": "The bands mirror GOV16's: canary drift suspected above 0.10, confirmed above 0.15; exposure suspected in (0.70, 0.90], confirmed above 0.90.",
+      "reason": "Observer and decider read the same Source; different bands would let threat-dynamics report CLEAR while governance revokes."
+    }
+  ]
+}
