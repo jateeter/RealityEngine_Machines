@@ -63,3 +63,8 @@ The identity checker verifies all 187 dispositions and current repository name/p
 ## EI05 offline SunSpec active-power subset
 
 [The selected model 103/203 decoder and register replay](../assets/sunspec-power.md) now connect pinned W/W_SF definitions to draft FSGIM accounting views, preserving signed values, missing-value sentinels and exact decimal scale conversion. This is offline byte-level software evidence only. Secure peer pairs, native status/time mappings, full simulated device behavior, engineering review and admission remain pending; all 43 behavioral cases remain NOT_RUN.
+
+
+## EI05 offline meter energy intervals
+
+[Selected SunSpec import/export counters and exact interval differences](../assets/meter-energy.md) now provide separate synthetic Wh/kWh quantities linked to the draft facility PCC Meter. Missing data, resets/rollovers, scale changes and stale endpoints never become zero-energy assertions. This is an offline accounting prerequisite; no carbon factor, native peer, complete device simulation or admission is verified. All 43 behavioral cases remain NOT_RUN.
