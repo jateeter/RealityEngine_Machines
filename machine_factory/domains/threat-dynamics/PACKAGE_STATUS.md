@@ -9,7 +9,7 @@ The steps are ai-governance-regime's (its PACKAGE_STATUS.md, GOV-SD-02).
 | # | Step | Produces | State |
 |---|---|---|---|
 | 1 | Intake | `admission-source-manifest.json` (by sha256), `REVIEW_QUEUE.md`, `tools/verify_package.py` | **done** 2026-11-25 |
-| 2 | Scope | `scope-decisions.json` TD-SD-01..06 | **decided** 2026-11-25 (from GOV-SD-10, 11, 12, 16) |
+| 2 | Scope | `scope-decisions.json` TD-SD-01..07 | **decided** 2026-11-25 (from GOV-SD-10, 11, 12, 16; amendments approved, TD-SD-07) |
 | 3 | Sources | the specification pinned; producers staged per milestone | pinned; staging open (TD-R02) |
 | 4 | Asset catalog | — | not applicable: the domain has no governed documents |
 | 5 | Machine conversion | `machines/*.json`, `semantic-amendments.json` | **built** 2026-11-25 |
@@ -51,5 +51,5 @@ The steps are ai-governance-regime's (its PACKAGE_STATUS.md, GOV-SD-02).
   - the published lanes match `governance-sources.json`;
   - every class has adversarial and near-miss simulations, and every
     confirming and gate CES is fired by one.
-- **Not done:** no engine run (TD-R06); producers (TD-R02); amendments review
-  (TD-R03).
+- **Not done:** no engine run (TD-R06); producers (TD-R02).
+- **Approved 2026-11-25:** TD-SA-01..06 (TD-SD-07, TD-R03 closed).

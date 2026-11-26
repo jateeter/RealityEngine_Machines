@@ -95,6 +95,7 @@ The voting engines, 3-of-3, are the authority on every expected output.
 ## 6. Not decided here
 
 - Producers, and the milestone that stages each: GOV-SD-14 and TD-R02.
-- Thresholds: they are design choices, not measurements (TD-R03).
+- Thresholds: they are design choices, not measurements; the owner approved them as
+  such (TD-SD-07).
 - The 8-bit quantization of continuous cells on the engines: every simulated
   value is chosen away from a band edge, but the live run is the check (TD-R05).

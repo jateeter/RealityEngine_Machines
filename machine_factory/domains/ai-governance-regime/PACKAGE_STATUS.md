@@ -13,7 +13,7 @@ same path. Directories appear when their step produces content
 | # | Step | Produces (ifrs-accounting equivalent) | State |
 |---|---|---|---|
 | 1 | Intake: receive, preserve, index, review | `intake/`, `admission-source-manifest.json`, `REVIEW_QUEUE.md`, `tools/verify_package.py` | **done** 2026-11-20 |
-| 2 | Scope: owner decisions on R02, R04, R06–R09 | `scope-decisions.json` entries | **decided** 2026-11-25 (GOV-SD-04/05, 09–16); R14, the amendments, still with the owner |
+| 2 | Scope: owner decisions on R02, R04, R06–R09 | `scope-decisions.json` entries | **decided** 2026-11-25 (GOV-SD-04/05, 09–17); amendments approved (GOV-SD-17, R14 closed) |
 | 3 | Sources: pin the baseline and each in-scope framework edition; extract controls | `source-requirements.json`, `source-reference-map.json`, milestone scope | baseline pinned (GOV-SD-15); per-milestone framework scope and producer staging open (GOV-SD-14, 16) |
 | 4 | Asset catalog: governance document types, fields, owners, dependencies | `document-asset-catalog.json`, `document-dependencies.json`, `templates/` | partly received (SHACL shapes, SoA template) |
 | 5 | Machine conversion: canonical candidate files | `machines/*.json` here, `machine-import-manifest.json`, `semantic-amendments.json` | **built** 2026-11-21; copied to `machines/domains/` at admission |
@@ -74,7 +74,7 @@ same path. Directories appear when their step produces content
   - no engine has loaded these machines;
   - no 3-of-3 trajectory comparison (GOV-R12);
   - the multi-valued watchdogs need an extension corpus (GOV-R11);
-  - the amendments need owner review (GOV-R14).
+  - the amendments need owner review (GOV-R14; approved 2026-11-25, GOV-SD-17).
 
 ## 0.2.0 record (connected rebuild)
 

@@ -20,7 +20,7 @@ step in [PACKAGE_STATUS.md](PACKAGE_STATUS.md) is redone. Findings marked
 | GOV-R11 | Continuous-input watchdogs are multi-valued machines | regression reach | **decided 2026-11-25**: shared extension corpus (GOV-SD-12); open until that corpus exists in RealityEngine_CI |
 | GOV-R12 | Latch feedback and verdict composition need live confirmation | engine/PE behavior | live 3-of-3 run |
 | GOV-R13 | GOV10 permits on every quiet step | specification | **closed 2026-11-21**: GOV10 runs per message on `req_egress` (GOV-SA-08) |
-| GOV-R14 | The semantic amendments need owner review | specification | **owner** |
+| GOV-R14 | The semantic amendments need owner review | specification | **closed 2026-11-25**: all 22 approved as proposed (GOV-SD-17) |
 | GOV-R15 | 91% of CESs are single events; the obligations are temporal | machines | **rebuilt 2026-11-21 (0.2.0)**: chains for every order in §1.4; 62 of 141 CESs are chains |
 | GOV-R16 | Templates reserve no lifecycle lanes (cells 2–7) | frames | **rebuilt**: every template reserves 2–7; the missing observations are GOV-R19 |
 | GOV-R17 | Templates publish verdicts by bus, which clones may not | clone contract | **rebuilt**: only fixtures publish; templates report by continuation and completion |
@@ -195,7 +195,11 @@ fold, that permit is enough to make the domain permit while nothing halts.
 Decide whether egress gets a request signal, or whether GOV00 counts only
 permits that answer a request.
 
-## GOV-R14: the semantic amendments need owner review (owner)
+## GOV-R14: the semantic amendments need owner review (closed)
+
+Closed 2026-11-25: the owner approved all 22 as proposed (GOV-SD-17). Each
+amendment now carries `status: approved`.
+
 
 `semantic-amendments.json` lists 22 places (GOV-SA-01 to GOV-SA-22; it was 12
 at 0.1.0, and the 0.2.0 rebuild added ten) where the
