@@ -37,3 +37,8 @@ Cases AC26–AC35 in [the case inventory](../../acceptance/cases.json) cover wei
 ## Implemented synthetic import ledger
 
 [The exact retrospective import ledger](../../assets/import-carbon-ledger.md) now exercises energy-weighted emissions/intensity, zero-denominator handling and strict compatibility/time/continuity checks using synthetic factors. It keeps exports separate without credits. This bounded arithmetic does not establish real provider rights/methods, uncertainty, storage allocation, trajectories, operational safety or AC26–AC35 acceptance; all remain pending.
+
+
+## Implemented draft storage allocation
+
+[The synthetic storage carbon pool](../../assets/storage-carbon.md) now carries source-row charging emissions through declared conversion losses and proportional discharge allocation. It prevents treating discharge as intrinsically zero-carbon or adding carried emissions to the upstream import inventory again. This draft policy does not establish physical SOC/flows, idle-loss treatment, durable revisions, uncertainty, safety or AC26–AC35 acceptance.
