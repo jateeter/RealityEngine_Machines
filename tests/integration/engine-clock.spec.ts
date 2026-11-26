@@ -8,13 +8,18 @@ import type { APIRequestContext, APIResponse } from '@playwright/test';
  *
  * Every running instance the instance registry lists, voters and followers
  * alike, is two participants: its RE (`GET /api/engine/clock`) and its PE
- * (`GET /api/clock`). On each:
- *   - the clock is {instance, lamport, commit, step} (plus the inbound header
- *     counts), `lamport >= commit`, and both are monotonic across requests;
- *   - every response carries `RE-Clock: instance=<its instance>; lamport=<n>`;
+ * (`GET /api/clock`). Those routes report the clock at the participant's last
+ * committed step; its current lamport is the one each response carries in
+ * `RE-Clock`. On each:
+ *   - the body is {instance, lamport, commit, step} plus the inbound header
+ *     counts, `lamport >= commit`, `step >= -1` (-1 before the first step), and
+ *     lamport and commit never decrease;
+ *   - every response carries `RE-Clock: instance=<its instance>; lamport=<n>`,
+ *     and that lamport increases by at least 2 per request (a receive, a send);
  *   - a presented `RE-Clock` whose lamport is far ahead moves the participant's
  *     lamport past it (a receive is max(local, received) + 1);
- *   - a malformed header is refused with 400 and the spec's error body.
+ *   - a malformed header is refused with 400 and the spec's error body, and is
+ *     still a receive.
  *
  * The comparison (QUORUM_CONTRACT.md): `step` is compared 3-of-3 across the
  * voters' REs, while `instance`, `lamport` and `commit` are per participant and
@@ -87,36 +92,41 @@ test.describe('engine clock (#600)', () => {
       expect(Object.keys(c).filter(k => k !== 'headers').sort(), `${p.name}: clock keys`)
         .toEqual(['commit', 'instance', 'lamport', 'step']);
       expect(c.instance, `${p.name}: instance is a lower-case UUID`).toMatch(UUID);
-      for (const k of ['lamport', 'commit', 'step'] as const) {
+      for (const k of ['lamport', 'commit'] as const) {
         expect(Number.isSafeInteger(c[k]) && c[k] >= 0, `${p.name}: ${k} = ${c[k]} is a non-negative integer`).toBe(true);
       }
+      expect(Number.isSafeInteger(c.step) && c.step >= -1, `${p.name}: step = ${c.step} is an integer >= -1`).toBe(true);
       expect(c.lamport, `${p.name}: lamport >= commit`).toBeGreaterThanOrEqual(c.commit);
       expect(Object.keys(c.headers ?? {}).sort(), `${p.name}: header counts`).toEqual(['missing', 'received', 'rejected']);
 
       const header = stamped(p, first.response);
       expect(header.instance, `${p.name}: RE-Clock names the participant`).toBe(c.instance);
-      // The response is a send after the body was read: its lamport is later.
-      expect(header.lamport, `${p.name}: RE-Clock lamport >= the body's`).toBeGreaterThanOrEqual(c.lamport);
+      // The response is a send after the committed step: its lamport is later.
+      expect(header.lamport, `${p.name}: RE-Clock lamport > the committed step's`).toBeGreaterThan(c.lamport);
 
-      const second = (await clockOf(request, p)).clock;
+      const again = await clockOf(request, p);
+      const second = again.clock;
       expect(second.instance, `${p.name}: instance is stable`).toBe(c.instance);
-      expect(second.lamport, `${p.name}: lamport increases across requests`).toBeGreaterThan(c.lamport);
+      expect(second.lamport, `${p.name}: the committed lamport never decreases`).toBeGreaterThanOrEqual(c.lamport);
       expect(second.commit, `${p.name}: commit never decreases`).toBeGreaterThanOrEqual(c.commit);
       expect(second.lamport, `${p.name}: lamport >= commit`).toBeGreaterThanOrEqual(second.commit);
+      expect(stamped(p, again.response).lamport, `${p.name}: a request moves lamport by at least 2`)
+        .toBeGreaterThanOrEqual(header.lamport + 2);
     }
   });
 
   test('a presented RE-Clock far ahead moves lamport past it', async ({ request }) => {
     for (const p of all) {
-      const before = (await clockOf(request, p)).clock;
-      const injected = before.lamport + JUMP;
+      const first = await clockOf(request, p);
+      const injected = stamped(p, first.response).lamport + JUMP;
       const { clock: after, response } = await clockOf(request, p, presented(injected));
-      expect(after.lamport, `${p.name}: lamport after receiving ${injected}`).toBeGreaterThan(injected);
+      expect(stamped(p, response).lamport, `${p.name}: the reply's RE-Clock is past the injection ${injected}`)
+        .toBeGreaterThan(injected);
       expect(after.headers?.received, `${p.name}: the header is counted as received`)
-        .toBeGreaterThan(before.headers?.received ?? 0);
-      expect(stamped(p, response).lamport, `${p.name}: the reply's RE-Clock is past the injection`).toBeGreaterThan(injected);
-      // The jump is durable in this process: a later plain read stays past it.
-      expect((await clockOf(request, p)).clock.lamport, `${p.name}: lamport stays past the injection`).toBeGreaterThan(injected);
+        .toBeGreaterThan(first.clock.headers?.received ?? 0);
+      // The jump holds: a later plain request is answered past it.
+      expect(stamped(p, (await clockOf(request, p)).response).lamport, `${p.name}: lamport stays past the injection`)
+        .toBeGreaterThan(injected);
     }
   });
 
@@ -128,17 +138,20 @@ test.describe('engine clock (#600)', () => {
       `instance=${randomUUID().toUpperCase()}; lamport=1`,
     ];
     for (const p of all) {
-      const before = (await clockOf(request, p)).clock;
+      const first = await clockOf(request, p);
+      let last = stamped(p, first.response).lamport;
       for (const value of malformed) {
         const r = await request.get(`${p.url}${p.clockPath}`, { headers: { 'RE-Clock': value } });
         expect(r.status(), `${p.name}: RE-Clock "${value}"`).toBe(400);
         expect(await r.json(), `${p.name}: the error body`).toEqual({ error: 'malformed RE-Clock header' });
+        // A refused request is still a receive, and the 400 carries RE-Clock.
+        const now = stamped(p, r).lamport;
+        expect(now, `${p.name}: lamport moves on a refused request`).toBeGreaterThanOrEqual(last + 2);
+        last = now;
       }
       const after = (await clockOf(request, p)).clock;
-      expect((after.headers?.rejected ?? 0) - (before.headers?.rejected ?? 0), `${p.name}: rejected count`)
+      expect((after.headers?.rejected ?? 0) - (first.clock.headers?.rejected ?? 0), `${p.name}: rejected count`)
         .toBe(malformed.length);
-      // A refused request still counts as a receive: lamport moved on.
-      expect(after.lamport, `${p.name}: lamport after refusals`).toBeGreaterThan(before.lamport + malformed.length);
     }
   });
 
@@ -176,11 +189,11 @@ test.describe('engine clock (#600)', () => {
     for (const p of all.filter(q => q.clockPath === '/api/clock')) {
       const bridgeId = `engine-clock-${p.runtime}-${Date.now()}`;
       for (const [path, body] of calls) {
-        const injected = (await clockOf(request, p)).clock.lamport + JUMP;
+        const injected = stamped(p, (await clockOf(request, p)).response).lamport + JUMP;
         const r = await request.post(`${p.url}${path}`, { data: body(bridgeId), headers: { ...auth, ...presented(injected) } });
         expect(r.status(), `${p.name} POST ${path}: answered, not refused for the header`).not.toBe(404);
         expect(stamped(p, r).lamport, `${p.name} POST ${path}: the reply is past the injection`).toBeGreaterThan(injected);
-        expect((await clockOf(request, p)).clock.lamport, `${p.name} after POST ${path}`).toBeGreaterThan(injected);
+        expect(stamped(p, (await clockOf(request, p)).response).lamport, `${p.name} after POST ${path}`).toBeGreaterThan(injected);
       }
     }
   });
