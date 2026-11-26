@@ -1,0 +1,343 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.example.org/schemas/re-kline.schema.json",
+  "title": "re-kline/1: one K-line, the RE half",
+  "description": "One episode of one critical event sequence, from departure to its end, as an RE stores it in $RE_INSTANCE_STATE_DIR/klines/<instance_uuid>/ (RealityEngine_CI SURFACE_SPEC.md, 'Boundaries', 'The K-line store', 'Record'). It carries no sources or causedBy: those are the PE half (re-isre-composition/1).",
+  "type": "object",
+  "required": [
+    "format",
+    "id",
+    "corpus",
+    "focal",
+    "outcome",
+    "reason",
+    "open",
+    "close",
+    "path",
+    "difference",
+    "subsumedBy",
+    "sustain",
+    "scope",
+    "contributors",
+    "feedbackTruncated",
+    "sharedCells",
+    "activeBefore",
+    "activeAfter",
+    "pairs",
+    "outputs"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "re-kline/1"
+    },
+    "id": {
+      "$ref": "kline-defs.schema.json#/$defs/klineId"
+    },
+    "corpus": {
+      "$ref": "kline-defs.schema.json#/$defs/corpus"
+    },
+    "focal": {
+      "type": "object",
+      "required": [
+        "machine",
+        "sequence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "machine": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sequence": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "outcome": {
+      "enum": [
+        "completed",
+        "abandoned",
+        "subsumed",
+        "interrupted"
+      ]
+    },
+    "reason": {
+      "enum": [
+        null,
+        "reset",
+        "machine-removed",
+        "shutdown"
+      ]
+    },
+    "open": {
+      "$ref": "kline-defs.schema.json#/$defs/clock"
+    },
+    "close": {
+      "$ref": "kline-defs.schema.json#/$defs/clock"
+    },
+    "path": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "event",
+          "step",
+          "milestone",
+          "outputs"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "event": {
+            "type": "string",
+            "minLength": 1
+          },
+          "step": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "milestone": {
+            "type": "boolean"
+          },
+          "outputs": {
+            "type": "array"
+          }
+        }
+      }
+    },
+    "difference": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "expected",
+            "elementIndex",
+            "cell",
+            "value",
+            "comparator",
+            "threshold",
+            "cells"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "expected": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "elementIndex": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cell": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "value": {
+              "type": "number"
+            },
+            "comparator": {
+              "type": "string",
+              "minLength": 1
+            },
+            "threshold": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "cells": {
+              "$ref": "kline-defs.schema.json#/$defs/cellRange"
+            }
+          }
+        }
+      ]
+    },
+    "subsumedBy": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "kline-defs.schema.json#/$defs/klineId"
+        }
+      ]
+    },
+    "sustain": {
+      "type": "object",
+      "required": [
+        "through",
+        "ended"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "through": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ended": {
+          "type": "boolean"
+        }
+      }
+    },
+    "scope": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "contributors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "kline",
+          "machine",
+          "hops"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "kline": {
+            "$ref": "kline-defs.schema.json#/$defs/klineId"
+          },
+          "machine": {
+            "type": "string",
+            "minLength": 1
+          },
+          "hops": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "feedbackTruncated": {
+      "type": "boolean"
+    },
+    "sharedCells": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "activeBefore": {
+      "type": "array",
+      "items": {
+        "$ref": "kline-defs.schema.json#/$defs/active"
+      }
+    },
+    "activeAfter": {
+      "type": "array",
+      "items": {
+        "$ref": "kline-defs.schema.json#/$defs/active"
+      }
+    },
+    "pairs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "kline-defs.schema.json#/$defs/pair"
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "required": [
+        "outputVector",
+        "mergedOutputVector"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "outputVector": {},
+        "mergedOutputVector": {}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "abandoned"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "difference": {
+            "type": "object"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "difference": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "subsumed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "subsumedBy": {
+            "$ref": "kline-defs.schema.json#/$defs/klineId"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "subsumedBy": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "interrupted"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "reason": {
+            "enum": [
+              "reset",
+              "machine-removed",
+              "shutdown"
+            ]
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "reason": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
+}

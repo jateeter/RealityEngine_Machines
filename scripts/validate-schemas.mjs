@@ -11,6 +11,8 @@
  *   - domains/clone-space.json      -> clone-space.schema.json
  *   - domains/lane-contracts.json   -> lane-contract.schema.json
  *   - schemas/source-kinds/*.json   -> source-kinds.schema.json
+ *   - schemas/examples/klines/valid/*   -> re-kline / re-kline-event / re-isre-composition
+ *     schemas/examples/klines/invalid/* -> each must be refused by its schema
  *   - triggers/*.example.json       -> ai-trigger-envelope.schema.json
  *   - triggers/*scenario*.json      -> trigger-scenario.schema.json
  *   (triggers/*.template.json is a documentation scaffold and is skipped.)
@@ -91,6 +93,33 @@ validateSet("lane-contracts", [join(REPO, "domains/lane-contracts.json")], "lane
 // half: ISRE composition"). A PE refuses to boot without its version.
 const sourceKindsDir = join(SCHEMA_DIR, "source-kinds");
 validateSet("source-kind taxonomy", existsSync(sourceKindsDir) ? walk(sourceKindsDir) : [], "source-kinds.schema.json");
+
+// The K-line records (RealityEngine_CI#603, SURFACE_SPEC.md "Record" and "The
+// PE half: ISRE composition"): every valid example must pass its schema, and
+// every invalid one, each carrying one defect, must be refused by it.
+const klineExamples = join(SCHEMA_DIR, "examples", "klines");
+const klineSchemaFor = (name) =>
+  name.startsWith("re-kline-event") ? "re-kline-event.schema.json"
+  : name.startsWith("re-isre-composition") ? "re-isre-composition.schema.json"
+  : "re-kline.schema.json";
+if (existsSync(klineExamples)) {
+  for (const schema of ["re-kline.schema.json", "re-kline-event.schema.json", "re-isre-composition.schema.json"]) {
+    const valid = readdirSync(join(klineExamples, "valid")).filter((n) => klineSchemaFor(n) === schema)
+      .map((n) => join(klineExamples, "valid", n));
+    validateSet(`K-line examples, valid (${schema.replace(".schema.json", "")})`, valid, schema);
+  }
+  const invalid = readdirSync(join(klineExamples, "invalid")).filter((n) => n.endsWith(".json"));
+  let refused = 0;
+  for (const n of invalid) {
+    total++;
+    const f = join(klineExamples, "invalid", n);
+    if (V(klineSchemaFor(n))(JSON.parse(readFileSync(f, "utf8")))) {
+      failed++;
+      failures.push([f, "an invalid K-line example passed its schema"]);
+    } else refused++;
+  }
+  console.log(`  ${refused === invalid.length ? "ok  " : "FAIL"} ${"K-line examples, invalid (each refused)".padEnd(46)} ${refused} refused / ${invalid.length - refused} passed`);
+}
 
 const approvalsDir = join(REPO, "domains/approvals");
 validateSet("domain admission ledgers", existsSync(approvalsDir) ? walk(approvalsDir) : [], "domain-admission-ledger.schema.json");
