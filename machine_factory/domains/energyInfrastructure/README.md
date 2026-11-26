@@ -93,3 +93,8 @@ EI03 now has [generic reference microgrids and authority](documents/workflow/ref
 ## EI05 synthetic measurement semantics
 
 [Four source-bound active-power snapshots](assets/power-snapshots.md) now exercise exact decimal W/kW normalization, net-import-positive signs, selected FSGIM accounting boundaries, timestamp ordering, observation-time freshness and null-preserving quality exclusion. This is offline project-contract validation only. Native property/peer mappings, engineering review, energy/carbon balance, simulated required hardware behavior and corpus admission remain pending; all 43 behavioral cases remain NOT_RUN.
+
+
+## EI05 offline SunSpec active-power subset
+
+[The selected model 103/203 decoder and register replay](assets/sunspec-power.md) now connect pinned W/W_SF definitions to draft FSGIM accounting views, preserving signed values, missing-value sentinels and exact decimal scale conversion. This is offline byte-level software evidence only. Secure peer pairs, native status/time mappings, full simulated device behavior, engineering review and admission remain pending; all 43 behavioral cases remain NOT_RUN.
