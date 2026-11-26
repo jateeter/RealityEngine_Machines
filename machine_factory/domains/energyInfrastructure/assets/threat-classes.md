@@ -25,6 +25,6 @@ No threat feeds, external endpoints, models, RAG index or control systems are co
 
 ## Remaining acceptance work
 
-SC16 is now partially reviewed for STIX object/schema coverage. TAXII transport/resource classes and service selection remain unreviewed. Nested extension/type taxonomy, all normative prose and applicable errata, complete fixture coverage, secure peer integration, cross-standard mappings, threat assessment and authentic runtime/admission evidence remain pending. All 43 behavioral acceptance cases remain NOT_RUN. Full EI04 completion is not asserted.
+SC16 is now partially reviewed for STIX object/schema coverage. [TAXII resource property tables](taxii-resources.md) now have a source-backed catalog and synthetic profile; full transport/prose review and service/peer selection remain pending. Nested extension/type taxonomy, all normative prose and applicable errata, complete fixture coverage, secure peer integration, cross-standard mappings, threat assessment and authentic runtime/admission evidence remain pending. All 43 behavioral acceptance cases remain NOT_RUN. Full EI04 completion is not asserted.
 
 The source receipt records a second supplemental public-model snapshot, separate from the original RAG family receipts. No extraction/indexing/retrieval approval is implied by collection, and no restricted DNP3 material was collected.

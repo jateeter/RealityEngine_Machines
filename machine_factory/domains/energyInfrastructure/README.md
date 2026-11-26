@@ -74,3 +74,8 @@ EI03 now has [generic reference microgrids and authority](documents/workflow/ref
 ### EI04 threat information taxonomy
 
 [SC16 class/schema coverage](assets/threat-classes.md) now catalogs 43 STIX top-level object/container classes with clause locators and 14 supporting schemas, preserving a pinned BSD-3-Clause OASIS snapshot. Offline synthetic validation executes against these explicitly non-normative schemas. TAXII, nested/prose/errata review, normative completion and actual risk/control integration remain pending. No behavioral acceptance case or live threat assessment was executed.
+
+
+### EI04 TAXII resource taxonomy
+
+[SC16 TAXII resource coverage](assets/taxii-resources.md) now includes nine resources and two supporting records, an unchanged official source snapshot with Notices, generated project schemas and offline synthetic fixtures. This is resource-table coverage only; full prose/errata, secure peer behavior, normative completion and behavioral acceptance remain pending.
