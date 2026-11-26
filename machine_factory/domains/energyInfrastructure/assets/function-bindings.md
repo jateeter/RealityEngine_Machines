@@ -30,3 +30,6 @@ node --test tools/test_function_bindings.mjs
 ```
 
 [The generator](../tools/build_function_bindings.py) reproduces the four canonical project fixtures. Semantically valid alternative draft parameters still require deliberate source/policy changes and regenerated fixtures before publication. Successful validation means draft structure and project profile checks passed; no network, runtime node, solver, control, normative conformance or behavioral acceptance case executed. EI04, EI05, EI06 and EI18 retain the remaining obligations.
+
+
+The separate [synthetic active-power snapshots](power-snapshots.md) now exercise project units/sign/time/quality semantics against these immutable projections. Their measurementBinding fields remain null: no native source/property or engineering-approved measurement binding has been established.

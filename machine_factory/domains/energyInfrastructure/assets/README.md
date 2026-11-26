@@ -70,3 +70,8 @@ The generator uses only the current checked-in scenario scope and generic fixtur
 ## Draft asset/function bindings
 
 [Typed FSGIM projections](function-bindings.md) now bind every asset in the generic and three reference fixtures to its draft role/function, scoped identity, optional DI type facet and accounting selection. Validation rejects incomplete/contradictory bindings and false execution claims. These remain inactive project projections, with normative, engineering and runtime verification pending.
+
+
+## EI05 synthetic measurement semantics
+
+[Four source-bound active-power snapshots](power-snapshots.md) now exercise exact decimal W/kW normalization, net-import-positive signs, selected FSGIM accounting boundaries, timestamp ordering, observation-time freshness and null-preserving quality exclusion. This is offline project-contract validation only. Native property/peer mappings, engineering review, energy/carbon balance, simulated required hardware behavior and corpus admission remain pending; all 43 behavioral cases remain NOT_RUN.

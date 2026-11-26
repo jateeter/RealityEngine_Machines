@@ -133,3 +133,8 @@ EI03 now has [generic reference microgrids and authority](documents/workflow/ref
 ### Draft FSGIM asset/function bindings
 
 [Four source-linked draft projections](assets/function-bindings.md) now cover the generic and three reference fixtures, with scoped identities, inactive functions, DI type facets and single-view resource accounting groups. This advances typed project bindings; normative model/property review, actual readings/units/time/boundaries, solver and protocol/runtime verification remain pending.
+
+
+## EI05 synthetic measurement semantics
+
+[Four source-bound active-power snapshots](assets/power-snapshots.md) now exercise exact decimal W/kW normalization, net-import-positive signs, selected FSGIM accounting boundaries, timestamp ordering, observation-time freshness and null-preserving quality exclusion. This is offline project-contract validation only. Native property/peer mappings, engineering review, energy/carbon balance, simulated required hardware behavior and corpus admission remain pending; all 43 behavioral cases remain NOT_RUN.

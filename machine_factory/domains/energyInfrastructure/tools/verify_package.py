@@ -17,6 +17,7 @@ from build_taxii_templates import check as check_taxii_templates
 from build_device_templates import check as check_device_templates
 from build_fsgim_context import check as check_fsgim_context
 from build_function_bindings import check as check_function_bindings
+from build_power_snapshots import check as check_power_snapshots
 
 EXCLUDED = {'asset-manifest.json', 'verification-summary.json'}
 EXPECTED_COUNTS = {'standards': 47, 'implementations': 29, 'sources': 19,
@@ -47,6 +48,7 @@ def check(root: Path) -> dict:
     require(not check_device_templates(root), 'OPC UA DI catalog/source mismatch')
     require(not check_fsgim_context(root), 'FSGIM integration context/source coverage mismatch')
     require(not check_function_bindings(root), 'FSGIM draft binding/source mismatch')
+    require(not check_power_snapshots(root), 'Synthetic power snapshot/source mismatch')
     def safe(rel: str) -> Path:
         p = root / rel
         if Path(rel).is_absolute() or not p.resolve().is_relative_to(root):
@@ -263,6 +265,7 @@ def check(root: Path) -> dict:
             'supplementalPublicModelSnapshots':4,'publicModelTemplates':112,
             'diTypeTemplates':58,'fsgimIntegrationContext':'OP23','fsgimRoleMappings':19,'fsgimSourceClassBindings':170,
             'draftFsgimFunctionProjectionSets':4,
+            'syntheticPowerSnapshotSets':4,
             'threatSchemaTemplates':57,'stixTopLevelObjectAndContainerTemplates':43,
             'supplementalNormativeStandardSnapshots':1,'taxiiResourceTemplates':9,'taxiiSupportingRecordTemplates':2,
             'genericRoleTemplates':19,'genericDocumentTemplates':7,'normativeClassCoverageComplete':False,
