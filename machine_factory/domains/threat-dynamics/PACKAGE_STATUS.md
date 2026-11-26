@@ -16,7 +16,7 @@ The steps are ai-governance-regime's (its PACKAGE_STATUS.md, GOV-SD-02).
 | 6 | Families and runbooks | `families/`, `runbooks/` | open |
 | 7 | Agents | — | none: observe only (TD-SD-02) |
 | 7a | Sources and simulations | `threat-sources.json` | **built** 2026-11-25 |
-| 8 | Acceptance | `acceptance/` | open |
+| 8 | Acceptance | `acceptance/` | live run recorded 2026-11-26 (`acceptance/live-run-2026-11-26.json`); extension-corpus boot, TLS lane, TD-R08 open |
 | 9 | Admission | `scripts/approve-domain.sh plan`, then `prepare` | open; before ai-governance-regime (TD-SD-06) |
 | 10 | Deployment | `deployments/` | open |
 
@@ -51,5 +51,6 @@ The steps are ai-governance-regime's (its PACKAGE_STATUS.md, GOV-SD-02).
   - the published lanes match `governance-sources.json`;
   - every class has adversarial and near-miss simulations, and every
     confirming and gate CES is fired by one.
-- **Not done:** no engine run (TD-R06); producers (TD-R02).
+- **Not done:** producers (TD-R02).
+- **Live run 2026-11-26:** 45 of 45 simulations agree 3-of-3; Rust and Go agree on all 45; output persistence found (TD-R08).
 - **Approved 2026-11-25:** TD-SA-01..06 (TD-SD-07, TD-R03 closed).

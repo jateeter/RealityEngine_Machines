@@ -1,0 +1,1937 @@
+{
+  "schemaVersion": "1.0.0",
+  "domain": "threat-dynamics",
+  "kind": "live-run",
+  "date": "2026-11-26",
+  "probe": "tools/live_probe.py",
+  "lane": "native local, plaintext (RE_TLS off); machine semantics, not transport",
+  "universe": "startUniverse.sh --engines=cpp:1,lsp:1,scala:1 --machine-corpus=regression --no-openclaw --free-ports; rust-1 and go-1 started beside it on the same corpus and width (16944), as scripts/follower-conformance.sh does",
+  "candidates": "the 11 THR machines registered at run time by POST /api/machines on every RE, once, with every declared region honoured",
+  "commits": {
+    "RealityEngine_CPP": "3878094",
+    "RealityEngine_LSP": "04e32cd (includes #201)",
+    "RealityEngine_Scala": "b953b05",
+    "RealityEngine_Rust": "9824508",
+    "RealityEngine_GO": "545bfe5",
+    "RealityEngine_CI": "672bb80",
+    "RealityEngine_Machines": "fd93da2c"
+  },
+  "buildProvenance": "verify-build-provenance.py: every engine built from its current source",
+  "method": "per simulation and engine: reset RE and PE, remove sources in the band, create the simulation's simulated Sources, push 32 steps, read the machine's output region from each step's perceptualSpace",
+  "result": {
+    "simulations": 45,
+    "votersAgree": 45,
+    "matchesExpected": 27,
+    "matchesExpectedPersistent": 45,
+    "rust-1.agrees": 45,
+    "go-1.agrees": 45
+  },
+  "finding": "All engines leave an output region unchanged on a step where no CES asserts, so it keeps the last written vector. The package's evaluator models such a step as all-zero. Every one of the 18 strict-model differences is that effect: with the last vector carried forward, all 45 match (TD-R08).",
+  "report": {
+    "engines": [
+      {
+        "id": "cpp-1",
+        "re": "http://<host>",
+        "pe": "http://<host>",
+        "role": "voter"
+      },
+      {
+        "id": "lsp-1",
+        "re": "http://<host>",
+        "pe": "http://<host>",
+        "role": "voter"
+      },
+      {
+        "id": "scala-1",
+        "re": "http://<host>",
+        "pe": "http://<host>",
+        "role": "voter"
+      },
+      {
+        "id": "rust-1",
+        "re": "http://<host>",
+        "pe": "http://<host>",
+        "role": "follower"
+      },
+      {
+        "id": "go-1",
+        "re": "http://<host>",
+        "pe": "http://<host>",
+        "role": "follower"
+      }
+    ],
+    "loaded": {
+      "cpp-1": {
+        "THR00_threat-level-rollup": {
+          "name": "THR00_threat-level-rollup",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 1,
+            "input": {
+              "length": 27,
+              "offset": 17680
+            },
+            "output": {
+              "length": 3,
+              "offset": 17707
+            }
+          }
+        },
+        "THR01_agent-hijacking-detector": {
+          "name": "THR01_agent-hijacking-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17440
+            },
+            "output": {
+              "length": 8,
+              "offset": 17600
+            }
+          }
+        },
+        "THR02_memory-poisoning-detector": {
+          "name": "THR02_memory-poisoning-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17456
+            },
+            "output": {
+              "length": 8,
+              "offset": 17608
+            }
+          }
+        },
+        "THR03_malicious-tool-detector": {
+          "name": "THR03_malicious-tool-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 5,
+              "offset": 17472
+            },
+            "output": {
+              "length": 8,
+              "offset": 17616
+            }
+          }
+        },
+        "THR04_malicious-skill-detector": {
+          "name": "THR04_malicious-skill-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 1,
+            "input": {
+              "length": 4,
+              "offset": 17488
+            },
+            "output": {
+              "length": 8,
+              "offset": 17624
+            }
+          }
+        },
+        "THR05_malicious-agent-detector": {
+          "name": "THR05_malicious-agent-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17504
+            },
+            "output": {
+              "length": 8,
+              "offset": 17632
+            }
+          }
+        },
+        "THR06_resource-exhaustion-detector": {
+          "name": "THR06_resource-exhaustion-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17520
+            },
+            "output": {
+              "length": 8,
+              "offset": 17640
+            }
+          }
+        },
+        "THR07_decomposition-detector": {
+          "name": "THR07_decomposition-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17536
+            },
+            "output": {
+              "length": 8,
+              "offset": 17648
+            }
+          }
+        },
+        "THR08_red-team-result-gate": {
+          "name": "THR08_red-team-result-gate",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 4,
+              "offset": 17552
+            },
+            "output": {
+              "length": 8,
+              "offset": 17656
+            }
+          }
+        },
+        "THR09_vendor-canary-drift": {
+          "name": "THR09_vendor-canary-drift",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 2,
+              "offset": 17568
+            },
+            "output": {
+              "length": 8,
+              "offset": 17664
+            }
+          }
+        },
+        "THR10_cross-domain-exposure": {
+          "name": "THR10_cross-domain-exposure",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17584
+            },
+            "output": {
+              "length": 8,
+              "offset": 17672
+            }
+          }
+        }
+      },
+      "lsp-1": {
+        "THR00_threat-level-rollup": {
+          "name": "THR00_threat-level-rollup",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 1,
+            "input": {
+              "length": 27,
+              "offset": 17680
+            },
+            "output": {
+              "length": 3,
+              "offset": 17707
+            }
+          }
+        },
+        "THR01_agent-hijacking-detector": {
+          "name": "THR01_agent-hijacking-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17440
+            },
+            "output": {
+              "length": 8,
+              "offset": 17600
+            }
+          }
+        },
+        "THR02_memory-poisoning-detector": {
+          "name": "THR02_memory-poisoning-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17456
+            },
+            "output": {
+              "length": 8,
+              "offset": 17608
+            }
+          }
+        },
+        "THR03_malicious-tool-detector": {
+          "name": "THR03_malicious-tool-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 5,
+              "offset": 17472
+            },
+            "output": {
+              "length": 8,
+              "offset": 17616
+            }
+          }
+        },
+        "THR04_malicious-skill-detector": {
+          "name": "THR04_malicious-skill-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 1,
+            "input": {
+              "length": 4,
+              "offset": 17488
+            },
+            "output": {
+              "length": 8,
+              "offset": 17624
+            }
+          }
+        },
+        "THR05_malicious-agent-detector": {
+          "name": "THR05_malicious-agent-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17504
+            },
+            "output": {
+              "length": 8,
+              "offset": 17632
+            }
+          }
+        },
+        "THR06_resource-exhaustion-detector": {
+          "name": "THR06_resource-exhaustion-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17520
+            },
+            "output": {
+              "length": 8,
+              "offset": 17640
+            }
+          }
+        },
+        "THR07_decomposition-detector": {
+          "name": "THR07_decomposition-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17536
+            },
+            "output": {
+              "length": 8,
+              "offset": 17648
+            }
+          }
+        },
+        "THR08_red-team-result-gate": {
+          "name": "THR08_red-team-result-gate",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 4,
+              "offset": 17552
+            },
+            "output": {
+              "length": 8,
+              "offset": 17656
+            }
+          }
+        },
+        "THR09_vendor-canary-drift": {
+          "name": "THR09_vendor-canary-drift",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 2,
+              "offset": 17568
+            },
+            "output": {
+              "length": 8,
+              "offset": 17664
+            }
+          }
+        },
+        "THR10_cross-domain-exposure": {
+          "name": "THR10_cross-domain-exposure",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17584
+            },
+            "output": {
+              "length": 8,
+              "offset": 17672
+            }
+          }
+        }
+      },
+      "scala-1": {
+        "THR00_threat-level-rollup": {
+          "name": "THR00_threat-level-rollup",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 1,
+            "input": {
+              "length": 27,
+              "offset": 17680
+            },
+            "output": {
+              "length": 3,
+              "offset": 17707
+            }
+          }
+        },
+        "THR01_agent-hijacking-detector": {
+          "name": "THR01_agent-hijacking-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17440
+            },
+            "output": {
+              "length": 8,
+              "offset": 17600
+            }
+          }
+        },
+        "THR02_memory-poisoning-detector": {
+          "name": "THR02_memory-poisoning-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17456
+            },
+            "output": {
+              "length": 8,
+              "offset": 17608
+            }
+          }
+        },
+        "THR03_malicious-tool-detector": {
+          "name": "THR03_malicious-tool-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 5,
+              "offset": 17472
+            },
+            "output": {
+              "length": 8,
+              "offset": 17616
+            }
+          }
+        },
+        "THR04_malicious-skill-detector": {
+          "name": "THR04_malicious-skill-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 1,
+            "input": {
+              "length": 4,
+              "offset": 17488
+            },
+            "output": {
+              "length": 8,
+              "offset": 17624
+            }
+          }
+        },
+        "THR05_malicious-agent-detector": {
+          "name": "THR05_malicious-agent-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17504
+            },
+            "output": {
+              "length": 8,
+              "offset": 17632
+            }
+          }
+        },
+        "THR06_resource-exhaustion-detector": {
+          "name": "THR06_resource-exhaustion-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17520
+            },
+            "output": {
+              "length": 8,
+              "offset": 17640
+            }
+          }
+        },
+        "THR07_decomposition-detector": {
+          "name": "THR07_decomposition-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17536
+            },
+            "output": {
+              "length": 8,
+              "offset": 17648
+            }
+          }
+        },
+        "THR08_red-team-result-gate": {
+          "name": "THR08_red-team-result-gate",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 4,
+              "offset": 17552
+            },
+            "output": {
+              "length": 8,
+              "offset": 17656
+            }
+          }
+        },
+        "THR09_vendor-canary-drift": {
+          "name": "THR09_vendor-canary-drift",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 2,
+              "offset": 17568
+            },
+            "output": {
+              "length": 8,
+              "offset": 17664
+            }
+          }
+        },
+        "THR10_cross-domain-exposure": {
+          "name": "THR10_cross-domain-exposure",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17584
+            },
+            "output": {
+              "length": 8,
+              "offset": 17672
+            }
+          }
+        }
+      },
+      "rust-1": {
+        "THR00_threat-level-rollup": {
+          "name": "THR00_threat-level-rollup",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 1,
+            "input": {
+              "length": 27,
+              "offset": 17680
+            },
+            "output": {
+              "length": 3,
+              "offset": 17707
+            }
+          }
+        },
+        "THR01_agent-hijacking-detector": {
+          "name": "THR01_agent-hijacking-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17440
+            },
+            "output": {
+              "length": 8,
+              "offset": 17600
+            }
+          }
+        },
+        "THR02_memory-poisoning-detector": {
+          "name": "THR02_memory-poisoning-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17456
+            },
+            "output": {
+              "length": 8,
+              "offset": 17608
+            }
+          }
+        },
+        "THR03_malicious-tool-detector": {
+          "name": "THR03_malicious-tool-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 5,
+              "offset": 17472
+            },
+            "output": {
+              "length": 8,
+              "offset": 17616
+            }
+          }
+        },
+        "THR04_malicious-skill-detector": {
+          "name": "THR04_malicious-skill-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 1,
+            "input": {
+              "length": 4,
+              "offset": 17488
+            },
+            "output": {
+              "length": 8,
+              "offset": 17624
+            }
+          }
+        },
+        "THR05_malicious-agent-detector": {
+          "name": "THR05_malicious-agent-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17504
+            },
+            "output": {
+              "length": 8,
+              "offset": 17632
+            }
+          }
+        },
+        "THR06_resource-exhaustion-detector": {
+          "name": "THR06_resource-exhaustion-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17520
+            },
+            "output": {
+              "length": 8,
+              "offset": 17640
+            }
+          }
+        },
+        "THR07_decomposition-detector": {
+          "name": "THR07_decomposition-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17536
+            },
+            "output": {
+              "length": 8,
+              "offset": 17648
+            }
+          }
+        },
+        "THR08_red-team-result-gate": {
+          "name": "THR08_red-team-result-gate",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 4,
+              "offset": 17552
+            },
+            "output": {
+              "length": 8,
+              "offset": 17656
+            }
+          }
+        },
+        "THR09_vendor-canary-drift": {
+          "name": "THR09_vendor-canary-drift",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 2,
+              "offset": 17568
+            },
+            "output": {
+              "length": 8,
+              "offset": 17664
+            }
+          }
+        },
+        "THR10_cross-domain-exposure": {
+          "name": "THR10_cross-domain-exposure",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17584
+            },
+            "output": {
+              "length": 8,
+              "offset": 17672
+            }
+          }
+        }
+      },
+      "go-1": {
+        "THR00_threat-level-rollup": {
+          "name": "THR00_threat-level-rollup",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 1,
+            "input": {
+              "length": 27,
+              "offset": 17680
+            },
+            "output": {
+              "length": 3,
+              "offset": 17707
+            }
+          }
+        },
+        "THR01_agent-hijacking-detector": {
+          "name": "THR01_agent-hijacking-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17440
+            },
+            "output": {
+              "length": 8,
+              "offset": 17600
+            }
+          }
+        },
+        "THR02_memory-poisoning-detector": {
+          "name": "THR02_memory-poisoning-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17456
+            },
+            "output": {
+              "length": 8,
+              "offset": 17608
+            }
+          }
+        },
+        "THR03_malicious-tool-detector": {
+          "name": "THR03_malicious-tool-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 5,
+              "offset": 17472
+            },
+            "output": {
+              "length": 8,
+              "offset": 17616
+            }
+          }
+        },
+        "THR04_malicious-skill-detector": {
+          "name": "THR04_malicious-skill-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 1,
+            "input": {
+              "length": 4,
+              "offset": 17488
+            },
+            "output": {
+              "length": 8,
+              "offset": 17624
+            }
+          }
+        },
+        "THR05_malicious-agent-detector": {
+          "name": "THR05_malicious-agent-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17504
+            },
+            "output": {
+              "length": 8,
+              "offset": 17632
+            }
+          }
+        },
+        "THR06_resource-exhaustion-detector": {
+          "name": "THR06_resource-exhaustion-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17520
+            },
+            "output": {
+              "length": 8,
+              "offset": 17640
+            }
+          }
+        },
+        "THR07_decomposition-detector": {
+          "name": "THR07_decomposition-detector",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17536
+            },
+            "output": {
+              "length": 8,
+              "offset": 17648
+            }
+          }
+        },
+        "THR08_red-team-result-gate": {
+          "name": "THR08_red-team-result-gate",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 4,
+              "offset": 17552
+            },
+            "output": {
+              "length": 8,
+              "offset": 17656
+            }
+          }
+        },
+        "THR09_vendor-canary-drift": {
+          "name": "THR09_vendor-canary-drift",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 2,
+              "offset": 17568
+            },
+            "output": {
+              "length": 8,
+              "offset": 17664
+            }
+          }
+        },
+        "THR10_cross-domain-exposure": {
+          "name": "THR10_cross-domain-exposure",
+          "regionsHonoured": true,
+          "perceptualMapping": {
+            "bitsPerElement": 8,
+            "input": {
+              "length": 3,
+              "offset": 17584
+            },
+            "output": {
+              "length": 8,
+              "offset": 17672
+            }
+          }
+        }
+      }
+    },
+    "simulations": [
+      {
+        "simulation": "thr01-hijack-after-injection",
+        "class": "adversarial",
+        "machine": "THR01_agent-hijacking-detector",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 16,
+          "engines": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr01-hijack-by-divergence",
+        "class": "adversarial",
+        "machine": "THR01_agent-hijacking-detector",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 8,
+          "engines": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr01-divergence-burst",
+        "class": "near-miss",
+        "machine": "THR01_agent-hijacking-detector",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 4,
+          "engines": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr01-untrusted-content-only",
+        "class": "near-miss",
+        "machine": "THR01_agent-hijacking-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr01-nominal",
+        "class": "nominal",
+        "machine": "THR01_agent-hijacking-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr02-dormant-payload",
+        "class": "adversarial",
+        "machine": "THR02_memory-poisoning-detector",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 8,
+          "engines": [
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr02-tainted-but-benign",
+        "class": "near-miss",
+        "machine": "THR02_memory-poisoning-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr02-nominal",
+        "class": "nominal",
+        "machine": "THR02_memory-poisoning-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr03-rug-pull",
+        "class": "adversarial",
+        "machine": "THR03_malicious-tool-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr03-injected-exfiltration",
+        "class": "adversarial",
+        "machine": "THR03_malicious-tool-detector",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 16,
+          "engines": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr03-tool-stall",
+        "class": "adversarial",
+        "machine": "THR03_malicious-tool-detector",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 8,
+          "engines": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr03-stall-burst",
+        "class": "near-miss",
+        "machine": "THR03_malicious-tool-detector",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 4,
+          "engines": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr03-instructions-without-egress",
+        "class": "near-miss",
+        "machine": "THR03_malicious-tool-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr03-nominal",
+        "class": "nominal",
+        "machine": "THR03_malicious-tool-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr04-credential-theft",
+        "class": "adversarial",
+        "machine": "THR04_malicious-skill-detector",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 8,
+          "engines": [
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr04-persistent-unreviewed",
+        "class": "near-miss",
+        "machine": "THR04_malicious-skill-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr04-nominal",
+        "class": "nominal",
+        "machine": "THR04_malicious-skill-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr05-self-replicating-injection",
+        "class": "adversarial",
+        "machine": "THR05_malicious-agent-detector",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 8,
+          "engines": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr05-context-overflow",
+        "class": "adversarial",
+        "machine": "THR05_malicious-agent-detector",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 8,
+          "engines": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr05-contained-spread",
+        "class": "near-miss",
+        "machine": "THR05_malicious-agent-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr05-nominal",
+        "class": "nominal",
+        "machine": "THR05_malicious-agent-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr06-action-loop",
+        "class": "adversarial",
+        "machine": "THR06_resource-exhaustion-detector",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 8,
+          "engines": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr06-budget-exhausted",
+        "class": "adversarial",
+        "machine": "THR06_resource-exhaustion-detector",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 8,
+          "engines": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr06-reasoning-runaway",
+        "class": "adversarial",
+        "machine": "THR06_resource-exhaustion-detector",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 8,
+          "engines": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr06-budget-high-but-bounded",
+        "class": "near-miss",
+        "machine": "THR06_resource-exhaustion-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr06-loop-burst",
+        "class": "near-miss",
+        "machine": "THR06_resource-exhaustion-detector",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 4,
+          "engines": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr06-nominal",
+        "class": "nominal",
+        "machine": "THR06_resource-exhaustion-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr07-escalating-composition",
+        "class": "adversarial",
+        "machine": "THR07_decomposition-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr07-bounded-composition",
+        "class": "near-miss",
+        "machine": "THR07_decomposition-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr07-split-without-harm",
+        "class": "near-miss",
+        "machine": "THR07_decomposition-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr07-nominal",
+        "class": "nominal",
+        "machine": "THR07_decomposition-detector",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr08-suite-fails-on-success-rate",
+        "class": "adversarial",
+        "machine": "THR08_red-team-result-gate",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr08-suite-fails-on-t13",
+        "class": "adversarial",
+        "machine": "THR08_red-team-result-gate",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr08-suite-misses-a-class",
+        "class": "adversarial",
+        "machine": "THR08_red-team-result-gate",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr08-suite-incomplete",
+        "class": "adversarial",
+        "machine": "THR08_red-team-result-gate",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr08-success-rate-under-gate",
+        "class": "near-miss",
+        "machine": "THR08_red-team-result-gate",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr08-nominal",
+        "class": "nominal",
+        "machine": "THR08_red-team-result-gate",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr09-sustained-drift",
+        "class": "adversarial",
+        "machine": "THR09_vendor-canary-drift",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 8,
+          "engines": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr09-elevated-not-breached",
+        "class": "near-miss",
+        "machine": "THR09_vendor-canary-drift",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr09-drift-spikes",
+        "class": "near-miss",
+        "machine": "THR09_vendor-canary-drift",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 4,
+          "engines": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr09-nominal",
+        "class": "nominal",
+        "machine": "THR09_vendor-canary-drift",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr10-exposure-breach",
+        "class": "adversarial",
+        "machine": "THR10_cross-domain-exposure",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 8,
+          "engines": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr10-deep-delegation",
+        "class": "adversarial",
+        "machine": "THR10_cross-domain-exposure",
+        "votersAgree": true,
+        "matchesExpected": false,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": {
+          "step": 8,
+          "engines": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "simulation": "thr10-exposure-in-approach",
+        "class": "near-miss",
+        "machine": "THR10_cross-domain-exposure",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      },
+      {
+        "simulation": "thr10-nominal",
+        "class": "nominal",
+        "machine": "THR10_cross-domain-exposure",
+        "votersAgree": true,
+        "matchesExpected": true,
+        "matchesExpectedPersistent": true,
+        "followers": {
+          "rust-1": "agrees",
+          "go-1": "agrees"
+        },
+        "errors": {},
+        "firstDifferenceFromExpected": null
+      }
+    ],
+    "summary": {
+      "simulations": 45,
+      "votersAgree": 45,
+      "matchesExpected": 27,
+      "matchesExpectedPersistent": 45,
+      "rust-1.agrees": 45,
+      "go-1.agrees": 45
+    }
+  }
+}

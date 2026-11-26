@@ -20,6 +20,7 @@ AUTHORED = {
     "README.md", "SPECIFICATION.md", "PACKAGE_STATUS.md", "REVIEW_QUEUE.md", "scope-decisions.json",
     "semantic-amendments.json", "admission-source-manifest.json", "threat-sources.json",
     "tools/build_machines.py", "tools/verify_machines.py", "tools/verify_package.py", "tools/validate_schema.mjs",
+    "tools/live_probe.py",
 }
 
 
@@ -41,7 +42,7 @@ def main() -> int:
     files = [p for p in sorted(PKG.rglob("*")) if p.is_file() and p.name != ".DS_Store" and "__pycache__" not in p.parts]
     for p in files:
         rel = p.relative_to(PKG).as_posix()
-        if rel not in listed and rel not in AUTHORED and not rel.startswith("machines/"):
+        if rel not in listed and rel not in AUTHORED and not rel.startswith(("machines/", "acceptance/")):
             errors.append(f"unlisted: {rel}")
         if sha256(p) in hashed_only:
             errors.append(f"{rel}: a source recorded by sha256 only is committed")
