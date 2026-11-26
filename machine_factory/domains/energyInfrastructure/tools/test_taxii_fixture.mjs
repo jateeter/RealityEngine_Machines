@@ -20,7 +20,7 @@ const bad=[
  ['wrong permission type',d=>resource(d,'collection').can_read='yes'],
  ['custom property outside selected profile',d=>resource(d,'collection').x_unreviewed='value'],
  ['unknown TAXII version',d=>resource(d,'api-root').versions=['application/taxii+json;version=2.0']],
- ['insecure discovery root',d=>resource(d,'discovery').api_roots=['http://example.invalid/']],
+ ['insecure discovery root',d=>resource(d,'discovery').api_roots=['http://example.invalid/']], // insecure-transport: negative-test
  ['credential-bearing discovery root',d=>{const p=resource(d,'discovery');p.default='https://user:secret@example.invalid/';p.api_roots=[p.default];}],
  ['unadvertised default',d=>resource(d,'discovery').default='https://other.example.invalid/'],
  ['negative counter',d=>resource(d,'status').total_count=-1],
