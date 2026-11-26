@@ -19,6 +19,7 @@ from build_fsgim_context import check as check_fsgim_context
 from build_function_bindings import check as check_function_bindings
 from build_power_snapshots import check as check_power_snapshots
 from build_sunspec_power import check as check_sunspec_power
+from build_meter_intervals import check as check_meter_intervals
 
 EXCLUDED = {'asset-manifest.json', 'verification-summary.json'}
 EXPECTED_COUNTS = {'standards': 47, 'implementations': 29, 'sources': 19,
@@ -51,6 +52,7 @@ def check(root: Path) -> dict:
     require(not check_function_bindings(root), 'FSGIM draft binding/source mismatch')
     require(not check_power_snapshots(root), 'Synthetic power snapshot/source mismatch')
     require(not check_sunspec_power(root), 'SunSpec power profile/replay source mismatch')
+    require(not check_meter_intervals(root), 'Meter energy profile/interval source mismatch')
     def safe(rel: str) -> Path:
         p = root / rel
         if Path(rel).is_absolute() or not p.resolve().is_relative_to(root):
@@ -269,6 +271,7 @@ def check(root: Path) -> dict:
             'draftFsgimFunctionProjectionSets':4,
             'syntheticPowerSnapshotSets':4,
             'offlineSunSpecPowerModels':2,
+            'offlineMeterEnergyModels':1,
             'threatSchemaTemplates':57,'stixTopLevelObjectAndContainerTemplates':43,
             'supplementalNormativeStandardSnapshots':1,'taxiiResourceTemplates':9,'taxiiSupportingRecordTemplates':2,
             'genericRoleTemplates':19,'genericDocumentTemplates':7,'normativeClassCoverageComplete':False,

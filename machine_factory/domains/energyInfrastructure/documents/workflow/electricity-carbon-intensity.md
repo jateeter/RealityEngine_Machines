@@ -27,3 +27,8 @@ EIA/Grid Monitor and EPA eGRID are US operating/annual reference options; ENTSO-
 Keep observed, forecast and approved target paths separate, with baseline year, scope, time horizon, uncertainty and target owner. Stratify connected/islanded/emergency operation. No numeric target is invented here. Optimizing carbon is subordinate to protection, reserve, thermal, feeder, ramp and critical-service constraints. Unknown/stale/unlicensed carbon inputs hold the dependent discretionary carbon objective while deterministic safe operation continues.
 
 Cases AC26–AC35 in [the case inventory](../../acceptance/cases.json) cover weighting, absolute totals, incompatible bases, imports, storage, export, freshness, rights, unsafe proposals and revisions. Their results are NOT_RUN; metering/provider tolerances require approved source uncertainty and calibration evidence.
+
+
+## Implemented interval-energy prerequisite
+
+[The offline meter interval contract](../../assets/meter-energy.md) now decodes selected pinned SunSpec model 203 import/export accumulators and derives separate exact synthetic Wh/kWh differences. Its quality/continuity/time checks exclude unusable intervals rather than filling missing values with zero. No compatible emissions factor, storage ledger, actual provider or carbon-intensity calculation is implemented by this step; AC26–AC35 remain NOT_RUN.
