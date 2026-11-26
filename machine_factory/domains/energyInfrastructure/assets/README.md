@@ -57,3 +57,7 @@ The generator uses only the current checked-in scenario scope and generic fixtur
 ## Threat information class templates
 
 [SC16 threat information classes](threat-classes.md) add a pinned, licensed OASIS schema snapshot, 57 templates, 43 top-level object/container clause mappings and an offline synthetic bundle validator. STIX schemas are explicitly non-normative; TAXII and full normative coverage remain pending. No operational threat feed or control action executes.
+
+## TAXII resource class templates
+
+[SC16 TAXII resources](taxii-resources.md) now include the official unchanged standard HTML and rights/source receipt, nine resource templates, two supporting record templates, project schemas and a complete synthetic resource fixture set. This advances resource-table coverage; full protocol/prose review, peer integration and normative completion remain pending.

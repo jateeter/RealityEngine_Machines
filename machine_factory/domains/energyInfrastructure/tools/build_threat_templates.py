@@ -60,9 +60,10 @@ def render(root):
             'schemaAuthority':'NON_NORMATIVE','requiredDeclarations':required,'references':refs,
             'instance':{'payload':None,'synthetic':True,'authority':'ANALYST_REVIEW_ONLY','automaticControlAction':'DENY','executionReceipt':None},
             'limitations':'Schema requirements/conditionals and references remain in the unmodified source. No physical asset equivalence, TAXII transport, pattern-language validity, semantic conformance or admission claim.'})
-    return {'schemaVersion':'1.0.0','status':'PARTIAL_SC16_STIX_OBJECT_SCHEMA_COVERAGE_TAXII_PENDING','sourceReceipt':'assets/stix-source-receipt.json',
+    return {'schemaVersion':'1.0.0','status':'PARTIAL_SC16_STIX_OBJECT_SCHEMA_COVERAGE_INTEGRATION_PENDING','sourceReceipt':'assets/stix-source-receipt.json',
+        'relatedResourceCatalog':'assets/taxii-resource-catalog.json',
         'normativeCoverageComplete':False,'schemaCount':57,'topLevelObjectAndContainerCount':len(CLAUSES),'supportingSchemaCount':57-len(CLAUSES),'templates':templates,
-        'remaining':['TAXII edition/services/classes and peer integration','Nested extension/type normative class review','Full prose requirements, errata applicability and STIX semantic/pattern validation','Cross-standard mappings and secure threat assessment integration','Authentic runtime and admission evidence']}
+        'remaining':['TAXII full protocol/prose review and peer integration; see related resource catalog','Nested extension/type normative class review','Full prose requirements, errata applicability and STIX semantic/pattern validation','Cross-standard mappings and secure threat assessment integration','Authentic runtime and admission evidence']}
 
 def check(root):
     try:return [] if render(root)==json.loads((root/'assets/threat-class-catalog.json').read_text()) else ['Threat class catalog/source mismatch']
