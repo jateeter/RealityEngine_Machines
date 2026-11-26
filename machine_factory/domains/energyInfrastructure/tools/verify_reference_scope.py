@@ -11,6 +11,7 @@ def validate(data, standard_ids, case_ids):
             errors.append(message)
     require(data['status'] == 'SCENARIO_DESIGN_BASELINE_NOT_RUNTIME_ACCEPTANCE', 'Unverified scenario acceptance claim')
     require(data['workstreamId'] == 'EI03', 'Wrong reference-scope workstream')
+    require(data.get('assetIntegrationContext',{}).get('standardId')=='OP23' and data['assetIntegrationContext'].get('artifact')=='assets/fsgim-integration-context.json','Missing owner-selected ASHRAE 201 integration context')
     require(data['behavioralCasesRun'] == 0 and not data['simulationModelsImplemented'] and not data['assetTemplatesImplemented'], 'Fabricated runtime/model/template delivery')
     roles = {r['id']: r for r in data['assetRoles']}
     require(len(roles) == len(data['assetRoles']), 'Duplicate functional asset role')

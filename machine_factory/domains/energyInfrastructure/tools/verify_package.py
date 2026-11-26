@@ -14,9 +14,11 @@ from build_asset_templates import check as check_asset_templates
 from build_reference_instances import check as check_reference_instances
 from build_threat_templates import check as check_threat_templates
 from build_taxii_templates import check as check_taxii_templates
+from build_device_templates import check as check_device_templates
+from build_fsgim_context import check as check_fsgim_context
 
 EXCLUDED = {'asset-manifest.json', 'verification-summary.json'}
-EXPECTED_COUNTS = {'standards': 46, 'implementations': 29, 'sources': 18,
+EXPECTED_COUNTS = {'standards': 47, 'implementations': 29, 'sources': 19,
                    'carbonProviders': 7, 'risks': 20, 'cases': 43, 'phases': 10}
 PDF_HASH = 'c1e6193af8f94b3f4fc48725a2e3c6eea497d9999cb968ecec2cb6be5d429c86'
 
@@ -41,6 +43,8 @@ def check(root: Path) -> dict:
     require(not check_reference_instances(root), 'Reference topology fixture/source mismatch')
     require(not check_threat_templates(root), 'Threat class catalog/source mismatch')
     require(not check_taxii_templates(root), 'TAXII resource catalog/schema/source mismatch')
+    require(not check_device_templates(root), 'OPC UA DI catalog/source mismatch')
+    require(not check_fsgim_context(root), 'FSGIM integration context/source coverage mismatch')
     def safe(rel: str) -> Path:
         p = root / rel
         if Path(rel).is_absolute() or not p.resolve().is_relative_to(root):
@@ -202,13 +206,16 @@ def check(root: Path) -> dict:
     coverage=read('acceptance/coverage-requirements.json')
     require(coverage['status']=='REQUIREMENTS_ONLY_NOT_FULFILLED','Fabricated template/simulator coverage')
     class_rows=coverage['standardClassCoverage']
-    require(len(class_rows)==46 and {r['standardId'] for r in class_rows}==ids['standards'],'Missing standard asset-class coverage obligation')
+    require(len(class_rows)==47 and {r['standardId'] for r in class_rows}==ids['standards'],'Missing standard asset-class coverage obligation')
     for row in class_rows:
-        expected_disposition='PARTIAL_STIX_TAXII_CLASS_REVIEW_INTEGRATION_PENDING' if row['standardId']=='SC16' else 'NOT_REVIEWED'
+        expected_disposition={'SC16':'PARTIAL_STIX_TAXII_CLASS_REVIEW_INTEGRATION_PENDING','OP17':'PARTIAL_OPCUA_DI_TYPES_CORE_MQTT_PENDING','OP23':'OWNER_SELECTED_FSGIM_CONTEXT_NORMATIVE_MAPPING_PENDING'}.get(row['standardId'],'NOT_REVIEWED')
         require(row['ownerIssueId']=='EI04' and row['taxonomyDisposition']==expected_disposition and row['fulfillmentReceipt'] is None,'Fabricated/misowned template coverage')
         if row['standardId']=='SC16':
             require(row.get('supportingCatalog')=='assets/threat-class-catalog.json','Missing SC16 source-backed class catalog')
             require(row.get('supportingResourceCatalog')=='assets/taxii-resource-catalog.json','Missing SC16 TAXII resource catalog')
+        if row['standardId'] in ['OP17','OP23']:
+            expected_catalog='assets/device-class-catalog.json' if row['standardId']=='OP17' else 'assets/fsgim-integration-context.json'
+            require(row.get('supportingCatalog')==expected_catalog,'Missing owner-selected device/FSGIM context catalog')
         require(row['rule']=='EVERY_DEFINED_CLASS_OF_ASSOCIATED_APPLICABLE_STANDARD_REQUIRES_TEMPLATE','Weakened asset-class template coverage')
     hardware_rows=coverage['hardwareCoverage']
     require(len(hardware_rows)==43 and {r['caseId'] for r in hardware_rows}==ids['cases'],'Missing simulated-hardware coverage obligation')
@@ -251,7 +258,8 @@ def check(root: Path) -> dict:
             'result':'FAIL' if errors else 'PASS','checks':checks,'assetFiles':len(recorded),
             'inventoryCounts':{k:len(v) for k,v in datasets.items()},'cloneMachinesVerified':187,
             'collectedSources':1,'behavioralCasesRun':0,'runtimeTestsRun':0,'domainAdmission':'NOT_PERFORMED',
-            'supplementalPublicModelSnapshots':2,'publicModelTemplates':112,
+            'supplementalPublicModelSnapshots':4,'publicModelTemplates':112,
+            'diTypeTemplates':58,'fsgimIntegrationContext':'OP23','fsgimRoleMappings':19,'fsgimSourceClassBindings':170,
             'threatSchemaTemplates':57,'stixTopLevelObjectAndContainerTemplates':43,
             'supplementalNormativeStandardSnapshots':1,'taxiiResourceTemplates':9,'taxiiSupportingRecordTemplates':2,
             'genericRoleTemplates':19,'genericDocumentTemplates':7,'normativeClassCoverageComplete':False,

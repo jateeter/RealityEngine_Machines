@@ -14,6 +14,7 @@ export function validateInstances(bundle,root=ROOT) {
   const validate=ajv.compile(schema);
   if(!validate(bundle)) return validate.errors.map(e=>`${e.instancePath}: ${e.message}`);
   const catalog=read(resolve(root,'assets/asset-class-catalog.json'));
+  const integration=read(resolve(root,'assets/fsgim-integration-context.json'));
   const scope=read(resolve(root,'examples/reference-microgrids.json'));
   const cases=new Set(read(resolve(root,'acceptance/cases.json')).cases.map(c=>c.id));
   const roles=new Map(catalog.genericRoleTemplates.map(t=>[t.templateId,t]));
@@ -37,6 +38,7 @@ export function validateInstances(bundle,root=ROOT) {
   }
   for(const c of bundle.caseIds) require(cases.has(c),`Unknown case: ${c}`);
   for(const asset of bundle.assets) {
+    require(integration.standardId==='OP23'&&integration.roleMappings.some(r=>r.roleId===asset.roleId),`Asset lacks FSGIM integration-context disposition: ${asset.id}`);
     const t=roles.get(asset.templateId);
     require(!!t,`Unknown role template: ${asset.templateId}`);
     if(t) require(t.referenceRoleId===asset.roleId,`Role/template mismatch: ${asset.id}`);

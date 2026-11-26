@@ -94,7 +94,9 @@ jobs:
         run: npm run test:contracts -- -v
 
       - name: Energy factory fixture contracts
-        run: node --test machine_factory/domains/energyInfrastructure/tools/test_asset_instances.mjs machine_factory/domains/energyInfrastructure/tools/test_threat_fixture.mjs machine_factory/domains/energyInfrastructure/tools/test_taxii_fixture.mjs
+        run: |
+          python3 machine_factory/domains/energyInfrastructure/tools/verify_package.py
+          node --test machine_factory/domains/energyInfrastructure/tools/test_asset_instances.mjs machine_factory/domains/energyInfrastructure/tools/test_threat_fixture.mjs machine_factory/domains/energyInfrastructure/tools/test_taxii_fixture.mjs
 
       - name: Report what this lane cannot check
         if: always()
