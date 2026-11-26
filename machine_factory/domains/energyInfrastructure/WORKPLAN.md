@@ -128,3 +128,8 @@ EI03 now has [generic reference microgrids and authority](documents/workflow/ref
 ## Owner-selected FSGIM integration context
 
 [ASHRAE Standard 201](assets/fsgim-integration.md), recorded as OP23, now governs the asset integration context. The current inventory has 47 standards/framework entries and 19 RAG source families. Crosswalks cover 19 reference roles, 112 SunSpec models and 58 OPC UA DI types. The original published backlog remains a historical snapshot; current context and source progress are explicit additions. Normative UML collection/equivalence, exact property/conformance mappings, reviewed operational instances and actual peer/simulator integration remain pending.
+
+
+### Draft FSGIM asset/function bindings
+
+[Four source-linked draft projections](assets/function-bindings.md) now cover the generic and three reference fixtures, with scoped identities, inactive functions, DI type facets and single-view resource accounting groups. This advances typed project bindings; normative model/property review, actual readings/units/time/boundaries, solver and protocol/runtime verification remain pending.

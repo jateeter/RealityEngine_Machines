@@ -1,0 +1,290 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.local/energyInfrastructure/fsgim-function-binding.schema.json",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "kind": {
+      "const": "SYNTHETIC_FSGIM_FUNCTION_PROJECTION"
+    },
+    "standardId": {
+      "const": "OP23"
+    },
+    "sourceFixture": {
+      "enum": [
+        "assets/generic-instance-fixture.json",
+        "assets/reference-instances/ref01_connected.json",
+        "assets/reference-instances/ref02_island_restore.json",
+        "assets/reference-instances/ref03_flex_ev.json"
+      ]
+    },
+    "sourceFixtureSHA256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "normativeEquivalenceVerified": {
+      "const": false
+    },
+    "bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "roleId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sourceAliases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "sourceSystemId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "namespaceUri": {
+                  "type": "string",
+                  "minLength": 1,
+                  "format": "uri"
+                },
+                "identifier": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "sourceSystemId",
+                "namespaceUri",
+                "identifier"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "mappingStatus": {
+            "const": "DRAFT_PROJECT_PROJECTION_NOT_NORMATIVE_EQUIVALENCE"
+          },
+          "deviceInstanceStatus": {
+            "const": "NOT_INSTANTIATED"
+          },
+          "functions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "projectionId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "concept": {
+                  "enum": [
+                    "Load",
+                    "Generator",
+                    "Meter",
+                    "EnergyManager"
+                  ]
+                },
+                "supplementaryClassIRI": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "requiredOperatingMode": {
+                  "enum": [
+                    "CHARGING",
+                    "DISCHARGING",
+                    null
+                  ]
+                },
+                "active": {
+                  "const": false
+                }
+              },
+              "required": [
+                "projectionId",
+                "concept",
+                "supplementaryClassIRI",
+                "requiredOperatingMode",
+                "active"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "accountingGroup": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "genericBidirectionalCapability": {
+            "type": "boolean"
+          },
+          "opcuaDITypeFacet": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "sourceTemplateId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "sourceClassId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "sourceIsAbstract": {
+                    "type": "boolean"
+                  },
+                  "runtimeNodeInstantiation": {
+                    "const": false
+                  },
+                  "derivedRuntimeTypeId": {
+                    "type": "null"
+                  },
+                  "peerMappingReceipt": {
+                    "type": "null"
+                  }
+                },
+                "required": [
+                  "sourceTemplateId",
+                  "sourceClassId",
+                  "sourceIsAbstract",
+                  "runtimeNodeInstantiation",
+                  "derivedRuntimeTypeId",
+                  "peerMappingReceipt"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "required": [
+          "assetId",
+          "roleId",
+          "sourceAliases",
+          "mappingStatus",
+          "deviceInstanceStatus",
+          "functions",
+          "accountingGroup",
+          "genericBidirectionalCapability",
+          "opcuaDITypeFacet"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "accounting": {
+      "type": "object",
+      "properties": {
+        "facilityNetMeterAssetId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "facilityMeterAssignment": {
+          "const": "DRAFT_PCC_NET_ASSUMPTION_REQUIRES_REVIEW"
+        },
+        "resourceViewsAddedToFacilityNet": {
+          "const": false
+        },
+        "resourceGroups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "memberAssetIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "primaryViewAssetId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "boundaryStatus": {
+                "const": "GENERIC_ASSUMPTION_REQUIRES_ENGINEERING_REVIEW"
+              },
+              "measurementBinding": {
+                "type": "null"
+              }
+            },
+            "required": [
+              "id",
+              "memberAssetIds",
+              "primaryViewAssetId",
+              "boundaryStatus",
+              "measurementBinding"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "facilityNetMeterAssetId",
+        "facilityMeterAssignment",
+        "resourceViewsAddedToFacilityNet",
+        "resourceGroups"
+      ],
+      "additionalProperties": false
+    },
+    "execution": {
+      "type": "object",
+      "properties": {
+        "networkExecution": {
+          "const": false
+        },
+        "runtimeTypeRegistration": {
+          "const": false
+        },
+        "controlAction": {
+          "const": "DENY"
+        },
+        "simulatorVersion": {
+          "type": "null"
+        },
+        "measuredIntegrationReceipt": {
+          "type": "null"
+        },
+        "behavioralCasesRun": {
+          "const": 0
+        }
+      },
+      "required": [
+        "networkExecution",
+        "runtimeTypeRegistration",
+        "controlAction",
+        "simulatorVersion",
+        "measuredIntegrationReceipt",
+        "behavioralCasesRun"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "kind",
+    "standardId",
+    "sourceFixture",
+    "sourceFixtureSHA256",
+    "normativeEquivalenceVerified",
+    "bindings",
+    "accounting",
+    "execution"
+  ],
+  "additionalProperties": false
+}

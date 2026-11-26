@@ -66,3 +66,7 @@ The generator uses only the current checked-in scenario scope and generic fixtur
 ## Primary energy-asset integration context
 
 [ASHRAE 201 FSGIM](fsgim-integration.md) is now the owner-selected context for appropriate energy assets. [OPC UA DI](device-types.md) adds 58 formal type templates and 447 source declarations, using the exact required core model. Context crosswalks preserve native semantics and cover all 19 roles and 170 SunSpec/DI type/model templates. The source and normative-equivalence gaps remain explicit.
+
+## Draft asset/function bindings
+
+[Typed FSGIM projections](function-bindings.md) now bind every asset in the generic and three reference fixtures to its draft role/function, scoped identity, optional DI type facet and accounting selection. Validation rejects incomplete/contradictory bindings and false execution claims. These remain inactive project projections, with normative, engineering and runtime verification pending.
