@@ -96,3 +96,8 @@ EI03 now has [generic reference microgrids and authority](documents/workflow/ref
 ## EI05 offline meter energy intervals
 
 [Selected SunSpec import/export counters and exact interval differences](assets/meter-energy.md) now provide separate synthetic Wh/kWh quantities linked to the draft facility PCC Meter. Missing data, resets/rollovers, scale changes and stale endpoints never become zero-energy assertions. This is an offline accounting prerequisite; no carbon factor, native peer, complete device simulation or admission is verified. All 43 behavioral cases remain NOT_RUN.
+
+
+## EI14 synthetic imported-electricity carbon ledger
+
+[The bounded retrospective ledger](assets/import-carbon-ledger.md) now computes exact energy-weighted imported-electricity emissions/intensity from compatible synthetic meter intervals and factors. Imports/exports remain separate; incompatible, missing or stale inputs cannot become zero intensity. Real providers, uncertainty, storage allocation, trajectories, safety/behavioral acceptance and corpus admission remain pending. All 43 behavioral cases remain NOT_RUN.
