@@ -39,7 +39,8 @@
       "decision": "Each machine has its own regions in the governance band (input <= 16 cells, an 8-element output); the PE composes the lifecycle and gate signals into each input, and a fixture aggregator (GOV00) folds the verdicts onto the four domain verdict elements.",
       "constraints": [
         "The specification's cell numbers become signal provenance (inputSemantics), not regions.",
-        "The band is proposed as [16960:17439]; allocation follows the admission workflow (GOV-R04)."
+        "The band is proposed as [16960:17429]; allocation follows the admission workflow (GOV-R04).",
+        "Corrected 2026-11-25: [16960:17439] was the 0.1.0 band; the 0.2.0 machines use [16960:17429] (PACKAGE_STATUS.md, 0.2.0 record)."
       ]
     },
     {
@@ -65,6 +66,84 @@
       "decision": "Agent behavior is generated runtime-neutral (schemas/agent-behavior.schema.json) and rendered per runtime, so the move from OpenClaw to ACP-hosted agents changes an adapter, not the agents.",
       "constraints": [
         "localOpenClawStack machine-behaviors/runtimes renders OpenClaw and ACP; the committed OpenClaw agents stay byte-identical."
+      ]
+    },
+    {
+      "id": "GOV-SD-09",
+      "date": "2026-11-25",
+      "decision": "The scope stays the 18 machines GOV00-GOV17 (GOV-SD-04 reaffirmed). The received hardening workplan's 315-machine corpus, its [16960:17087] band and its fixed cells 16987-16991 are source material, not targets.",
+      "constraints": [
+        "M-GOV-15/16/17 in RESOLUTION_WORKPLAN.md are GOV15/16/17 here (corpus-315's M-GOV-HRD-313..315).",
+        "Cells 16987-16991 survive only as inputSemantics provenance labels (GOV-SD-05).",
+        "The workplan's 1,867-machine and p99 <= 820 ns figures are designed, not measured (GOV-R09)."
+      ]
+    },
+    {
+      "id": "GOV-SD-10",
+      "date": "2026-11-25",
+      "decision": "Threat classification and dynamic, reactive threat observability are a separate peer domain, threat-dynamics, not part of ai-governance-regime. This domain focuses on closing the seven wrapper gaps (GAP_ANALYSIS.md).",
+      "constraints": [
+        "The NIST SP 2400-102 adversarial-ML taxonomy (NISTAML attack classes, agentic .061-.067) is threat-dynamics' specification, not this domain's.",
+        "Control identifiers for this domain come from the governance frameworks pinned under GOV-R07, not from SP 2400-102."
+      ]
+    },
+    {
+      "id": "GOV-SD-11",
+      "date": "2026-11-25",
+      "decision": "Observe vs decide: threat-dynamics owns classification, detection, red-team harnesses and vendor canaries, and publishes the results as Sources; ai-governance-regime consumes them only as gate inputs and owns the decision.",
+      "constraints": [
+        "The two domains couple only through published lanes, declared on both sides (governance-sources.json producerDomain; threat-dynamics' published-lane contract).",
+        "The Sources produced by threat-dynamics: gate_redteam_pass (GOV01, gap 3), mon_canary_drift_score (GOV16, gap 6) and mon_xdomain_mu_agg (GOV16, gap 5).",
+        "Admission order: threat-dynamics, the producer, is admitted before this domain."
+      ]
+    },
+    {
+      "id": "GOV-SD-12",
+      "date": "2026-11-25",
+      "decision": "One shared extension corpus and regression profile carries both peer domains above the corpus vector budget (16944), as MACHINE_CONCEPT.md 9.3 provides. The standard vector budget does not change.",
+      "constraints": [
+        "The 8-bit watchdogs GOV07, GOV08, GOV09, GOV12, GOV14 and GOV16 reach the parity gate through this extension corpus (closes GOV-R11).",
+        "threat-dynamics is allocated next to this domain's band, below the clone space (20480)."
+      ]
+    },
+    {
+      "id": "GOV-SD-13",
+      "date": "2026-11-25",
+      "decision": "Two quorums, two terms. An approval quorum is the human q-of-n signer bundle (Byzantine bounds, signer diversity across org units); the engine quorum is RealityEngine_CI/docs/QUORUM_CONTRACT.md's unanimous C++, LSP and Scala agreement. An approval quorum never substitutes for the engine quorum.",
+      "constraints": [
+        "The cross-department signer rule (RESOLUTION_WORKPLAN.md 1.3) is enforced inside GOV06, not by changing QUORUM_CONTRACT.md.",
+        "Closes GOV-R06; documents adopt the terms when next revised (GOV-R10, GOV-R22)."
+      ]
+    },
+    {
+      "id": "GOV-SD-14",
+      "date": "2026-11-25",
+      "decision": "Framework alignment follows the ifrs-accounting pattern: a source-requirements.json listing each control's obligation, required evidence and source span against a pinned edition. Which frameworks and controls are in scope, and which are out, is declared per milestone.",
+      "constraints": [
+        "A framework not declared in scope for a milestone is recorded as out of scope for it, never as aligned.",
+        "The milestone scoping also stages the Source producers (GOV-SD-16).",
+        "Closes GOV-R07 as a decision; the per-milestone scope is step 3 work."
+      ]
+    },
+    {
+      "id": "GOV-SD-15",
+      "date": "2026-11-25",
+      "decision": "The authoritative baseline is RealityEngine V0.18, NIST terminology revision (22 November 2026), pinned at intake/BASELINE-V0.18-NIST.md (the Markdown source).",
+      "constraints": [
+        "The received documents cite the 19 November edition; its sha256 is recorded in admission-source-manifest.json as the cited edition.",
+        "Closes GOV-R08.",
+        "The owner's PDF rendering of the same edition is recorded by sha256 only (renderedEdition)."
+      ]
+    },
+    {
+      "id": "GOV-SD-16",
+      "date": "2026-11-25",
+      "decision": "Until a producer exists, every governance input is provided as a simulation: a Source through the ISRE, composed by the PE, carrying the Source semantics of SURFACE_SPEC Sources & Sensors (kind, region, value, activity, sensor TTL and freshness, membership).",
+      "constraints": [
+        "A machine's own input sequences are not enough: they specify behavior at machine granularity, while a simulated Source has to reproduce the signal's semantics across machines and over time (e.g. a revoked key dropping lane_quorum_integrity_ok within one poll for every consumer).",
+        "Each signal in governance-sources.json gets its simulated-Source definition before its machines count as tested.",
+        "Real producers are staged by milestone (GOV-SD-14); a producer replaces its simulation without changing the consuming machines.",
+        "Closes GOV-R09 as a decision."
       ]
     }
   ],

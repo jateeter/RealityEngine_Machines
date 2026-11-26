@@ -9,15 +9,15 @@ step in [PACKAGE_STATUS.md](PACKAGE_STATUS.md) is redone. Findings marked
 |---|---|---|---|
 | GOV-R01 | Neither corpus is in the canonical machine form | conversion | **closed 2026-11-21**: built from the spec (GOV-SD-06) |
 | GOV-R02 | Machine identity: base templates against corpus ids | conversion | **closed 2026-11-21**: 17 base machines (GOV-SD-04) |
-| GOV-R03 | Machine and corpus counts disagree across documents | documents | count is 18 (17 + GOV00); documents still to be revised |
+| GOV-R03 | Machine and corpus counts disagree across documents | documents | **closed 2026-11-25**: the count is 18 (GOV-SD-09); received documents keep their counts as received, mapped in PACKAGE_STATUS.md |
 | GOV-R04 | The region-allocation patch does not apply | allocation | layout decided (GOV-SD-05); allocation through the admission workflow |
 | GOV-R05 | Corpus-315 declares itself `accepted` | admission | **closed 2026-11-21**: candidates are `candidate-not-admitted` |
-| GOV-R06 | Two meanings of "quorum" | specification | **owner** |
-| GOV-R07 | Framework alignment has no pinned sources | every alignment claim | **owner** (which editions) |
-| GOV-R08 | The authoritative baseline (V0.18) is not in the workspace | every citation | **owner** |
-| GOV-R09 | Designed mechanisms are described as if they exist | workplan, specification | **owner** (scope per release) |
+| GOV-R06 | Two meanings of "quorum" | specification | **closed 2026-11-25**: approval quorum vs engine quorum (GOV-SD-13) |
+| GOV-R07 | Framework alignment has no pinned sources | every alignment claim | **decided 2026-11-25**: ifrs pattern, scope per milestone (GOV-SD-14); `source-requirements.json` is step 3 work |
+| GOV-R08 | The authoritative baseline (V0.18) is not in the workspace | every citation | **closed 2026-11-25**: pinned at `intake/BASELINE-V0.18-NIST.md` (GOV-SD-15) |
+| GOV-R09 | Designed mechanisms are described as if they exist | workplan, specification | **decided 2026-11-25**: simulated Sources until producers exist, producers staged by milestone (GOV-SD-16) |
 | GOV-R10 | Generated-text residue and stale cross-references | documents | mechanical |
-| GOV-R11 | Continuous-input watchdogs are multi-valued machines | regression reach | **owner** (extension corpus) |
+| GOV-R11 | Continuous-input watchdogs are multi-valued machines | regression reach | **decided 2026-11-25**: shared extension corpus (GOV-SD-12); open until that corpus exists in RealityEngine_CI |
 | GOV-R12 | Latch feedback and verdict composition need live confirmation | engine/PE behavior | live 3-of-3 run |
 | GOV-R13 | GOV10 permits on every quiet step | specification | **closed 2026-11-21**: GOV10 runs per message on `req_egress` (GOV-SA-08) |
 | GOV-R14 | The semantic amendments need owner review | specification | **owner** |
@@ -28,6 +28,8 @@ step in [PACKAGE_STATUS.md](PACKAGE_STATUS.md) is redone. Findings marked
 | GOV-R19 | A clone's non-lane inputs need a writer | lifecycle | localAssetStorageStack: frame facts and the step agent's completion into the clone's block |
 | GOV-R20 | 31 of the 38 Sources are partial or new | Sources | build per governance-sources.json; issues in each producing repository |
 | GOV-R21 | The ACP side of the runtime split | agent runtime | Manager ACP AgentDriver, the MCP servers behind the capabilities, the runtime choice (v0.0.3) |
+| GOV-R22 | The received wrapper-machine document diverges from the package | documents | fixed when the documents are next revised; intake copy stays as received |
+| GOV-R23 | Three Sources move to the peer domain threat-dynamics | Sources, admission order | threat-dynamics package and its published-lane contract (GOV-SD-10, GOV-SD-11) |
 
 ## GOV-R01: neither corpus is in the canonical machine form
 
@@ -195,7 +197,8 @@ permits that answer a request.
 
 ## GOV-R14: the semantic amendments need owner review (owner)
 
-`semantic-amendments.json` lists 12 places (GOV-SA-01 to GOV-SA-12) where the
+`semantic-amendments.json` lists 22 places (GOV-SA-01 to GOV-SA-22; it was 12
+at 0.1.0, and the 0.2.0 rebuild added ten) where the
 machines resolve a choice or a nondeterminism the specification leaves open.
 Each CES cites the amendments it carries.
 
@@ -246,3 +249,38 @@ To run them on ACP, three things are still needed:
 - the MCP servers behind the capabilities marked `implemented: false`, with
   the frame-scoped lifecycle server first (#714);
 - a choice of runtime, with its protocol version pinned.
+
+## GOV-R22: the received wrapper-machine document diverges from the package
+
+`intake/ORGANIZATIONAL-WRAPPER-MACHINE.md` (received as
+`organizational-wrapper-governance-machine.md`, intaken 2026-11-25) restates
+SPECIFICATION.md §3–4 and differs from the package in four places:
+- it names **14** machines (M-GOV-01–14) where the package has 18 (GOV00–17,
+  GOV-SD-04, GOV-SD-09);
+- it gives the band as `[16960:17087]` and fixed shared cells, where each
+  machine has its own regions in `[16960:17429]` (GOV-SD-05);
+- its outputs `HALT_PROMOTION`, `REVOKE_EPOCH`, `PERMIT_DEPLOY` and
+  `TRIGGER_INCIDENT` sit at cells 17056–17059, which are GOV07's input region
+  here; the package's domain verdicts are GOV00's output;
+- it names the voting runtimes "C++, Scala/Akka, and Common Lisp" and uses
+  "quorum" both for them and for the human q-of-n signers (GOV-R06). The
+  quorum contract names C++, LSP and Scala, unanimous.
+
+These are fixed when the documents are next revised, as with GOV-R10.
+
+## GOV-R23: three Sources move to the peer domain threat-dynamics
+
+Under GOV-SD-10 and GOV-SD-11, threat classification and observation are a
+separate domain, and this domain only consumes its results. Three Sources in
+`governance-sources.json` now name threat-dynamics as their producer
+(`producerDomain`):
+
+| Signal | Consumer | Gap |
+|---|---|---|
+| `gate_redteam_pass` | GOV01, input element 14 | 3, domain blind spots |
+| `mon_canary_drift_score` | GOV16, input element 1 | 6, closed-API vendor drift |
+| `mon_xdomain_mu_agg` | GOV16, input element 0 | 5, cascading delegation |
+
+This finding closes when threat-dynamics declares the same three lanes in its
+published-lane contract, and its machines produce them. Because this domain
+consumes them, threat-dynamics is admitted first.
