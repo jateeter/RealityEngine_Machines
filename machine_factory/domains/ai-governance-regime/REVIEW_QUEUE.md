@@ -32,10 +32,10 @@ step in [PACKAGE_STATUS.md](PACKAGE_STATUS.md) is redone. Findings marked
 | GOV-R23 | Three Sources move to the peer domain threat-dynamics | Sources, admission order | threat-dynamics package and its published-lane contract (GOV-SD-10, GOV-SD-11) |
 | GOV-R24 | GOV-SA-10 names `lane_quorum_met`; the build reads `quorum_valid` | amendments | **closed 2026-11-25**: erratum recorded on the amendment |
 | GOV-R25 | GOV12 containment drives engines to a domain fail-safe vector | engine/arbiter, Phase 2 | confirm s_safe in the implementation; if absent, an engine feature on the three voters |
-| GOV-R26 | GOV13's evidence pack needs a signed, append-only frame log | lifecycle | localAssetStorageStack signed log and dokieli notifications (lass#14), staged with GOV13 |
+| GOV-R26 | GOV13's evidence pack reads the lifecycle's hash-chained log; the engine's own record is Design | lifecycle, engines | GOV13's producer reads the lifecycle log (implemented); the engine-side hash chain is staged with GOV13 |
 | GOV-R27 | An agent must never resume an approval continuation (T15) | agent runtime | an explicit check in the A2A work: agents hold task-scoped capabilities only |
 | GOV-R28 | The ISO 42001 / EU AI Act crosswalk needs re-deriving | alignment | step 3 `source-requirements.json`, per milestone (GOV-SD-14) |
-| GOV-R29 | The V0.18 baseline lags the v0.0.3 implementation | every citation | **owner 2026-11-25**: a new baseline from v0.0.3 progress; design-only judgements made from V0.18 are re-checked against it |
+| GOV-R29 | The V0.18 baseline lags the v0.0.3 implementation | every citation | **owner 2026-11-25**: a new baseline from v0.0.3 progress. Draft V0.19 (sha256 `5c60c2cf…`, heads of 25 November 2026) is with the owner; it is intaken and pinned like V0.18 (GOV-SD-15) once accepted |
 
 ## GOV-R01: neither corpus is in the canonical machine form
 
@@ -300,8 +300,10 @@ the "status" findings are to be confirmed against v0.0.3, not taken from V0.18.
   are not Sources here. The quorum is `quorum_valid`, GOV06's verdict carried
   by the frame. K-line replay and task sufficiency are agent completions:
   GOV04's replay analyst and GOV02's hazard-sufficiency analyst.
-- **C5:** "Byzantine quorum". The approval quorum is a human q-of-n; the engine
-  quorum is 3-of-3 unanimous (GOV-SD-13). Rust and Go are non-voting followers.
+- **C5:** the document ties the rule-update quorum to the engines' parity. The
+  rule-update quorum is a q-of-n of governance signers (V0.18 §7, where n ≥ 3f+1
+  under Byzantine faults). The engine quorum is 3-of-3 unanimous and compares
+  runtimes in regression (GOV-SD-13). Rust and Go are non-voting followers.
 - **C6:** the signers (CRO, Lead AI Architect, General Counsel, CISO). GOV-SA-18
   requires Risk, Engineering and Legal, with no preparer among the signers.
 - **C7:** "sub-microsecond cycles". In V0.18 this is objective TO-1 (p99 ≤ 820
@@ -321,8 +323,10 @@ the "status" findings are to be confirmed against v0.0.3, not taken from V0.18.
   comes from threat-dynamics.
 - T4, T20 and T21. V0.18 lists them as Design.
 - Verified Source channels, which is Gap 2 (SLSA attestation).
-- The signed append-only log, Linked Data Notifications and ActivityStreams
-  (GOV-R26).
+- "Every state progression emits a signed log record". The lifecycle's log is
+  implemented: append-only, fsynced, hash-chained, with Ed25519 receipts and
+  LDN annotations (V0.18 §6). The engine's own hash-chained record is Design
+  (V0.18 Table 7). ActivityStreams is not cited in V0.18 (GOV-R26).
 - Clones deallocated while parked.
 - Agents without WebIDs, holding EdDSA capabilities only (GOV-R27).
 
