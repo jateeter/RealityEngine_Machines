@@ -47,3 +47,8 @@ Cases AC26–AC35 in [the case inventory](../../acceptance/cases.json) cover wei
 ## Implemented synthetic revision/series integrity
 
 [The bounded trajectory archive](../../assets/carbon-trajectories.md) now preserves a synthetic original and factor-corrected report, keeps historical references on their declared available snapshot, and separates observations from forecasts and unadopted target examples. Hashes are internal consistency checks, not durable or authenticated dispatch evidence. Actual trajectories, approved targets, uncertainty, historic qualification and operational acceptance remain pending.
+
+
+## Implemented draft proposal-screen prerequisite
+
+[The synthetic REF01 algebraic screen](../../assets/proposal-screen.md) rejects selected reserve, critical-service and active-power-envelope violations regardless of a claimed carbon benefit. It neither qualifies the carbon objective nor authorizes operation. Full deterministic safety feasibility, actual control-gateway enforcement and AC34 acceptance remain pending.
