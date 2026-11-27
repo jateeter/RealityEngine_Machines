@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "domain": "ai-governance-regime",
-  "scope": "Where the candidate machines resolve or refine SPECIFICATION.md 4.3 and HARDENING_TRANSITION_RULES.md. Each amendment is cited from the CESs that carry it (sequences[].metadata.semanticAmendments). GOV-SA-01..22 approved by the owner as proposed, 2026-11-25 (GOV-SD-17, closes GOV-R14); GOV-SA-23 approved by the owner as recommended, 2026-11-27 (GOV-SD-20, closes GOV-R31).",
+  "scope": "Where the candidate machines resolve or refine SPECIFICATION.md 4.3 and HARDENING_TRANSITION_RULES.md. Each amendment is cited from the CESs that carry it (sequences[].metadata.semanticAmendments). GOV-SA-01..22 approved by the owner as proposed, 2026-11-25 (GOV-SD-17, closes GOV-R14); GOV-SA-23 approved by the owner as recommended, 2026-11-27 (GOV-SD-20, closes GOV-R31); GOV-SA-24 decided by the owner 2026-11-27 (GOV-SD-22), superseding GOV-SA-06's feedback cell.",
   "amendments": [
     {
       "id": "GOV-SA-01",
@@ -49,7 +49,8 @@
       "change": "An SR latch on a fixture Q(k) = S(k) or (not R(k) and Q(k-1)) is built from a feedback input element (latch_q_prev, composed by the PE), one set CES per set disjunct (debounced, GOV-SA-19), one hold CES per negated literal of R, and an explicit release CES. Where a watchdog dispatches an agent, the release also requires the agent's completion (triage before release). Templates hold no latch: the frame's lanes carry their state.",
       "reason": "The engines keep no state a CES can test across steps except active events, and a final event asserts only while it matches; the release is explicit so the latch never depends on whether an unwritten cell keeps its value.",
       "status": "approved",
-      "approved": "2026-11-25"
+      "approved": "2026-11-25",
+      "supersededBy": "GOV-SA-24 (2026-11-27): the latch is held in the CES's own events; the feedback cell is withdrawn"
     },
     {
       "id": "GOV-SA-07",
@@ -185,6 +186,14 @@
       "applies": "all 18 machines (one idle CES each)",
       "change": "Each machine carries one idle CES: a single initial event whose every element accepts any value, asserting the all-zero output vector. Outputs merge by `or`, so it never masks another CES; on a step where no other CES asserts it writes zeros, so a decision holds exactly as long as its condition. A GOV-SA-06 latch is unaffected, because its hold CES asserts LATCH on every step the latch is set.",
       "reason": "Outputs are latched (GOV-SD-19). Without it, 83 of 87 decision fixtures still assert their decision three nominal steps after the condition ends; with it, only the intended GOV-SA-06 latches (GOV07, 09, 14, 16) and GOV08's stateless permit under nominal latency hold.",
+      "status": "approved",
+      "approved": "2026-11-27"
+    },
+    {
+      "id": "GOV-SA-24",
+      "applies": "GOV07, GOV09, GOV14 (two set paths), GOV16 (two set paths): each SR latch",
+      "change": "Each SR latch is one closed CES: the set chain; a hold cluster of one event per negated literal of the release conjunction, each asserting the latched vector; and one release event. The set chain's final event and every hold event list every hold event and the release in their next-active lists, so while any release literal is still false some hold event matches and re-arms the cluster. The feedback input latch_q_prev (GOV-SA-06) is removed. CESs that read it as a guard now read the cluster: triage requested and harm confirmed are hold events; the nominal-band warnings (approach, renewal window, delegation throttle) lose their latch_q_prev = 0 guard and may co-assert while latched, merged by `or`.",
+      "reason": "Owner, 2026-11-27: next-active lists are unrestricted except that every entry stays within its own CES (closed), and outputs persist by default. A closed CES therefore holds Q(k) = S(k) or (not R(k) and Q(k-1)) in its active events, as the corpus RS flip-flops do, with no PE composition (GOV-R12). The hold asserts every latched step, so another CES's write or GOV-SA-23's idle zeros cannot clear it.",
       "status": "approved",
       "approved": "2026-11-27"
     }

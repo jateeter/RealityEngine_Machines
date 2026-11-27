@@ -219,3 +219,24 @@ Record: `acceptance/live-run-2026-11-27.json`. Probe: `tools/live_probe.py`.
   no engine. The machines' latch semantics agree; the composition itself is
   still to be built.
 
+## Latches as automaton state (2026-11-27, GOV-SA-24, GOV-SD-22)
+
+- **What changed:** the SR latches of GOV07, GOV09, GOV14 and GOV16 are each one
+  closed CES. GOV14 and GOV16 have two set paths, so they carry two such CESs.
+  - The CES is the set chain, then a hold cluster of one event per negated
+    release literal, cross-linked through next-active lists, then the release.
+  - `latch_q_prev` and the `latchFeedback` metadata are gone. GOV-SA-06's
+    feedback cell is superseded, and GOV-R12 is closed.
+- **Build:** 18 machines; 154 fixtures replay; 154 simulations. None has a
+  feedback cell any more.
+  - The simulated-Source fit gained non-integer frequencies (i/100, with every
+    phase 0.05 clear of the threshold), so a two-level cell need not have equal
+    runs.
+- **Checks:**
+  - No next-active reference leaves its CES.
+  - GOV07 stays latched while the hold passes through each release literal in
+    turn, and clears only when all of them are satisfied.
+  - After the inputs return to nominal, only the four latch machines, and
+    GOV08's stateless permit, still hold a decision.
+- **Not done:** a live run on the engines.
+
