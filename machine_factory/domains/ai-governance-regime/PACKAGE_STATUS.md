@@ -201,3 +201,21 @@ same path. Directories appear when their step produces content
     example 0.5251). If the engines quantize continuous cells (TD-R05), those
     values could leave the band live. The live run must confirm it (GOV-R32).
 
+## Live run (2026-11-27)
+
+Record: `acceptance/live-run-2026-11-27.json`. Probe: `tools/live_probe.py`.
+
+- **Result:** 145 of 145 simulations agree 3-of-3 (C++, LSP, Scala) and match
+  the latched expectation. Rust and Go agree on all 145. All 18 machines were
+  registered at run time on the extension-corpus universe, with every declared
+  region honoured. Plaintext lane.
+- **Zero writes confirmed:** 7 simulations write an output and later clear it to
+  all-zero, identically on five engines. GOV-SA-20 and GOV-SA-23 can rely on
+  this.
+- **GOV-R32 confirmed:** band-edge continuous values stay in band (19
+  simulations).
+- **GOV-R12, still open:** the 35 latch simulations ran with the feedback cell
+  written by the probe, because the PE composition that would feed it exists on
+  no engine. The machines' latch semantics agree; the composition itself is
+  still to be built.
+
