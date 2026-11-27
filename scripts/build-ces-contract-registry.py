@@ -153,17 +153,31 @@ def factory_machine_dirs() -> list[Path]:
 
 
 def corpus_files() -> dict[str, Path]:
-    """Basename → path across every root. Corpus filenames are globally unique.
+    """Basename → path across every corpus root. Corpus filenames are globally unique.
 
-    The corpus and localAIStack come first, so an admitted machine always wins
-    over a factory candidate of the same name.
+    Machine-factory candidates are not corpus roots: see factory_candidates().
     """
     out: dict[str, Path] = {}
-    for root in corpus_roots() + factory_machine_dirs():
+    for root in corpus_roots():
         if root.is_dir():
             for f in sorted(root.rglob("*.json")):
                 out.setdefault(f.name, f)
     return out
+
+
+def factory_candidates() -> set[str]:
+    """Basenames of every machine-factory candidate (machine_factory/domains/*/machines/).
+
+    A test-environment selection may boot candidates (RealityEngine_CI
+    config/extension-corpus.txt), but **a candidate is outside every registry
+    check until it is admitted**. Its entry is neither a member of the scope,
+    nor in its fingerprint or chain count, nor an unresolved entry. So a work in
+    progress in the factory, its edits, additions and renames included, cannot
+    make this registry stale. At admission the machine moves under
+    machines/domains/<slug>/, resolves from the corpus root first and joins the
+    scope as a member; the admission change regenerates this registry.
+    """
+    return {f.name for d in factory_machine_dirs() for f in d.glob("*.json")}
 
 
 def domain_scopes() -> dict[str, list[Path]]:
@@ -183,6 +197,7 @@ def corpus_scopes(files: dict[str, Path]) -> tuple[dict[str, list[Path]], dict[s
     """
     scopes: dict[str, list[Path]] = {}
     unresolved: dict[str, list[str]] = {}
+    candidates = factory_candidates()
     config = CI_DIR / "config"
     if not config.is_dir():
         return scopes, unresolved
@@ -194,7 +209,10 @@ def corpus_scopes(files: dict[str, Path]) -> tuple[dict[str, list[Path]], dict[s
             if not line or line.startswith("#"):
                 continue
             base = line.split("/")[-1]
-            (paths.append(files[base]) if base in files else missing.append(base))
+            if base in files:
+                paths.append(files[base])
+            elif base not in candidates:  # a candidate is outside the check until admitted
+                missing.append(base)
         scopes[f"corpus:{name}"] = paths
         if missing:
             unresolved[f"corpus:{name}"] = sorted(missing)
@@ -373,6 +391,10 @@ def build() -> dict[str, Any]:
         "contract": "../RealityEngine_CI/docs/QUORUM_CONTRACT.md",
         "recordedBy": "../RealityEngine_CI/scripts/record-ces-contracts.py",
         "fingerprintAlgorithm": fp.ALGORITHM,
+        "candidatePolicy": ("A corpus selection may name machine-factory candidates "
+                            "(machine_factory/domains/*/machines/). They are outside every scope's "
+                            "members, fingerprint and counts until admitted, so factory work in "
+                            "progress never makes this registry stale."),
         "scopeCount": len(entries),
         "statusCounts": dict(sorted(status_counts.items())),
         # Summed across scopes, which overlap: every corpus selection's
