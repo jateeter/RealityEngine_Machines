@@ -121,3 +121,8 @@ EI03 now has [generic reference microgrids and authority](documents/workflow/ref
 ## EI07 conservative synthetic risk posture
 
 [The pinned STIX assessment and proposal bridge](assets/risk-assessment.md) now exercise evidence freshness, applicability/mapping and context revision checks with UNKNOWN/BLOCKED postures only. Unresolved evidence holds discretionary proposals without changing electrical/protection state or granting clearance. Actual feed provenance, risk acceptance, durable incident state, native control and all 43 behavioral acceptance cases remain pending.
+
+
+## EI13 public implementation review packets
+
+[The bounded review-only source lookup](assets/public-model-review.md) now prepares exact-source excerpts from selected pinned SunSpec/OPC UA DI material with locators, parent hashes, dependency context and retained license notices. Normative/live/private/operating requests abstain before source text reads. No source is admitted for model use, no index/model answer is created, and authenticated RAG/LLM integration and all 43 behavioral cases remain pending.

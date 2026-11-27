@@ -25,6 +25,7 @@ from build_storage_carbon import check as check_storage_carbon
 from build_carbon_trajectories import check as check_carbon_trajectories
 from build_proposal_screen import check as check_proposal_screen
 from build_risk_assessment import check as check_risk_assessment
+from build_review_lookup import check as check_review_lookup
 
 EXCLUDED = {'asset-manifest.json', 'verification-summary.json'}
 EXPECTED_COUNTS = {'standards': 47, 'implementations': 29, 'sources': 19,
@@ -63,6 +64,7 @@ def check(root: Path) -> dict:
     require(not check_carbon_trajectories(root), 'Synthetic carbon trajectory source/input mismatch')
     require(not check_proposal_screen(root), 'Synthetic proposal screen source/profile mismatch')
     require(not check_risk_assessment(root), 'Synthetic risk assessment source/policy mismatch')
+    require(not check_review_lookup(root), 'Public model review policy/query mismatch')
     def safe(rel: str) -> Path:
         p = root / rel
         if Path(rel).is_absolute() or not p.resolve().is_relative_to(root):
@@ -287,6 +289,7 @@ def check(root: Path) -> dict:
             'syntheticTrajectoryArchives':1,
             'syntheticProposalScreens':1,
             'syntheticRiskAssessments':1,
+            'publicModelReviewLookupPolicies':1,
             'threatSchemaTemplates':57,'stixTopLevelObjectAndContainerTemplates':43,
             'supplementalNormativeStandardSnapshots':1,'taxiiResourceTemplates':9,'taxiiSupportingRecordTemplates':2,
             'genericRoleTemplates':19,'genericDocumentTemplates':7,'normativeClassCoverageComplete':False,
