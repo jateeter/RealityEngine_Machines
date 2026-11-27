@@ -134,3 +134,5 @@ EI09/EI18 component extension: version 0.2.0 adds separate cumulative import/exp
 EI11/EI18 partial restart evidence: [source-bound execution journal](assets/storage-component.md#source-bound-execution-journal-version-030) now reconstructs saved simulated histories by re-executing and checking receipts. This is offline reconstruction, without authenticated durable delivery, trusted history completeness or domain admission.
 
 EI07/EI11/EI18 partial composition: [assessed risk execution holds](assets/storage-component.md#assessed-risk-execution-holds-version-040) connect source-bound conservative assessments to simulated proposal holds and journal reconstruction. No risk clearance, protection action, actual threat feed or integrated acceptance is claimed.
+
+EI14 partial composition: [journal-derived import carbon accounting](assets/journal-carbon.md) now reconstructs source-bound applied intervals, excludes replay/held requests and computes exact retrospective energy-weighted synthetic intensity. This does not qualify providers, resolve opening storage carbon, establish facility-consumption intensity or run integrated acceptance.

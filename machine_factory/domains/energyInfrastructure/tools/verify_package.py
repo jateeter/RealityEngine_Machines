@@ -287,6 +287,7 @@ def check(root: Path) -> dict:
             'offlineSunSpecPowerModels':2,
             'offlineMeterEnergyModels':1,
             'syntheticImportCarbonLedgers':1,
+            'syntheticJournalCarbonBridges':1,
             'syntheticStorageAllocations':1,
             'syntheticTrajectoryArchives':1,
             'syntheticProposalScreens':1,
