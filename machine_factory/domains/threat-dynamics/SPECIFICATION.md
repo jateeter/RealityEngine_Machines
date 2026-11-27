@@ -97,5 +97,7 @@ The voting engines, 3-of-3, are the authority on every expected output.
 - Producers, and the milestone that stages each: GOV-SD-14 and TD-R02.
 - Thresholds: they are design choices, not measurements; the owner approved them as
   such (TD-SD-07).
+- Outputs are latched (TD-SD-08): a level is the last one an observer wrote, and it
+  holds through steps on which nothing asserts.
 - The 8-bit quantization of continuous cells on the engines: every simulated
   value is chosen away from a band edge, but the live run is the check (TD-R05).

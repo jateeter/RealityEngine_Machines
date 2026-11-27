@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "domain": "ai-governance-regime",
-  "scope": "Where the candidate machines resolve or refine SPECIFICATION.md 4.3 and HARDENING_TRANSITION_RULES.md. Each amendment is cited from the CESs that carry it (sequences[].metadata.semanticAmendments). All 22 approved by the owner as proposed, 2026-11-25 (GOV-SD-17, closes GOV-R14).",
+  "scope": "Where the candidate machines resolve or refine SPECIFICATION.md 4.3 and HARDENING_TRANSITION_RULES.md. Each amendment is cited from the CESs that carry it (sequences[].metadata.semanticAmendments). GOV-SA-01..22 approved by the owner as proposed, 2026-11-25 (GOV-SD-17, closes GOV-R14); GOV-SA-23 proposed 2026-11-27 (GOV-R31).",
   "amendments": [
     {
       "id": "GOV-SA-01",
@@ -179,6 +179,13 @@
       "reason": "CONNECTED_WORKFLOW.md 1.4: a missed window is its own finding.",
       "status": "approved",
       "approved": "2026-11-25"
+    },
+    {
+      "id": "GOV-SA-23",
+      "applies": "all 18 machines (one idle CES each)",
+      "change": "Each machine carries one idle CES: a single initial event whose every element accepts any value, asserting the all-zero output vector. Outputs merge by `or`, so it never masks another CES; on a step where no other CES asserts it writes zeros, so a decision holds exactly as long as its condition. A GOV-SA-06 latch is unaffected, because its hold CES asserts LATCH on every step the latch is set.",
+      "reason": "Outputs are latched (GOV-SD-19). Without it, 83 of 87 decision fixtures still assert their decision three nominal steps after the condition ends; with it, only the intended GOV-SA-06 latches (GOV07, 09, 14, 16) and GOV08's stateless permit under nominal latency hold.",
+      "status": "proposed"
     }
   ]
 }

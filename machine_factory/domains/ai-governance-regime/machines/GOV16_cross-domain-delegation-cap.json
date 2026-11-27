@@ -841,6 +841,80 @@
             ]
           }
         ]
+      },
+      {
+        "id": "ces_gov16_idle",
+        "name": "M-GOV-16 any → Idle",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "any",
+          "sourceToState": "Idle",
+          "regularExpression": "[]",
+          "length": 1,
+          "specRule": "HARDENING_TRANSITION_RULES.md section 2 (16)",
+          "semanticAmendments": [
+            "GOV-SA-23"
+          ],
+          "asserts": [
+            "none (explicit release)"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov16_idle-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov16_idle-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
       }
     ],
     "inputSequences": [
@@ -1621,6 +1695,50 @@
         }
       },
       {
+        "name": "gov16-idle",
+        "events": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov16_idle: []",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov16_idle"
+        }
+      },
+      {
         "name": "gov16-single-canary-spike",
         "events": [
           [
@@ -1662,56 +1780,13 @@
           "purpose": "one canary spike does not trip",
           "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
         }
-      },
-      {
-        "name": "gov16-nominal",
-        "events": [
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0,
-            0.0,
-            0.0
-          ]
-        ],
-        "metadata": {
-          "expectedOutputVector": [
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          "expectedOutputsByStep": [
-            [
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0
-            ]
-          ],
-          "purpose": "the quiet state",
-          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
-        }
       }
     ],
     "metadata": {
       "category": "ai-governance-regime",
       "domain": "ai-governance-regime",
       "machineClass": "signal-monitor",
-      "sequenceCount": 9,
+      "sequenceCount": 10,
       "inputSemantics": [
         "mon_xdomain_mu_agg (continuous [0,1]; sensor: aggregate cross-domain exposure; new): aggregate cross-domain exposure consumed",
         "mon_canary_drift_score (continuous [0,1]; sensor: canary prompts (localAIStack /observations/drift records drift today); partial): behavioral drift on canary prompts",
@@ -1931,6 +2006,24 @@
             "ragStatusCode": "GREEN",
             "processStatus": "info",
             "description": "M-GOV-16 S2_CrossDomainBreachLatch → S0_Nominal: [mon_xdomain_mu_agg∈[0,0.5] ∧ mon_canary_drift_score∈[0,0.1] ∧ operator_approved=1 ∧ operator_distinct=1 ∧ latch_q_prev=1]"
+          },
+          {
+            "sequenceId": "ces_gov16_idle",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-16 any → Idle: []"
           }
         ]
       },
