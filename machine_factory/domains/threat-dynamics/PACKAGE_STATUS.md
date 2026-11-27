@@ -16,7 +16,7 @@ The steps are ai-governance-regime's (its PACKAGE_STATUS.md, GOV-SD-02).
 | 6 | Families and runbooks | `families/`, `runbooks/` | open |
 | 7 | Agents | — | none: observe only (TD-SD-02) |
 | 7a | Sources and simulations | `threat-sources.json` | **built** 2026-11-25 |
-| 8 | Acceptance | `acceptance/` | live run recorded 2026-11-26 (`acceptance/live-run-2026-11-26.json`); extension-corpus boot, TLS lane, TD-R08 open |
+| 8 | Acceptance | `acceptance/` | live run recorded 2026-11-26 (`acceptance/live-run-2026-11-26.json`); extension-corpus regression 2026-11-27 passed 3-of-3 (CI run `20261127T000353Z`), followers agree after RealityEngine_CI#880; CES shard and TD-R08 open |
 | 9 | Admission | `scripts/approve-domain.sh plan`, then `prepare` | open; before ai-governance-regime (TD-SD-06) |
 | 10 | Deployment | `deployments/` | open |
 
