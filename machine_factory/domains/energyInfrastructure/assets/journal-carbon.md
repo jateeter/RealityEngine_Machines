@@ -81,3 +81,5 @@ protocol peer, physical equipment, provider, Large Model or RAG service is used.
 All 43 integrated acceptance cases remain NOT_RUN; EI14/EI16/EI18 and domain
 admission remain open. Required hardware remains simulated and template/generic
 assets remain permitted in every case.
+
+The separate [journal storage reconciliation](journal-storage.md) now verifies storage energy/loss balances and new charging attribution. It preserves unknown opening carbon and therefore does not qualify total storage inventory, delivered carbon or facility-consumption intensity.
