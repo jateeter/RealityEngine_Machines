@@ -37,6 +37,7 @@ step in [PACKAGE_STATUS.md](PACKAGE_STATUS.md) is redone. Findings marked
 | GOV-R28 | The ISO 42001 / EU AI Act crosswalk needs re-deriving | alignment | step 3 `source-requirements.json`, per milestone (GOV-SD-14) |
 | GOV-R30 | An output region keeps its last vector when nothing asserts (threat-dynamics TD-R08) | machines, fixtures | **resolved 2026-11-27**: outputs are latched (GOV-SD-19); the evaluator models it; GOV-SA-23 clears a decision when its condition ends |
 | GOV-R31 | GOV-SA-23 needs owner review | specification | **owner** |
+| GOV-R32 | Simulated continuous values sit 0.0001 inside a band edge (GOV-SA-01) | live run | confirm on the engines that no value leaves its band (cf. threat-dynamics TD-R05); move such values to mid-band if any does |
 | GOV-R29 | The V0.18 baseline lags the v0.0.3 implementation | every citation | **owner 2026-11-25**: a new baseline from v0.0.3 progress. **provisionally closed 2026-11-25**: V0.19 (heads of 25 November 2026) is provisionally accepted and pinned at `intake/BASELINE-V0.19-NIST.md` (GOV-SD-18); final acceptance pending |
 
 ## GOV-R01: neither corpus is in the canonical machine form

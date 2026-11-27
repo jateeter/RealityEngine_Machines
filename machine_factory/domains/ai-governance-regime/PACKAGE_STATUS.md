@@ -14,7 +14,7 @@ same path. Directories appear when their step produces content
 |---|---|---|---|
 | 1 | Intake: receive, preserve, index, review | `intake/`, `admission-source-manifest.json`, `REVIEW_QUEUE.md`, `tools/verify_package.py` | **done** 2026-11-20 |
 | 2 | Scope: owner decisions on R02, R04, R06–R09 | `scope-decisions.json` entries | **decided** 2026-11-25 (GOV-SD-04/05, 09–17); amendments approved (GOV-SD-17, R14 closed); new baseline from v0.0.3 pending (GOV-R29) |
-| 3 | Sources: pin the baseline and each in-scope framework edition; extract controls | `source-requirements.json`, `source-reference-map.json`, milestone scope | baseline V0.19 pinned, provisionally accepted (GOV-SD-18; V0.18 kept as the prior edition, GOV-SD-15); per-milestone framework scope and producer staging open (GOV-SD-14, 16) |
+| 3 | Sources: pin the baseline and each in-scope framework edition; extract controls | `source-requirements.json`, `source-reference-map.json`, milestone scope, simulated Sources | baseline V0.19 pinned, provisionally accepted (GOV-SD-18; V0.18 kept as the prior edition, GOV-SD-15); **simulated-Source definitions built 2026-11-27** (GOV-SD-16: 145 simulations in `governance-sources.json`); per-milestone framework scope and producer staging open (GOV-SD-14) |
 | 4 | Asset catalog: governance document types, fields, owners, dependencies | `document-asset-catalog.json`, `document-dependencies.json`, `templates/` | partly received (SHACL shapes, SoA template) |
 | 5 | Machine conversion: canonical candidate files | `machines/*.json` here, `machine-import-manifest.json`, `semantic-amendments.json` | **built** 2026-11-21; copied to `machines/domains/` at admission |
 | 6 | Families and runbooks: one accountable family per workflow | `families/`, `runbooks/` | open; seven workflows in `agentic-workflow-contract.json` |
@@ -182,4 +182,22 @@ same path. Directories appear when their step produces content
 
 - **Not done:** live confirmation that the engines write an all-zero output
   vector, which GOV-SA-20 also depends on. That is part of the governance live run.
+
+## Simulated Sources (2026-11-27, GOV-SD-16)
+
+- `governance-sources.json` now has `simulations`: 145 of them, one per fixture,
+  across all 18 machines. They use 1,540 simulated Sources, one per input cell:
+  1,437 constant, 99 square, 4 binary. Every one is deterministic in
+  `globalStep`, under the SURFACE_SPEC sample formula.
+- `tools/build_machines.py` fits each cell's values to a single waveform.
+  - The options are constant; binary (1 for k steps, then 0); and square between
+    two levels a and b (`dcOffset (a+b)/2`, `amplitude (a-b)/2`).
+  - The build fails unless the composed vectors drive the machine exactly as
+    its fixture does, under the latched evaluator (GOV-SD-19).
+- The GOV-SA-06 feedback cell has no Source (`feedbackCell`): the engine feeds it.
+- **Not done:**
+  - a live run on the engines; governance is not yet in the extension corpus;
+  - continuous fixture values sit 0.0001 inside a band edge (GOV-SA-01, for
+    example 0.5251). If the engines quantize continuous cells (TD-R05), those
+    values could leave the band live. The live run must confirm it (GOV-R32).
 
