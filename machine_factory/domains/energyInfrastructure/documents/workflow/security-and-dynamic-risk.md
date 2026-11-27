@@ -38,3 +38,8 @@ The local command gate authenticates principal/delegation, authorizes exact asse
 Permitted commands pass to bounded adapters; ACK and observed readback are separate evidence. On a timeout the result is completionUnknown, not success or a blind retry. Compensation is a newly assessed action under current plant state. Planned switching, resynchronization, firmware/relay/protection changes require the applicable authorized human/utility procedure; the model cannot grant an emergency bypass. The [command proposal template](../../templates/command-proposal.json) is documentary, not an accepted API schema.
 
 For each fixed critical rejection test, prove zero adapter execution and persisted denial reason. Threat reassessment must replay from pinned inputs/policy, and stale or unsigned inputs must not improve posture. Certificate revocation and withdrawn/expired approval take effect at execution, not only proposal creation. Simulation acceptance must demonstrate independent modeled protection and service fallback during total model/network loss. The package verifier checks artifacts only; none of these controls has been executed by this research.
+
+
+## Implemented conservative synthetic assessment prerequisite
+
+[The offline assessment/bridge](../../assets/risk-assessment.md) now replays selected source freshness, context changes and applicability assertions from the pinned synthetic STIX fixture. It cannot clear an asset, accept residual risk or grant operating authority; unresolved evidence holds discretionary proposals while preserving the synthetic electrical/protection fields. This does not establish actual threat coverage, native protection resilience or AC09–AC25 acceptance.
