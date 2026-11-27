@@ -32,15 +32,18 @@ function sourcePins(root){
 }
 
 export class StorageExecutionJournal {
- #sim; #header; #events=[]; #head;
+ #sim; #header; #events=[]; #head; #root;
  constructor(runId,root=ROOT){
+  this.#root=root;
   require(typeof runId==='string'&&/^[a-zA-Z0-9_.-]{1,80}$/.test(runId),'Invalid synthetic run ID');
   this.#header={schemaVersion:'1.0.0',kind:'SYNTHETIC_STORAGE_EXECUTION_JOURNAL',runId,sourcePins:sourcePins(root),simulationOnly:true,controlAction:'DENY',behavioralCasesRun:0};
   this.#head=digest(this.#header);this.#sim=new StorageComponentSimulator(root,runId);
  }
  observe(){return this.#sim.observe();}
+ stateToken(){require(isDeepStrictEqual(sourcePins(this.#root),this.#header.sourcePins),'Journal source package changed');return this.#sim.stateToken();}
  #append(operation,payload){
   require(this.#events.length<MAX_EVENTS,'Journal event limit reached');
+  if(operation==='STEP'&&payload&&Object.hasOwn(payload,'expectedStateSHA256'))this.stateToken();
   // Reserve space before mutating the simulator. Caller-controlled receipts are never accepted.
   require(Buffer.byteLength(JSON.stringify(this.export()))+Buffer.byteLength(JSON.stringify(payload))+20000<MAX_BYTES,'Journal byte limit reached');
   const receipt=operation==='STEP'?this.#sim.step(payload):operation==='RISK_ASSESSMENT'?this.#sim.applyRiskAssessment(payload):this.#sim.injectFault(payload);

@@ -10,6 +10,7 @@ import {decodeMeterEnergy,evaluateMeterInterval} from './evaluate_meter_interval
 import {decodeSunSpecPower} from './decode_sunspec_power.mjs';
 const ROOT=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const hash=b=>createHash('sha256').update(b).digest('hex');
+const canonical=x=>Array.isArray(x)?'['+x.map(canonical).join(',')+']':x!==null&&typeof x==='object'?'{'+Object.keys(x).sort().map(k=>JSON.stringify(k)+':'+canonical(x[k])).join(',')+'}':JSON.stringify(x);
 const require=(ok,msg)=>{if(!ok)throw Error(msg);};
 const decimal=m=>{const sign=m<0?'-':'';m=Math.abs(m);return sign+`${Math.floor(m/1000000)}.${String(m%1000000).padStart(6,'0')}`;};
 const clone=x=>structuredClone(x);
@@ -30,7 +31,7 @@ export class StorageComponentSimulator {
   require(hash(profileBytes)===this.#template.profileSHA256,'Simulator profile binding mismatch');
   this.#profile=JSON.parse(readFileSync(resolve(root,'assets/sunspec-power-profile.json'))).models.find(m=>m.modelId===203);
   this.#meter=JSON.parse(readFileSync(resolve(root,'assets/meter-energy-profile.json')));
-  this.#provenance={version:'energy-storage-component/0.4.0',implementationSHA256:hash(readFileSync(fileURLToPath(import.meta.url))),templateSHA256:hash(templateBytes),profileSHA256:hash(profileBytes)};
+  this.#provenance={version:'energy-storage-component/0.5.0',implementationSHA256:hash(readFileSync(fileURLToPath(import.meta.url))),templateSHA256:hash(templateBytes),profileSHA256:hash(profileBytes)};
   // Validate source bindings, profile, and pinned model before exposing any observation.
   require(screenStorageProposal(this.#frame('bootstrap','0'),root).eligibleForFurtherSimulation,'Invalid simulator bootstrap');this.observe();
  }
@@ -58,7 +59,12 @@ export class StorageComponentSimulator {
  observe() {
   const unknown=this.#faults.has('TELEMETRY_UNKNOWN');
   const readback=this.#readback(2000-Math.round(Number(this.#previous)*1000),this.#imported,this.#exported,unknown);
-  return {...SCOPE,provenance:clone(this.#provenance),observedAt:new Date(this.#time).toISOString(),stateRevision:`sim.${this.#revision}`,storedEnergyKWh:unknown?null:decimal(this.#energy),riskDisposition:this.#effectiveRisk(),faults:[...this.#faults].sort(),selectedPoints:['W','W_SF','TotWhImp','TotWhExp','TotWh_SF'],...readback};
+  return {...SCOPE,simulationRunId:this.#runId,provenance:clone(this.#provenance),observedAt:new Date(this.#time).toISOString(),stateRevision:`sim.${this.#revision}`,storedEnergyKWh:unknown?null:decimal(this.#energy),riskDisposition:this.#effectiveRisk(),faults:[...this.#faults].sort(),selectedPoints:['W','W_SF','TotWhImp','TotWhExp','TotWh_SF'],...readback};
+ }
+ stateToken(){
+  const observation=this.observe(),sourceManifestSHA256=hash(readFileSync(resolve(this.#root,'asset-manifest.json')));
+  return {simulationRunId:this.#runId,stateRevision:observation.stateRevision,sourceManifestSHA256,
+   expectedStateSHA256:hash(canonical({observation,sourceManifestSHA256})),simulationOnly:true,controlAction:'DENY'};
  }
  #interval(start,end,time) {
   const endpoint=(observation,t)=>({observedAt:new Date(t).toISOString(),receivedAt:new Date(t+100).toISOString(),counterEpochId:this.#runId,sourceIdentity:{sourceSystemId:'synthetic.storage.component',namespaceUri:'urn:energy:synthetic:sunspec',identifier:'REF01.pcc.203'},quality:'GOOD',blockHex:observation.blockHex});
@@ -82,17 +88,22 @@ export class StorageComponentSimulator {
   if(!this.#faults.has(fault)){this.#faults.add(fault);this.#revision++;}return this.observe();
  }
  step(request) {
-  require(request&&Object.keys(request).sort().join(',')==='id,storagePowerKw','Unsupported simulator request fields');
+  require(request&&['id,storagePowerKw','expectedStateSHA256,id,storagePowerKw'].includes(Object.keys(request).sort().join(',')),'Unsupported simulator request fields');
   const {id,storagePowerKw:power}=request;
   require(typeof id==='string'&&/^[a-zA-Z0-9_.-]{1,80}$/.test(id),'Invalid simulator request ID');
   require(typeof power==='string'&&/^-?(0|[1-9]\d?)(\.\d{1,2})?$/.test(power),'Expected bounded power decimal at 10 W resolution');
-  const intent=hash(JSON.stringify({power}));
+  const bound=Object.hasOwn(request,'expectedStateSHA256');
+  require(!bound||(typeof request.expectedStateSHA256==='string'&&/^[0-9a-f]{64}$/.test(request.expectedStateSHA256)),'Invalid expected state digest');
+  const intent=hash(JSON.stringify({power,expectedStateSHA256:bound?request.expectedStateSHA256:null}));
   if(this.#receipts.has(id)){
    const old=this.#receipts.get(id);require(old.intent===intent,'Conflicting replay intent');
    return {...clone(old.receipt),replayed:true};
   }
   require(this.#receipts.size<100,'Simulator request limit reached');
   const screen=screenStorageProposal(this.#frame(id,power),this.#root);
+  const actual=bound?this.stateToken().expectedStateSHA256:null;
+  const stateBinding=bound?{mode:'EXPECTED_STATE_SNAPSHOT',expectedSHA256:request.expectedStateSHA256,evaluatedSHA256:actual,matched:actual===request.expectedStateSHA256}:null;
+  if(bound&&!stateBinding.matched){screen.eligibleForFurtherSimulation=false;screen.reasons.unshift('EXPECTED_STATE_CHANGED');screen.calculations=null;}
   let meterInterval=null;
   if(screen.eligibleForFurtherSimulation){
    const watts=Math.round(Number(power)*1000);
@@ -112,7 +123,7 @@ export class StorageComponentSimulator {
    this.#energy=next;this.#previous=power;this.#time+=900000;this.#revision++;
    this.#imported=imported;this.#exported=exported;
   }
-  const receipt={...SCOPE,id,applied:screen.eligibleForFurtherSimulation,replayed:false,screen,meterInterval,observation:this.observe()};
+  const receipt={...SCOPE,id,applied:screen.eligibleForFurtherSimulation,replayed:false,stateBinding,screen,meterInterval,observation:this.observe()};
   this.#receipts.set(id,{intent,receipt:clone(receipt)});return receipt;
  }
 }

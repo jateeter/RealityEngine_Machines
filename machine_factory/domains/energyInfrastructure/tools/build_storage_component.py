@@ -9,7 +9,7 @@ def build(root):
     paths=['tools/simulate_storage_component.mjs','assets/storage-proposal-screen.json','assets/generic-storage-screen-profile.json','assets/function-bindings/ref01_connected.json','assets/sunspec-power-profile.json','assets/meter-energy-profile.json','tools/evaluate_meter_interval.mjs','tools/storage_execution_journal.mjs','tools/assess_risk.mjs','assets/risk-assessment-fixture.json']
     return {'storage-component-catalog.json':{
         'schemaVersion':'1.0.0','kind':'PARTIAL_SIMULATED_REQUIRED_HARDWARE_COMPONENT',
-        'version':'energy-storage-component/0.4.0','status':'COMPONENT_ONLY_NOT_DOMAIN_ACCEPTANCE',
+        'version':'energy-storage-component/0.5.0','status':'COMPONENT_ONLY_NOT_DOMAIN_ACCEPTANCE',
         'ownerIssueId':'EI18','referenceScenarioId':'REF01_CONNECTED',
         'assetMode':'GENERIC_OR_TEMPLATE_ALLOWED','storageAssetId':'fixture.battery-inverter',
         'integrationContext':'OP23_FSGIM_WITH_OP17_DI_FACET_PROVISIONAL_NOT_NORMATIVE_EQUIVALENCE',
