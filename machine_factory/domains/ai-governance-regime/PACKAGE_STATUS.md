@@ -238,5 +238,5 @@ Record: `acceptance/live-run-2026-11-27.json`. Probe: `tools/live_probe.py`.
     turn, and clears only when all of them are satisfied.
   - After the inputs return to nominal, only the four latch machines, and
     GOV08's stateless permit, still hold a decision.
-- **Not done:** a live run on the engines.
+- **Live run, 2026-11-27** (`acceptance/live-run-2026-11-27-sa24.json`): 154 of 154 simulations agree 3-of-3 and match the expectation, and Rust and Go agree on all 154. No simulation needed a feedback cell.
 
