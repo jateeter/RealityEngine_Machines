@@ -374,11 +374,15 @@ def run(sequences, steps, fired=None):
     """Drive CESs over input vectors under SURFACE_SPEC's transition rule.
 
     Authoring self-check only; the engines (3-of-3) are the authority. Returns the
-    merged output per step, None where nothing asserted. With `fired`, adds the ids
-    of the CESs whose final event asserted.
+    machine's output region after each step. **The output is latched** (TD-SD-08,
+    owner 2026-11-27): a step on which a CES asserts writes the whole region with
+    the merged vector, and a step on which none asserts leaves the region holding
+    the last vector written. None only before the first write. With `fired`, adds
+    the ids of the CESs whose final event asserted.
     """
     active = [{0} for _ in sequences]
     trace = []
+    latched = None
     for x in steps:
         merged = None
         for si, seq in enumerate(sequences):
@@ -399,7 +403,9 @@ def run(sequences, steps, fired=None):
                 for nid in ev.get("nextEventIds", []):
                     nxt.add(pos[nid])
             active[si] = nxt
-        trace.append(merged)
+        if merged is not None:
+            latched = merged
+        trace.append(latched)
     return trace
 
 

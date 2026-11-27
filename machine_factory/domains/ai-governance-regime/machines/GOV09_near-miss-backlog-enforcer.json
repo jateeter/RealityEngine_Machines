@@ -280,6 +280,65 @@
             ]
           }
         ]
+      },
+      {
+        "id": "ces_gov09_idle",
+        "name": "M-GOV-09 any → Idle",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "any",
+          "sourceToState": "Idle",
+          "regularExpression": "[]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (9)",
+          "semanticAmendments": [
+            "GOV-SA-23"
+          ],
+          "asserts": [
+            "none (explicit release)"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov09_idle-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov09_idle-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
       }
     ],
     "inputSequences": [
@@ -567,7 +626,7 @@
         }
       },
       {
-        "name": "gov09-nominal",
+        "name": "gov09-idle",
         "events": [
           [
             0.0,
@@ -602,8 +661,9 @@
               0.0
             ]
           ],
-          "purpose": "the quiet state",
-          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
+          "purpose": "drives ces_gov09_idle: []",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov09_idle"
         }
       }
     ],
@@ -611,7 +671,7 @@
       "category": "ai-governance-regime",
       "domain": "ai-governance-regime",
       "machineClass": "signal-monitor",
-      "sequenceCount": 4,
+      "sequenceCount": 5,
       "inputSemantics": [
         "mon_nearmiss_backlog (continuous [0,1]; sensor: near-miss K-line classification over engine K-line histories; partial): unresolved near-miss K-lines relative to ring capacity",
         "triage_completed (binary; aigov-near-miss-triage completion via aigov.gov09.near-miss-triage.completion): the triage pass is complete",
@@ -738,6 +798,24 @@
             "ragStatusCode": "GREEN",
             "processStatus": "info",
             "description": "M-GOV-09 S1_BacklogThreshold → S0_Nominal: [mon_nearmiss_backlog∈[0,0.4999] ∧ triage_completed=1 ∧ latch_q_prev=1]"
+          },
+          {
+            "sequenceId": "ces_gov09_idle",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-09 any → Idle: []"
           }
         ]
       },
