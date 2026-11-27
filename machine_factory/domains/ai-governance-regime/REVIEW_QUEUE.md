@@ -18,7 +18,7 @@ step in [PACKAGE_STATUS.md](PACKAGE_STATUS.md) is redone. Findings marked
 | GOV-R09 | Designed mechanisms are described as if they exist | workplan, specification | **decided 2026-11-25**: simulated Sources until producers exist, producers staged by milestone (GOV-SD-16) |
 | GOV-R10 | Generated-text residue and stale cross-references | documents | mechanical |
 | GOV-R11 | Continuous-input watchdogs are multi-valued machines | regression reach | **decided 2026-11-25**: shared extension corpus (GOV-SD-12); open until that corpus exists in RealityEngine_CI |
-| GOV-R12 | Latch feedback and verdict composition need live confirmation | engine/PE behavior | live 3-of-3 run |
+| GOV-R12 | Latch feedback and verdict composition need live confirmation | engine/PE behavior | **machine semantics confirmed 2026-11-27**: the 35 latch simulations agree 3-of-3 with the feedback cell harness-composed; open: the PE composition itself (the previous LATCH output into the feedback element) is implemented on no engine |
 | GOV-R13 | GOV10 permits on every quiet step | specification | **closed 2026-11-21**: GOV10 runs per message on `req_egress` (GOV-SA-08) |
 | GOV-R14 | The semantic amendments need owner review | specification | **closed 2026-11-25**: all 22 approved as proposed (GOV-SD-17) |
 | GOV-R15 | 91% of CESs are single events; the obligations are temporal | machines | **rebuilt 2026-11-21 (0.2.0)**: chains for every order in §1.4; 62 of 141 CESs are chains |
@@ -37,7 +37,7 @@ step in [PACKAGE_STATUS.md](PACKAGE_STATUS.md) is redone. Findings marked
 | GOV-R28 | The ISO 42001 / EU AI Act crosswalk needs re-deriving | alignment | step 3 `source-requirements.json`, per milestone (GOV-SD-14) |
 | GOV-R30 | An output region keeps its last vector when nothing asserts (threat-dynamics TD-R08) | machines, fixtures | **resolved 2026-11-27**: outputs are latched (GOV-SD-19); the evaluator models it; GOV-SA-23 clears a decision when its condition ends |
 | GOV-R31 | GOV-SA-23 needs owner review | specification | **owner** |
-| GOV-R32 | Simulated continuous values sit 0.0001 inside a band edge (GOV-SA-01) | live run | confirm on the engines that no value leaves its band (cf. threat-dynamics TD-R05); move such values to mid-band if any does |
+| GOV-R32 | Simulated continuous values sit 0.0001 inside a band edge (GOV-SA-01) | live run | **confirmed 2026-11-27**: 19 simulations drive such a value and all match on five engines (`acceptance/live-run-2026-11-27.json`); re-check when values change |
 | GOV-R29 | The V0.18 baseline lags the v0.0.3 implementation | every citation | **owner 2026-11-25**: a new baseline from v0.0.3 progress. **provisionally closed 2026-11-25**: V0.19 (heads of 25 November 2026) is provisionally accepted and pinned at `intake/BASELINE-V0.19-NIST.md` (GOV-SD-18); final acceptance pending |
 
 ## GOV-R01: neither corpus is in the canonical machine form
