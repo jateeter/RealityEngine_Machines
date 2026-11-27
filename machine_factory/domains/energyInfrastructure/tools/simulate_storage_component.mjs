@@ -16,8 +16,9 @@ const SCOPE={simulationOnly:true,controlAction:'DENY',behavioralCasesRun:0,carri
 
 export class StorageComponentSimulator {
  #root; #template; #energy=5000000; #previous='0'; #time=Date.parse('2026-01-01T00:00:00.000Z');
- #revision=0; #faults=new Set(); #receipts=new Map(); #profile; #provenance; #meter; #imported=1000000; #exported=100000;
- constructor(root=ROOT) {
+ #revision=0; #faults=new Set(); #receipts=new Map(); #profile; #provenance; #runId; #meter; #imported=1000000; #exported=100000;
+ constructor(root=ROOT,runId='synthetic.storage.component.scenario.1') {
+  require(typeof runId==='string'&&/^[a-zA-Z0-9_.-]{1,80}$/.test(runId),'Invalid synthetic run ID');this.#runId=runId;
   this.#root=root;
   const templateBytes=readFileSync(resolve(root,'assets/storage-proposal-screen.json'));
   this.#template=JSON.parse(templateBytes);
@@ -28,7 +29,7 @@ export class StorageComponentSimulator {
   require(hash(profileBytes)===this.#template.profileSHA256,'Simulator profile binding mismatch');
   this.#profile=JSON.parse(readFileSync(resolve(root,'assets/sunspec-power-profile.json'))).models.find(m=>m.modelId===203);
   this.#meter=JSON.parse(readFileSync(resolve(root,'assets/meter-energy-profile.json')));
-  this.#provenance={version:'energy-storage-component/0.2.0',implementationSHA256:hash(readFileSync(fileURLToPath(import.meta.url))),templateSHA256:hash(templateBytes),profileSHA256:hash(profileBytes)};
+  this.#provenance={version:'energy-storage-component/0.3.0',implementationSHA256:hash(readFileSync(fileURLToPath(import.meta.url))),templateSHA256:hash(templateBytes),profileSHA256:hash(profileBytes)};
   // Validate source bindings, profile, and pinned model before exposing any observation.
   require(screenStorageProposal(this.#frame('bootstrap','0'),root).eligibleForFurtherSimulation,'Invalid simulator bootstrap');this.observe();
  }
@@ -58,7 +59,7 @@ export class StorageComponentSimulator {
   return {...SCOPE,provenance:clone(this.#provenance),observedAt:new Date(this.#time).toISOString(),stateRevision:`sim.${this.#revision}`,storedEnergyKWh:unknown?null:decimal(this.#energy),faults:[...this.#faults].sort(),selectedPoints:['W','W_SF','TotWhImp','TotWhExp','TotWh_SF'],...readback};
  }
  #interval(start,end,time) {
-  const endpoint=(observation,t)=>({observedAt:new Date(t).toISOString(),receivedAt:new Date(t+100).toISOString(),counterEpochId:'synthetic.storage.component.scenario.1',sourceIdentity:{sourceSystemId:'synthetic.storage.component',namespaceUri:'urn:energy:synthetic:sunspec',identifier:'REF01.pcc.203'},quality:'GOOD',blockHex:observation.blockHex});
+  const endpoint=(observation,t)=>({observedAt:new Date(t).toISOString(),receivedAt:new Date(t+100).toISOString(),counterEpochId:this.#runId,sourceIdentity:{sourceSystemId:'synthetic.storage.component',namespaceUri:'urn:energy:synthetic:sunspec',identifier:'REF01.pcc.203'},quality:'GOOD',blockHex:observation.blockHex});
   const input={schemaVersion:'1.0.0',kind:'SYNTHETIC_METER_ENERGY_INTERVAL',sourceProjection:this.#template.sourceProjection,sourceProjectionSHA256:this.#template.sourceProjectionSHA256,meterAssetId:'fixture.meter',boundaryId:'FACILITY_PCC',modelId:203,start:endpoint(start,this.#time),end:endpoint(end,time),evaluationAt:new Date(time+1000).toISOString(),maxAgeMs:2000,maxIntervalMs:900000,synthetic:true,engineeringReview:'PENDING',controlAction:'DENY',behavioralCasesRun:0};
   return {input,result:evaluateMeterInterval(input,this.#root)};
  }

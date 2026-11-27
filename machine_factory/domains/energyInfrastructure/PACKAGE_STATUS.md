@@ -130,3 +130,5 @@ EI03 now has [generic reference microgrids and authority](documents/workflow/ref
 EI18 partial execution: [offline storage simulated hardware component](assets/storage-component.md) now supplies deterministic energy state, selected SunSpec power readback, process-local replay and injected fault holds. This does not run the 43 integrated acceptance cases or fulfill full hardware coverage.
 
 EI09/EI18 component extension: version 0.2.0 adds separate cumulative import/export readback and source-bound REF01 interval evaluation; replay and rejected steps do not accumulate energy. See [component scope](assets/storage-component.md#cumulative-energy-readback-version-020). Full integrated acceptance remains pending.
+
+EI11/EI18 partial restart evidence: [source-bound execution journal](assets/storage-component.md#source-bound-execution-journal-version-030) now reconstructs saved simulated histories by re-executing and checking receipts. This is offline reconstruction, without authenticated durable delivery, trusted history completeness or domain admission.

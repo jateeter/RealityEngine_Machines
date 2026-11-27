@@ -6,10 +6,10 @@ import json
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 def build(root):
-    paths=['tools/simulate_storage_component.mjs','assets/storage-proposal-screen.json','assets/generic-storage-screen-profile.json','assets/function-bindings/ref01_connected.json','assets/sunspec-power-profile.json','assets/meter-energy-profile.json','tools/evaluate_meter_interval.mjs']
+    paths=['tools/simulate_storage_component.mjs','assets/storage-proposal-screen.json','assets/generic-storage-screen-profile.json','assets/function-bindings/ref01_connected.json','assets/sunspec-power-profile.json','assets/meter-energy-profile.json','tools/evaluate_meter_interval.mjs','tools/storage_execution_journal.mjs']
     return {'storage-component-catalog.json':{
         'schemaVersion':'1.0.0','kind':'PARTIAL_SIMULATED_REQUIRED_HARDWARE_COMPONENT',
-        'version':'energy-storage-component/0.2.0','status':'COMPONENT_ONLY_NOT_DOMAIN_ACCEPTANCE',
+        'version':'energy-storage-component/0.3.0','status':'COMPONENT_ONLY_NOT_DOMAIN_ACCEPTANCE',
         'ownerIssueId':'EI18','referenceScenarioId':'REF01_CONNECTED',
         'assetMode':'GENERIC_OR_TEMPLATE_ALLOWED','storageAssetId':'fixture.battery-inverter',
         'integrationContext':'OP23_FSGIM_WITH_OP17_DI_FACET_PROVISIONAL_NOT_NORMATIVE_EQUIVALENCE',
@@ -22,7 +22,7 @@ def build(root):
         'coverageFulfillmentReceipt':None,'engineeringReview':'PENDING',
         'limitations':['No wire peer, full hardware coverage or physical solver',
                        'Clock advances only on accepted held intervals; no autonomous evolution during holds',
-                       'In-memory replay only; no durable or distributed execution guarantee',
+                       'Source-bound offline journal reconstruction available; no authenticated durable or distributed execution guarantee',
                        'No authenticated risk clearance, engineering approval or native admission']}}
 def check(root):
     try:return ['Storage component catalog drift: '+n for n,d in build(root).items() if not (root/'assets'/n).is_file() or json.loads((root/'assets'/n).read_text())!=d]
