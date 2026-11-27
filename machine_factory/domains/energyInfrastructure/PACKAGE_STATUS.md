@@ -132,3 +132,5 @@ EI18 partial execution: [offline storage simulated hardware component](assets/st
 EI09/EI18 component extension: version 0.2.0 adds separate cumulative import/export readback and source-bound REF01 interval evaluation; replay and rejected steps do not accumulate energy. See [component scope](assets/storage-component.md#cumulative-energy-readback-version-020). Full integrated acceptance remains pending.
 
 EI11/EI18 partial restart evidence: [source-bound execution journal](assets/storage-component.md#source-bound-execution-journal-version-030) now reconstructs saved simulated histories by re-executing and checking receipts. This is offline reconstruction, without authenticated durable delivery, trusted history completeness or domain admission.
+
+EI07/EI11/EI18 partial composition: [assessed risk execution holds](assets/storage-component.md#assessed-risk-execution-holds-version-040) connect source-bound conservative assessments to simulated proposal holds and journal reconstruction. No risk clearance, protection action, actual threat feed or integrated acceptance is claimed.
