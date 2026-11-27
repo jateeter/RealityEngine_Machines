@@ -163,3 +163,23 @@ same path. Directories appear when their step produces content
 - **Not done:** the threat-dynamics package itself; the milestone scope and the
   simulated-Source definitions (step 3); R14 (owner); R10 and R22 wait for the
   next document revision.
+
+## Latched outputs (2026-11-27)
+
+- **Owner fact, GOV-SD-19:** outputs are latched. The evaluator in
+  `tools/build_machines.py` now models it, and the GOV-SA-06 feedback cell
+  reads the latched region.
+- **GOV-SA-23 (proposed):** an idle CES on each of the 18 machines.
+  - The machines now carry 159 CESs: 97 of one event, 52 of two, 10 of three.
+  - All 145 fixtures replay. `verify_machines.py` and the one-pattern gate pass.
+- **Evidence.** For every fixture that asserts a decision, I appended three
+  nominal steps:
+
+  | Evaluator | Decision fixtures still holding it after three nominal steps |
+  |---|---|
+  | Latched, without GOV-SA-23 | 83 of 87 |
+  | Latched, with GOV-SA-23 | only the intended GOV-SA-06 latches (GOV07, 09, 14, 16), and GOV08's permit, which is the stateless verdict under nominal latency |
+
+- **Not done:** live confirmation that the engines write an all-zero output
+  vector, which GOV-SA-20 also depends on. That is part of the governance live run.
+

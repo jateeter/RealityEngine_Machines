@@ -904,6 +904,95 @@
             ]
           }
         ]
+      },
+      {
+        "id": "ces_gov06_idle",
+        "name": "M-GOV-06 any → Idle",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "any",
+          "sourceToState": "Idle",
+          "regularExpression": "[]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (6); HARDENING_TRANSITION_RULES.md section 1",
+          "semanticAmendments": [
+            "GOV-SA-23"
+          ],
+          "asserts": [
+            "none (explicit release)"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov06_idle-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov06_idle-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
       }
     ],
     "inputSequences": [
@@ -1236,6 +1325,53 @@
         }
       },
       {
+        "name": "gov06-idle",
+        "events": [
+          [
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov06_idle: []",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov06_idle"
+        }
+      },
+      {
         "name": "gov06-signatures-before-bundle",
         "events": [
           [
@@ -1280,59 +1416,13 @@
           "purpose": "signatures that arrive before the bundle is ready do not make a quorum",
           "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
         }
-      },
-      {
-        "name": "gov06-nominal",
-        "events": [
-          [
-            0.0,
-            1.0,
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0
-          ]
-        ],
-        "metadata": {
-          "expectedOutputVector": [
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          "expectedOutputsByStep": [
-            [
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0
-            ]
-          ],
-          "purpose": "the quiet state",
-          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
-        }
       }
     ],
     "metadata": {
       "category": "ai-governance-regime",
       "domain": "ai-governance-regime",
       "machineClass": "safety-compliance-checker",
-      "sequenceCount": 8,
+      "sequenceCount": 9,
       "inputSemantics": [
         "src_req_epoch_swap (binary; sensor: scripts/approve-domain.sh deploy (epoch request); partial): a rule-epoch swap is requested",
         "src_quorum_integrity_ok (binary; sensor: keyring Source: re_pki CRL plus signer keys, org units, dwell; partial): signer keys clean, diverse, dwell met",
@@ -1537,6 +1627,24 @@
             "ragStatusCode": "RED",
             "processStatus": "error",
             "description": "M-GOV-06 S1_Collecting → S_fail_QuorumViolation: [src_req_epoch_swap=1 ∧ src_slsa_attested=0]"
+          },
+          {
+            "sequenceId": "ces_gov06_idle",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-06 any → Idle: []"
           }
         ]
       },

@@ -492,6 +492,70 @@
             ]
           }
         ]
+      },
+      {
+        "id": "ces_gov14_idle",
+        "name": "M-GOV-14 any → Idle",
+        "schemaVersion": "1.0",
+        "metadata": {
+          "sourceFromState": "any",
+          "sourceToState": "Idle",
+          "regularExpression": "[]",
+          "length": 1,
+          "specRule": "SPECIFICATION.md 4.3 (14)",
+          "semanticAmendments": [
+            "GOV-SA-23"
+          ],
+          "asserts": [
+            "none (explicit release)"
+          ]
+        },
+        "events": [
+          {
+            "id": "ces_gov14_idle-e0",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [],
+            "outputEvents": [
+              {
+                "id": "ces_gov14_idle-out",
+                "vector": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
       }
     ],
     "inputSequences": [
@@ -862,6 +926,48 @@
         }
       },
       {
+        "name": "gov14-idle",
+        "events": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "drives ces_gov14_idle: []",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov14_idle"
+        }
+      },
+      {
         "name": "gov14-expiry-holds-after-renewal",
         "events": [
           [
@@ -919,54 +1025,13 @@
           "purpose": "a renewed TTL without approval keeps the epoch revoked",
           "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
         }
-      },
-      {
-        "name": "gov14-nominal",
-        "events": [
-          [
-            1.0,
-            0.0,
-            0.0,
-            0.0
-          ]
-        ],
-        "metadata": {
-          "expectedOutputVector": [
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          "expectedOutputsByStep": [
-            [
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0
-            ]
-          ],
-          "purpose": "the quiet state",
-          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines."
-        }
       }
     ],
     "metadata": {
       "category": "ai-governance-regime",
       "domain": "ai-governance-regime",
       "machineClass": "signal-monitor",
-      "sequenceCount": 7,
+      "sequenceCount": 8,
       "inputSemantics": [
         "mon_recert_ttl_rem (continuous [0,1]; sensor: domains/approvals and approval tags (time since last approval); exists): fraction of the recertification TTL remaining",
         "operator_approved (binary; sensor: governance console: operator release approval; new): a distinct human operator approved the release of a latched watchdog",
@@ -1148,6 +1213,24 @@
             "ragStatusCode": "GREEN",
             "processStatus": "info",
             "description": "M-GOV-14 S2_ExpiredRevoked → S0_Current: [mon_recert_ttl_rem∈[0.1501,1] ∧ operator_approved=1 ∧ latch_q_prev=1]"
+          },
+          {
+            "sequenceId": "ces_gov14_idle",
+            "outputMatches": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "ragStatusCode": "GREEN",
+            "processStatus": "info",
+            "description": "M-GOV-14 any → Idle: []"
           }
         ]
       },

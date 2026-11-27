@@ -8,10 +8,21 @@
 | TD-R04 | SURFACE_SPEC states the simulated-source defaults but not the sample formula | contract | **closed 2026-11-26**: formula in SURFACE_SPEC (RealityEngine_CI#866); LSP fixed (RealityEngine_LSP#201); binary, square, linear-ramp and constant agree live on five engines (`acceptance/live-run-2026-11-26.json`) |
 | TD-R05 | Continuous cells are 8-bit on the engines | engines | **confirmed for the 45 simulations 2026-11-26**: every continuous value landed in its band on five engines; re-check when values change |
 | TD-R06 | No engine has loaded these machines | engines | **live run 2026-11-26**: 45 of 45 simulations agree 3-of-3; Rust and Go agree on 45 of 45 (`acceptance/live-run-2026-11-26.json`). Registered at run time on the regression corpus, plaintext lane. **Extension-corpus boot 2026-11-27**: RealityEngine_CI regression run `20261127T000353Z` (`--machine-corpus extension`, TLS lane) booted the 11 candidates with the regression corpus. Every voter stage passed 3-of-3, 57 machines resident on every instance, no new failures. Both followers differed on five stages only because the follower lane's localAI slice was refused by localAI's clock lock. Fixed in RealityEngine_CI#880: re-run on the extension corpus, Rust and Go agree on all 11 compared stages. Open: the CES contract shard for `corpus:extension`, and a TLS-lane follower re-run |
-| TD-R08 | An output region keeps its last vector on a step where nothing asserts | evaluator, specification | **owner**: model persistence in the evaluator, or have each observer assert an explicit vector on every step; and SURFACE_SPEC to state the rule |
+| TD-R08 | An output region keeps its last vector on a step where nothing asserts | evaluator, specification | **closed 2026-11-27**: the output is latched (owner, TD-SD-08); the evaluator models it, and its expectations equal the engines' traces for all 45 simulations on five engines |
 | TD-R07 | `gate_redteam_pass` reaches GOV01 only through the lifecycle's frame-fact writer | lifecycle | localAssetStorageStack, with GOV-R19 |
 
-## TD-R08: output persistence (owner)
+## TD-R08: output persistence (closed)
+
+Closed 2026-11-27. The owner's ruling is that **the output is latched**
+(TD-SD-08). `tools/build_machines.py` `run()` now models it: a step on which
+nothing asserts keeps the last vector. `threat-sources.json` is regenerated, and
+its `expectedOutputsByStep` equal the five engines' recorded traces in all 45
+simulations, with 0 mismatches. An observer's level means the last level it
+wrote. In the example below, THR01 shows CLEAR through the debounce of the next
+breach, by design.
+
+The finding as first recorded:
+
 
 Found in the 2026-11-26 live run. On a step where no CES asserts, every engine
 (C++, LSP, Scala, Rust, Go) leaves the machine's output region as it was, so it

@@ -628,6 +628,16 @@ MACHINES = [
                 ["OVERDUE", "HALT_PROMOTION", "REVOKE_EPOCH"], "RED")]),
 ]
 
+# GOV-SA-23 (proposed): every machine's output region is latched by the engines
+# (GOV-SD-19), so a decision would hold after its conditions end. Each machine
+# carries one idle CES: a single event that accepts any input and asserts the
+# all-zero vector. Outputs merge by `or`, so it never masks another CES; on a
+# step where nothing else asserts it clears the region, and a decision lasts
+# exactly as long as its condition. A GOV-SA-06 latch is unaffected: its hold
+# CES asserts LATCH on every step the latch is set.
+for _m in MACHINES:
+    _m["ces"].append(C("idle", "any", "Idle", [{}], [], "GREEN", ["GOV-SA-23"]))
+
 FIXTURE_PRODUCERS = [m for m in MACHINES if m["kind"] == "fixture"]
 
 NOMINAL = {"lane_principal_distinct": 1, "lane_quorum_integrity_ok": 1, "gate_source_slsa_attested": 1,
@@ -758,10 +768,13 @@ def run(sequences, steps, latch_index=None, latch_out=0):
     """Drive CESs over input vectors under SURFACE_SPEC's transition rule.
 
     Authoring self-check only; the engines (3-of-3) are the authority. Returns
-    the merged output per step, None where nothing asserted.
+    the machine's output region after each step. The output is latched
+    (GOV-SD-19): a step on which a CES asserts writes the merged vector, and a
+    step on which none asserts keeps the last vector written; None only before
+    the first write. The GOV-SA-06 feedback cell reads that latched region.
     """
     active = [{0} for _ in sequences]
-    trace, prev_latch = [], 0.0
+    trace, prev_latch, latched = [], 0.0, None
     for x in steps:
         x = list(x)
         if latch_index is not None:
@@ -783,9 +796,11 @@ def run(sequences, steps, latch_index=None, latch_out=0):
                 for nid in ev.get("nextEventIds", []):
                     nxt.add(pos[nid])
             active[si] = nxt
-        trace.append(merged)
+        if merged is not None:
+            latched = merged
+        trace.append(latched)
         if latch_index is not None:
-            prev_latch = merged[latch_out] if merged else 0.0
+            prev_latch = latched[latch_out] if latched else 0.0
     return trace
 
 
@@ -1078,6 +1093,7 @@ def build_aggregator():
             f"{c} raises an incident")
         preds = {f"{c}.PERMIT_DEPLOY": 1, **{h: 0 for h in halts}, **{r: 0 for r in revokes}}
         ces(f"ces_gov00_permit_{c.lower()}", preds, [0.0, 0.0, 1.0, 0.0], "GREEN", f"{c} permits and no fixture halts or revokes")
+    ces("ces_gov00_idle", {}, [0.0, 0.0, 0.0, 0.0], "GREEN", "nothing folds: the verdict clears (GOV-SA-23)")
 
     def fx(name, ones, purpose):
         v = [1.0 if n in ones else 0.0 for n in inputs]
