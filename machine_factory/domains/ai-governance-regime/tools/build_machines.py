@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -1183,7 +1184,92 @@ def workflow_contract():
             "workflows": out}
 
 
-def sources_manifest():
+# ---------------------------------------------------------------- simulated Sources (GOV-SD-16)
+def sample(pattern, frequency, amplitude, dc_offset, t):
+    """A simulated Source's sample at t = globalStep (SURFACE_SPEC "Simulated source: the sample")."""
+    period = 1.0 / frequency if frequency > 0 else 1.0
+    phase = math.fmod(t / period, 1.0)
+    if pattern == "constant":
+        return dc_offset
+    if pattern == "binary":
+        return 1.0 if phase < 0.5 else 0.0
+    if pattern == "square":
+        return dc_offset + amplitude * (1.0 if phase < 0.5 else -1.0)
+    raise ValueError(pattern)
+
+
+def fit_source(seq):
+    """The deterministic waveform that reproduces one cell's values at t = 0..n-1 exactly.
+
+    constant; binary (1 for k steps, then 0); or square between two levels a and b
+    (dcOffset (a+b)/2, amplitude (a-b)/2: a for k steps, then b). For 0/1 cells the
+    square is exact (0.5 +- 0.5), which the `equals` comparator needs; a continuous
+    level is reproduced to within 1e-9, and the caller checks the machine behaves alike.
+    """
+    if all(v == seq[0] for v in seq):
+        return ("constant", 1.0, 0.0, seq[0])
+    a = seq[0]
+    b = next(v for v in seq if v != a)
+    for k in range(1, len(seq) + 1):
+        f = 1.0 / (2 * k)
+        for spec in (("binary", f, 0.0, 0.0), ("square", f, (a - b) / 2, (a + b) / 2)):
+            if all(abs(sample(*spec, t) - v) < 1e-9 for t, v in enumerate(seq)):
+                return spec
+    raise SystemExit(f"no deterministic simulated Source reproduces {seq}")
+
+
+def simulations(built):
+    """One simulation per fixture: a simulated Source per input cell, through the ISRE.
+
+    Every governance input is a simulated Source until its producer exists (GOV-SD-16).
+    The fixtures are machine-granularity; each becomes a simulation whose Sources
+    reproduce its input vectors exactly, checked here, with the latched expected
+    outputs. The GOV-SA-06 feedback cell has no Source: the engine feeds it from the
+    machine's own latched output.
+    """
+    out = []
+    for doc in built:
+        m = doc["machine"]
+        code = m["name"][:5].lower()
+        inp = m["perceptualMapping"]["input"]
+        sem = m["metadata"].get("inputSemantics", [])
+        labels = [x.split(" ", 1)[0] for x in sem]
+        fb = m["metadata"].get("latchFeedback")
+        skip = fb["inputElement"] if fb else None
+        args = (fb["inputElement"], fb["fromOutputElement"]) if fb else ()
+        for f in m.get("inputSequences", []):
+            cols = list(zip(*f["events"]))
+            sources = []
+            for i, col in enumerate(cols):
+                if i == skip:
+                    continue
+                pattern, freq, amp, dc = fit_source(list(col))
+                signal = labels[i] if i < len(labels) else f"element{i}"
+                sources.append({"type": "simulated", "id": f"gov-sim-{f['name']}-{i}",
+                                "name": f"{signal} ({f['name']})",
+                                "region": {"offset": inp["offset"] + i, "length": 1},
+                                "pattern": pattern, "frequency": freq, "amplitude": amp, "dcOffset": dc})
+            composed = []
+            for t in range(len(f["events"])):
+                v = [0.0] * inp["length"]
+                for src in sources:
+                    v[src["region"]["offset"] - inp["offset"]] = sample(
+                        src["pattern"], src["frequency"], src["amplitude"], src["dcOffset"], t)
+                if skip is not None:
+                    v[skip] = f["events"][t][skip]
+                composed.append(v)
+            trace = run(m["sequences"], composed, *args)
+            if trace != run(m["sequences"], f["events"], *args):
+                raise SystemExit(f"{m['name']}: simulation {f['name']} does not behave as its fixture")
+            width = m["perceptualMapping"]["output"]["length"]
+            out.append({"name": f["name"], "machine": m["name"], "steps": len(f["events"]),
+                        "purpose": f["metadata"].get("purpose"), "sources": sources,
+                        "feedbackCell": (inp["offset"] + skip) if skip is not None else None,
+                        "expectedOutputsByStep": [t or [0.0] * width for t in trace]})
+    return out
+
+
+def sources_manifest(built=()):
     uses = {}
     for m in MACHINES:
         names, _ = layout(m)
@@ -1204,12 +1290,19 @@ def sources_manifest():
     comps = [{"sensorId": sensor_id(m), "agent": m["agent"]["id"], "machine": m["stem"],
               "provider": write_back(m)["provider"], "region": write_back(m)["region"],
               "fields": [f for f, _ in m["completion"]], "status": "new"} for m in MACHINES if m.get("agent")]
+    sims = simulations(built)
     return {"schemaVersion": "1.0.0", "domain": DOMAIN, "candidateVersion": CANDIDATE,
             "scope": "Every Source in v1 (GOV-SD-07). status: exists / partial / new for the producer as of 2026-11-21.",
             "counts": {"signals": len(sigs), "exists": sum(s["status"] == "exists" for s in sigs),
                        "partial": sum(s["status"] == "partial" for s in sigs),
-                       "new": sum(s["status"] == "new" for s in sigs), "completionSources": len(comps)},
-            "signals": sigs, "completionSources": comps}
+                       "new": sum(s["status"] == "new" for s in sigs), "completionSources": len(comps),
+                       "simulations": len(sims)},
+            "simulationRule": ("GOV-SD-16: until its producer exists, every input is a SURFACE_SPEC simulated Source "
+                               "through the ISRE, one per input cell, deterministic in globalStep (constant, binary, "
+                               "square). Drive: reset RE and PE, create the simulation's sources, push `steps` times; "
+                               "the machine's output region after each push is expectedOutputsByStep (outputs are "
+                               "latched, GOV-SD-19). The feedbackCell has no Source: the engine feeds it."),
+            "signals": sigs, "completionSources": comps, "simulations": sims}
 
 
 def render(doc):
@@ -1217,12 +1310,14 @@ def render(doc):
 
 
 def outputs():
-    files = {OUT / f"{m['stem']}.json": render(build_machine(m)) for m in MACHINES}
-    files[OUT / "GOV00_governance-verdict-aggregator.json"] = render(build_aggregator())
+    built = [build_machine(m) for m in MACHINES]
+    agg = build_aggregator()
+    files = {OUT / f"{m['stem']}.json": render(b) for m, b in zip(MACHINES, built)}
+    files[OUT / "GOV00_governance-verdict-aggregator.json"] = render(agg)
     for m in MACHINES:
         if m.get("agent"):
             files[AGENTS / f"{m['agent']['id']}.agent.json"] = render(behavior(m))
-    files[PKG / "governance-sources.json"] = render(sources_manifest())
+    files[PKG / "governance-sources.json"] = render(sources_manifest([agg] + built))
     files[PKG / "agentic-workflow-contract.json"] = render(workflow_contract())
     return files
 
