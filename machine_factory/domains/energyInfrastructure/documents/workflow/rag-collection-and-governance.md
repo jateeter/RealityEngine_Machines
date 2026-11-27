@@ -4,7 +4,7 @@
 
 The [owner-approved acceptance scope](../../acceptance/scope.json) governs this active document: **all required hardware is simulated**, and **template/generic assets may be used in every case**. EI04 must provide templates for each asset class defined by the associated applicable standards, with edition/clause traceability; EI18 must verify a simulated counterpart for every hardware dependency. Generic reference parameters replace site-specific prerequisites for corpus admission. Actual software execution and genuine admission/reviewer evidence remain mandatory. Physical equipment certification and field commissioning are separate future activities. Historical research notes retain their original research context and do not override this decision.
 
-The [source inventory](../../rag-source-manifest.json) contains 18 material families and seven carbon-data provider options. Only the supplied NIST PDF is collected in this package. Its exact bytes are in [intake](../../intake/NIST.SP.1108r4_1.pdf), SHA-256 `c1e6193af8f94b3f4fc48725a2e3c6eea497d9999cb968ecec2cb6be5d429c86`, 239 physical pages. Research examination does not establish an approved extract, source admission, indexing or retrieval validation. No RAG ingestion was performed.
+The [source inventory](../../rag-source-manifest.json) contains 19 material families and seven carbon-data provider options. The supplied NIST PDF is collected as the original RAG-family source receipt; separately pinned public model/specification snapshots are tracked in their supplemental asset receipts. Its exact bytes are in [intake](../../intake/NIST.SP.1108r4_1.pdf), SHA-256 `c1e6193af8f94b3f4fc48725a2e3c6eea497d9999cb968ecec2cb6be5d429c86`, 239 physical pages. Research examination does not establish an approved extract, source admission, indexing or retrieval validation. No production RAG ingestion was performed.
 
 ## Collect authority before generating operational advice
 
@@ -34,3 +34,8 @@ Before enabling a collection, pass approved-source coverage, page/table fidelity
 ## Standard 201 context collection
 
 R19 adds the owner-selected ASHRAE 201 normative text/UML/errata and mapping evidence collection. [Source authority](../../assets/fsgim-integration.md#sources-and-authority) distinguishes the blocked official model archive, a pinned licensed supplementary SHACL implementation and an excluded restricted historical draft. Structural source lookup is not RAG indexing or a normative-equivalence proof. External ontology imports and source instructions never acquire execution authority.
+
+
+## Implemented public-model review preparation
+
+[The on-demand review lookup](../../assets/public-model-review.md) now prepares bounded source-grounded SunSpec and OPC UA DI fragments for public implementation study, with pre-search scope/purpose/source exclusions and packet revalidation. Source receipts remain unindexed/unadmitted for RAG and all packets deny model readiness or operating authority. This does not implement normative answers, authenticated tenant/site isolation, embeddings, actual LLM retrieval or AC36–AC37 acceptance.
