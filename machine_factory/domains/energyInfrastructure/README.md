@@ -133,3 +133,5 @@ EI03 now has [generic reference microgrids and authority](documents/workflow/ref
 ## EI13 public implementation review packets
 
 [The bounded review-only source lookup](assets/public-model-review.md) now prepares exact-source excerpts from selected pinned SunSpec/OPC UA DI material with locators, parent hashes, dependency context and retained license notices. Normative/live/private/operating requests abstain before source text reads. No source is admitted for model use, no index/model answer is created, and authenticated RAG/LLM integration and all 43 behavioral cases remain pending.
+
+EI18 partial execution: [offline storage simulated hardware component](assets/storage-component.md) now supplies deterministic energy state, selected SunSpec power readback, process-local replay and injected fault holds. This does not run the 43 integrated acceptance cases or fulfill full hardware coverage.
