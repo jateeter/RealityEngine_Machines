@@ -43,7 +43,7 @@ function decimal(n,exponent) {
 }
 export function evaluateMeterInterval(input,root=ROOT) {
  require(keys(input,'schemaVersion kind sourceProjection sourceProjectionSHA256 meterAssetId boundaryId modelId start end evaluationAt maxAgeMs maxIntervalMs synthetic engineeringReview controlAction behavioralCasesRun'),'Unsupported interval fields');
- require(input.schemaVersion==='1.0.0'&&input.kind==='SYNTHETIC_METER_ENERGY_INTERVAL'&&input.sourceProjection==='assets/function-bindings/generic.json'&&input.boundaryId==='FACILITY_PCC'&&input.modelId===203&&input.synthetic===true&&input.engineeringReview==='PENDING'&&input.controlAction==='DENY'&&input.behavioralCasesRun===0,'Unsupported interval scope/claims');
+ require(input.schemaVersion==='1.0.0'&&input.kind==='SYNTHETIC_METER_ENERGY_INTERVAL'&&['assets/function-bindings/generic.json','assets/function-bindings/ref01_connected.json'].includes(input.sourceProjection)&&input.boundaryId==='FACILITY_PCC'&&input.modelId===203&&input.synthetic===true&&input.engineeringReview==='PENDING'&&input.controlAction==='DENY'&&input.behavioralCasesRun===0,'Unsupported interval scope/claims');
  require(Number.isSafeInteger(input.maxAgeMs)&&input.maxAgeMs>0&&input.maxAgeMs<=3600000&&Number.isSafeInteger(input.maxIntervalMs)&&input.maxIntervalMs>0&&input.maxIntervalMs<=86400000,'Invalid generic time policy');
  const bytes=readFileSync(resolve(root,input.sourceProjection));require(hash(bytes)===input.sourceProjectionSHA256,'Interval projection hash mismatch');
  const p=JSON.parse(bytes);require(!validateFunctionBindings(p,root).length,'Invalid source function projection');
