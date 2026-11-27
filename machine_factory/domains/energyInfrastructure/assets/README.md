@@ -100,3 +100,8 @@ The generator uses only the current checked-in scenario scope and generic fixtur
 ## EI14 synthetic revision and trajectory archive
 
 [The source-bound archive](carbon-trajectories.md) preserves original/corrected synthetic reports and historical snapshot references while keeping forecasts and unadopted target examples separate. Digests check internal consistency, not signatures or real dispatch evidence. Durable history, trusted times, historical meter qualification, actual forecasts/targets, uncertainty, safety and acceptance remain pending; all 43 behavioral cases remain NOT_RUN.
+
+
+## EI10 draft deterministic proposal rejection
+
+[The REF01 generic storage screen](proposal-screen.md) rejects selected energy reserve/capacity, power/step/import/export, critical-service, state-quality and revision violations independently of claimed carbon benefit. Passing permits only further simulation under an unapproved generic profile; control remains DENY and no execution path exists. Native authorization, solver/device behavior, concurrency, reviewed envelopes and all 43 behavioral cases remain pending.
