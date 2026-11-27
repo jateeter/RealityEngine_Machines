@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
+import {assessRisk} from './assess_risk.mjs';
 import {screenStorageProposal} from './screen_storage_proposal.mjs';
 import {decodeMeterEnergy,evaluateMeterInterval} from './evaluate_meter_interval.mjs';
 import {decodeSunSpecPower} from './decode_sunspec_power.mjs';
@@ -15,8 +16,8 @@ const clone=x=>structuredClone(x);
 const SCOPE={simulationOnly:true,controlAction:'DENY',behavioralCasesRun:0,carriedCarbonGCO2e:null};
 
 export class StorageComponentSimulator {
- #root; #template; #energy=5000000; #previous='0'; #time=Date.parse('2026-01-01T00:00:00.000Z');
- #revision=0; #faults=new Set(); #receipts=new Map(); #profile; #provenance; #runId; #meter; #imported=1000000; #exported=100000;
+ #root; #template; #energy=5000000; #previous='0'; #time=Date.parse('2026-11-25T00:00:00.000Z');
+ #revision=0; #faults=new Set(); #receipts=new Map(); #profile; #provenance; #risk='CLEAR'; #runId; #meter; #imported=1000000; #exported=100000;
  constructor(root=ROOT,runId='synthetic.storage.component.scenario.1') {
   require(typeof runId==='string'&&/^[a-zA-Z0-9_.-]{1,80}$/.test(runId),'Invalid synthetic run ID');this.#runId=runId;
   this.#root=root;
@@ -29,15 +30,16 @@ export class StorageComponentSimulator {
   require(hash(profileBytes)===this.#template.profileSHA256,'Simulator profile binding mismatch');
   this.#profile=JSON.parse(readFileSync(resolve(root,'assets/sunspec-power-profile.json'))).models.find(m=>m.modelId===203);
   this.#meter=JSON.parse(readFileSync(resolve(root,'assets/meter-energy-profile.json')));
-  this.#provenance={version:'energy-storage-component/0.3.0',implementationSHA256:hash(readFileSync(fileURLToPath(import.meta.url))),templateSHA256:hash(templateBytes),profileSHA256:hash(profileBytes)};
+  this.#provenance={version:'energy-storage-component/0.4.0',implementationSHA256:hash(readFileSync(fileURLToPath(import.meta.url))),templateSHA256:hash(templateBytes),profileSHA256:hash(profileBytes)};
   // Validate source bindings, profile, and pinned model before exposing any observation.
   require(screenStorageProposal(this.#frame('bootstrap','0'),root).eligibleForFurtherSimulation,'Invalid simulator bootstrap');this.observe();
  }
+ #effectiveRisk(){return this.#risk==='BLOCKED'?'BLOCKED':this.#faults.has('RISK_UNKNOWN')?'UNKNOWN':this.#risk;}
  #frame(id,power) {
   const f=clone(this.#template),iso=offset=>new Date(this.#time+offset).toISOString();
   const s=f.state,q=f.proposal;
   Object.assign(s,{observedAt:iso(0),receivedAt:iso(100),stateRevision:`sim.${this.#revision}`,topologyRevision:'sim.connected.1',storedEnergyKWh:decimal(this.#energy),previousStorageKw:this.#previous,
-   quality:this.#faults.has('TELEMETRY_UNKNOWN')?'UNKNOWN':'GOOD',protectiveInterlocks:this.#faults.has('PROTECTION_BLOCKED')?'BLOCKED':'HEALTHY',riskDisposition:this.#faults.has('RISK_UNKNOWN')?'UNKNOWN':'CLEAR'});
+   quality:this.#faults.has('TELEMETRY_UNKNOWN')?'UNKNOWN':'GOOD',protectiveInterlocks:this.#faults.has('PROTECTION_BLOCKED')?'BLOCKED':'HEALTHY',riskDisposition:this.#effectiveRisk()});
   if(s.quality==='UNKNOWN')for(const key of ['storedEnergyKWh','previousStorageKw','criticalDemandKw','otherDemandKw','pvGenerationKw'])s[key]=null;
   Object.assign(q,{id,issuedAt:iso(500),expiresAt:iso(2000),stateRevision:s.stateRevision,topologyRevision:s.topologyRevision,storagePowerKw:power,intervalHours:'0.25',criticalServedKw:'2',claimedCarbonReductionPercent:'0'});
   f.evaluationAt=iso(1000);return f;
@@ -56,12 +58,24 @@ export class StorageComponentSimulator {
  observe() {
   const unknown=this.#faults.has('TELEMETRY_UNKNOWN');
   const readback=this.#readback(2000-Math.round(Number(this.#previous)*1000),this.#imported,this.#exported,unknown);
-  return {...SCOPE,provenance:clone(this.#provenance),observedAt:new Date(this.#time).toISOString(),stateRevision:`sim.${this.#revision}`,storedEnergyKWh:unknown?null:decimal(this.#energy),faults:[...this.#faults].sort(),selectedPoints:['W','W_SF','TotWhImp','TotWhExp','TotWh_SF'],...readback};
+  return {...SCOPE,provenance:clone(this.#provenance),observedAt:new Date(this.#time).toISOString(),stateRevision:`sim.${this.#revision}`,storedEnergyKWh:unknown?null:decimal(this.#energy),riskDisposition:this.#effectiveRisk(),faults:[...this.#faults].sort(),selectedPoints:['W','W_SF','TotWhImp','TotWhExp','TotWh_SF'],...readback};
  }
  #interval(start,end,time) {
   const endpoint=(observation,t)=>({observedAt:new Date(t).toISOString(),receivedAt:new Date(t+100).toISOString(),counterEpochId:this.#runId,sourceIdentity:{sourceSystemId:'synthetic.storage.component',namespaceUri:'urn:energy:synthetic:sunspec',identifier:'REF01.pcc.203'},quality:'GOOD',blockHex:observation.blockHex});
   const input={schemaVersion:'1.0.0',kind:'SYNTHETIC_METER_ENERGY_INTERVAL',sourceProjection:this.#template.sourceProjection,sourceProjectionSHA256:this.#template.sourceProjectionSHA256,meterAssetId:'fixture.meter',boundaryId:'FACILITY_PCC',modelId:203,start:endpoint(start,this.#time),end:endpoint(end,time),evaluationAt:new Date(time+1000).toISOString(),maxAgeMs:2000,maxIntervalMs:900000,synthetic:true,engineeringReview:'PENDING',controlAction:'DENY',behavioralCasesRun:0};
   return {input,result:evaluateMeterInterval(input,this.#root)};
+ }
+ applyRiskAssessment(input) {
+  require(input&&Buffer.byteLength(JSON.stringify(input))<=16384&&Array.isArray(input.findings)&&input.findings.length<=16&&input.findings.every(f=>typeof f.id==='string'&&f.id.length<=80),'Risk simulation input bound exceeded');
+  const before=this.#effectiveRisk(),prior=before==='BLOCKED'?'BLOCKED':'UNKNOWN';
+  require(input.evaluationAt===new Date(this.#time+1000).toISOString()&&input.context?.topologyRevision==='sim.connected.1'&&input.context?.electricalMode==='GRID_CONNECTED'&&input.priorRiskDisposition===prior,'Risk/simulation clock, topology, mode or prior binding mismatch');
+  require(input.sourceProjection===this.#template.sourceProjection&&input.sourceProjectionSHA256===this.#template.sourceProjectionSHA256,'Risk/simulation projection binding mismatch');
+  const assessment=assessRisk(input,this.#root);
+  require(Buffer.byteLength(JSON.stringify(assessment))<=8192,'Risk simulation receipt bound exceeded');
+  // Only tighten synthetic posture; this entrypoint cannot grant clearance or alter electrical state.
+  const next=before==='BLOCKED'?'BLOCKED':assessment.riskDisposition;
+  if(next!==this.#risk){this.#risk=next;this.#revision++;}
+  return {...SCOPE,previousRiskDisposition:before,riskDisposition:this.#effectiveRisk(),assessment,observation:this.observe()};
  }
  injectFault(fault) {
   require(['TELEMETRY_UNKNOWN','PROTECTION_BLOCKED','RISK_UNKNOWN'].includes(fault),'Unsupported simulated fault');

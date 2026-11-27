@@ -121,3 +121,60 @@ sequence/order/head changes, false control claims, oversize input and unsupporte
 operations. All evidence remains simulation-only with control DENY, unknown
 carbon inventory/intensity and zero integrated behavioral cases run. EI11, EI16,
 EI18 and domain admission remain open.
+
+## Assessed risk execution holds (version 0.4.0)
+
+The component now accepts bounded source-bound inputs through
+`applyRiskAssessment`, calls the existing conservative assessor, and carries
+UNKNOWN/BLOCKED into subsequent proposal screening. This is stricter than the
+initial unreviewed synthetic CLEAR bootstrap. There is no clearance path: empty,
+NOT_AFFECTED, stale or unusable evidence never grants authority. Once BLOCKED,
+subsequent assessments must acknowledge that prior posture and cannot downgrade
+it. Injecting UNKNOWN also cannot weaken an assessed block.
+
+Inputs must match the current simulated evaluation time, connected electrical
+mode, topology and source projection, including its source hash. The assessor
+still validates pinned STIX infrastructure/vulnerability/relationship bindings
+and its draft policy. Inputs are capped at 16 findings, 80-character finding IDs
+and 16 KiB, with an 8 KiB result cap before posture mutation. Wrong context,
+source, prior state, scope or size throws before changing simulation state.
+
+Version 0.4.0 starts the synthetic clock at 2026-11-25T00:00:00Z, aligned with the
+already pinned synthetic threat objects. This replaces the earlier January
+clock seed, which predates those objects. It is a versioned scenario parameter,
+not current wall-clock or real threat-feed evidence. Existing journals remain
+source-bound and are not silently migrated.
+
+A finding bound to the REF01 microgrid controller holds discretionary storage
+proposals in this single fixed scenario. This is a conservative project policy,
+not a claim that every energy asset is vulnerable. Electrical protection,
+critical-load declarations, meter readback and battery energy remain unchanged;
+no automatic trip, load shedding, device command or remediation occurs. The
+observed state exposes its effective risk posture. Denied steps still advance
+neither clock nor counters and emit no interval. The held-interval time model
+and synthetic CLEAR bootstrap remain limitations; this is not continuous plant
+or autonomous threat monitoring.
+
+Journals now support RISK_ASSESSMENT alongside STEP/FAULT events. Reconstruction
+re-runs the assessor and compares its generated receipt, then restores the
+posture and subsequent denied-request replay behavior. This shares the existing
+source binding, size/event limits and lack of authenticated history completeness,
+rollback protection or durable delivery.
+
+Run the composed scenario and its 22 targeted tests from the repository root:
+
+```bash
+node machine_factory/domains/energyInfrastructure/tools/run_assessed_risk_scenario.mjs
+node --test machine_factory/domains/energyInfrastructure/tools/test_assessed_risk_simulation.mjs
+```
+
+The scenario binds the existing synthetic finding to the simulator topology,
+asserts AFFECTED, verifies BLOCKED, holds a proposal with no energy interval,
+and reconstructs the same blocked state from its journal. No real CVE, threat
+feed, authenticated risk acceptance, engineering approval, normative standards
+conformance, integrated acceptance or admission is established. Native control
+remains DENY, carbon inventory/intensity unknown, and all 43 integrated cases
+remain NOT_RUN. All required hardware remains simulated; template/generic
+assets remain allowed throughout.
+
+A replay of an earlier accepted request returns its original historical receipt with `replayed: true`; the historical `applied: true` is not a fresh authorization. It advances no clock, energy or counters and does not weaken the current assessed posture. New requests remain held. A dedicated test verifies this behavior before and after journal reconstruction.
