@@ -123,3 +123,8 @@ EI03 now has [generic reference microgrids and authority](documents/workflow/ref
 ## EI10 draft deterministic proposal rejection
 
 [The REF01 generic storage screen](assets/proposal-screen.md) rejects selected energy reserve/capacity, power/step/import/export, critical-service, state-quality and revision violations independently of claimed carbon benefit. Passing permits only further simulation under an unapproved generic profile; control remains DENY and no execution path exists. Native authorization, solver/device behavior, concurrency, reviewed envelopes and all 43 behavioral cases remain pending.
+
+
+## EI07 conservative synthetic risk posture
+
+[The pinned STIX assessment and proposal bridge](assets/risk-assessment.md) now exercise evidence freshness, applicability/mapping and context revision checks with UNKNOWN/BLOCKED postures only. Unresolved evidence holds discretionary proposals without changing electrical/protection state or granting clearance. Actual feed provenance, risk acceptance, durable incident state, native control and all 43 behavioral acceptance cases remain pending.
