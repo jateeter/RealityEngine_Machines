@@ -48,3 +48,39 @@ test('scenario reproduces deterministic component-only events',()=>{
  const a=runStorageComponentScenario();assert.deepEqual(a,runStorageComponentScenario());assert.deepEqual(a.events.filter(e=>'applied' in e).map(e=>e.applied),[true,true,true,true,false,false]);
  assert.equal(a.result,'COMPONENT_SIMULATION_ONLY_NOT_DOMAIN_ACCEPTANCE');
 });
+
+test('counters accumulate separate import/export energy at .01 Wh resolution',()=>{
+ const s=new StorageComponentSimulator(),opening=s.observe();
+ assert.equal(opening.energy.rawImported,1000000);assert.equal(opening.energy.rawExported,100000);assert.equal(opening.energy.scaleExponent,-2);
+ let r=s.step(req('balanced','2'));assert.equal(r.meterInterval.result.importedKWh,'0');assert.equal(r.meterInterval.result.exportedKWh,'0');
+ r=s.step(req('import','0'));assert.equal(r.meterInterval.result.importedWh,'500');assert.equal(r.meterInterval.result.importedKWh,'0.5');assert.equal(r.meterInterval.result.exportedWh,'0');assert.equal(r.observation.energy.rawImported,1050000);
+ r=s.step(req('export','3'));assert.equal(r.meterInterval.result.importedWh,'0');assert.equal(r.meterInterval.result.exportedWh,'250');assert.equal(r.meterInterval.result.exportedKWh,'0.25');assert.equal(r.observation.energy.rawExported,125000);
+ const b=Buffer.from(r.observation.blockHex,'hex');assert.equal(b.readUInt32BE(92),1050000);assert.equal(b.readUInt32BE(76),125000);assert.equal(b.readInt16BE(108),-2);
+ assert.equal(r.meterInterval.input.sourceProjection,'assets/function-bindings/ref01_connected.json');assert.equal(r.meterInterval.result.carbonIntensity,null);
+});
+test('charging imports facility energy independently of retained battery energy',()=>{
+ const r=new StorageComponentSimulator().step(req('charge-counter','-2'));
+ assert.equal(r.meterInterval.result.importedKWh,'1');assert.equal(r.meterInterval.result.exportedKWh,'0');assert.equal(r.observation.storedEnergyKWh,'5.450000');
+});
+test('fractional kW produces exact counter interval without netting',()=>{
+ const r=new StorageComponentSimulator().step(req('small-counter','0.01'));
+ assert.equal(r.meterInterval.result.importedWh,'497.5');assert.equal(r.meterInterval.result.importedKWh,'0.4975');
+});
+test('replayed intervals do not reaccumulate counters',()=>{
+ const s=new StorageComponentSimulator(),first=s.step(req('import-once','0'));s.step(req('import-twice','0'));const before=s.observe();
+ const r=s.step(req('import-once','0'));assert.equal(r.replayed,true);assert.deepEqual(r.meterInterval,first.meterInterval);assert.deepEqual(s.observe(),before);assert.equal(before.energy.rawImported,1100000);
+ r.meterInterval.input.end.blockHex='mutated';assert.deepEqual(s.step(req('import-once','0')).meterInterval,first.meterInterval);
+});
+test('rejected and fault-held proposals have no interval',()=>{
+ const s=new StorageComponentSimulator();const before=s.observe();assert.equal(s.step(req('over','99')).meterInterval,null);assert.deepEqual(s.observe(),before);
+ s.injectFault('TELEMETRY_UNKNOWN');const held=s.step(req('held-counter','0'));assert.equal(held.meterInterval,null);assert.equal(held.observation.energy.rawImported,null);assert.equal(held.observation.energy.rawExported,null);assert.equal(held.observation.energy.scaleExponent,null);
+});
+
+test('REF01 generated interval rejects wrong projection, identity and epoch',async()=>{
+ const {evaluateMeterInterval}=await import('./evaluate_meter_interval.mjs');
+ const input=new StorageComponentSimulator().step(req('bound','0')).meterInterval.input;
+ for(const mutate of [x=>x.sourceProjection='../../private.json',x=>x.sourceProjectionSHA256='0'.repeat(64),x=>x.meterAssetId='fixture.battery-inverter',x=>x.end.counterEpochId='different',x=>x.end.sourceIdentity.identifier='different']){
+  const x=structuredClone(input);mutate(x);assert.throws(()=>evaluateMeterInterval(x));
+ }
+ const x=structuredClone(input);x.end.quality='UNKNOWN';const r=evaluateMeterInterval(x);assert.equal(r.eligible,false);assert.equal(r.importedKWh,null);assert.equal(r.exportedKWh,null);
+});
