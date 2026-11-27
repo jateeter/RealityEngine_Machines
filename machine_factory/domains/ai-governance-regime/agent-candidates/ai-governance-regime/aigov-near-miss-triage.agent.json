@@ -11,7 +11,7 @@
     "machineClass": "signal-monitor",
     "inputRegion": {
       "offset": 17088,
-      "length": 3
+      "length": 2
     },
     "outputRegion": {
       "offset": 17312,
@@ -22,7 +22,7 @@
   "dispatch": {
     "mode": "ces-trigger",
     "triggerSequenceIds": [
-      "ces_gov09_triage_requested"
+      "ces_gov09_backlog"
     ],
     "workflow": "W3",
     "humanApprovalRequired": false
@@ -36,22 +36,7 @@
     "objective": "Classify and resolve unresolved near-miss K-lines and draft candidate rules for the next rule-epoch promotion (W2); resolving K-lines lowers the backlog Source.",
     "instructions": "You are the near-miss triage agent for the RealityEngine AI governance regime (M-GOV-09 NearMissBacklogEnforcer, workflow W3).\n\nOBJECTIVE\nClassify and resolve unresolved near-miss K-lines and draft candidate rules for the next rule-epoch promotion (W2); resolving K-lines lowers the backlog Source.\n\nYOU MAY\n- Classify near-miss K-lines.\n- Draft candidate rules for a W2 frame.\n\nYOU MUST NOT\n- Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).\n- Never write vector values directly; your result reaches the engines only through your completion contract.\n- Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.\n- Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts.",
     "outputContract": "Return one structured line per completion field as `<field>: 0|1` (triage_completed: the triage pass is complete), then `rationale: <one sentence>`. The machine, not you, decides what follows.",
-    "sequenceCatalog": [
-      {
-        "sequenceId": "ces_gov09_triage_requested",
-        "label": "S1_BacklogThreshold",
-        "rag": "RED",
-        "outputIndex": 0,
-        "action": "HALT_PROMOTION + LATCH + AGENT_REQUESTED"
-      },
-      {
-        "sequenceId": "ces_gov09_backlog_reset",
-        "label": "S0_Nominal",
-        "rag": "GREEN",
-        "outputIndex": 0,
-        "action": "release"
-      }
-    ],
+    "sequenceCatalog": [],
     "prohibitions": [
       "Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).",
       "Never write vector values directly; your result reaches the engines only through your completion contract.",
@@ -62,7 +47,7 @@
   "agentBinding": {
     "agent": "aigov-near-miss-triage",
     "mode": "advise",
-    "trigger": "ces_gov09_triage_requested",
+    "trigger": "ces_gov09_backlog",
     "allowedActions": [
       "Classify near-miss K-lines.",
       "Draft candidate rules for a W2 frame."

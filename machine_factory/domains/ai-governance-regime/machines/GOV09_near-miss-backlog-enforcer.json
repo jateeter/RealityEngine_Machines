@@ -10,7 +10,7 @@
     "perceptualMapping": {
       "input": {
         "offset": 17088,
-        "length": 3
+        "length": 2
       },
       "output": {
         "offset": 17312,
@@ -20,27 +20,29 @@
     },
     "sequences": [
       {
-        "id": "ces_gov09_backlog_set",
+        "id": "ces_gov09_backlog",
         "name": "M-GOV-09 S0_Nominal → S1_BacklogThreshold",
         "schemaVersion": "1.0",
         "metadata": {
           "sourceFromState": "S0_Nominal",
           "sourceToState": "S1_BacklogThreshold",
-          "regularExpression": "[mon_nearmiss_backlog∈[0.8,1]]{2}",
-          "length": 2,
+          "regularExpression": "[mon_nearmiss_backlog∈[0.8,1]]{2} · ([triage_completed=0] | [mon_nearmiss_backlog∈[0.5,1]])* · [mon_nearmiss_backlog∈[0,0.4999] ∧ triage_completed=1]",
+          "length": 5,
           "specRule": "SPECIFICATION.md 4.3 (9)",
           "semanticAmendments": [
-            "GOV-SA-06",
+            "GOV-SA-24",
+            "GOV-SA-01",
             "GOV-SA-19"
           ],
           "asserts": [
             "HALT_PROMOTION",
             "LATCH"
-          ]
+          ],
+          "dispatchesAgent": "aigov-near-miss-triage"
         },
         "events": [
           {
-            "id": "ces_gov09_backlog_set-e0",
+            "id": "ces_gov09_backlog-e0",
             "isInitial": true,
             "elements": [
               {
@@ -52,19 +54,14 @@
                 "value": 0.5,
                 "threshold": 0.5,
                 "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
               }
             ],
             "nextEventIds": [
-              "ces_gov09_backlog_set-e1"
+              "ces_gov09_backlog-e1"
             ]
           },
           {
-            "id": "ces_gov09_backlog_set-e1",
+            "id": "ces_gov09_backlog-e1",
             "isInitial": false,
             "elements": [
               {
@@ -76,17 +73,16 @@
                 "value": 0.5,
                 "threshold": 0.5,
                 "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
               }
             ],
-            "nextEventIds": [],
+            "nextEventIds": [
+              "ces_gov09_backlog-h-triage-pending",
+              "ces_gov09_backlog-h-backlog",
+              "ces_gov09_backlog-release"
+            ],
             "outputEvents": [
               {
-                "id": "ces_gov09_backlog_set-out",
+                "id": "ces_gov09_backlog-out",
                 "vector": [
                   1.0,
                   0.0,
@@ -101,33 +97,10 @@
                 ]
               }
             ]
-          }
-        ]
-      },
-      {
-        "id": "ces_gov09_triage_requested",
-        "name": "M-GOV-09 S1_BacklogThreshold → S1_BacklogThreshold",
-        "schemaVersion": "1.0",
-        "metadata": {
-          "sourceFromState": "S1_BacklogThreshold",
-          "sourceToState": "S1_BacklogThreshold",
-          "regularExpression": "[triage_completed=0 ∧ latch_q_prev=1]",
-          "length": 1,
-          "specRule": "SPECIFICATION.md 4.3 (9)",
-          "semanticAmendments": [
-            "GOV-SA-06"
-          ],
-          "asserts": [
-            "HALT_PROMOTION",
-            "LATCH",
-            "AGENT_REQUESTED"
-          ],
-          "dispatchesAgent": "aigov-near-miss-triage"
-        },
-        "events": [
+          },
           {
-            "id": "ces_gov09_triage_requested-e0",
-            "isInitial": true,
+            "id": "ces_gov09_backlog-h-triage-pending",
+            "isInitial": false,
             "elements": [
               {
                 "value": 0.5,
@@ -137,16 +110,16 @@
               {
                 "value": 0.0,
                 "comparatorType": "equals"
-              },
-              {
-                "value": 1.0,
-                "comparatorType": "equals"
               }
             ],
-            "nextEventIds": [],
+            "nextEventIds": [
+              "ces_gov09_backlog-h-triage-pending",
+              "ces_gov09_backlog-h-backlog",
+              "ces_gov09_backlog-release"
+            ],
             "outputEvents": [
               {
-                "id": "ces_gov09_triage_requested-out",
+                "id": "ces_gov09_backlog-h-triage-pending-out",
                 "vector": [
                   1.0,
                   0.0,
@@ -161,31 +134,10 @@
                 ]
               }
             ]
-          }
-        ]
-      },
-      {
-        "id": "ces_gov09_hold_backlog",
-        "name": "M-GOV-09 S_Latched → S_Latched",
-        "schemaVersion": "1.0",
-        "metadata": {
-          "sourceFromState": "S_Latched",
-          "sourceToState": "S_Latched",
-          "regularExpression": "[mon_nearmiss_backlog∈[0.5,1] ∧ latch_q_prev=1]",
-          "length": 1,
-          "specRule": "SPECIFICATION.md 4.3 (9)",
-          "semanticAmendments": [
-            "GOV-SA-06"
-          ],
-          "asserts": [
-            "HALT_PROMOTION",
-            "LATCH"
-          ]
-        },
-        "events": [
+          },
           {
-            "id": "ces_gov09_hold_backlog-e0",
-            "isInitial": true,
+            "id": "ces_gov09_backlog-h-backlog",
+            "isInitial": false,
             "elements": [
               {
                 "value": 0.75,
@@ -196,16 +148,16 @@
                 "value": 0.5,
                 "threshold": 0.5,
                 "comparatorType": "threshold"
-              },
-              {
-                "value": 1.0,
-                "comparatorType": "equals"
               }
             ],
-            "nextEventIds": [],
+            "nextEventIds": [
+              "ces_gov09_backlog-h-triage-pending",
+              "ces_gov09_backlog-h-backlog",
+              "ces_gov09_backlog-release"
+            ],
             "outputEvents": [
               {
-                "id": "ces_gov09_hold_backlog-out",
+                "id": "ces_gov09_backlog-h-backlog-out",
                 "vector": [
                   1.0,
                   0.0,
@@ -220,31 +172,10 @@
                 ]
               }
             ]
-          }
-        ]
-      },
-      {
-        "id": "ces_gov09_backlog_reset",
-        "name": "M-GOV-09 S1_BacklogThreshold → S0_Nominal",
-        "schemaVersion": "1.0",
-        "metadata": {
-          "sourceFromState": "S1_BacklogThreshold",
-          "sourceToState": "S0_Nominal",
-          "regularExpression": "[mon_nearmiss_backlog∈[0,0.4999] ∧ triage_completed=1 ∧ latch_q_prev=1]",
-          "length": 1,
-          "specRule": "SPECIFICATION.md 4.3 (9)",
-          "semanticAmendments": [
-            "GOV-SA-01",
-            "GOV-SA-06"
-          ],
-          "asserts": [
-            "none (explicit release)"
-          ]
-        },
-        "events": [
+          },
           {
-            "id": "ces_gov09_backlog_reset-e0",
-            "isInitial": true,
+            "id": "ces_gov09_backlog-release",
+            "isInitial": false,
             "elements": [
               {
                 "value": 0.24995,
@@ -254,16 +185,12 @@
               {
                 "value": 1.0,
                 "comparatorType": "equals"
-              },
-              {
-                "value": 1.0,
-                "comparatorType": "equals"
               }
             ],
             "nextEventIds": [],
             "outputEvents": [
               {
-                "id": "ces_gov09_backlog_reset-out",
+                "id": "ces_gov09_backlog-release-out",
                 "vector": [
                   0.0,
                   0.0,
@@ -312,11 +239,6 @@
                 "value": 0.5,
                 "threshold": 0.5,
                 "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
               }
             ],
             "nextEventIds": [],
@@ -347,12 +269,10 @@
         "events": [
           [
             0.9,
-            0.0,
             0.0
           ],
           [
             0.9,
-            0.0,
             0.0
           ]
         ],
@@ -395,177 +315,168 @@
               0.0
             ]
           ],
-          "purpose": "drives ces_gov09_backlog_set: [mon_nearmiss_backlog∈[0.8,1]]{2}",
+          "purpose": "sets ces_gov09_backlog",
           "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
-          "expectedSequenceId": "ces_gov09_backlog_set"
+          "expectedSequenceId": "ces_gov09_backlog"
         }
       },
       {
-        "name": "gov09-triage-requested",
+        "name": "gov09-backlog-hold-triage-pending",
         "events": [
           [
             0.9,
-            0.0,
             0.0
           ],
           [
             0.9,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "metadata": {
-          "expectedOutputVector": [
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            0.0
-          ],
-          "expectedOutputsByStep": [
-            [
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0
-            ],
-            [
-              1.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              1.0,
-              0.0,
-              0.0,
-              0.0
-            ],
-            [
-              1.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              1.0,
-              0.0,
-              1.0,
-              0.0
-            ]
-          ],
-          "purpose": "drives ces_gov09_triage_requested: [triage_completed=0 ∧ latch_q_prev=1]",
-          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
-          "expectedSequenceId": "ces_gov09_triage_requested"
-        }
-      },
-      {
-        "name": "gov09-hold-backlog",
-        "events": [
-          [
-            0.9,
-            0.0,
-            0.0
-          ],
-          [
-            0.9,
-            0.0,
-            0.0
-          ],
-          [
-            0.75,
-            0.0,
-            1.0
-          ]
-        ],
-        "metadata": {
-          "expectedOutputVector": [
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            0.0
-          ],
-          "expectedOutputsByStep": [
-            [
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0
-            ],
-            [
-              1.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              1.0,
-              0.0,
-              0.0,
-              0.0
-            ],
-            [
-              1.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              1.0,
-              0.0,
-              1.0,
-              0.0
-            ]
-          ],
-          "purpose": "drives ces_gov09_hold_backlog: [mon_nearmiss_backlog∈[0.5,1] ∧ latch_q_prev=1]",
-          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
-          "expectedSequenceId": "ces_gov09_hold_backlog"
-        }
-      },
-      {
-        "name": "gov09-backlog-reset",
-        "events": [
-          [
-            0.9,
-            0.0,
-            0.0
-          ],
-          [
-            0.9,
-            0.0,
             0.0
           ],
           [
             0.25,
+            0.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
             1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "purpose": "holds ces_gov09_backlog while triage-pending",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov09_backlog"
+        }
+      },
+      {
+        "name": "gov09-backlog-hold-backlog",
+        "events": [
+          [
+            0.9,
+            0.0
+          ],
+          [
+            0.9,
+            0.0
+          ],
+          [
+            0.75,
+            1.0
+          ]
+        ],
+        "metadata": {
+          "expectedOutputVector": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "expectedOutputsByStep": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "purpose": "holds ces_gov09_backlog while backlog",
+          "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
+          "expectedSequenceId": "ces_gov09_backlog"
+        }
+      },
+      {
+        "name": "gov09-backlog-release",
+        "events": [
+          [
+            0.9,
+            0.0
+          ],
+          [
+            0.9,
+            0.0
+          ],
+          [
+            0.25,
             1.0
           ]
         ],
@@ -620,16 +531,15 @@
               0.0
             ]
           ],
-          "purpose": "drives ces_gov09_backlog_reset: [mon_nearmiss_backlog∈[0,0.4999] ∧ triage_completed=1 ∧ latch_q_prev=1]",
+          "purpose": "releases ces_gov09_backlog",
           "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
-          "expectedSequenceId": "ces_gov09_backlog_reset"
+          "expectedSequenceId": "ces_gov09_backlog"
         }
       },
       {
         "name": "gov09-idle",
         "events": [
           [
-            0.0,
             0.0,
             0.0
           ]
@@ -671,11 +581,10 @@
       "category": "ai-governance-regime",
       "domain": "ai-governance-regime",
       "machineClass": "signal-monitor",
-      "sequenceCount": 5,
+      "sequenceCount": 2,
       "inputSemantics": [
         "mon_nearmiss_backlog (continuous [0,1]; sensor: near-miss K-line classification over engine K-line histories; partial): unresolved near-miss K-lines relative to ring capacity",
-        "triage_completed (binary; aigov-near-miss-triage completion via aigov.gov09.near-miss-triage.completion): the triage pass is complete",
-        "latch_q_prev (binary; feedback: PE: this machine's LATCH output at the previous step; new): previous LATCH output"
+        "triage_completed (binary; aigov-near-miss-triage completion via aigov.gov09.near-miss-triage.completion): the triage pass is complete"
       ],
       "outputSemantics": [
         "0: HALT_PROMOTION",
@@ -727,7 +636,7 @@
         "processName": "M-GOV-09 NearMissBacklogEnforcer",
         "rules": [
           {
-            "sequenceId": "ces_gov09_backlog_set",
+            "sequenceId": "ces_gov09_backlog",
             "outputMatches": [
               1.0,
               0.0,
@@ -742,62 +651,8 @@
             ],
             "ragStatusCode": "RED",
             "processStatus": "error",
-            "description": "M-GOV-09 S0_Nominal → S1_BacklogThreshold: [mon_nearmiss_backlog∈[0.8,1]]{2}"
-          },
-          {
-            "sequenceId": "ces_gov09_triage_requested",
-            "outputMatches": [
-              1.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              1.0,
-              0.0,
-              1.0,
-              0.0
-            ],
-            "ragStatusCode": "RED",
-            "processStatus": "error",
-            "description": "M-GOV-09 S1_BacklogThreshold → S1_BacklogThreshold: [triage_completed=0 ∧ latch_q_prev=1]",
+            "description": "M-GOV-09 S0_Nominal → S1_BacklogThreshold: [mon_nearmiss_backlog∈[0.8,1]]{2} · ([triage_completed=0] | [mon_nearmiss_backlog∈[0.5,1]])* · [mon_nearmiss_backlog∈[0,0.4999] ∧ triage_completed=1]",
             "dispatchAgent": "aigov-near-miss-triage"
-          },
-          {
-            "sequenceId": "ces_gov09_hold_backlog",
-            "outputMatches": [
-              1.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              1.0,
-              0.0,
-              0.0,
-              0.0
-            ],
-            "ragStatusCode": "RED",
-            "processStatus": "error",
-            "description": "M-GOV-09 S_Latched → S_Latched: [mon_nearmiss_backlog∈[0.5,1] ∧ latch_q_prev=1]"
-          },
-          {
-            "sequenceId": "ces_gov09_backlog_reset",
-            "outputMatches": [
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0
-            ],
-            "ragStatusCode": "GREEN",
-            "processStatus": "info",
-            "description": "M-GOV-09 S1_BacklogThreshold → S0_Nominal: [mon_nearmiss_backlog∈[0,0.4999] ∧ triage_completed=1 ∧ latch_q_prev=1]"
           },
           {
             "sequenceId": "ces_gov09_idle",
@@ -881,7 +736,7 @@
       "agentBinding": {
         "agent": "aigov-near-miss-triage",
         "mode": "advise",
-        "trigger": "ces_gov09_triage_requested",
+        "trigger": "ces_gov09_backlog",
         "allowedActions": [
           "Classify near-miss K-lines.",
           "Draft candidate rules for a W2 frame."
@@ -935,16 +790,9 @@
           "blockedWhenRag": []
         }
       },
-      "aiTrigger": "ces_gov09_triage_requested",
+      "aiTrigger": "ces_gov09_backlog",
       "dispatchableAgent": "aigov-near-miss-triage",
-      "agentBehavior": "agent-candidates/ai-governance-regime/aigov-near-miss-triage.agent.json",
-      "latchFeedback": {
-        "inputElement": 2,
-        "fromOutputElement": 6,
-        "compositionOwner": "perception-engine",
-        "peCompositionRequired": true,
-        "rule": "Q(k) = S(k) or (not R(k) and Q(k-1)); the PE writes this machine's previous LATCH output into this element (GOV-R12)."
-      }
+      "agentBehavior": "agent-candidates/ai-governance-regime/aigov-near-miss-triage.agent.json"
     }
   }
 }

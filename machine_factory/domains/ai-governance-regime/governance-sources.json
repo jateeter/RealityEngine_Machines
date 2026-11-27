@@ -4,12 +4,12 @@
   "candidateVersion": "0.2.0",
   "scope": "Every Source in v1 (GOV-SD-07). status: exists / partial / new for the producer as of 2026-11-21.",
   "counts": {
-    "signals": 38,
+    "signals": 37,
     "exists": 7,
     "partial": 16,
-    "new": 15,
+    "new": 14,
     "completionSources": 16,
-    "simulations": 145
+    "simulations": 154
   },
   "simulationRule": "GOV-SD-16: until its producer exists, every input is a SURFACE_SPEC simulated Source through the ISRE, one per input cell, deterministic in globalStep (constant, binary, square). Drive: reset RE and PE, create the simulation's sources, push `steps` times; the machine's output region after each push is expectedOutputsByStep (outputs are latched, GOV-SD-19). The feedbackCell has no Source: the engine feeds it.",
   "signals": [
@@ -983,36 +983,6 @@
           "machine": "GOV16_cross-domain-delegation-cap",
           "inputElement": 3,
           "cell": 17203
-        }
-      ]
-    },
-    {
-      "signal": "latch_q_prev",
-      "kind": "binary",
-      "delivery": "feedback",
-      "producer": "PE: this machine's LATCH output at the previous step",
-      "status": "new",
-      "meaning": "previous LATCH output",
-      "consumers": [
-        {
-          "machine": "GOV07_exposure-budget-watchdog",
-          "inputElement": 5,
-          "cell": 17061
-        },
-        {
-          "machine": "GOV09_near-miss-backlog-enforcer",
-          "inputElement": 2,
-          "cell": 17090
-        },
-        {
-          "machine": "GOV14_periodic-recertification-timer",
-          "inputElement": 3,
-          "cell": 17171
-        },
-        {
-          "machine": "GOV16_cross-domain-delegation-cap",
-          "inputElement": 5,
-          "cell": 17205
         }
       ]
     }
@@ -12521,7 +12491,7 @@
       "name": "gov07-approach",
       "machine": "GOV07_exposure-budget-watchdog",
       "steps": 1,
-      "purpose": "drives ces_gov07_approach: [mon_mu_exhaust_rate∈[0.0201,0.05] ∧ latch_q_prev=0]",
+      "purpose": "drives ces_gov07_approach: [mon_mu_exhaust_rate∈[0.0201,0.05]]",
       "sources": [
         {
           "type": "simulated",
@@ -12589,7 +12559,7 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17061,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -12609,7 +12579,7 @@
       "name": "gov07-breach-set",
       "machine": "GOV07_exposure-budget-watchdog",
       "steps": 3,
-      "purpose": "drives ces_gov07_breach_set: [mon_mu_exhaust_rate∈[0.0501,1]]{3}",
+      "purpose": "sets ces_gov07_breach",
       "sources": [
         {
           "type": "simulated",
@@ -12677,7 +12647,7 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17061,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -12718,511 +12688,15 @@
       ]
     },
     {
-      "name": "gov07-triage-requested",
+      "name": "gov07-breach-hold-triage-pending",
       "machine": "GOV07_exposure-budget-watchdog",
       "steps": 4,
-      "purpose": "drives ces_gov07_triage_requested: [triage_completed=0 ∧ latch_q_prev=1]",
+      "purpose": "holds ces_gov07_breach while triage-pending",
       "sources": [
         {
           "type": "simulated",
-          "id": "gov-sim-gov07-triage-requested-0",
-          "name": "mon_mu_exhaust_rate (gov07-triage-requested)",
-          "region": {
-            "offset": 17056,
-            "length": 1
-          },
-          "pattern": "square",
-          "frequency": 0.16666666666666666,
-          "amplitude": 0.26255,
-          "dcOffset": 0.26255
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-triage-requested-1",
-          "name": "operator_approved (gov07-triage-requested)",
-          "region": {
-            "offset": 17057,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-triage-requested-2",
-          "name": "operator_distinct (gov07-triage-requested)",
-          "region": {
-            "offset": 17058,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 1.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-triage-requested-3",
-          "name": "triage_completed (gov07-triage-requested)",
-          "region": {
-            "offset": 17059,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-triage-requested-4",
-          "name": "confirmed_harm (gov07-triage-requested)",
-          "region": {
-            "offset": 17060,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        }
-      ],
-      "feedbackCell": 17061,
-      "expectedOutputsByStep": [
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          1.0,
-          0.0
-        ]
-      ]
-    },
-    {
-      "name": "gov07-harm-confirmed",
-      "machine": "GOV07_exposure-budget-watchdog",
-      "steps": 4,
-      "purpose": "drives ces_gov07_harm_confirmed: [triage_completed=1 ∧ confirmed_harm=1 ∧ latch_q_prev=1]",
-      "sources": [
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-harm-confirmed-0",
-          "name": "mon_mu_exhaust_rate (gov07-harm-confirmed)",
-          "region": {
-            "offset": 17056,
-            "length": 1
-          },
-          "pattern": "square",
-          "frequency": 0.16666666666666666,
-          "amplitude": 0.26255,
-          "dcOffset": 0.26255
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-harm-confirmed-1",
-          "name": "operator_approved (gov07-harm-confirmed)",
-          "region": {
-            "offset": 17057,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-harm-confirmed-2",
-          "name": "operator_distinct (gov07-harm-confirmed)",
-          "region": {
-            "offset": 17058,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 1.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-harm-confirmed-3",
-          "name": "triage_completed (gov07-harm-confirmed)",
-          "region": {
-            "offset": 17059,
-            "length": 1
-          },
-          "pattern": "square",
-          "frequency": 0.16666666666666666,
-          "amplitude": -0.5,
-          "dcOffset": 0.5
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-harm-confirmed-4",
-          "name": "confirmed_harm (gov07-harm-confirmed)",
-          "region": {
-            "offset": 17060,
-            "length": 1
-          },
-          "pattern": "square",
-          "frequency": 0.16666666666666666,
-          "amplitude": -0.5,
-          "dcOffset": 0.5
-        }
-      ],
-      "feedbackCell": 17061,
-      "expectedOutputsByStep": [
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ]
-      ]
-    },
-    {
-      "name": "gov07-hold-not-distinct",
-      "machine": "GOV07_exposure-budget-watchdog",
-      "steps": 4,
-      "purpose": "drives ces_gov07_hold_not_distinct: [operator_distinct=0 ∧ latch_q_prev=1]",
-      "sources": [
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-hold-not-distinct-0",
-          "name": "mon_mu_exhaust_rate (gov07-hold-not-distinct)",
-          "region": {
-            "offset": 17056,
-            "length": 1
-          },
-          "pattern": "square",
-          "frequency": 0.16666666666666666,
-          "amplitude": 0.26255,
-          "dcOffset": 0.26255
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-hold-not-distinct-1",
-          "name": "operator_approved (gov07-hold-not-distinct)",
-          "region": {
-            "offset": 17057,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-hold-not-distinct-2",
-          "name": "operator_distinct (gov07-hold-not-distinct)",
-          "region": {
-            "offset": 17058,
-            "length": 1
-          },
-          "pattern": "binary",
-          "frequency": 0.16666666666666666,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-hold-not-distinct-3",
-          "name": "triage_completed (gov07-hold-not-distinct)",
-          "region": {
-            "offset": 17059,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-hold-not-distinct-4",
-          "name": "confirmed_harm (gov07-hold-not-distinct)",
-          "region": {
-            "offset": 17060,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        }
-      ],
-      "feedbackCell": 17061,
-      "expectedOutputsByStep": [
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          1.0,
-          0.0
-        ]
-      ]
-    },
-    {
-      "name": "gov07-hold-rate",
-      "machine": "GOV07_exposure-budget-watchdog",
-      "steps": 4,
-      "purpose": "drives ces_gov07_hold_rate: [mon_mu_exhaust_rate∈[0.0201,1] ∧ latch_q_prev=1]",
-      "sources": [
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-hold-rate-0",
-          "name": "mon_mu_exhaust_rate (gov07-hold-rate)",
-          "region": {
-            "offset": 17056,
-            "length": 1
-          },
-          "pattern": "square",
-          "frequency": 0.16666666666666666,
-          "amplitude": 0.24755,
-          "dcOffset": 0.27755
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-hold-rate-1",
-          "name": "operator_approved (gov07-hold-rate)",
-          "region": {
-            "offset": 17057,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-hold-rate-2",
-          "name": "operator_distinct (gov07-hold-rate)",
-          "region": {
-            "offset": 17058,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 1.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-hold-rate-3",
-          "name": "triage_completed (gov07-hold-rate)",
-          "region": {
-            "offset": 17059,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-hold-rate-4",
-          "name": "confirmed_harm (gov07-hold-rate)",
-          "region": {
-            "offset": 17060,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        }
-      ],
-      "feedbackCell": 17061,
-      "expectedOutputsByStep": [
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          1.0,
-          0.0
-        ]
-      ]
-    },
-    {
-      "name": "gov07-breach-reset",
-      "machine": "GOV07_exposure-budget-watchdog",
-      "steps": 4,
-      "purpose": "drives ces_gov07_breach_reset: [mon_mu_exhaust_rate∈[0,0.02] ∧ operator_approved=1 ∧ operator_distinct=1 ∧ triage_completed=1 ∧ latch_q_prev=1]",
-      "sources": [
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov07-breach-reset-0",
-          "name": "mon_mu_exhaust_rate (gov07-breach-reset)",
+          "id": "gov-sim-gov07-breach-hold-triage-pending-0",
+          "name": "mon_mu_exhaust_rate (gov07-breach-hold-triage-pending)",
           "region": {
             "offset": 17056,
             "length": 1
@@ -13234,8 +12708,8 @@
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov07-breach-reset-1",
-          "name": "operator_approved (gov07-breach-reset)",
+          "id": "gov-sim-gov07-breach-hold-triage-pending-1",
+          "name": "operator_approved (gov07-breach-hold-triage-pending)",
           "region": {
             "offset": 17057,
             "length": 1
@@ -13247,8 +12721,8 @@
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov07-breach-reset-2",
-          "name": "operator_distinct (gov07-breach-reset)",
+          "id": "gov-sim-gov07-breach-hold-triage-pending-2",
+          "name": "operator_distinct (gov07-breach-hold-triage-pending)",
           "region": {
             "offset": 17058,
             "length": 1
@@ -13260,8 +12734,132 @@
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov07-breach-reset-3",
-          "name": "triage_completed (gov07-breach-reset)",
+          "id": "gov-sim-gov07-breach-hold-triage-pending-3",
+          "name": "triage_completed (gov07-breach-hold-triage-pending)",
+          "region": {
+            "offset": 17059,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-triage-pending-4",
+          "name": "confirmed_harm (gov07-breach-hold-triage-pending)",
+          "region": {
+            "offset": 17060,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov07-breach-hold-harm",
+      "machine": "GOV07_exposure-budget-watchdog",
+      "steps": 4,
+      "purpose": "holds ces_gov07_breach while harm",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-harm-0",
+          "name": "mon_mu_exhaust_rate (gov07-breach-hold-harm)",
+          "region": {
+            "offset": 17056,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.25755,
+          "dcOffset": 0.26755
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-harm-1",
+          "name": "operator_approved (gov07-breach-hold-harm)",
+          "region": {
+            "offset": 17057,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-harm-2",
+          "name": "operator_distinct (gov07-breach-hold-harm)",
+          "region": {
+            "offset": 17058,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 1.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-harm-3",
+          "name": "triage_completed (gov07-breach-hold-harm)",
           "region": {
             "offset": 17059,
             "length": 1
@@ -13273,8 +12871,132 @@
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov07-breach-reset-4",
-          "name": "confirmed_harm (gov07-breach-reset)",
+          "id": "gov-sim-gov07-breach-hold-harm-4",
+          "name": "confirmed_harm (gov07-breach-hold-harm)",
+          "region": {
+            "offset": 17060,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov07-breach-hold-unapproved",
+      "machine": "GOV07_exposure-budget-watchdog",
+      "steps": 4,
+      "purpose": "holds ces_gov07_breach while unapproved",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-unapproved-0",
+          "name": "mon_mu_exhaust_rate (gov07-breach-hold-unapproved)",
+          "region": {
+            "offset": 17056,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.25755,
+          "dcOffset": 0.26755
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-unapproved-1",
+          "name": "operator_approved (gov07-breach-hold-unapproved)",
+          "region": {
+            "offset": 17057,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-unapproved-2",
+          "name": "operator_distinct (gov07-breach-hold-unapproved)",
+          "region": {
+            "offset": 17058,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 1.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-unapproved-3",
+          "name": "triage_completed (gov07-breach-hold-unapproved)",
+          "region": {
+            "offset": 17059,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-unapproved-4",
+          "name": "confirmed_harm (gov07-breach-hold-unapproved)",
           "region": {
             "offset": 17060,
             "length": 1
@@ -13285,7 +13007,379 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17061,
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov07-breach-hold-not-distinct",
+      "machine": "GOV07_exposure-budget-watchdog",
+      "steps": 4,
+      "purpose": "holds ces_gov07_breach while not-distinct",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-not-distinct-0",
+          "name": "mon_mu_exhaust_rate (gov07-breach-hold-not-distinct)",
+          "region": {
+            "offset": 17056,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.25755,
+          "dcOffset": 0.26755
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-not-distinct-1",
+          "name": "operator_approved (gov07-breach-hold-not-distinct)",
+          "region": {
+            "offset": 17057,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-not-distinct-2",
+          "name": "operator_distinct (gov07-breach-hold-not-distinct)",
+          "region": {
+            "offset": 17058,
+            "length": 1
+          },
+          "pattern": "binary",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-not-distinct-3",
+          "name": "triage_completed (gov07-breach-hold-not-distinct)",
+          "region": {
+            "offset": 17059,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-not-distinct-4",
+          "name": "confirmed_harm (gov07-breach-hold-not-distinct)",
+          "region": {
+            "offset": 17060,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov07-breach-hold-rate",
+      "machine": "GOV07_exposure-budget-watchdog",
+      "steps": 4,
+      "purpose": "holds ces_gov07_breach while rate",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-rate-0",
+          "name": "mon_mu_exhaust_rate (gov07-breach-hold-rate)",
+          "region": {
+            "offset": 17056,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.24755,
+          "dcOffset": 0.27755
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-rate-1",
+          "name": "operator_approved (gov07-breach-hold-rate)",
+          "region": {
+            "offset": 17057,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-rate-2",
+          "name": "operator_distinct (gov07-breach-hold-rate)",
+          "region": {
+            "offset": 17058,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 1.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-rate-3",
+          "name": "triage_completed (gov07-breach-hold-rate)",
+          "region": {
+            "offset": 17059,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-hold-rate-4",
+          "name": "confirmed_harm (gov07-breach-hold-rate)",
+          "region": {
+            "offset": 17060,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov07-breach-release",
+      "machine": "GOV07_exposure-budget-watchdog",
+      "steps": 4,
+      "purpose": "releases ces_gov07_breach",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-release-0",
+          "name": "mon_mu_exhaust_rate (gov07-breach-release)",
+          "region": {
+            "offset": 17056,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.25755,
+          "dcOffset": 0.26755
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-release-1",
+          "name": "operator_approved (gov07-breach-release)",
+          "region": {
+            "offset": 17057,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-release-2",
+          "name": "operator_distinct (gov07-breach-release)",
+          "region": {
+            "offset": 17058,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 1.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-release-3",
+          "name": "triage_completed (gov07-breach-release)",
+          "region": {
+            "offset": 17059,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov07-breach-release-4",
+          "name": "confirmed_harm (gov07-breach-release)",
+          "region": {
+            "offset": 17060,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -13409,7 +13503,7 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17061,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -13497,7 +13591,7 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17061,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -13585,7 +13679,7 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17061,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -13897,7 +13991,7 @@
       "name": "gov09-backlog-set",
       "machine": "GOV09_near-miss-backlog-enforcer",
       "steps": 2,
-      "purpose": "drives ces_gov09_backlog_set: [mon_nearmiss_backlog∈[0.8,1]]{2}",
+      "purpose": "sets ces_gov09_backlog",
       "sources": [
         {
           "type": "simulated",
@@ -13926,7 +14020,7 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17090,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -13955,161 +14049,15 @@
       ]
     },
     {
-      "name": "gov09-triage-requested",
+      "name": "gov09-backlog-hold-triage-pending",
       "machine": "GOV09_near-miss-backlog-enforcer",
       "steps": 3,
-      "purpose": "drives ces_gov09_triage_requested: [triage_completed=0 ∧ latch_q_prev=1]",
+      "purpose": "holds ces_gov09_backlog while triage-pending",
       "sources": [
         {
           "type": "simulated",
-          "id": "gov-sim-gov09-triage-requested-0",
-          "name": "mon_nearmiss_backlog (gov09-triage-requested)",
-          "region": {
-            "offset": 17088,
-            "length": 1
-          },
-          "pattern": "square",
-          "frequency": 0.25,
-          "amplitude": 0.45,
-          "dcOffset": 0.45
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov09-triage-requested-1",
-          "name": "triage_completed (gov09-triage-requested)",
-          "region": {
-            "offset": 17089,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        }
-      ],
-      "feedbackCell": 17090,
-      "expectedOutputsByStep": [
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          1.0,
-          0.0
-        ]
-      ]
-    },
-    {
-      "name": "gov09-hold-backlog",
-      "machine": "GOV09_near-miss-backlog-enforcer",
-      "steps": 3,
-      "purpose": "drives ces_gov09_hold_backlog: [mon_nearmiss_backlog∈[0.5,1] ∧ latch_q_prev=1]",
-      "sources": [
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov09-hold-backlog-0",
-          "name": "mon_nearmiss_backlog (gov09-hold-backlog)",
-          "region": {
-            "offset": 17088,
-            "length": 1
-          },
-          "pattern": "square",
-          "frequency": 0.25,
-          "amplitude": 0.07500000000000001,
-          "dcOffset": 0.825
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov09-hold-backlog-1",
-          "name": "triage_completed (gov09-hold-backlog)",
-          "region": {
-            "offset": 17089,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        }
-      ],
-      "feedbackCell": 17090,
-      "expectedOutputsByStep": [
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          1.0,
-          0.0
-        ]
-      ]
-    },
-    {
-      "name": "gov09-backlog-reset",
-      "machine": "GOV09_near-miss-backlog-enforcer",
-      "steps": 3,
-      "purpose": "drives ces_gov09_backlog_reset: [mon_nearmiss_backlog∈[0,0.4999] ∧ triage_completed=1 ∧ latch_q_prev=1]",
-      "sources": [
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov09-backlog-reset-0",
-          "name": "mon_nearmiss_backlog (gov09-backlog-reset)",
+          "id": "gov-sim-gov09-backlog-hold-triage-pending-0",
+          "name": "mon_nearmiss_backlog (gov09-backlog-hold-triage-pending)",
           "region": {
             "offset": 17088,
             "length": 1
@@ -14121,8 +14069,81 @@
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov09-backlog-reset-1",
-          "name": "triage_completed (gov09-backlog-reset)",
+          "id": "gov-sim-gov09-backlog-hold-triage-pending-1",
+          "name": "triage_completed (gov09-backlog-hold-triage-pending)",
+          "region": {
+            "offset": 17089,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov09-backlog-hold-backlog",
+      "machine": "GOV09_near-miss-backlog-enforcer",
+      "steps": 3,
+      "purpose": "holds ces_gov09_backlog while backlog",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov09-backlog-hold-backlog-0",
+          "name": "mon_nearmiss_backlog (gov09-backlog-hold-backlog)",
+          "region": {
+            "offset": 17088,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.25,
+          "amplitude": 0.07500000000000001,
+          "dcOffset": 0.825
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov09-backlog-hold-backlog-1",
+          "name": "triage_completed (gov09-backlog-hold-backlog)",
           "region": {
             "offset": 17089,
             "length": 1
@@ -14133,7 +14154,80 @@
           "dcOffset": 0.5
         }
       ],
-      "feedbackCell": 17090,
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov09-backlog-release",
+      "machine": "GOV09_near-miss-backlog-enforcer",
+      "steps": 3,
+      "purpose": "releases ces_gov09_backlog",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov09-backlog-release-0",
+          "name": "mon_nearmiss_backlog (gov09-backlog-release)",
+          "region": {
+            "offset": 17088,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.25,
+          "amplitude": 0.325,
+          "dcOffset": 0.575
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov09-backlog-release-1",
+          "name": "triage_completed (gov09-backlog-release)",
+          "region": {
+            "offset": 17089,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.25,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        }
+      ],
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -14206,7 +14300,7 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17090,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -21130,7 +21224,7 @@
       "name": "gov14-renewal-window",
       "machine": "GOV14_periodic-recertification-timer",
       "steps": 1,
-      "purpose": "drives ces_gov14_renewal_window: [mon_recert_ttl_rem∈[0.0001,0.15] ∧ renewal_frame_open=0 ∧ latch_q_prev=0]",
+      "purpose": "drives ces_gov14_renewal_window: [mon_recert_ttl_rem∈[0.0001,0.15] ∧ renewal_frame_open=0]",
       "sources": [
         {
           "type": "simulated",
@@ -21172,7 +21266,7 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17171,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -21192,7 +21286,7 @@
       "name": "gov14-renewal-open",
       "machine": "GOV14_periodic-recertification-timer",
       "steps": 1,
-      "purpose": "drives ces_gov14_renewal_open: [mon_recert_ttl_rem∈[0.0001,0.15] ∧ renewal_frame_open=1 ∧ latch_q_prev=0]",
+      "purpose": "drives ces_gov14_renewal_open: [mon_recert_ttl_rem∈[0.0001,0.15] ∧ renewal_frame_open=1]",
       "sources": [
         {
           "type": "simulated",
@@ -21234,7 +21328,7 @@
           "dcOffset": 1.0
         }
       ],
-      "feedbackCell": 17171,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -21254,7 +21348,7 @@
       "name": "gov14-expired-set",
       "machine": "GOV14_periodic-recertification-timer",
       "steps": 1,
-      "purpose": "drives ces_gov14_expired_set: [mon_recert_ttl_rem=0]",
+      "purpose": "sets ces_gov14_expired",
       "sources": [
         {
           "type": "simulated",
@@ -21296,7 +21390,7 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17171,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -21313,28 +21407,102 @@
       ]
     },
     {
-      "name": "gov14-expired-without-window",
+      "name": "gov14-expired-hold-ttl",
       "machine": "GOV14_periodic-recertification-timer",
       "steps": 2,
-      "purpose": "drives ces_gov14_expired_without_window: [mon_recert_ttl_rem∈[0.1501,1]] · [mon_recert_ttl_rem=0]",
+      "purpose": "holds ces_gov14_expired while ttl",
       "sources": [
         {
           "type": "simulated",
-          "id": "gov-sim-gov14-expired-without-window-0",
-          "name": "mon_recert_ttl_rem (gov14-expired-without-window)",
+          "id": "gov-sim-gov14-expired-hold-ttl-0",
+          "name": "mon_recert_ttl_rem (gov14-expired-hold-ttl)",
           "region": {
             "offset": 17168,
             "length": 1
           },
           "pattern": "square",
           "frequency": 0.5,
-          "amplitude": 0.28755,
+          "amplitude": -0.0375,
+          "dcOffset": 0.0375
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov14-expired-hold-ttl-1",
+          "name": "operator_approved (gov14-expired-hold-ttl)",
+          "region": {
+            "offset": 17169,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.5,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov14-expired-hold-ttl-2",
+          "name": "renewal_frame_open (gov14-expired-hold-ttl)",
+          "region": {
+            "offset": 17170,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov14-expired-hold-unapproved",
+      "machine": "GOV14_periodic-recertification-timer",
+      "steps": 2,
+      "purpose": "holds ces_gov14_expired while unapproved",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov14-expired-hold-unapproved-0",
+          "name": "mon_recert_ttl_rem (gov14-expired-hold-unapproved)",
+          "region": {
+            "offset": 17168,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.5,
+          "amplitude": -0.28755,
           "dcOffset": 0.28755
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov14-expired-without-window-1",
-          "name": "operator_approved (gov14-expired-without-window)",
+          "id": "gov-sim-gov14-expired-hold-unapproved-1",
+          "name": "operator_approved (gov14-expired-hold-unapproved)",
           "region": {
             "offset": 17169,
             "length": 1
@@ -21346,8 +21514,8 @@
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov14-expired-without-window-2",
-          "name": "renewal_frame_open (gov14-expired-without-window)",
+          "id": "gov-sim-gov14-expired-hold-unapproved-2",
+          "name": "renewal_frame_open (gov14-expired-hold-unapproved)",
           "region": {
             "offset": 17170,
             "length": 1
@@ -21358,7 +21526,155 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17171,
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov14-expired-release",
+      "machine": "GOV14_periodic-recertification-timer",
+      "steps": 2,
+      "purpose": "releases ces_gov14_expired",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov14-expired-release-0",
+          "name": "mon_recert_ttl_rem (gov14-expired-release)",
+          "region": {
+            "offset": 17168,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.5,
+          "amplitude": -0.28755,
+          "dcOffset": 0.28755
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov14-expired-release-1",
+          "name": "operator_approved (gov14-expired-release)",
+          "region": {
+            "offset": 17169,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.5,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov14-expired-release-2",
+          "name": "renewal_frame_open (gov14-expired-release)",
+          "region": {
+            "offset": 17170,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov14-expired-without-window-set",
+      "machine": "GOV14_periodic-recertification-timer",
+      "steps": 2,
+      "purpose": "sets ces_gov14_expired_without_window",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov14-expired-without-window-set-0",
+          "name": "mon_recert_ttl_rem (gov14-expired-without-window-set)",
+          "region": {
+            "offset": 17168,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.5,
+          "amplitude": 0.28755,
+          "dcOffset": 0.28755
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov14-expired-without-window-set-1",
+          "name": "operator_approved (gov14-expired-without-window-set)",
+          "region": {
+            "offset": 17169,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov14-expired-without-window-set-2",
+          "name": "renewal_frame_open (gov14-expired-without-window-set)",
+          "region": {
+            "offset": 17170,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -21387,189 +21703,41 @@
       ]
     },
     {
-      "name": "gov14-hold-ttl",
+      "name": "gov14-expired-without-window-hold-ttl",
       "machine": "GOV14_periodic-recertification-timer",
-      "steps": 2,
-      "purpose": "drives ces_gov14_hold_ttl: [mon_recert_ttl_rem∈[0,0.15] ∧ latch_q_prev=1]",
+      "steps": 3,
+      "purpose": "holds ces_gov14_expired_without_window while ttl",
       "sources": [
         {
           "type": "simulated",
-          "id": "gov-sim-gov14-hold-ttl-0",
-          "name": "mon_recert_ttl_rem (gov14-hold-ttl)",
+          "id": "gov-sim-gov14-expired-without-window-hold-ttl-0",
+          "name": "mon_recert_ttl_rem (gov14-expired-without-window-hold-ttl)",
           "region": {
             "offset": 17168,
             "length": 1
           },
           "pattern": "square",
-          "frequency": 0.5,
-          "amplitude": -0.0375,
-          "dcOffset": 0.0375
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov14-hold-ttl-1",
-          "name": "operator_approved (gov14-hold-ttl)",
-          "region": {
-            "offset": 17169,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov14-hold-ttl-2",
-          "name": "renewal_frame_open (gov14-hold-ttl)",
-          "region": {
-            "offset": 17170,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        }
-      ],
-      "feedbackCell": 17171,
-      "expectedOutputsByStep": [
-        [
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ]
-      ]
-    },
-    {
-      "name": "gov14-hold-unapproved",
-      "machine": "GOV14_periodic-recertification-timer",
-      "steps": 2,
-      "purpose": "drives ces_gov14_hold_unapproved: [operator_approved=0 ∧ latch_q_prev=1]",
-      "sources": [
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov14-hold-unapproved-0",
-          "name": "mon_recert_ttl_rem (gov14-hold-unapproved)",
-          "region": {
-            "offset": 17168,
-            "length": 1
-          },
-          "pattern": "square",
-          "frequency": 0.5,
-          "amplitude": -0.5,
-          "dcOffset": 0.5
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov14-hold-unapproved-1",
-          "name": "operator_approved (gov14-hold-unapproved)",
-          "region": {
-            "offset": 17169,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov14-hold-unapproved-2",
-          "name": "renewal_frame_open (gov14-hold-unapproved)",
-          "region": {
-            "offset": 17170,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        }
-      ],
-      "feedbackCell": 17171,
-      "expectedOutputsByStep": [
-        [
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ]
-      ]
-    },
-    {
-      "name": "gov14-recertified",
-      "machine": "GOV14_periodic-recertification-timer",
-      "steps": 2,
-      "purpose": "drives ces_gov14_recertified: [mon_recert_ttl_rem∈[0.1501,1] ∧ operator_approved=1 ∧ latch_q_prev=1]",
-      "sources": [
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov14-recertified-0",
-          "name": "mon_recert_ttl_rem (gov14-recertified)",
-          "region": {
-            "offset": 17168,
-            "length": 1
-          },
-          "pattern": "square",
-          "frequency": 0.5,
-          "amplitude": -0.28755,
+          "frequency": 0.78,
+          "amplitude": 0.28755,
           "dcOffset": 0.28755
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov14-recertified-1",
-          "name": "operator_approved (gov14-recertified)",
+          "id": "gov-sim-gov14-expired-without-window-hold-ttl-1",
+          "name": "operator_approved (gov14-expired-without-window-hold-ttl)",
           "region": {
             "offset": 17169,
             "length": 1
           },
           "pattern": "square",
-          "frequency": 0.5,
+          "frequency": 0.25,
           "amplitude": -0.5,
           "dcOffset": 0.5
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov14-recertified-2",
-          "name": "renewal_frame_open (gov14-recertified)",
+          "id": "gov-sim-gov14-expired-without-window-hold-ttl-2",
+          "name": "renewal_frame_open (gov14-expired-without-window-hold-ttl)",
           "region": {
             "offset": 17170,
             "length": 1
@@ -21580,8 +21748,118 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17171,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "gov14-expired-without-window-hold-unapproved",
+      "machine": "GOV14_periodic-recertification-timer",
+      "steps": 3,
+      "purpose": "holds ces_gov14_expired_without_window while unapproved",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov14-expired-without-window-hold-unapproved-0",
+          "name": "mon_recert_ttl_rem (gov14-expired-without-window-hold-unapproved)",
+          "region": {
+            "offset": 17168,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.5,
+          "amplitude": 0.28755,
+          "dcOffset": 0.28755
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov14-expired-without-window-hold-unapproved-1",
+          "name": "operator_approved (gov14-expired-without-window-hold-unapproved)",
+          "region": {
+            "offset": 17169,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov14-expired-without-window-hold-unapproved-2",
+          "name": "renewal_frame_open (gov14-expired-without-window-hold-unapproved)",
+          "region": {
+            "offset": 17170,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0
+        ],
         [
           0.0,
           1.0,
@@ -21593,6 +21871,80 @@
           0.0,
           0.0,
           0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov14-expired-without-window-release",
+      "machine": "GOV14_periodic-recertification-timer",
+      "steps": 3,
+      "purpose": "releases ces_gov14_expired_without_window",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov14-expired-without-window-release-0",
+          "name": "mon_recert_ttl_rem (gov14-expired-without-window-release)",
+          "region": {
+            "offset": 17168,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.5,
+          "amplitude": 0.28755,
+          "dcOffset": 0.28755
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov14-expired-without-window-release-1",
+          "name": "operator_approved (gov14-expired-without-window-release)",
+          "region": {
+            "offset": 17169,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.25,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov14-expired-without-window-release-2",
+          "name": "renewal_frame_open (gov14-expired-without-window-release)",
+          "region": {
+            "offset": 17170,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0
         ],
         [
           0.0,
@@ -21654,7 +22006,7 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17171,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -21716,7 +22068,7 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17171,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -23334,7 +23686,7 @@
       "name": "gov16-delegation-throttle",
       "machine": "GOV16_cross-domain-delegation-cap",
       "steps": 1,
-      "purpose": "drives ces_gov16_delegation_throttle: [mon_xdomain_mu_agg∈[0.7001,0.9] ∧ mon_canary_drift_score∈[0,0.15] ∧ delegation_clamped=0 ∧ latch_q_prev=0]",
+      "purpose": "drives ces_gov16_delegation_throttle: [mon_xdomain_mu_agg∈[0.7001,0.9] ∧ mon_canary_drift_score∈[0,0.15] ∧ delegation_clamped=0]",
       "sources": [
         {
           "type": "simulated",
@@ -23402,7 +23754,7 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17205,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -23422,7 +23774,7 @@
       "name": "gov16-delegation-clamped",
       "machine": "GOV16_cross-domain-delegation-cap",
       "steps": 1,
-      "purpose": "drives ces_gov16_delegation_clamped: [mon_xdomain_mu_agg∈[0.7001,0.9] ∧ delegation_clamped=1 ∧ latch_q_prev=0]",
+      "purpose": "drives ces_gov16_delegation_clamped: [mon_xdomain_mu_agg∈[0.7001,0.9] ∧ delegation_clamped=1]",
       "sources": [
         {
           "type": "simulated",
@@ -23490,7 +23842,7 @@
           "dcOffset": 1.0
         }
       ],
-      "feedbackCell": 17205,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -23507,15 +23859,15 @@
       ]
     },
     {
-      "name": "gov16-breach-exposure",
+      "name": "gov16-breach-exposure-set",
       "machine": "GOV16_cross-domain-delegation-cap",
       "steps": 3,
-      "purpose": "drives ces_gov16_breach_exposure: [mon_xdomain_mu_agg∈[0.9001,1]]{3}",
+      "purpose": "sets ces_gov16_breach_exposure",
       "sources": [
         {
           "type": "simulated",
-          "id": "gov-sim-gov16-breach-exposure-0",
-          "name": "mon_xdomain_mu_agg (gov16-breach-exposure)",
+          "id": "gov-sim-gov16-breach-exposure-set-0",
+          "name": "mon_xdomain_mu_agg (gov16-breach-exposure-set)",
           "region": {
             "offset": 17200,
             "length": 1
@@ -23527,8 +23879,8 @@
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov16-breach-exposure-1",
-          "name": "mon_canary_drift_score (gov16-breach-exposure)",
+          "id": "gov-sim-gov16-breach-exposure-set-1",
+          "name": "mon_canary_drift_score (gov16-breach-exposure-set)",
           "region": {
             "offset": 17201,
             "length": 1
@@ -23540,8 +23892,8 @@
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov16-breach-exposure-2",
-          "name": "operator_approved (gov16-breach-exposure)",
+          "id": "gov-sim-gov16-breach-exposure-set-2",
+          "name": "operator_approved (gov16-breach-exposure-set)",
           "region": {
             "offset": 17202,
             "length": 1
@@ -23553,8 +23905,8 @@
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov16-breach-exposure-3",
-          "name": "operator_distinct (gov16-breach-exposure)",
+          "id": "gov-sim-gov16-breach-exposure-set-3",
+          "name": "operator_distinct (gov16-breach-exposure-set)",
           "region": {
             "offset": 17203,
             "length": 1
@@ -23566,8 +23918,8 @@
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov16-breach-exposure-4",
-          "name": "delegation_clamped (gov16-breach-exposure)",
+          "id": "gov-sim-gov16-breach-exposure-set-4",
+          "name": "delegation_clamped (gov16-breach-exposure-set)",
           "region": {
             "offset": 17204,
             "length": 1
@@ -23578,7 +23930,7 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17205,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -23619,623 +23971,15 @@
       ]
     },
     {
-      "name": "gov16-breach-canary",
-      "machine": "GOV16_cross-domain-delegation-cap",
-      "steps": 3,
-      "purpose": "drives ces_gov16_breach_canary: [mon_canary_drift_score∈[0.1501,1]]{3}",
-      "sources": [
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-breach-canary-0",
-          "name": "mon_xdomain_mu_agg (gov16-breach-canary)",
-          "region": {
-            "offset": 17200,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-breach-canary-1",
-          "name": "mon_canary_drift_score (gov16-breach-canary)",
-          "region": {
-            "offset": 17201,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.5751
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-breach-canary-2",
-          "name": "operator_approved (gov16-breach-canary)",
-          "region": {
-            "offset": 17202,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-breach-canary-3",
-          "name": "operator_distinct (gov16-breach-canary)",
-          "region": {
-            "offset": 17203,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 1.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-breach-canary-4",
-          "name": "delegation_clamped (gov16-breach-canary)",
-          "region": {
-            "offset": 17204,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        }
-      ],
-      "feedbackCell": 17205,
-      "expectedOutputsByStep": [
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ]
-      ]
-    },
-    {
-      "name": "gov16-hold-unapproved",
+      "name": "gov16-breach-exposure-hold-unapproved",
       "machine": "GOV16_cross-domain-delegation-cap",
       "steps": 4,
-      "purpose": "drives ces_gov16_hold_unapproved: [operator_approved=0 ∧ latch_q_prev=1]",
+      "purpose": "holds ces_gov16_breach_exposure while unapproved",
       "sources": [
         {
           "type": "simulated",
-          "id": "gov-sim-gov16-hold-unapproved-0",
-          "name": "mon_xdomain_mu_agg (gov16-hold-unapproved)",
-          "region": {
-            "offset": 17200,
-            "length": 1
-          },
-          "pattern": "square",
-          "frequency": 0.16666666666666666,
-          "amplitude": 0.47505,
-          "dcOffset": 0.47505
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-unapproved-1",
-          "name": "mon_canary_drift_score (gov16-hold-unapproved)",
-          "region": {
-            "offset": 17201,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-unapproved-2",
-          "name": "operator_approved (gov16-hold-unapproved)",
-          "region": {
-            "offset": 17202,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-unapproved-3",
-          "name": "operator_distinct (gov16-hold-unapproved)",
-          "region": {
-            "offset": 17203,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 1.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-unapproved-4",
-          "name": "delegation_clamped (gov16-hold-unapproved)",
-          "region": {
-            "offset": 17204,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        }
-      ],
-      "feedbackCell": 17205,
-      "expectedOutputsByStep": [
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ]
-      ]
-    },
-    {
-      "name": "gov16-hold-not-distinct",
-      "machine": "GOV16_cross-domain-delegation-cap",
-      "steps": 4,
-      "purpose": "drives ces_gov16_hold_not_distinct: [operator_distinct=0 ∧ latch_q_prev=1]",
-      "sources": [
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-not-distinct-0",
-          "name": "mon_xdomain_mu_agg (gov16-hold-not-distinct)",
-          "region": {
-            "offset": 17200,
-            "length": 1
-          },
-          "pattern": "square",
-          "frequency": 0.16666666666666666,
-          "amplitude": 0.47505,
-          "dcOffset": 0.47505
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-not-distinct-1",
-          "name": "mon_canary_drift_score (gov16-hold-not-distinct)",
-          "region": {
-            "offset": 17201,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-not-distinct-2",
-          "name": "operator_approved (gov16-hold-not-distinct)",
-          "region": {
-            "offset": 17202,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-not-distinct-3",
-          "name": "operator_distinct (gov16-hold-not-distinct)",
-          "region": {
-            "offset": 17203,
-            "length": 1
-          },
-          "pattern": "binary",
-          "frequency": 0.16666666666666666,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-not-distinct-4",
-          "name": "delegation_clamped (gov16-hold-not-distinct)",
-          "region": {
-            "offset": 17204,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        }
-      ],
-      "feedbackCell": 17205,
-      "expectedOutputsByStep": [
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ]
-      ]
-    },
-    {
-      "name": "gov16-hold-exposure",
-      "machine": "GOV16_cross-domain-delegation-cap",
-      "steps": 4,
-      "purpose": "drives ces_gov16_hold_exposure: [mon_xdomain_mu_agg∈[0.5001,1] ∧ latch_q_prev=1]",
-      "sources": [
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-exposure-0",
-          "name": "mon_xdomain_mu_agg (gov16-hold-exposure)",
-          "region": {
-            "offset": 17200,
-            "length": 1
-          },
-          "pattern": "square",
-          "frequency": 0.16666666666666666,
-          "amplitude": 0.17504999999999998,
-          "dcOffset": 0.77505
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-exposure-1",
-          "name": "mon_canary_drift_score (gov16-hold-exposure)",
-          "region": {
-            "offset": 17201,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-exposure-2",
-          "name": "operator_approved (gov16-hold-exposure)",
-          "region": {
-            "offset": 17202,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-exposure-3",
-          "name": "operator_distinct (gov16-hold-exposure)",
-          "region": {
-            "offset": 17203,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 1.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-exposure-4",
-          "name": "delegation_clamped (gov16-hold-exposure)",
-          "region": {
-            "offset": 17204,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        }
-      ],
-      "feedbackCell": 17205,
-      "expectedOutputsByStep": [
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ]
-      ]
-    },
-    {
-      "name": "gov16-hold-canary",
-      "machine": "GOV16_cross-domain-delegation-cap",
-      "steps": 4,
-      "purpose": "drives ces_gov16_hold_canary: [mon_canary_drift_score∈[0.1001,1] ∧ latch_q_prev=1]",
-      "sources": [
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-canary-0",
-          "name": "mon_xdomain_mu_agg (gov16-hold-canary)",
-          "region": {
-            "offset": 17200,
-            "length": 1
-          },
-          "pattern": "square",
-          "frequency": 0.16666666666666666,
-          "amplitude": 0.47505,
-          "dcOffset": 0.47505
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-canary-1",
-          "name": "mon_canary_drift_score (gov16-hold-canary)",
-          "region": {
-            "offset": 17201,
-            "length": 1
-          },
-          "pattern": "square",
-          "frequency": 0.16666666666666666,
-          "amplitude": -0.06,
-          "dcOffset": 0.06
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-canary-2",
-          "name": "operator_approved (gov16-hold-canary)",
-          "region": {
-            "offset": 17202,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-canary-3",
-          "name": "operator_distinct (gov16-hold-canary)",
-          "region": {
-            "offset": 17203,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 1.0
-        },
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-hold-canary-4",
-          "name": "delegation_clamped (gov16-hold-canary)",
-          "region": {
-            "offset": 17204,
-            "length": 1
-          },
-          "pattern": "constant",
-          "frequency": 1.0,
-          "amplitude": 0.0,
-          "dcOffset": 0.0
-        }
-      ],
-      "feedbackCell": 17205,
-      "expectedOutputsByStep": [
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        [
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ]
-      ]
-    },
-    {
-      "name": "gov16-breach-reset",
-      "machine": "GOV16_cross-domain-delegation-cap",
-      "steps": 4,
-      "purpose": "drives ces_gov16_breach_reset: [mon_xdomain_mu_agg∈[0,0.5] ∧ mon_canary_drift_score∈[0,0.1] ∧ operator_approved=1 ∧ operator_distinct=1 ∧ latch_q_prev=1]",
-      "sources": [
-        {
-          "type": "simulated",
-          "id": "gov-sim-gov16-breach-reset-0",
-          "name": "mon_xdomain_mu_agg (gov16-breach-reset)",
+          "id": "gov-sim-gov16-breach-exposure-hold-unapproved-0",
+          "name": "mon_xdomain_mu_agg (gov16-breach-exposure-hold-unapproved)",
           "region": {
             "offset": 17200,
             "length": 1
@@ -24247,8 +23991,8 @@
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov16-breach-reset-1",
-          "name": "mon_canary_drift_score (gov16-breach-reset)",
+          "id": "gov-sim-gov16-breach-exposure-hold-unapproved-1",
+          "name": "mon_canary_drift_score (gov16-breach-exposure-hold-unapproved)",
           "region": {
             "offset": 17201,
             "length": 1
@@ -24260,21 +24004,21 @@
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov16-breach-reset-2",
-          "name": "operator_approved (gov16-breach-reset)",
+          "id": "gov-sim-gov16-breach-exposure-hold-unapproved-2",
+          "name": "operator_approved (gov16-breach-exposure-hold-unapproved)",
           "region": {
             "offset": 17202,
             "length": 1
           },
-          "pattern": "square",
-          "frequency": 0.16666666666666666,
-          "amplitude": -0.5,
-          "dcOffset": 0.5
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov16-breach-reset-3",
-          "name": "operator_distinct (gov16-breach-reset)",
+          "id": "gov-sim-gov16-breach-exposure-hold-unapproved-3",
+          "name": "operator_distinct (gov16-breach-exposure-hold-unapproved)",
           "region": {
             "offset": 17203,
             "length": 1
@@ -24286,8 +24030,8 @@
         },
         {
           "type": "simulated",
-          "id": "gov-sim-gov16-breach-reset-4",
-          "name": "delegation_clamped (gov16-breach-reset)",
+          "id": "gov-sim-gov16-breach-exposure-hold-unapproved-4",
+          "name": "delegation_clamped (gov16-breach-exposure-hold-unapproved)",
           "region": {
             "offset": 17204,
             "length": 1
@@ -24298,7 +24042,1235 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17205,
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov16-breach-exposure-hold-not-distinct",
+      "machine": "GOV16_cross-domain-delegation-cap",
+      "steps": 4,
+      "purpose": "holds ces_gov16_breach_exposure while not-distinct",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-hold-not-distinct-0",
+          "name": "mon_xdomain_mu_agg (gov16-breach-exposure-hold-not-distinct)",
+          "region": {
+            "offset": 17200,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.35005,
+          "dcOffset": 0.60005
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-hold-not-distinct-1",
+          "name": "mon_canary_drift_score (gov16-breach-exposure-hold-not-distinct)",
+          "region": {
+            "offset": 17201,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.025,
+          "dcOffset": 0.025
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-hold-not-distinct-2",
+          "name": "operator_approved (gov16-breach-exposure-hold-not-distinct)",
+          "region": {
+            "offset": 17202,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-hold-not-distinct-3",
+          "name": "operator_distinct (gov16-breach-exposure-hold-not-distinct)",
+          "region": {
+            "offset": 17203,
+            "length": 1
+          },
+          "pattern": "binary",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-hold-not-distinct-4",
+          "name": "delegation_clamped (gov16-breach-exposure-hold-not-distinct)",
+          "region": {
+            "offset": 17204,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov16-breach-exposure-hold-exposure",
+      "machine": "GOV16_cross-domain-delegation-cap",
+      "steps": 4,
+      "purpose": "holds ces_gov16_breach_exposure while exposure",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-hold-exposure-0",
+          "name": "mon_xdomain_mu_agg (gov16-breach-exposure-hold-exposure)",
+          "region": {
+            "offset": 17200,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.17504999999999998,
+          "dcOffset": 0.77505
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-hold-exposure-1",
+          "name": "mon_canary_drift_score (gov16-breach-exposure-hold-exposure)",
+          "region": {
+            "offset": 17201,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.025,
+          "dcOffset": 0.025
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-hold-exposure-2",
+          "name": "operator_approved (gov16-breach-exposure-hold-exposure)",
+          "region": {
+            "offset": 17202,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-hold-exposure-3",
+          "name": "operator_distinct (gov16-breach-exposure-hold-exposure)",
+          "region": {
+            "offset": 17203,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 1.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-hold-exposure-4",
+          "name": "delegation_clamped (gov16-breach-exposure-hold-exposure)",
+          "region": {
+            "offset": 17204,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov16-breach-exposure-hold-canary",
+      "machine": "GOV16_cross-domain-delegation-cap",
+      "steps": 4,
+      "purpose": "holds ces_gov16_breach_exposure while canary",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-hold-canary-0",
+          "name": "mon_xdomain_mu_agg (gov16-breach-exposure-hold-canary)",
+          "region": {
+            "offset": 17200,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.35005,
+          "dcOffset": 0.60005
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-hold-canary-1",
+          "name": "mon_canary_drift_score (gov16-breach-exposure-hold-canary)",
+          "region": {
+            "offset": 17201,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.06,
+          "dcOffset": 0.06
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-hold-canary-2",
+          "name": "operator_approved (gov16-breach-exposure-hold-canary)",
+          "region": {
+            "offset": 17202,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-hold-canary-3",
+          "name": "operator_distinct (gov16-breach-exposure-hold-canary)",
+          "region": {
+            "offset": 17203,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 1.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-hold-canary-4",
+          "name": "delegation_clamped (gov16-breach-exposure-hold-canary)",
+          "region": {
+            "offset": 17204,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov16-breach-exposure-release",
+      "machine": "GOV16_cross-domain-delegation-cap",
+      "steps": 4,
+      "purpose": "releases ces_gov16_breach_exposure",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-release-0",
+          "name": "mon_xdomain_mu_agg (gov16-breach-exposure-release)",
+          "region": {
+            "offset": 17200,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.35005,
+          "dcOffset": 0.60005
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-release-1",
+          "name": "mon_canary_drift_score (gov16-breach-exposure-release)",
+          "region": {
+            "offset": 17201,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.025,
+          "dcOffset": 0.025
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-release-2",
+          "name": "operator_approved (gov16-breach-exposure-release)",
+          "region": {
+            "offset": 17202,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-release-3",
+          "name": "operator_distinct (gov16-breach-exposure-release)",
+          "region": {
+            "offset": 17203,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 1.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-exposure-release-4",
+          "name": "delegation_clamped (gov16-breach-exposure-release)",
+          "region": {
+            "offset": 17204,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov16-breach-canary-set",
+      "machine": "GOV16_cross-domain-delegation-cap",
+      "steps": 3,
+      "purpose": "sets ces_gov16_breach_canary",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-set-0",
+          "name": "mon_xdomain_mu_agg (gov16-breach-canary-set)",
+          "region": {
+            "offset": 17200,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-set-1",
+          "name": "mon_canary_drift_score (gov16-breach-canary-set)",
+          "region": {
+            "offset": 17201,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.5751
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-set-2",
+          "name": "operator_approved (gov16-breach-canary-set)",
+          "region": {
+            "offset": 17202,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-set-3",
+          "name": "operator_distinct (gov16-breach-canary-set)",
+          "region": {
+            "offset": 17203,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 1.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-set-4",
+          "name": "delegation_clamped (gov16-breach-canary-set)",
+          "region": {
+            "offset": 17204,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov16-breach-canary-hold-unapproved",
+      "machine": "GOV16_cross-domain-delegation-cap",
+      "steps": 4,
+      "purpose": "holds ces_gov16_breach_canary while unapproved",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-unapproved-0",
+          "name": "mon_xdomain_mu_agg (gov16-breach-canary-hold-unapproved)",
+          "region": {
+            "offset": 17200,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.125,
+          "dcOffset": 0.125
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-unapproved-1",
+          "name": "mon_canary_drift_score (gov16-breach-canary-hold-unapproved)",
+          "region": {
+            "offset": 17201,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.26254999999999995,
+          "dcOffset": 0.31255
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-unapproved-2",
+          "name": "operator_approved (gov16-breach-canary-hold-unapproved)",
+          "region": {
+            "offset": 17202,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-unapproved-3",
+          "name": "operator_distinct (gov16-breach-canary-hold-unapproved)",
+          "region": {
+            "offset": 17203,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 1.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-unapproved-4",
+          "name": "delegation_clamped (gov16-breach-canary-hold-unapproved)",
+          "region": {
+            "offset": 17204,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov16-breach-canary-hold-not-distinct",
+      "machine": "GOV16_cross-domain-delegation-cap",
+      "steps": 4,
+      "purpose": "holds ces_gov16_breach_canary while not-distinct",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-not-distinct-0",
+          "name": "mon_xdomain_mu_agg (gov16-breach-canary-hold-not-distinct)",
+          "region": {
+            "offset": 17200,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.125,
+          "dcOffset": 0.125
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-not-distinct-1",
+          "name": "mon_canary_drift_score (gov16-breach-canary-hold-not-distinct)",
+          "region": {
+            "offset": 17201,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.26254999999999995,
+          "dcOffset": 0.31255
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-not-distinct-2",
+          "name": "operator_approved (gov16-breach-canary-hold-not-distinct)",
+          "region": {
+            "offset": 17202,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-not-distinct-3",
+          "name": "operator_distinct (gov16-breach-canary-hold-not-distinct)",
+          "region": {
+            "offset": 17203,
+            "length": 1
+          },
+          "pattern": "binary",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-not-distinct-4",
+          "name": "delegation_clamped (gov16-breach-canary-hold-not-distinct)",
+          "region": {
+            "offset": 17204,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov16-breach-canary-hold-exposure",
+      "machine": "GOV16_cross-domain-delegation-cap",
+      "steps": 4,
+      "purpose": "holds ces_gov16_breach_canary while exposure",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-exposure-0",
+          "name": "mon_xdomain_mu_agg (gov16-breach-canary-hold-exposure)",
+          "region": {
+            "offset": 17200,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.3,
+          "dcOffset": 0.3
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-exposure-1",
+          "name": "mon_canary_drift_score (gov16-breach-canary-hold-exposure)",
+          "region": {
+            "offset": 17201,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.26254999999999995,
+          "dcOffset": 0.31255
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-exposure-2",
+          "name": "operator_approved (gov16-breach-canary-hold-exposure)",
+          "region": {
+            "offset": 17202,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-exposure-3",
+          "name": "operator_distinct (gov16-breach-canary-hold-exposure)",
+          "region": {
+            "offset": 17203,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 1.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-exposure-4",
+          "name": "delegation_clamped (gov16-breach-canary-hold-exposure)",
+          "region": {
+            "offset": 17204,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov16-breach-canary-hold-canary",
+      "machine": "GOV16_cross-domain-delegation-cap",
+      "steps": 4,
+      "purpose": "holds ces_gov16_breach_canary while canary",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-canary-0",
+          "name": "mon_xdomain_mu_agg (gov16-breach-canary-hold-canary)",
+          "region": {
+            "offset": 17200,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.125,
+          "dcOffset": 0.125
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-canary-1",
+          "name": "mon_canary_drift_score (gov16-breach-canary-hold-canary)",
+          "region": {
+            "offset": 17201,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.22754999999999997,
+          "dcOffset": 0.34754999999999997
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-canary-2",
+          "name": "operator_approved (gov16-breach-canary-hold-canary)",
+          "region": {
+            "offset": 17202,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-canary-3",
+          "name": "operator_distinct (gov16-breach-canary-hold-canary)",
+          "region": {
+            "offset": 17203,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 1.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-hold-canary-4",
+          "name": "delegation_clamped (gov16-breach-canary-hold-canary)",
+          "region": {
+            "offset": 17204,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
+      "expectedOutputsByStep": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "gov16-breach-canary-release",
+      "machine": "GOV16_cross-domain-delegation-cap",
+      "steps": 4,
+      "purpose": "releases ces_gov16_breach_canary",
+      "sources": [
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-release-0",
+          "name": "mon_xdomain_mu_agg (gov16-breach-canary-release)",
+          "region": {
+            "offset": 17200,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.125,
+          "dcOffset": 0.125
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-release-1",
+          "name": "mon_canary_drift_score (gov16-breach-canary-release)",
+          "region": {
+            "offset": 17201,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": 0.26254999999999995,
+          "dcOffset": 0.31255
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-release-2",
+          "name": "operator_approved (gov16-breach-canary-release)",
+          "region": {
+            "offset": 17202,
+            "length": 1
+          },
+          "pattern": "square",
+          "frequency": 0.16666666666666666,
+          "amplitude": -0.5,
+          "dcOffset": 0.5
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-release-3",
+          "name": "operator_distinct (gov16-breach-canary-release)",
+          "region": {
+            "offset": 17203,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 1.0
+        },
+        {
+          "type": "simulated",
+          "id": "gov-sim-gov16-breach-canary-release-4",
+          "name": "delegation_clamped (gov16-breach-canary-release)",
+          "region": {
+            "offset": 17204,
+            "length": 1
+          },
+          "pattern": "constant",
+          "frequency": 1.0,
+          "amplitude": 0.0,
+          "dcOffset": 0.0
+        }
+      ],
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -24422,7 +25394,7 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17205,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,
@@ -24510,7 +25482,7 @@
           "dcOffset": 0.0
         }
       ],
-      "feedbackCell": 17205,
+      "feedbackCell": null,
       "expectedOutputsByStep": [
         [
           0.0,

@@ -168,10 +168,25 @@ def review_ces(parked, approve, ctx_wf, park_outs=("PARKED",), approve_outs=("PE
     ]
 
 
-def latch_holds(literals, outs):
-    """One hold CES per negated literal of the release condition (GOV-SA-06)."""
-    return [C(f"hold-{name}", "S_Latched", "S_Latched", [{"latch_q_prev": 1, **lit}], outs, "RED", ["GOV-SA-06"])
-            for name, lit in literals]
+def latch_ces(cid, frm, to, set_events, set_outs, holds, release, amend=(), dispatch=False):
+    """An SR latch as one closed CES (GOV-SA-24, superseding GOV-SA-06's feedback cell).
+
+    Q(k) = S(k) or (not R(k) and Q(k-1)), held in the CES's own active events:
+      * set: the chain `set_events`; its final event asserts `set_outs`;
+      * hold: one event per negated literal of the release condition, each asserting
+        its outputs (the latched vector). Every hold event, and the set chain's final
+        event, lists every hold event and the release in its next-active list, so
+        while any release literal is still false some hold event matches and re-arms
+        the whole cluster. The union of negated literals is held without a feedback
+        cell, and the latch asserts on every latched step (it merges by `or` over any
+        other CES of the machine and over GOV-SA-23's idle zeros);
+      * release: one event, the release conjunction, asserting `release[1]`.
+    Every next-active reference stays inside this CES (closed events, owner 2026-11-27).
+    """
+    c = C(cid, frm, to, set_events, set_outs, "RED", ["GOV-SA-24", *amend], dispatch)
+    c["latchGraph"] = {"holds": [(name, dict(lit), list(outs)) for name, lit, outs in holds],
+                       "release": (dict(release[0]), list(release[1]))}
+    return c
 
 
 # ---------------------------------------------------------------- the machines
@@ -359,7 +374,7 @@ MACHINES = [
                 [{"src_req_epoch_swap": 1, "src_slsa_attested": 0}], ["HALT_PROMOTION"], "RED", ["GOV-SA-05"])]),
     dict(n=7, stem="GOV07_exposure-budget-watchdog", code="M-GOV-07", title="ExposureBudgetWatchdog",
          kind="fixture", cls="signal-monitor", family="C-runtime-assurance", workflow="W3", asset=None, handoff=None,
-         rule="SPECIFICATION.md 4.3 (7)", latch=True,
+         rule="SPECIFICATION.md 4.3 (7)",
          desc="Exposure-budget watchdog with an SR latch: reports the approach band, trips on a sustained breach, dispatches incident triage, and releases only after triage and a distinct operator's approval with the rate back in band.",
          facts=["mon_mu_exhaust_rate", "operator_approved", "operator_distinct"],
          completion=[("triage_completed", "incident triage is complete"), ("confirmed_harm", "triage confirmed in-bounds harm")],
@@ -367,20 +382,19 @@ MACHINES = [
                     objective="Summarize a latched exposure-budget breach from the K-lines around it, say whether in-bounds harm occurred, and propose containment for the operator; take no action.",
                     capabilities=["pe.completion.write", "pe.observations.read", "kline.read", "rag.query"],
                     actions=["Write a triage summary and the confirmed_harm finding."]),
-         ces=[C("approach", "S0_Nominal", "S1_Warning", [{"mon_mu_exhaust_rate": (0.0201, 0.05), "latch_q_prev": 0}],
+         ces=[C("approach", "S0_Nominal", "S1_Warning", [{"mon_mu_exhaust_rate": (0.0201, 0.05)}],
                 ["APPROACH"], "AMBER", ["GOV-SA-01"]),
-              C("breach-set", "S0_Nominal|S1_Warning", "S2_BreachLatch", rep({"mon_mu_exhaust_rate": gt(0.05)}, DEBOUNCE),
-                ["REVOKE_EPOCH", "TRIGGER_INCIDENT", "LATCH"], "RED", ["GOV-SA-01", "GOV-SA-06", "GOV-SA-19"]),
-              C("triage-requested", "S2_BreachLatch", "S2_BreachLatch", [{"latch_q_prev": 1, "triage_completed": 0}],
-                ["REVOKE_EPOCH", "LATCH", "AGENT_REQUESTED"], "RED", ["GOV-SA-06"], dispatch=True),
-              C("harm-confirmed", "S2_BreachLatch", "S2_BreachLatch",
-                [{"latch_q_prev": 1, "triage_completed": 1, "confirmed_harm": 1}],
-                ["REVOKE_EPOCH", "TRIGGER_INCIDENT", "LATCH"], "RED", ["GOV-SA-06"]),
-              *latch_holds([("unapproved", {"operator_approved": 0}), ("not-distinct", {"operator_distinct": 0}),
-                            ("rate", {"mon_mu_exhaust_rate": gt(0.02)})], ["REVOKE_EPOCH", "LATCH"]),
-              C("breach-reset", "S2_BreachLatch", "S0_Nominal",
-                [{"latch_q_prev": 1, "triage_completed": 1, "operator_approved": 1, "operator_distinct": 1,
-                  "mon_mu_exhaust_rate": le(0.02)}], [], "GREEN", ["GOV-SA-06"])]),
+              latch_ces("breach", "S0_Nominal|S1_Warning", "S2_BreachLatch",
+                        rep({"mon_mu_exhaust_rate": gt(0.05)}, DEBOUNCE), ["REVOKE_EPOCH", "TRIGGER_INCIDENT", "LATCH"],
+                        [("triage-pending", {"triage_completed": 0}, ["REVOKE_EPOCH", "LATCH", "AGENT_REQUESTED"]),
+                         ("harm", {"triage_completed": 1, "confirmed_harm": 1, "operator_approved": 0},
+                          ["REVOKE_EPOCH", "TRIGGER_INCIDENT", "LATCH"]),
+                         ("unapproved", {"operator_approved": 0}, ["REVOKE_EPOCH", "LATCH"]),
+                         ("not-distinct", {"operator_distinct": 0}, ["REVOKE_EPOCH", "LATCH"]),
+                         ("rate", {"mon_mu_exhaust_rate": gt(0.02)}, ["REVOKE_EPOCH", "LATCH"])],
+                        ({"triage_completed": 1, "operator_approved": 1, "operator_distinct": 1,
+                          "mon_mu_exhaust_rate": le(0.02)}, []),
+                        ["GOV-SA-01", "GOV-SA-19"], dispatch=True)]),
     dict(n=8, stem="GOV08_latency-gate-sentinel", code="M-GOV-08", title="LatencyGateSentinel",
          kind="fixture", cls="signal-monitor", family="C-runtime-assurance", workflow="W3", asset=None, handoff=None,
          rule="SPECIFICATION.md 4.3 (8)",
@@ -395,7 +409,7 @@ MACHINES = [
                 ["GOV-SA-07", "GOV-SA-19"])]),
     dict(n=9, stem="GOV09_near-miss-backlog-enforcer", code="M-GOV-09", title="NearMissBacklogEnforcer",
          kind="fixture", cls="signal-monitor", family="C-runtime-assurance", workflow="W3", asset=None, handoff=None,
-         rule="SPECIFICATION.md 4.3 (9)", latch=True,
+         rule="SPECIFICATION.md 4.3 (9)",
          desc="Near-miss backlog enforcer with hysteresis: halts promotion on a sustained backlog of 0.80 of ring capacity, dispatches near-miss triage, and holds until the backlog falls below 0.50.",
          facts=["mon_nearmiss_backlog"],
          completion=[("triage_completed", "the triage pass is complete")],
@@ -403,15 +417,12 @@ MACHINES = [
                     objective="Classify and resolve unresolved near-miss K-lines and draft candidate rules for the next rule-epoch promotion (W2); resolving K-lines lowers the backlog Source.",
                     capabilities=["pe.completion.write", "kline.read", "rag.query"],
                     actions=["Classify near-miss K-lines.", "Draft candidate rules for a W2 frame."]),
-         ces=[C("backlog-set", "S0_Nominal", "S1_BacklogThreshold", rep({"mon_nearmiss_backlog": ge(0.80)}, 2),
-                ["HALT_PROMOTION", "LATCH"], "RED", ["GOV-SA-06", "GOV-SA-19"]),
-              C("triage-requested", "S1_BacklogThreshold", "S1_BacklogThreshold",
-                [{"latch_q_prev": 1, "triage_completed": 0}], ["HALT_PROMOTION", "LATCH", "AGENT_REQUESTED"], "RED",
-                ["GOV-SA-06"], dispatch=True),
-              *latch_holds([("backlog", {"mon_nearmiss_backlog": ge(0.50)})], ["HALT_PROMOTION", "LATCH"]),
-              C("backlog-reset", "S1_BacklogThreshold", "S0_Nominal",
-                [{"latch_q_prev": 1, "triage_completed": 1, "mon_nearmiss_backlog": lt(0.50)}], [], "GREEN",
-                ["GOV-SA-01", "GOV-SA-06"])]),
+         ces=[latch_ces("backlog", "S0_Nominal", "S1_BacklogThreshold", rep({"mon_nearmiss_backlog": ge(0.80)}, 2),
+                        ["HALT_PROMOTION", "LATCH"],
+                        [("triage-pending", {"triage_completed": 0}, ["HALT_PROMOTION", "LATCH", "AGENT_REQUESTED"]),
+                         ("backlog", {"mon_nearmiss_backlog": ge(0.50)}, ["HALT_PROMOTION", "LATCH"])],
+                        ({"triage_completed": 1, "mon_nearmiss_backlog": lt(0.50)}, []),
+                        ["GOV-SA-01", "GOV-SA-19"], dispatch=True)]),
     dict(n=10, stem="GOV10_synthetic-transparency-gate", code="M-GOV-10", title="SyntheticTransparencyGate",
          kind="template", cls="safety-compliance-checker", family="D-transparency-oversight", workflow="W4",
          asset="EgressArt50Log", handoff="GOV13_control-crosswalk-assembler", rule="SPECIFICATION.md 4.3 (10)",
@@ -517,7 +528,7 @@ MACHINES = [
               *review_ces(P13, A_HUMAN, W)]),
     dict(n=14, stem="GOV14_periodic-recertification-timer", code="M-GOV-14", title="PeriodicRecertificationTimer",
          kind="fixture", cls="signal-monitor", family="A-domain-onboarding-impact", workflow="W7", asset=None,
-         handoff=None, rule="SPECIFICATION.md 4.3 (14)", latch=True,
+         handoff=None, rule="SPECIFICATION.md 4.3 (14)",
          desc="Periodic recertification timer: at 15% TTL remaining it dispatches the renewal scheduler to open a renewal admission frame; expiry latches a revoke, expiry without a renewal window first is overdue, and the epoch is restored only on a renewed TTL with an operator's approval.",
          facts=["mon_recert_ttl_rem", "operator_approved"],
          completion=[("renewal_frame_open", "a renewal admission frame is open")],
@@ -526,21 +537,21 @@ MACHINES = [
                     capabilities=["pe.completion.write", "lifecycle.frame.open", "registry.read"],
                     actions=["Open the renewal admission frame."]),
          ces=[C("renewal-window", "S0_Current", "S1_RenewalWindow",
-                [{"mon_recert_ttl_rem": (EPS, 0.15), "latch_q_prev": 0, "renewal_frame_open": 0}],
+                [{"mon_recert_ttl_rem": (EPS, 0.15), "renewal_frame_open": 0}],
                 ["APPROACH", "AGENT_REQUESTED"], "AMBER", ["GOV-SA-01"], dispatch=True),
               C("renewal-open", "S1_RenewalWindow", "S1_RenewalWindow",
-                [{"mon_recert_ttl_rem": (EPS, 0.15), "latch_q_prev": 0, "renewal_frame_open": 1}], ["APPROACH"], "AMBER",
+                [{"mon_recert_ttl_rem": (EPS, 0.15), "renewal_frame_open": 1}], ["APPROACH"], "AMBER",
                 ["GOV-SA-01"]),
-              C("expired-set", "S0_Current|S1_RenewalWindow", "S2_ExpiredRevoked", [{"mon_recert_ttl_rem": 0}],
-                ["REVOKE_EPOCH", "LATCH"], "RED", ["GOV-SA-06"]),
-              C("expired-without-window", "S0_Current", "S2_ExpiredRevoked",
-                [{"mon_recert_ttl_rem": gt(0.15)}, {"mon_recert_ttl_rem": 0}], ["REVOKE_EPOCH", "LATCH", "OVERDUE"],
-                "RED", ["GOV-SA-22"]),
-              *latch_holds([("ttl", {"mon_recert_ttl_rem": le(0.15)}), ("unapproved", {"operator_approved": 0})],
-                           ["REVOKE_EPOCH", "LATCH"]),
-              C("recertified", "S2_ExpiredRevoked", "S0_Current",
-                [{"latch_q_prev": 1, "mon_recert_ttl_rem": gt(0.15), "operator_approved": 1}], [], "GREEN",
-                ["GOV-SA-01", "GOV-SA-06"])]),
+              *[latch_ces(cid, frm, "S2_ExpiredRevoked", ev, outs,
+                          [("ttl", {"mon_recert_ttl_rem": le(0.15)}, ["REVOKE_EPOCH", "LATCH"]),
+                           ("unapproved", {"operator_approved": 0}, ["REVOKE_EPOCH", "LATCH"])],
+                          ({"mon_recert_ttl_rem": gt(0.15), "operator_approved": 1}, []), amend)
+                for cid, frm, ev, outs, amend in (
+                    ("expired", "S0_Current|S1_RenewalWindow", [{"mon_recert_ttl_rem": 0}], ["REVOKE_EPOCH", "LATCH"],
+                     ["GOV-SA-01"]),
+                    ("expired-without-window", "S0_Current",
+                     [{"mon_recert_ttl_rem": gt(0.15)}, {"mon_recert_ttl_rem": 0}],
+                     ["REVOKE_EPOCH", "LATCH", "OVERDUE"], ["GOV-SA-01", "GOV-SA-22"]))]]),
     dict(n=15, stem="GOV15_break-glass-emergency-override", code="M-GOV-15", title="BreakGlassEmergencyOverride",
          kind="template", cls="governance-escalator", family="H-hardening", workflow="W6",
          asset="EmergencyEpochOverrideFrame", handoff="GOV04_rule-epoch-promotion",
@@ -573,7 +584,7 @@ MACHINES = [
                 ["HALT_PROMOTION", "REVOKE_EPOCH", "REWORK"], "RED")]),
     dict(n=16, stem="GOV16_cross-domain-delegation-cap", code="M-GOV-16", title="CrossDomainDelegationCap",
          kind="fixture", cls="signal-monitor", family="H-hardening", workflow="W3", asset=None, handoff=None,
-         rule="HARDENING_TRANSITION_RULES.md section 2 (16)", latch=True,
+         rule="HARDENING_TRANSITION_RULES.md section 2 (16)",
          desc="Cross-domain delegation cap with an SR latch: in the approach band it dispatches the delegation clamp; a sustained exposure or canary breach trips a revoke and an incident, released on a distinct operator's approval with both back in band.",
          facts=["mon_xdomain_mu_agg", "mon_canary_drift_score", "operator_approved", "operator_distinct"],
          completion=[("delegation_clamped", "delegation depth was clamped")],
@@ -582,23 +593,21 @@ MACHINES = [
                     capabilities=["pe.completion.write", "pe.observations.read", "delegation.clamp", "human.notify"],
                     actions=["Clamp A2A delegation depth on the offending chains."]),
          ces=[C("delegation-throttle", "S0_Nominal", "S1_DelegationThrottle",
-                [{"mon_xdomain_mu_agg": (0.7001, 0.90), "mon_canary_drift_score": le(0.15), "latch_q_prev": 0,
+                [{"mon_xdomain_mu_agg": (0.7001, 0.90), "mon_canary_drift_score": le(0.15),
                   "delegation_clamped": 0}], ["APPROACH", "AGENT_REQUESTED"], "AMBER", ["GOV-SA-01"], dispatch=True),
               C("delegation-clamped", "S1_DelegationThrottle", "S1_DelegationThrottle",
-                [{"mon_xdomain_mu_agg": (0.7001, 0.90), "latch_q_prev": 0, "delegation_clamped": 1}], ["APPROACH"],
+                [{"mon_xdomain_mu_agg": (0.7001, 0.90), "delegation_clamped": 1}], ["APPROACH"],
                 "AMBER", ["GOV-SA-01"]),
-              C("breach-exposure", "S0_Nominal|S1_DelegationThrottle", "S2_CrossDomainBreachLatch",
-                rep({"mon_xdomain_mu_agg": gt(0.90)}, DEBOUNCE), ["REVOKE_EPOCH", "TRIGGER_INCIDENT", "LATCH"], "RED",
-                ["GOV-SA-01", "GOV-SA-06", "GOV-SA-19"]),
-              C("breach-canary", "S0_Nominal|S1_DelegationThrottle", "S2_CrossDomainBreachLatch",
-                rep({"mon_canary_drift_score": gt(0.15)}, DEBOUNCE), ["REVOKE_EPOCH", "TRIGGER_INCIDENT", "LATCH"], "RED",
-                ["GOV-SA-01", "GOV-SA-06", "GOV-SA-19"]),
-              *latch_holds([("unapproved", {"operator_approved": 0}), ("not-distinct", {"operator_distinct": 0}),
-                            ("exposure", {"mon_xdomain_mu_agg": gt(0.50)}),
-                            ("canary", {"mon_canary_drift_score": gt(0.10)})], ["REVOKE_EPOCH", "LATCH"]),
-              C("breach-reset", "S2_CrossDomainBreachLatch", "S0_Nominal",
-                [{"latch_q_prev": 1, "operator_approved": 1, "operator_distinct": 1, "mon_xdomain_mu_agg": le(0.50),
-                  "mon_canary_drift_score": le(0.10)}], ["PERMIT_DEPLOY"], "GREEN", ["GOV-SA-06"])]),
+              *[latch_ces(cid, "S0_Nominal|S1_DelegationThrottle", "S2_CrossDomainBreachLatch",
+                          rep({signal: gt(limit)}, DEBOUNCE), ["REVOKE_EPOCH", "TRIGGER_INCIDENT", "LATCH"],
+                          [("unapproved", {"operator_approved": 0}, ["REVOKE_EPOCH", "LATCH"]),
+                           ("not-distinct", {"operator_distinct": 0}, ["REVOKE_EPOCH", "LATCH"]),
+                           ("exposure", {"mon_xdomain_mu_agg": gt(0.50)}, ["REVOKE_EPOCH", "LATCH"]),
+                           ("canary", {"mon_canary_drift_score": gt(0.10)}, ["REVOKE_EPOCH", "LATCH"])],
+                          ({"operator_approved": 1, "operator_distinct": 1, "mon_xdomain_mu_agg": le(0.50),
+                            "mon_canary_drift_score": le(0.10)}, ["PERMIT_DEPLOY"]), ["GOV-SA-01", "GOV-SA-19"])
+                for cid, signal, limit in (("breach-exposure", "mon_xdomain_mu_agg", 0.90),
+                                           ("breach-canary", "mon_canary_drift_score", 0.15))]]),
     dict(n=17, stem="GOV17_quorum-key-revocation-lifecycle", code="M-GOV-17", title="QuorumKeyRevocationLifecycle",
          kind="template", cls="governance-escalator", family="H-hardening", workflow="W6",
          asset="QuorumKeyring", handoff="GOV15_break-glass-emergency-override",
@@ -634,8 +643,8 @@ MACHINES = [
 # carries one idle CES: a single event that accepts any input and asserts the
 # all-zero vector. Outputs merge by `or`, so it never masks another CES; on a
 # step where nothing else asserts it clears the region, and a decision lasts
-# exactly as long as its condition. A GOV-SA-06 latch is unaffected: its hold
-# CES asserts LATCH on every step the latch is set.
+# exactly as long as its condition. A latch is unaffected: its hold cluster
+# (GOV-SA-24) asserts LATCH on every step the latch is set.
 for _m in MACHINES:
     _m["ces"].append(C("idle", "any", "Idle", [{}], [], "GREEN", ["GOV-SA-23"]))
 
@@ -654,9 +663,13 @@ FIXTURE_CONTEXT = {
     (4, "aibom-missing"): {"gate_3of3_parity": 1},
 }
 FIXTURE_VALUES = {
-    (7, "hold-rate"): {"mon_mu_exhaust_rate": 0.03},
-    (16, "hold-canary"): {"mon_canary_drift_score": 0.12},
-    (16, "hold-exposure"): {"mon_xdomain_mu_agg": 0.6},
+    (7, "breach-hold-rate"): {"mon_mu_exhaust_rate": 0.03},
+    (16, "breach-exposure-hold-canary"): {"mon_canary_drift_score": 0.12},
+    (16, "breach-exposure-hold-exposure"): {"mon_xdomain_mu_agg": 0.6},
+    (16, "breach-canary-hold-canary"): {"mon_canary_drift_score": 0.12},
+    (16, "breach-canary-hold-exposure"): {"mon_xdomain_mu_agg": 0.6},
+    # Hold at the expired TTL (0 satisfies the hold literal TTL <= 0.15), so the cell has two levels.
+    (14, "expired-without-window-hold-ttl"): {"mon_recert_ttl_rem": 0.0},
 }
 NEGATIVES = {
     1: [("approval-without-dwell", [P01, A_HUMAN], "an approval after a single parked step does not permit"),
@@ -897,19 +910,37 @@ def build_machine(m):
     for c in m["ces"]:
         sid = f"ces_{m['stem'][:5].lower()}_{c['id'].replace('-', '_')}"
         evs = []
+        graph = c.get("latchGraph")
+        for pm in ([lit for _, lit, _ in graph["holds"]] + [graph["release"][0]]) if graph else []:
+            unknown = set(pm) - set(names)
+            if unknown:
+                raise SystemExit(f"{m['stem']} {c['id']}: predicates on {sorted(unknown)} not in the input")
+        cluster = ([f"{sid}-h-{name}" for name, _, _ in graph["holds"]] + [f"{sid}-release"]) if graph else []
         for i, pm in enumerate(c["events"]):
             unknown = set(pm) - set(names)
             if unknown:
                 raise SystemExit(f"{m['stem']} {c['id']}: predicates on {sorted(unknown)} not in the input")
+            last = i == len(c["events"]) - 1
             ev = {"id": f"{sid}-e{i}", "isInitial": i == 0, "elements": [element(pm.get(n)) for n in names],
-                  "nextEventIds": [f"{sid}-e{i + 1}"] if i < len(c["events"]) - 1 else []}
-            if i == len(c["events"]) - 1:
+                  "nextEventIds": [f"{sid}-e{i + 1}"] if not last else list(cluster)}
+            if last:
                 ev["outputEvents"] = [{"id": f"{sid}-out", "vector": vector(c["outs"])}]
             evs.append(ev)
+        if graph:
+            for name, lit, outs in graph["holds"]:
+                evs.append({"id": f"{sid}-h-{name}", "isInitial": False,
+                            "elements": [element(lit.get(n)) for n in names], "nextEventIds": list(cluster),
+                            "outputEvents": [{"id": f"{sid}-h-{name}-out", "vector": vector(outs)}]})
+            rel, rel_outs = graph["release"]
+            evs.append({"id": f"{sid}-release", "isInitial": False, "elements": [element(rel.get(n)) for n in names],
+                        "nextEventIds": [], "outputEvents": [{"id": f"{sid}-release-out", "vector": vector(rel_outs)}]})
         rx = regex(c["events"], names)
+        if graph:
+            holds_rx = " | ".join(symbol(lit, names) for _, lit, _ in graph["holds"])
+            rx = f"{rx} · ({holds_rx})* · {symbol(graph['release'][0], names)}"
         sequences.append({"id": sid, "name": f"{m['code']} {c['frm']} → {c['to']}", "schemaVersion": "1.0",
                           "metadata": {"sourceFromState": c["frm"], "sourceToState": c["to"], "regularExpression": rx,
-                                       "length": len(c["events"]), "specRule": m["rule"],
+                                       "length": len(evs), "specRule": m["rule"],
                                        "semanticAmendments": c["amend"],
                                        "asserts": c["outs"] or ["none (explicit release)"],
                                        **({"dispatchesAgent": m["agent"]["id"]} if c["dispatch"] else {})},
@@ -1031,6 +1062,18 @@ def resolve(m, vecs, sequences, latch_index):
 def build_fixtures(m, sequences, names, latch_index):
     scenarios = []
     for c, seq in zip(m["ces"], sequences):
+        graph = c.get("latchGraph")
+        if graph:
+            rel, rel_outs = graph["release"]
+            pre = [dict(e) for e in c["events"]]
+            scenarios.append((f"{c['id']}-set", pre, f"sets {seq['id']}", seq["id"]))
+            for name, lit, outs in graph["holds"]:
+                step = {**rel, **lit, **FIXTURE_VALUES.get((m["n"], f"{c['id']}-hold-{name}"), {})}
+                scenarios.append((f"{c['id']}-hold-{name}", pre + [step],
+                                  f"holds {seq['id']} while {name}", (seq["id"], outs)))
+            scenarios.append((f"{c['id']}-release", pre + [dict(rel)], f"releases {seq['id']}",
+                              (seq["id"], rel_outs, c["outs"])))
+            continue
         steps = [dict(e) for e in c["events"]]
         ctx = FIXTURE_CONTEXT.get((m["n"], c["id"]))
         if ctx:
@@ -1052,8 +1095,20 @@ def build_fixtures(m, sequences, names, latch_index):
     for name, steps, purpose, target in scenarios:
         vecs, trace = resolve(m, scenario_vectors(m, names, steps), sequences, latch_index)
         final = trace[-1] or [0.0] * OUTPUT_LEN
-        if target is not None:
-            want = next(s for s in sequences if s["id"] == target)["events"][-1]["outputEvents"][0]["vector"]
+        if isinstance(target, tuple):
+            # A latch hold or release (GOV-SA-24): the final step asserts its outputs, and a
+            # release leaves none of the set outputs it does not itself assert.
+            want = vector(target[1])
+            if trace[-1] is None or not all(f >= w for f, w in zip(final, want)):
+                raise SystemExit(f"{m['stem']}: fixture {name} does not assert {target[1]}: {trace}")
+            if len(target) == 3:
+                stuck = [o for o in target[2] if o not in target[1] and final[OUTPUTS.index(o)] >= 0.5]
+                if stuck:
+                    raise SystemExit(f"{m['stem']}: fixture {name} leaves {stuck} latched after release: {trace}")
+            target = target[0]
+        elif target is not None:
+            want = next(s for s in sequences if s["id"] == target)["events"][len(
+                next(c for c in m["ces"] if f"ces_{m['stem'][:5].lower()}_{c['id'].replace('-', '_')}" == target)["events"]) - 1]["outputEvents"][0]["vector"]
             if trace[-1] is None or not all(f >= w for f, w in zip(final, want)):
                 raise SystemExit(f"{m['stem']}: fixture {name} does not drive {target}: {trace}")
         key = json.dumps(vecs)
@@ -1210,11 +1265,30 @@ def fit_source(seq):
         return ("constant", 1.0, 0.0, seq[0])
     a = seq[0]
     b = next(v for v in seq if v != a)
+    if any(v not in (a, b) for v in seq):
+        raise SystemExit(f"no deterministic simulated Source reproduces {seq}: more than two levels")
+
+    def matches(f):
+        return any(all(abs(sample(*spec, t) - v) < 1e-9 for t, v in enumerate(seq))
+                   for spec in (("binary", f, 0.0, 0.0), ("square", f, (a - b) / 2, (a + b) / 2)))
+
+    def spec_for(f):
+        binary = ("binary", f, 0.0, 0.0)
+        if all(abs(sample(*binary, t) - v) < 1e-9 for t, v in enumerate(seq)):
+            return binary
+        return ("square", f, (a - b) / 2, (a + b) / 2)
+
+    # Integer half-periods first: a for k steps, then b.
     for k in range(1, len(seq) + 1):
-        f = 1.0 / (2 * k)
-        for spec in (("binary", f, 0.0, 0.0), ("square", f, (a - b) / 2, (a + b) / 2)):
-            if all(abs(sample(*spec, t) - v) < 1e-9 for t, v in enumerate(seq)):
-                return spec
+        if matches(1.0 / (2 * k)):
+            return spec_for(1.0 / (2 * k))
+    # Then f = i/100, where the a/b runs need not be equal (e.g. 0.8: a, b, b). Only
+    # frequencies whose every sampled phase sits 0.05 clear of the 0.5 threshold and of
+    # a wrap are taken, so the level is exact under floating point on every engine.
+    for i in range(1, 100):
+        phases = [(t * i) % 100 for t in range(1, len(seq))]
+        if all(5 <= ph <= 45 or 55 <= ph <= 95 for ph in phases) and matches(i / 100):
+            return spec_for(i / 100)
     raise SystemExit(f"no deterministic simulated Source reproduces {seq}")
 
 

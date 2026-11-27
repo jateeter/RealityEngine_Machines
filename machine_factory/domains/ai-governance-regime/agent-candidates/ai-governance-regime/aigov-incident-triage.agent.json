@@ -11,7 +11,7 @@
     "machineClass": "signal-monitor",
     "inputRegion": {
       "offset": 17056,
-      "length": 6
+      "length": 5
     },
     "outputRegion": {
       "offset": 17292,
@@ -22,7 +22,7 @@
   "dispatch": {
     "mode": "ces-trigger",
     "triggerSequenceIds": [
-      "ces_gov07_triage_requested"
+      "ces_gov07_breach"
     ],
     "workflow": "W3",
     "humanApprovalRequired": false
@@ -37,29 +37,7 @@
     "objective": "Summarize a latched exposure-budget breach from the K-lines around it, say whether in-bounds harm occurred, and propose containment for the operator; take no action.",
     "instructions": "You are the incident triage agent for the RealityEngine AI governance regime (M-GOV-07 ExposureBudgetWatchdog, workflow W3).\n\nOBJECTIVE\nSummarize a latched exposure-budget breach from the K-lines around it, say whether in-bounds harm occurred, and propose containment for the operator; take no action.\n\nYOU MAY\n- Write a triage summary and the confirmed_harm finding.\n\nYOU MUST NOT\n- Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).\n- Never write vector values directly; your result reaches the engines only through your completion contract.\n- Read and write frame documents only through the asset lifecycle with the step's capability, under the pinned ETag.\n- Leave unresolved what the evidence does not settle; never invent thresholds, signatures or receipts.",
     "outputContract": "Return one structured line per completion field as `<field>: 0|1` (triage_completed: incident triage is complete, confirmed_harm: triage confirmed in-bounds harm), then `rationale: <one sentence>`. The machine, not you, decides what follows.",
-    "sequenceCatalog": [
-      {
-        "sequenceId": "ces_gov07_triage_requested",
-        "label": "S2_BreachLatch",
-        "rag": "RED",
-        "outputIndex": 1,
-        "action": "REVOKE_EPOCH + LATCH + AGENT_REQUESTED"
-      },
-      {
-        "sequenceId": "ces_gov07_harm_confirmed",
-        "label": "S2_BreachLatch",
-        "rag": "RED",
-        "outputIndex": 1,
-        "action": "REVOKE_EPOCH + TRIGGER_INCIDENT + LATCH"
-      },
-      {
-        "sequenceId": "ces_gov07_breach_reset",
-        "label": "S0_Nominal",
-        "rag": "GREEN",
-        "outputIndex": 0,
-        "action": "release"
-      }
-    ],
+    "sequenceCatalog": [],
     "prohibitions": [
       "Never approve, resume, capture or close a continuation; approvals belong to distinct humans (T15).",
       "Never write vector values directly; your result reaches the engines only through your completion contract.",
@@ -70,7 +48,7 @@
   "agentBinding": {
     "agent": "aigov-incident-triage",
     "mode": "advise",
-    "trigger": "ces_gov07_triage_requested",
+    "trigger": "ces_gov07_breach",
     "allowedActions": [
       "Write a triage summary and the confirmed_harm finding."
     ],
