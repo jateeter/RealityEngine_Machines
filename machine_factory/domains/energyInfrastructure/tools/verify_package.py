@@ -289,6 +289,7 @@ def check(root: Path) -> dict:
             'syntheticImportCarbonLedgers':1,
             'syntheticJournalCarbonBridges':1,
             'syntheticJournalStorageReconciliations':1,
+            'syntheticJournalRevisionArchives':1,
             'syntheticStorageAllocations':1,
             'syntheticTrajectoryArchives':1,
             'syntheticProposalScreens':1,

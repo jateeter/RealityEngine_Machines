@@ -83,3 +83,5 @@ service is exercised. Native control remains DENY and operational authorization
 false. All 43 integrated acceptance cases remain NOT_RUN; full simulated hardware
 coverage, carbon qualification and domain admission remain pending. Required
 hardware remains simulated and generic/template assets remain allowed throughout.
+
+The [journal-backed revision archive](journal-revisions.md) now recomputes this reconciliation for each factor reporting revision and preserves earlier as-of reports. Recalculation does not resolve unknown opening/inventory/delivery carbon or authenticate reporting history.
