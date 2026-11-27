@@ -8,7 +8,7 @@ As of 24 November 2026: **DESIGN_PACKAGE_NOT_ADMITTED**, version 0.2.0.
 
 Implemented package assets are the unchanged 187-definition clone, NIST PDF receipt, research-backed standards/public-implementation/RAG inventories, proposed lifecycle/security/agent/carbon contracts, documentary templates, 20 risk scenarios, 43 unexecuted acceptance cases and a ten-phase workplan. Actual offline integrity results are in [verification-summary.json](verification-summary.json). Its PASS applies only to package consistency and provenance.
 
-Not performed: machine adaptation/new identity or allocation, source/service bootstrap, protocol/model/agent installation or integration, approved RAG extraction/indexing, current wire probes, native regression/reasoning, software/simulated-hardware tests, accredited conformance, site commissioning, production risk acceptance, domain admission, deployment, domain-specific release or deployment. The baseline source package and GitHub issue backlog are published; EI03 reference-scope additions proceed through their own PR.
+Not performed: machine adaptation/new identity or allocation, source/service bootstrap, protocol/model/agent installation or integration, approved RAG extraction/indexing, current wire probes, native regression/reasoning, integrated software/simulated-hardware acceptance tests, accredited conformance, site commissioning, production risk acceptance, domain admission, deployment, domain-specific release or deployment. The baseline source package and GitHub issue backlog are published; EI03 reference-scope additions proceed through their own PR.
 
 ## Blocking design decisions and evidence
 
@@ -31,7 +31,7 @@ Source inspection anchors: CI `c985c0d7b592013d4d830b079d5af1663d407b6c`; localA
 
 ## Backlog publication
 
-The current detailed backlog is [acceptance/issues.json](acceptance/issues.json). Publication status and actual GitHub URLs are recorded there. The original published issue snapshot records all 24 workstreams as PLANNED; current source progress is tracked separately and all 43 behavioral cases remain NOT_RUN. EI04 template/class coverage and EI18 simulated-hardware coverage are required future deliverables, not claims that templates or models have been built.
+The current detailed backlog is [acceptance/issues.json](acceptance/issues.json). Publication status and actual GitHub URLs are recorded there. The original published issue snapshot records all 24 workstreams as PLANNED; current source progress is tracked separately and all 43 behavioral cases remain NOT_RUN. EI04 template/class coverage and EI18 simulated-hardware coverage are required future deliverables, not claims of complete template or simulator coverage. Partial source-backed assets and the offline storage component are described below.
 
 ## Published issue backlog
 
@@ -126,3 +126,5 @@ EI03 now has [generic reference microgrids and authority](documents/workflow/ref
 ## EI13 public implementation review packets
 
 [The bounded review-only source lookup](assets/public-model-review.md) now prepares exact-source excerpts from selected pinned SunSpec/OPC UA DI material with locators, parent hashes, dependency context and retained license notices. Normative/live/private/operating requests abstain before source text reads. No source is admitted for model use, no index/model answer is created, and authenticated RAG/LLM integration and all 43 behavioral cases remain pending.
+
+EI18 partial execution: [offline storage simulated hardware component](assets/storage-component.md) now supplies deterministic energy state, selected SunSpec power readback, process-local replay and injected fault holds. This does not run the 43 integrated acceptance cases or fulfill full hardware coverage.

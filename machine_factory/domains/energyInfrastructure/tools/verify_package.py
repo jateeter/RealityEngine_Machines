@@ -26,6 +26,7 @@ from build_carbon_trajectories import check as check_carbon_trajectories
 from build_proposal_screen import check as check_proposal_screen
 from build_risk_assessment import check as check_risk_assessment
 from build_review_lookup import check as check_review_lookup
+from build_storage_component import check as check_storage_component
 
 EXCLUDED = {'asset-manifest.json', 'verification-summary.json'}
 EXPECTED_COUNTS = {'standards': 47, 'implementations': 29, 'sources': 19,
@@ -65,6 +66,7 @@ def check(root: Path) -> dict:
     require(not check_proposal_screen(root), 'Synthetic proposal screen source/profile mismatch')
     require(not check_risk_assessment(root), 'Synthetic risk assessment source/policy mismatch')
     require(not check_review_lookup(root), 'Public model review policy/query mismatch')
+    require(not check_storage_component(root), 'Storage component catalog mismatch')
     def safe(rel: str) -> Path:
         p = root / rel
         if Path(rel).is_absolute() or not p.resolve().is_relative_to(root):
@@ -290,6 +292,7 @@ def check(root: Path) -> dict:
             'syntheticProposalScreens':1,
             'syntheticRiskAssessments':1,
             'publicModelReviewLookupPolicies':1,
+            'partialOfflineStorageComponents':1,
             'threatSchemaTemplates':57,'stixTopLevelObjectAndContainerTemplates':43,
             'supplementalNormativeStandardSnapshots':1,'taxiiResourceTemplates':9,'taxiiSupportingRecordTemplates':2,
             'genericRoleTemplates':19,'genericDocumentTemplates':7,'normativeClassCoverageComplete':False,
@@ -297,7 +300,7 @@ def check(root: Path) -> dict:
             'assetManifestSHA256':digest(root/'asset-manifest.json'),'errors':errors,
             'referenceScope':'THREE_GENERIC_SCENARIOS_SPECIFICATION_ONLY',
             'identityPlan':'187_DISPOSITIONS_NOT_RUNTIME_PAYLOAD',
-            'limitations':['No runtime/model/adapter or RAG execution','No simulated-hardware behavior/protocol or physical conformance evidence','No standards compliance or security assurance claim','No domain admission/deployment; EI01 baseline source was published in PR289','Issue body readback and progress events are recorded evidence, not ongoing live GitHub checks','Full normative class coverage and simulator catalog remain EI04/EI18 deliverables; supplemental partial templates are separately counted','collectedSources counts original RAG family receipts; supplemental public-model snapshot is separately recorded']}
+            'limitations':['No native runtime/adapter, Large Model or RAG execution','Only partial offline storage component behavior; no integrated hardware/protocol or physical conformance evidence','No standards compliance or security assurance claim','No domain admission/deployment; EI01 baseline source was published in PR289','Issue body readback and progress events are recorded evidence, not ongoing live GitHub checks','Full normative class coverage and simulator catalog remain EI04/EI18 deliverables; supplemental partial templates are separately counted','collectedSources counts original RAG family receipts; supplemental public-model snapshot is separately recorded']}
 
 def main() -> int:
     parser=argparse.ArgumentParser(description=__doc__)
