@@ -58,3 +58,11 @@ test('stale risk evidence after an applied interval holds rather than clears',()
 test('risk scenario composes assessor, hold and reconstruction deterministically',()=>{
  const a=runAssessedRiskScenario();assert.deepEqual(a,runAssessedRiskScenario());assert.equal(a.risk.riskDisposition,'BLOCKED');assert.equal(a.held.applied,false);assert.equal(a.reconstructedObservation.riskDisposition,'BLOCKED');assert.equal(a.behavioralCasesRun,0);
 });
+
+test('historical accepted replay after assessed block cannot execute or weaken posture',()=>{
+ const j=new StorageExecutionJournal('risk.historical');j.step({id:'before-risk',storagePowerKw:'0'});
+ const x=fixture();x.evaluationAt='2026-11-25T00:15:01.000Z';x.feed.receivedAt='2026-11-25T00:15:00.200Z';x.findings[0].observedAt='2026-11-25T00:15:00.000Z';x.findings[0].receivedAt=x.feed.receivedAt;x.findings[0].applicability='AFFECTED';
+ assert.equal(j.applyRiskAssessment(x).riskDisposition,'BLOCKED');const before=j.observe();
+ const old=j.step({id:'before-risk',storagePowerKw:'0'});assert.equal(old.replayed,true);assert.equal(old.applied,true);assert.equal(old.controlAction,'DENY');assert.deepEqual(j.observe(),before);
+ assert.equal(j.step({id:'new-after-risk',storagePowerKw:'0'}).applied,false);assert.deepEqual(j.observe(),before);assert.deepEqual(StorageExecutionJournal.restore(j.export()).observe(),before);
+});

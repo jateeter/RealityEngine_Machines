@@ -161,7 +161,7 @@ posture and subsequent denied-request replay behavior. This shares the existing
 source binding, size/event limits and lack of authenticated history completeness,
 rollback protection or durable delivery.
 
-Run the composed scenario and its 21 targeted tests from the repository root:
+Run the composed scenario and its 22 targeted tests from the repository root:
 
 ```bash
 node machine_factory/domains/energyInfrastructure/tools/run_assessed_risk_scenario.mjs
@@ -176,3 +176,5 @@ conformance, integrated acceptance or admission is established. Native control
 remains DENY, carbon inventory/intensity unknown, and all 43 integrated cases
 remain NOT_RUN. All required hardware remains simulated; template/generic
 assets remain allowed throughout.
+
+A replay of an earlier accepted request returns its original historical receipt with `replayed: true`; the historical `applied: true` is not a fresh authorization. It advances no clock, energy or counters and does not weaken the current assessed posture. New requests remain held. A dedicated test verifies this behavior before and after journal reconstruction.
