@@ -85,6 +85,17 @@ class SourceKindsTest(unittest.TestCase):
         self.assertEqual(kinds["feedback"]["class"], "deterministic")
         self.assertIsNone(kinds["none"]["class"])
 
+    def test_version_2_adds_simulated_and_openai(self) -> None:
+        # Owner, 2026-11-27: `simulated` (ARBITER_CONTRACT maps it to `synthetic`,
+        # measured) and the `openai` provider (generated); v1 reads unchanged.
+        v1, v2 = self.versions[1], self.versions[2]
+        kinds = {k["kind"]: k for k in v2["kinds"]}
+        self.assertEqual(set(kinds), {"test", "sensor", "simulated", "feedback", "none"})
+        self.assertEqual(kinds["simulated"]["class"], "measured")
+        self.assertIn({"provider": "openai", "class": "generated"}, kinds["sensor"]["providers"])
+        self.assertTrue(all(m["from"] == m["to"] for m in v2["mappingFromPrevious"]), "v1 is renamed nowhere")
+        self.assertEqual(v2["providerMapping"], v1["providerMapping"])
+
     def test_classes_follow_the_arbiter_contract(self) -> None:
         for n, doc in self.versions.items():
             self.assertEqual(doc["unknownProvider"]["class"], "generated", f"version {n}")
