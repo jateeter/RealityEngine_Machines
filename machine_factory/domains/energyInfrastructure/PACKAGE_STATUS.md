@@ -140,3 +140,5 @@ EI14 partial composition: [journal-derived import carbon accounting](assets/jour
 EI14 partial storage evidence: [journal storage reconciliation](assets/journal-storage.md) independently checks energy and conversion losses, allocates new charging emissions as a subset of imports and preserves unknown opening/delivered/inventory carbon. Historical storage energy never replaces current UNKNOWN telemetry. Integrated acceptance and carbon qualification remain pending.
 
 EI14 partial restatement evidence: [journal-backed reporting revisions](assets/journal-revisions.md) recompute import and new-charge allocation from the same journal, preserve historical snapshots and select reports without later correction values. Unknown opening carbon, provider qualification and integrated acceptance remain unresolved.
+
+EI10/EI11 partial execution guard: [simulated snapshot preconditions](assets/state-preconditions.md) bind optional requests to run/state/source context, deny stale intents without state advance and survive journal reconstruction. This is not approval, a distributed reservation, a qualified gateway or full AC14 acceptance.
