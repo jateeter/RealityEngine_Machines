@@ -7,6 +7,7 @@ import {createHash} from 'node:crypto';
 import {isDeepStrictEqual} from 'node:util';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
+import {StorageExecutionJournal} from './storage_execution_journal.mjs';
 import {evaluateMeterInterval} from './evaluate_meter_interval.mjs';
 const ROOT=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const read=p=>JSON.parse(readFileSync(p,'utf8'));
@@ -28,6 +29,10 @@ export function evaluateCarbonLedger(input,root=ROOT) {
  require(isDeepStrictEqual(input.basis,BASIS),'Unsupported or incompatible accounting basis');
  const bytes=readFileSync(resolve(root,input.sourceInterval));require(createHash('sha256').update(bytes).digest('hex')===input.sourceIntervalSHA256,'Ledger source interval hash mismatch');
  const base=JSON.parse(bytes);evaluateMeterInterval(base,root);
+ return evaluateRows(input,base,root,false);
+}
+function evaluateRows(input,base,root,preserveAcquisitionEvaluation) {
+ require(isDeepStrictEqual(input.basis,BASIS),'Unsupported or incompatible accounting basis');
  require(Array.isArray(input.rows)&&input.rows.length>0&&input.rows.length<=100,'Invalid ledger row count');
  const evaluation=time(input.evaluationAt),ids=new Set(),reasons=[],receipts=[];let previous=null;
  let imported=[0n,1n],exported=[0n,1n],mass=[0n,1n];
@@ -35,7 +40,7 @@ export function evaluateCarbonLedger(input,root=ROOT) {
   require(keys(row,'id meterInterval factor')&&typeof row.id==='string'&&row.id.length>0&&!ids.has(row.id),'Invalid/duplicate ledger row');ids.add(row.id);
   const interval=row.meterInterval,f=row.factor;
   const energy=evaluateMeterInterval(interval,root);
-  require(interval.evaluationAt===input.evaluationAt,'Interval/ledger evaluation times differ');
+  require(preserveAcquisitionEvaluation?time(interval.evaluationAt)<=evaluation:interval.evaluationAt===input.evaluationAt,'Interval/ledger evaluation times differ');
   require(interval.meterAssetId===base.meterAssetId&&interval.sourceProjection===base.sourceProjection&&interval.sourceProjectionSHA256===base.sourceProjectionSHA256&&isDeepStrictEqual(interval.start.sourceIdentity,base.start.sourceIdentity),'Meter/projection differs from ledger source');
   if(previous)require(isDeepStrictEqual(previous,interval.start),'Intervals overlap, have a gap or lack continuous endpoint evidence');
   previous=interval.end;
@@ -61,9 +66,29 @@ export function evaluateCarbonLedger(input,root=ROOT) {
   intensityStatus:!eligible?'UNKNOWN_INPUT':zero?'UNDEFINED_ZERO_IMPORTED_ENERGY':'EXACT_SYNTHETIC_RATIO',
   exportCreditApplied:false,controlAction:'DENY',behavioralCasesRun:0};
 }
+export function evaluateJournalCarbonLedger(input,root=ROOT) {
+ require(keys(input,'schemaVersion kind journal evaluationAt basis factors accountingUse engineeringReview controlAction behavioralCasesRun'),'Unsupported journal carbon fields');
+ require(input.schemaVersion==='1.0.0'&&input.kind==='SYNTHETIC_JOURNAL_IMPORT_CARBON_LEDGER'&&input.accountingUse==='RETROSPECTIVE_ONLY'&&input.engineeringReview==='PENDING'&&input.controlAction==='DENY'&&input.behavioralCasesRun===0,'Unsupported journal carbon scope/claims');
+ const restored=StorageExecutionJournal.restore(input.journal,root),journal=restored.export();
+ // Select actual applied events once; replays, holds and posture changes are not energy intervals.
+ const events=journal.events.filter(e=>e.operation==='STEP'&&e.receipt.applied===true&&e.receipt.replayed===false);
+ require(events.length>0&&events.length<=100,'Journal has no supported applied intervals');
+ require(Array.isArray(input.factors)&&input.factors.length===events.length,'Factor coverage must exactly match applied non-replay events');
+ const rows=events.map((e,i)=>{
+  const f=input.factors[i];require(keys(f,'eventSHA256 factor')&&f.eventSHA256===e.eventSHA256,'Factor event binding/order mismatch');
+  require(e.receipt.meterInterval?.result.eligible===true,'Applied journal event lacks eligible meter interval');
+  return {id:e.eventSHA256,meterInterval:e.receipt.meterInterval.input,factor:f.factor};
+ });
+ const result=evaluateRows({...input,rows},rows[0].meterInterval,root,true);
+ return {...result,verificationType:'SOURCE_BOUND_SYNTHETIC_JOURNAL_IMPORT_ACCOUNTING_ONLY',
+  journalHeadSHA256:journal.headSHA256,accountedEventSHA256:events.map(e=>e.eventSHA256),
+  acquisitionTimeFreshnessPreserved:true,simulationOnly:true,providerQualified:false,
+  storageCarbonInventoryKnown:false,facilityConsumptionIntensityQualified:false,operationallyAuthorized:false};
+}
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)) {
  try {
   if(process.argv.length!==3)throw Error('Usage: node tools/evaluate_carbon_ledger.mjs <ledger.json>');
-  console.log(JSON.stringify({result:'PASS',...evaluateCarbonLedger(read(resolve(process.argv[2])))},null,2));
+  const d=read(resolve(process.argv[2]));
+  console.log(JSON.stringify({result:'PASS',...(d.kind==='SYNTHETIC_JOURNAL_IMPORT_CARBON_LEDGER'?evaluateJournalCarbonLedger(d):evaluateCarbonLedger(d))},null,2));
  }catch(e){console.error(e.message);process.exitCode=1;}
 }
