@@ -144,3 +144,5 @@ EI14 partial restatement evidence: [journal-backed reporting revisions](assets/j
 EI10/EI11 partial execution guard: [simulated snapshot preconditions](assets/state-preconditions.md) bind optional requests to run/state/source context, deny stale intents without state advance and survive journal reconstruction. This is not approval, a distributed reservation, a qualified gateway or full AC14 acceptance.
 
 EI09/EI11 partial timing evidence: [logical observation-age evaluation](assets/observation-age.md) now expires stale observations during explicit evaluator-clock advances, without inventing plant energy or meter intervals. A matching snapshot cannot bypass age exclusion. This is not wall-clock monitoring, trusted synchronization, continuous plant dynamics or integrated acceptance.
+
+EI12/EI17 partial model boundary: [strict model-proposal simulation review](assets/model-proposal-review.md) accepts only bounded state-bound JSON data, rejects instruction/tool/completion envelopes and evaluates on a discarded journal clone. No real model call, production tool registration, original-history mutation or operating authority is introduced.
