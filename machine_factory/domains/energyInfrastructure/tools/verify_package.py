@@ -295,6 +295,7 @@ def check(root: Path) -> dict:
             'syntheticProposalScreens':1,
             'syntheticRiskAssessments':1,
             'publicModelReviewLookupPolicies':1,
+            'syntheticModelProposalReviews':1,
             'partialOfflineStorageComponents':1,
             'threatSchemaTemplates':57,'stixTopLevelObjectAndContainerTemplates':43,
             'supplementalNormativeStandardSnapshots':1,'taxiiResourceTemplates':9,'taxiiSupportingRecordTemplates':2,
