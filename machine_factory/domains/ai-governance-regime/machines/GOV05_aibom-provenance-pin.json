@@ -20,17 +20,17 @@
     },
     "sequences": [
       {
-        "id": "ces_gov05_agent_requested_admit",
+        "id": "ces_gov05_agent_requested",
         "name": "M-GOV-05 S0_Idle → S1_AgentRunning",
         "schemaVersion": "1.0",
         "metadata": {
           "sourceFromState": "S0_Idle",
           "sourceToState": "S1_AgentRunning",
-          "regularExpression": "[req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0]",
-          "length": 1,
+          "regularExpression": "([req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0] | [req_epoch_swap=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0])",
+          "length": 2,
           "specRule": "SPECIFICATION.md 4.3 (5)",
           "semanticAmendments": [
-            "GOV-SA-04"
+            "GOV-SA-25"
           ],
           "asserts": [
             "AGENT_REQUESTED"
@@ -39,7 +39,7 @@
         },
         "events": [
           {
-            "id": "ces_gov05_agent_requested_admit-e0",
+            "id": "ces_gov05_agent_requested-e0-admit",
             "isInitial": true,
             "elements": [
               {
@@ -102,7 +102,7 @@
             "nextEventIds": [],
             "outputEvents": [
               {
-                "id": "ces_gov05_agent_requested_admit-out",
+                "id": "ces_gov05_agent_requested-e0-admit-out",
                 "vector": [
                   0.0,
                   0.0,
@@ -117,30 +117,9 @@
                 ]
               }
             ]
-          }
-        ]
-      },
-      {
-        "id": "ces_gov05_agent_requested_epoch",
-        "name": "M-GOV-05 S0_Idle → S1_AgentRunning",
-        "schemaVersion": "1.0",
-        "metadata": {
-          "sourceFromState": "S0_Idle",
-          "sourceToState": "S1_AgentRunning",
-          "regularExpression": "[req_epoch_swap=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0]",
-          "length": 1,
-          "specRule": "SPECIFICATION.md 4.3 (5)",
-          "semanticAmendments": [
-            "GOV-SA-04"
-          ],
-          "asserts": [
-            "AGENT_REQUESTED"
-          ],
-          "dispatchesAgent": "aigov-aibom-assembler"
-        },
-        "events": [
+          },
           {
-            "id": "ces_gov05_agent_requested_epoch-e0",
+            "id": "ces_gov05_agent_requested-e0-epoch",
             "isInitial": true,
             "elements": [
               {
@@ -203,7 +182,7 @@
             "nextEventIds": [],
             "outputEvents": [
               {
-                "id": "ces_gov05_agent_requested_epoch-out",
+                "id": "ces_gov05_agent_requested-e0-epoch-out",
                 "vector": [
                   0.0,
                   0.0,
@@ -392,17 +371,17 @@
         ]
       },
       {
-        "id": "ces_gov05_pinned_admit",
+        "id": "ces_gov05_pinned",
         "name": "M-GOV-05 S1_AgentRunning → S2_Pinned",
         "schemaVersion": "1.0",
         "metadata": {
           "sourceFromState": "S1_AgentRunning",
           "sourceToState": "S2_Pinned",
-          "regularExpression": "[req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0] · [aibom_assembled=1 ∧ unpinned_items=0 ∧ gate_aibom_pinned=1]",
-          "length": 2,
+          "regularExpression": "([req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0] | [req_epoch_swap=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0]) · [aibom_assembled=1 ∧ unpinned_items=0 ∧ gate_aibom_pinned=1]",
+          "length": 3,
           "specRule": "SPECIFICATION.md 4.3 (5)",
           "semanticAmendments": [
-            "GOV-SA-04"
+            "GOV-SA-25"
           ],
           "asserts": [
             "PERMIT_DEPLOY"
@@ -410,7 +389,7 @@
         },
         "events": [
           {
-            "id": "ces_gov05_pinned_admit-e0",
+            "id": "ces_gov05_pinned-e0-admit",
             "isInitial": true,
             "elements": [
               {
@@ -471,11 +450,76 @@
               }
             ],
             "nextEventIds": [
-              "ces_gov05_pinned_admit-e1"
+              "ces_gov05_pinned-e1"
             ]
           },
           {
-            "id": "ces_gov05_pinned_admit-e1",
+            "id": "ces_gov05_pinned-e0-epoch",
+            "isInitial": true,
+            "elements": [
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 1.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.0,
+                "comparatorType": "equals"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              },
+              {
+                "value": 0.5,
+                "threshold": 0.5,
+                "comparatorType": "threshold"
+              }
+            ],
+            "nextEventIds": [
+              "ces_gov05_pinned-e1"
+            ]
+          },
+          {
+            "id": "ces_gov05_pinned-e1",
             "isInitial": false,
             "elements": [
               {
@@ -539,173 +583,7 @@
             "nextEventIds": [],
             "outputEvents": [
               {
-                "id": "ces_gov05_pinned_admit-out",
-                "vector": [
-                  0.0,
-                  0.0,
-                  1.0,
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "ces_gov05_pinned_epoch",
-        "name": "M-GOV-05 S1_AgentRunning → S2_Pinned",
-        "schemaVersion": "1.0",
-        "metadata": {
-          "sourceFromState": "S1_AgentRunning",
-          "sourceToState": "S2_Pinned",
-          "regularExpression": "[req_epoch_swap=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0] · [aibom_assembled=1 ∧ unpinned_items=0 ∧ gate_aibom_pinned=1]",
-          "length": 2,
-          "specRule": "SPECIFICATION.md 4.3 (5)",
-          "semanticAmendments": [
-            "GOV-SA-04"
-          ],
-          "asserts": [
-            "PERMIT_DEPLOY"
-          ]
-        },
-        "events": [
-          {
-            "id": "ces_gov05_pinned_epoch-e0",
-            "isInitial": true,
-            "elements": [
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 1.0,
-                "comparatorType": "equals"
-              },
-              {
-                "value": 1.0,
-                "comparatorType": "equals"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 1.0,
-                "comparatorType": "equals"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.0,
-                "comparatorType": "equals"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              }
-            ],
-            "nextEventIds": [
-              "ces_gov05_pinned_epoch-e1"
-            ]
-          },
-          {
-            "id": "ces_gov05_pinned_epoch-e1",
-            "isInitial": false,
-            "elements": [
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 1.0,
-                "comparatorType": "equals"
-              },
-              {
-                "value": 0.5,
-                "threshold": 0.5,
-                "comparatorType": "threshold"
-              },
-              {
-                "value": 0.0,
-                "comparatorType": "equals"
-              },
-              {
-                "value": 1.0,
-                "comparatorType": "equals"
-              }
-            ],
-            "nextEventIds": [],
-            "outputEvents": [
-              {
-                "id": "ces_gov05_pinned_epoch-out",
+                "id": "ces_gov05_pinned-out",
                 "vector": [
                   0.0,
                   0.0,
@@ -733,9 +611,7 @@
           "regularExpression": "[lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0] · [aibom_assembled=1 ∧ unpinned_items=1]",
           "length": 2,
           "specRule": "SPECIFICATION.md 4.3 (5)",
-          "semanticAmendments": [
-            "GOV-SA-04"
-          ],
+          "semanticAmendments": [],
           "asserts": [
             "HALT_PROMOTION"
           ]
@@ -1209,9 +1085,9 @@
               0.0
             ]
           ],
-          "purpose": "drives ces_gov05_agent_requested_admit: [req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0]",
+          "purpose": "drives ces_gov05_agent_requested by admit: ([req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0] | [req_epoch_swap=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0])",
           "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
-          "expectedSequenceId": "ces_gov05_agent_requested_admit"
+          "expectedSequenceId": "ces_gov05_agent_requested"
         }
       },
       {
@@ -1259,9 +1135,9 @@
               0.0
             ]
           ],
-          "purpose": "drives ces_gov05_agent_requested_epoch: [req_epoch_swap=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0]",
+          "purpose": "drives ces_gov05_agent_requested by epoch: ([req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0] | [req_epoch_swap=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0])",
           "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
-          "expectedSequenceId": "ces_gov05_agent_requested_epoch"
+          "expectedSequenceId": "ces_gov05_agent_requested"
         }
       },
       {
@@ -1411,9 +1287,9 @@
               0.0
             ]
           ],
-          "purpose": "drives ces_gov05_pinned_admit: [req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0] · [aibom_assembled=1 ∧ unpinned_items=0 ∧ gate_aibom_pinned=1]",
+          "purpose": "drives ces_gov05_pinned by admit: ([req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0] | [req_epoch_swap=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0]) · [aibom_assembled=1 ∧ unpinned_items=0 ∧ gate_aibom_pinned=1]",
           "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
-          "expectedSequenceId": "ces_gov05_pinned_admit"
+          "expectedSequenceId": "ces_gov05_pinned"
         }
       },
       {
@@ -1487,9 +1363,9 @@
               0.0
             ]
           ],
-          "purpose": "drives ces_gov05_pinned_epoch: [req_epoch_swap=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0] · [aibom_assembled=1 ∧ unpinned_items=0 ∧ gate_aibom_pinned=1]",
+          "purpose": "drives ces_gov05_pinned by epoch: ([req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0] | [req_epoch_swap=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0]) · [aibom_assembled=1 ∧ unpinned_items=0 ∧ gate_aibom_pinned=1]",
           "expectedEvaluationScope": "Isolated from reset; expected outputs computed by the package's authoring evaluator from SURFACE_SPEC's transition rule, to be confirmed 3-of-3 on the engines.",
-          "expectedSequenceId": "ces_gov05_pinned_epoch"
+          "expectedSequenceId": "ces_gov05_pinned"
         }
       },
       {
@@ -1699,7 +1575,7 @@
       "category": "ai-governance-regime",
       "domain": "ai-governance-regime",
       "machineClass": "safety-compliance-checker",
-      "sequenceCount": 8,
+      "sequenceCount": 6,
       "inputSemantics": [
         "req_domain_admit (binary; fact: scripts/approve-domain.sh prepare (admission request); partial): a domain admission is requested",
         "req_epoch_swap (binary; fact: scripts/approve-domain.sh deploy / domains/deployments (epoch request); partial): a rule-epoch swap is requested",
@@ -1763,7 +1639,7 @@
         "processName": "M-GOV-05 AIBOMProvenancePin",
         "rules": [
           {
-            "sequenceId": "ces_gov05_agent_requested_admit",
+            "sequenceId": "ces_gov05_agent_requested",
             "outputMatches": [
               0.0,
               0.0,
@@ -1778,26 +1654,7 @@
             ],
             "ragStatusCode": "AMBER",
             "processStatus": "warning",
-            "description": "M-GOV-05 S0_Idle → S1_AgentRunning: [req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0]",
-            "dispatchAgent": "aigov-aibom-assembler"
-          },
-          {
-            "sequenceId": "ces_gov05_agent_requested_epoch",
-            "outputMatches": [
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              1.0,
-              0.0
-            ],
-            "ragStatusCode": "AMBER",
-            "processStatus": "warning",
-            "description": "M-GOV-05 S0_Idle → S1_AgentRunning: [req_epoch_swap=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0]",
+            "description": "M-GOV-05 S0_Idle → S1_AgentRunning: ([req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0] | [req_epoch_swap=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0])",
             "dispatchAgent": "aigov-aibom-assembler"
           },
           {
@@ -1819,7 +1676,7 @@
             "description": "M-GOV-05 S1_AgentRunning → S_err_StepFailed: [lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0] · [aibom_failed=1]"
           },
           {
-            "sequenceId": "ces_gov05_pinned_admit",
+            "sequenceId": "ces_gov05_pinned",
             "outputMatches": [
               0.0,
               0.0,
@@ -1834,25 +1691,7 @@
             ],
             "ragStatusCode": "GREEN",
             "processStatus": "info",
-            "description": "M-GOV-05 S1_AgentRunning → S2_Pinned: [req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0] · [aibom_assembled=1 ∧ unpinned_items=0 ∧ gate_aibom_pinned=1]"
-          },
-          {
-            "sequenceId": "ces_gov05_pinned_epoch",
-            "outputMatches": [
-              0.0,
-              0.0,
-              1.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              0.0
-            ],
-            "ragStatusCode": "GREEN",
-            "processStatus": "info",
-            "description": "M-GOV-05 S1_AgentRunning → S2_Pinned: [req_epoch_swap=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0] · [aibom_assembled=1 ∧ unpinned_items=0 ∧ gate_aibom_pinned=1]"
+            "description": "M-GOV-05 S1_AgentRunning → S2_Pinned: ([req_domain_admit=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0] | [req_epoch_swap=1 ∧ lane_in_workflow=1 ∧ lane_step_running=1 ∧ aibom_assembled=0]) · [aibom_assembled=1 ∧ unpinned_items=0 ∧ gate_aibom_pinned=1]"
           },
           {
             "sequenceId": "ces_gov05_unpinned",
@@ -1943,7 +1782,7 @@
       "agentBinding": {
         "agent": "aigov-aibom-assembler",
         "mode": "supervised-act",
-        "trigger": "ces_gov05_agent_requested_admit",
+        "trigger": "ces_gov05_agent_requested",
         "allowedActions": [
           "Write the AIBOM document into the frame.",
           "Report unpinned items."
@@ -1999,7 +1838,7 @@
           "blockedWhenRag": []
         }
       },
-      "aiTrigger": "ces_gov05_agent_requested_admit",
+      "aiTrigger": "ces_gov05_agent_requested",
       "dispatchableAgent": "aigov-aibom-assembler",
       "agentBehavior": "agent-candidates/ai-governance-regime/aigov-aibom-assembler.agent.json",
       "frameInputs": {

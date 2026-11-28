@@ -10,7 +10,7 @@ corpus, which these candidates are not part of):
   * clone     - scripts/cloneable_machines.py's rule: nothing here is cloneable
                 (every machine is an observer fixture);
 and adds the package's own:
-  * shape     - one initial and one terminal event per CES, element count =
+  * shape     - initial and final events, closed next-active lists, reachability; element count =
                 input length, output vectors = output length;
   * observe   - no output named as a decision (TD-SD-02), no latch, no agent;
   * regions   - inside the band, no overlap between machines, clear of
@@ -96,8 +96,29 @@ def main() -> int:
         md = m["metadata"]
         for s in m["sequences"]:
             evs = s["events"]
-            if sum(1 for e in evs if e.get("isInitial")) != 1 or sum(1 for e in evs if not e.get("nextEventIds")) != 1:
-                failures.append(f"{p.name}: {s['id']} is not one initial and one terminal event")
+            ids = {e["id"] for e in evs}
+            initial = [e["id"] for e in evs if e.get("isInitial")]
+            # The owner's CES rules (2026-11-27; GOV-SD-22, GOV-SD-23): one or more initial
+            # events and one or more final events, R = (a+b)c and R = a(b+c) alike; a
+            # next-active list without duplicates, every entry inside this CES (the CES is
+            # closed); and every event reachable from an initial event.
+            if not initial or not any(e.get("outputEvents") for e in evs):
+                failures.append(f"{p.name}: {s['id']} needs an initial and a final event")
+            for e in evs:
+                nxt = e.get("nextEventIds", [])
+                if len(nxt) != len(set(nxt)):
+                    failures.append(f"{p.name}: {e['id']} lists a next-active event twice")
+                if set(nxt) - ids:
+                    failures.append(f"{p.name}: {e['id']} references events outside its CES: {sorted(set(nxt) - ids)}")
+            seen, todo = set(initial), list(initial)
+            by_id = {e["id"]: e for e in evs}
+            while todo:
+                for n in by_id[todo.pop()].get("nextEventIds", []):
+                    if n in by_id and n not in seen:
+                        seen.add(n)
+                        todo.append(n)
+            if ids - seen:
+                failures.append(f"{p.name}: {s['id']} has events no initial event reaches: {sorted(ids - seen)}")
             for e in evs:
                 if len(e["elements"]) != lin:
                     failures.append(f"{p.name}: {e['id']} has {len(e['elements'])} elements for input length {lin}")
