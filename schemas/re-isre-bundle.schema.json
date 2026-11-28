@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.example.org/schemas/re-isre-bundle.schema.json",
+  "title": "re-isre-bundle/1: the header line of an ISRE composition export",
+  "description": "The first line of POST /api/isre-composition/export (application/x-ndjson). Each later line is a re-isre-composition/1 record exactly as its segment stored it (RealityEngine_CI SURFACE_SPEC.md 'The PE half: ISRE composition').",
+  "type": "object",
+  "required": [
+    "format",
+    "source",
+    "re",
+    "taxonomy",
+    "count",
+    "sha256"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "re-isre-bundle/1"
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "instance"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "instance": {
+          "$ref": "kline-defs.schema.json#/$defs/uuid"
+        }
+      }
+    },
+    "re": {
+      "type": "object",
+      "required": [
+        "instance"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "instance": {
+          "anyOf": [
+            {
+              "$ref": "kline-defs.schema.json#/$defs/uuid"
+            },
+            {
+              "const": ""
+            }
+          ],
+          "description": "The RE this PE recorded against; empty before the first record."
+        }
+      }
+    },
+    "taxonomy": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^re-source-kinds/[1-9][0-9]*$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Lines after the header: records, plus each K-line's re-kline-event/1 lines."
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Hex SHA-256 of every byte after the header line (each line ending \\n)."
+    }
+  }
+}

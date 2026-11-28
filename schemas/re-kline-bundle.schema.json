@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://realityengine.example.org/schemas/re-kline-bundle.schema.json",
+  "title": "re-kline-bundle/1: the header line of a K-line export",
+  "description": "The first line of POST /api/klines/export (application/x-ndjson): what the bundle is and where it came from. Each later line is a record exactly as its segment stored it (RealityEngine_CI SURFACE_SPEC.md 'K-lines and runtime snapshots', bundles; 'The historical archive').",
+  "type": "object",
+  "required": [
+    "format",
+    "source",
+    "corpus",
+    "controls",
+    "count",
+    "sha256"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "re-kline-bundle/1"
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "instance"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "instance": {
+          "$ref": "kline-defs.schema.json#/$defs/uuid"
+        }
+      }
+    },
+    "corpus": {
+      "$ref": "kline-defs.schema.json#/$defs/corpus"
+    },
+    "controls": {
+      "type": "object",
+      "required": [
+        "klineCapture",
+        "klineFeedbackHops",
+        "klineStoreMaxBytes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "klineCapture": {
+          "type": "boolean"
+        },
+        "klineFeedbackHops": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16
+        },
+        "klineStoreMaxBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Lines after the header: records, plus each K-line's re-kline-event/1 lines."
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Hex SHA-256 of every byte after the header line (each line ending \\n)."
+    }
+  }
+}

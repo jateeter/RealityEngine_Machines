@@ -11,7 +11,8 @@
  *   - domains/clone-space.json      -> clone-space.schema.json
  *   - domains/lane-contracts.json   -> lane-contract.schema.json
  *   - schemas/source-kinds/*.json   -> source-kinds.schema.json
- *   - schemas/examples/klines/valid/*   -> re-kline / re-kline-event / re-isre-composition
+ *   - schemas/examples/klines/valid/*   -> re-kline / re-kline-event / re-isre-composition,
+ *                                          and the bundle headers re-kline-bundle / re-isre-bundle
  *     schemas/examples/klines/invalid/* -> each must be refused by its schema
  *   - triggers/*.example.json       -> ai-trigger-envelope.schema.json
  *   - triggers/*scenario*.json      -> trigger-scenario.schema.json
@@ -99,11 +100,14 @@ validateSet("source-kind taxonomy", existsSync(sourceKindsDir) ? walk(sourceKind
 // every invalid one, each carrying one defect, must be refused by it.
 const klineExamples = join(SCHEMA_DIR, "examples", "klines");
 const klineSchemaFor = (name) =>
-  name.startsWith("re-kline-event") ? "re-kline-event.schema.json"
+  name.startsWith("re-kline-bundle") ? "re-kline-bundle.schema.json"
+  : name.startsWith("re-isre-bundle") ? "re-isre-bundle.schema.json"
+  : name.startsWith("re-kline-event") ? "re-kline-event.schema.json"
   : name.startsWith("re-isre-composition") ? "re-isre-composition.schema.json"
   : "re-kline.schema.json";
 if (existsSync(klineExamples)) {
-  for (const schema of ["re-kline.schema.json", "re-kline-event.schema.json", "re-isre-composition.schema.json"]) {
+  for (const schema of ["re-kline.schema.json", "re-kline-event.schema.json", "re-isre-composition.schema.json",
+                        "re-kline-bundle.schema.json", "re-isre-bundle.schema.json"]) {
     const valid = readdirSync(join(klineExamples, "valid")).filter((n) => klineSchemaFor(n) === schema)
       .map((n) => join(klineExamples, "valid", n));
     validateSet(`K-line examples, valid (${schema.replace(".schema.json", "")})`, valid, schema);

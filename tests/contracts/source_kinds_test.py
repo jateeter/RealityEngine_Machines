@@ -118,5 +118,46 @@ class SourceKindsTest(unittest.TestCase):
             self.assertFalse(unknown, f"version {n} maps origins to unlisted providers {sorted(unknown)}")
 
 
+    def test_every_origin_in_use_is_in_the_current_version(self) -> None:
+        """Every provider a source can name, from the corpus and from the
+        integrations CI configures, is listed by the newest version: an unlisted
+        one would be recorded as unattributed (RealityEngine_Machines#222)."""
+        current = self.versions[max(self.versions)]
+        providers = {p["provider"] for k in current["kinds"] for p in k.get("providers", [])}
+        mapping = current["providerMapping"]
+
+        def provider(origin: str) -> str:
+            first = origin.split(".", 1)[0].lower() or "signal"
+            return mapping.get(first, first)
+
+        def origins(node):
+            if isinstance(node, dict):
+                for key, value in node.items():
+                    if key == "origin" and isinstance(value, str):
+                        yield value
+                    else:
+                        yield from origins(value)
+            elif isinstance(node, list):
+                for value in node:
+                    yield from origins(value)
+
+        used: dict[str, str] = {}
+        for path in sorted((REPO_ROOT / "machines").rglob("*.json")):
+            try:
+                doc = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            for origin in origins(doc):
+                used.setdefault(provider(origin), str(path.relative_to(REPO_ROOT)))
+        integrations = REPO_ROOT.parent / "RealityEngine_CI" / "config" / "integrations.example.json"
+        if integrations.is_file():
+            for integration in json.loads(integrations.read_text(encoding="utf-8")).get("integrations", []):
+                if isinstance(integration.get("kind"), str):
+                    used.setdefault(provider(integration["kind"]), "RealityEngine_CI config/integrations.example.json")
+        unknown = {p: where for p, where in used.items() if p not in providers}
+        self.assertFalse(unknown, f"{current['format']}/{max(self.versions)} does not list {unknown}")
+        if not integrations.is_file():
+            self.skipTest(f"corpus origins checked; {integrations} is not checked out beside this repository")
+
 if __name__ == "__main__":
     unittest.main()
