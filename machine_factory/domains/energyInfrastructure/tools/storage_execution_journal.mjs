@@ -46,12 +46,13 @@ export class StorageExecutionJournal {
   if(operation==='STEP'&&payload&&Object.hasOwn(payload,'expectedStateSHA256'))this.stateToken();
   // Reserve space before mutating the simulator. Caller-controlled receipts are never accepted.
   require(Buffer.byteLength(JSON.stringify(this.export()))+Buffer.byteLength(JSON.stringify(payload))+20000<MAX_BYTES,'Journal byte limit reached');
-  const receipt=operation==='STEP'?this.#sim.step(payload):operation==='RISK_ASSESSMENT'?this.#sim.applyRiskAssessment(payload):this.#sim.injectFault(payload);
+  const receipt=operation==='STEP'?this.#sim.step(payload):operation==='RISK_ASSESSMENT'?this.#sim.applyRiskAssessment(payload):operation==='EVALUATION_CLOCK_ADVANCE'?this.#sim.advanceEvaluationClock(payload):this.#sim.injectFault(payload);
   const body={sequence:this.#events.length+1,previousSHA256:this.#head,operation,payload:structuredClone(payload),receipt:structuredClone(receipt)};
   const event={...body,eventSHA256:digest(body)};this.#events.push(event);this.#head=event.eventSHA256;return structuredClone(receipt);
  }
  step(request){return this.#append('STEP',request);}
  injectFault(fault){return this.#append('FAULT',fault);}
+ advanceEvaluationClock(deltaMs){return this.#append('EVALUATION_CLOCK_ADVANCE',deltaMs);}
  applyRiskAssessment(input){return this.#append('RISK_ASSESSMENT',input);}
  export(){return {...structuredClone(this.#header),events:structuredClone(this.#events),headSHA256:this.#head};}
  static restore(input,root=ROOT){
@@ -61,7 +62,7 @@ export class StorageExecutionJournal {
   const restored=new StorageExecutionJournal(input.runId,root);
   require(isDeepStrictEqual(input.sourcePins,restored.#header.sourcePins),'Journal source pins changed');
   for(const e of input.events){
-   require(keys(e,'sequence previousSHA256 operation payload receipt eventSHA256')&&['STEP','FAULT','RISK_ASSESSMENT'].includes(e.operation),'Invalid journal event');
+   require(keys(e,'sequence previousSHA256 operation payload receipt eventSHA256')&&['STEP','FAULT','RISK_ASSESSMENT','EVALUATION_CLOCK_ADVANCE'].includes(e.operation),'Invalid journal event');
    const {eventSHA256,...body}=e;
    require(e.sequence===restored.#events.length+1&&e.previousSHA256===restored.#head&&eventSHA256===digest(body),'Journal sequence/hash mismatch');
    const actual=restored.#append(e.operation,e.payload);

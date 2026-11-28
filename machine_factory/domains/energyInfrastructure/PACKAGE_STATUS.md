@@ -142,3 +142,5 @@ EI14 partial storage evidence: [journal storage reconciliation](assets/journal-s
 EI14 partial restatement evidence: [journal-backed reporting revisions](assets/journal-revisions.md) recompute import and new-charge allocation from the same journal, preserve historical snapshots and select reports without later correction values. Unknown opening carbon, provider qualification and integrated acceptance remain unresolved.
 
 EI10/EI11 partial execution guard: [simulated snapshot preconditions](assets/state-preconditions.md) bind optional requests to run/state/source context, deny stale intents without state advance and survive journal reconstruction. This is not approval, a distributed reservation, a qualified gateway or full AC14 acceptance.
+
+EI09/EI11 partial timing evidence: [logical observation-age evaluation](assets/observation-age.md) now expires stale observations during explicit evaluator-clock advances, without inventing plant energy or meter intervals. A matching snapshot cannot bypass age exclusion. This is not wall-clock monitoring, trusted synchronization, continuous plant dynamics or integrated acceptance.
