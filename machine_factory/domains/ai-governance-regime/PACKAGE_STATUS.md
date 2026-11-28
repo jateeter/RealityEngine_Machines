@@ -240,3 +240,20 @@ Record: `acceptance/live-run-2026-11-27.json`. Probe: `tools/live_probe.py`.
     GOV08's stateless permit, still hold a decision.
 - **Live run, 2026-11-27** (`acceptance/live-run-2026-11-27-sa24.json`): 154 of 154 simulations agree 3-of-3 and match the expectation, and Rust and Go agree on all 154. No simulation needed a feedback cell.
 
+## Several initial events per CES (2026-11-27, GOV-SA-25, GOV-SD-23)
+
+- **The rule (owner):** a CES may have several initial events and several final
+  events, as R = (a+b)c and R = a(b+c) show.
+- **GOV05:** the split pairs are one CES each.
+  - `agent-requested` is R = (admit | epoch).
+  - `pinned` is R = (admit | epoch) · pinned.
+  - GOV-SA-04 is superseded, and GOV-R33 is closed.
+- **Builder:** an `Alt` position emits one event per alternative, linked to every
+  event of the next position.
+- **Evaluator:** every initial event is always armed.
+- **Verifier:** the shape check now requires initial and final events, closed
+  next-active lists without duplicates, and reachability from an initial event.
+  threat-dynamics' verifier takes the same rule.
+- **Build:** 154 fixtures replay; both packages and the one-pattern gate pass.
+- **Live, 2026-11-27:** all 8 GOV05 simulations agree 3-of-3 and match the expectation; Rust and Go agree on all 8.
+

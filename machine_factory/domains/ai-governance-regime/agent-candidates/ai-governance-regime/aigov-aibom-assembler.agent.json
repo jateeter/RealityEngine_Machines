@@ -22,8 +22,7 @@
   "dispatch": {
     "mode": "frame-step",
     "triggerSequenceIds": [
-      "ces_gov05_agent_requested_admit",
-      "ces_gov05_agent_requested_epoch"
+      "ces_gov05_agent_requested"
     ],
     "frameScopes": [
       "frame:read",
@@ -48,20 +47,6 @@
     "outputContract": "Return one structured line per completion field as `<field>: 0|1` (aibom_assembled: the AIBOM is assembled, aibom_failed: the agent's step failed, unpinned_items: the assembler found items it could not pin), then `rationale: <one sentence>`. The machine, not you, decides what follows.",
     "sequenceCatalog": [
       {
-        "sequenceId": "ces_gov05_agent_requested_admit",
-        "label": "S1_AgentRunning",
-        "rag": "AMBER",
-        "outputIndex": 8,
-        "action": "AGENT_REQUESTED"
-      },
-      {
-        "sequenceId": "ces_gov05_agent_requested_epoch",
-        "label": "S1_AgentRunning",
-        "rag": "AMBER",
-        "outputIndex": 8,
-        "action": "AGENT_REQUESTED"
-      },
-      {
         "sequenceId": "ces_gov05_agent_failed",
         "label": "S_err_StepFailed",
         "rag": "RED",
@@ -69,14 +54,7 @@
         "action": "PARKED + REWORK"
       },
       {
-        "sequenceId": "ces_gov05_pinned_admit",
-        "label": "S2_Pinned",
-        "rag": "GREEN",
-        "outputIndex": 2,
-        "action": "PERMIT_DEPLOY"
-      },
-      {
-        "sequenceId": "ces_gov05_pinned_epoch",
+        "sequenceId": "ces_gov05_pinned",
         "label": "S2_Pinned",
         "rag": "GREEN",
         "outputIndex": 2,
@@ -107,7 +85,7 @@
   "agentBinding": {
     "agent": "aigov-aibom-assembler",
     "mode": "supervised-act",
-    "trigger": "ces_gov05_agent_requested_admit",
+    "trigger": "ces_gov05_agent_requested",
     "allowedActions": [
       "Write the AIBOM document into the frame.",
       "Report unpinned items."

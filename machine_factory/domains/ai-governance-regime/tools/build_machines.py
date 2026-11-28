@@ -135,6 +135,24 @@ def rep(pred, k):
     return [dict(pred) for _ in range(k)]
 
 
+class Alt(tuple):
+    """An alternation at one position of a CES chain (GOV-SA-25): ((label, predicate), ...).
+
+    Each alternative is its own Reality Event; every event of the previous position
+    lists all of them as next-active, and each lists every event of the next position.
+    At position 0 they are all initial (R = (a+b)c); at the last, all final (R = a(b+c)).
+    """
+
+
+def alt(**named):
+    return Alt(named.items())
+
+
+def preds_at(pos):
+    """The predicates at one chain position: one, or one per alternative."""
+    return [pm for _, pm in pos] if isinstance(pos, Alt) else [pos]
+
+
 def C(cid, frm, to, events, outs, rag, amend=(), dispatch=False):
     return dict(id=cid, frm=frm, to=to, events=events, outs=list(outs), rag=rag, amend=list(amend), dispatch=dispatch)
 
@@ -191,6 +209,9 @@ def latch_ces(cid, frm, to, set_events, set_outs, holds, release, amend=(), disp
 
 # ---------------------------------------------------------------- the machines
 W = {"lane_in_workflow": 1}
+# GOV05's request, (domain admission | epoch swap): two initial events in one CES (GOV-SA-25).
+REQ05 = alt(admit={"lane_in_workflow": 1, "req_domain_admit": 1, "lane_step_running": 1, "aibom_assembled": 0},
+            epoch={"lane_in_workflow": 1, "req_epoch_swap": 1, "lane_step_running": 1, "aibom_assembled": 0})
 
 P01 = {"lane_in_workflow": 1, "req_domain_admit": 1, "prep_completed": 1, "sections_unresolved": 0,
        "comp_iso42005_signed": 1, "comp_eu_fria_signed": 1, "gate_redteam_pass": 1, "gate_source_slsa_attested": 1,
@@ -319,26 +340,17 @@ MACHINES = [
                     capabilities=["frame.read", "pod.read", "pod.write", "frame.return.write", "registry.read",
                                   "regression.report.read"],
                     actions=["Write the AIBOM document into the frame.", "Report unpinned items."]),
-         ces=[C("agent-requested-admit", "S0_Idle", "S1_AgentRunning",
-                [{"lane_in_workflow": 1, "req_domain_admit": 1, "lane_step_running": 1, "aibom_assembled": 0}],
-                ["AGENT_REQUESTED"], "AMBER", ["GOV-SA-04"], dispatch=True),
-              C("agent-requested-epoch", "S0_Idle", "S1_AgentRunning",
-                [{"lane_in_workflow": 1, "req_epoch_swap": 1, "lane_step_running": 1, "aibom_assembled": 0}],
-                ["AGENT_REQUESTED"], "AMBER", ["GOV-SA-04"], dispatch=True),
+         ces=[C("agent-requested", "S0_Idle", "S1_AgentRunning", [REQ05], ["AGENT_REQUESTED"], "AMBER",
+                ["GOV-SA-25"], dispatch=True),
               C("agent-failed", "S1_AgentRunning", "S_err_StepFailed",
                 [{"lane_in_workflow": 1, "lane_step_running": 1, "aibom_assembled": 0}, {"aibom_failed": 1}],
                 ["PARKED", "REWORK"], "RED", ["GOV-SA-13"]),
-              C("pinned-admit", "S1_AgentRunning", "S2_Pinned",
-                [{"lane_in_workflow": 1, "req_domain_admit": 1, "lane_step_running": 1, "aibom_assembled": 0},
-                 {"aibom_assembled": 1, "unpinned_items": 0, "gate_aibom_pinned": 1}], ["PERMIT_DEPLOY"], "GREEN",
-                ["GOV-SA-04"]),
-              C("pinned-epoch", "S1_AgentRunning", "S2_Pinned",
-                [{"lane_in_workflow": 1, "req_epoch_swap": 1, "lane_step_running": 1, "aibom_assembled": 0},
-                 {"aibom_assembled": 1, "unpinned_items": 0, "gate_aibom_pinned": 1}], ["PERMIT_DEPLOY"], "GREEN",
-                ["GOV-SA-04"]),
+              C("pinned", "S1_AgentRunning", "S2_Pinned",
+                [REQ05, {"aibom_assembled": 1, "unpinned_items": 0, "gate_aibom_pinned": 1}], ["PERMIT_DEPLOY"], "GREEN",
+                ["GOV-SA-25"]),
               C("unpinned", "S1_AgentRunning", "S_fail_UnpinnedModel",
                 [{"lane_in_workflow": 1, "lane_step_running": 1, "aibom_assembled": 0},
-                 {"aibom_assembled": 1, "unpinned_items": 1}], ["HALT_PROMOTION"], "RED", ["GOV-SA-04"]),
+                 {"aibom_assembled": 1, "unpinned_items": 1}], ["HALT_PROMOTION"], "RED"),
               C("verifier-disagrees", "S1_AgentRunning", "S_fail_UnpinnedModel",
                 [{"lane_in_workflow": 1, "lane_step_running": 1, "aibom_assembled": 0},
                  {"aibom_assembled": 1, "unpinned_items": 0, "gate_aibom_pinned": 0}], ["HALT_PROMOTION"], "RED",
@@ -765,7 +777,8 @@ def regex(events, names):
         j = i
         while j + 1 < len(events) and events[j + 1] == events[i]:
             j += 1
-        s = symbol(events[i], names)
+        s = ("(" + " | ".join(symbol(pm, names) for pm in preds_at(events[i])) + ")"
+             if isinstance(events[i], Alt) else symbol(events[i], names))
         out.append(s if j == i else f"{s}{{{j - i + 1}}}")
         i = j + 1
     return " · ".join(out)
@@ -787,7 +800,8 @@ def run(sequences, steps, latch_index=None, latch_out=0):
     step on which none asserts keeps the last vector written; None only before
     the first write. The GOV-SA-06 feedback cell reads that latched region.
     """
-    active = [{0} for _ in sequences]
+    initials = [{i for i, e in enumerate(seq["events"]) if e.get("isInitial")} for seq in sequences]
+    active = [set(ini) for ini in initials]
     trace, prev_latch, latched = [], 0.0, None
     for x in steps:
         x = list(x)
@@ -797,7 +811,7 @@ def run(sequences, steps, latch_index=None, latch_out=0):
         for si, seq in enumerate(sequences):
             evs = seq["events"]
             pos = {e["id"]: i for i, e in enumerate(evs)}
-            nxt = {0}
+            nxt = set(initials[si])
             for ei in sorted(active[si]):
                 ev = evs[ei]
                 if not all(accepts(el, xv) for el, xv in zip(ev["elements"], x)):
@@ -805,7 +819,7 @@ def run(sequences, steps, latch_index=None, latch_out=0):
                 if ev.get("outputEvents"):
                     vec = ev["outputEvents"][0]["vector"]
                     merged = list(vec) if merged is None else [max(a, b) for a, b in zip(merged, vec)]
-                    if ei != 0:
+                    if ei not in initials[si]:
                         nxt.add(ei)
                 for nid in ev.get("nextEventIds", []):
                     nxt.add(pos[nid])
@@ -916,16 +930,22 @@ def build_machine(m):
             if unknown:
                 raise SystemExit(f"{m['stem']} {c['id']}: predicates on {sorted(unknown)} not in the input")
         cluster = ([f"{sid}-h-{name}" for name, _, _ in graph["holds"]] + [f"{sid}-release"]) if graph else []
-        for i, pm in enumerate(c["events"]):
-            unknown = set(pm) - set(names)
-            if unknown:
-                raise SystemExit(f"{m['stem']} {c['id']}: predicates on {sorted(unknown)} not in the input")
-            last = i == len(c["events"]) - 1
-            ev = {"id": f"{sid}-e{i}", "isInitial": i == 0, "elements": [element(pm.get(n)) for n in names],
-                  "nextEventIds": [f"{sid}-e{i + 1}"] if not last else list(cluster)}
-            if last:
-                ev["outputEvents"] = [{"id": f"{sid}-out", "vector": vector(c["outs"])}]
-            evs.append(ev)
+        pos_ids = [[f"{sid}-e{i}-{label}" for label, _ in pos] if isinstance(pos, Alt) else [f"{sid}-e{i}"]
+                   for i, pos in enumerate(c["events"])]
+        for i, pos in enumerate(c["events"]):
+            items = list(pos) if isinstance(pos, Alt) else [(None, pos)]
+            for k, (_label, pm) in enumerate(items):
+                unknown = set(pm) - set(names)
+                if unknown:
+                    raise SystemExit(f"{m['stem']} {c['id']}: predicates on {sorted(unknown)} not in the input")
+                last = i == len(c["events"]) - 1
+                eid = pos_ids[i][k]
+                ev = {"id": eid, "isInitial": i == 0, "elements": [element(pm.get(n)) for n in names],
+                      "nextEventIds": list(pos_ids[i + 1]) if not last else list(cluster)}
+                if last:
+                    ev["outputEvents"] = [{"id": f"{eid}-out" if len(items) > 1 else f"{sid}-out",
+                                           "vector": vector(c["outs"])}]
+                evs.append(ev)
         if graph:
             for name, lit, outs in graph["holds"]:
                 evs.append({"id": f"{sid}-h-{name}", "isInitial": False,
@@ -1074,6 +1094,14 @@ def build_fixtures(m, sequences, names, latch_index):
             scenarios.append((f"{c['id']}-release", pre + [dict(rel)], f"releases {seq['id']}",
                               (seq["id"], rel_outs, c["outs"])))
             continue
+        if any(isinstance(pos, Alt) for pos in c["events"]):
+            import itertools
+            choices = [list(pos) if isinstance(pos, Alt) else [(None, pos)] for pos in c["events"]]
+            for path in itertools.product(*choices):
+                label = "-".join(lb for lb, _ in path if lb)
+                scenarios.append((f"{c['id']}-{label}", [dict(pm) for _, pm in path],
+                                  f"drives {seq['id']} by {label}: {seq['metadata']['regularExpression']}", seq["id"]))
+            continue
         steps = [dict(e) for e in c["events"]]
         ctx = FIXTURE_CONTEXT.get((m["n"], c["id"]))
         if ctx:
@@ -1107,8 +1135,8 @@ def build_fixtures(m, sequences, names, latch_index):
                     raise SystemExit(f"{m['stem']}: fixture {name} leaves {stuck} latched after release: {trace}")
             target = target[0]
         elif target is not None:
-            want = next(s for s in sequences if s["id"] == target)["events"][len(
-                next(c for c in m["ces"] if f"ces_{m['stem'][:5].lower()}_{c['id'].replace('-', '_')}" == target)["events"]) - 1]["outputEvents"][0]["vector"]
+            want = vector(next(c for c in m["ces"]
+                               if f"ces_{m['stem'][:5].lower()}_{c['id'].replace('-', '_')}" == target)["outs"])
             if trace[-1] is None or not all(f >= w for f, w in zip(final, want)):
                 raise SystemExit(f"{m['stem']}: fixture {name} does not drive {target}: {trace}")
         key = json.dumps(vecs)

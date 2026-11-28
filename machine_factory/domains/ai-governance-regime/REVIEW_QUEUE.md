@@ -37,7 +37,7 @@ step in [PACKAGE_STATUS.md](PACKAGE_STATUS.md) is redone. Findings marked
 | GOV-R28 | The ISO 42001 / EU AI Act crosswalk needs re-deriving | alignment | step 3 `source-requirements.json`, per milestone (GOV-SD-14) |
 | GOV-R30 | An output region keeps its last vector when nothing asserts (threat-dynamics TD-R08) | machines, fixtures | **resolved 2026-11-27**: outputs are latched (GOV-SD-19); the evaluator models it; GOV-SA-23 clears a decision when its condition ends |
 | GOV-R31 | GOV-SA-23 needs owner review | specification | **closed 2026-11-27**: approved as recommended (GOV-SD-20) |
-| GOV-R33 | GOV-SA-04 split `or` guards on a reading of the one-pattern rule that was too strict | machines | optional: merge a split guard into one branched CES where that reads better (GOV-SD-22) |
+| GOV-R33 | GOV-SA-04 split `or` guards on a reading of the one-pattern rule that was too strict | machines | **closed 2026-11-27, merged**: GOV05's split pairs are one CES each, with an initial event per request (GOV-SA-25, GOV-SD-23) |
 | GOV-R32 | Simulated continuous values sit 0.0001 inside a band edge (GOV-SA-01) | live run | **confirmed 2026-11-27**: 19 simulations drive such a value and all match on five engines (`acceptance/live-run-2026-11-27.json`); re-check when values change |
 | GOV-R29 | The V0.18 baseline lags the v0.0.3 implementation | every citation | **owner 2026-11-25**: a new baseline from v0.0.3 progress. **provisionally closed 2026-11-25**: V0.19 (heads of 25 November 2026) is provisionally accepted and pinned at `intake/BASELINE-V0.19-NIST.md` (GOV-SD-18); final acceptance pending One more update to V0.19 is expected (owner, 2026-11-27; GOV-SD-21); it will not directly affect this work. |
 

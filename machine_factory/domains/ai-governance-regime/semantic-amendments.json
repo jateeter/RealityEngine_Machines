@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "domain": "ai-governance-regime",
-  "scope": "Where the candidate machines resolve or refine SPECIFICATION.md 4.3 and HARDENING_TRANSITION_RULES.md. Each amendment is cited from the CESs that carry it (sequences[].metadata.semanticAmendments). GOV-SA-01..22 approved by the owner as proposed, 2026-11-25 (GOV-SD-17, closes GOV-R14); GOV-SA-23 approved by the owner as recommended, 2026-11-27 (GOV-SD-20, closes GOV-R31); GOV-SA-24 decided by the owner 2026-11-27 (GOV-SD-22), superseding GOV-SA-06's feedback cell.",
+  "scope": "Where the candidate machines resolve or refine SPECIFICATION.md 4.3 and HARDENING_TRANSITION_RULES.md. Each amendment is cited from the CESs that carry it (sequences[].metadata.semanticAmendments). GOV-SA-01..22 approved by the owner as proposed, 2026-11-25 (GOV-SD-17, closes GOV-R14); GOV-SA-23 approved by the owner as recommended, 2026-11-27 (GOV-SD-20, closes GOV-R31); GOV-SA-24 decided by the owner 2026-11-27 (GOV-SD-22), superseding GOV-SA-06's feedback cell; GOV-SA-25 approved 2026-11-27 (GOV-SD-23), superseding GOV-SA-04.",
   "amendments": [
     {
       "id": "GOV-SA-01",
@@ -33,7 +33,8 @@
       "change": "The guard (req_domain_admit or req_epoch_swap) and aibom is split into one CES per request.",
       "reason": "One CES is one regular expression with no alternation (owner rule 2026-10-05).",
       "status": "approved",
-      "approved": "2026-11-25"
+      "approved": "2026-11-25",
+      "supersededBy": "GOV-SA-25 (2026-11-27): the alternation is one CES with an initial event per request"
     },
     {
       "id": "GOV-SA-05",
@@ -194,6 +195,14 @@
       "applies": "GOV07, GOV09, GOV14 (two set paths), GOV16 (two set paths): each SR latch",
       "change": "Each SR latch is one closed CES: the set chain; a hold cluster of one event per negated literal of the release conjunction, each asserting the latched vector; and one release event. The set chain's final event and every hold event list every hold event and the release in their next-active lists, so while any release literal is still false some hold event matches and re-arms the cluster. The feedback input latch_q_prev (GOV-SA-06) is removed. CESs that read it as a guard now read the cluster: triage requested and harm confirmed are hold events; the nominal-band warnings (approach, renewal window, delegation throttle) lose their latch_q_prev = 0 guard and may co-assert while latched, merged by `or`.",
       "reason": "Owner, 2026-11-27: next-active lists are unrestricted except that every entry stays within its own CES (closed), and outputs persist by default. A closed CES therefore holds Q(k) = S(k) or (not R(k) and Q(k-1)) in its active events, as the corpus RS flip-flops do, with no PE composition (GOV-R12). The hold asserts every latched step, so another CES's write or GOV-SA-23's idle zeros cannot clear it.",
+      "status": "approved",
+      "approved": "2026-11-27"
+    },
+    {
+      "id": "GOV-SA-25",
+      "applies": "GOV05 (agent-requested, pinned)",
+      "change": "The request guard (req_domain_admit or req_epoch_swap) is one CES with an initial event per request, instead of one CES per request (GOV-SA-04). agent-requested is R = (admit | epoch): two initial events, both final and both dispatching the assembler. pinned is R = (admit | epoch) · pinned: two initial events, each listing the one final event as next-active.",
+      "reason": "Owner, 2026-11-27: a CES may have more than one initial Reality Event, as R = (a+b)c has two initial events and one final, and R = a(b+c) has two final events (GOV-SD-23). The split read the one-pattern rule too strictly.",
       "status": "approved",
       "approved": "2026-11-27"
     }
