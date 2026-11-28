@@ -180,3 +180,5 @@ assets remain allowed throughout.
 A replay of an earlier accepted request returns its original historical receipt with `replayed: true`; the historical `applied: true` is not a fresh authorization. It advances no clock, energy or counters and does not weaken the current assessed posture. New requests remain held. A dedicated test verifies this behavior before and after journal reconstruction.
 
 Version 0.5.0 adds [optional state snapshot preconditions](state-preconditions.md), exposes the synthetic run label in observations and records binding results in receipts. The two-field unbound component fixture path remains available; neither path grants operating authority.
+
+Version 0.6.0 adds [explicit evaluation-clock advances](observation-age.md) and observation-age exclusion. The plant clock still advances only through accepted held intervals; separate evaluation-only events create no plant evolution or energy interval.
